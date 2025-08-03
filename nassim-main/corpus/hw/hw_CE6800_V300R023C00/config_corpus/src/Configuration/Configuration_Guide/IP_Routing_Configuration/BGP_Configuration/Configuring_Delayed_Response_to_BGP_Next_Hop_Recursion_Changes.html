@@ -1,0 +1,88 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring Delayed Response to BGP Next Hop Recursion Changes">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0105.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_3100_copy.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130783946">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Configuring Delayed Response to BGP Next Hop Recursion Changes</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130783946"></a><a name="EN-US_TASK_0000001130783946"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring Delayed Response to BGP Next Hop Recursion Changes</h1>
+<div class="taskbody"><div class="prereq" style="margin-left:0"><a name="EN-US_TASK_0000001130783946__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Prerequisites</h4>
+<div class="p"><p>Before configuring delayed response to BGP next hop recursion changes, you have completed the following task:</p>
+<ul><li><p><a href="vrp_bgp_cfg_0014.html">Configure basic BGP functions.</a></p>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130783946__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>As shown in <a href="#EN-US_TASK_0000001130783946__fig_dc_vrp_bgp_cfg_410201">Figure 1</a>, PE1, PE2, and PE3 are the clients of the RR, and CE2 is dual-homed to PE1 and PE2, which advertise their routes destined for CE2 to the RR. The RR preferentially forwards the route advertised by PE1 to PE3. PE3 has only one route to CE2 and advertises this route to CE1. After the route exchange, CE1 and CE2 can communicate. With delayed response to BGP next hop recursion changes enabled, if PE1 fails, PE3 detects that the next hop is unreachable and instructs CE1 to delete the route to CE2, interrupting traffic. After BGP route convergence is complete, the RR preferentially selects the route advertised by PE2 and sends an Update message to PE3. PE3 then advertises this route to CE1, restoring traffic forwarding. During this process, BGP route convergence is rather slow, and a high volume of traffic will be lost.</p>
+<p>If delayed response to BGP next hop recursion changes is enabled on PE3, PE3 does not reselect a route or send a withdraw message to CE1 immediately after detecting that the route to PE1 is unreachable. After BGP convergence is complete, the RR preferentially selects the route advertised by PE2 and sends it to PE3. PE3 then reselects a route and sends an Update message to CE1, restoring traffic forwarding. After delayed response to BGP next hop recursion changes is enabled on PE3, PE3 does not need to send withdrawn routes or delete the local routes. This delayed response helps speed up BGP route convergence and reduces traffic loss.</p>
+<div class="fignone" id="EN-US_TASK_0000001130783946__fig_dc_vrp_bgp_cfg_410201"><a name="EN-US_TASK_0000001130783946__fig_dc_vrp_bgp_cfg_410201"></a><a name="fig_dc_vrp_bgp_cfg_410201"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring delayed response to BGP next hop recursion changes</span><br><span><img class="vsd" src="figure/en-us_image_0000001130784034.png" width="NaN" height="NaN"></span></div>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Delayed response to BGP next hop recursion changes applies only to scenarios where multiple links exist between the downstream device and the same destination. If the downlink is unique and a link switchover cannot be performed when the link fails, configuring delayed response to BGP next hop recursion changes will cause additional traffic loss.</p>
+</div></div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130783946__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li><span>Enter the BGP view.</span><p><pre class="screen"><a href="cmdqueryname=bgp"><b><span class="cmdname">bgp</span></b></a> <i><span class="varname">as-number</span></i></pre>
+</p></li><li><span>Configure delayed response to next hop recursion changes.</span><p><pre class="screen"><a href="cmdqueryname=nexthop+recursive-lookup+delay"><b><span class="cmdname">nexthop recursive-lookup delay</span></b></a> [ <i><span class="varname">delay-time</span></i> ]</pre>
+<p><span>If the <b><span class="cmdname">nexthop recursive-lookup delay</span></b> command is run, the device delays responses to all recursion changes (including critical and non-critical ones). If the <b><span class="cmdname">nexthop recursive-lookup non-critical-event delay</span></b> command is run, the device delays responses only to non-critical BGP recursion changes. If both the commands are run, the <b><span class="cmdname">nexthop recursive-lookup non-critical-event delay</span></b> command takes precedence over the <b><span class="cmdname">nexthop recursive-lookup delay</span></b> command. </span></p>
+<p>If both the commands are run, the delay time set using the <a href="cmdqueryname=nexthop+recursive-lookup+non-critical-event+delay"><b><span class="cmdname">nexthop recursive-lookup non-critical-event delay</span></b></a> command cannot be shorter than that set using the <a href="cmdqueryname=nexthop+recursive-lookup+delay"><b><span class="cmdname">nexthop recursive-lookup delay</span></b></a> command.</p>
+</p></li><li><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001130783946__en-us_task_0234857734_screen163801330213"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001130783946__en-us_task_0234857734_en-us_concept_0141113565_cmdname1667501373175340">commit</span></b></a></pre>
+</p></li></ol></div>
+<div class="postreq"><a name="EN-US_TASK_0000001130783946__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>After configuring delayed response to BGP next hop recursion changes, you can run the following commands to check the previous configuration.</p>
+<ul><li>Run the <a href="cmdqueryname=display+current-configuration+configuration+bgp+%7C+include"><b><span class="cmdname">display current-configuration</span></b></a> <strong><span>configuration</span></strong> <strong><span>bgp</span></strong> <strong><span>|</span></strong> <strong><span>include</span></strong> <strong><span>nexthop recursive-lookup delay</span></strong> command to view information about the delay in responding to a next hop recursion change.</li><li>Run the <a href="cmdqueryname=display+current-configuration+configuration+bgp+%7C+include"><b><span class="cmdname">display current-configuration</span></b></a> <strong><span>configuration</span></strong> <strong><span>bgp</span></strong> <strong><span>|</span></strong> <strong><span>include</span></strong> <strong><span>nexthop recursive-lookup non-critical-event delay</span></strong> command to view information about the delay in responding to a non-critical BGP recursion change.</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bgp_cfg_0001.html">BGP Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bgp_cfg_0105.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_bgp_cfg_3100_copy.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

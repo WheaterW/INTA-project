@@ -1,0 +1,352 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring an NQA PWE3 Ping Test to check PW Connectivity on a VPWS Network">
+<meta name="abstract" content="This section provides an example for configuring an NQA PWE3 ping test to check PW connectivity on a virtual private wire service (VPWS) network.">
+<meta name="description" content="This section provides an example for configuring an NQA PWE3 ping test to check PW connectivity on a virtual private wire service (VPWS) network.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_nqa_cfg_0025.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_nqa_cfg_0030.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_nqa_cfg_0077.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,network-monitor_vrp,w00556928,c00511010,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="NQA">
+<meta name="featuretype" content="System Monitor">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="NQA">
+<meta name="featuretype" content="System Monitor">
+<meta name="featurename" content="NQA">
+<meta name="featuretype" content="System Monitor">
+<meta name="featurename" content="NQA">
+<meta name="featuretype" content="System Monitor">
+<meta name="OWNER" content="c00511010">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="c00511010">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172373144">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring an NQA PWE3 Ping Test to check PW Connectivity on a VPWS Network</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172373144"></a><a name="EN-US_TASK_0172373144"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring an NQA PWE3 Ping Test to check PW Connectivity on a VPWS Network</h1>
+<div class="taskbody"><p>This section provides an example for configuring an NQA PWE3 ping test to check PW connectivity on a virtual private wire service (VPWS) network.</p>
+<div class="context"><a name="EN-US_TASK_0172373144__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0172373144__fig_dc_vrp_nqa_cfg_004201">Figure 1</a>, CE-A and CE-B run PPP to access U-PE1 and U-PE2, respectively. U-PE1 and U-PE2 are connected over an MPLS backbone network. A dynamic multi-segment PW between U-PE1 and U-PE2 is established over a label switched path (LSP), with an S-PE functioning as a switching node.</p>
+<p>The PWE3 ping function can be configured to check the connectivity of the multi-segment PW between U-PE1 and U-PE2.</p>
+<div class="fignone" id="EN-US_TASK_0172373144__fig_dc_vrp_nqa_cfg_004201"><a name="EN-US_TASK_0172373144__fig_dc_vrp_nqa_cfg_004201"></a><a name="fig_dc_vrp_nqa_cfg_004201"></a><span class="figcap"><b>Figure 1 </b>VPWS networking</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>In this example, interfaces 1 and 2 represent GE<span>0/1/0</span> and GE<span>0/2/0</span>, respectively.</li></ul>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_nqa_cfg_004201.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172373144__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure an IGP on the backbone network for communication between <span class="keyword">Router</span>s on the network.</p>
+</li><li><p>Enable basic MPLS functions over the backbone network and set up LSPs. Establish a remote MPLS Label Distribution Protocol (LDP) peer relationship between U-PE1 and S-PE, and between U-PE2 and S-PE.</p>
+</li><li><p>Set up an MPLS Layer 2 virtual circuit (L2VC) connection between U-PEs.</p>
+</li><li><p>Set up a switched PW on the switching node S-PE.</p>
+</li><li><p>Configure a PWE3 ping test instance for the multi-segment PW on U-PE1.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172373144__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Different L2VC IDs of U-PE1 and U-PE2</p>
+</li><li><p>MPLS LSR IDs of U-PE1, S-PE, and U-PE2</p>
+</li><li><p>IP address of the remote peer</p>
+</li><li><p>Encapsulation type of the switched PW</p>
+</li><li><p>Name of the PW template configured on each U-PE and template parameters</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172373144__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure a dynamic multi-segment PW.</span><p><p>Configure a dynamic multi-segment PW on the MPLS backbone network.</p>
+<p>For details, see "VPWS Configuration" in <em><span class="keyword">HUAWEI NE40E-M2 series</span><span class="keyword">NE40E</span> Configuration Guide &gt; VPN</em>.</p>
+</p></li><li><span>Configure a PWE3 ping test instance for the multi-segment PW.</span><p><p># Configure U-PE1.</p>
+<pre class="screen">[<span class="keyword">*</span>U-PE1] <strong>nqa test-instance test pwe3ping</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>U-PE1-nqa-test-pwe3ping] <strong>test-type pwe3ping</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>U-PE1-nqa-test-pwe3ping] <strong>local-pw-id 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>U-PE1-nqa-test-pwe3ping] <strong>local-pw-type ppp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>U-PE1-nqa-test-pwe3ping] <strong>label-type control-word</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>U-PE1-nqa-test-pwe3ping] <strong>remote-pw-id 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>U-PE1-nqa-test-pwe3ping] <strong>commit</strong></pre>
+</p></li><li><span>Start the test instance.</span><p><pre class="screen">[<span class="keyword">*</span>U-PE1-nqa-test-pwe3ping]<strong> start now</strong></pre>
+</p></li><li><span>Verify the test result.</span><p><p>Run the <strong>display nqa results</strong> command on the PE. The command output shows that the test is successful.</p>
+<pre class="screen">[<span class="keyword">*</span>U-PE1-nqa-test-pwe3ping]<strong> display nqa results</strong></pre>
+<pre class="screen">NQA entry(lh, 11) :testflag is inactive ,testtype is pwe3ping
+  1 . Test 1 result   The test is finished 
+   SendProbe:3                            ResponseProbe:3                       
+   Completion:success                     RTD OverThresholds number:0           
+   OWD OverThresholds SD number:0         OWD OverThresholds DS number:0        
+   Min/Max/Avg/Sum RTT:3/5/4/11           RTT Square Sum:43                     
+   NumOfRTT:3                             Drop operation number:0               
+   Operation sequence errors number:0     RTT Status errors number:0            
+   System busy operation number:0         Operation timeout number:0            
+   Min Positive SD:0                      Min Positive DS:1                     
+   Max Positive SD:0                      Max Positive DS:1                     
+   Positive SD Number:0                   Positive DS Number:1                  
+   Positive SD Sum:0                      Positive DS Sum:1                     
+   Positive SD Square Sum:0               Positive DS Square Sum:1              
+   Min Negative SD:1                      Min Negative DS:1                     
+   Max Negative SD:2                      Max Negative DS:1                     
+   Negative SD Number:2                   Negative DS Number:1                  
+   Negative SD Sum:3                      Negative DS Sum:1                     
+   Negative SD Square Sum:5               Negative DS Square Sum:1              
+   Min Delay SD:0                         Min Delay DS:0                        
+   Max Delay SD:0                         Max Delay DS:0                        
+   Delay SD Square Sum:0                  Delay DS Square Sum:0                 
+   Packet Loss SD:0                       Packet Loss DS:0                      
+   Packet Loss Unknown:0                  Average of Jitter:1                   
+   Average of Jitter SD:1                 Average of Jitter DS:1                
+   Jitter out value:0.1015625             Jitter in value:0.0611979             
+   NumberOfOWD:0                          Packet Loss Ratio:0 %                 
+   OWD SD Sum:0                           OWD DS Sum:0                          
+   ICPIF value:0                          MOS-CQ value:0                        
+   Attempts number:1                      Disconnect operation number:0         
+   Connection fail number:0               Destination ip address:10.4.1.2        
+   Last Good Probe Time: 2016-11-15 20:33:43.8</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172373144__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>CE-A configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname CE-A</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.10.1.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> return</pre>
+</li><li><p>U-PE1 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname U-PE1</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls lsr-id 1.1.1.9</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls l2vpn</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls ldp remote-peer 3.3.3.9</pre>
+<pre class="screen"> remote-ip 3.3.3.9  </pre>
+<pre class="screen">#</pre>
+<pre class="screen"> pw-template wwt</pre>
+<pre class="screen"> peer-address 3.3.3.9</pre>
+<pre class="screen"> control-word</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> mpls l2vc 3.3.3.9 pw-template wwt 100   </pre>
+<pre class="screen">#</pre>
+<pre class="screen"> interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.1.1.1 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> interface LoopBack0</pre>
+<pre class="screen"> ip address 1.1.1.9 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> nqa test-instance test pwe3ping</pre>
+<pre class="screen"> test-type pwe3ping</pre>
+<pre class="screen"> local-pw-id 100</pre>
+<pre class="screen"> local-pw-type ppp</pre>
+<pre class="screen"> remote-pw-id 200</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen"> network 10.1.1.0 0.0.0.255</pre>
+<pre class="screen"> network 1.1.1.9 0.0.0.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> return</pre>
+</li><li><p>P1 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname P1</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls lsr-id 2.2.2.9</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.1.1.2 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.2.1.1 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> interface LoopBack0</pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 2.2.2.9 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen"> network 2.2.2.9 0.0.0.0</pre>
+<pre class="screen"> network 10.1.1.0 0.0.0.255</pre>
+<pre class="screen"> network 10.2.1.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> return</pre>
+</li><li><p>S-PE configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname S-PE</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls lsr-id 3.3.3.9</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls l2vpn</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls switch-l2vc 5.5.5.9 200 between 1.1.1.9 100 encapsulation ethernet</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls ldp remote-peer 1.1.1.9</pre>
+<pre class="screen"> remote-ip 1.1.1.9</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls ldp remote-peer 5.5.5.9</pre>
+<pre class="screen"> remote-ip 5.5.5.9</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.2.1.2 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.3.1.1 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> interface LoopBack0</pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 3.3.3.9 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen"> network 3.3.3.9 0.0.0.0</pre>
+<pre class="screen"> network 10.2.1.0 0.0.0.255</pre>
+<pre class="screen"> network 10.3.1.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> return</pre>
+</li><li><p>P2 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname P2</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls lsr-id 4.4.4.9</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.3.1.2 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.4.1.1 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> interface LoopBack0</pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 4.4.4.9 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen"> network 4.4.4.9 0.0.0.0</pre>
+<pre class="screen"> network 10.3.1.0 0.0.0.255</pre>
+<pre class="screen"> network 10.4.1.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+</li><li><p>U-PE2 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname U-PE2</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls lsr-id 5.5.5.9</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls l2vpn</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls ldp remote-peer 3.3.3.9</pre>
+<pre class="screen"> remote-ip 3.3.3.9</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.4.1.2 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> pw-template wwt
+ peer-address 3.3.3.9
+ control-word
+#
+ interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ mpls l2vc 3.3.3.9 pw-template wwt 200   </pre>
+<pre class="screen">#</pre>
+<pre class="screen"> interface LoopBack0</pre>
+<pre class="screen"> ip address 5.5.5.9 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen"> network 5.5.5.9 0.0.0.0</pre>
+<pre class="screen"> network 10.4.1.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> return</pre>
+</li><li><p>CE-B configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname CE-B</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.10.1.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_nqa_cfg_0025.html">Configuration Examples for NQA
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_nqa_cfg_0030.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_nqa_cfg_0077.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

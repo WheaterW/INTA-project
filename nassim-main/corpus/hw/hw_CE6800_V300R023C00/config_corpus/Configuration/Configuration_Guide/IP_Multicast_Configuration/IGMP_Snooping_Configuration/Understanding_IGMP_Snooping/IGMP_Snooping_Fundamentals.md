@@ -1,0 +1,58 @@
+IGMP Snooping Fundamentals
+==========================
+
+IGMP Snooping Fundamentals
+
+#### Working Process of IGMP Snooping
+
+This section uses an example to describe the working process of IGMP snooping in the networking shown in [Figure 1](#EN-US_CONCEPT_0000001176741563__fig206970134364). In this example, DeviceA is a last-hop multicast router, and IGMPv2 is enabled on its interface connected to DeviceB. IGMP snooping is enabled on DeviceB, and all interfaces on this device belong to VLAN10. Initially, the Layer 2 multicast forwarding table on DeviceB is empty. At this stage, it does not forward the multicast traffic received from DeviceA to any interface.
+
+**Figure 1** Initial state of IGMP snooping  
+![](figure/en-us_image_0000001130781918.png)
+
+1. After IGMP is enabled on an interface of DeviceA, the interface periodically sends IGMP General Query messages.
+2. In [Figure 2](#EN-US_CONCEPT_0000001176741563__fig423014298388), DeviceB receives the IGMP General Query message through interface10 from DeviceA. At this stage, the IGMP snooping router port list on DeviceB is empty. DeviceB therefore directly adds interface10 to the list, classifying this interface as a dynamic router port. At the same time, DeviceB starts an aging timer for the interface, and resets the timer when it receives an IGMP General Query message through the interface again. DeviceB then floods the IGMP General Query message through all the interfaces in VLAN10, except interface10.**Figure 2** IGMP General Query message  
+   ![](figure/en-us_image_0000001130781920.png)
+3. UserA, UserB, and UserC receive the IGMP General Query message flooded by DeviceB. As UserC is not a member of any multicast group, it discards the message and does not respond. Being members of multicast group 239.1.1.22, UserA and UserB respond with IGMP Report messages.**Figure 3** IGMP Membership Report message  
+   ![](figure/en-us_image_0000001176741583.png)
+   ![](../public_sys-resources/note_3.0-en-us.png) 
+   
+   When UserA and UserB join multicast group 239.1.1.22 for the first time, they can proactively send IGMP Report messages without waiting for an IGMP General Query message.
+4. In [Figure 3](#EN-US_CONCEPT_0000001176741563__fig7459231154119), interface1 and interface2 on DeviceB receive the IGMP Report messages and parse them because IGMP snooping is enabled. After finding that the users connected to interface 1 and interface 2 need to join multicast group 239.1.1.22, DeviceB creates an entry 239.1.1.22 in its Layer 2 multicast forwarding table, sets interface 1 and interface 2 as dynamic member ports of the entry, and starts an aging timer for each of the two interfaces. DeviceB resets the timer of either interface when it receives IGMP Report messages through the interface again. DeviceB then forwards the received IGMP Report messages through interface10.
+5. DeviceA receives the IGMP Report messages from DeviceB, and maintains the corresponding multicast entries. DeviceA then forwards the traffic destined for multicast group 239.1.1.22 to DeviceB. After receiving the traffic destined for 239.1.1.22 through interface10, DeviceB searches its Layer 2 multicast forwarding table and finds the matching entry. In this example, the matching entry contains two member ports (interface1 and interface2). As such, DeviceB forwards the multicast traffic through the two interfaces. In this way, UserC will not receive the multicast traffic.
+6. When UserA wants to leave multicast group 239.1.1.22, it sends an IGMP Leave message, which DeviceB receives through interface1. DeviceB searches its Layer 2 multicast forwarding table and finds that the interface is a member port of multicast group 239.1.1.22. DeviceB will then forward the message through all its router ports (interface10 in this example).**Figure 4** IGMP Leave message  
+   ![](figure/en-us_image_0000001176741585.png)
+7. DeviceA sends an IGMP Group-Specific Query message immediately after it receives the IGMP Leave message of UserA.
+8. DeviceB receives the IGMP Group-Specific Query message through interface10 and forwards the message through all the interfaces in VLAN10, except interface10.
+9. After receiving the IGMP Group-Specific Query message, UserB determines that the multicast group it joins is being queried and responds with an IGMP Report message immediately.
+10. DeviceB receives the IGMP Report message through interface2. When searching its Layer 2 multicast forwarding table, DeviceB determines that interface2 is already a member port of multicast group 239.1.1.22. As such, DeviceB resets the aging timer of the interface, and then forwards the IGMP Report message through interface10.
+11. After receiving UserB's IGMP Report message, DeviceA learns that a user is still requesting the traffic of multicast group 239.1.1.22. As a result, DeviceA continues to forward the traffic of this group to the subnet where the user resides.
+12. Because UserA has left multicast group 239.1.1.22, it no longer sends IGMP Report messages. After the aging timer of interface1 expires, DeviceB deletes interface1 from the member port list of multicast group 239.1.1.22. DeviceB then stops forwarding the traffic of this group to interface1.
+
+
+#### IGMP Message Processing by IGMP Snooping
+
+After IGMP snooping is enabled on a Layer 2 multicast device, the device processes received IGMP messages differently and creates Layer 2 multicast forwarding entries during message processing.
+
+**Table 1** IGMP message processing by IGMP snooping
+| IGMP Working Phase | Type of Message Received by a Layer 2 Multicast Device | Processing Method |
+| --- | --- | --- |
+| General query  An IGMP querier periodically sends an IGMP General Query message (with the destination address being 224.0.0.1) to all hosts and routers on the local subnet. This is performed to check which multicast groups have members. | IGMP General Query message | The device forwards this message to all interfaces in the corresponding VLAN, except the interface that received the message. It then performs either of the following operations on the interface that received the message:  * If the interface is not in the router port list, the device adds it to the list and starts an aging timer for the interface. * If the interface is already in the router port list, the device resets its aging timer.   NOTE:  The aging timer is triggered upon receipt of an IGMP General Query message. The default value of the aging timer for a dynamic router port is 180s. The value can be changed using a command. |
+| Membership report Report messages are sent in two scenarios:  * A member sends an IGMP Membership Report message in response to an IGMP General Query message. * A member proactively sends an IGMP Membership Report message to request to join a multicast group. | IGMP Membership Report message | The device forwards this message to all the router ports in the corresponding VLAN and parses the message to obtain the multicast group address. It then performs the following operations on the interface that received the message:  * If no forwarding entry is created for the group, the device creates an entry for it, adds the interface to the outbound interface list as a dynamic member port, and starts an aging timer for the interface. * If a forwarding entry is already created for the group but the interface is not in the outbound interface list, the device adds the interface to the list as a dynamic member port, and starts an aging timer for the interface. * If a forwarding entry is already created for the group and the interface is already in the outbound interface list as a dynamic member port, the device resets the aging timer for the interface.   NOTE:  After an IGMP Membership Report message is received, the aging time of a dynamic member port is calculated as follows: Robustness variable x General Query interval + Maximum response time. |
+| Leave of group members Two phases are involved:  1. An IGMPv2 or IGMPv3 member sends an IGMP Leave message to notify an IGMP querier that it is leaving the multicast group. 2. Upon receiving the IGMP Leave message, the IGMP querier learns the multicast group address and sends an IGMP Group-Specific/Group-Source-Specific Query message to the multicast group through the interface that received the IGMP Leave message. | IGMP Leave message | The device checks whether a forwarding entry is created for the multicast group and whether the interface that received the message is added to the outbound interface list.  * If a forwarding entry is not created for the group or the interface that received the message is not added to the outbound interface list, the Layer 2 multicast device drops the message, instead of forwarding it. * If a forwarding entry is created for the group and the interface that received the message is added to the outbound interface list, the Layer 2 device forwards the message to all the router ports in the corresponding VLAN.  Within the aging time of the interface that received the IGMP Leave message (assuming that the interface is a dynamic member port), the device performs the following operations:  * If the interface receives IGMP Group-Specific/Group-Source-Specific Query messages of hosts (indicating that some users still require the traffic of the multicast group), the device resets the aging timer of the interface. * If the interface does not receive IGMP Group-Specific/Group-Source-Specific Query messages of hosts (indicating that no users require the traffic of the multicast group), the device waits for the aging timer to expire and then deletes the interface from the outbound interface list after the timer expires.   NOTE:  After an IGMP Leave message is received, the aging time of a dynamic member port is calculated as follows: Robustness variable x Group-Specific Query interval. |
+| IGMP Group-Specific/Group-Source-Specific Query message | The device forwards this message to all interfaces in the corresponding VLAN, except the interface that received the message. |
+
+
+Upon receiving a PIM Hello message, a Layer 2 multicast device forwards it to all the interfaces in the corresponding VLAN, except the interface that received the message. The device then performs the following operations:
+
+* If the interface is already in the router port list, the device resets its aging timer.
+* If the interface is not in the router port list, the device adds it to the list and starts an aging timer for the interface.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+When a PIM Hello message is received, the aging time of the dynamic router port equals the value of the Holdtime field in the Hello message.
+
+
+If a static router port is configured, the Layer 2 multicast device forwards received IGMP Membership Report and Leave messages to this port. If a static member port is configured, the device adds this port to the outbound interface list as an outbound interface.
+
+If Layer 2 multicast forwarding entries have been created on a Layer 2 multicast device, the device searches for a forwarding entry for a received multicast data packet based on the VLAN and destination address (multicast group address) information in the packet. This is performed to determine whether an outbound interface exists. If such an interface exists, the device sends the packet to the corresponding multicast group member port and router port. Otherwise, the device discards the packet or broadcasts it in the VLAN.

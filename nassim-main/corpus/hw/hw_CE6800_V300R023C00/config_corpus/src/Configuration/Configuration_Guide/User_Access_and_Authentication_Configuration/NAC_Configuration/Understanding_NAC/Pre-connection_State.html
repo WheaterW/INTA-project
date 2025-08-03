@@ -1,0 +1,93 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Pre-connection State">
+<meta name="abstract" content="">
+<meta name="description" content="">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_nac_cfg_0003.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_nac_cfg_0038.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_nac_cfg_0006.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="802.1X Authentication">
+<meta name="featurename" content="MAC Address Authentication">
+<meta name="featurename" content="NAC">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="802.1X Authentication">
+<meta name="featurename" content="MAC Address Authentication">
+<meta name="featurename" content="NAC">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="featurename" content="802.1X Authentication">
+<meta name="featurename" content="MAC Address Authentication">
+<meta name="featurename" content="NAC">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001564000465">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<link rel="stylesheet" type="text/css" href="public_sys-resources/imagePopup.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/customQuery.js"></script>
+<script language="javascript" type="text/javascript" src="public_sys-resources/imagePopup.js"></script>
+<title>Pre-connection State</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001564000465"></a><a name="EN-US_CONCEPT_0000001564000465"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Pre-connection State</h1>
+<div><p></p>
+<p>The pre-connection function enables users to enter the pre-connection state before they are authenticated successfully or after they fail authentication. You can configure pre-connection authorization for users in pre-connection state so that they have certain network access rights. If pre-connection authorization is not configured, these users do not have any access rights.</p>
+<div class="p">A pre-connection is triggered in either of the following situations:<ul><li>After startup, a client sends a packet to an access device and enters the pre-connection state.</li><li>A client enters the pre-connection state after it fails the authentication.</li></ul>
+</div>
+<p>The following assumes that the access device has no entries for a user before the user accesses the network. The access device deletes an existing user entry when detecting that the corresponding user goes offline or the physical link is down for more than T seconds (user logout delay) through ARP probing. If the access device has a user entry that has not been aged out for the user during user access, the access device does not generate a pre-connection log. If a user fails the first authentication, the user remains in the pre-connection state until going offline. The following describes the pre-connection mechanism upon a re-authentication failure.</p>
+<p>When the client is directly connected to the access device, the interfaces on both ends will go down if the client is powered off. When the client is connected to the access device through an IP phone, the interface of the access device is connected to the IP phone; therefore, this interface will not go down if the client is powered off. In the two scenarios, the output of pre-connection logs is different. The following describes the two scenarios, assuming that when the interface link is faulty, the user logout delay is T seconds, and the user ARP probing ends within T seconds.</p>
+<div class="section"><h4 class="sectiontitle">A Client Is Directly Connected to an Access Device</h4><div class="fignone"><span class="figcap"><b>Figure 1 </b>A client is directly connected to an access device</span><br><span><img class="imgResize" src="figure/en-us_image_0000001563760825.png" width="517.4032500000001" title="Click to enlarge"></span></div>
+<div class="p"><ol><li>The client sends a packet to the access device to establish a pre-connection, after which a pre-connection log is generated.</li><li>The client initiates 802.1X authentication. If the authentication is successful, an authentication success log is generated.</li><li>After the client is successfully authenticated, it is periodically re-authenticated. Each time the re-authentication is successful (N times, for example), an authentication success log is generated.</li><li>After the client is powered off, its interface goes down, and the interface that connects the access device to the client goes down after a delay of T seconds.<ul><li>If the user is re-authenticated for the (N+1)th time within T seconds, the user fails the authentication, and a pre-connection log is generated.</li><li>When the interface on the access device goes down after a delay of T seconds, the user will no longer be re-authenticated.</li></ul>
+</li><li>After ARP probing initiated by the access device fails, the device logs out the client.</li></ol>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">A Client Is Indirectly Connected to an Access Device</h4><div class="fignone"><span class="figcap"><b>Figure 2 </b>A client is indirectly connected to an access device</span><br><span><img class="imgResize" src="figure/en-us_image_0000001512840918.png" width="517.4032500000001" title="Click to enlarge"></span></div>
+<div class="p"><ol><li>The client sends a packet to the access device to establish a pre-connection, after which a pre-connection log is generated.</li><li>The client initiates 802.1X authentication. If the authentication is successful, an authentication success log is generated.</li><li>After the client is successfully authenticated, it is periodically re-authenticated. Each time the re-authentication is successful (N times, for example), an authentication success log is generated.</li><li>After the client is powered off, the interface on the access device sends packets normally to the client because the client is still connected to the IP phone.<ul><li>The user will be re-authenticated for the (N+1)th time before ARP probing fails. In this case, the user fails the authentication, and a pre-connection log is generated.</li><li>If ARP probing fails, the device logs out the client and does not perform (N+1)th re-authentication.</li></ul>
+</li><li>After ARP probing initiated by the access device fails, the device logs out the client.</li></ol>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_nac_cfg_0003.html">Understanding NAC
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_nac_cfg_0038.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="galaxy_nac_cfg_0006.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+
+<script language="JavaScript">
+<!--
+initImageViewer('.imgResize');
+var msg_imageMax = "view original image";
+var msg_imageClose = "close";
+//--></script></body>
+</html>

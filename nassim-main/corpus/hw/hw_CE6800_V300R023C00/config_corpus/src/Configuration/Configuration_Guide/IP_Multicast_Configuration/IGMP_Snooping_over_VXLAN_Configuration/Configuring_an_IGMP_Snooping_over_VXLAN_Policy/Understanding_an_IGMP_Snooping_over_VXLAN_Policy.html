@@ -1,0 +1,76 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding an IGMP Snooping over VXLAN Policy">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_l2mc_over_vxlan_cfg_0028.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_l2mc_over_vxlan_cfg_0033.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IGMP Snooping over VXLAN">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IGMP Snooping over VXLAN">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="IGMP Snooping over VXLAN">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001155057052">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding an IGMP Snooping over VXLAN Policy</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001155057052"></a><a name="EN-US_CONCEPT_0000001155057052"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding an IGMP Snooping over VXLAN Policy</h1>
+<div><p>An IGMP snooping over VXLAN policy restricts or extends IGMP snooping behaviors, without affecting the implementation of IGMP snooping over VXLAN. Such a policy can be configured for multicast group filtering, Report/Leave message filtering, Query message filtering, entry aging time configuration, and SSM group policy configuration.</p>
+<div class="section"><h4 class="sectiontitle">IGMP snooping over VXLAN Multicast Group Filtering</h4><p>For security or management purposes, it may be necessary to prevent a device from accepting Report messages or forwarding multicast data for certain multicast groups. In this case, you can configure the range of multicast groups that hosts can join on an IGMP snooping interface.</p>
+<p>On the network shown in <a href="#EN-US_CONCEPT_0000001155057052__fig10725741163116">Figure 1</a>, HostA and HostB join multicast group G1 (225.1.1.1), and HostC and HostD join multicast group G2 (226.1.1.1). If DeviceA needs to accept and forward data only for G1, configure DeviceA to forward data only for G1.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001155057052__fig10725741163116"><a name="EN-US_CONCEPT_0000001155057052__fig10725741163116"></a><a name="fig10725741163116"></a><span class="figcap"><b>Figure 1 </b>Range of multicast groups that hosts can join on an IGMP snooping interface</span><br><span><img class="vsd" src="figure/en-us_image_0000001217639857.png" width="NaN" height="NaN"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">IGMP Snooping over VXLAN Report/Leave Message Filtering</h4><p>Forged IGMP messages may be used to attack a multicast network, wasting bandwidth because traffic is forwarded to multicast groups that have no members. If no filtering policy is configured for Report/Leave messages in a BD, all user hosts can receive multicast services. To configure a device to process only the Report/Leave messages received from specified hosts and thereby improve multicast service security, configure a Report/Leave message filtering policy.</p>
+<p>As shown in <a href="#EN-US_CONCEPT_0000001155057052__fig4828206184314">Figure 2</a>, DeviceA is a querier on the network. The source addresses of Report/Leave messages sent by HostA and HostB are 10.1.0.1 and 10.0.0.8, respectively. HostC and HostD do not order programs. If no ACL rule is specified, DeviceA processes messages from both HostA and HostB. Conversely, if an ACL rule is configured for DeviceA to accept only the Report/Leave messages with the source address 10.0.0.8, DeviceA processes only the messages from HostB and discards those from HostA.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001155057052__fig4828206184314"><a name="EN-US_CONCEPT_0000001155057052__fig4828206184314"></a><a name="fig4828206184314"></a><span class="figcap"><b>Figure 2 </b>IGMP Snooping over VXLAN Report/Leave message filtering policy</span><br><span><img class="vsd" src="figure/en-us_image_0000001200900163.png" width="NaN" height="NaN"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">IGMP Snooping over VXLAN Query Message Filtering</h4><p>If an attacker sends Query messages with a smaller IP address than that of the real IGMP querier on the network, devices running IGMP snooping consider the attacker as a legitimate querier. As such, they forward IGMP Report/Leave messages to the network-side interface of the attacker, resulting in the incorrect transmission of multicast traffic. To prevent this problem, you can configure an IGMP Query message filtering policy that permits only IGMP Query messages with specified source IP addresses and rejects other IGMP Query messages. This improves the security of a Layer 2 multicast network.</p>
+<p>In <a href="#EN-US_CONCEPT_0000001155057052__fig18214181217297">Figure 3</a>, assume that DeviceA is the querier on the network. If an attacker forges IGMP Query messages with a smaller IP address (for example, 10.0.0.1/24), the real querier DeviceA becomes invalid. As a result, DeviceA cannot respond to the Leave messages sent by hosts and continues to forward traffic to the hosts that have left the multicast group, wasting network resources. To address this problem, you can configure a Query message filtering policy. If you configure an ACL rule on DeviceA to deny the IGMP Query messages with the IP address 10.0.0.1/24, DeviceA discards such IGMP Query messages upon reception.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001155057052__fig18214181217297"><a name="EN-US_CONCEPT_0000001155057052__fig18214181217297"></a><a name="fig18214181217297"></a><span class="figcap"><b>Figure 3 </b>IGMP Snooping over VXLAN Query message filtering policy</span><br><span><img class="vsd" src="figure/en-us_image_0000001201107797.png" width="NaN" height="NaN"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Aging Time of IGMP Snooping over VXLAN Entries</h4><p>When a multicast source no longer sends multicast data to a multicast group, the device needs to delete the corresponding (S, G) or (*, G) entry. In this case, the device continuously detects whether there is multicast traffic sent to the multicast group. To reduce the number of exchanged IGMP snooping messages and the volume of network traffic, set the aging time of entries triggered by multicast traffic in a BD on the querier. By default, the aging time of (S, G) or (*, G) entries triggered by multicast traffic is 210s. You can set the aging time according to the number of multicast entries required on the network. If many multicast entries exist and the configured time is too short, some entries cannot be generated. Conversely, if the time is too long, unused entries cannot be promptly deleted and system resources cannot be released.</p>
+<p>After an aging time is set for entries triggered by multicast traffic in a BD, the device deletes the corresponding (S, G) or (*, G) entry if the device does not receive multicast traffic destined for the multicast group within the specified time. In this manner, multicast entries are updated and entry resources are released promptly.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">IGMP Snooping over VXLAN SSM Group Policy</h4><p>SSM requires a device to know the multicast source specified when hosts join a multicast group. By default, the SSM group address ranges from 232.0.0.0 to 232.255.255.255. If the address of the multicast group that a user joins is not in the SSM group address range, configure an SSM group policy in the BD to add the group address to the range.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_l2mc_over_vxlan_cfg_0028.html">Configuring an IGMP Snooping over VXLAN Policy
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_l2mc_over_vxlan_cfg_0033.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

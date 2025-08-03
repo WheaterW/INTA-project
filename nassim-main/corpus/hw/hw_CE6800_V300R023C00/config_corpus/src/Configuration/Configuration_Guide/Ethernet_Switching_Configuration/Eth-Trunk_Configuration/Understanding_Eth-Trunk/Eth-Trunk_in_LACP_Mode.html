@@ -1,0 +1,128 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Eth-Trunk in LACP Mode">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_eth-trunk_cfg_0003.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_eth-trunk_cfg_0005.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_eth-trunk_cfg_0007.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Eth-Trunk">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Eth-Trunk">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="featurename" content="Eth-Trunk">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001130621732">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<link rel="stylesheet" type="text/css" href="public_sys-resources/imagePopup.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/customQuery.js"></script>
+<script language="javascript" type="text/javascript" src="public_sys-resources/imagePopup.js"></script>
+<title>Eth-Trunk in LACP Mode</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001130621732"></a><a name="EN-US_CONCEPT_0000001130621732"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Eth-Trunk in LACP Mode</h1>
+<div><p>In Link Aggregation Control Protocol (LACP) mode, similar to in manual mode, you also need to manually create Eth-Trunks and add member interfaces to Eth-Trunks, which, unlikely manual mode, requires the participation of LACP.</p>
+<p>While manual mode can increase the bandwidth using an Eth-Trunk, only member link disconnections in the Eth-Trunk can be detected in this mode. Other faults, such as link layer faults and incorrect link connections, cannot be detected. This is another difference of LACP, which can be used to detect more fault types, improving fault tolerance of Eth-Trunks, providing backup, and ensuring high reliability of member links.</p>
+<p>LACP, as specified in IEEE 802.3ad, implements dynamic link aggregation and de-aggregation, allowing LACP-enabled devices at both ends to create an Eth-Trunk based on their configurations and exchange Link Aggregation Control Protocol Data Units (LACPDUs). After an Eth-Trunk is created, LACP is responsible for maintaining the Eth-Trunk, and adjusting its member links if a link aggregation condition changes.</p>
+<p>For example, in <a href="#EN-US_CONCEPT_0000001130621732__fig_dc_fd_eth-trunk_000701">Figure 1</a>, four interfaces on DeviceA are supposed to be bundled into an Eth-Trunk and connected to the corresponding interfaces on DeviceB. However, one interface on DeviceA is connected to an interface on DeviceC, which means that DeviceA may send data destined for DeviceB to DeviceC. In manual mode, this fault would go undetected.</p>
+<p>In this case, if LACP is enabled on DeviceA and DeviceB, the Eth-Trunk only selects active links (links connected to DeviceB) to forward data after negotiation. Data sent by DeviceA destined for DeviceB only reaches DeviceB.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130621732__fig_dc_fd_eth-trunk_000701"><a name="EN-US_CONCEPT_0000001130621732__fig_dc_fd_eth-trunk_000701"></a><a name="fig_dc_fd_eth-trunk_000701"></a><span class="figcap"><b>Figure 1 </b>Incorrect Eth-Trunk connection</span><br><span><img class="vsd" src="figure/en-us_image_0000001130781630.png"></span></div>
+<div class="section"><h4 class="sectiontitle">Eth-Trunk Configuration in LACP Mode</h4><p>LACP implements dynamic link aggregation and de-aggregation, allowing devices at both ends of the link to exchange LACPDUs. After member interfaces are added to an Eth-Trunk in LACP mode, each device sends LACPDUs to inform the other device of its system priority, MAC address, member interface priorities, interface numbers, and keys. Of these, keys are used to determine whether the member interfaces on the local and peer end are in the same LAG and whether bandwidth of each interface in the LAG is the same. The peer end then compares this information with its own information, and selects interfaces to join the Eth-Trunk. Both devices perform LACP negotiation to select active interfaces and links.</p>
+<p>Two important parameters in LACP mode are the LACP system priority and LACP interface priority, which directly affect the selection of the Actor and active interfaces of an Eth-Trunk.</p>
+<ul><li><p>LACP system priority</p>
+<p>System LACP priorities are set to prioritize the devices at both ends of an Eth-Trunk link. In LACP mode, active interfaces selected by devices at both ends must be consistent; otherwise, the LAG cannot be set up. To ensure consistency between active interfaces at both ends, set a higher priority for one device. The other device then selects active interfaces based on this device. A smaller LACP system priority value indicates a higher LACP system priority.</p>
+</li><li><p>LACP interface priority</p>
+<p>Interfaces of an Eth-Trunk are assigned different LACP interface priorities. The interfaces with the highest LACP interface priority become active interfaces. A smaller numerical value represents a higher priority.</p>
+</li></ul>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>To learn more information about the format of the LACPDU, use <a href="https://info.support.huawei.com/network/infofinder/openPacketFormatPage?module=6&amp;lang=en" target="_blank" rel="noopener noreferrer">Packet Format Query Tool</a>.</p>
+</div></div>
+<p>An Eth-Trunk in LACP mode is set up as follows:</p>
+<ol><li><p>After member interfaces are added to an Eth-Trunk in LACP mode, both ends of the Eth-Trunk send LACPDUs.</p>
+<p>In <a href="#EN-US_CONCEPT_0000001130621732__fig_dc_fd_eth-trunk_000704">Figure 2</a>, an Eth-Trunk is created in LACP mode on DeviceA and DeviceB. After member interfaces are added to the Eth-Trunk, LACP is automatically enabled on them. Both devices can then exchange LACPDUs.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130621732__fig_dc_fd_eth-trunk_000704"><a name="EN-US_CONCEPT_0000001130621732__fig_dc_fd_eth-trunk_000704"></a><a name="fig_dc_fd_eth-trunk_000704"></a><span class="figcap"><b>Figure 2 </b>Exchange of LACPDUs</span><br><span><img class="vsd" src="figure/en-us_image_0000001130621834.png"></span></div>
+</li><li><p>Devices at both ends determine the Actor and active links.</p>
+<p>In <a href="#EN-US_CONCEPT_0000001130621732__fig_dc_fd_eth-trunk_000705">Figure 3</a>, both DeviceA and DeviceB receive LACPDUs from each other. Take DeviceB as an example. After receiving LACPDUs from DeviceA, DeviceB checks and records information about DeviceA and compares their LACP system priorities. DeviceA becomes the Actor if its LACP system priority is higher than that of DeviceB. If they have the same LACP system priority, the device with a smaller MAC address becomes the Actor.</p>
+<p>After the Actor is selected, both devices select active interfaces based on the LACP interface priorities of the Actor. If priorities of interfaces on the Actor are the same, interfaces with smaller interface numbers are selected as active interfaces. An Eth-Trunk is established when both devices select the same interfaces as active interfaces. Traffic is then load balanced among active links.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130621732__fig_dc_fd_eth-trunk_000705"><a name="EN-US_CONCEPT_0000001130621732__fig_dc_fd_eth-trunk_000705"></a><a name="fig_dc_fd_eth-trunk_000705"></a><span class="figcap"><b>Figure 3 </b>Selecting the Actor and active links in LACP mode</span><br><span><img class="vsd" src="figure/en-us_image_0000001176661381.png"></span></div>
+</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">LACP Preemption</h4><p>In <a href="#EN-US_CONCEPT_0000001130621732__fig_dc_fd_eth-trunk_000706">Figure 4</a>, Port 1, Port 2, and Port 3 are member interfaces of an Eth-Trunk. DeviceA acts as the Actor; the upper threshold for the number of active interfaces is 2; and LACP interface priorities of Port 1, Port 2, and Port 3 are 10, 20, and 30 respectively. When LACP negotiation is complete, Port 1 and Port 2 are selected as active interfaces because their LACP interface priorities are higher, and Port 3 is used as the backup interface.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130621732__fig_dc_fd_eth-trunk_000706"><a name="EN-US_CONCEPT_0000001130621732__fig_dc_fd_eth-trunk_000706"></a><a name="fig_dc_fd_eth-trunk_000706"></a><span class="figcap"><b>Figure 4 </b>LACP preemption</span><br><span><img class="vsd" src="figure/en-us_image_0000001176741291.png"></span></div>
+<p>When LACP preemption is enabled, interfaces with higher priorities in an Eth-Trunk always function as active interfaces. The following describes two typical application scenarios of LACP preemption:</p>
+<ul><li>Port 1 fails and then recovers. Port 1 becomes faulty and is replaced by Port 3 to transmit traffic. When Port 1 recovers, if LACP preemption is not enabled on the Eth-Trunk, Port 1 remains in backup state, despite having a higher priority than Port 3. If LACP preemption is enabled on the Eth-Trunk, the recovered Port 1 becomes active again because of its higher priority than Port 3. Port 3 then becomes a backup interface again.</li><li>With LACP preemption enabled, setting a higher LACP priority for Port 3 will allow it to replace Port 1 or Port 2 as an active interface without either of them first becoming faulty. If LACP preemption is not enabled, the system does not re-select active interfaces even if the priority of a backup interface is set higher than that of an active interface.</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">LACP Preemption Delay</h4><p>The LACP preemption delay is the time a backup interface waits before becoming an active interface after an active interface becomes faulty. Such a delay is used to prevent unstable data transmission over an Eth-Trunk caused by flapping of member link statuses.</p>
+<p>In <a href="#EN-US_CONCEPT_0000001130621732__fig_dc_fd_eth-trunk_000706">Figure 4</a>, Port1 becomes a backup interface due to a faulty link, which then recovers. If LACP preemption is enabled and the LACP preemption delay is set, Port 1 becomes active again only after the LACP preemption delay.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Switchover Between Active and Inactive Links</h4><p>In LACP mode, a link switchover in a LAG is triggered if a device at one end detects one of the following events:</p>
+<ul><li><p>An active link goes down.</p>
+</li><li><p>LACP detects a link fault.</p>
+</li><li><p>An active interface becomes unavailable.</p>
+</li><li><p>When LACP preemption is enabled, a backup interface's priority is changed so that an active interface no longer has the highest priority.</p>
+</li></ul>
+<p>When a fault occurs, LACP takes effect with the following sequence of events:</p>
+<ol><li><p>Shut down the faulty link.</p>
+</li><li><p>The backup link with the highest priority is selected to replace the faulty active link.</p>
+</li><li><p>The new active link begins forwarding data.</p>
+</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">LACP Implementation Modes</h4><p>LACP can work in static or dynamic LACP mode. The characteristics are as follows:</p>
+<p><strong>Static LACP mode</strong></p>
+<p>On the network shown in <a href="#EN-US_CONCEPT_0000001130621732__fig8805227019">Figure 5</a>, DeviceA and DeviceB are directly connected and both support LACP. To implement load balancing and link backup, configure an Eth-Trunk in static LACP mode on each device. The static LACP mode is widely used as it provides both backup links and protection against faults. If an active link fails, the system selects the backup link with the highest priority as a new active link.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130621732__fig8805227019"><a name="EN-US_CONCEPT_0000001130621732__fig8805227019"></a><a name="fig8805227019"></a><span class="figcap"><b>Figure 5 </b>Eth-Trunk in static LACP mode</span><br><span><img class="vsd" src="figure/en-us_image_0000001218111834.png"></span></div>
+<p><strong>Dynamic LACP mode</strong></p>
+<div class="p">In dynamic LACP mode, LACPDUs are exchanged in the same way as in static LACP mode. Where they differ is how they respond to an LACP negotiation failure:<ul><li>In static LACP mode, an Eth-Trunk goes down and cannot forward data after an LACP negotiation failure.</li><li>In dynamic LACP mode, an Eth-Trunk goes down after an LACP negotiation failure, but its member interfaces inherit VLAN attributes of the Eth-Trunk and enter the Indep state. In this state, they can still forward data at Layer 2.</li></ul>
+</div>
+<p>After a device configured with an Eth-Trunk in dynamic LACP mode receives LACPDUs from a peer device, the two devices will use LACPDUs to negotiate link aggregation parameters. After the negotiation, the Eth-Trunk provides the same function as the Eth-Trunk working in static LACP mode.</p>
+<div class="p">The dynamic LACP mode is often used for Eth-Trunks that directly connect devices to servers. For example, in <a href="#EN-US_CONCEPT_0000001130621732__fig7806727012">Figure 6</a>, ServerA needs to obtain the configuration file from the file server ServerB through DeviceA.<ul><li>When ServerA restarts and restores the default configuration, LACP negotiation fails. The dynamic LACP mode ensures that ServerA obtains the configuration file from ServerB through an Eth-Trunk member interface.</li><li>After DeviceA receives LACPDUs from ServerA, DeviceA uses LACPDUs to negotiate link aggregation parameters with ServerA.</li></ul>
+</div>
+<div class="fignone" id="EN-US_CONCEPT_0000001130621732__fig7806727012"><a name="EN-US_CONCEPT_0000001130621732__fig7806727012"></a><a name="fig7806727012"></a><span class="figcap"><b>Figure 6 </b>Eth-Trunk in dynamic LACP mode</span><br><span><img class="imgResize" src="figure/en-us_image_0000001262471731.png" width="497.1051225" title="Click to enlarge"></span></div>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Eth-Trunks in dynamic LACP mode are used only when Huawei devices connect to servers. For other scenarios, configuring Eth-Trunks in static LACP mode is recommended because Eth-Trunks in dynamic LACP mode may incur a risk of loops.</p>
+</div></div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_eth-trunk_cfg_0003.html">Understanding Eth-Trunk
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_eth-trunk_cfg_0005.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_eth-trunk_cfg_0007.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+
+<script language="JavaScript">
+<!--
+initImageViewer('.imgResize');
+var msg_imageMax = "view original image";
+var msg_imageClose = "close";
+//--></script></body>
+</html>

@@ -1,0 +1,354 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Deploying NetStream on a BGP/MPLS IP VPN Network">
+<meta name="abstract" content="This section provides an example for configuring NetStream on a BGP/MPLS IP VPN network to monitor VPN service traffic.">
+<meta name="description" content="This section provides an example for configuring NetStream on a BGP/MPLS IP VPN network to monitor VPN service traffic.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ns_cfg_0030.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ns_cfg_0034.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ns_cfg_0051.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00606909">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="NetStream">
+<meta name="featuretype" content="System Monitor">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="NetStream">
+<meta name="featuretype" content="System Monitor">
+<meta name="featurename" content="NetStream">
+<meta name="featuretype" content="System Monitor">
+<meta name="featurename" content="Netstream">
+<meta name="featuretype" content="System Monitor">
+<meta name="OWNER" content="l00425560">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00799643">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172373031">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Deploying NetStream on a BGP/MPLS IP VPN Network</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172373031"></a><a name="EN-US_TASK_0172373031"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Deploying NetStream on a BGP/MPLS IP VPN Network</h1>
+<div class="taskbody"><p>This section provides an example for configuring NetStream on a BGP/MPLS IP VPN network to monitor VPN service traffic.</p>
+<div class="context"><a name="EN-US_TASK_0172373031__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>As Layer 3 virtual private network (L3VPN) services develop, carriers place increasingly higher requirements on VPN traffic statistics collection. After conventional IP networks carry voice and video services, it has become commonplace for carriers and their customers to sign Service Level Agreements (SLAs). Deploying NetStream on a BGP/MPLS IP VPN network allows users to analyze LSP traffic between PEs and adjust the network to better meet service requirements.</p>
+<div class="p">On the IPv4 BGP/MPLS IP VPN network shown in <a href="#EN-US_TASK_0172373031__fig_dc_vrp_ns_cfg_003501">Figure 1</a>:<ul><li>Packets with specified application labels are sampled on PE2 and sent to the NetStream Collector (NSC) and NetStream Data Analyzer (NDA).</li><li>Statistics collection of incoming and outgoing packets with specified application labels is enabled on the P. Packets with specified application labels sent by the CE are sampled and sent to the NSC and NDA.</li><li>Traffic statistics are analyzed on the NSC and NDA to obtain users' traffic volume between PEs.</li></ul>
+</div>
+<div class="fignone" id="EN-US_TASK_0172373031__fig_dc_vrp_ns_cfg_003501"><a name="EN-US_TASK_0172373031__fig_dc_vrp_ns_cfg_003501"></a><a name="fig_dc_vrp_ns_cfg_003501"></a><span class="figcap"><b>Figure 1 </b>Networking diagram of the BGP/MPLS IP VPN</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>In this example, interfaces 1 through 3 represent GE<span>0/1/0</span>, GE<span>0/2/0</span>, and GE<span>0/3/0</span>, respectively.</li></ul>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_ns_cfg_003501.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172373031__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Assign an IP address to each involved interface.</p>
+</li><li><p>Configure the BGP/MPLS IP VPN.</p>
+</li><li><p>Enable NetStream to sample packets with specified application labels on PE2.</p>
+</li><li><p>Enable NetStream to collect statistics about incoming and outgoing packets with specified labels on the P.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172373031__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Version for outputting NetStream packets and sampling interval</p>
+</li><li><p>Destination address, destination port number, and source address of the output NetStream flows</p>
+</li><li><p>ID of the slot in which the NetStream service processing board resides (In this example, the NetStream service processing board is in slot <span>3</span>.)</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172373031__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each involved interface.</span><p><p>Assign an IP address and a mask to each interface (including loopback interfaces) according to <a href="#EN-US_TASK_0172373031__fig_dc_vrp_ns_cfg_003501">Figure 1</a>. The configuration details are not provided here.</p>
+</p></li><li><span>Configure the BGP/MPLS IP VPN.</span><p><p>For configuration details, see "BGP/MPLS IP VPN Configuration" in <em><span class="keyword">NE40E</span> Configuration &gt; VPN</em>.</p>
+</p></li><li><span>Enable NetStream to sample packets with specified application labels on PE2.</span><p><div class="p"># Configure the board on PE2 to process NetStream services in distributed mode.<pre class="screen">[<span class="keyword">*</span>PE2] <strong>slot <span>3</span></strong>
+[<span class="keyword">*</span>PE2-slot-<span>3</span>]<strong> ip netstream sampler to slot self</strong>
+[<span class="keyword">*</span>PE2-slot-<span>3</span>]<strong> quit</strong></pre>
+</div>
+<div class="p"># Configure PE2 to send information about L3VPN application labels to the NSC.<pre class="screen">[<span class="keyword">*</span>PE2] <strong>ip netstream export template option application-label</strong></pre>
+</div>
+<p># Set the version for outputting NetStream flows to V9, and specify the source and destination addresses and destination port number for the output flows.</p>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> ip netstream export version 9</strong>
+[<span class="keyword">*</span>PE2]<strong> ip netstream export host 192.168.2.2 9000</strong>
+[<span class="keyword">*</span>PE2]<strong> ip netstream export source 192.168.2.1</strong></pre>
+</p></li><li><span>Enable NetStream to collect statistics about incoming and outgoing packets with specified labels on the P.</span><p><div class="p"># Configure the board on the P to process NetStream services in distributed mode.<pre class="screen">[<span class="keyword">*</span>P] <strong>slot <span>3</span></strong>
+[<span class="keyword">*</span>P-slot-<span>3</span>]<strong> ip netstream sampler to slot self</strong>
+[<span class="keyword">*</span>P-slot-<span>3</span>]<strong> quit </strong></pre>
+</div>
+<div class="p"># Collect statistics about incoming and outgoing packets on GigabitEthernet <span>0/1/0</span> of the P.<pre class="screen">[<span class="keyword">*</span>P]<strong> interface GigabitEthernet <span>0/1/0</span></strong>
+[<span class="keyword">*</span>P-GigabitEthernet<span>0/1/0</span>]<strong> ip netstream inbound</strong>
+[<span class="keyword">*</span>P-GigabitEthernet<span>0/1/0</span>]<strong> ip netstream outbound</strong>
+[<span class="keyword">*</span>P-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p id="EN-US_TASK_0172373031__en-us_task_0172373022_p7233155631010">NetStream enabled on a main interface cannot collect traffic statistics about its sub-interface.</p>
+</div></div>
+</div>
+<div class="p"># Configure NetStream to sample both inner IP packets and labels of MPLS packets.<pre class="screen">[<span class="keyword">*</span>P] <strong>ip netstream mpls-aware label-and-ip</strong></pre>
+</div>
+<p># Set the version for outputting NetStream flows to V9, and specify the source and destination addresses and destination port number for the output flows.</p>
+<pre class="screen">[<span class="keyword">*</span>P]<strong> ip netstream export version 9</strong>
+[<span class="keyword">*</span>P]<strong> ip netstream export host 172.16.2.2 9001</strong>
+[<span class="keyword">*</span>P]<strong> ip netstream export source 172.16.2.1</strong></pre>
+<p># Enable NetStream sampling and configure the fixed packet sampling mode.</p>
+<pre class="screen">[<span class="keyword">*</span>P]<strong> ip netstream sampler fix-packets 10000 inbound</strong>
+[<span class="keyword">*</span>P] <strong>ip netstream sampler fix-packets 10000 outbound</strong>
+[<span class="keyword">*</span>P] <strong>commit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p># Run the <a href="cmdqueryname=display+ip+netstream+cache+origin+slot"><b><span class="cmdname">display ip netstream cache origin slot</span></b></a><strong> <span>3</span></strong> command on the P after completing the configuration. The command output shows IP and MPLS related information about VPN packets cached in the NetStream flow buffer.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P]<strong> display ip netstream cache origin slot <span>3</span></strong>
+
+
+ DstIf                         
+ SrcIf                           
+ DstP                          Msk          Pro            Tos 
+ SrcP                          Msk          Flags          <span>Ttl</span>
+ Packets                                                   Bytes
+ NextHop                                                   Direction
+ DstIP                                                     DstAs
+ SrcIP                                                     SrcAs
+ BGP: BGP NextHop                                          TopLabelType
+ Label1                        Exp1         Bottom1
+ Label2                        Exp2         Bottom2
+ Label3                        Exp3         Bottom3
+ TopLabelIpAddress                          VlanId         VniId
+<span> CreateFlowTime                LastRefreshTime</span><span>             VPN</span>(direct)
+ FlowLabel                     Rdvalue
+ ForwardStatus
+  --------------------------------------------------------------------------
+
+ GigabitEthernet<span>0/2/0</span>                                                          
+ GigabitEthernet<span>0/1/0</span>                                            
+ 0                             24            253            0
+ 0                             24            0              <span>60</span>
+ 3                                                          384       
+ 172.16.3.1                                                 in
+ 10.2.1.5                                                   0         
+ 10.4.1.5                                                   0         
+ 0.0.0.0                                                    UNKNOWN             
+ 0                             0            0         
+ 0                             0            0         
+ 0                             0            0         
+ 0.0.0.0                                    0               0        
+<span> 2018-05-09 11:38:07           2018-05-09 11:40:30          --</span>
+ --                            -:-
+ 66(Forwarded Not Fragmented)</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172373031__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>PE1 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname PE1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ip vpn-instance vpna</pre>
+<pre class="screen"> route-distinguisher 100:1</pre>
+<pre class="screen"> apply-label per-instance</pre>
+<pre class="screen"> vpn-target 100:1 export-extcommunity</pre>
+<pre class="screen"> vpn-target 100:1 import-extcommunity</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls lsr-id 1.1.1.9</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> ip binding vpn-instance vpna</pre>
+<pre class="screen"> ip address 10.2.1.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/3/0</span></pre>
+<pre class="screen">  ip address 172.16.1.1 255.255.255.0</pre>
+<pre class="screen">  mpls</pre>
+<pre class="screen">  mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 1.1.1.9 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 100</pre>
+<pre class="screen"> peer 3.3.3.9 as-number 100</pre>
+<pre class="screen"> peer 3.3.3.9 connect-interface LoopBack1</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  peer 3.3.3.9 enable</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family vpnv4</pre>
+<pre class="screen">  policy vpn-target</pre>
+<pre class="screen">  peer 3.3.3.9 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> ipv4-family vpn-instance vpna</pre>
+<pre class="screen">  import-route direct</pre>
+<pre class="screen">  peer 10.1.1.1 as-number 65440</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 1.1.1.9 0.0.0.0</pre>
+<pre class="screen">  network 172.16.1.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>P configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">slot <span>3</span></pre>
+<pre class="screen"> ip netstream sampler to slot self</pre>
+<pre class="screen">#</pre>
+<pre class="screen">sysname P</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> ip netstream mpls-aware label-and-ip</pre>
+<pre class="screen"> ip netstream export version 9</pre>
+<pre class="screen"> ip netstream sampler fix-packets 10000 inbound</pre>
+<pre class="screen"> ip netstream sampler fix-packets 10000 outbound </pre>
+<pre class="screen"> ip netstream export source 172.16.2.1</pre>
+<pre class="screen"> ip netstream export host 172.16.2.2 9001</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls lsr-id 2.2.2.9</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls</pre>
+<pre class="screen"> lsp-trigger all</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> ip address 172.16.1.2 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> ip address 172.16.3.1 255.255.255.0</pre>
+<pre class="screen"> ip netstream inbound</pre>
+<pre class="screen"> ip netstream outbound</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/3/0</span></pre>
+<pre class="screen"> ip address 172.16.2.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 2.2.2.9 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 172.16.1.0 0.0.0.255</pre>
+<pre class="screen">  network 172.17.1.0 0.0.0.255</pre>
+<pre class="screen">  network 2.2.2.9 0.0.0.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">slot <span>3</span></pre>
+<pre class="screen"> ip netstream sampler to slot self</pre>
+<pre class="screen">#</pre>
+<pre class="screen">sysname PE2</pre>
+<pre class="screen"># </pre>
+<pre class="screen"> ip netstream export version 9</pre>
+<pre class="screen"> ip netstream export source 192.168.2.1</pre>
+<pre class="screen"> ip netstream export host 192.168.2.2 9000</pre>
+<pre class="screen"> ip netstream export template option application-label</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ip vpn-instance vpna</pre>
+<pre class="screen"> route-distinguisher 200:1</pre>
+<pre class="screen"> apply-label per-instance</pre>
+<pre class="screen"> vpn-target 100:1 export-extcommunity</pre>
+<pre class="screen"> vpn-target 100:1 import-extcommunity</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls lsr-id 3.3.3.9</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls</pre>
+<pre class="screen"> lsp-trigger all</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> ip binding vpn-instance vpna</pre>
+<pre class="screen"> ip address 10.3.1.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/3/0</span></pre>
+<pre class="screen"> ip address 172.16.3.2 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 3.3.3.9 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 100</pre>
+<pre class="screen"> peer 1.1.1.9 as-number 100</pre>
+<pre class="screen"> peer 1.1.1.9 connect-interface LoopBack1</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  peer 1.1.1.9 enable</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family vpnv4</pre>
+<pre class="screen">  policy vpn-target</pre>
+<pre class="screen">  peer 1.1.1.9 enable</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family vpn-instance vpna</pre>
+<pre class="screen">  import-route direct</pre>
+<pre class="screen">  peer 10.4.1.1 as-number 65440</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 172.17.1.0 0.0.0.255</pre>
+<pre class="screen">  network 3.3.3.9 0.0.0.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>CE2 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname CE2</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> ip address 10.2.1.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 65420</pre>
+<pre class="screen"> peer 10.2.1.2 as-number 100</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  import-route direct</pre>
+<pre class="screen">  peer 10.2.1.2 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>CE4 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname CE4</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> ip address 10.4.1.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 65440</pre>
+<pre class="screen"> peer 10.4.1.2 as-number 100</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  import-route direct</pre>
+<pre class="screen">  peer 10.4.1.2 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ns_cfg_0030.html">Configuration Examples for NetStream
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ns_cfg_0034.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ns_cfg_0051.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+multicast-nat bind instance
+===========================
+
+multicast-nat bind instance
+
+Function
+--------
+
+
+
+The **multicast-nat bind instance** command binds a multicast NAT instance to a traffic behavior.
+
+The **undo multicast-nat bind instance** command deletes a multicast NAT instance.
+
+
+
+By default, no multicast NAT instance is bound to a traffic behavior.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**multicast-nat bind instance id** *instance-id* [ **name** *instance-name* ]
+
+**undo multicast-nat bind instance id** *instance-id* [ **name** *instance-name* ]
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| **name** *instance-name* | Specifies the name of a multicast NAT instance. | The value is a string of 1 to 127 case-sensitive characters. It cannot contain spaces. |
+| **id** *instance-id* | Specifies the ID of a multicast NAT instance. | The value is an integer ranging from 1 to 2048. |
+
+
+
+Views
+-----
+
+Traffic behavior view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+In multicast NAT, input and output multicast streams are associated through a multicast NAT instance. You can bind a multicast NAT instance to a traffic behavior in the traffic behavior view and apply the traffic policy to the inbound interface of multicast streams. In this manner, input multicast streams are associated with the multicast NAT instance.
+
+**Follow-up Procedure**
+
+After a traffic policy is applied to the inbound interface of multicast streams, input multicast streams are associated with the multicast NAT instance.
+
+
+Example
+-------
+
+# Bind a multicast NAT instance to a traffic behavior in the traffic behavior view.
+```
+<HUAWEI> system-view
+[*HUAWEI] multicast-nat enable
+[*HUAWEI] multicast-nat instance id 1 name stream1
+[*HUAWEI] traffic behavior behavior1
+[*HUAWEI-behavior-behavior1] multicast-nat bind instance id 1 name stream1
+
+```

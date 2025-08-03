@@ -1,0 +1,167 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="(Optional) Configuring a Bootstrap Server">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ztp_cfg_0029.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ztp_cfg_0034.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ztp_cfg_0035.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="ZTP">
+<meta name="featuretype" content="Basic Configuration">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="ZTP">
+<meta name="featuretype" content="Basic Configuration">
+<meta name="featurename" content="ZTP">
+<meta name="featuretype" content="Basic Configuration">
+<meta name="featurename" content="ZTP">
+<meta name="featuretype" content="Basic Configuration">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001564114485">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>(Optional) Configuring a Bootstrap Server</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001564114485"></a><a name="EN-US_TASK_0000001564114485"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">(Optional) Configuring a Bootstrap Server</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001564114485__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>Huawei devices do not provide the bootstrap server capability. Therefore, a third-party bootstrap server needs to be deployed. For details about how to configure the third-party bootstrap server, see the operation guide of the third-party bootstrap server.</p>
+<p>Before configuring the bootstrap server, you must obtain the ownership voucher of the device to be deployed by referring to the following process:</p>
+<ul><li>Send the root certificate of the bootstrap server to Huawei technical support engineers.</li><li>Huawei then issues the ownership voucher of the device to be deployed based on the root certificate of the bootstrap server and the ESN of the device.</li><li>Huawei technical support engineers send the ownership voucher to you.</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001564114485__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Log in to Huawei <a href="https://hwpki.huawei.com/pki/#/home" target="_blank" rel="noopener noreferrer">PKI website</a> and download the Huawei level-2 CA certificate of the device to be deployed.</span></li><li><span>Install the Huawei level-2 CA certificate on the bootstrap server.</span></li><li><span>Obtain the ownership voucher issued by Huawei for the ZTP device to be deployed.</span></li><li><span>Install the ownership voucher on the bootstrap server.</span></li><li><span>Configure the bootstrap server.</span><p><p>For SZTP, you need to create and upload bootstrapping data on the bootstrap server. Bootstrapping data is a set of data obtained by the device from the bootstrap server during SZTP. For details, see <a href="https://datatracker.ietf.org/doc/html/rfc8572" target="_blank" rel="noopener noreferrer">RFC 8572</a>.</p>
+<p>The following is an example of the interaction process between the device to be deployed and the bootstrap server:</p>
+<p>The device to be deployed requests bootstrapping data:</p>
+<pre class="screen">   POST:/restconf/operations/ietf-sztp-bootstrap-server:get-bootstrapping-data
+   Content-Type: application/yang.data+xml
+   &lt;input xmlns="urn:ietf:params:xml:ns:yang:ietf-sztp-bootstrap-server"&gt;
+     &lt;signed-data-preferred/&gt;
+   &lt;/input&gt;</pre>
+<p>The bootstrap server replies with bootstrapping data.</p>
+<pre class="screen">   Content-Type: application/yang.data+xml
+   &lt;output xmlns="urn:ietf:params:xml:ns:yang:ietf-sztp-bootstrap-server"&gt;
+     &lt;conveyed-information&gt;base64encodedvalue==&lt;/conveyed-information&gt;
+     &lt;owner-certificate&gt;base64encodedvalue==&lt;/owner-certificate&gt;
+     &lt;ownership-voucher&gt;base64encodedvalue==&lt;/ownership-voucher&gt;
+   &lt;/output&gt;</pre>
+<p>Bootstrapping data contains the following parts:</p>
+<ol type="a"><li>Conveyed information: contains the bootstrapping information required by the device to be deployed, that is, redirect information or onboarding information (only one type of the information can be carried).<p>ietf-sztp-conveyed-info example of the YANG model:</p>
+<pre class="screen">       yang-data conveyed-information:
+         +-- (information-type)
+            +--:(redirect-information)
+            |  +-- redirect-information
+            |     +-- bootstrap-server* [address]
+            |        +-- address         inet:host
+            |        +-- port?           inet:port-number
+            |        +-- trust-anchor?   cms
+            +--:(onboarding-information)
+               +-- onboarding-information
+                  +-- boot-image
+                  |  +-- os-name?              string
+                  |  +-- os-version?           string
+                  |  +-- download-uri*         inet:uri
+                  |  +-- image-verification* [hash-algorithm]
+                  |     +-- hash-algorithm    identityref
+                  |     +-- hash-value        yang:hex-string
+                  +-- configuration-handling?      enumeration
+                  +-- pre-configuration-script?    script
+                  +-- configuration?               binary
+                  +-- post-configuration-script?   script</pre>
+<ul><li>Redirect information: is used to redirect a device to another bootstrap server. The redirect information contains a list of bootstrap servers, as well as the host name, optional port, and optional trust anchor certificate used by the device to authenticate the bootstrap server.<p>Example:</p>
+<pre class="screen">&lt;conveyed-information xmlns="urn:ietf:params:xml:ns:yang:ietf-sztp-conveyed-info"&gt;
+    &lt;redirect-information&gt;
+      &lt;bootstrap-server&gt;
+            &lt;address&gt;https://sztp1.example.com&lt;/address&gt;
+            &lt;port&gt;90&lt;/port&gt;
+            &lt;trust-anchor&gt;base64encodedvalue==&lt;/trust-anchor&gt;
+      &lt;/bootstrap-server&gt;
+      &lt;bootstrap-server&gt; 
+            &lt;address&gt;https://sztp2.example.com&lt;/address&gt;
+            &lt;port&gt;90&lt;/port&gt;
+            &lt;trust-anchor&gt;base64encodedvalue==&lt;/trust-anchor&gt;
+      &lt;/bootstrap-server&gt;
+      &lt;bootstrap-server&gt;
+            &lt;address&gt;https://sztp3.example.com&lt;/address&gt;
+            &lt;port&gt;90&lt;/port&gt;
+            &lt;trust-anchor&gt;base64encodedvalue==&lt;/trust-anchor&gt;
+        &lt;/bootstrap-server&gt;
+    &lt;/redirect-information&gt;
+&lt;/conveyed-information&gt;</pre>
+</li><li>Onboarding information: provides detailed information about the image, configuration file, and other deployment files of the device to be deployed.<p>Example:</p>
+<pre class="screen">&lt;conveyed-information xmlns="urn:ietf:params:xml:ns:yang:ietf-sztp-conveyed-info"&gt;
+    &lt;onboarding-information&gt;
+        &lt;boot-image&gt;
+            &lt;os-name&gt;&lt;/os-name&gt;
+            &lt;os-version&gt;&lt;/os-version&gt;
+            &lt;download-uri&gt;https://example.com/path/to/image/cfg_file_name.cfg&lt;/download-uri&gt;
+            &lt;image-verification&gt;
+                &lt;hash-algorithm&gt;ietf-sztp-conveyed-info:sha-256&lt;/hash-algorithm&gt;
+                &lt;hash-value&gt;ee0d0a46ebb2db92762eedba2c0afd9543bf3c3a983dab2e00c559ba9e62196f&lt;/hash-value&gt;
+            &lt;/image-verification&gt;
+        &lt;/boot-image&gt;
+        &lt;configuration-handling&gt;merge&lt;/configuration-handling&gt;
+        &lt;pre-configuration-script&gt;base64encodedvalue==&lt;/pre-configuration-script&gt;
+        &lt;configuration&gt;base64encodedvalue==&lt;/configuration&gt;
+        &lt;post-configuration-script&gt;base64encodedvalue==&lt;/post-configuration-script&gt;
+    &lt;/onboarding-information&gt;
+&lt;/conveyed-information&gt;</pre>
+</li></ul>
+</li><li>Owner certificate: contains the public key certificate of the customer. The device can use this certificate to verify the signature of the conveyed information.</li><li>Ownership voucher: is signed by Huawei. The customer needs to provide the pinned domain certificate and the ESN of the device to be deployed. Huawei generates and provides the ownership voucher for the customer. For details about the ownership voucher, see <a href="https://datatracker.ietf.org/doc/html/rfc8366" target="_blank" rel="noopener noreferrer">RFC 8366</a>.<div class="p">Example:<pre class="screen">   {
+     "ietf-voucher:voucher": {
+       "created-on": "2023-05-30T19:31:42Z",
+       "expires-on": "2023-09-30T19:31:42Z",
+       "assertion": "verified",
+       "serial-number": "BARCODETEST20200620",
+       "idevid-issuer": "base64encodedvalue==",
+       "pinned-domain-cert": "base64encodedvalue==",
+       "domain-cert-revocation-checks": "false",
+       "last-renewal-date": ""
+     }
+   }</pre>
+</div>
+</li></ol>
+</p></li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_ztp_cfg_0029.html">Configuring DHCP-based ZTP (Without a Controller)
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_ztp_cfg_0034.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="galaxy_ztp_cfg_0035.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

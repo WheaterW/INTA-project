@@ -1,0 +1,74 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding iQCN">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ai_iqcn_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ai_iqcn_cfg_0002.html">
+<meta name="DC.Relation" scheme="URI" content="spec/iQCN_limitation_CE_v6r23c00.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="iQCN">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="iQCN">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001512840010">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding iQCN</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001512840010"></a><a name="EN-US_CONCEPT_0000001512840010"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding iQCN</h1>
+<div><div class="section"><h4 class="sectiontitle">Context</h4><p></p>
+<p>As shown in <a href="#EN-US_CONCEPT_0000001512840010__fig58123141845">Figure 1</a>, the three roles in DCQCN are as follows:</p>
+<ul><li><strong>Congestion Point (CP)</strong><p>An ECN-enabled forwarding device functions as a CP. If the CP finds that the queue buffer of its outbound interface exceeds the ECN threshold, it performs ECN marking for forwarded packets (setting the ECN field to 11) based on a certain probability, indicating that congestion has occurred on the network.</p>
+</li><li><strong>Notification Point (NP)</strong><p>The packet receiver functions as an NP. After receiving ECN-marked packets, the NP knows that congestion has occurred on the network, and then sends CNPs to the Reaction Point (RP) based on the source address in the ECN-marked packets, instructing the RP to reduce the packet sending rate.</p>
+</li><li><strong>Reaction Point (RP)</strong><p>The packet sender functions as an RP. The NIC of the RP can adjust the packet sending rate based on the received CNPs. The process is as follows:</p>
+<ol><li>After receiving CNPs, the RP knows that congestion occurs on the network and reduces the packet sending rate.</li><li>If the RP receives CNPs within the configured interval between rate increase events of the NIC, the RP continues to decrease the packet sending rate.</li><li>If the RP does not receive CNPs after the configured interval between rate increase events of the NIC expires, the RP determines that congestion has been removed and proactively increases the packet sending rate to improve the throughput (bandwidth usage).</li></ol>
+</li></ul>
+<div class="fignone" id="EN-US_CONCEPT_0000001512840010__fig58123141845"><a name="EN-US_CONCEPT_0000001512840010__fig58123141845"></a><a name="fig58123141845"></a><span class="figcap"><b>Figure 1 </b>DCQCN implementation</span><br><span><img class="vsd" src="figure/en-us_image_0000001513159582.png"></span></div>
+<p>Although congestion occurs on the CP, the device that reports the congestion is the NP at the end of the packet transmission path. As such, if congestion occurs on the network, the long congestion feedback path from the NP to the RP increases the forwarding delay of CNPs because of factors such as packets waiting in queues. As a result, the RP cannot receive the CNPs in a timely manner. Additionally, when the network is congested, the NP frequently receives ECN-marked packets, but cannot send CNPs for all congested queues promptly because the rate at which its NIC generates CNPs is limited. If the period during which the RP does not receive CNPs exceeds the interval between rate increase events of its NIC, the RP increases the packet sending rate. As a result, the buffer of the forwarding device may be further congested, and even devices on the entire network stop sending traffic due to PFC.</p>
+<p>iQCN enables the forwarding device to intelligently detect network congestion. Based on the interval at which the NP sends CNPs and the interval between rate increase events of the NIC of the RP, the forwarding device proactively sends CNPs to the RP so that the RP can reduce the packet sending rate in a timely manner.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">iQCN Implementation</h4><div class="p"><a href="#EN-US_CONCEPT_0000001512840010__fig3772912145720">Figure 2</a> shows how iQCN is implemented.<ol><li>If congestion does not occur on the CP when packets are sent from RP1 to NP1, the CP forwards the packets properly.</li><li>If congestion occurs on the outbound interface of the CP when packets are sent from RP2 and RP3 to NP2, the CP performs ECN marking for the packets and forwards the packets to NP2.</li><li>After receiving the ECN-marked packets, NP2 learns that congestion occurs on the network, and its NIC sends CNPs to RP2 and RP3, instructing their NICs to reduce the packet sending rate. If congestion persists on the outbound interface of the CP, NP2 continues to send CNPs.</li><li>The iQCN-enabled CP records the received CNPs and maintains a flow table that contains the CNP information and timestamp. Additionally, the CP keeps monitoring the congestion status of its outbound interface. When its outbound interface is heavily congested, the CP compares the interval at which CNPs are received with the interval between rate increase events of an RP's NIC.<ul><li>If the interval at which CNPs are received from an NP is shorter than the interval between rate increase events of an RP's NIC, the CP determines that the RP's NIC can decrease the packet sending rate properly, and forwards CNPs to the RP.</li><li>If the interval at which CNPs are received from an NP is longer than the interval between rate increase events of an RP's NIC, the CP determines that the RP's NIC cannot decrease the packet sending rate in a timely manner and may increase the rate, and therefore proactively sends CNPs to the RP.</li></ul>
+</li></ol>
+</div>
+<div class="fignone" id="EN-US_CONCEPT_0000001512840010__fig3772912145720"><a name="EN-US_CONCEPT_0000001512840010__fig3772912145720"></a><a name="fig3772912145720"></a><span class="figcap"><b>Figure 2 </b>iQCN implementation</span><br><span><img class="vsd" src="figure/en-us_image_0000001512840014.png"></span></div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_ai_iqcn_cfg_0001.html">iQCN Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_ai_iqcn_cfg_0002.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="spec/iQCN_limitation_CE_v6r23c00.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

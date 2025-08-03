@@ -1,0 +1,279 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Applying a Route-Policy to Route Import">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_route-policy_cfg_0011.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_route-policy_cfg_0017.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Routing Policy">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Routing Policy">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="Routing Policy">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130623994">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Applying a Route-Policy to Route Import</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130623994"></a><a name="EN-US_TASK_0000001130623994"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Applying a Route-Policy to Route Import</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130623994__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In <a href="#EN-US_TASK_0000001130623994__fig151861539163119">Figure 1</a>, DeviceA and DeviceB exchange routes through OSPF; DeviceB and DeviceC exchange routes through IS-IS. It is required to configure the route importing function on DeviceB to import IS-IS routes to the OSPF routing table and use a route-policy to configure route attributes. You need to set the cost of the route to 172.16.1.0/24 to 100, and set the tag attribute of the route to 172.16.2.0/24 to 20.</p>
+<div class="fignone" id="EN-US_TASK_0000001130623994__fig151861539163119"><a name="EN-US_TASK_0000001130623994__fig151861539163119"></a><a name="fig151861539163119"></a><span class="figcap"><b>Figure 1 </b>Networking diagram of applying a route-policy for importing routes</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1, interface 2, interface 3, and interface 4 represent <span>100GE</span> <span>1/0/1</span>, <span>100GE</span> <span>1/0/2</span>, <span>100GE</span> <span>1/0/3</span>, and <span>100GE</span> <span>1/0/4</span>, respectively. </p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001130624002.png"></span></div>
+<p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Area IDs, IS-IS levels, and system IDs of DeviceB and DeviceC</p>
+</li><li><p>Area 0 (backbone area), in which DeviceA and DeviceB are located</p>
+</li><li><p>ACL number, name of the IP prefix list, cost of the route to 172.16.1.0/24, and tag of the route to 172.16.2.0/24</p>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130623994__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure basic IS-IS functions on DeviceB and DeviceC.</p>
+</li><li><p>Configure OSPF on DeviceA and DeviceB and import IS-IS routes.</p>
+</li><li><p>Configure a route-policy on DeviceB and apply the route-policy when OSPF imports IS-IS routes.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130623994__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IPv4 address to each involved interface. For configuration details, see <a href="#EN-US_TASK_0000001130623994__postreq24192593172748">Configuration Scripts</a>.</span></li><li><span>Configure IS-IS.</span><p><p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC]<strong> isis</strong>
+[<span class="keyword">*</span>DeviceC-isis-1]<strong> is-level level-2</strong>
+[<span class="keyword">*</span>DeviceC-isis-1]<strong> network-entity 10.0000.0000.0001.00</strong>
+[<span class="keyword">*</span>DeviceC-isis-1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceC]<strong> interface <span>100ge</span> <span>1/0/4</span></strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/4</span>]<strong> isis enable</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/4</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceC]<strong> interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/1</span>]<strong> isis enable</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/1</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceC]<strong> interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>]<strong> isis enable</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceC]<strong> interface <span>100ge</span> <span>1/0/3</span></strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/3</span>]<strong> isis enable</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/3</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> isis</strong>
+[<span class="keyword">*</span>DeviceB-isis-1]<strong> is-level level-2</strong>
+[<span class="keyword">*</span>DeviceB-isis-1]<strong> network-entity 10.0000.0000.0002.00</strong>
+[<span class="keyword">*</span>DeviceB-isis-1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB]<strong> interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>]<strong> isis enable</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li><li><span>Configure OSPF and route importing.</span><p><p># Configure DeviceA and enable OSPF.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> ospf</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1]<strong> area 0</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0]<strong> network 192.168.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceB, enable OSPF, and import IS-IS routes.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> ospf</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1]<strong> area 0</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0]<strong> network 192.168.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1]<strong> import-route isis 1</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Check the OSPF routing table on DeviceA to view the imported routes.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> display ospf routing</strong>
+
+          OSPF Process 1 with Router ID 192.168.1.1
+                   Routing Tables
+
+ Routing for Network
+ Destination        Cost  Type       NextHop         AdvRouter       Area
+ 192.168.1.0/24     1     Stub       192.168.1.1     192.168.1.1     0.0.0.0
+
+ Routing for ASEs
+ Destination        Cost      Type      Tag         NextHop         AdvRouter
+ 172.16.1.0/24      1         Type2      1          192.168.1.2     192.168.1.2
+ 172.16.2.0/24      1         Type2      1          192.168.1.2     192.168.1.2
+ 172.16.3.0/24      1         Type2      1          192.168.1.2     192.168.1.2
+ 192.168.2.0/24     1         Type2      1          192.168.1.2     192.168.1.2
+
+ Routing for NSSAs
+ Destination        Cost      Type       Tag         NextHop         AdvRouter
+
+ Total Nets: 5
+ Intra Area: 1  Inter Area: 0  ASE: 4  NSSA: 0</pre>
+</p></li><li><span>Configure filters.</span><p><p># Configure ACL 2002 on DeviceB to allow packets from 172.16.2.0/24 to pass.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>acl number 2002</strong>
+[<span class="keyword">*</span>DeviceB-acl4-basic-2002] <strong>rule permit source 172.16.2.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-acl4-basic-2002] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure an IP prefix list named <strong>prefix-a</strong> on DeviceB to allow the packets from 172.16.1.0/24 to pass.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ip ip-prefix prefix-a index 10 permit 172.16.1.0 24</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li><li><span>Configure a route-policy.</span><p><p># Configure a route-policy named <strong>isis2ospf </strong>on DeviceB.</p>
+</p><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>route-policy isis2ospf permit node 10</strong>
+[<span class="keyword">*</span>DeviceB-route-policy] <strong>if-match ip-prefix prefix-a</strong>
+[<span class="keyword">*</span>DeviceB-route-policy] <strong>apply cost 100</strong>
+[<span class="keyword">*</span>DeviceB-route-policy] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>route-policy isis2ospf permit node 20</strong>
+[<span class="keyword">*</span>DeviceB-route-policy] <strong>if-match acl 2002</strong>
+[<span class="keyword">*</span>DeviceB-route-policy] <strong>apply tag 20</strong>
+[<span class="keyword">*</span>DeviceB-route-policy] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>route-policy isis2ospf permit node 30</strong>
+[<span class="keyword">*</span>DeviceB-route-policy] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li><li><span>Apply the route-policy for importing routes.</span><p><p># Configure DeviceB and apply the route-policy for importing routes.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ospf</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>import-route isis 1 route-policy isis2ospf</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001130623994__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check the OSPF routing table on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> display ospf routing</strong>
+
+          OSPF Process 1 with Router ID 192.168.1.1
+                   Routing Tables
+ Routing for Network
+ Destination        Cost  Type       NextHop         AdvRouter       Area
+ 192.168.1.0/24     1  Stub       192.168.1.1     192.168.1.1     0.0.0.0
+
+ Routing for ASEs
+ Destination        Cost      Type       Tag         NextHop         AdvRouter
+ 172.16.1.0/24      100       Type2      1           192.168.1.2     192.168.1.2
+ 172.16.2.0/24      1         Type2      20          192.168.1.2     192.168.1.2
+ 172.16.3.0/24      1         Type2      1           192.168.1.2     192.168.1.2
+ 192.168.2.0/24     1         Type2      1           192.168.1.2     192.168.1.2
+
+ Routing for NSSAs
+ Destination        Cost      Type       Tag         NextHop         AdvRouter
+
+ Total Nets: 5
+ Intra Area: 1  Inter Area: 0  ASE: 4  NSSA: 0</pre>
+<p>The preceding command output shows that the cost of the route to 172.16.1.0/24 is 100, the tag of the route to 172.16.2.0/24 is 20, and the attributes of other routes remain unchanged. </p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001130623994__postreq24192593172748"></a><a name="postreq24192593172748"></a><a name="EN-US_TASK_0000001130623994__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+ sysname DeviceA
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.1.1 255.255.255.0
+#
+ospf 1
+ area 0.0.0.0
+  network 192.168.1.0 0.0.0.255
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+acl number 2002
+ rule 5 permit source 172.16.2.0 0.0.0.255
+#
+isis 1
+ is-level level-2
+ network-entity 10.0000.0000.0002.00
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.2.2 255.255.255.0
+ isis enable 1
+#
+ospf 1
+ import-route isis 1 route-policy isis2ospf
+ area 0.0.0.0
+  network 192.168.1.0 0.0.0.255
+#
+route-policy isis2ospf permit node 10
+ if-match ip-prefix prefix-a
+ apply cost 100
+#
+route-policy isis2ospf permit node 20
+ if-match acl 2002
+ apply tag 20
+#
+route-policy isis2ospf permit node 30
+#
+ip ip-prefix prefix-a index 10 permit 172.16.1.0 24
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+isis 1
+ is-level level-2
+ network-entity 10.0000.0000.0001.00
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 172.16.1.1 255.255.255.0
+ isis enable 1
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 172.16.2.1 255.255.255.0
+ isis enable 1
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 172.16.3.1 255.255.255.0
+ isis enable 1
+#
+interface <span>100GE</span><span>1/0/4</span>
+ undo portswitch
+ ip address 192.168.2.1 255.255.255.0
+ isis enable 1
+# 
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_route-policy_cfg_0011.html">Configuring a Route-Policy
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_route-policy_cfg_0017.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

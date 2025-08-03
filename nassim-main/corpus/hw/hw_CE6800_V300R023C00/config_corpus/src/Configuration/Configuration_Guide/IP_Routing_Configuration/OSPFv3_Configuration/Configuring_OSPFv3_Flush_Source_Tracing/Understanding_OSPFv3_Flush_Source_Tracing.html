@@ -1,0 +1,183 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding OSPFv3 Flush Source Tracing">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_ospfv3_cfg_00100.html">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_ospfv3_cfg_00102.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="OSPFv3">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="OSPFv3">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001176662801">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Understanding OSPFv3 Flush Source Tracing</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001176662801"></a><a name="EN-US_CONCEPT_0000001176662801"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding OSPFv3 Flush Source Tracing</h1>
+<div><div class="section"><h4 class="sectiontitle">Context</h4><p>If network-wide OSPFv3 LSA flush causes network instability, source tracing must be implemented as soon as possible to locate and isolate the fault source. However, OSPFv3 itself does not support source tracing. A conventional solution is to isolate nodes one by one until the fault source is located, but the process is complex and time-consuming and may compromise network services. To solve the preceding problem, OSPFv3 introduces a proprietary protocol, namely, the source tracing protocol. This protocol supports the flooding of flush source information. When the preceding problem occurs, you can quickly query the flush source information on any device on the network to quickly locate the fault source.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Related Concepts</h4><p><strong>Source tracing</strong></p>
+<div class="p">The source tracing protocol provides a flush source tracing mechanism to locate the device that flushes an OSPFv3 LSA. This feature has the following characteristics:<ul><li>Uses a new UDP port. Source tracing packets are carried by UDP packets, and the UDP packets carry the OSPFv3 LSAs flushed by the current device and are flooded hop by hop based on the OSPFv3 topology.</li><li>Depends on OSPFv3 neighbors for flooding and forwards packets along UDP channels, which are independent of the channels used to transmit OSPFv3 packets. Therefore, this protocol facilitates incremental deployment. In addition, source tracing does not affect the devices with the related UDP port disabled.</li><li><p>Supports query of the node that flushed LSAs on any device that supports this feature after source tracing packets are flooded on the network, which speeds up fault locating and faulty node isolation by maintenance personnel.</p>
+</li></ul>
+</div>
+<p><strong>Flush</strong></p>
+<p>Network-wide OSPFv3 LSAs are deleted.</p>
+<p><strong>PS-Hello packets</strong></p>
+<p>Packets used to negotiate the OSPFv3 flush source tracing capability between OSPFv3 neighbors.</p>
+<p><strong>PS-LSA</strong></p>
+<p>When a device flushes an OSPFv3 LSA, it generates a PS-LSA carrying information about the device and brief information about the OSPFv3 LSA.</p>
+<p><strong>PS-LSU packets</strong></p>
+<p>OSPFv3 flush source tracing packets that carry PS-LSAs.</p>
+<p><strong>PS-LSU ACK packets</strong></p>
+<p>Acknowledgment packets used to enhance the reliability of OSPFv3 flush source tracing packets.</p>
+<p><strong>OSPFv3 flush source tracing port</strong></p>
+<p>ID of the UDP port that receives and sends OSPFv3 flush source tracing packets. The ID is configurable.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Fundamentals</h4><div class="p">The implementation of OSPFv3 flush source tracing is as follows:<ol><li><p>Source tracing capability negotiation</p>
+<p>After an OSPFv3 neighbor relationship is established between two devices, they need to negotiate the source tracing capability through PS-Hello packets.</p>
+</li><li><p>PS-LSA generation and flooding</p>
+<p>When a device flushes an OSPFv3 LSA, it generates a PS-LSA carrying information about the device and brief information about the OSPFv3 LSA, adds the PS-LSA to a PS-LSU packet, and floods the PS-LSU packet to source tracing-capable neighbors, which helps other devices locate the fault source and perform isolation.</p>
+</li></ol>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Only router-LSAs, network-LSAs, and inter-area-router-LSAs can be flushed. Therefore, a device generates a PS-LSA only when it flushes a router-LSA, network-LSA, or inter-area-router-LSA.</p>
+</div></div>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Source Tracing Capability Negotiation</h4><p>The source tracing protocol uses UDP to carry source tracing packets and listens to the UDP port, which is used to receive source tracing packets. If a source tracing-capable Huawei device sends source tracing packets to a source tracing-incapable Huawei device or non-Huawei device, the source tracing-capable Huawei device may be incorrectly identified as an attacker. Therefore, the source tracing capability needs to be negotiated between the devices. In addition, the source tracing-capable device needs to send source tracing information on behalf of the source tracing-incapable device, which also requires negotiation.</p>
+<p>Source tracing capability negotiation depends on OSPFv3 neighbor relationships. Specifically, after an OSPFv3 neighbor relationship is established, the local device initiates source tracing capability negotiation. <a href="#EN-US_CONCEPT_0000001176662801__fig_dc_vrp_ospf_feature_202301">Figure 1</a> shows the negotiation process.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001176662801__fig_dc_vrp_ospf_feature_202301"><a name="EN-US_CONCEPT_0000001176662801__fig_dc_vrp_ospf_feature_202301"></a><a name="fig_dc_vrp_ospf_feature_202301"></a><span class="figcap"><b>Figure 1 </b>Source tracing capability negotiation</span><br><span><img class="vsd" src="figure/en-us_image_0000001130623384.png" width="NaN" height="NaN"></span></div>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Source tracing capability negotiation</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="34.19%" id="mcps1.3.4.5.2.3.1.1" liSelected="liSelected"><p>Whether Source Tracing Is Supported</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="65.81%" id="mcps1.3.4.5.2.3.1.2" liSelected="liSelected"><p>Source Tracing Capability Negotiation Process</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="34.19%" headers="mcps1.3.4.5.2.3.1.1 "><p>DeviceA and DeviceB both support source tracing.</p>
+</td>
+<td class="cellrowborder" valign="top" width="65.81%" headers="mcps1.3.4.5.2.3.1.2 "><ol><li>DeviceA sends a PS-Hello packet to notify its source tracing capability.</li><li>Upon reception of the PS-Hello packet, DeviceB sets the source tracing field for DeviceA and replies with an ACK packet to notify its source tracing capability to DeviceA.</li><li>Upon reception of the ACK packet, DeviceA sets the source tracing field for DeviceB, and does not retransmit the PS-Hello packet.</li></ol>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="34.19%" headers="mcps1.3.4.5.2.3.1.1 "><p>DeviceA supports source tracing, but DeviceB does not.</p>
+</td>
+<td class="cellrowborder" valign="top" width="65.81%" headers="mcps1.3.4.5.2.3.1.2 "><ol><li>DeviceA sends a PS-Hello packet to notify its source tracing capability.</li><li>DeviceA fails to receive an ACK packet from DeviceB within 10s and retransmits the PS-Hello packet. A maximum of two retransmissions are allowed. After DeviceA fails to receive an ACK packet from DeviceB after two retransmissions, DeviceA considers that DeviceB does not support source tracing.</li></ol>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="34.19%" headers="mcps1.3.4.5.2.3.1.1 "><p>DeviceA and DeviceB both support source tracing, but source tracing is disabled from DeviceB.</p>
+</td>
+<td class="cellrowborder" valign="top" width="65.81%" headers="mcps1.3.4.5.2.3.1.2 "><ol><li>After source tracing is disabled from DeviceB, DeviceB sends a PS-Hello packet to notify its source tracing incapability to DeviceA.</li><li>Upon reception of the PS-Hello packet from DeviceB, DeviceA replies with an ACK packet that carries the source tracing capability.</li><li>Upon reception of the ACK packet from DeviceA, DeviceB considers the capability negotiation complete and disables the UDP port.</li></ol>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="34.19%" headers="mcps1.3.4.5.2.3.1.1 "><p>DeviceA does not support source tracing, and source tracing is disabled from DeviceB.</p>
+</td>
+<td class="cellrowborder" valign="top" width="65.81%" headers="mcps1.3.4.5.2.3.1.2 "><ol><li>After source tracing is disabled from DeviceB, DeviceB sends a PS-Hello packet to notify its source tracing incapability.</li><li>DeviceB fails to receive an ACK packet within 10s and retransmits the PS-Hello packet. A maximum of two retransmissions are allowed. After two retransmissions, DeviceB considers the capability negotiation complete and disables the UDP port.</li></ol>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">PS-LSA Generation and Flooding</h4><div class="p">PS-LSA: carries information about the node that flushed OSPFv3 LSAs.<ul><li><p>If a device flushes an LSA, it generates and floods a PS-LSA to source tracing-capable neighbors.</p>
+</li><li><p>If a device receives a flush LSA from a source tracing-incapable neighbor, the device generates and floods a PS-LSA to source tracing-capable neighbors. If a device receives the same flush LSA (with the same LSID and sequence number) from more than one source tracing-incapable neighbor, the device generates only one PS-LSA.</p>
+</li><li><p>If a device flushes a router-LSA, network-LSA, or inter-area-router-LSA, it generates a PS-LSA, adds the PS-LSA to a PS-LSU packet, and floods the PS-LSU packet to all source tracing-capable neighbors.</p>
+</li></ul>
+</div>
+<div class="fignone"><span class="figcap"><b>Figure 2 </b>PS-LSA generation rules</span><br><span><img class="vsd" src="figure/en-us_image_0000001176662931.png" width="NaN" height="NaN"></span></div>
+<p><strong>PS-LSA generation rules</strong></p>
+<ul><li>When DeviceA flushes a router-LSA, network-LSA, or inter-area-router-LSA, it generates a PS-LSA in which the <strong>Flush Router</strong> field is its router ID and the <strong>Neighbor Router</strong> field is 0, and adds the PS-LSA to the queue where packets are to be sent to all source tracing-capable neighbors.</li><li>After DeviceA receives the flush LSA from source tracing-incapable DeviceB, DeviceA generates a PS-LSA in which the <strong>Flush Router</strong> field is its router ID and the <strong>Neighbor Router</strong> field is the router ID of DeviceB, and adds the PS-LSA to the queue where packets are to be sent to all source tracing-capable neighbors.</li><li>After DeviceA receives the flush LSA from DeviceB, followed by the same flush LSA sent by DeviceC, DeviceA generates a PS-LSA in which the <strong>Flush Router</strong> field is its router ID and the <strong>Neighbor Router</strong> field is the router ID of DeviceB, and adds the PS-LSA to the queue where packets are to be sent to all source tracing-capable neighbors. No PS-LSA is generated in response to the flush LSA received from DeviceC.</li></ul>
+<p><strong>PS-LSU packet sending rules</strong></p>
+<ul><li>During neighbor relationship establishment, a device initializes the sequence number of the PS-LSU packet of the neighbor. When the device replies with a PS-LSU packet, it adds the sequence number of the PS-LSU packet of the neighbor. During PS-LSU packet retransmission, the sequence number remains unchanged. After the device receives a PS-LSU ACK packet with the same sequence number, it increases the sequence number of the neighbor's PS-LSU packet by 1.</li><li>The neighbor manages the PS-LSA sending queue. When a PS-LSA is added to the queue which was empty, the neighbor starts a timer. After the timer expires, the neighbor adds the PS-LSA to a PS-LSU packet, sends the packet to its neighbor, and starts another timer to wait for a PS-LSU ACK packet.</li><li>After the PS-LSU ACK timer expires, the PS-LSU packet is retransmitted.</li><li>When the device receives a PS-LSU ACK packet with a sequence number same as that in the neighbor record, the device clears PS-LSAs from the neighbor queue, and sends another PS-LSU packet after the timer expires.<ul><li>If the sequence number of a received PS-LSU ACK packet is less than that in the neighbor record, the device ignores the packet.</li><li>If the sequence number of a received PS-LSU ACK packet is greater than that in the neighbor record, the device discards the packet.</li></ul>
+</li></ul>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>PS-LSU packet sending is independent among neighbors.</p>
+</div></div>
+<p><strong>PS-LSU packet receiving rules</strong></p>
+<ul><li>When a device receives a PS-LSU packet from a neighbor, the neighbor records the sequence number of the packet and replies with a PS-LSU ACK packet.</li><li>When the device receives a PS-LSU packet with the sequence number the same as that in the neighbor record, the device discards the PS-LSU packet.</li><li>After the device parses a PS-LSU packet, it adds the PS-LSA in the packet to its LSDB. The device also checks whether the PS-LSA is newer than the corresponding PS-LSA in its LSDB.<ul><li>If the received PS-LSA is newer, the device floods it to other neighbors.</li><li>If the received PS-LSA is the same as the corresponding local one, the device does not process the received PS-LSA.</li><li>If the received PS-LSA is older, the device floods the corresponding local one to the neighbor.</li></ul>
+</li><li>If the device receives a PS-LSU packet from a neighbor and the neighbor does not support source tracing, the device modifies the neighbor status as source tracing capable.</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Source Tracing Security</h4><p>The source tracing protocol uses a UDP port to receive and send source tracing packets. Therefore, the security of the port must be taken into consideration.</p>
+<p>The source tracing protocol inevitably increases packet receiving and sending workload and intensifies bandwidth pressure. To minimize its impact on other protocols, the number of source tracing packets must be controlled.</p>
+<p>The following security measures are available:</p>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 2 </b>Security Measures for Source Tracing</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="34.19%" id="mcps1.3.6.5.2.3.1.1" liSelected="liSelected"><p>Security Measures for Source Tracing</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="65.81%" id="mcps1.3.6.5.2.3.1.2" liSelected="liSelected"><p>Fundamentals</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="34.19%" headers="mcps1.3.6.5.2.3.1.1 "><p>Authentication</p>
+</td>
+<td class="cellrowborder" valign="top" width="65.81%" headers="mcps1.3.6.5.2.3.1.2 "><p>Source tracing is embedded in OSPFv3, inherits existing OSPFv3 configuration parameters, and uses OSPFv3 authentication parameters to authenticate packets.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="34.19%" headers="mcps1.3.6.5.2.3.1.1 "><p>GTSM</p>
+</td>
+<td class="cellrowborder" valign="top" width="65.81%" headers="mcps1.3.6.5.2.3.1.2 "><p>GTSM is a security mechanism that checks whether the time to live (TTL) value in each received IP packet header is within a pre-defined range.</p>
+<div class="p">Source tracing packets can only be flooded as far as one hop. Therefore, GTSM can be used to check such packets by default.<ul><li>When a device sends a packet, it sets the TTL of the packet to 255.</li><li>If the TTL is not 254 when the packet is received, the packet will be discarded.</li></ul>
+</div>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="34.19%" headers="mcps1.3.6.5.2.3.1.1 "><p>CPU-CAR</p>
+</td>
+<td class="cellrowborder" valign="top" width="65.81%" headers="mcps1.3.6.5.2.3.1.2 "><p>The device can check and control the packets to be sent to the CPU for processing, preventing the CPU from being overloaded by a large number of packets that are sent to the CPU. The source tracing protocol needs to apply for an independent CAR channel and has small CAR values configured.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Typical Scenarios</h4><p><strong>Scenario where all nodes support source tracing</strong></p>
+<p>Assume that all nodes on the network support source tracing and DeviceA is the fault source. In this scenario, the fault source can be accurately located. <a href="#EN-US_CONCEPT_0000001176662801__fig_dc_vrp_ospf_feature_202302">Figure 3</a> shows the networking.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001176662801__fig_dc_vrp_ospf_feature_202302"><a name="EN-US_CONCEPT_0000001176662801__fig_dc_vrp_ospf_feature_202302"></a><a name="fig_dc_vrp_ospf_feature_202302"></a><span class="figcap"><b>Figure 3 </b>Scenario where all nodes support source tracing</span><br><span><img class="vsd" src="figure/en-us_image_0000001176742839.png" width="NaN" height="NaN"></span></div>
+<p>When DeviceA flushes an OSPFv3 LSA, it generates a PS-LSA that carries DeviceA information and brief information about the flush LSA and floods the PS-LSA. After the fault occurs, maintenance personnel can log in to any node on the network to locate DeviceA, which keeps sending flush LSAs, and isolate DeviceA from the network.</p>
+<p><strong>Scenario where source tracing-incapable nodes are not isolated from source tracing-capable nodes</strong></p>
+<p>All nodes on the network except DeviceC support source tracing, and DeviceA is the fault source. In this case, the PS-LSA can be flooded on the entire network, and the fault source can be accurately located. <a href="#EN-US_CONCEPT_0000001176662801__fig8882636306">Figure 4</a> shows the networking.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001176662801__fig8882636306"><a name="EN-US_CONCEPT_0000001176662801__fig8882636306"></a><a name="fig8882636306"></a><span class="figcap"><b>Figure 4 </b>Scenario where source tracing-incapable nodes are not isolated from source tracing-capable nodes</span><br><span><img class="vsd" src="figure/en-us_image_0000001130623392.png" width="NaN" height="NaN"></span></div>
+<p>When DeviceA flushes an OSPFv3 LSA, it generates a PS-LSA that carries DeviceA information and brief information about the flush LSA and floods the PS-LSA. When DeviceB and DeviceE negotiate the source tracing capability with DeviceC, they find that DeviceC does not support source tracing. Therefore, after DeviceB receives the PS-LSA from DeviceA, DeviceB sends the PS-LSA to DeviceD, but not to DeviceC. Device A sends a flush LSA to Device B. When Device C sends the flush LSA to Device E, Device E finds that Device C does not support source tracing, helps Device C generate a PS-LSA that carries information about the advertisement source (Device E) and flush source (Device C), and flushed OSPFv3 LSA, and floods the PS-LSA on the entire network.</p>
+<p>After the fault occurs, maintenance personnel can log in to any device on the network except DeviceC to locate the faulty node. Two possible faulty nodes can be located in this case: DeviceA and DeviceC, and they both send the same flush LSA. In this case, DeviceA takes precedence over DeviceC when the maintenance personnel determine the most possible faulty source. After DeviceA is isolated from the network, the network recovers.</p>
+<p><strong>Scenario where source tracing-incapable nodes are isolated from source tracing-capable nodes</strong></p>
+<p>All nodes on the network except DeviceC and DeviceD support source tracing, and DeviceA is the fault source. In this case, the PS-LSA cannot be flooded on the entire network. The fault source locating is complicated. <a href="#EN-US_CONCEPT_0000001176662801__fig764319173016">Figure 5</a> shows the networking.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001176662801__fig764319173016"><a name="EN-US_CONCEPT_0000001176662801__fig764319173016"></a><a name="fig764319173016"></a><span class="figcap"><b>Figure 5 </b>Scenario where source tracing-incapable nodes are isolated from source tracing-capable nodes</span><br><span><img class="vsd" src="figure/en-us_image_0000001130623396.png" width="NaN" height="NaN"></span></div>
+<p>When DeviceA flushes an OSPFv3 LSA, it generates a PS-LSA that carries DeviceA information and brief information about the flush LSA and floods the PS-LSA. However, the PS-LSA sent by DeviceA can reach only DeviceB because DeviceC and DeviceD do not support source tracing.</p>
+<p>During source tracing capability negotiation, DeviceE finds that DeviceC does not support source tracing, and DeviceF finds that DeviceD does not support source tracing. After DeviceE receives the flush LSA from DeviceC, DeviceE generates and floods a PS-LSA on behalf of DeviceC. Similarly, after DeviceF receives the flush LSA from DeviceD, DeviceF generates and floods a PS-LSA on behalf of DeviceD.</p>
+<div class="p">After the fault occurs:<ul><li>If maintenance personnel log in to DeviceA or DeviceB, the personnel can locate the fault source (DeviceA) directly. After DeviceA is isolated, the network recovers.</li><li>If the maintenance personnel log in to DeviceE, DeviceF, DeviceG, or DeviceH, the personnel will find that DeviceE claims DeviceC to be the fault source of the OSPFv3 flush LSA and DeviceF claims DeviceD to be the fault source of the OSPFv3 flush LSA.</li><li>If the maintenance personnel log in to DeviceC and DeviceD, the personnel will find that the flush LSA was initiated by DeviceB, not generated by DeviceC or DeviceD.</li><li>If the maintenance personnel log in to DeviceB, the personnel will find that DeviceA is the fault source, and isolate DeviceA. After DeviceA is isolated, the network recovers.</li></ul>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../vrp/vrp_ospfv3_cfg_00100.html">Configuring OSPFv3 Flush Source Tracing
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../vrp/vrp_ospfv3_cfg_00102.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

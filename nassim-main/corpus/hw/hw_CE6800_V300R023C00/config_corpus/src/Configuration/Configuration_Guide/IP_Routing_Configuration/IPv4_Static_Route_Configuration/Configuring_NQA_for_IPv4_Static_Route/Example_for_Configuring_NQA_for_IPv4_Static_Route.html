@@ -1,0 +1,287 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring NQA for IPv4 Static Route">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_ipv4-static-route_cfg_0031.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_ipv4-static-route_cfg_0033.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IPv4 Static Route">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IPv4 Static Route">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="IPv4 Static Route">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130622970">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring NQA for IPv4 Static Route</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130622970"></a><a name="EN-US_TASK_0000001130622970"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring NQA for IPv4 Static Route</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130622970__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><div class="p">On the network shown in <a href="#EN-US_TASK_0000001130622970__fig5524221141413">Figure 1</a>, an OSPF neighbor relationship is established between DeviceA and each of DeviceB and DeviceC. Static routes are configured on DeviceB and DeviceC. OSPF imports static routes on DeviceB and DeviceC. Preference values are set for the imported routes on DeviceB and DeviceC so that DeviceB functions as the master device, and DeviceC functions as the backup device. If no fault occurs, service traffic is transmitted through the active link A. If the active link fails, service traffic is quickly switched to the standby link B. BFD for static route cannot be deployed on the network. Therefore, NQA is used to monitor the IPv4 static routes. DeviceA, DeviceB, and DeviceC reside in the OSPF backbone area (area 0), and their router IDs are 1.1.1.1, 2.2.2.2, and 3.3.3.3, respectively.<div class="fignone" id="EN-US_TASK_0000001130622970__fig5524221141413"><a name="EN-US_TASK_0000001130622970__fig5524221141413"></a><a name="fig5524221141413"></a><span class="figcap"><b>Figure 1 </b>Network diagram of NQA for IPv4 static route</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 and interface 2 represent <span>100GE</span> <span>1/0/1</span> and <span>100GE</span> <span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001130782788.png" width="NaN" height="NaN"></span></div>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130622970__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Configure IPv4 addresses for interfaces on each device.</li><li><p>Create an ICMP NQA test instance to monitor the active link.</p>
+<p>Create an ICMP NQA test instance on the NQA client DeviceB to test whether the active link to SwitchA is running properly.</p>
+</li><li><p>Configure static routes and associate the static route along the active link with the ICMP NQA test instance.</p>
+<p>Configure static routes on DeviceB and DeviceC, and associate the static route configured on DeviceB with the ICMP NQA test instance. If the ICMP NQA test instance detects a link fault, it instructs the routing management module to delete the associated static route from the IPv4 routing table.</p>
+</li><li><p>Configure OSPF.</p>
+<p>Configure OSPF on DeviceA, DeviceB, and DeviceC so that they can learn routes from one another.</p>
+</li><li><p>Configure OSPF to import static routes and set a smaller cost for the static route along the primary link than for the one along the backup link.</p>
+<p>Configure OSPF on DeviceB and DeviceC to import static routes, and set a higher cost for the static route imported by DeviceC than for the static route imported by DeviceB. After DeviceA learns routes to the same destination from DeviceB and DeviceC, DeviceA preferentially selects the link DeviceB -&gt; SwitchA with a lower cost.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130622970__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure IPv4 addresses for interfaces on each device.</span><p><p># Configure DeviceA.</p>
+<pre class="screen"><span class="keyword">&lt;HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface </strong><strong><span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>undo </strong><strong>portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ip address 172.16.3.1 255.255.255.0</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>undo </strong><strong>portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>ip address 172.16.4.1 255.255.255.0</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p>The configurations of DeviceB and DeviceC are similar to the configuration of DeviceA. For detailed configurations, see <a href="#EN-US_TASK_0000001130622970__postreq24192593172748">Configuration Scripts</a>.</p>
+</p></li><li><span>Create an ICMP NQA test instance to monitor the active link.</span><p><p># Create an NQA test instance on DeviceB to monitor the link between DeviceB and SwitchA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> nqa test-instance user test</strong>
+[<span class="keyword">*</span>DeviceB-nqa-user-test]<strong> test-type icmp</strong>
+[<span class="keyword">*</span>DeviceB-nqa-user-test]<strong> destination-address ipv4 172.16.1.2</strong>
+[<span class="keyword">*</span>DeviceB-nqa-user-test]<strong> frequency 10</strong>
+[<span class="keyword">*</span>DeviceB-nqa-user-test]<strong> probe-count 2</strong>
+[<span class="keyword">*</span>DeviceB-nqa-user-test]<strong> interval seconds 5</strong>
+[<span class="keyword">*</span>DeviceB-nqa-user-test]<strong> timeout 4</strong>
+[<span class="keyword">*</span>DeviceB-nqa-user-test]<strong> start now</strong>
+[<span class="keyword">*</span>DeviceB-nqa-user-test]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li><li><span>Configure static routes and associate the static route along the active link with the ICMP NQA test instance.</span><p><p># On DeviceB, configure an IPv4 static route with SwitchA as a next hop and associate the IPv4 static route with the NQA test instance named <strong>test</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ip route-static 172.16.7.0 255.255.255.0 <span>100ge</span> <span>1/0/2</span> 172.16.1.2 track nqa user test</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># On DeviceC, configure an IPv4 static route to SwitchA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>ip route-static 172.16.7.0 255.255.255.0 <span>100ge</span> <span>1/0/1</span> 172.16.6.2</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li><li><span>Configure a dynamic routing protocol.</span><p><p># Configure OSPF on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>area 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>network 172.16.3.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>network 172.16.4.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p>The configurations of DeviceB and DeviceC are similar to the configuration of DeviceA. For detailed configurations, see <a href="#EN-US_TASK_0000001130622970__postreq24192593172748">Configuration Scripts</a>.</p>
+</p></li><li><span>Configure OSPF to import static routes and set a smaller cost for the static route along the primary link than for the one along the backup link.</span><p><p># Configure OSPF on DeviceB to import a static route and set the cost to 10 for the static route.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>import-route static cost 10</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure OSPF on DeviceC to import a static route and set the cost to 20 for the static route.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1] <strong>import-route static cost 20</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001130622970__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check the NQA test result on DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display nqa results test-instance user test</strong>
+ NQA entry(user, test) : testflag is active ,testtype is icmp
+  1 . Test 6645 result   The test is finished
+   Send operation times: 2                Receive response times: 2
+   <strong>Completion:success</strong>                   RTD OverThresholds number:0
+   Attempts number:1                      Drop operation number:0
+   Disconnect operation number:0          Operation timeout number:0
+   System busy operation number:0         Connection fail number:0
+   Operation sequence errors number:0     RTT Stats errors number:0
+   Destination ip address:172.16.1.2
+   Min/Max/Average Completion Time: 1/1/1
+   Sum/Square-Sum  Completion Time: 2/2
+   Last Good Probe Time: 2012-11-14 04:20:36.9
+   <strong>Lost packet ratio: 0 %</strong></pre>
+<p>The command output contains "Lost packet ratio: 0%", indicating that link A is working properly.</p>
+<p># Check the routing table of DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display ip routing-table</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table : _public_
+         Destinations : 11       Routes : 11
+
+Destination/Mask    Proto   Pre  Cost        Flags NextHop         Interface
+
+      127.0.0.0/8   Direct  0    0             D  127.0.0.1       InLoopBack0
+      127.0.0.1/32  Direct  0    0             D  127.0.0.1       InLoopBack0
+127.255.255.255/32  Direct  0    0             D  127.0.0.1       InLoopBack0
+     172.16.3.0/24  Direct  0    0             D  172.16.3.1      <span>100GE</span><span>1/0/1</span>
+     172.16.3.1/32  Direct  0    0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+   172.16.3.255/32  Direct  0    0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+     172.16.4.0/24  Direct  0    0             D  172.16.4.1      <span>100GE</span><span>1/0/2</span>
+     172.16.4.1/32  Direct  0    0             D  127.0.0.1       <span>100GE</span><span>1/0/2</span>
+   172.16.4.255/32  Direct  0    0             D  127.0.0.1       <span>100GE</span><span>1/0/2</span>
+    <strong> 172.16.7.0/24  O_ASE   150  10       D  </strong><strong>172.16.3.2</strong><strong>    <span>100GE</span><span>1/0/1</span></strong>
+255.255.255.255/32  Direct  0    0             D  127.0.0.1       InLoopBack0</pre>
+<p>The command output shows that the next hop of the route from DeviceA to SwitchA is DeviceB, and the traffic destined for the users is transmitted over link A.</p>
+<p># Shut down <span>100GE</span> <span>1/0/2</span> on DeviceB to simulate a link fault.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong>shutdown</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Check the NQA test result on DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display nqa results test-instance user test</strong>
+ NQA entry(user, test) : testflag is active ,testtype is icmp
+  1 . Test 7160 result   The test is finished
+   Send operation times: 2                Receive response times: 0
+   <strong>Completion:failed</strong>                    RTD OverThresholds number:0
+   Attempts number:1                      Drop operation number:0
+   Disconnect operation number:0          Operation timeout number:2
+   System busy operation number:0         Connection fail number:0
+   Operation sequence errors number:0     RTT Stats errors number:0
+   Destination ip address:172.16.1.2
+   Min/Max/Average Completion Time: 0/0/0
+   Sum/Square-Sum  Completion Time: 0/0
+   Last Good Probe Time: 0000-00-00 00:00:00.0
+   <strong>Lost packet ratio: 100 %</strong></pre>
+<p>The command output contains "Completion:failed" and "Lost packet ratio is 100 %", indicating that link A is faulty.</p>
+<p># Check the routing table of DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display ip routing-table</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table : _public_
+         Destinations : 11       Routes : 11
+
+Destination/Mask    Proto   Pre  Cost        Flags NextHop         Interface
+
+      127.0.0.0/8   Direct  0    0             D  127.0.0.1       InLoopBack0
+      127.0.0.1/32  Direct  0    0             D  127.0.0.1       InLoopBack0
+127.255.255.255/32  Direct  0    0             D  127.0.0.1       InLoopBack0
+     172.16.3.0/24  Direct  0    0             D  172.16.3.1      <span>100GE</span><span>1/0/1</span>
+     172.16.3.1/32  Direct  0    0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+   172.16.3.255/32  Direct  0    0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+     172.16.4.0/24  Direct  0    0             D  172.16.4.1      <span>100GE</span><span>1/0/2</span>
+     172.16.4.1/32  Direct  0    0             D  127.0.0.1       <span>100GE</span><span>1/0/2</span>
+   172.16.4.255/32  Direct  0    0             D  127.0.0.1       <span>100GE</span><span>1/0/2</span>
+  <strong>172.16.7.0/24  O_ASE   150  20          D  </strong><strong>172.16.4.2</strong><strong>    <span>100GE</span><span>1/0/2</span></strong>
+255.255.255.255/32  Direct  0    0             D  127.0.0.1       InLoopBack0</pre>
+<p>The command output shows that the next hop of the route from DeviceA to SwitchA is DeviceC, and the traffic destined for the users is transmitted over link B.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001130622970__postreq24192593172748"></a><a name="postreq24192593172748"></a><a name="EN-US_TASK_0000001130622970__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 172.16.3.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 172.16.4.1 255.255.255.0
+#
+ospf 1
+ area 0.0.0.0
+  network 172.16.3.0 0.0.0.255
+  network 172.16.4.0 0.0.0.255
+# 
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+router id 2.2.2.2
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 172.16.3.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 172.16.1.1 255.255.255.0
+#
+ospf 1
+ import-route static cost 10
+ area 0.0.0.0
+  network 172.16.3.0 0.0.0.255
+# 
+ip route-static 172.16.7.0 255.255.255.0 <span>100GE</span><span>1/0/2</span> 172.16.1.2 track nqa user test
+#
+nqa test-instance user test
+ test-type icmp
+ destination-address ipv4 172.16.1.2
+ interval seconds 5
+ timeout 4
+ probe-count 2
+ frequency 10
+ start now
+#
+return</pre>
+</li><li>DeviceC<pre class="screen">#
+sysname DeviceC
+#
+router id 3.3.3.3
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 172.16.6.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 172.16.4.2 255.255.255.0
+#
+ospf 1
+ import-route static cost 20
+ area 0.0.0.0
+  network 172.16.4.0 0.0.0.255
+# 
+ip route-static 172.16.7.0 255.255.255.0 <span>100GE</span><span>1/0/1</span> 172.16.6.2
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_ipv4-static-route_cfg_0031.html">Configuring NQA for IPv4 Static Route
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_ipv4-static-route_cfg_0033.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

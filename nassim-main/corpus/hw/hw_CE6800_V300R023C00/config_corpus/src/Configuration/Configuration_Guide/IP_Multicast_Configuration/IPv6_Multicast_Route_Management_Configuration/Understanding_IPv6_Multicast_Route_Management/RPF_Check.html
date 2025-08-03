@@ -1,0 +1,87 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="RPF Check">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_mcastv6_cfg_0003.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_mcastv6_cfg_0004.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IPv6 Multicast Route Management">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IPv6 Multicast Route Management">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="IPv6 Multicast Route Management">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001533240830">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<link rel="stylesheet" type="text/css" href="public_sys-resources/imagePopup.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/customQuery.js"></script>
+<script language="javascript" type="text/javascript" src="public_sys-resources/imagePopup.js"></script>
+<title>RPF Check</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001533240830"></a><a name="EN-US_CONCEPT_0000001533240830"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">RPF Check</h1>
+<div><div class="section"><h4 class="sectiontitle">Fundamentals</h4><p>In unicast routing and forwarding, unicast packets are transmitted along a point-to-point path. To determine the outbound interfaces of packets, devices only need to learn the packets' destination addresses. Multicast routing and forwarding is different. The destination address of a multicast packet is a multicast address, which identifies a group of receivers. The location of a specific receiver, therefore, cannot be determined based on the destination address. However, the source address of a multicast packet is known and therefore can be used to ensure correct forwarding of the multicast packet.</p>
+<p>After a device receives a multicast packet, it searches the unicast routing table and multicast static routing table for the route to the packet source based on the source address of the packet. Then, the device checks whether the outbound interface of the route to the packet source is the same as the inbound interface that receives the multicast packet. If they are the same, the device considers that the multicast packet arrives at the correct interface. This ensures the correctness and uniqueness of the entire forwarding path. This process is called reverse path forwarding (RPF) check.</p>
+<p>The correct interface is referred to as an RPF interface, that is, the interface that passes the RPF check.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">RPF Check Process</h4><p>After a device receives a multicast packet, it checks the packet as follows:</p>
+<ol><li><p>The device selects an optimal route each from the unicast routing table and multicast static routing table according to the source address of the multicast packet. The outbound interface and next hop of the unicast route are an RPF interface and RPF neighbor, respectively. Note that the multicast static route is manually configured, with the RPF interface and RPF neighbor having been specified.</p>
+</li><li><p>The device selects one from the two routes as the RPF route according to the following rules:</p>
+<ul><li>If longest match is configured for route selection, the device selects the route whose destination address has the longest matching mask with the source address. If the matching mask lengths of these routes are the same, the device selects the route with the highest priority. If they have the same priority, the device selects the route in the following order of preference: multicast static route &gt; unicast route.</li><li>If longest match is not configured, the device selects the route with the highest priority. If they have the same priority, the device selects the route in the following order of preference: multicast static route &gt; unicast route.</li></ul>
+</li><li><p>The device compares the inbound interface of the packet with the RPF interface of the RPF route. If they are the same, the RPF check succeeds, indicating that the packet arrived along the correct path. The device then forwards the packet to the downstream device. If they are different, the RPF check fails, indicating that the packet arrived from an incorrect path. The device then discards the packet.</p>
+</li></ol>
+<div class="p">On the network shown in <a href="#EN-US_CONCEPT_0000001533240830__fig_dc_fd_mrm_000501">Figure 1</a>, the device performs an RPF check based on the routing table after a multicast stream from multicast source FC00:0:0:2001::1 arrives at the device through interface 1. In the routing table, the outbound interface used to forward the stream is interface 0 rather than interface 1. Therefore, the RPF check fails, and the device discards the stream received through interface 1.<div class="fignone" id="EN-US_CONCEPT_0000001533240830__fig_dc_fd_mrm_000501"><a name="EN-US_CONCEPT_0000001533240830__fig_dc_fd_mrm_000501"></a><a name="fig_dc_fd_mrm_000501"></a><span class="figcap"><b>Figure 1 </b>RPF check failure</span><br><span><img class="imgResize" src="figure/en-us_image_0000001583680829.png" width="326.1825" height="172.5675" title="Click to enlarge"></span></div>
+</div>
+<div class="p">On the network shown in <a href="#EN-US_CONCEPT_0000001533240830__fig_dc_fd_mrm_000502">Figure 2</a>, a multicast stream sent from multicast source FC00:0:0:2001::1 arrives at the device through interface 0. The device checks the routing table and finds that the inbound interface of the matched route is also interface 0, indicating that the RPF check succeeds. The multicast stream is then correctly forwarded.<div class="fignone" id="EN-US_CONCEPT_0000001533240830__fig_dc_fd_mrm_000502"><a name="EN-US_CONCEPT_0000001533240830__fig_dc_fd_mrm_000502"></a><a name="fig_dc_fd_mrm_000502"></a><span class="figcap"><b>Figure 2 </b>RPF check success</span><br><span><img class="vsd" src="figure/en-us_image_0000001583800533.png" width="NaN" height="NaN"></span></div>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Application of RPF Checks in Multicast Data Forwarding</h4><p>Multicast routing protocols use existing unicast routes or multicast static routes to determine upstream and downstream neighbors and create multicast routing entries. The RPF check mechanism enables multicast streams to be transmitted along the correct MDTs (paths) and prevents loops on forwarding paths.</p>
+<p>During multicast data forwarding, a device will be heavily burdened if it performs an RPF check on each received multicast data packet based on the unicast routing table. To address this issue, a device can first search the MFIB for a matching (S, G) entry after receiving a data packet sent from source S to group G.</p>
+<ul><li>If no matching (S, G) entry exists, the device performs an RPF check on the packet, uses the found RPF interface (if present) as the inbound interface, creates a multicast routing entry, and delivers the entry to the MFIB. In particular, the RPF check result is handled as follows: If the RPF check succeeds, the inbound interface of the packet is the RPF interface, and the device forwards the packet to all the outbound interfaces in the forwarding entry. If the RPF check fails, the device drops the packet as the packet was forwarded along an incorrect path. </li><li>If a matching (S, G) entry is found and the inbound interface of the packet is the same as the inbound interface in the entry, the device forwards the packet to all the outbound interfaces in the forwarding entry.</li><li>If a matching (S, G) entry is found but the inbound interface of the packet is different from the inbound interface in the entry, the device performs an RPF check on the packet. Depending on the RPF check result, the device performs the following operations:<ul><li>If the RPF interface is the same as the inbound interface in the entry, the (S, G) entry is correct, and the packet is forwarded along an incorrect path. The device then drops the packet.</li><li>If the RPF interface is different from the inbound interface in the entry, the (S, G) entry is outdated. The device then changes the inbound interface in the entry to be the same as the RPF interface. After that, the device compares the RPF interface with the inbound interface of the packet. If they are identical, the device forwards the packet to all the outbound interfaces specified in the entry. Otherwise, the device discards the packet.</li></ul>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_mcastv6_cfg_0003.html">Understanding IPv6 Multicast Route Management
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_mcastv6_cfg_0004.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+
+<script language="JavaScript">
+<!--
+initImageViewer('.imgResize');
+var msg_imageMax = "view original image";
+var msg_imageClose = "close";
+//--></script></body>
+</html>

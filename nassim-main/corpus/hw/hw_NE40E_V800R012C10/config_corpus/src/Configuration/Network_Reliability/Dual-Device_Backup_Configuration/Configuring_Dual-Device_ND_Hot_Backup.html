@@ -1,0 +1,111 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring Dual-Device ND Hot Backup">
+<meta name="abstract" content="This section describes how to enable dual-device ND hot backup to back up ND entries between devices. This allows fast service switching if a network node or link fails, enhancing service reliability.">
+<meta name="description" content="This section describes how to enable dual-device ND hot backup to back up ND entries between devices. This allows fast service switching if a network node or link fails, enhancing service reliability.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_rbs_cfg_0000.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_rbs_cfg_0020.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_rbs_cfg_0023.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00604599">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="Dual-Device Backup">
+<meta name="featuretype" content="Network Reliability">
+<meta name="Solution" content="html_ismerge">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Dual-Device Backup">
+<meta name="featuretype" content="Network Reliability">
+<meta name="featurename" content="Dual-Device Backup">
+<meta name="featuretype" content="Network Reliability">
+<meta name="OWNER" content="w00604599">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="w00604599">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0183753474">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Configuring Dual-Device ND Hot Backup</title>
+</head>
+<body><a name="EN-US_TASK_0183753474"></a><a name="EN-US_TASK_0183753474"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring Dual-Device ND Hot Backup</h1>
+<div class="taskbody"><p>This section describes how to enable dual-device ND hot backup to back up ND entries between devices. This allows fast service switching if a network node or link fails, enhancing service reliability.</p>
+<div class="context"><a name="EN-US_TASK_0183753474__1.4.1"></a><a name="1.4.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>On the network shown in <a href="#EN-US_TASK_0183753474__fig_dc_vrp_dhcp_server_cfg_002003">Figure 1</a>, users access Device A and Device B over a switch. A Virtual Router Redundancy Protocol for IPv6 (VRRP6) group is configured on Device A and Device B, with Device A as the master device and Device B as the backup device.</p>
+<p>In normal circumstances, Device A forwards both upstream and downstream traffic. If Device A or the link between Device A and the switch fails, a master/backup VRRP6 switchover is triggered and Device B becomes the master device. Then, Device B needs to advertise a network segment route to network-side devices so that downstream traffic is directed from the network side to Device B. However, if Device B has not learned ND entries from user-side devices, the downstream traffic is interrupted. Device B can properly forward downstream traffic only after it learns ND entries from user-side devices.</p>
+<p>If ND entries are not synchronized from Device A to Device B and a master/backup switchover occurs, downstream traffic may be interrupted because Device B fails to learn ND entries from users-side devices in time. To resolve this problem, deploy dual-device ND hot backup on Device A and Device B.</p>
+<div class="fignone" id="EN-US_TASK_0183753474__fig_dc_vrp_dhcp_server_cfg_002003"><a name="EN-US_TASK_0183753474__fig_dc_vrp_dhcp_server_cfg_002003"></a><a name="fig_dc_vrp_dhcp_server_cfg_002003"></a><span class="figcap"><b>Figure 1 </b>Dual-device ND hot backup</span><br><span><img class="vsd" src="figure/en-us_image_0183753901.png" width="NaN" height="NaN"></span><br></div>
+<p>Perform the following steps on the devices that back up ND entries from each other:</p>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0183753474__1.4.2"></a><a name="1.4.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure basic VRRP6 group functions.</span><ol type="a"><li class="substepexpand"><span>Run <a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span><p><p>The system view is displayed.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> { <i><span class="varname">interface-name</span></i> |<i><span class="varname"> interface-type</span></i> <i><span class="varname">interface-number</span></i> }</span><p><p>The interface view for a VRRP6 group is displayed.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=vrrp6+vrid"><b><span class="cmdname">vrrp6 vrid</span></b></a> <i><span class="varname">virtual-router-id</span></i> [<strong><span> virtual-ip</span></strong> <i><span class="varname">virtual--address</span></i> [ link-local ] ]</span><p><p>A VRRP6 group is created and a virtual IPv6 address is assigned.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=vrrp6+vrid"><b><span class="cmdname">vrrp6 vrid</span></b></a> <i><span class="varname">virtual-router-id </span></i><strong><span>preempt-mode</span></strong> <strong><span>timer</span></strong> <strong><span>delay</span></strong> <i><span class="varname">delay<span>-time</span></span></i></span><p><p>A preemption delay is set for devices in the VRRP6 group.</p>
+</p><p><p>You are advised to set the preemption delay to 0 on a backup device to allow it to immediately preempt the master role and set the preemption delay to a non-0 value on the master device.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=vrrp6+vrid"><b><span class="cmdname">vrrp6 vrid</span></b></a> <i><span class="varname">virtual-router-id</span></i> <strong><span>priority</span></strong> <i><span class="varname">priority-value</span></i></span><p><p>A priority is configured for a device in the VRRP6 group.</p>
+</p></li><li class="substepexpand"><span>(Optional) Run <a href="cmdqueryname=vrrp6+vrid"><b><span class="cmdname">vrrp6 vrid</span></b></a> <i><span class="varname">virtual-router-id</span></i> <strong><span>timer</span></strong> <strong><span>advertise</span></strong> <i><span class="varname">advertise-interval</span></i></span><p><p>The interval for sending VRRP6 Advertisement packets is configured.</p>
+</p><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The interval for sending VRRP6 Advertisement packets cannot be less than the time required for a master/backup switchover. Otherwise, VRRP may intermittently go down during a switchover. You are advised to set the interval for sending VRRP6 Advertisement packets to more than 1 second.</p>
+</div></div>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span><p><p>The configuration is committed.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></span><p><p>Exit the interface view.</p>
+</p></li></ol>
+</li><li><span>Configure an RBS.</span><ol type="a"><li class="substepexpand"><span>Run <a href="cmdqueryname=remote-backup-service"><b><span class="cmdname">remote-backup-service</span></b></a> <i><span class="varname"><span>remote-backup-</span>service-name</span></i></span><p><p>An RBS is created, and the RBS view is displayed.</p>
+</p></li><li class="substepexpand"><span>(Optional) Run <a href="cmdqueryname=batch-backup"><b><span class="cmdname">batch-backup</span></b></a> <strong><span>service-type</span></strong> <strong><span>nd</span></strong> <strong><span>now</span></strong></span><p><p>The device is enabled to immediately back up user services configured in the RBS.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span><p><p>The configuration is committed.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></span><p><p>Exit the RBS view.</p>
+</p></li></ol>
+</li><li><span>Configure an RBP.</span><ol type="a"><li class="substepexpand"><span>Run <a href="cmdqueryname=remote-backup-profile"><b><span class="cmdname">remote-backup-profile</span></b></a> <i><span class="varname">profile-name</span></i></span><p><p>An RBP is created, and the RBP view is displayed.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=peer-backup"><b><span class="cmdname">peer-backup</span></b></a> <strong><span>hot</span></strong></span><p><p>A backup mode is configured for user information backup between devices.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=vrrp6-id"><b><span class="cmdname">vrrp6-id</span></b></a> <i><span class="varname">vr<span>id</span></span></i><strong><span> interface</span></strong> {<i><span class="varname"> interface-name</span></i> | <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> }</span><p><p>The RBP is bound to the VRRP6 group.</p>
+<p>The <i><span class="varname">vrid</span></i> parameter specifies the ID of a VRRP6 group. The ID must be the same as the VRRP6 group's ID configured using the <a href="cmdqueryname=vrrp6+vrid"><b><span class="cmdname">vrrp6 vrid</span></b></a> <i><span class="varname">virtual-router-id</span></i> [ <strong><span>virtual-ip</span></strong> <i><span class="varname">virtual-address</span></i> ] command in the interface view.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=backup-id"><b><span class="cmdname">backup-id</span></b></a> <i><span class="varname">backup-id</span></i> <a href="cmdqueryname=remote-backup-service"><b><span class="cmdname">remote-backup-service</span></b></a> <i><span class="varname">service-name</span></i></span><p><p>A user backup ID is set for the RBP, and the RBP is associated with the RBS.</p>
+<p>The <i><span class="varname">backup-id</span></i> parameter specifies a user backup ID for the RBP. You can use a backup ID and an RBS to determine an RBP. The backup IDs configured for the same RBP must be the same on the master and backup devices and can no longer be configured for other RBPs.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span><p><p>The configuration is committed.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></span><p><p>Exit the RBP view.</p>
+</p></li></ol>
+</li><li><span>Enable the remote backup function for ND.</span><ol type="a"><li class="substepexpand"><span>Run <a href="cmdqueryname=remote-backup-profile"><b><span class="cmdname">remote-backup-profile</span></b></a> <i><span class="varname">profile-name</span></i></span><p><p>The RBP view is displayed.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=service-type+nd"><b><span class="cmdname">service-type nd</span></b></a></span><p><p>The remote backup function for ND is enabled.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span><p><p>The configuration is committed.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></span><p><p>Exit the RBP view.</p>
+</p></li></ol>
+</li><li><span>Bind the RBP to an interface.</span><ol type="a"><li class="substepexpand"><span>Run <a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> {<i><span class="varname"> interface-name</span></i> | <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> }</span><p><p>The interface view for configuring the VRRP6 group is displayed.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=remote-backup-profile"><b><span class="cmdname">remote-backup-profile</span></b></a> <i><span class="varname">profile-name</span></i></span><p><p>The RBP is bound to the interface.</p>
+</p><p><p>The name of the RBP to be bound to an interface must be the same as the name of the RBP created using the <a href="cmdqueryname=remote-backup-profile"><b><span class="cmdname">remote-backup-profile</span></b></a> command in the system view.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span><p><p>The configuration is committed.</p>
+</p></li></ol>
+</li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_rbs_cfg_0000.html">Dual-Device Backup Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_rbs_cfg_0020.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_rbs_cfg_0023.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

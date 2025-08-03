@@ -1,0 +1,401 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Basic Concepts of OSPF">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_ospf_cfg_0002.html">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_ospf_cfg_0004.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001176742865">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Basic Concepts of OSPF</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001176742865"></a><a name="EN-US_CONCEPT_0000001176742865"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Basic Concepts of OSPF</h1>
+<div><div class="section"><h4 class="sectiontitle">Router ID</h4><p>A router ID is a 32-bit unsigned integer and uniquely identifies a device in an AS. A router ID must exist before a device runs OSPF. </p>
+<p>A router ID can be generated manually or automatically. If no router ID has been manually configured, the device automatically selects the system ID or the IP address of the current interface as the router ID.</p>
+<p>In any of the following situations, router ID reselection may be triggered:</p>
+<ul><li>The system router ID is reconfigured, and the OSPF process is restarted.</li><li>The OSPF router ID is reconfigured, and the OSPF process is restarted.</li><li>The system ID or IP address that is selected as the router ID is deleted, and the OSPF process is restarted.</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Areas</h4><p>When a large number of devices run OSPF, LSDBs increase in size and often require a significant amount of storage space. Large LSDBs also complicate SPF computation and can overload the devices. As the network scale expands, there is an increasing probability that the network topology changes, causing the network to change continuously. In this case, a large number of OSPF packets are transmitted on the network, leading to a decrease in bandwidth utilization efficiency. Every time the topology changes, each device on the network must recalculate routes.</p>
+<p>OSPF resolves this problem by partitioning an AS into different areas, each of which is regarded as a logical group and identified by an area ID. A device, not a link, resides at the border of an area, and a network segment or link can belong to only one area. An area must be specified for each OSPF interface.</p>
+<p>OSPF areas include common areas, stub areas, and not-so-stubby areas (NSSAs). <a href="#EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003001">Table 1</a> describes these in more detail.</p>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003001"></a><a name="tab_dc_vrp_ospf_feature_003001"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003001" frame="border" border="1" rules="all"><caption><b>Table 1 </b>OSPF areas</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="14.469999999999999%" id="mcps1.3.2.5.2.4.1.1" liSelected="liSelected"><p>Area Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="54.39000000000001%" id="mcps1.3.2.5.2.4.1.2" liSelected="liSelected"><p>Function</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="31.14%" id="mcps1.3.2.5.2.4.1.3" liSelected="liSelected"><p>Notes</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="14.469999999999999%" headers="mcps1.3.2.5.2.4.1.1 "><p>Common area</p>
+</td>
+<td class="cellrowborder" valign="top" width="54.39000000000001%" headers="mcps1.3.2.5.2.4.1.2 "><p>By default, OSPF areas are defined as common areas, and these include:</p>
+<ul><li>Standard area: transmits intra-area, inter-area, and external routes.</li><li>Backbone area: <strong>area 0</strong>, which connects to all other OSPF areas and transmits inter-area routes. Routes between non-backbone areas must be forwarded through the backbone area.</li></ul>
+</td>
+<td class="cellrowborder" valign="top" width="31.14%" headers="mcps1.3.2.5.2.4.1.3 "><ul><li>The backbone area must have all its devices connected.</li><li>All non-backbone areas must remain connected to the backbone area.</li></ul>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.469999999999999%" headers="mcps1.3.2.5.2.4.1.1 "><p>Stub area</p>
+</td>
+<td class="cellrowborder" valign="top" width="54.39000000000001%" headers="mcps1.3.2.5.2.4.1.2 "><p>A stub area is a non-backbone area with only one area border router (ABR) and generally resides at the border of an AS. The ABR in a stub area does not transmit received AS external routes, significantly decreasing the number of entries in the routing table on the ABR and the amount of routing information to be transmitted. To ensure the reachability of AS external routes, the ABR in the stub area generates a default route and advertises it to non-ABR devices in the stub area.</p>
+<p>A totally stubby area allows only intra-area routes and ABR-advertised Type 3 link state advertisements (LSAs) carrying the default route information to be advertised within the area. The totally stubby area does not allow AS external routes or inter-area routes to be advertised.</p>
+</td>
+<td class="cellrowborder" valign="top" width="31.14%" headers="mcps1.3.2.5.2.4.1.3 "><ul><li>The backbone area cannot be configured as a stub area.</li><li>An autonomous system boundary router (ASBR) cannot exist in a stub area. As such, AS external routes cannot be advertised within the stub area.</li><li>A virtual link cannot pass through a stub area.</li></ul>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.469999999999999%" headers="mcps1.3.2.5.2.4.1.1 "><p>NSSA</p>
+</td>
+<td class="cellrowborder" valign="top" width="54.39000000000001%" headers="mcps1.3.2.5.2.4.1.2 "><p>An NSSA is similar to a stub area. An NSSA does not advertise Type 5 LSAs but can import AS external routes. ASBRs in an NSSA generate Type 7 LSAs to carry information about the AS external routes, and these Type 7 LSAs are advertised only within the NSSA. When the Type 7 LSAs reach an ABR in the NSSA, the ABR translates them into Type 5 LSAs, which are then flooded to all the other OSPF areas.</p>
+<p>A totally NSSA allows only intra-area routes to be advertised within the area.</p>
+</td>
+<td class="cellrowborder" valign="top" width="31.14%" headers="mcps1.3.2.5.2.4.1.3 "><ul><li>An ABR in an NSSA advertises Type 7 LSA default routes within the NSSA.</li><li>All inter-area routes are advertised by ABRs.</li><li>A virtual link cannot pass through an NSSA.</li></ul>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Device Roles</h4><p>Devices are classified into internal routers, ABRs, backbone routers, and ASBRs by location in an AS. <a href="#EN-US_CONCEPT_0000001176742865__fig_dc_vrp_ospf_feature_003001">Figure 1</a> shows the layout of the four device roles, and <a href="#EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003002">Table 2</a> lists their descriptions.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001176742865__fig_dc_vrp_ospf_feature_003001"><a name="EN-US_CONCEPT_0000001176742865__fig_dc_vrp_ospf_feature_003001"></a><a name="fig_dc_vrp_ospf_feature_003001"></a><span class="figcap"><b>Figure 1 </b>Device roles in an AS</span><br><span><img class="vsd" src="figure/en-us_image_0000001130623492.png" width="NaN" height="NaN"></span></div>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003002"></a><a name="tab_dc_vrp_ospf_feature_003002"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003002" frame="border" border="1" rules="all"><caption><b>Table 2 </b>Device roles in an AS</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="34.06%" id="mcps1.3.3.4.2.3.1.1" liSelected="liSelected"><p>Device Role</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="65.94%" id="mcps1.3.3.4.2.3.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="34.06%" headers="mcps1.3.3.4.2.3.1.1 "><p>Internal router</p>
+</td>
+<td class="cellrowborder" valign="top" width="65.94%" headers="mcps1.3.3.4.2.3.1.2 "><p>All interfaces on an internal router belong to the same OSPF area.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="34.06%" headers="mcps1.3.3.4.2.3.1.1 "><p>ABR</p>
+</td>
+<td class="cellrowborder" valign="top" width="65.94%" headers="mcps1.3.3.4.2.3.1.2 "><p>An ABR is a device that can belong to two or more areas, one of which must be the backbone area.</p>
+<p>An ABR connects the backbone area and non-backbone areas, and it can connect to the backbone area either physically or logically.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="34.06%" headers="mcps1.3.3.4.2.3.1.1 "><p>Backbone router</p>
+</td>
+<td class="cellrowborder" valign="top" width="65.94%" headers="mcps1.3.3.4.2.3.1.2 "><p>A backbone router is a device that has at least one interface belonging to the backbone area.</p>
+<p>Backbone routers include internal routers in the backbone area and all ABRs.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="34.06%" headers="mcps1.3.3.4.2.3.1.1 "><p>ASBR</p>
+</td>
+<td class="cellrowborder" valign="top" width="65.94%" headers="mcps1.3.3.4.2.3.1.2 "><p>An ASBR exchanges routing information with other ASs.</p>
+<p>An ASBR may be an internal router or an ABR, and therefore may not necessarily reside at the border of an AS.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">LSAs</h4><p>OSPF encapsulates routing information into LSAs for transmission. <a href="#EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003003">Table 3</a> describes different types of LSAs and their functions.</p>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003003"></a><a name="tab_dc_vrp_ospf_feature_003003"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003003" frame="border" border="1" rules="all"><caption><b>Table 3 </b>Different types of LSAs and their functions</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="32.74%" id="mcps1.3.4.3.2.3.1.1" liSelected="liSelected"><p>LSA Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="67.25999999999999%" id="mcps1.3.4.3.2.3.1.2" liSelected="liSelected"><p>LSA Function</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="32.74%" headers="mcps1.3.4.3.2.3.1.1 "><p>Router-LSA (Type 1)</p>
+</td>
+<td class="cellrowborder" valign="top" width="67.25999999999999%" headers="mcps1.3.4.3.2.3.1.2 "><p>Describes the link status and cost of a device. Router-LSAs are generated by each device and advertised within the area to which the devices belong.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="32.74%" headers="mcps1.3.4.3.2.3.1.1 "><p>Network-LSA (Type 2)</p>
+</td>
+<td class="cellrowborder" valign="top" width="67.25999999999999%" headers="mcps1.3.4.3.2.3.1.2 "><p>Describes the link status on the local network segment. Network-LSAs are generated by a designated router (DR) and advertised within the area to which the DR belongs.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="32.74%" headers="mcps1.3.4.3.2.3.1.1 "><p>Network-Summary-LSA (Type 3)</p>
+</td>
+<td class="cellrowborder" valign="top" width="67.25999999999999%" headers="mcps1.3.4.3.2.3.1.2 "><p>Describes routes on a network segment of an area. Network-Summary-LSAs are generated by an ABR and advertised to other areas, excluding totally stub areas and totally NSSAs. For example, an ABR belongs to both area 0 and area 1, area 0 has a network segment 10.1.1.0, and area 1 has a network segment 10.2.1.0. In this case, the ABR generates Type 3 LSAs destined for the network segment 10.2.1.0 for area 0, and Type 3 LSAs destined for the network segment 10.1.1.0 for area 1.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="32.74%" headers="mcps1.3.4.3.2.3.1.1 "><p>ASBR-Summary-LSA (Type 4)</p>
+</td>
+<td class="cellrowborder" valign="top" width="67.25999999999999%" headers="mcps1.3.4.3.2.3.1.2 "><p>Describes routes of an area to the ASBRs of other areas. ASBR-Summary-LSAs are generated by an ABR and advertised to other areas, excluding stub areas, totally stub area, NSSAs, and totally NSSAs.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="32.74%" headers="mcps1.3.4.3.2.3.1.1 "><p>AS-external-LSA (Type 5)</p>
+</td>
+<td class="cellrowborder" valign="top" width="67.25999999999999%" headers="mcps1.3.4.3.2.3.1.2 "><p>Describes AS external routes, which are advertised to all areas, excluding the stub area, totally stubby area, NSSA, and totally NSSA. AS-external-LSAs are generated by an ASBR.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="32.74%" headers="mcps1.3.4.3.2.3.1.1 "><p>NSSA-LSA (Type 7)</p>
+</td>
+<td class="cellrowborder" valign="top" width="67.25999999999999%" headers="mcps1.3.4.3.2.3.1.2 "><p>Is advertised only in NSSAs.</p>
+<ul><li>It describes AS external routes and is generated by an ASBR.</li><li>If a neighbor in Full state and an interface that is up exist in the backbone area, the ABR automatically generates a default NSSA LSA.</li></ul>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="32.74%" headers="mcps1.3.4.3.2.3.1.1 "><p>Opaque-LSA (Type 9/Type 10/Type 11)</p>
+</td>
+<td class="cellrowborder" valign="top" width="67.25999999999999%" headers="mcps1.3.4.3.2.3.1.2 "><p>Provides a general mechanism for OSPF extension. Different types of LSAs are described as follows:</p>
+<ul><li>Type 9 LSAs are advertised only on the network segment where the interface advertising the LSAs resides. Grace LSAs used in graceful restart (GR) are Type 9 LSAs.</li><li>Type 10 LSAs are advertised within an OSPF area. LSAs that are used to support traffic engineering (TE) are Type 10 LSAs.</li><li>Type 11 LSAs are advertised within an AS but have not been used in practice.</li></ul>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><a href="#EN-US_CONCEPT_0000001176742865__tab_dc_vrp_feature_new_00630508">Table 4</a> describes whether a type of LSA is supported in an area.</p>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001176742865__tab_dc_vrp_feature_new_00630508"></a><a name="tab_dc_vrp_feature_new_00630508"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001176742865__tab_dc_vrp_feature_new_00630508" frame="border" border="1" rules="all"><caption><b>Table 4 </b>Support status of LSAs in different types of areas</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="27.732773277327734%" id="mcps1.3.4.5.2.8.1.1" liSelected="liSelected"><p>Area Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="11.831183118311833%" id="mcps1.3.4.5.2.8.1.2" liSelected="liSelected"><p>Router-LSA (Type 1)</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="12.021202120212022%" id="mcps1.3.4.5.2.8.1.3" liSelected="liSelected"><p>Network-LSA (Type 2)</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="11.901190119011902%" id="mcps1.3.4.5.2.8.1.4" liSelected="liSelected"><p>Network-Summary-LSA (Type 3)</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="12.151215121512152%" id="mcps1.3.4.5.2.8.1.5" liSelected="liSelected"><p>ASBR-Summary-LSA (Type 4)</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="12.341234123412342%" id="mcps1.3.4.5.2.8.1.6" liSelected="liSelected"><p>AS-external-LSA (Type 5)</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="12.021202120212022%" id="mcps1.3.4.5.2.8.1.7" liSelected="liSelected"><p>NSSA-LSA (Type 7)</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="27.732773277327734%" headers="mcps1.3.4.5.2.8.1.1 "><p>Common area (including standard and backbone areas)</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.831183118311833%" headers="mcps1.3.4.5.2.8.1.2 "><p>Supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.021202120212022%" headers="mcps1.3.4.5.2.8.1.3 "><p>Supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.901190119011902%" headers="mcps1.3.4.5.2.8.1.4 "><p>Supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.151215121512152%" headers="mcps1.3.4.5.2.8.1.5 "><p>Supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.341234123412342%" headers="mcps1.3.4.5.2.8.1.6 "><p>Supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.021202120212022%" headers="mcps1.3.4.5.2.8.1.7 "><p>Not supported</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="27.732773277327734%" headers="mcps1.3.4.5.2.8.1.1 "><p>Stub area</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.831183118311833%" headers="mcps1.3.4.5.2.8.1.2 "><p>Supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.021202120212022%" headers="mcps1.3.4.5.2.8.1.3 "><p>Supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.901190119011902%" headers="mcps1.3.4.5.2.8.1.4 "><p>Supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.151215121512152%" headers="mcps1.3.4.5.2.8.1.5 "><p>Not supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.341234123412342%" headers="mcps1.3.4.5.2.8.1.6 "><p>Not supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.021202120212022%" headers="mcps1.3.4.5.2.8.1.7 "><p>Not supported</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="27.732773277327734%" headers="mcps1.3.4.5.2.8.1.1 "><p>Totally stub area</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.831183118311833%" headers="mcps1.3.4.5.2.8.1.2 "><p>Supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.021202120212022%" headers="mcps1.3.4.5.2.8.1.3 "><p>Supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.901190119011902%" headers="mcps1.3.4.5.2.8.1.4 "><p>Not supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.151215121512152%" headers="mcps1.3.4.5.2.8.1.5 "><p>Not supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.341234123412342%" headers="mcps1.3.4.5.2.8.1.6 "><p>Not supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.021202120212022%" headers="mcps1.3.4.5.2.8.1.7 "><p>Not supported</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="27.732773277327734%" headers="mcps1.3.4.5.2.8.1.1 "><p>NSSA</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.831183118311833%" headers="mcps1.3.4.5.2.8.1.2 "><p>Supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.021202120212022%" headers="mcps1.3.4.5.2.8.1.3 "><p>Supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.901190119011902%" headers="mcps1.3.4.5.2.8.1.4 "><p>Supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.151215121512152%" headers="mcps1.3.4.5.2.8.1.5 "><p>Not supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.341234123412342%" headers="mcps1.3.4.5.2.8.1.6 "><p>Not supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.021202120212022%" headers="mcps1.3.4.5.2.8.1.7 "><p>Supported</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="27.732773277327734%" headers="mcps1.3.4.5.2.8.1.1 "><p>Totally NSSA</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.831183118311833%" headers="mcps1.3.4.5.2.8.1.2 "><p>Supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.021202120212022%" headers="mcps1.3.4.5.2.8.1.3 "><p>Supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.901190119011902%" headers="mcps1.3.4.5.2.8.1.4 "><p>Not supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.151215121512152%" headers="mcps1.3.4.5.2.8.1.5 "><p>Not supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.341234123412342%" headers="mcps1.3.4.5.2.8.1.6 "><p>Not supported</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.021202120212022%" headers="mcps1.3.4.5.2.8.1.7 "><p>Supported</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Packet Types</h4><p>OSPF packets are encapsulated into IP packets, and the OSPF protocol number is 89. OSPF packets are classified as Hello, database description (DD), link state request (LSR), link state update (LSU), or link state acknowledgment (LSAck) packets, as described in <a href="#EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003004">Table 5</a>.</p>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003004"></a><a name="tab_dc_vrp_ospf_feature_003004"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003004" frame="border" border="1" rules="all"><caption><b>Table 5 </b>OSPF packets and their functions</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="39.95%" id="mcps1.3.5.3.2.3.1.1" liSelected="liSelected"><p>Packet Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="60.050000000000004%" id="mcps1.3.5.3.2.3.1.2" liSelected="liSelected"><p>Function</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="39.95%" headers="mcps1.3.5.3.2.3.1.1 "><p>Hello packet</p>
+</td>
+<td class="cellrowborder" valign="top" width="60.050000000000004%" headers="mcps1.3.5.3.2.3.1.2 "><p>Hello packets are sent periodically to discover and maintain OSPF neighbor relationships.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="39.95%" headers="mcps1.3.5.3.2.3.1.1 "><p>DD packet</p>
+</td>
+<td class="cellrowborder" valign="top" width="60.050000000000004%" headers="mcps1.3.5.3.2.3.1.2 "><p>DD packets contain the summaries of LSAs in the local LSDB, and are used for LSDB synchronization between two devices.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="39.95%" headers="mcps1.3.5.3.2.3.1.1 "><p>LSR packet</p>
+</td>
+<td class="cellrowborder" valign="top" width="60.050000000000004%" headers="mcps1.3.5.3.2.3.1.2 "><p>LSR packets are sent to OSPF neighbors to request required LSAs.</p>
+<p>A device sends LSR packets to its OSPF neighbor only after DD packets have been successfully exchanged.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="39.95%" headers="mcps1.3.5.3.2.3.1.1 "><p>LSU packet</p>
+</td>
+<td class="cellrowborder" valign="top" width="60.050000000000004%" headers="mcps1.3.5.3.2.3.1.2 "><p>LSU packets are used to transmit required LSAs to OSPF neighbors.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="39.95%" headers="mcps1.3.5.3.2.3.1.1 "><p>LSAck packet</p>
+</td>
+<td class="cellrowborder" valign="top" width="60.050000000000004%" headers="mcps1.3.5.3.2.3.1.2 "><p>LSAck packets are used to acknowledge received LSAs.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Route Types</h4><p>Routes are classified into intra-area, inter-area, and AS external routes. Intra-area and inter-area routes describe the network structure of an AS, and AS external routes describe how to select routes to destinations outside an AS. AS external routes imported by OSPF are classified as Type 1 or Type 2 external routes.</p>
+<p><a href="#EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003005">Table 6</a> describes OSPF routes in descending order of priority.</p>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003005"></a><a name="tab_dc_vrp_ospf_feature_003005"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003005" frame="border" border="1" rules="all"><caption><b>Table 6 </b>OSPF route types</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="35.39%" id="mcps1.3.6.4.2.3.1.1" liSelected="liSelected"><p>Route Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="64.61%" id="mcps1.3.6.4.2.3.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="35.39%" headers="mcps1.3.6.4.2.3.1.1 "><p>Intra-area route</p>
+</td>
+<td class="cellrowborder" valign="top" width="64.61%" headers="mcps1.3.6.4.2.3.1.2 "><p>Routes transmitted within an OSPF area.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="35.39%" headers="mcps1.3.6.4.2.3.1.1 "><p>Inter-area route</p>
+</td>
+<td class="cellrowborder" valign="top" width="64.61%" headers="mcps1.3.6.4.2.3.1.2 "><p>Routes transmitted between OSPF areas.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="35.39%" headers="mcps1.3.6.4.2.3.1.1 "><p>Type 1 external route</p>
+</td>
+<td class="cellrowborder" valign="top" width="64.61%" headers="mcps1.3.6.4.2.3.1.2 "><p>Type 1 external routes offer higher reliability than Type 2.</p>
+<p>Cost of a Type 1 external route = Cost of the route from the local device to an ASBR + Cost of the route from the ASBR to the destination</p>
+<p>If multiple ASBRs exist, the cost of each Type 1 external route is calculated based on the preceding equation. The obtained cost is used for route selection.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="35.39%" headers="mcps1.3.6.4.2.3.1.1 "><p>Type 2 external route</p>
+</td>
+<td class="cellrowborder" valign="top" width="64.61%" headers="mcps1.3.6.4.2.3.1.2 "><p>Because a Type 2 external route offers low reliability, its cost is considered to be much greater than the cost of any internal route to an ASBR.</p>
+<p>Cost of a Type 2 external route = Cost of the route from an ASBR to the destination</p>
+<p>If multiple ASBRs have routes to the same destination, the route with the lowest cost from the corresponding ASBR to the destination is selected and imported. If the routes to be imported have the same cost from their ASBRs to the destination, the route with the lowest cost from the local device to the corresponding ASBR is selected and then imported.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Network Types Supported by OSPF</h4><p>Networks are classified as broadcast, non-broadcast multiple access (NBMA), point-to-multipoint (P2MP), or point-to-point (P2P) networks by link layer protocol. <a href="#EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003006">Table 7</a> describes the network types.</p>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003006"></a><a name="tab_dc_vrp_ospf_feature_003006"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001176742865__tab_dc_vrp_ospf_feature_003006" frame="border" border="1" rules="all"><caption><b>Table 7 </b>Network types supported by OSPF</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="30.72%" id="mcps1.3.7.3.2.4.1.1" liSelected="liSelected"><p>Network Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="30.64%" id="mcps1.3.7.3.2.4.1.2" liSelected="liSelected"><p>Link Layer Protocol</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="38.64%" id="mcps1.3.7.3.2.4.1.3" liSelected="liSelected"><p>Graph</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="30.72%" headers="mcps1.3.7.3.2.4.1.1 "><p>Broadcast</p>
+</td>
+<td class="cellrowborder" valign="top" width="30.64%" headers="mcps1.3.7.3.2.4.1.2 "><ul><li>Ethernet</li><li>Fiber distributed data interface (FDDI)</li></ul>
+</td>
+<td class="cellrowborder" valign="top" width="38.64%" headers="mcps1.3.7.3.2.4.1.3 "><p><span><img class="vsd" src="figure/en-us_image_0000001130783280.png"></span></p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="30.72%" headers="mcps1.3.7.3.2.4.1.1 "><p>NBMA</p>
+</td>
+<td class="cellrowborder" valign="top" width="30.64%" headers="mcps1.3.7.3.2.4.1.2 "><p>X.25</p>
+</td>
+<td class="cellrowborder" valign="top" width="38.64%" headers="mcps1.3.7.3.2.4.1.3 "><p><span><img class="vsd" src="figure/en-us_image_0000001130623490.png"></span></p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="30.72%" headers="mcps1.3.7.3.2.4.1.1 "><p>P2MP</p>
+</td>
+<td class="cellrowborder" valign="top" width="30.64%" headers="mcps1.3.7.3.2.4.1.2 "><p>Regardless of the link layer protocol, OSPF does not default the network type to P2MP. Instead, P2MP is forcibly changed from another type of network. In most cases, a non-fully meshed NBMA network is changed to a P2MP network.</p>
+</td>
+<td class="cellrowborder" valign="top" width="38.64%" headers="mcps1.3.7.3.2.4.1.3 "><p><span><img class="vsd" src="figure/en-us_image_0000001130623494.png"></span></p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="30.72%" headers="mcps1.3.7.3.2.4.1.1 "><p>P2P</p>
+</td>
+<td class="cellrowborder" valign="top" width="30.64%" headers="mcps1.3.7.3.2.4.1.2 "><ul><li>PPP</li><li>Link Access Procedure Balanced (LAPB)</li></ul>
+</td>
+<td class="cellrowborder" valign="top" width="38.64%" headers="mcps1.3.7.3.2.4.1.3 "><p><span><img class="vsd" src="figure/en-us_image_0000001130783278.png"></span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">OSPF Multi-Process</h4><p>OSPF multi-process allows multiple OSPF processes to independently run on the same device. Route exchange between different OSPF processes is similar to that between different routing protocols, and a device interface can belong to only one OSPF process.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../vrp/vrp_ospf_cfg_0002.html">Understanding OSPF
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../vrp/vrp_ospf_cfg_0004.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

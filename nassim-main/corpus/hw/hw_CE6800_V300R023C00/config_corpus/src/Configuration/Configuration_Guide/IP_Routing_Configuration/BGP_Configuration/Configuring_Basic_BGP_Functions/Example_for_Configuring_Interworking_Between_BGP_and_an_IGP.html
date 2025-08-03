@@ -1,0 +1,266 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Interworking Between BGP and an IGP">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0014.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0019.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130783886">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Interworking Between BGP and an IGP</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130783886"></a><a name="EN-US_TASK_0000001130783886"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Interworking Between BGP and an IGP</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130783886__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>As communications services grow, devices in different ASs require mutual access, data must be reliably transmitted, and the traffic interruption time must be minimized. Such demands require routing information to be widely transmitted and route convergence to be accelerated. While BGP can transmit routing information widely and efficiently, it does not calculate routes by itself. In contrast, an IGP can implement rapid route convergence, but transmits routing information with low efficiency and with limited scope. After interworking between BGP and an IGP is configured, IGP routes can be imported into the BGP routing table and then transmitted efficiently and widely. BGP routes can also be imported into the IGP routing table so that the local AS can access other ASs.</p>
+<p>The network shown in <a href="#EN-US_TASK_0000001130783886__fig_dc_vrp_bgp_cfg_407301">Figure 1</a> is divided into AS 65008 and AS 65009. In AS 65009, an IGP is deployed to calculate routes. In this example, OSPF is used. To implement communication between the ASs, configure BGP between them and configure interworking between BGP and the IGP on edge devices of the ASs.</p>
+<div class="fignone" id="EN-US_TASK_0000001130783886__fig_dc_vrp_bgp_cfg_407301"><a name="EN-US_TASK_0000001130783886__fig_dc_vrp_bgp_cfg_407301"></a><a name="fig_dc_vrp_bgp_cfg_407301"></a><span class="figcap"><b>Figure 1 </b>Network diagram of interworking between BGP and an IGP</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 and interface 2 represent <span>100GE</span><span>1/0/1</span> and <span>100GE</span><span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001130783974.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130783886__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>During the configuration, note the following:</p>
+<ul><li>To improve security, you are advised to deploy BGP security measures. For details, see "Configuring BGP Authentication." Keychain authentication is used as an example. For details, see Example for Configuring Keychain Authentication for BGP.</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130783886__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure OSPF on DeviceB and DeviceC.</p>
+</li><li><p>Establish an EBGP connection between DeviceA and DeviceB.</p>
+</li><li><p>Configure BGP and OSPF to import routes from each other on DeviceB, and then check the routing information.</p>
+</li><li><p>Configure BGP route summarization on DeviceB to reduce the size of the BGP routing table.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130783886__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface. For detailed configurations, see <a href="#EN-US_TASK_0000001130783886__postreq186481836141010">Configuration Scripts</a>.</span></li><li><span>Configure OSPF.</span><p><p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> ospf 1</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1]<strong> area 0</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0]<strong> network 10.1.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC]<strong> ospf 1</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0] <strong>network 10.1.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0] <strong>network 10.1.2.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li><li><span>Configure an EBGP connection.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>bgp 65008</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>router-id 1.1.1.1</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 172.16.1.1 as-number 65009</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv4] <strong>network 192.168.1.0 255.255.255.0</strong>
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv4] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>bgp 65009</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>router-id 2.2.2.2</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 172.16.1.2 as-number 65008</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li><li><span>Configure interworking between BGP and the IGP.</span><p><p># Configure BGP to import OSPF routes on DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> bgp 65009</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-bgp]<strong> ipv4-family unicast</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv4]<strong> import-route ospf 1</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv4]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Check the routing table of DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display bgp routing-table</strong>
+
+ BGP Local router ID is 1.1.1.1
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+ RPKI validation codes: V - valid, I - invalid, N - not-found
+
+ Total Number of Routes: 3
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+ *&gt;   192.168.1.0/24     0.0.0.0         0                     0      i
+ *&gt;   10.1.1.0/24        172.16.1.1      1                     0      65009?
+ *&gt;   10.1.2.0/24        172.16.1.1      2                     0      65009?</pre>
+<p># Configure OSPF to import BGP routes on DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ospf</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>import-route bgp</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Check the IP routing table of DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>display ip routing-table</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table : _public_
+         Destinations : 12        Routes : 12
+
+Destination/Mask    Proto  Pre  Cost        Flags NextHop         Interface
+
+    192.168.1.0/24  O_ASE  150  1             D  10.1.1.1        <span>100GE</span><span>1/0/1</span>
+       10.1.1.0/24  Direct 0    0             D  10.1.1.2        <span>100GE</span><span>1/0/1</span>
+       10.1.1.1/32  Direct 0    0             D  10.1.1.1        <span>100GE</span><span>1/0/1</span>
+       10.1.1.2/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+     10.1.1.255/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+       10.1.2.0/24  Direct 0    0             D  10.1.2.1        <span>100GE</span><span>1/0/2</span>
+       10.1.2.1/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/2</span>
+     10.1.2.255/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/2</span>
+      127.0.0.0/8   Direct 0    0             D  127.0.0.1       InLoopBack0
+      127.0.0.1/32  Direct 0    0             D  127.0.0.1       InLoopBack0
+127.255.255.255/32  Direct 0    0             D  127.0.0.1       InLoopBack0
+255.255.255.255/32  Direct 0    0             D  127.0.0.1       InLoopBack0</pre>
+</p></li><li><span>Configure automatic route summarization.</span><p><p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>bgp 65009</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-bgp]<strong> ipv4-family unicast</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-bgp-af-ipv4]<strong> summary automatic</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv4]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001130783886__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check the BGP routing table of DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display bgp routing-table</strong>
+
+ BGP Local router ID is 1.1.1.1
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+ RPKI validation codes: V - valid, I - invalid, N - not-found
+
+ Total Number of Routes: 2
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *&gt;   192.168.1.0/24     0.0.0.0         0                     0      i
+ *&gt;   10.0.0.0           172.16.1.1                            0      65009?</pre>
+<p># Verify the configuration using the <strong>ping</strong> command.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>ping -a 192.168.1.1 10.1.2.1</strong>
+  PING 10.1.2.1: 56  data bytes, press CTRL_C to break
+    Reply from 10.1.2.1: bytes=56 Sequence=1 ttl=254 time=15 ms
+    Reply from 10.1.2.1: bytes=56 Sequence=2 ttl=254 time=31 ms
+    Reply from 10.1.2.1: bytes=56 Sequence=3 ttl=254 time=47 ms
+    Reply from 10.1.2.1: bytes=56 Sequence=4 ttl=254 time=46 ms
+    Reply from 10.1.2.1: bytes=56 Sequence=5 ttl=254 time=47 ms
+  --- 10.1.2.1 ping statistics ---
+    5 packet(s) transmitted
+    5 packet(s) received
+    0.00% packet loss
+    round-trip min/avg/max = 15/37/47 ms</pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001130783886__postreq186481836141010"></a><a name="postreq186481836141010"></a><a name="EN-US_TASK_0000001130783886__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 172.16.1.2 255.255.255.0
+#
+bgp 65008
+ router-id 1.1.1.1
+ peer 172.16.1.1 as-number 65009
+ #
+ ipv4-family unicast
+  network 192.168.1.0 255.255.255.0
+  peer 172.16.1.1 enable
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 172.16.1.1 255.255.255.0
+#
+bgp 65009
+ router-id 2.2.2.2
+ peer 172.16.1.2 as-number 65008
+ #
+ ipv4-family unicast
+  summary automatic
+  import-route ospf 1
+  peer 172.16.1.2 enable
+#
+ospf 1
+ import-route bgp
+ area 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.2.1 255.255.255.0
+#
+ospf 1
+ area 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+  network 10.1.2.0 0.0.0.255
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bgp_cfg_0014.html">Configuring Basic BGP Functions
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bgp_cfg_0019.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

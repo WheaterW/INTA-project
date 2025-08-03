@@ -1,0 +1,86 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding OSPFv3 IP FRR">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_ospfv3_cfg_0078_copy.html">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_ospfv3_cfg_0079_copy.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="OSPFv3">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="OSPFv3">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001130783000">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Understanding OSPFv3 IP FRR</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001130783000"></a><a name="EN-US_CONCEPT_0000001130783000"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding OSPFv3 IP FRR</h1>
+<div><p>OSPFv3 IP fast reroute (FRR) is dynamic IP FRR, in which the IGP (OSPFv3) precomputes a backup path based on the network-wide LSDBs, and stores this backup path in the forwarding table. If the primary path fails, traffic can be quickly switched to the backup path, reducing the fault recovery time. OSPFv3 IP FRR complies with standard protocols and provides link and node protection for traffic.</p>
+<div class="section"><h4 class="sectiontitle">Context</h4><p>As networks develop, services such as Voice over IP (VoIP) and online video services require high-quality and real-time transmission. However, if a link fails, OSPFv3 must complete the following procedure before switching traffic to a new link: detect the fault, update LSAs, flood LSAs, calculate routes, and deliver route entries to the FIB. This is a lengthy process, and the associated traffic interruption is often longer than users can tolerate. As a result, real-time transmission requirements cannot be met.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Fundamentals</h4><p>OSPFv3 IP FRR refers to a mechanism in which a device uses the loop-free alternate (LFA) algorithm to precompute a backup route, and stores the primary and backup routes in the forwarding table. If a fault occurs on the network, OSPFv3 IP FRR can fast switch traffic to the backup link before routes on the control plane converge. This ensures uninterrupted traffic transmission and improves OSPFv3 network reliability.</p>
+<p>A device uses the SPF algorithm to calculate shortest paths to destinations, with each neighbor that provides a backup link as a root node. The device then uses an inequality defined in the standard protocol to calculate the loop-free backup link with the lowest cost among available shortest paths.</p>
+<p>An OSPFv3 IP FRR policy can be used to filter backup routes. Only the backup routes that match the filtering rules in the policy can be added to the IP routing table, facilitating flexible control of the OSPFv3 backup routes to be added to the table.</p>
+<p>A BFD session can be associated with OSPFv3 IP FRR. With this configuration, the BFD session goes down if BFD detects a link fault. In this case, OSPFv3 IP FRR is triggered to switch traffic from the faulty link to the backup link, thereby protecting traffic.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Application Scenario</h4><div class="p">OSPFv3 IP FRR protects traffic against either a link failure or a node-and-link failure. Distance_opt (<em>X</em>, <em>Y</em>) indicates the shortest path from node <em>X</em> to node <em>Y</em>.<ul><li><p><strong>Link protection</strong>: takes effect when the traffic to be protected flows along a specified link.</p>
+<div class="p">The link costs must meet the inequality: Distance_opt (N, D) &lt; Distance_opt (N, S) + Distance_opt (S, D).<ul><li>S: source node that forwards traffic</li><li>N: node along the backup link</li><li>D: destination node for traffic forwarding</li></ul>
+</div>
+<p>In <a href="#EN-US_CONCEPT_0000001130783000__en-us_concept_0275857994_fig_dc_vrp_ospfv3_feature_200701">Figure 1</a>, traffic flows from DeviceS to DeviceD, and the link costs meet the preceding inequality. If the primary link fails, DeviceS switches traffic to the backup link DeviceS -&gt; DeviceN, minimizing the traffic interruption duration.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130783000__en-us_concept_0275857994_fig_dc_vrp_ospfv3_feature_200701"><a name="EN-US_CONCEPT_0000001130783000__en-us_concept_0275857994_fig_dc_vrp_ospfv3_feature_200701"></a><a name="en-us_concept_0275857994_fig_dc_vrp_ospfv3_feature_200701"></a><span class="figcap"><b>Figure 1 </b>OSPFv3 IP FRR â link protection</span><br><span><img class="vsd" src="figure/en-us_image_0000001229682723.png" width="NaN" height="NaN"></span></div>
+</li><li><p><strong>Node-and-link protection</strong>: <a href="#EN-US_CONCEPT_0000001130783000__en-us_concept_0275857994_fig_dc_vrp_ospfv3_feature_200702">Figure 2</a> shows a network diagram for node-and-link protection. Node-and-link protection takes precedence over link protection.</p>
+<p>Node-and-link protection takes effect only if the following conditions are met:</p>
+<ul><li><p>The link costs meet the inequality: Distance_opt (N, D) &lt; Distance_opt (N, S) + Distance_opt (S, D).</p>
+</li><li><p>The interface costs meet the inequality: Distance_opt (N, D) &lt; Distance_opt (N, E) + Distance_opt (E, D).</p>
+</li></ul>
+<p>S stands for the source node, E for the faulty node, N for a node along the backup link, and D for the destination node.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130783000__en-us_concept_0275857994_fig_dc_vrp_ospfv3_feature_200702"><a name="EN-US_CONCEPT_0000001130783000__en-us_concept_0275857994_fig_dc_vrp_ospfv3_feature_200702"></a><a name="en-us_concept_0275857994_fig_dc_vrp_ospfv3_feature_200702"></a><span class="figcap"><b>Figure 2 </b>OSPFv3 IP FRR â node-and-link protection</span><br><span><img class="vsd" src="figure/en-us_image_0000001184761504.png" width="NaN" height="NaN"></span></div>
+</li></ul>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">OSPFv3 FRR for a Scenario Where the Same Route Is Received from Multiple Nodes</h4><p>With OSPFv3 LFA FRR, a device uses the SPF algorithm to calculate the shortest path to the destination with a neighbor that provides a backup link as the root node, and then stores the node-based backup next hop. This applies to a scenario where a route is received from only one node. As networks are increasingly diversified, two ABRs or ASBRs are deployed to improve network reliability. In this case, OSPFv3 FRR is developed for scenarios where the same route is received from multiple nodes.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In scenarios where the same route is received from multiple nodes, OSPFv3 FRR is implemented by calculating the Type 3 LSAs advertised by the ABRs of an area for intra-area, inter-area, or ASE routing. Inter-area routing is used as an example to describe how FRR works in a scenario where the same route is received from multiple nodes.</p>
+</div></div>
+<div class="fignone" id="EN-US_CONCEPT_0000001130783000__en-us_concept_0275857994_fig_dc_vrp_ospfv3_feature_200703"><a name="EN-US_CONCEPT_0000001130783000__en-us_concept_0275857994_fig_dc_vrp_ospfv3_feature_200703"></a><a name="en-us_concept_0275857994_fig_dc_vrp_ospfv3_feature_200703"></a><span class="figcap"><b>Figure 3 </b>OSPFv3 FRR in a scenario where the same route is received from multiple nodes</span><br><span><img class="vsd" src="figure/en-us_image_0000001229602675.png" width="NaN" height="NaN"></span></div>
+<p>In <a href="#EN-US_CONCEPT_0000001130783000__en-us_concept_0275857994_fig_dc_vrp_ospfv3_feature_200703">Figure 3</a>, DeviceB and DeviceC function as ABRs to forward routes between area 0 and area 1. DeviceE advertises an intra-area route. Upon receipt of the route, DeviceB and DeviceC each translate it into a Type 3 LSA and flood the LSA to area 0. After OSPFv3 FRR is enabled on DeviceA, DeviceA considers both DeviceB and DeviceC as its neighbors. Without a fixed neighbor as the root node, DeviceA fails to calculate the FRR backup next hop. To address this problem, a virtual node is simulated between DeviceB and DeviceC, which converts the scenario where the same route is received from multiple nodes to a scenario where a route is received from a single node. The LFA algorithm is then used to calculate the backup next hop for the virtual node. The multi-source route inherits the backup next hop from the virtual node.</p>
+<p>For example, DeviceB and DeviceC each advertise a route with the prefix 2001:DB8:1::1/64, and OSPFv3 FRR is enabled on DeviceA. After DeviceA receives the route, it fails to calculate a backup next hop due to a lack of a fixed root node. To address this problem, a virtual node is simulated between DeviceB and DeviceC. The cost of the link from DeviceB to the virtual node is 0, and the cost of the link from DeviceC to the virtual node is 5. The costs of the links from the virtual node to DeviceB and to DeviceC are both the maximum value (65535). If the virtual node advertises the 2001:DB8:1::1/64 route, it will use the lower cost of the routes advertised by DeviceB and DeviceC as the cost of the 2001:DB8:1::1/64 route. DeviceA considers DeviceB and DeviceC as invalid sources of the 2001:DB8:1::1/64 route and uses the LFA algorithm to calculate a backup next hop for the route, with the virtual node as the root node.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../vrp/vrp_ospfv3_cfg_0078_copy.html">Configuring OSPFv3 IP FRR
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../vrp/vrp_ospfv3_cfg_0079_copy.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,528 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring BGP over GRE over IPsec (Intra-Board)">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ipsec_cfg_all_0040.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_ipsec_cfg_0002.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_ipsec_cfg_0004.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,z00603461,ipsec,w00556928,w00606909,h00522387,l00455378,z00805567">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="IPSec">
+<meta name="featuretype" content="Security">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IPSec">
+<meta name="featuretype" content="Security">
+<meta name="featurename" content="IPSec">
+<meta name="featuretype" content="Security">
+<meta name="featurename" content="IPSec">
+<meta name="featuretype" content="Security">
+<meta name="featurename" content="IPSec">
+<meta name="featuretype" content="Security">
+<meta name="OWNER" content="z00485179">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="z00485179">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172372487">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/thickbox.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/jquery.min.js"></script>
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/imageResize.js"></script>
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/jquery-migrate-1.2.1.min.js"></script>
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/jquery-ui.min.js"></script>
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/jquery.mousewheel.min.js"></script>
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/thickbox.js"></script>
+<title>Example for Configuring BGP over GRE over IPsec (Intra-Board)</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172372487"></a><a name="EN-US_TASK_0172372487"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring BGP over GRE over IPsec (Intra-Board)</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0172372487__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><div class="p"><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Only the following models support this configuration:</p>
+<p>NE40E-M2K</p>
+<p>NE40E-M2K-B</p>
+</div></div>
+<h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0172372487__fig1">Figure 1</a>, <span class="keyword">Device</span>A is a CE, and <span class="keyword">Device</span>B is a PE. The VSUs of both <span class="keyword">Device</span>A and <span class="keyword">Device</span>B reside in slot <span>1</span>. Establish a GRE over IPsec tunnel between <span class="keyword">Device</span>A and <span class="keyword">Device</span>B. Packets are transmitted through the public MPLS LDP network before being encrypted and after being decrypted on <span class="keyword">Device</span>B, and the <span class="keyword">Device</span>B-side GRE tunnel is bound to an L3VPN. In an intra-board scenario, both GRE encapsulation and IPsec encryption need to be performed on a VSU.</p>
+<div class="fignone" id="EN-US_TASK_0172372487__fig1"><a name="EN-US_TASK_0172372487__fig1"></a><a name="fig1"></a><span class="figcap"><b>Figure 1 </b>Configuring BGP over GRE over IPsec</span><br><span><img class="imgResize" src="images/fig_dc_ne_ipsec_cfg_000301.png" width="526.6800000000001" title="Click to enlarge"></span><br></div>
+<h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap for <span class="keyword">Device</span>A is as follows:</p>
+<ol><li><p>Configure IP addresses for interfaces.</p>
+</li><li>Enable IPsec.</li><li><p>Create and configure a tunnel interface.</p>
+</li><li><p>Configure a static route that steers traffic to a tunnel.</p>
+</li><li><p>Configure a static route that steers encrypted packets to a physical link's outbound interface.</p>
+</li><li><p>Configure BGP.</p>
+</li><li><p>Configure ACL rules.</p>
+</li><li><p>Configure an IKE proposal. Specify SHA2-256 and pre-shared key authentication as the authentication algorithm and authentication method, respectively. In addition, set the DH group identifier used for key negotiation to group14.</p>
+</li><li><p>Configure an IPsec proposal. Specify ESP as the security protocol, SHA2-256 as the authentication algorithm, and AES-256 as the encryption algorithm.</p>
+</li><li><p>Configure an IKE peer.</p>
+</li><li><p>Configure an IPsec policy.</p>
+</li><li><p>Configure an IPsec service-instance group.</p>
+</li><li><p>Apply the IPsec policy.</p>
+</li></ol>
+<p>The configuration roadmap for <span class="keyword">Device</span>B is as follows:</p>
+<ol><li><p>Configure IS-IS.</p>
+</li><li><p>Configure an MPLS session.</p>
+</li><li><p>Configure IP addresses for interfaces.</p>
+</li><li>Enable IPsec.</li><li><p>Create and configure a VPN instance.</p>
+</li><li><p>Create and configure a tunnel interface.</p>
+</li><li><p>Configure a static route that steers traffic to a tunnel.</p>
+</li><li><p>Configure a static route that steers encrypted packets to a physical link's outbound interface.</p>
+</li><li><p>Configure BGP.</p>
+</li><li><p>Configure ACL rules.</p>
+</li><li><p>Configure an IKE proposal.</p>
+</li><li><p>Configure an IPsec proposal.</p>
+</li><li><p>Configure an IKE peer.</p>
+</li><li><p>Configure an IPsec policy.</p>
+</li><li><p>Configure an IPsec service-instance group.</p>
+</li><li><p>Apply the IPsec policy.</p>
+</li></ol>
+<h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>IP addresses of interfaces</p>
+</li><li><p>Security protocol, encapsulation mode, encryption and authentication algorithms that security protocols use</p>
+</li><li><p>Pre-shared key</p>
+</li></ul>
+<h4 class="sectiontitle">Procedure</h4><ul><li><p>Configure <span class="keyword">Device</span>A.</p>
+</li></ul>
+<ol><li><p>Configure IP addresses for interfaces.</p>
+<ul><li><p>Configure an IP address for GE<span>0/2/2</span>.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>interface GigabitEthernet<span>0/2/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/2</span>] <strong>ip address 10.0.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/2</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</li><li><p>Configure an IP address for GE<span>0/3/1</span>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>interface GigabitEthernet<span>0/3/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/3/1</span>] <strong>ip address 10.116.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/3/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</li></ul>
+</li><li>Enable IPsec.<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Before configuring IPsec on the VSUP, run the <a href="cmdqueryname=undo+vsm+on-board-mode+disable"><b><span class="cmdname">vsm on-board-mode disable</span></b></a> command in the system view and then perform the following steps to enable this function.</p>
+</div></div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>license</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-license] <strong>active ipsec bandwidth-enhance 40 slot </strong><strong><span>1</span></strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-license] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</li><li><p>Create and configure a tunnel interface.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In a GRE over IPsec intra-board scenario, a tunnel interface name must be in the format of slot ID/card ID/interface ID.</p>
+</div></div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>interface LoopBack1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-LoopBack1] <strong>ip address 10.60.60.60 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>interface Tunnel 0/0/1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-Tunnel0/0/1] <strong>ip address 10.200.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-Tunnel0/0/1] <strong>tunnel-protocol gre</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-Tunnel0/0/1] <strong>source LoopBack1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-Tunnel0/0/1] <strong>destination 10.200.200.200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-Tunnel0/0/1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</li><li><p>Configure a static route that steers traffic to a tunnel.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>ip route-static 10.200.1.2 255.255.255.255 Tunnel0/0/1 10.200.200.200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</li><li><p>Configure a static route that steers encrypted packets to a physical link's outbound interface.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>ip route-static 10.200.200.200 255.255.255.255 10.0.1.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</li><li><p>Configure BGP.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>bgp 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>peer 10.200.1.2 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>peer 10.200.1.2 ebgp-max-hop 255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>peer 10.200.1.2 connect-interface Tunnel0/0/1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</li><li><p>Configure an advanced ACL numbered 3001 to define the data flows to be protected.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl 3001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl4-advance-3001] <strong>rule permit gre source 10.60.60.60 0 destination 10.200.200.200 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl4-advance-3001] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</li><li><p>Configure an IKE proposal numbered 1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>ike proposal 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ike-proposal-1] <strong>encryption-algorithm aes-cbc 256</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ike-proposal-1] <strong>dh group14</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ike-proposal-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</li><li><p>Configure an IPsec proposal named <strong>pro1</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>ipsec proposal pro1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ipsec-proposal-pro1] <strong>esp authentication-algorithm sha1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ipsec-proposal-pro1] <strong>esp encryption-algorithm aes 256</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ipsec-proposal-pro1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</li><li><p>Configure an IKE peer named <strong>peer1</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>ike peer peer1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ike-peer-peer1] <strong>pre-shared-key 1234567890</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ike-peer-peer1] <strong>ike-proposal 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ike-peer-peer1] <strong>remote-address 10.200.200.200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ike-peer-peer1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</li><li><p>Configure an IPsec policy named <strong>policy1</strong> and numbered 1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>ipsec policy policy1 1 isakmp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ipsec-policy-isakmp-policy1-1] <strong>security acl 3001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ipsec-policy-isakmp-policy1-1] <strong>ike-peer peer1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ipsec-policy-isakmp-policy1-1] <strong>proposal pro1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ipsec-policy-isakmp-policy1-1] <strong>local-address 10.60.60.60</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ipsec-policy-isakmp-policy1-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</li><li><p>Configure an IPsec service-instance group named <strong>group1</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>service-location 1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-service-location-1] <strong>location slot <span>1</span></strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-service-location-1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-service-location-1] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>service-instance-group group1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-service-instance-group-group1] <strong>service-location 1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-service-instance-group-group1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-service-instance-group-group1] <strong>quit</strong></pre>
+</li><li><p>Apply the IPsec policy named <strong>policy1</strong> on the tunnel interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>interface Tunnel 0/0/1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-Tunnel0/0/1] <strong>ipsec policy policy1 service-instance-group group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-Tunnel0/0/1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</li></ol>
+<ul><li><p>Configure <span class="keyword">Device</span>B.</p>
+</li></ul>
+<ol><li><p>Configure IS-IS.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-isis-1] <strong>network-entity 00.0000.0000.0200.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+</li><li><p>Configure an MPLS session.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>interface LoopBack0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-LoopBack0] <strong>ip address 10.200.200.200 32</strong> </pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-LoopBack0] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-LoopBack0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>mpls lsr-id 10.200.200.200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+</li><li><p>Configure IP addresses for interfaces.</p>
+<ul><li><p>Configure an IP address for GE<span>0/1/1</span>.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>B&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>interface GigabitEthernet<span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/1</span>] <strong>ip address 10.0.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+</li><li><p>Configure an IP address for GE<span>0/2/2</span>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>interface GigabitEthernet<span>0/2/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/2/2</span>] <strong>ip address 10.201.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/2/2</span>] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/2/2</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/2/2</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/2/2</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+</li></ul>
+</li><li>Enable IPsec.<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Before configuring IPsec on the VSUP, run the <a href="cmdqueryname=undo+vsm+on-board-mode+disable"><b><span class="cmdname">vsm on-board-mode disable</span></b></a> command in the system view and then perform the following steps to enable this function.</p>
+</div></div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>license</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-license] <strong>active ipsec bandwidth-enhance 40 slot </strong><strong><span>1</span></strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-license] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+</li><li><p>Create and configure a VPN instance.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>ip vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-vpn-instance-vpn1] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-vpn-instance-vpn1-af-ipv4] <strong>route-distinguisher 1:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-vpn-instance-vpn1-af-ipv4] <strong>vpn-target 1:1 export-extcommunity</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-vpn-instance-vpn1-af-ipv4] <strong>vpn-target 1:1 import-extcommunity</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-vpn-instance-vpn1-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+</li><li><p>Create and configure a tunnel interface.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In a GRE over IPsec intra-board scenario, a tunnel interface name must be in the format of slot ID/card ID/interface ID.</p>
+</div></div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>interface LoopBack1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-LoopBack1] <strong>ip address 10.200.200.200 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>interface Tunnel 0/0/1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-Tunnel0/0/1] <strong>ip binding vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-Tunnel0/0/1] <strong>ip address 10.200.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-Tunnel0/0/1] <strong>tunnel-protocol gre</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-Tunnel0/0/1] <strong>source LoopBack1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-Tunnel0/0/1] <strong>destination 10.60.60.60</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-Tunnel0/0/1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+</li><li><p>Configure a static route that steers traffic to a tunnel.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>ip route-static vpn-instance vpn1 10.200.1.1 255.255.255.255 Tunnel0/0/1 10.60.60.60</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+</li><li><p>Configure a static route that steers encrypted packets to a physical link's outbound interface.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>ip route-static 10.60.60.60 255.255.255.255 10.0.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+</li><li><p>Configure BGP.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>peer 10.201.1.2 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>peer 10.201.1.2 connect-interface LoopBack0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>ipv4-family vpnv4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp-af-vpnv4] <strong>peer 10.201.1.2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp-af-vpnv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>ipv4-family vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp-vpn1] <strong>import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp-vpn1] <strong>peer 10.200.1.1 as-number 200</strong> </pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp-vpn1] <strong>peer 10.200.1.1 ebgp-max-hop 255 </strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp-vpn1] <strong>peer 10.200.1.1 connect-interface Tunnel0/0/1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp-vpn1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+</li><li><p>Configure an advanced ACL numbered 3001 to define the data flows to be protected.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>acl 3001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-acl4-advance-3001] <strong>rule permit ip vpn-instance vpn1 source 10.200.200.200 0 destination 10.60.60.60 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-acl4-advance-3001] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+</li><li><p>Configure an IKE proposal numbered 1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>ike proposal 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ike-proposal-1] <strong>encryption-algorithm aes-cbc 256</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ike-proposal-1] <strong>dh group14</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ike-proposal-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+</li><li><p>Configure an IPsec proposal named <strong>pro1</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>ipsec proposal pro1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ipsec-proposal-pro1] <strong>esp authentication-algorithm sha1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ipsec-proposal-pro1] <strong>esp encryption-algorithm aes 256</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ipsec-proposal-pro1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+</li><li><p>Configure an IKE peer named <strong>peer1</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>ike peer peer1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ike-peer-peer1] <strong>pre-shared-key 1234567890</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ike-peer-peer1] <strong>ike-proposal 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ike-peer-peer1] <strong>remote-address 10.60.60.60</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ike-peer-peer1] <strong>sa binding vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ike-peer-peer1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+</li><li><p>Configure an IPsec policy named <strong>policy1</strong> and numbered 1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>ipsec policy policy1 1 isakmp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ipsec-policy-isakmp-policy1-1] <strong>security acl 3001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ipsec-policy-isakmp-policy1-1] <strong>ike-peer peer1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ipsec-policy-isakmp-policy1-1] <strong>proposal pro1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ipsec-policy-isakmp-policy1-1] <strong>local-address 10.200.200.200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ipsec-policy-isakmp-policy1-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+</li><li><p>Configure an IPsec service-instance group named <strong>group1</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>service-location 1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-service-location-1] <strong>location slot <span>1</span></strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-service-location-1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-service-location-1] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>service-instance-group group1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-service-instance-group-group1] <strong>service-location 1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-service-instance-group-group1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-service-instance-group-group1] <strong>quit</strong></pre>
+</li><li><p>Apply the IPsec policy named <strong>policy1</strong> on the tunnel interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>interface Tunnel 0/0/1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-Tunnel0/0/1] <strong>ipsec policy policy1 service-instance-group group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-Tunnel0/0/1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+</li></ol>
+<h4 class="sectiontitle">Configuration Files</h4><ul><li><p><span class="keyword">Device</span>A configuration file</p>
+</li></ul>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname <span class="keyword">Device</span>A</pre>
+<pre class="screen" id="EN-US_TASK_0172372487__screen205512402501">#
+license
+ active ipsec bandwidth-enhance 40 slot <span>1</span> //Perform this configuration for the VSUP.</pre>
+<pre class="screen">#
+service-location 1
+ location slot <span>1</span>
+#
+service-instance-group group1
+ service-location 1</pre>
+<pre class="screen">acl number 3001 </pre>
+<pre class="screen"> rule permit gre source 10.60.60.60 0 destination 10.200.200.200 0 </pre>
+<pre class="screen">#</pre>
+<pre class="screen">ike proposal 1</pre>
+<pre class="screen"> encryption-algorithm aes-cbc 256</pre>
+<pre class="screen"> dh group14</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ike peer peer1</pre>
+<pre class="screen"> pre-shared-key %$%$0\WT%.iDi6%K-f)_^mQ6,.2n%$%$ </pre>
+<pre class="screen"> ike-proposal 1</pre>
+<pre class="screen"> remote-address 10.200.200.200</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ipsec proposal pro1</pre>
+<pre class="screen"> esp authentication-algorithm sha1</pre>
+<pre class="screen"> esp encryption-algorithm aes 256</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ipsec policy policy1 1 isakmp</pre>
+<pre class="screen"> security acl 3001</pre>
+<pre class="screen"> ike-peer peer1</pre>
+<pre class="screen"> proposal pro1</pre>
+<pre class="screen"> local-address 10.60.60.60</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/2</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.0.1.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/3/1</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.116.1.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 10.60.60.60 255.255.255.255</pre>
+<pre class="screen"> binding tunnel ipsec</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface Tunnel0/0/1</pre>
+<pre class="screen"> ip address 10.200.1.1 255.255.255.0</pre>
+<pre class="screen"> tunnel-protocol gre</pre>
+<pre class="screen"> source LoopBack1</pre>
+<pre class="screen"> destination 10.200.200.200</pre>
+<pre class="screen"> ipsec policy policy1 service-instance-group group1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 200</pre>
+<pre class="screen"> peer 10.200.1.2 as-number 100</pre>
+<pre class="screen"> peer 10.200.1.2 ebgp-max-hop 255</pre>
+<pre class="screen"> peer 10.200.1.2 connect-interface Tunnel0/0/1</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  undo synchronization</pre>
+<pre class="screen">  import-route direct</pre>
+<pre class="screen">  peer 10.200.1.2 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ip route-static 10.200.1.2 255.255.255.255 Tunnel0/0/1 10.200.200.200</pre>
+<pre class="screen">ip route-static 10.200.200.200 255.255.255.255 10.0.1.2</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+<ul><li><p><span class="keyword">Device</span>B configuration file</p>
+</li></ul>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname <span class="keyword">Device</span>B</pre>
+<pre class="screen">#
+license
+ active ipsec bandwidth-enhance 40 slot <span>1</span> //Perform this configuration for the VSUP.</pre>
+<pre class="screen">#
+service-location 1
+ location slot <span>1</span>
+#
+service-instance-group group1
+ service-location 1</pre>
+<pre class="screen">ip vpn-instance vpn1</pre>
+<pre class="screen"> ipv4-family</pre>
+<pre class="screen">  route-distinguisher 1:1</pre>
+<pre class="screen">  apply-label per-instance</pre>
+<pre class="screen">  vpn-target 1:1 export-extcommunity</pre>
+<pre class="screen">  vpn-target 1:1 import-extcommunity</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls lsr-id 10.200.200.200</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls ldp</pre>
+<pre class="screen"> #
+ ipv4-family</pre>
+<pre class="screen">#</pre>
+<pre class="screen">acl number 3001 </pre>
+<pre class="screen"> rule permit ip vpn-instance vpn1 source 10.200.200.200 0 destination 10.60.60.60 0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ike proposal 1</pre>
+<pre class="screen"> encryption-algorithm aes-cbc 256</pre>
+<pre class="screen"> dh group14</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ike peer peer1</pre>
+<pre class="screen"> pre-shared-key %$%$0\WT%.iDi6%K-f)_^mQ6,.2n%$%$</pre>
+<pre class="screen"> ike-proposal 1</pre>
+<pre class="screen"> remote-address 10.60.60.60</pre>
+<pre class="screen"> sa binding vpn-instance vpn1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ipsec proposal pro1</pre>
+<pre class="screen"> esp authentication-algorithm sha1</pre>
+<pre class="screen"> esp encryption-algorithm aes 256</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ipsec policy policy1 1 isakmp</pre>
+<pre class="screen"> security acl 3001</pre>
+<pre class="screen"> ike-peer peer1</pre>
+<pre class="screen"> proposal pro1</pre>
+<pre class="screen"> local-address 10.200.200.200</pre>
+<pre class="screen">#</pre>
+<pre class="screen">isis 1</pre>
+<pre class="screen"> network-entity 00.0000.0000.0200.00</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/1</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.0.1.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/2</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.201.1.1 255.255.255.0</pre>
+<pre class="screen"> isis enable 1</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack0</pre>
+<pre class="screen"> ip address 10.200.200.200 255.255.255.255</pre>
+<pre class="screen"> isis enable 1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 10.200.200.200 255.255.255.255</pre>
+<pre class="screen"> binding tunnel ipsec</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface Tunnel0/0/1</pre>
+<pre class="screen"> ip binding vpn-instance vpn1</pre>
+<pre class="screen"> ip address 10.200.1.2 255.255.255.0 </pre>
+<pre class="screen"> tunnel-protocol gre</pre>
+<pre class="screen"> source LoopBack1</pre>
+<pre class="screen"> destination 10.60.60.60</pre>
+<pre class="screen"> ipsec policy policy1 service-instance-group group1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 100</pre>
+<pre class="screen"> peer 10.201.1.2 as-number 100</pre>
+<pre class="screen"> peer 10.201.1.2 connect-interface LoopBack0</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  undo synchronization</pre>
+<pre class="screen">  peer 10.201.1.2 enable</pre>
+<pre class="screen"> # </pre>
+<pre class="screen"> ipv4-family vpnv4</pre>
+<pre class="screen">  policy vpn-target</pre>
+<pre class="screen">  peer 10.201.1.2 enable</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family vpn-instance vpn1</pre>
+<pre class="screen">  import-route direct</pre>
+<pre class="screen">  peer 10.200.1.1 as-number 200</pre>
+<pre class="screen">  peer 10.200.1.1 ebgp-max-hop 255</pre>
+<pre class="screen">  peer 10.200.1.1 connect-interface Tunnel0/0/1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ip route-static 10.60.60.60 255.255.255.255 10.0.1.1</pre>
+<pre class="screen">ip route-static vpn-instance vpn1 10.200.1.1 255.255.255.255 Tunnel0/0/1 10.60.60.60</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</div>
+</div></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ipsec_cfg_all_0040.html">GRE over IPsec Scenario
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_ipsec_cfg_0002.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_ipsec_cfg_0004.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+
+<script language="JavaScript">
+<!--
+image_size('.imgResize');
+var msg_imageMax = "view original image";
+var msg_imageClose = "close";
+//--></script></body>
+</html>

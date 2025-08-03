@@ -1,0 +1,650 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring a Basic BGP/MPLS IPv6 VPN">
+<meta name="abstract" content="This section provides an example for configuring a basic BGP/MPLS IPv6 VPN to allow intra-VPN access and prohibit inter-VPN access.">
+<meta name="description" content="This section provides an example for configuring a basic BGP/MPLS IPv6 VPN to allow intra-VPN access and prohibit inter-VPN access.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mpls-l3vpn-v6_cfg_2039.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mpls-l3vpn-v6_cfg_2080.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,l3vpnvrp,w00556928,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="BGP/MPLS IPv6 VPN">
+<meta name="featurename" content="BGP/MPLS IP VPN">
+<meta name="featuretype" content="VPN">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP/MPLS IPv6 VPN">
+<meta name="featurename" content="BGP/MPLS IP VPN">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="BGP/MPLS IPv6 VPN">
+<meta name="featurename" content="BGP/MPLS IP VPN">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="BGP/MPLS IPv6 VPN">
+<meta name="featuretype" content="VPN">
+<meta name="OWNER" content="h00847023">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="h00847023">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172369698">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring a Basic BGP/MPLS IPv6 VPN</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172369698"></a><a name="EN-US_TASK_0172369698"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring a Basic BGP/MPLS IPv6 VPN</h1>
+<div class="taskbody"><p>This section provides an example for configuring a basic BGP/MPLS IPv6 VPN to allow intra-VPN access and prohibit inter-VPN access.</p>
+<div class="context"><a name="EN-US_TASK_0172369698__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>If users at different sites desire IPv6 data communications between each other across the public network without having the internal route information known to the public network, BGP/MPLS IPv6 VPN can be deployed. BGP/MPLS IPv6 VPN isolates VPN services from each other by allowing intra-VPN access and prohibiting inter-VPN access.</p>
+<div class="p">As shown in <a href="#EN-US_TASK_0172369698__fig_dc_vrp_mpls-l3vpn-v6_cfg_204001">Figure 1</a>, CE1 and CE3 belong to vpna, and CE2 and CE4 belong to vpnb. It is required that BGP/MPLS IPv6 VPN be configured to allow site access within each VPN across the MPLS backbone network and prohibit site access between vpna and vpnb. In addition, PEs and CEs are required to use different routing protocols for route exchange. The requirements are as follows:<ul><li><p>BGP4+ between PE1 and CE1, and between PE2 and CE4</p>
+</li><li><p>IPv6 static route between PE1 and CE2</p>
+</li><li><p>OSPFv3 between PE2 and CE3</p>
+</li></ul>
+</div>
+<div class="fignone" id="EN-US_TASK_0172369698__fig_dc_vrp_mpls-l3vpn-v6_cfg_204001"><a name="EN-US_TASK_0172369698__fig_dc_vrp_mpls-l3vpn-v6_cfg_204001"></a><a name="fig_dc_vrp_mpls-l3vpn-v6_cfg_204001"></a><span class="figcap"><b>Figure 1 </b>Configuring a basic BGP/MPLS IPv6 VPN</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 through 3 in this example represent GE <span>0/1/0</span>, GE <span>0/2/0</span>, and GE <span>0/3/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_mpls-l3vpn-v6_cfg_204001.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172369698__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure an IGP on the IPv4 backbone network to ensure IP connectivity on the backbone network. </p>
+</li><li><p>Configure MPLS and LDP both globally and per interface on each PE and the P, and establish an LDP LSP between PEs.</p>
+</li><li><p>Configure MP-IBGP between PE1 and PE2 to exchange IPv6 VPN routing information.</p>
+</li><li><p>Configure an IPv6-address-family-supporting VPN instance on PE1 and PE2, and bind the interface that connects a PE to a CE to the VPN instance on that PE.</p>
+</li><li><p>Configure IPv6 routing protocols between PEs and CEs to exchange IPv6 routing information.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172369698__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Numbers of the ASs where PEs and CEs reside</p>
+</li><li><p>Names of VPN instances</p>
+</li><li><p>Attributes of the VPN instance IPv6 address family, such as the RD and VPN target</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172369698__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure IPv4 or IPv6 addresses for interfaces on each device.</span><p><p># Configure an IPv6 address for the interface on CE1.</p>
+<pre class="screen">&lt;CE1&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-GigabitEthernet<span>0/1/0</span>]<strong> ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>]<strong> ipv6 address 2001:db8:1::1 64</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<p>The configurations of CE2, CE3, CE4, PE1, PE2, and the P are similar to the configuration of CE1. For configuration details, see <a href="#EN-US_TASK_0172369698__example562924779214051">Configuration Files</a> in this section.</p>
+</p></li><li><span>Configure an IGP on the IPv4 backbone network for IP connectivity between the PEs. This example uses IS-IS as the IGP.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1]<strong> network-entity 10.1111.1111.1111.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitEthernet <span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/3/0</span>] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/3/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p>The configurations of the P and PE2 are similar to the configuration of PE1. For configuration details, see <a href="#EN-US_TASK_0172369698__example562924779214051">Configuration Files</a> in this section.</p>
+<p>After the configuration is complete, PE1, the P, and PE2 can learn the routes, including the routes to loopback interfaces, from one another. You can run the <strong>display ip routing-table</strong> command to view the routes. The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display ip routing-table</strong></pre>
+<pre class="screen"><span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table: _public_
+         Destinations : 11        Routes : 11
+
+Destination/Mask    Proto   Pre  Cost      Flags NextHop         Interface
+
+1.1.1.9/32          Direct  0    0           D   127.0.0.1       InLoopBack0
+<strong>2.2.2.9/32</strong>         ISIS-L2 15   10          D   10.11.11.2      GigabitEthernet<span>0/3/0</span>
+<strong>3.3.3.9/32</strong>         ISIS-L2 15   20          D   10.11.11.2      GigabitEthernet<span>0/3/0</span>
+127.0.0.0/8         Direct  0    0           D   127.0.0.1       InLoopBack0
+127.0.0.1/32        Direct  0    0           D   127.0.0.1       InLoopBack0
+127.255.255.255/32  Direct  0    0           D   127.0.0.1       InLoopBack0
+10.11.11.0/24       Direct  0    0           D   10.11.11.1      GigabitEthernet<span>0/3/0</span>
+10.11.11.1/32       Direct  0    0           D   127.0.0.1       GigabitEthernet<span>0/3/0</span>
+10.11.11.255/32     Direct  0    0           D   127.0.0.1       GigabitEthernet<span>0/3/0</span>
+10.12.12.0/24       ISIS-L2 15   20          D   10.11.11.2      GigabitEthernet<span>0/3/0</span>
+255.255.255.255/32  Direct  0    0           D   127.0.0.1       InLoopBack0</pre>
+</p></li><li><span>Configure MPLS and MPLS LDP both globally and per interface on each node of the IPv4 backbone network, and set up an LDP LSP between PE1 and PE2.</span><p><p># Configure MPLS and MPLS LDP on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>mpls lsr-id 1.1.1.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface gigabitEthernet <span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/3/0</span>]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/3/0</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/3/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p>The configurations of the P and PE2 are similar to the configuration of PE1. For configuration details, see <a href="#EN-US_TASK_0172369698__example562924779214051">Configuration Files</a> in this section.</p>
+<p>After the configurations are complete, an LDP LSP is established between PE1 and PE2. You can run the <a href="cmdqueryname=display+mpls+ldp+lsp"><b><span class="cmdname">display mpls ldp lsp</span></b></a> command to check LDP LSP information. The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display mpls ldp lsp</strong></pre>
+<pre class="screen"> LDP LSP Information
+-------------------------------------------------------------------------------
+Flag after Out IF: (I) - RLFA Iterated LSP, (I*) - Normal and RLFA Iterated LSP
+-------------------------------------------------------------------------------
+ DestAddress/Mask   In/OutLabel    UpstreamPeer    NextHop         OutInterface
+-------------------------------------------------------------------------------
+ 1.1.1.9/32         3/NULL         2.2.2.9         127.0.0.1       InLoop0
+*1.1.1.9/32         Liberal/1024                   DS/2.2.2.9
+ 2.2.2.9/32         NULL/3         -               10.11.11.2       GE<span>0/3/0</span>
+ 2.2.2.9/32         1024/3         2.2.2.9         10.11.11.2       GE<span>0/3/0</span>
+ 3.3.3.9/32         NULL/1025      -               10.11.11.2       GE<span>0/3/0</span>
+ 3.3.3.9/32         1025/1025      2.2.2.9         10.11.11.2       GE<span>0/3/0</span>
+ -------------------------------------------------------------------------------
+ TOTAL: 5 Normal LSP(s) Found.
+ TOTAL: 1 Liberal LSP(s) Found.
+ TOTAL: 0 Frr LSP(s) Found.
+<span> An asterisk (*) before an LSP means the LSP is not established
+ An asterisk (*) before a Label means the USCB or DSCB is stale
+ An asterisk (*) before an UpstreamPeer means the session is stale
+ An asterisk (*) before a DS means the session is stale
+ An asterisk (*) before a NextHop means the LSP is FRR LSP</span></pre>
+</p></li><li><span>Configure an IPv6-address-family-supporting VPN instance on each PE and bind the interface that connects a PE to a CE to the VPN instance on that PE.</span><p><p># Configure an IPv6-address-family-supporting VPN instance named vpna on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>ip vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna] <strong>ipv6-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna-af-ipv6] <strong>route-distinguisher 100:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna-af-ipv6] <strong>vpn-target 22:22 export-extcommunity</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna-af-ipv6] <strong>vpn-target 33:33 import-extcommunity</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna-af-ipv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Bind the interface connecting PE1 to CE1 to vpna.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>ip binding vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>ipv6 address 2001:db8:1::2 64</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Create an IPv6 address family-supporting VPN instance named vpnb on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>ip vpn-instance vpnb</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpnb] <strong>ipv6-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpnb-af-ipv6] <strong>route-distinguisher 100:3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpnb-af-ipv6] <strong>vpn-target 44:44 export-extcommunity</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpnb-af-ipv6]<strong> vpn-target 55:55 import-extcommunity</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpnb-af-ipv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpnb] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Bind the interface that connects PE1 to CE2 to vpnb.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>ip binding vpn-instance vpnb</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>ipv6 address 2001:db8:3::2 64</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p>The configuration of PE2 is similar to the configuration of PE1. For configuration details, see <a href="#EN-US_TASK_0172369698__example562924779214051">Configuration Files</a> in this section.</p>
+<p>After completing the configurations, run the <strong>display ip vpn-instance verbose</strong> command on each PE to check its VPN instance information. The command output shows that each PE can ping its connected CE. The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display ip vpn-instance verbose</strong></pre>
+<pre class="screen"> Total VPN-Instances configured : 2
+ Total IPv4 VPN-Instances configured : 0
+ Total IPv6 VPN-Instances configured : 2
+
+ VPN-Instance Name and ID : vpna, 1
+  Interfaces : GigabitEthernet<span>0/1/0</span>
+ Address family ipv6
+  Create date : 2010/07/20 12:31:47
+  Up time : 0 days, 04 hours, 37 minutes and 05 seconds
+  Vrf Status : UP
+  Route Distinguisher : 100:1
+  Export VPN Targets :  22:22
+  Import VPN Targets :  33:33
+  Label Policy : label per route
+  The diffserv-mode Information is : uniform
+  The ttl-mode Information is : pipe
+
+ VPN-Instance Name and ID : vpnb, 2
+  Interfaces : GigabitEthernet<span>0/2/0</span>
+ Address family ipv6
+  Create date : 2010/07/20 14:41:46
+  Up time : 0 days, 02 hours, 27 minutes and 06 seconds
+  Vrf Status : UP
+  Route Distinguisher : 100:3
+  Export VPN Targets :  44:44
+  Import VPN Targets :  55:55
+  Label Policy : label per route
+  The diffserv-mode Information is : uniform
+  The ttl-mode Information is : pipe</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>ping ipv6 vpn-instance vpna 2001:db8:1::1</strong></pre>
+<pre class="screen">  PING 2001:db8:1::1 : 56  data bytes, press CTRL_C to break
+    Reply from 2001:db8:1::1
+    bytes=56 Sequence=1 hop limit=64  time = 20 ms
+    Reply from 2001:db8:1::1
+    bytes=56 Sequence=2 hop limit=64  time = 30 ms
+    Reply from 2001:db8:1::1
+    bytes=56 Sequence=3 hop limit=64  time = 30 ms
+    Reply from 2001:db8:1::1
+    bytes=56 Sequence=4 hop limit=64  time = 1 ms
+    Reply from 2001:db8:1::1
+    bytes=56 Sequence=5 hop limit=64  time = 1 ms
+
+  --- 2001:db8:1::1 ping statistics ---
+    5 packet(s) transmitted
+    5 packet(s) received
+    0.00% packet loss
+    round-trip min/avg/max = 1/16/30 ms</pre>
+</p></li><li><span>Establish a VPNv6 peer relationship between PEs.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>peer 3.3.3.9 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp]<strong> peer 3.3.3.9 connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>ipv6-family vpnv6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-vpnv6] <strong>peer 3.3.3.9 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-vpnv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>peer 1.1.1.9 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp]<strong> peer 1.1.1.9 connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>ipv6-family vpnv6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-vpnv6] <strong>peer 1.1.1.9 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-vpnv6]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p>After completing the configurations, you can run the <strong>display bgp vpnv6 all peer</strong> command on the PEs to check whether the VPNv6 peer relationship is set up. The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> display bgp vpnv6 all peer</strong></pre>
+<pre class="screen"> BGP local router ID : 1.1.1.9
+ Local AS number : 100
+ Total number of peers : 1                 Peers in established state : 1
+
+  Peer            V          AS  MsgRcvd  MsgSent  OutQ  Up/Down       State     PrefRcv
+
+  3.3.3.9         4         100        4        3     0 00:01:50  <strong>Established</strong>    0</pre>
+<p>The command output shows that the status of the VPNv6 peer relationship is <strong>Established</strong>.</p>
+</p></li><li><span>Configure BGP4+ on PE1 and CE1.</span><p><p># Configure EBGP on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp]<strong> ipv6-family vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp6-vpna] <strong>peer 2001:db8:1::1 as-number 65410</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp6-vpna] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure EBGP on CE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1]<strong> bgp 65410</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp] <strong>router-id 10.10.10.10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp] <strong>peer 2001:db8:1::2 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp] <strong>ipv6-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp-af-ipv6]<strong> network 2001:db8:8:: 64</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp-af-ipv6]<strong> peer 2001:db8:1::2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp-af-ipv6] <strong>import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp-af-ipv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>commit</strong></pre>
+<p>The configurations of PE2 and CE4 are similar to the configurations of PE1 and CE1. For configuration details, see <a href="#EN-US_TASK_0172369698__example562924779214051">Configuration Files</a> in this section.</p>
+<p>After completing the configurations, run the <strong>display bgp vpnv6 vpn-instance</strong> <em>vpn-instance-name</em> <strong>peer</strong> command on the PEs to check whether the EBGP peer relationship is set up. The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> display bgp vpnv6 vpn-instance vpna peer</strong></pre>
+<pre class="screen"> BGP local router ID : 1.1.1.9
+ Local AS number : 100
+ Total number of peers : 1                 Peers in established state : 1
+
+  Peer            V          AS  MsgRcvd  MsgSent  OutQ  Up/Down       State PrefRcv
+
+  2001:DB8:1::1   4       65410        3        3     0 00:00:37 Established       1</pre>
+</p></li><li><span>Configure static routes between PE1 and CE2.</span><p><p># Configure an IPv6 static route for the VPN instance vpnb on PE1, and import the route into the routing table of the BGP-VPN instance IPv6 address family.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> ipv6 route-static vpn-instance vpnb 2001:db8:8:: 64 2001:db8:3::1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp]<strong> ipv6-family vpn-instance vpnb</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp6-vpnb]<strong> import-route static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp6-vpnb] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure a default IPv6 route on CE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2] <strong>ipv6 route-static :: 0 2001:db8:3::2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2] <strong>commit</strong></pre>
+</p></li><li><span>Configure OSPFv3 between PE2 and CE3.</span><p><p># Configure OSPFv3 on PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong> ospfv3 1 vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospfv3-1]<strong> router-id 10.10.11.11</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospfv3-1] <strong>area 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospfv3-1-area 0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospfv3-1]<strong> import-route bgp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospfv3-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Gigabitethernet <span>0/2/0</span>] <strong>ospfv3 1 area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Gigabitethernet <span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Import OSPFv3 routes into BGP on PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong> bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp]<strong> ipv6-family vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp6-vpna]<strong> import-route ospfv3 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp6-vpna]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure OSPFv3 on CE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE3] <strong>ospfv3 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE3-ospfv3-1]<strong> router-id 22.22.22.22</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE3-ospfv3-1] <strong>area 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE3-ospfv3-1-area 0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE3-ospfv3-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE3] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE3-GigabitEthernet<span>0/1/0</span>]<strong> ospfv3 1 area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE3-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE3] <strong>interface LoopBack 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE3-LoopBack1]<strong> ospfv3 1 area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE3-LoopBack1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE3]<strong> commit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p>After the configurations are complete, the ping (with the source address specified in the <strong>ping</strong> command) between CE1 and CE3, and between CE2 and CE4 can succeed. The following example uses the command output on CE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>ping ipv6 -a 2001:db8:8::1 2001:db8:9::1</strong></pre>
+<pre class="screen">  PING 2001:db8:9::1 : 56  data bytes, press CTRL_C to break
+    Reply from 2001:db8:9::1
+    bytes=56 Sequence=1 hop limit=62  time = 170 ms
+    Reply from 2001:db8:9::1
+    bytes=56 Sequence=2 hop limit=62  time = 140 ms
+    Reply from 2001:db8:9::1
+    bytes=56 Sequence=3 hop limit=62  time = 150 ms
+    Reply from 2001:db8:9::1
+    bytes=56 Sequence=4 hop limit=62  time = 140 ms
+    Reply from 2001:db8:9::1
+    bytes=56 Sequence=5 hop limit=62  time = 170 ms
+
+  --- 2001:db8:9::1 ping statistics ---
+    5 packet(s) transmitted
+    5 packet(s) received
+    0.00% packet loss
+    round-trip min/avg/max = 140/154/170 ms</pre>
+<p>The address 2001:db8:9::1/64 also exists on CE4. To determine whether the forwarding path is the desired one, you only need to run the <strong>display ipv6 statistics interface</strong> command on PE2 to check if the number of ICMPv6 packets sent and received on the interface changes.</p>
+<p>Run the <strong>ping ipv6 -a 2001:db8:8::1 -c 100 2001:db8:9::1</strong> command on CE1 to send 100 IPv6 data packets with the source address specified to PE2. On PE2, run the <strong>display ipv6 statistics interface gigabitethernet<span>0/1/0</span></strong> and <strong>display ipv6 statistics interface gigabitethernet<span>0/2/0</span></strong> commands repeatedly to check the numbers of ICMPv6 packets sent and received on GE<span>0/1/0</span> and GE<span>0/2/0</span>. The command outputs show that the number of ICMPv6 packets sent and received on GE<span>0/2/0</span> keeps changing. This means that IPv6 data is forwarded to CE3 that is in the same VPN and vpna and vpnb are isolated from each other.</p>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0172369698__example562924779214051"><a name="EN-US_TASK_0172369698__example562924779214051"></a><a name="example562924779214051"></a><a name="EN-US_TASK_0172369698__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>PE1 configuration file</p>
+<pre class="screen">#
+sysname PE1
+#
+ip vpn-instance vpna
+ ipv6-family
+  route-distinguisher 100:1
+<span>  apply-label per-instance</span>
+  vpn-target 22:22 export-extcommunity
+  vpn-target 33:33 import-extcommunity
+#
+ip vpn-instance vpnb
+ ipv6-family
+  route-distinguisher 100:3
+  apply-label per-instance
+  vpn-target 44:44 export-extcommunity
+  vpn-target 55:55 import-extcommunity
+#
+mpls lsr-id 1.1.1.9
+#
+mpls
+#
+mpls ldp
+#
+isis 1
+ network-entity 10.1111.1111.1111.00
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip binding vpn-instance vpna
+ ipv6 enable
+ ipv6 address 2001:db8:1::2/64
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip binding vpn-instance vpnb
+ ipv6 enable
+ ipv6 address 2001:db8:3::2/64
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown
+ ip address 10.11.11.1 255.255.255.0
+ isis enable 1
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 1.1.1.9 255.255.255.255
+ isis enable 1
+#
+bgp 100
+ peer 3.3.3.9 as-number 100
+ peer 3.3.3.9 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 3.3.3.9 enable
+ #
+ ipv6-family vpnv6
+  policy vpn-target
+  peer 3.3.3.9 enable
+ #
+ ipv6-family vpn-instance vpna
+  peer 2001:db8:1::1 as-number 65410
+ #
+ ipv6-family vpn-instance vpnb
+  import-route static
+#
+ ipv6 route-static vpn-instance vpnb 2001:db8:8:: 64 2001:db8:3::1
+#
+return </pre>
+</li><li><p>P configuration file</p>
+<pre class="screen">#
+sysname P
+#
+mpls lsr-id 2.2.2.9
+#
+mpls
+#
+mpls ldp
+#
+isis 1
+ network-entity 20.2222.2222.2222.00
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.11.11.2 255.255.255.0
+ isis enable 1
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.12.12.1 255.255.255.0
+ isis enable 1
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 2.2.2.9 255.255.255.255
+ isis enable 1
+#
+return</pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#
+sysname PE2
+#
+ip vpn-instance vpna
+ ipv6-family
+  route-distinguisher 100:2
+  apply-label per-instance
+  vpn-target 33:33 export-extcommunity
+  vpn-target 22:22 import-extcommunity
+#
+ip vpn-instance vpnb
+ ipv6-family
+  route-distinguisher 100:4
+  apply-label per-instance
+  vpn-target 55:55 export-extcommunity
+  vpn-target 44:44 import-extcommunity
+#
+mpls lsr-id 3.3.3.9
+#
+mpls
+#
+mpls ldp
+#
+isis 1
+ network-entity 30.3333.3333.3333.00
+#
+ospfv3 1 vpn-instance vpna
+ router-id 10.10.11.11
+ import-route bgp
+ area 0.0.0.0
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip binding vpn-instance vpnb
+ ipv6 enable
+ ipv6 address 2001:db8:5::2/64
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip binding vpn-instance vpna
+ ipv6 enable
+ ipv6 address 2001:db8:4::2/64
+ ospfv3 1 area 0.0.0.0
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown
+ ip address 10.12.12.2 255.255.255.0
+ isis enable 1
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 3.3.3.9 255.255.255.255
+ isis enable 1
+#
+bgp 100
+ peer 1.1.1.9 as-number 100
+ peer 1.1.1.9 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 1.1.1.9 enable
+ #
+ ipv6-family vpnv6
+  policy vpn-target
+  peer 1.1.1.9 enable
+ #
+ ipv6-family vpn-instance vpna
+  import-route ospfv3 1
+ #
+ ipv6-family vpn-instance vpnb
+  peer 2001:db8:5::1 as-number 65420
+#
+return</pre>
+</li><li><p>CE1 configuration file</p>
+<pre class="screen">#
+sysname CE1
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ipv6 enable
+ ipv6 address 2001:db8:1::1/64
+#
+interface LoopBack1
+ ipv6 enable
+ ipv6 address 2001:db8:8::1/64
+#
+bgp 65410
+ router-id 10.10.10.10
+ peer 2001:db8:1::2 as-number 100
+ #
+ ipv4-family unicast
+  undo synchronization
+ #
+ ipv6-family unicast
+  undo synchronization
+  network 2001:db8:8:: 64
+  import-route direct
+  peer 2001:db8:1::2 enable
+#
+return</pre>
+</li><li><p>CE2 configuration file</p>
+<pre class="screen">#
+sysname CE2
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ipv6 enable
+ ipv6 address 2001:db8:3::1/64
+#
+interface LoopBack1
+ ipv6 enable
+ ipv6 address 2001:db8:8::1/64
+#
+ ipv6 route-static :: 0 2001:db8:3::2
+#
+return</pre>
+</li><li><p>CE3 configuration file</p>
+<pre class="screen">#
+sysname CE3
+#
+ospfv3 1
+ router-id 22.22.22.22
+ area 0.0.0.0
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ipv6 enable
+ ipv6 address 2001:db8:4::1/64
+ ospfv3 1 area 0.0.0.0
+#
+interface LoopBack1
+ ipv6 enable
+ ipv6 address 2001:db8:9::1/64
+ ospfv3 1 area 0.0.0.0
+#
+return</pre>
+</li><li><p>CE4 configuration file</p>
+<pre class="screen">#
+sysname CE4
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ipv6 enable
+ ipv6 address 2001:db8:5::1/64
+#
+interface LoopBack1
+ ipv6 enable
+ ipv6 address 2001:db8:9::1/64
+#
+bgp 65420
+ router-id 33.33.33.33
+ peer 2001:db8:5::2 as-number 100
+ #
+ ipv4-family unicast
+  undo synchronization
+ #
+ ipv6-family unicast
+  undo synchronization
+  import-route direct
+  peer 2001:db8:5::2 enable
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mpls-l3vpn-v6_cfg_2039.html">Configuration Examples for BGP/MPLS IPv6 VPN
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mpls-l3vpn-v6_cfg_2080.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

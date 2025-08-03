@@ -1,0 +1,75 @@
+ipv4 source check user-bind enable
+==================================
+
+ipv4 source check user-bind enable
+
+Function
+--------
+
+
+
+The **ipv4 source check user-bind enable** command enables the IP packet check function.
+
+The **undo ipv4 source check user-bind enable** command disables the IP packet check function.
+
+
+
+By default, the IP packet check function is disabled.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**ipv4 source check user-bind enable**
+
+**undo ipv4 source check user-bind enable**
+
+
+Parameters
+----------
+
+None
+
+Views
+-----
+
+Layer 2 100GE interface view,Layer 2 10GE interface view,Layer 2 200GE interface view,25GE-L2 view,400GE-L2 view,Layer 2 50GE interface view,Layer 2 Eth-Trunk interface view,Layer 2 GE interface view,VLAN view,Interface group view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+Attackers often send bogus packets with the source IP address and MAC address of authorized users to access or attack the network. As a result, authorized users cannot obtain stable and secure network services. You can configure the IP packet check function to prevent the preceding problem.After the IP packet check function is enabled, the device checks the IP address, MAC address, VLAN ID, and interface information in IP packets against the binding table by default. You can also run the ip source check user-bind check-item (interface view) or ip source check user-bind check-item (VLAN view) command to configure check items for IP packets. Only the IP packets that match the binding table can be forwarded. Otherwise, the IP packets are discarded.
+
+**Prerequisites**
+
+The IP packet check is based on the binding table. So,· For DHCP users, DHCP snooping must be enabled to automatically generate dynamic binding entries.· For users with static IP addresses, you need to manually configure the static binding table.
+
+**Precautions**
+
+After IP packet check is enabled using the **ipv4 source check user-bind enable** command, the device checks the source IPv4 addresses of users' IP packets. The configuration file is displayed as follows:ipv4 source check user-bind enable
+
+
+Example
+-------
+
+# Enable IPv4 packet check on 100GE1/0/1.
+```
+<HUAWEI> system-view
+[~HUAWEI] interface 100GE 1/0/1
+[*HUAWEI-100GE1/0/1] ipv4 source check user-bind enable
+
+```

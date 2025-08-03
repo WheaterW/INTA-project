@@ -1,0 +1,427 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring BFD for RSVP">
+<meta name="abstract" content="This section provides an example for configuring BFD for RSVP for nodes to detect link failures and perform TE FRR switching on a network with Layer 2 devices between two RSVP nodes.">
+<meta name="description" content="This section provides an example for configuring BFD for RSVP for nodes to detect link failures and perform TE FRR switching on a network with Layer 2 devices between two RSVP nodes.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0093.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0131.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0139.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,te-p2pvrp,w00556928,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="OWNER" content="l00468467">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="w00845984">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172368366">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring BFD for RSVP</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172368366"></a><a name="EN-US_TASK_0172368366"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring BFD for RSVP</h1>
+<div class="taskbody"><p>This section provides an example for configuring BFD for RSVP for nodes to detect link failures and perform TE FRR switching on a network with Layer 2 devices between two RSVP nodes.</p>
+<div class="context"><a name="EN-US_TASK_0172368366__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the MPLS network shown in <a href="#EN-US_TASK_0172368366__fig_dc_vrp_te-p2p_cfg_007201">Figure 1</a>, a Layer 2 device (switch) is deployed on a link between P1 and P2. A primary MPLS TE tunnel between PE1 and PE2 is established over a path PE1 -&gt; P1 -&gt; switch -&gt; P2 -&gt; PE2. A TE FRR bypass tunnel between P1 and PE2 is established over the path P1 -&gt; P3 -&gt; PE2. P1 functions as the point of local repair (PLR), and PE2 functions as the merge point (MP).</p>
+<p>If the link between the switch and P2 fails, P1 keeps sending the switch RSVP messages (including Hello messages) destined for P2 and detects the fault only after P1 fails to receive replies to RSVP Hello messages sent to P2.</p>
+<p>The timeout period of RSVP neighbor relationships is three times as long as the interval between Hello message transmissions. After the timeout period elapses, P1 declares its neighbor Down, which is seconds slower than it does when there is no Layer 2 device. The fault detection latency causes a large number of packets to be dropped. To minimize traffic loss, BFD can be configured to rapidly detect the fault in the link between P2 and the switch. After a BFD session detects the fault, it advertises the fault to trigger TE FRR switching.</p>
+<div class="fignone" id="EN-US_TASK_0172368366__fig_dc_vrp_te-p2p_cfg_007201"><a name="EN-US_TASK_0172368366__fig_dc_vrp_te-p2p_cfg_007201"></a><a name="fig_dc_vrp_te-p2p_cfg_007201"></a><span class="figcap"><b>Figure 1 </b>BFD for RSVP</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 through 3 in this example represent GE <span>0/1/0</span>, GE <span>0/2/0</span>, and GE <span>0/3/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0218387335.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368366__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure an IP address for each interface and enable IGP on each LSR so that LSRs can communicate. Enable IGP GR to support RSVP GR.</p>
+</li><li><p>Configure the MPLS network and basic MPLS TE functions.</p>
+</li><li><p>Configure explicit paths for the primary and bypass tunnels.</p>
+</li><li><p>Create the primary tunnel interface and enable TE FRR on PE1. Configure the bypass tunnel on P1.</p>
+</li><li><p>Configure BFD for RSVP on P1 and P2.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368366__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>IGP protocol and parameters</p>
+</li><li><p>MPLS LSR IDs</p>
+</li><li><p>Bandwidth attributes of the outbound interfaces of links along the tunnel</p>
+</li><li><p>Primary tunnel interface number and explicit path</p>
+</li><li><p>Bypass tunnel interface number and explicit path</p>
+</li><li><p>Physical interfaces to be protected by the bypass tunnel</p>
+</li><li><p>Minimum intervals at which BFD packets are sent and received</p>
+</li><li><p>Local BFD detection multiplier</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172368366__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface.</span><p><p>Assign an IP address to each interface according to <a href="#EN-US_TASK_0172368366__fig_dc_vrp_te-p2p_cfg_007201">Figure 1</a>, create loopback interfaces on LSRs, and configure the loopback interface addresses as MPLS LSR IDs. For configuration details, see <a href="#EN-US_TASK_0172368366__section_dc_vrp_cfg_00384805">Configuration Files</a> in this section.</p>
+</p></li><li><span>Configure the switch.</span><p><p>Configure the switch so that P1 and P2 can communicate. For configuration details, see <a href="#EN-US_TASK_0172368366__section_dc_vrp_cfg_00384805">Configuration Files</a> in this section.</p>
+</p></li><li><span>Configure an IGP.</span><p><p>Configure OSPF or IS-IS on each LSR so that LSRs can communicate. In this example, IS-IS is used. For configuration details, see <a href="#EN-US_TASK_0172368366__section_dc_vrp_cfg_00384805">Configuration Files</a> in this section.</p>
+</p></li><li><span>Configure basic MPLS functions.</span><p><p>Configure the LSR ID and enable MPLS in the system and interface views on each LSR. For configuration details, see <a href="#EN-US_TASK_0172368366__section_dc_vrp_cfg_00384805">Configuration Files</a> in this section.</p>
+</p></li><li><span>Configure basic MPLS TE functions.</span><p><p>Enable MPLS TE and MPLS RSVP-TE in the MPLS and interface views on each LSR. For configuration details, see <a href="#EN-US_TASK_0172368366__section_dc_vrp_cfg_00384805">Configuration Files</a> in this section.</p>
+</p></li><li><span>Configure IS-IS TE and CSPF.</span><p><p>Enable IS-IS TE on each node and configure CSPF on PE1 and P1. For configuration details, see <a href="#EN-US_TASK_0172368366__section_dc_vrp_cfg_00384805">Configuration Files</a> in this section.</p>
+</p></li><li><span>Configure the primary tunnel.</span><p><p># Specify an explicit path for the primary tunnel on PE1.</p>
+<pre class="screen">&lt;PE1&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>explicit-path tope2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-explicit-path-tope2] <strong>next hop 10.1.1.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-explicit-path-tope2] <strong>next hop 10.2.1.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-explicit-path-tope2] <strong>next hop 10.4.1.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-explicit-path-tope2] <strong>next hop 5.5.5.5</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-explicit-path-tope2]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-explicit-path-tope2] <strong>quit</strong></pre>
+<p># Create a tunnel interface on PE1, specify an explicit path, and enable TE FRR.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>interface Tunnel 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel10] <strong>ip address unnumbered interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel10] <strong>tunnel-protocol mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel10] <strong>destination 5.5.5.5</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel10] <strong>mpls te tunnel-id 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel10] <strong>mpls te path explicit-path tope2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel10] <strong>mpls te fast-reroute</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel10]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-Tunnel10]<strong> quit</strong></pre>
+<p># Run the <strong>display mpls te tunnel-interface tunnel</strong> command on PE1. The status of Tunnel 10 on PE1 is Up.</p>
+</p></li><li><span>Configure the bypass tunnel.</span><p><p># Specify the explicit path for the bypass tunnel on P1.</p>
+<pre class="screen">&lt;P1&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1]<strong> explicit-path tope2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-explicit-path-tope2]<strong> next hop 10.3.1.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-explicit-path-tope2] <strong>next hop 10.5.1.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-explicit-path-tope2] <strong>next hop 5.5.5.5</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-explicit-path-tope2]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1-explicit-path-tope2] <strong>quit</strong></pre>
+<p># Configure a bypass tunnel interface and specify an explicit path for the bypass tunnel on P1. Specify the physical interface to be protected by the bypass tunnel.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>interface Tunnel 30</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-Tunnel30] <strong>ip address unnumbered interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-Tunnel30] <strong>tunnel-protocol mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-Tunnel30] <strong>destination 5.5.5.5</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-Tunnel30] <strong>mpls te tunnel-id 300</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-Tunnel30] <strong>mpls te path explicit-path tope2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-Tunnel30] <strong>mpls te bypass-tunnel</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-Tunnel30] <strong>mpls te protected-interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-Tunnel30] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1-Tunnel30] <strong>quit</strong></pre>
+</p></li><li><span>Configure BFD for RSVP.</span><p><p># Enable BFD for RSVP on GE <span>0/2/0</span> on P1 and P2. Set the minimum intervals at which BFD packets are sent and received, and the local BFD detection multiplier.</p>
+<p># Configure P1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>bfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-bfd] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/2/0</span>] <strong>mpls rsvp-te bfd enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/2/0</span>] <strong>mpls rsvp-te bfd min-tx-interval 100 min-rx-interval 100 detect-multiplier 3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/2/0</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<p># Configure P2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2] <strong>bfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-bfd] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/2/0</span>] <strong>mpls rsvp-te bfd enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/2/0</span>] <strong>mpls rsvp-te bfd min-tx-interval 100 min-rx-interval 100 detect-multiplier 3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/2/0</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><div class="p"># After the configuration is complete, run the <a href="cmdqueryname=display+mpls+rsvp-te+bfd+session"><b><span class="cmdname">display mpls rsvp-te bfd session</span></b></a> { <strong><span>all</span></strong> | <strong><span>interface</span></strong> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> | <strong><span>peer</span></strong> <i><span class="varname">ip-address</span></i> } [ <strong><span>verbose</span></strong> ] command on P1 and P2. The BFD session status is up. The following example uses the configuration on P1.<pre class="screen">&lt;P1&gt; <strong>display mpls rsvp-te bfd session all</strong> 
+</pre>
+<pre class="screen">Total Nbrs/Rsvp triggered sessions : 3/1
+-------------------------------------------------------------------------------
+Local      Remote     Local           Peer            Interface       Session
+Discr      Discr      Addr            Addr            Name            State
+-------------------------------------------------------------------------------
+16385      16385      10.2.1.1        10.2.1.2        GE<span>0/2/0</span>         <strong>UP</strong>      </pre>
+</div>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0172368366__section_dc_vrp_cfg_00384805"><a name="EN-US_TASK_0172368366__section_dc_vrp_cfg_00384805"></a><a name="section_dc_vrp_cfg_00384805"></a><a name="EN-US_TASK_0172368366__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The switch configuration file is not provided here.</p>
+</div></div>
+<ul><li><p>PE1 configuration file</p>
+<pre class="screen">#
+sysname PE1
+#
+mpls lsr-id 1.1.1.1
+#
+mpls
+ mpls te
+ mpls rsvp-te
+ mpls rsvp-te hello
+ mpls te cspf
+#
+explicit-path tope2
+ next hop 10.1.1.2
+ next hop 10.2.1.2
+ next hop 10.4.1.2
+ next hop 5.5.5.5
+#
+isis 1
+ is-level level-2
+ cost-style wide
+ network-entity 86.4501.0010.0100.1001.00
+ traffic-eng level-2
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.1.1 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+ mpls rsvp-te hello
+#               
+interface LoopBack1
+ ip address 1.1.1.1 255.255.255.255
+ isis enable 1  
+#
+interface Tunnel10
+ ip address unnumbered interface LoopBack1
+ tunnel-protocol mpls te
+ destination 5.5.5.5
+ mpls te record-route label
+ mpls te fast-reroute
+ mpls te tunnel-id 100
+ mpls te path explicit-path tope2  
+#
+return</pre>
+</li><li><p>P1 configuration file</p>
+<pre class="screen">#
+sysname P1
+#
+bfd
+#
+mpls lsr-id 2.2.2.2
+#
+mpls
+ mpls te
+ mpls rsvp-te
+ mpls rsvp-te hello
+ mpls te cspf
+#
+explicit-path tope2
+ next hop 10.3.1.2
+ next hop 10.5.1.2
+ next hop 5.5.5.5
+#
+isis 1
+ is-level level-2
+ cost-style wide
+ network-entity 86.4501.0020.0200.2002.00
+ traffic-eng level-2
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.1.2 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+ mpls rsvp-te hello
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.2.1.1 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+ mpls rsvp-te bfd enable
+ mpls rsvp-te bfd min-tx-interval 100 min-rx-interval 100 detect-multiplier 3
+ mpls rsvp-te hello
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown
+ ip address 10.3.1.1 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+ mpls rsvp-te hello
+#
+interface LoopBack1
+ ip address 2.2.2.2 255.255.255.255
+ isis enable 1
+#
+interface Tunnel30
+ ip address unnumbered interface LoopBack1
+ tunnel-protocol mpls te
+ destination 5.5.5.5
+ mpls te record-route
+ mpls te tunnel-id 300
+ mpls te path explicit-path tope2  
+ mpls te bypass-tunnel
+ mpls te protected-interface Gigabitethernet <span>0/2/0</span>
+#
+return</pre>
+</li><li><p>P2 configuration file</p>
+<pre class="screen">#
+sysname P2
+#
+bfd
+#
+mpls lsr-id 3.3.3.3
+#
+mpls
+ mpls te
+ mpls rsvp-te
+ mpls rsvp-te hello
+ mpls te cspf
+#
+isis 1
+ is-level level-2
+ cost-style wide
+ network-entity 86.4501.0030.0300.3003.00
+ traffic-eng level-2
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.4.1.1 255.255.255.252
+ isis enable 1  
+ mpls
+ mpls te
+ mpls rsvp-te
+ mpls rsvp-te hello
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.2.1.2 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+ mpls rsvp-te bfd enable
+ mpls rsvp-te bfd min-tx-interval 100 min-rx-interval 100 detect-multiplier 3
+ mpls rsvp-te hello
+#
+interface LoopBack1
+ ip address 3.3.3.3 255.255.255.255
+ isis enable 1
+#
+return</pre>
+</li><li><p>P3 configuration file</p>
+<pre class="screen">#
+sysname P3
+#
+mpls lsr-id 4.4.4.4
+#
+mpls
+ mpls te
+ mpls rsvp-te
+ mpls rsvp-te hello
+ mpls te cspf
+#
+isis 1          
+ is-level level-2
+ cost-style wide
+ network-entity 86.4501.0040.0400.4004.00
+ traffic-eng level-2
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.3.1.2 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+ mpls rsvp-te hello
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.5.1.1 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+ mpls rsvp-te hello
+#
+interface LoopBack1
+ ip address 4.4.4.4 255.255.255.255
+ isis enable 1  
+#
+return</pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#
+sysname PE2
+#
+mpls lsr-id 5.5.5.5
+#
+mpls
+ mpls te
+ mpls rsvp-te
+ mpls rsvp-te hello
+ mpls te cspf
+#
+isis 1          
+ is-level level-2
+ cost-style wide
+ network-entity 86.4501.0050.0500.5005.00
+ traffic-eng level-2
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.4.1.2 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+ mpls rsvp-te hello
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.5.1.2 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+ mpls rsvp-te hello
+#
+interface LoopBack1
+ ip address 5.5.5.5 255.255.255.255
+ isis enable 1
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0093.html">Configuration Examples for MPLS TE
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0131.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0139.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

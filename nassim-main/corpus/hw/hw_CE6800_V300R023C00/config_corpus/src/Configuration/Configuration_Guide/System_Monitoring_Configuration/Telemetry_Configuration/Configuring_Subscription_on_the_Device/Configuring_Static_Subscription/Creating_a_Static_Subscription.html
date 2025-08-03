@@ -1,0 +1,149 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Creating a Static Subscription">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_telemetry_cfg_0008_c.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_telemetry_cfg_0011_c.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_telemetry_cfg_0013_c.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Telemetry">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Telemetry">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featurename" content="Telemetry">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featurename" content="Telemetry">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001564114261">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Creating a Static Subscription</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001564114261"></a><a name="EN-US_TASK_0000001564114261"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Creating a Static Subscription</h1>
+<div class="taskbody"><div class="prereq" style="margin-left:0"><a name="EN-US_TASK_0000001564114261__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Prerequisites</h4>
+<div class="p"><p>Before configuring gRPC in dial-out mode, you have completed the following tasks:</p>
+<p>Create an SSL policy if you need to create an SSL connection between the server and client. For details about how to create an SSL policy, see "SSL Configuration" in <span>Configuration Guide</span> &gt; Security Configuration.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001564114261__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>When configuring static subscription to collect sampled data, you need to create a sampling sensor group and specify a sampling path and filter criteria. When the sampling path meets the filter criteria, the device reports sampled data to the collector for service policy determination.</p>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001564114261__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Create a subscription.</span><ol type="a"><li class="substepexpand"><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Enter the telemetry view.</span><p><pre class="screen"><a href="cmdqueryname=telemetry"><b><span class="cmdname">telemetry</span></b></a> [ <strong><span>openconfig</span></strong> ]</pre>
+</p></li><li class="substepexpand"><span>(Optional) Configure the format of the UDP header.</span><p><pre class="screen"><strong>protocol udp message-header ietf-netconf-udp-notif</strong></pre>
+<p>By default, telemetry uses the UDP header in draft-ietf-netconf-udp-pub-channel format. You can run this command to switch the format to draft-ietf-netconf-udp-notif-08 as required.</p>
+</p></li><li class="substepexpand"><span>Create a subscription for associating a destination group and a sampling sensor group, and enter the subscription view.</span><p><pre class="screen"><a href="cmdqueryname=subscription"><b><span class="cmdname">subscription</span></b></a> <i><span class="varname">subscription-name</span></i></pre>
+</p></li><li class="substepexpand"><span>Associate the subscription with a destination group.</span><p><pre class="screen"><a href="cmdqueryname=destination-group"><b><span class="cmdname">destination-group</span></b></a> <i><span class="varname">destination-name</span></i></pre>
+</p></li><li class="substepexpand"><span>Associate the subscription with a sampling sensor group, and configure a sampling interval, redundancy suppression, and a heartbeat interval for the sampling sensor group.</span><p><pre class="screen"><a href="cmdqueryname=sensor-group"><b><span class="cmdname">sensor-group</span></b></a> <i><span class="varname">sensor-name</span></i> [ <strong><span>sample-interval</span></strong> <i><span class="varname">sample-interval</span></i> { [ <strong><span>suppress-redundant</span></strong> ] | [ <strong><span>heartbeat-interval</span></strong> <i><span class="varname">heartbeat-interval</span></i> ] } <sup>*</sup> ]</pre>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>When the sampling path type is alarm, the sampling interval, redundancy suppression, and heartbeat interval configurations do not take effect.</li><li>When the sampling type is OnChange or OnChange+, the sampling interval takes effect only when it is set to 0 ms. The redundancy suppression and heartbeat interval configurations are mutually exclusive with the OnChange or OnChange+ sampling.</li><li>When the sampling type is OnChange or OnChange+:<ul><li>If the configured sampling interval is 0, sampling is performed immediately in OnChange sampling, and incremental sampling is performed in OnChange+ sampling.</li><li>If the configured sampling interval is not 0 and the service supports periodic sampling, the larger value between the configured sampling interval and the minimum sampling interval takes effect.</li></ul>
+</li><li>When the sampling interval is set to 0 ms, periodic sampling and user-defined sampling do not take effect.</li><li>You can run the <a href="cmdqueryname=display+telemetry+sensor-path"><b><span class="cmdname">display telemetry sensor-path</span></b></a> command to check the sampling paths and types supported by the device.</li></ul>
+</div></div>
+</p></li></ol>
+</li><li><span>(Optional) Configure telemetry adaptive sampling.</span><p><p>Generally, a small sampling interval is set for an analyzer to obtain more accurate data for analysis. However, a large amount of redundant data is generated when a small sampling interval is used. The data requires a large amount of storage space and is inconvenient for data management. If adaptive sampling is configured, telemetry dynamically adjusts the sampling interval based on preset conditions. When the monitoring indicators are normal, telemetry reduces the sampling interval. When the monitoring indicators reach the threshold, telemetry automatically adjusts the sampling interval based on the configuration to report collected data at a higher frequency, reducing the amount of data on the analyzer.</p>
+</p><ol type="a"><li class="substepexpand"><span>Configure a sampling sensor group that requires adaptive sampling, and enter the sample-adaptive view.</span><p><pre class="screen"><a href="cmdqueryname=sensor-group"><b><span class="cmdname">sensor-group</span></b></a> <i><span class="varname">sensor-group-name</span></i> <strong><span>sample-adaptive</span></strong></pre>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Adaptive sampling can be configured only when the sampling sensor group meets the following conditions:</p>
+<ol><li>The group has only one sampling path, and the path is a container or list that contains leaf nodes and cannot be a pure container node.</li><li>The type of the sampling path in the group is not OnChange, Alarm, or Event.</li><li>The minimum sampling interval of the sampling path in the group is greater than or equal to 1000 ms.</li></ol>
+</div></div>
+</p></li><li class="substepexpand"><span>Configure the sampling interval and conditions for adaptive sampling.</span><p><pre class="screen"><a href="cmdqueryname=sample-interval"><b><span class="cmdname">sample-interval</span></b></a> <i><span class="varname">interval</span></i> <strong><span>op-field</span></strong> <i><span class="varname">field</span></i> <strong><span>op-type</span></strong> { <strong><span>eq</span></strong> | <strong><span>gt</span></strong> | <strong><span>ge</span></strong> | <strong><span>lt</span></strong> | <strong><span>le</span></strong> } <strong><span>op-value</span></strong> <i><span class="varname">value</span></i></pre>
+<p>By default, adaptive sampling is not configured.</p>
+<p>When adaptive sampling conditions are met, the device samples data based on the specified sampling interval. If the command is run multiple times, only the latest configuration takes effect.</p>
+</p></li></ol>
+</li><li><span>(Optional) Configure information about the protocol for the destination collector associated with this subscription.</span><ol type="a"><li class="substepexpand"><span>Configure the protocol and encryption mode for the destination collector.</span><p><pre class="screen"><a href="cmdqueryname=protocol"><b><span class="cmdname">protocol</span></b></a> { <strong><span>grpc</span></strong> [ <strong><span>no-tls</span></strong> ] [ <strong><span>compression gzip</span></strong> ] | <strong><span>udp</span></strong> }</pre>
+<p>By default, no protocol and encryption mode are configured for the destination collector that is associated with this subscription.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><div class="p">Both this command and the <a href="cmdqueryname=ipv4-address+port"><b><span class="cmdname">ipv4-address port</span></b></a> command in the destination group view can configure a protocol and encryption mode for the destination collector. If the destination collector is associated with a subscription, command configurations take effect based on the following rules:<ul><li><p>If this command has been run, the encryption mode configured using this command in the subscription view takes effect.</p>
+</li><li><p>If this command has not been run, the encryption mode configured using the <a href="cmdqueryname=ipv4-address+port"><b><span class="cmdname">ipv4-address port</span></b></a> command in the destination group view takes effect.</p>
+</li></ul>
+</div>
+</div></div>
+</p></li><li class="substepexpand"><span>Configure the source IP address for the packets to be reported.</span><p><ul><li>Run the following command if the source IP address is an IPv4 address:<pre class="screen"><a href="cmdqueryname=local-source-address+ipv4"><b><span class="cmdname">local-source-address ipv4</span></b></a> <i><span class="varname">ipv4-address</span></i> [ <a href="cmdqueryname=port"><b><span class="cmdname">port</span></b></a> <i><span class="varname">port-value</span></i> ]</pre>
+</li><li>Run the following command if the source IP address is an IPv6 address:<pre class="screen"><a href="cmdqueryname=local-source-address+ipv6"><b><span class="cmdname">local-source-address ipv6</span></b></a> <i><span class="varname">ipv6-address</span></i> [ <a href="cmdqueryname=port"><b><span class="cmdname">port</span></b></a> <i><span class="varname">port-value6</span></i> ]</pre>
+</li></ul>
+</p><p><p>By default, the source IP address is the IP address of the route's outbound interface, and the port number is randomly allocated.</p>
+</p></li><li class="substepexpand"><span>Configure the source interface for the packets to be reported.</span><p><pre class="screen"><a href="cmdqueryname=local-source-interface"><b><span class="cmdname">local-source-interface</span></b></a> { <i><span class="varname">if-name</span></i> | <i><span class="varname">if-type</span></i> <i><span class="varname">if-number</span></i> } [ <a href="cmdqueryname=port"><b><span class="cmdname">port</span></b></a> <em>port-value</em> ]</pre>
+<p>By default, no source interface is configured for the packets to be reported.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In the same subscription view, only the source interface or source IP address can be configured for the packets to be reported.</p>
+<p>In different subscription views, only two types of source interfaces and source IP addresses can be configured for the packets to be reported. If the same source interface or source IP address is configured for the packets to be reported in different subscription views, the system considers that the configurations are of the same type.</p>
+</div></div>
+</p></li><li class="substepexpand"><span>(Optional) Set the DSCP value in the packets to be reported.</span><p><pre class="screen"><a href="cmdqueryname=dscp"><b><span class="cmdname">dscp</span></b></a> <i><span class="varname">value</span></i></pre>
+<p>By default, the DSCP value in the packets to be reported is 0.</p>
+</p></li></ol>
+</li><li><span>(Optional) Configure the encoding format for the packets to be reported.</span><p><pre class="screen"><a href="cmdqueryname=encoding"><b><span class="cmdname">encoding</span></b></a> { <strong><span>json</span></strong> | <strong><span>gpb</span></strong> }</pre>
+<p>By default, the encoding format of the packets to be reported is GPB.</p>
+</p></li><li><span>(Optional) Configure the telemetry layer and service data layer of the to-be-reported packets to use the GPB and JSON encoding formats respectively when a static subscription uses the JSON encoding format.</span><p><ol type="a"><li>Return to the telemetry view.<pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</li><li>Configure the telemetry layer and service data layer of the to-be-reported packets to use the GPB and JSON encoding formats respectively when a static subscription uses the JSON encoding format.<pre class="screen"><a href="cmdqueryname=json+only-content"><b><span class="cmdname">json only-content</span></b></a></pre>
+<p>By default, when a static subscription uses the JSON encoding format, both the telemetry layer and service data layer of the to-be-reported packets use the JSON encoding format.</p>
+</li></ol>
+</p></li><li><span>(Optional) Configure the maximum usage of CPU resources used for telemetry data sampling.</span><p><pre class="screen"><a href="cmdqueryname=cpu-usage+max-percent"><b><span class="cmdname">cpu-usage max-percent</span></b></a> <i><span class="varname">usage</span></i></pre>
+<p>By default, telemetry data sampling can occupy at most 5% of the CPU resources.</p>
+</p></li><li><span>(Optional) Specify the maximum size of a packet sent by telemetry through UDP.</span><p><pre class="screen"><a href="cmdqueryname=protocol+udp+packet-max-size"><b><span class="cmdname">protocol udp packet-max-size</span></b></a> <i><span class="varname">size</span></i></pre>
+<p>By default, the value is 0, indicating that the maximum size of a UDP packet is not limited.</p>
+</p></li><li><span>(Optional) Configure the client to combine multiple data packets into one data packet when sending packets.</span><p><pre class="screen"><a href="cmdqueryname=pack+enable"><b><span class="cmdname">pack enable</span></b></a></pre>
+</p><p><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>When the transport protocol is UDP, the device does not support the <a href="cmdqueryname=pack+enable"><b><span class="cmdname">pack enable</span></b></a> command.</p>
+<p>After telemetry adaptive sampling is configured, the combined packet sending interval is still the same as the sampling interval specified before adaptive sampling is configured.</p>
+<p>If the same subscription has different sampling intervals, the longest one is used as the combined packet sending interval. If the sampling interval is 0, the combined packet sending interval is 1 second.</p>
+</div></div>
+</p></li><li><span>(Optional) Configure an SSL policy for the client or enable the client to perform SSL verification on the server.</span><p><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The certificate to be loaded must be supported by both the client and server.</p>
+</div></div>
+</p><ol type="a"><li class="substepexpand"><span>Return to the system view.</span><p><pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Enter the gRPC view.</span><p><pre class="screen" id="EN-US_TASK_0000001564114261__en-us_task_0000001512846270_screen2076083915279"><a href="cmdqueryname=grpc"><b><span class="cmdname" id="EN-US_TASK_0000001564114261__en-us_task_0000001512846270_cmdname138409448276">grpc</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Enter the gRPC client view.</span><p><pre class="screen" id="EN-US_TASK_0000001564114261__en-us_task_0000001512846270_screen16897192111218"><a href="cmdqueryname=grpc+client"><b><span class="cmdname" id="EN-US_TASK_0000001564114261__en-us_task_0000001512846270_cmdname1969298141214105">grpc client</span></b></a></pre>
+</p></li><li class="substepexpand"><span>(Optional) Configure the gRPC client to perform SSL verification on the gRPC server.</span><p><pre class="screen"><a href="cmdqueryname=ssl-verify+peer"><b><span class="cmdname" id="EN-US_TASK_0000001564114261__en-us_task_0000001512846270_cmdname329553457214105">ssl-verify peer</span></b></a></pre>
+<p>By default, a server does not perform SSL verification on a client.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If the <strong><span>no-tls</span></strong> parameter has been configured in the <a href="cmdqueryname=ipv4-address+port"><b><span class="cmdname">ipv4-address port</span></b></a> or <a href="cmdqueryname=protocol"><b><span class="cmdname">protocol</span></b></a> command (subscription view) and taken effect, the TLS encryption mode is not used. In this case, the client-specific SSL policy configured using this command does not take effect.</p>
+</div></div>
+</p></li><li class="substepexpand"><span>(Optional) Configure an SSL policy for the gRPC client.</span><p><pre class="screen"><a href="cmdqueryname=ssl-policy"><b><span class="cmdname" id="EN-US_TASK_0000001564114261__en-us_task_0000001512846270_cmdname7548144735412">ssl-policy</span></b></a> <i><span class="varname" id="EN-US_TASK_0000001564114261__en-us_task_0000001512846270_varname1154818478547">ssl-policy-name</span></i> [ <a href="cmdqueryname=verify-san"><b><span class="cmdname" id="EN-US_TASK_0000001564114261__en-us_task_0000001512846270_cmdname1212035018515">verify-san</span></b></a> <i><span class="varname" id="EN-US_TASK_0000001564114261__en-us_task_0000001512846270_varname71851153755">san</span></i> ]</pre>
+<p>By default, no SSL policy is configured for a client.</p>
+</p><p><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If the <strong><span>no-tls</span></strong> parameter has been configured in the <a href="cmdqueryname=ipv4-address+port"><b><span class="cmdname">ipv4-address port</span></b></a> or <a href="cmdqueryname=protocol"><b><span class="cmdname">protocol</span></b></a> command (subscription view) and taken effect, the TLS encryption mode is not used. In this case, the configuration that enables the client to perform SSL verification on a server does not take effect.</p>
+</div></div>
+</p></li></ol>
+</li><li><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001564114261__en-us_task_0228023023_screen163801330213"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001564114261__en-us_task_0228023023_en-us_concept_0141113565_cmdname1667501373175340">commit</span></b></a></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001564114261__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><ul><li>Run the <a href="cmdqueryname=display+telemetry+subscription"><b><span class="cmdname">display telemetry subscription</span></b></a> [ <i><span class="varname">subscription-name</span></i> ]command to check subscription information.</li><li>Run the <a href="cmdqueryname=display+telemetry+destination"><b><span class="cmdname">display telemetry destination</span></b></a> [ <i><span class="varname">dest-name</span></i> ] command to check information about the destination group.</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_telemetry_cfg_0008_c.html">Configuring Static Subscription
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_telemetry_cfg_0011_c.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="galaxy_telemetry_cfg_0013_c.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

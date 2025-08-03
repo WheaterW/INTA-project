@@ -1,0 +1,325 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring BGP Auto FRR">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0113.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0115.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001176743549">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring BGP Auto FRR</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001176743549"></a><a name="EN-US_TASK_0000001176743549"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring BGP Auto FRR</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001176743549__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>As networks continue to develop, services, such as voice, online video, and financial services, pose higher requirements for real-time transmission. Primary and backup links are typically deployed on a network to ensure the stability of these services. If the primary link fails, a routing device must wait for route convergence to be completed, after which the routing device reselects an optimal route and delivers it to the FIB table to start a link switchover. This is the traditional switchover mode, during which extended service interruption occurs, resulting in a failure to meet service requirements.</p>
+<p>BGP Auto FRR addresses this problem by using a routing device to select the optimal route to forward packets. In addition, the routing device automatically adds information about the sub-optimal route to the backup forwarding entries of the optimal route and delivers the backup forwarding entries to the FIB table. If the primary link fails, the routing device quickly switches traffic to the backup link. The switchover does not depend on route convergence and can be performed within sub-seconds, greatly reducing service interruption time.</p>
+<p>As shown in <a href="#EN-US_TASK_0000001176743549__fig_dc_vrp_bgp_cfg_408401">Figure 1</a>, DeviceA is located in AS 100, and DeviceB, DeviceC, and DeviceD are located in AS 200. BGP Auto FRR must be configured to ensure that the route from DeviceA to DeviceD has the backup route.</p>
+<div class="fignone" id="EN-US_TASK_0000001176743549__fig_dc_vrp_bgp_cfg_408401"><a name="EN-US_TASK_0000001176743549__fig_dc_vrp_bgp_cfg_408401"></a><a name="fig_dc_vrp_bgp_cfg_408401"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring BGP Auto FRR</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 and interface 2 represent <span>100GE</span> <span>1/0/1</span> and <span>100GE</span> <span>1/0/2</span>, respectively.</p>
+<p>In this example, interface 1 and interface 2 represent VLANIF100 and VLANIF200, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001130624176.png"></span></div>
+<p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Router IDs and AS numbers of DeviceA, DeviceB, DeviceC, and DeviceD</p>
+</li><li><p>Names of route-policies and MED values of routes on DeviceB and DeviceC</p>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176743549__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>During the configuration, note the following:</p>
+<ul><li><p>To implement BGP Auto FRR, at least two routes to the same destination network segment must be available.</p>
+</li><li><p>When applying a route-policy, ensure that the route-policy name is case sensitive.</p>
+</li><li>To improve security, you are advised to deploy BGP security measures. For details, see "Configuring BGP Authentication." Keychain authentication is used as an example. For details, see Example for Configuring Keychain Authentication for BGP.</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176743549__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Establish EBGP connections between DeviceA and DeviceB, and between DeviceA and DeviceC. Establish IBGP connections between DeviceD and DeviceB, and between DeviceD and DeviceC.</p>
+</li><li><p>Configure route-policies on DeviceB and DeviceC to change the MED values of routes to DeviceD for route selection.</p>
+</li><li><p>Configure BGP Auto FRR on DeviceA.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001176743549__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface. For detailed configurations, see <a href="#EN-US_TASK_0000001176743549__postreq128914577716">Configuration Scripts</a>.</span></li><li><span>Configure EBGP connections between DeviceA and DeviceB and between DeviceA and DeviceC, and configure IBGP connections between DeviceB and DeviceD, and between DeviceC and DeviceD.</span><p><p># Establish EBGP connections on DeviceA.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>router-id 1.1.1.1</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.1.1.2 as-number 200</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.2.1.2 as-number 200</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p>The configurations on DeviceB and DeviceC are similar to the configuration on DeviceA.</p>
+<p># Establish IBGP connections on DeviceD.</p>
+<pre class="screen">&lt;DeviceD&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>bgp 200</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>router-id 4.4.4.4</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 10.3.1.1 as-number 200</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 10.4.1.1 as-number 200</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+<p>The configurations on DeviceB and DeviceC are similar to the configuration on DeviceD.</p>
+</p></li><li><span>Configure BFD for BGP on DeviceA, DeviceB, DeviceC and DeviceD.</span><p><p># Configure BFD for BGP on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>bfd</strong>
+[<span class="keyword">*</span>DeviceA-bfd] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.1.1.2 bfd enable</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.1.1.2 bfd min-tx-interval 100 min-rx-interval 100 detect-multiplier 4</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.2.1.2 bfd enable</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.2.1.2 bfd min-tx-interval 100 min-rx-interval 100 detect-multiplier 4</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p>The configurations on DeviceB, DeviceC and DeviceD are similar to the configuration on DeviceA.</p>
+</p></li><li><span>Configure route-policies on DeviceB and DeviceC to ensure that the MED values of routes to DeviceD are different.</span><p><p># Configure a route-policy on DeviceB.</p>
+<pre class="screen">&lt;DeviceB&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>route-policy rtb permit node 10</strong>
+[<span class="keyword">*</span>DeviceB-route-policy] <strong>apply cost 80</strong>
+[<span class="keyword">*</span>DeviceB-route-policy] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>bgp 200</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv4] <strong>peer 10.1.1.1 route-policy rtb export</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv4] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure a route-policy on DeviceC.</p>
+<pre class="screen">&lt;DeviceC&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>route-policy rtc permit node 10</strong>
+[<span class="keyword">*</span>DeviceC-route-policy] <strong>apply cost 120</strong>
+[<span class="keyword">*</span>DeviceC-route-policy] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>bgp 200</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword">*</span>DeviceC-bgp-af-ipv4] <strong>peer 10.2.1.1 route-policy rtc export</strong>
+[<span class="keyword">*</span>DeviceC-bgp-af-ipv4] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure DeviceD to advertise a route destined for 4.4.4.4/32.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>bgp 200</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD-bgp] <strong>network 4.4.4.4 32</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+<p># Run the <strong>display ip routing-table verbose</strong> command on DeviceA to check detailed information about the learned route destined for 4.4.4.4/32.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display ip routing-table 4.4.4.4 32 verbose</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table : _public_
+Summary Count : 1
+
+Destination: 4.4.4.4/32
+     Protocol: EBGP            Process ID: 0
+   Preference: 255                   Cost: 80
+      NextHop: 10.1.1.2         Neighbour: 10.1.1.2
+        State: Active Adv             Age: 00h00m12s
+          Tag: 0                 Priority: low
+        Label: NULL               QoSInfo: 0x0
+   IndirectID: 0x4
+ RelayNextHop: 0.0.0.0          Interface: <span>100GE</span><span>1/0/1</span>
+     TunnelID: 0x0                  Flags:  D</pre>
+<p>As the MED value of the route learned from DeviceB is smaller, DeviceA selects the path DeviceA -&gt; DeviceB -&gt; DeviceD to transmit traffic to 4.4.4.4/32. However, as FRR has not yet been configured, no information about the backup route is available.</p>
+</p></li><li><span>Enable BGP Auto FRR.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>bgp 100</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-bgp-af-ipv4] <strong>auto-frr</strong>
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv4] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001176743549__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>After completing the configuration, run the <strong>display ip routing-table verbose</strong> command on DeviceA to check the routing information.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display ip routing-table 4.4.4.4 32 verbose</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table : _public_
+Summary Count : 1
+
+Destination: 4.4.4.4/32
+     Protocol: EBGP            Process ID: 0
+   Preference: 255                   Cost: 80
+      NextHop: 10.1.1.2         Neighbour: 10.1.1.2
+        State: Active Adv             Age: 00h52m45s
+          Tag: 0                 Priority: low
+        Label: NULL               QoSInfo: 0x0
+   IndirectID: 0x4
+ RelayNextHop: 0.0.0.0          Interface: <span>100GE</span><span>1/0/1</span>
+     TunnelID: 0x0                  Flags:  D
+    <strong>BkNextHop: 10.2.1.2       BkInterface: <span>100GE</span><span>1/0/2</span></strong>
+      BkLabel: NULL           SecTunnelID: 0x0
+ BkPETunnelID: 0x0        BkPESecTunnelID: 0x0
+ BkIndirectID: 0x2  </pre>
+<p>The command output shows that DeviceA has a backup next hop (10.2.1.2) for the route to 4.4.4.4/32 and the backup outbound interface is <strong><span>100GE</span><span>1/0/2</span></strong>.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001176743549__postreq128914577716"></a><a name="postreq128914577716"></a><a name="EN-US_TASK_0000001176743549__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+bfd
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.2.1.1 255.255.255.0
+#
+bgp 100
+ router-id 1.1.1.1
+ peer 10.1.1.2 as-number 200
+ peer 10.1.1.2 bfd min-tx-interval 100 min-rx-interval 100 detect-multiplier 4
+ peer 10.1.1.2 bfd enable
+ peer 10.2.1.2 as-number 200
+ peer 10.2.1.2 bfd min-tx-interval 100 min-rx-interval 100 detect-multiplier 4
+ peer 10.2.1.2 bfd enable
+ #
+ ipv4-family unicast
+  auto-frr
+  peer 10.1.1.2 enable
+  peer 10.2.1.2 enable
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+bfd
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.3.1.1 255.255.255.0
+#
+bgp 200
+ router-id 2.2.2.2
+ peer 10.1.1.1 as-number 100
+ peer 10.1.1.1 bfd min-tx-interval 100 min-rx-interval 100 detect-multiplier 4
+ peer 10.1.1.1 bfd enable
+ peer 10.3.1.2 as-number 200
+ peer 10.3.1.2 bfd min-tx-interval 100 min-rx-interval 100 detect-multiplier 4
+ peer 10.3.1.2 bfd enable
+ #
+ ipv4-family unicast
+  peer 10.1.1.1 route-policy rtb export
+  peer 10.1.1.1 enable
+  peer 10.3.1.2 enable
+#
+route-policy rtb permit node 10
+ apply cost 80
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+bfd
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.2.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.4.1.1 255.255.255.0
+#
+bgp 200
+ router-id 3.3.3.3
+ peer 10.2.1.1 as-number 100
+ peer 10.2.1.1 bfd min-tx-interval 100 min-rx-interval 100 detect-multiplier 4
+ peer 10.2.1.1 bfd enable
+ peer 10.4.1.2 as-number 200
+ peer 10.4.1.2 bfd min-tx-interval 100 min-rx-interval 100 detect-multiplier 4
+ peer 10.4.1.2 bfd enable
+ #
+ ipv4-family unicast
+  peer 10.2.1.1 route-policy rtc export
+  peer 10.2.1.1 enable
+  peer 10.4.1.2 enable
+#
+route-policy rtc permit node 10
+ apply cost 120
+#
+return</pre>
+</li><li><p>DeviceD</p>
+<pre class="screen">#
+sysname DeviceD
+#
+bfd
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.3.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.4.1.2 255.255.255.0
+#
+interface LoopBack1
+ ip address 4.4.4.4 255.255.255.255
+#
+bgp 200
+ router-id 4.4.4.4
+ peer 10.3.1.1 as-number 200
+ peer 10.3.1.1 bfd min-tx-interval 100 min-rx-interval 100 detect-multiplier 4
+ peer 10.3.1.1 bfd enable
+ peer 10.4.1.1 as-number 200
+ peer 10.4.1.1 bfd min-tx-interval 100 min-rx-interval 100 detect-multiplier 4
+ peer 10.4.1.1 bfd enable
+ #
+ ipv4-family unicast
+  network 4.4.4.4 255.255.255.255
+  peer 10.3.1.1 enable
+  peer 10.4.1.1 enable
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bgp_cfg_0113.html">Configuring BGP Auto FRR
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bgp_cfg_0115.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

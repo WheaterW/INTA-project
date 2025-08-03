@@ -1,0 +1,154 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring the Peer-Link">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_cfg_m-lag_0020.html">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_cfg_m-lag_0013.html">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_cfg_m-lag_0011.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="M-LAG">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="M-LAG">
+<meta name="featuretype" content="High Availability">
+<meta name="featurename" content="M-LAG">
+<meta name="featuretype" content="High Availability">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001512689654">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Configuring the Peer-Link</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001512689654"></a><a name="EN-US_TASK_0000001512689654"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring the Peer-Link</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001512689654__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>For the <span>CE6866, CE6860-SAN, CE6866K, CE6860-HAM, CE8851-32CQ8DQ-P, CE8850-SAN, CE8851K, CE8850-HAM</span>, <span>CE8855, CE8851-32CQ4BQ, CE6855-48XS8CQ, CE6885, CE6885-SAN, CE6885-LL (standard forwarding mode), CE6885-T, <span>and CE6863E-48S8CQ</span></span>, the device provides the physical peer-link solution and virtual peer-link solution. The peer-link of the former is an Eth-Trunk that directly connects two M-LAG member devices, and the peer-link of the latter is a static bypass VXLAN tunnel between two M-LAG member devices.</p>
+<p>For the <span>CE6820H, CE6820H-K, CE6863H, CE6863H-K, CE6881H, CE6881H-K, CE6820S</span>, CE6885-LL (low latency mode), the device provides the physical peer-link solution in which an Eth-Trunk that directly connects two M-LAG member devices is used as the peer-link.</p>
+<p>The peer-link is used to achieve the following:</p>
+<ul><li>Transmit DFS group protocol packets.</li><li>Transmit synchronization packets used for synchronizing MAC address entries and ARP entries between M-LAG master and backup devices.</li><li>Forward inter-device traffic sent from non-M-LAG member interfaces or traffic received from an M-LAG member interface when downstream devices are single-homed to the M-LAG due to a fault.</li></ul>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If the <strong>peer </strong><em>ip-address</em> parameter for DAD has been configured, run the <strong><a href="cmdqueryname=display+dfs-group+heartbeat"><b><span class="cmdname">display dfs-group heartbeat</span></b></a></strong> command to check the heartbeat status. Configure the peer-link only when the heartbeat status is OK to prevent interfaces on one M-LAG member device from entering the error-down state incorrectly.</p>
+</div></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001512689654__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Procedure</h4><ul><li><strong>Physical peer-link solution</strong><ol><li>Enter the system view.<pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</li><li>Enter the Eth-Trunk interface view.<pre class="screen"><a href="cmdqueryname=interface+eth-trunk"><b><span class="cmdname">interface eth-trunk</span></b></a> <i><span class="varname">trunk-id</span></i></pre>
+</li><li>Add member interfaces to the Eth-Trunk interface.<pre class="screen"><a href="cmdqueryname=trunkport"><b><span class="cmdname">trunkport</span></b></a> <i><span class="varname">interface-type</span></i> { <i><span class="varname">interface-number1</span></i> [ <strong><span>to</span></strong> <i><span class="varname">interface-number2</span></i> ] } &amp;&lt;1-16&gt;</pre>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>You are advised to configure at least two member interfaces for a peer-link interface.</p>
+</div></div>
+</li><li>Configure the Eth-Trunk interface to work in static LACP mode.<pre class="screen"><a href="cmdqueryname=mode"><b><span class="cmdname">mode</span></b></a> <a href="cmdqueryname=lacp-static"><b><span class="cmdname">lacp-static</span></b></a></pre>
+<p>By default, an Eth-Trunk interface works in manual load balancing mode. To improve M-LAG reliability, you are advised to configure the Eth-Trunk interface to work in static LACP mode.</p>
+</li><li>Configure STP or VBST.<ul><li>If the M-LAG is configured in root bridge mode, disable STP on the interface.<pre class="screen"><a href="cmdqueryname=undo+stp+enable"><b><span class="cmdname">undo stp enable</span></b></a></pre>
+</li><li>If the M-LAG is configured in V-STP mode, enable STP on the interface.<pre class="screen"><a href="cmdqueryname=stp+enable"><b><span class="cmdname">stp enable</span></b></a></pre>
+</li><li>If the M-LAG is configured in V-VBST mode, enable VBST on the interface.<pre class="screen"><a href="cmdqueryname=stp+enable"><b><span class="cmdname">stp enable</span></b></a></pre>
+</li></ul>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>In an M-LAG configured in root bridge mode, because the M-LAG master and backup devices need to be simulated into one root bridge, you need to disable STP on peer-link interfaces to ensure that the directly connected interfaces are not blocked.</li><li>In an M-LAG configured in V-STP mode, because the M-LAG master and backup devices need to exchange packets through the peer-link to perform STP virtualization calculation, you need to enable STP on peer-link interfaces. The STP configurations on the peer-link interfaces of the two devices must be the same.</li><li>In an M-LAG configured in V-VBST mode, because the M-LAG master and backup devices need to exchange packets through the peer-link to perform STP virtualization calculation, you need to enable VBST on peer-link interfaces.</li></ul>
+</div></div>
+</li><li>Configure the Eth-Trunk interface as the peer-link interface.<pre class="screen"><a href="cmdqueryname=peer-link"><b><span class="cmdname">peer-link</span></b></a> <i><span class="varname">peer-linkid</span></i></pre>
+<p>By default, an Eth-Trunk interface does not function as a peer-link interface.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>An interface configured as a peer-link interface is added to all VLANs by default. However, if a VLAN is bound to a BD, the peer-link interface is not added to the VLAN.</li><li><p>An interface configured as a peer-link interface cannot be configured with any other service.</p>
+</li><li><p>If network-side VLANIF interfaces are configured on M-LAG member devices and establish a DAD link, perform <a href="#EN-US_TASK_0000001512689654__li3280175251918">step 7</a> to remove peer-link interfaces from the VLANs corresponding to the VLANIF interfaces. Otherwise, DAD may fail.</p>
+</li><li>If the <strong>peer </strong><em>ip-address</em> parameter has been configured for DAD, you are advised to configure an Eth-Trunk interface in the up state as a peer-link interface. If you configure an Eth-Trunk interface in the down state as a peer-link interface, the peer-link interface is down. In this case, if the DAD heartbeat status is normal, interfaces on one M-LAG member device will enter the error-down state.</li><li>Each M-LAG member device has independent services, and MAC addresses learned in VLANs of these services do not need to be synchronized. In addition, M-LAG member devices independently maintain MAC addresses used to establish a VXLAN tunnel between them and do not synchronize the MAC addresses to each other.  MAC address synchronization in this scenario causes MAC address flapping, resulting in loss of traffic forwarded through a peer-link interface when the physical peer-link solution is used. To prevent this problem, run the <a href="cmdqueryname=port+vlan+exclude"><b><span class="cmdname">port vlan exclude</span></b></a> command on the Eth-Trunk interface that functions as the peer-link interface to remove the Eth-Trunk interface from a VLAN. M-LAG synchronization then is not performed for the VLAN.</li></ul>
+</div></div>
+</li><li id="EN-US_TASK_0000001512689654__li3280175251918"><a name="EN-US_TASK_0000001512689654__li3280175251918"></a><a name="li3280175251918"></a>(Optional) Configure the VLANs from which packets are not allowed to pass through the peer-link interface.<pre class="screen"><a href="cmdqueryname=port+vlan+exclude"><b><span class="cmdname">port vlan exclude</span></b></a> { { <i><span class="varname">vlan-id1</span></i> [ <strong><span>to</span></strong> <i><span class="varname">vlan-id2</span></i> ] } &amp;&lt;1-10&gt; }</pre>
+<p>By default, packets from all VLANs are allowed to pass through a peer-link interface.</p>
+</li><li>Exit the Eth-Trunk interface view.<pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</li><li>(Optional) Configure a VLAN to contain only the peer-link interface.<ol type="a"><li>Create a VLAN and enter the VLAN view. If the VLAN has been created, the VLAN view is displayed.<pre class="screen"><a href="cmdqueryname=vlan"><b><span class="cmdname">vlan</span></b></a> <i><span class="varname">vlan-id</span></i></pre>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Based on service requirements, you can also run the <strong>vlan range</strong> { <i><span class="varname">vlan-id1</span></i> [ <strong>to</strong> <i><span class="varname">vlan-id2</span></i> ] } &amp;&lt;1-10&gt; command in the system view to create a temporary VLAN range and enter the VLAN range view.</p>
+</div></div>
+</li><li>Configure the VLAN to contain only the peer-link interface so that packets from the VLAN can be forwarded only on the peer-link interface.<pre class="screen"><a href="cmdqueryname=m-lag+peer-link+reserved"><b><span class="cmdname">m-lag peer-link reserved</span></b></a></pre>
+<p>By default, a VLAN can contain a peer-link interface and other Layer 2 interfaces.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In a multicast over VXLAN scenario, as long as the receiver and multicast source are dual-homed to the two member devices in the same M-LAG, the VLANIF interface corresponding to the VLAN configured with the <a href="cmdqueryname=m-lag+peer-link+reserved"><b><span class="cmdname">m-lag peer-link reserved</span></b></a> command cannot be used to establish a bypass VXLAN tunnel, regardless of whether the receiver and multicast source are in the same VLAN. Otherwise, the receiver will receive redundant multicast traffic.</p>
+</div></div>
+</li></ol>
+</li><li>Commit the configuration.<pre class="screen"><strong>commit</strong></pre>
+</li></ol>
+</li><li><strong>Virtual peer-link solution</strong> (supported only by the <span>CE6866, CE6860-SAN, CE6866K, CE6860-HAM, CE8851-32CQ8DQ-P, CE8850-SAN, CE8851K, CE8850-HAM</span>, <span>CE8855, CE8851-32CQ4BQ, CE6855-48XS8CQ, CE6885, CE6885-SAN, CE6885-LL (standard forwarding mode), CE6885-T, and CE6863E-48S8CQ</span>)<ol><li>Enter the system view.<pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</li><li>Enter the NVE interface view.<pre class="screen"><strong>interface nve</strong> <em>nve-number</em></pre>
+</li><li>Create a static bypass VXLAN tunnel and specify the source and peer IP addresses.<pre class="screen"><strong>pip-source</strong> <em>src-ip</em> <strong>peer</strong> <em>peer-ip</em> <strong>bypass</strong></pre>
+<p>By default, no static bypass VXLAN tunnel is created between M-LAG member devices. An IPv4 or IPv6 tunnel can be configured. IPv4 and IPv6 tunnels are mutually exclusive. That is, only one IPv4 or IPv6 tunnel can be configured at a time.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>The virtual peer-link solution does not support pure Layer 2 scenarios. The bypass VXLAN tunnel requires reachable Layer 3 routes. Therefore, ensure that there are reachable Layer 3 routes between the source and peer IP addresses.</li><li>It is recommended that loopback interface addresses be used as the source and destination IP/IPv6 addresses for establishing a bypass VXLAN tunnel. If a Layer 3 interface address is used, the interface address can only be used by the bypass VXLAN tunnel and cannot be used to forward network-side service traffic.</li></ul>
+</div></div>
+</li><li>Exit the NVE interface view.<pre class="screen"><strong>quit</strong></pre>
+</li><li>Enter the Eth-Trunk interface view.<pre class="screen"><a href="cmdqueryname=interface+eth-trunk"><b><span class="cmdname">interface eth-trunk</span></b></a> <i><span class="varname">trunk-id</span></i></pre>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The Eth-Trunk interface cannot be configured with any member interface. Otherwise, it cannot be configured as a virtual peer-link interface.</p>
+</div></div>
+</li><li>Configure STP or VBST.<ul><li>If the M-LAG is configured in root bridge mode, disable STP on the interface.<pre class="screen"><a href="cmdqueryname=undo+stp+enable"><b><span class="cmdname">undo stp enable</span></b></a></pre>
+</li><li>If the M-LAG is configured in V-STP mode, enable STP on the interface.<pre class="screen"><a href="cmdqueryname=stp+enable"><b><span class="cmdname">stp enable</span></b></a></pre>
+</li><li>If the M-LAG is configured in V-VBST mode, enable VBST on the interface.<pre class="screen"><a href="cmdqueryname=stp+enable"><b><span class="cmdname">stp enable</span></b></a></pre>
+</li></ul>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>In an M-LAG configured in root bridge mode, because the M-LAG master and backup devices need to be simulated into one root bridge, you need to disable STP on peer-link interfaces to ensure that the directly connected interfaces are not blocked.</li><li>In an M-LAG configured in V-STP mode, because the M-LAG master and backup devices need to exchange packets through the peer-link to perform STP virtualization calculation, you need to enable STP on peer-link interfaces. The STP configurations on the peer-link interfaces of the two devices must be the same.</li><li>In an M-LAG configured in V-VBST mode, because the M-LAG master and backup devices need to exchange packets through the peer-link to perform STP virtualization calculation, you need to enable VBST on peer-link interfaces.</li></ul>
+</div></div>
+</li><li>Configure the Eth-Trunk interface as the virtual peer-link interface.<pre class="screen"><a href="cmdqueryname=peer-link"><b><span class="cmdname">peer-link</span></b></a> <i><span class="varname">peer-linkid</span></i> <strong>virtual-link</strong></pre>
+<p>By default, an Eth-Trunk interface does not function as a peer-link interface.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>An interface configured as a peer-link interface is added to all VLANs by default. However, if a VLAN is bound to a BD, the peer-link interface is not added to the VLAN.</li><li><p>An interface configured as a peer-link interface cannot be configured with any other service.</p>
+</li><li><p>If network-side VLANIF interfaces are configured on M-LAG member devices and establish a DAD link, perform <a href="#EN-US_TASK_0000001512689654__li16612118309">step 8</a> to remove peer-link interfaces from the VLANs corresponding to the VLANIF interfaces. Otherwise, DAD may fail.</p>
+</li><li>In the virtual peer-link solution, the up/down status of the virtual peer-link interface is the same as the up/down status of the bypass VXLAN tunnel.</li><li>If the <strong>peer </strong><em>ip-address</em> parameter has been configured for DAD, you are advised to configure a virtual peer-link interface when the bypass VXLAN tunnel is up. If you configure a virtual peer-link interface when the bypass VXLAN tunnel is down, the virtual peer-link interface is also down. In this case, if the DAD heartbeat status is normal, interfaces on one M-LAG member device will enter the error-down state.</li><li>The <strong>peer-link</strong> <em>peer-linkid</em> <strong>virtual-link</strong> and <strong>mode lacp-static</strong> commands are mutually exclusive on an interface.</li><li>The <strong>peer-link</strong> <em>peer-linkid</em> <strong>virtual-link</strong> and <strong>mode lacp-dynamic</strong> commands are mutually exclusive on an interface.</li><li>The <strong>peer-link</strong> <em>peer-linkid</em> <strong>virtual-link</strong> and <strong>trunkport</strong> commands are mutually exclusive on an interface.</li><li>The <strong>peer-link</strong> <em>peer-linkid</em> <strong>virtual-link</strong> and <strong>shutdown</strong> commands are mutually exclusive on an interface.</li><li>The <strong>peer-link</strong> <em>peer-linkid</em> <strong>virtual-link</strong> command and the <a href="cmdqueryname=mld+snooping+enable"><b><span class="cmdname">mld snooping enable</span></b></a> command in the system view are mutually exclusive.</li><li>Each M-LAG member device has independent services, and MAC addresses learned in VLANs of these services do not need to be synchronized. In addition, M-LAG member devices independently maintain MAC addresses used to establish a VXLAN tunnel between them and do not synchronize the MAC addresses to each other. MAC address synchronization in this scenario causes MAC address flapping, resulting in loss of traffic forwarded through the virtual peer-link interface. To prevent this problem, use either of the following methods:<ul><li>Run the <a href="cmdqueryname=port+vlan+exclude"><b><span class="cmdname">port vlan exclude</span></b></a> command on the Eth-Trunk interface that functions as the virtual peer-link interface to remove the Eth-Trunk interface from a VLAN. M-LAG synchronization then is not performed for the VLAN.</li><li>Run the <a href="cmdqueryname=reserved+for+vxlan+bypass"><b><span class="cmdname">reserved for vxlan bypass</span></b></a> command on the VLANIF interface corresponding to the virtual peer-link interface to configure the IP address of the VLANIF interface to be used only by the bypass VXLAN tunnel. M-LAG synchronization then is not performed for the VLAN.<br><ul class="simple"><li> </li></ul>
+</li></ul>
+</li></ul>
+</div></div>
+</li><li id="EN-US_TASK_0000001512689654__li16612118309"><a name="EN-US_TASK_0000001512689654__li16612118309"></a><a name="li16612118309"></a>(Optional) Configure the VLANs from which packets are not allowed to pass through the peer-link interface.<pre class="screen"><a href="cmdqueryname=port+vlan+exclude"><b><span class="cmdname">port vlan exclude</span></b></a> { { <i><span class="varname">vlan-id1</span></i> [ <strong><span>to</span></strong> <i><span class="varname">vlan-id2</span></i> ] } &amp;&lt;1-10&gt; }</pre>
+<p>By default, packets from all VLANs are allowed to pass through a peer-link interface.</p>
+</li><li>Exit the Eth-Trunk interface view.<pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</li><li>Enter the NVE interface view.<pre class="screen"><strong>interface nve</strong> <em>nve-number</em></pre>
+</li><li>Configure reserved VNIs. The 4096 VNIs starting from the VNI specified by the <em>vni-id</em> parameter are reserved for the virtual peer-link solution.<pre class="screen"><strong>vni </strong><em>vni-id</em><strong> reserved</strong><strong> for </strong><strong>m-lag</strong></pre>
+<p>By default, no reserved VNI is configured for the virtual peer-link solution.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>In the virtual peer-link solution, reserved VNIs must be configured. Otherwise, the M-LAG cannot be set up.</li><li>The reserved VNIs on the two M-LAG member devices must be the same.</li><li>In the virtual peer-link solution, VLAN traffic between M-LAG member devices needs to be forwarded through the virtual peer-link. VLAN IDs need to be converted into VNIs so that the VLAN traffic is forwarded through a bypass VXLAN tunnel. In this case, 4096 VNIs need to be reserved. VNIs 1 to 4094 are reserved for mapping from VLAN IDs to VNIs, and VNIs 4095 and 4096 are reserved for the M-LAG mechanism.</li></ul>
+</div></div>
+</li><li>Exit the NVE interface view.<pre class="screen"><strong>quit</strong></pre>
+</li><li>(Optional) Configure a VLAN to contain only the peer-link interface.<ol type="a"><li>Create a VLAN and enter the VLAN view. If the VLAN has been created, the VLAN view is displayed.<pre class="screen"><a href="cmdqueryname=vlan"><b><span class="cmdname">vlan</span></b></a> <i><span class="varname">vlan-id</span></i></pre>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Based on service requirements, you can also run the <strong>vlan range</strong> { <i><span class="varname">vlan-id1</span></i> [ <strong>to</strong> <i><span class="varname">vlan-id2</span></i> ] } &amp;&lt;1-10&gt; command in the system view to create a temporary VLAN range and enter the VLAN range view.</p>
+</div></div>
+</li><li>Configure the VLAN to contain only the peer-link interface so that packets from the VLAN can be forwarded only on the peer-link interface.<pre class="screen"><a href="cmdqueryname=m-lag+peer-link+reserved"><b><span class="cmdname">m-lag peer-link reserved</span></b></a></pre>
+<p>By default, a VLAN can contain a peer-link interface and other Layer 2 interfaces.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In a multicast over VXLAN scenario, as long as the receiver and multicast source are dual-homed to the two member devices in the same M-LAG, the VLANIF interface corresponding to the VLAN configured with the <a href="cmdqueryname=m-lag+peer-link+reserved"><b><span class="cmdname">m-lag peer-link reserved</span></b></a> command cannot be used to establish a bypass VXLAN tunnel, regardless of whether the receiver and multicast source are in the same VLAN. Otherwise, the receiver will receive redundant multicast traffic.</p>
+</div></div>
+</li></ol>
+</li><li>Commit the configuration.<pre class="screen"><strong>commit</strong></pre>
+</li></ol>
+</li></ul>
+</div></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../dc/dc_cfg_m-lag_0020.html">Configuring an M-LAG
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../dc/dc_cfg_m-lag_0013.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../dc/dc_cfg_m-lag_0011.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

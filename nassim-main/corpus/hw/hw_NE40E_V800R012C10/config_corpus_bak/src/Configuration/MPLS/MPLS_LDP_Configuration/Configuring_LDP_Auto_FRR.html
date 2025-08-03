@@ -1,0 +1,134 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring LDP Auto FRR">
+<meta name="abstract" content="LDP Auto Fast Reroute (FRR) can be configured to rapidly trigger a service switchover if a fault occurs, which improves network reliability.">
+<meta name="description" content="LDP Auto Fast Reroute (FRR) can be configured to rapidly trigger a service switchover if a fault occurs, which improves network reliability.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_0000.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_0071.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_2033.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_0050.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_0052.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_0213.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_rlfa_trap.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_0051.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="ldp-p2pvrp,w00800033,z00545680,w00556928,w00606909,z00809835,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="MPLS LDP">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="MPLS LDP">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="featurename" content="MPLS LDP">
+<meta name="featuretype" content="MPLS">
+<meta name="OWNER" content="z00809835">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="b00896120">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172368494">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Configuring LDP Auto FRR</title>
+</head>
+<body><a name="EN-US_TASK_0172368494"></a><a name="EN-US_TASK_0172368494"></a>
+
+<div class="articleBoxWithoutHead">
+
+<h1 class="topicTitle-h1">Configuring LDP Auto FRR</h1>
+
+
+
+<div class="taskbody"><p>LDP Auto Fast Reroute (FRR) can be configured to rapidly trigger a service switchover if a fault occurs, which improves network reliability.</p>
+
+<div class="context"><a name="EN-US_TASK_0172368494__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Usage Scenario</h4><p>On an MPLS network with a backup link, if a link fault occurs, Interior Gateway Protocol (IGP) routes converge and routes related to the backup link become available. Traffic on an LDP LSP can be switched to a backup path only after IGP routes are converged successfully. Before the switchover is complete, traffic is interrupted. To prevent traffic interruptions, LDP FRR can be configured.</p>
+<p>LDP FRR uses the liberal label retention mode, obtains a liberal label, and applies for a forwarding entry associated with the label. It then forwards the forwarding entry to the forwarding plane as a backup forwarding entry used by the primary LSP. On the network enabled with LDP FRR, the interface can detect a fault that occurs on itself, and a BFD session associated with the interface can also detect a failure in the interface or the primary LSP established on the interface. If a fault occurs, LDP FRR is notified of the failure and rapidly forwards traffic to a backup LSP, protecting traffic on the primary LSP. The traffic switchover is performed within 50 milliseconds, which minimizes the traffic interruption time.</p>
+<p>LDP Auto FRR depends on IGP FRR. When IGP FRR is enabled, LDP Auto FRR will be automatically enabled, and a backup LSP will be established based on a specific policy.</p>
+<p>LFA Auto FRR cannot be used to calculate alternate links on large-scale networks, especially on ring networks. To address this problem, enable Remote LFA Auto FRR.</p>
+</div></div>
+
+<div class="context"><a name="EN-US_TASK_0172368494__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Pre-configuration Tasks</h4><p>Before configuring LDP Auto FRR, complete the following tasks:</p>
+<ul><li><p>Assign an IP address to each interface to implement IP connectivity.</p>
+</li><li><p>Configure an IGP to advertise the route to each network segment of each interface and to advertise the host route to each LSR ID.</p>
+</li><li><p><a href="dc_vrp_ldp-p2p_cfg_0015.html">Configure an LDP LSP</a> to establish a primary LDP LSP.</p>
+</li><li><p>Configure IGP Auto FRR (<a href="dc_vrp_isis_cfg_0091.html">IS-IS
+Auto FRR</a> or <a href="dc_vrp_ospf_cfg_2009.html">OSPF IP FRR</a>).</p>
+</li><li><p>Before you configure remote LFA FRR, configure LDP LSPs to perform recursion hop by hop between the source node and PQ node. That is, <a href="dc_vrp_ldp-p2p_cfg_0003.html">configure a local LDP session</a> between each pair of directly connected nodes along the link from the source node to PQ node.</p>
+</li></ul>
+</div></div>
+
+</div>
+
+
+<ul class="ullinks">
+<dl>
+<dt>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_0050.html">Enabling LDP Auto FRR</a>
+</dt>
+<dd>
+If LDP auto FRR is needed, configure it on the ingress or a transit node of a tunnel.</dd>
+</dl>
+<dl>
+<dt>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_0052.html">(Optional) Configuring Graceful Deletion for LDP Sessions</a>
+</dt>
+<dd>
+LDP graceful deletion can be configured to speed up LDP FRR traffic switching.</dd>
+</dl>
+<dl>
+<dt>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_0213.html">(Optional) Enabling the Coexistence of ECMP and FRR</a>
+</dt>
+<dd>
+The coexistence of ECMP and FRR can be enabled so that protection paths can be established for ECMP paths, preventing traffic loss stemming from an ECMP path disconnection.</dd>
+</dl>
+<dl>
+<dt>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_rlfa_trap.html">(Optional) Configuring the Function to Report Remote LDP Session Down Traps Generated Due to RLFA Route Deletion</a>
+</dt>
+<dd>
+In a remote LFA FRR scenario, enable the function to report remote LDP session down traps generated due to RLFA route deletion if the function is required.</dd>
+</dl>
+<dl>
+<dt>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_0051.html">Verifying the Configuration</a>
+</dt>
+<dd>
+After configuring LDP Auto FRR, you can view information about the LDP Auto FRR LSP.</dd>
+</dl>
+</ul>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_0000.html">MPLS LDP Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_0071.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_2033.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

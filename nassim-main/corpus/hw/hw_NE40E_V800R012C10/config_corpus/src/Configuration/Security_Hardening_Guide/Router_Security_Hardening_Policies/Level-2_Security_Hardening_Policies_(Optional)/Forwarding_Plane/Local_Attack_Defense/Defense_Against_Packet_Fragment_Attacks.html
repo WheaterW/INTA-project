@@ -1,0 +1,102 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Defense Against Packet Fragment Attacks">
+<meta name="abstract" content="">
+<meta name="description" content="">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_maintenance_0030.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_maintenance_0031.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_maintenance_0033.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z00588052,w00606909">
+<meta name="DC.Publisher" content="20240229">
+<meta name="OWNER" content="z00588052,w00843073">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="x60031980">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001134623468">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Defense Against Packet Fragment Attacks</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001134623468"></a><a name="EN-US_CONCEPT_0000001134623468"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Defense Against Packet Fragment Attacks</h1>
+<div><p></p>
+<div class="section"><h4 class="sectiontitle">Security Policy</h4><p>Teardrop attacks target fragments that are not properly reassembled. To defend a system against teardrop attacks, the system must reassemble packet fragments properly and discard packets that are not properly reassembled. For repeated packet fragment attacks, no effective measures are available. An interface board may fail to receive all fragments due to trunk and load sharing on an IP network. Therefore, packet fragments cannot be reassembled on an interface board. If packet fragments are reassembled on a main control board, the CPU of the main control board and inter-board communication resources are consumed. To defend the system against repeated packet fragment attacks, the forwarding engine sets a committed access rate (CAR) for packet fragments separately on an interface board to prevent great numbers of packet fragments from attacking the CPU. The CAR parameter can be configured.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Attack Methods</h4><p>Packet fragment attacks are classified into the following categories:</p>
+<ul><li><p>Excessive fragments</p>
+<p>Attackers produce a great number of fragments with a minimum size of 8 bytes. Normally, the IP header contains 20 bytes, and the maximum IP payload is 65515 bytes. If the data is fragmented and each IP payload contains 8 bytes, a total of 8189. 375 fragments are obtained. (If a packet is divided into 8189 fragments, the IP payload does not reach 65515 bytes. If a packet is divided into 8190 fragments, the IP payload exceeds 65515 bytes.) A large number of small fragments are often malicious. If these small fragments are sent to a <span class="keyword">Router</span>, the <span class="keyword">Router</span> attempts to reassemble these fragments, which consumes a large number of CPU resources.</p>
+</li><li><p>Teardrop attacks</p>
+<p>Teardrop attacks are the most famous IP fragmentation attacks. They are initiated by producing IP fragmentation errors in UDP packets, causing the second fragment to be contained in the first fragment. In the first fragment, the IP payload is 36 bytes, the total length is 56 bytes (correct), the protocol is UDP, and the UDP checksum is 0 (no CRC). In the second fragment, the IP payload is 4 bytes, the total length is 24 bytes (correct), the protocol is UDP, and the offset is 24 (3 x 8), which is incorrect. The correct offset is 36.</p>
+</li><li><p>Syndrop attacks</p>
+<p>The principle is similar to that of a teardrop attack, except that the TCP protocol is used, the flag is SYN, and a packet contains padding. In the first fragment, the IP payload is 28 bytes (byte 0 to byte 27, including the TCP header) and the IP header is 20 bytes. In the second fragment, the offset is 24, the total length of the payload is 4 bytes (byte 24 to byte 27), and the IP header is 20 bytes.</p>
+</li><li><p>Nesta attacks</p>
+<p>A packet is divided into three fragments. In the first fragment, the IP payload is 18 bytes (byte 0 to byte 17), the protocol is UDP, and the checksum is 0. In the second fragment, the offset is 6 x 8 = 48, the IP payload is 116 bytes. If there is no subsequent fragment, the second fragment is the end fragment. In the third fragment, the offset is 0, the <strong>more frag</strong> value is 1 (indicating there are subsequent fragments), the size of the IP option is 40 bytes (all EOL), and the IP payload is 224 bytes.</p>
+</li><li><p>FAWX attacks</p>
+<p>During a FAWX attack, incorrectly fragmented IGMP packets are sent. Two IGMP packet fragments are sent. The first fragment is 9 bytes. In the second fragment, the offset is 8, the IP payload is 16 bytes, and there is no end fragment.</p>
+</li><li><p>BONK attacks</p>
+<p>BONK attacks are similar to NewTear attacks, except that the IP payload of the first fragment is 36 bytes and the UDP checksum is 0; the offset of the second fragment is 32; the length is 4 bytes.</p>
+</li><li><p>Dead ping attacks</p>
+<p>The total length of an ICMP Echo Request exceeds 65535 bytes, causing the protocol stack to collapse. During this type of attack, IP packets are fragmented to cause the total length of the IP payload and the IP header exceed 65535 bytes.</p>
+</li><li><p>Jolt attacks</p>
+<p>Jolt attacks are similar to Dead Ping attacks. A packet contains a total of 173 fragments. The IP payload of each fragment is 380 bytes. Therefore, the total length is 65760 bytes (173 x 380 + 20), which far exceed 65535 bytes.</p>
+</li><li><p>Repeated packet fragment attacks</p>
+<p>During this type of attack, the same fragment is sent more than twice. This can bring about two different results. In the first case, the first and second fragments have the same sequence number because both may be retransmitted. In the second case, the first and second fragments have different sequence numbers, and the system needs to determine which fragment is to be reserved and which fragment is to be discarded, or whether both fragments are to be discarded.</p>
+</li><li><p>NewTear attacks</p>
+<p>NewTear attacks are similar to Syndrop attacks in terms of fragments, except that the protocol is UDP, the IP payload of the first fragment is 28 bytes (byte 0 to byte 27; including the UDP header; UDP checksum is 0), and the offset of the second fragment is 24. The total payload length is 4 bytes (byte 24 to byte 27).</p>
+</li><li><p>Rose attacks</p>
+<p>The IP protocol can be UDP or TCP.</p>
+<ul><li><p>TCP: There are a total of two fragments. The IP payload length of the first fragment is 48 bytes. The IP payload length of the second fragment is 32 bytes, but the offset is 65408, and the <strong>more frag</strong> value is 0 (indicating there is no subsequent fragment).</p>
+</li><li>UDP: There are a total of two fragments. The IP payload length of the first fragment is 40 bytes. The IP payload length of the second fragment is 32 bytes, but the offset is 65408, and the <strong>more frag</strong> value is 0 (indicating there is no subsequent fragment).</li></ul>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration and Maintenance Methods</h4><ul><li><p>Enable or disable defense against packet fragment attacks.</p>
+<p><a href="cmdqueryname=fragment-flood+enable"><b><span class="cmdname">fragment-flood enable</span></b></a></p>
+<p><a href="cmdqueryname=undo+fragment-flood+enable"><b><span class="cmdname">undo fragment-flood enable</span></b></a></p>
+</li><li><p>Delete statistics about packet fragment attacks on all the interface boards or a specified interface board.</p>
+<p><a href="cmdqueryname=reset+cpu-defend+car+fragment+statistics"><b><span class="cmdname">reset cpu-defend car fragment statistics</span></b></a></p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Verifying the Security Hardening Result</h4><ul><li><p>Check statistics about packet fragment attacks on all the interface boards or a specified interface board.</p>
+<p><a href="cmdqueryname=display+cpu-defend+car+fragment+statistics"><b><span class="cmdname">display cpu-defend car fragment statistics</span></b></a></p>
+</li><li><p>Check detailed information about attack source tracing.</p>
+<p><a href="cmdqueryname=display+attack-source-trace+verbose"><b><span class="cmdname">display attack-source-trace verbose</span></b></a></p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration and Maintenance Suggestions</h4><p>None</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_maintenance_0030.html">Local Attack Defense
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_maintenance_0031.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_maintenance_0033.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

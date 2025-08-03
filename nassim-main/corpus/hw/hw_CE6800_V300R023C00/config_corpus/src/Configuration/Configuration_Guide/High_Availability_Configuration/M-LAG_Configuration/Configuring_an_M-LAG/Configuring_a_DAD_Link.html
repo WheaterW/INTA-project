@@ -1,0 +1,88 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring a DAD Link">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_cfg_m-lag_0020.html">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_cfg_m-lag_0008.html">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_cfg_m-lag_0009.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="M-LAG">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="M-LAG">
+<meta name="featuretype" content="High Availability">
+<meta name="featurename" content="M-LAG">
+<meta name="featuretype" content="High Availability">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001563769157">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Configuring a DAD Link</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001563769157"></a><a name="EN-US_TASK_0000001563769157"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring a DAD Link</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001563769157__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Prerequisites</h4><p>The IP addresses of the Layer 3 interfaces between which a DAD link is set up have been configured on the M-LAG master and backup devices, and the two devices can communicate with each other. The M-LAG DAD link can be set up between Ethernet management interfaces or service interfaces, or be an independent direct link. If the M-LAG is connected to a VPN network, you need to create a VPN instance on M-LAG member devices.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001563769157__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>The DAD link is used to transmit DAD packets, which detect whether two paired devices in an M-LAG both act as M-LAG master devices, periodically between the two paired devices. If the peer-link fails, the two paired M-LAG member devices do not send protocol packets and synchronization packets to each other; instead, they both function as M-LAG master devices, leading to traffic forwarding exceptions. In this case, some interfaces on one M-LAG device enter the error-down state to prevent this problem. DAD packets are UDP packets forwarded at Layer 3, sent by the M-LAG master and backup devices to each other every 1 second, with both devices expecting to receive response packets within 45 seconds by default. If one end does not receive the DAD packets after a timeout period, the DAD status of the device changes from <strong>OK</strong> to <strong>LOST</strong>.</p>
+<p>For the <span>CE6885-LL (low latency mode)</span>: IPv6-related configurations are not supported.</p>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001563769157__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li><span>Create a DFS group and enter its view.</span><p><pre class="screen"><a href="cmdqueryname=dfs-group"><b><span class="cmdname">dfs-group</span></b></a> <i><span class="varname">dfs-group-id</span></i></pre>
+</p></li><li><span>Bind an IP address to the DFS group. Run either of the following commands. The commands cannot be configured together.</span><p><ul><li><p>Bind an IPv4 address and a VPN instance to the DFS group.</p>
+<pre class="screen"><a href="cmdqueryname=dual-active+detection+source+ip"><b><span class="cmdname">dual-active detection source ip</span></b></a> <i><span class="varname">ipv4-address1</span></i> [ <a href="cmdqueryname=vpn-instance"><b><span class="cmdname">vpn-instance</span></b></a> <i><span class="varname">vpn-instance-name</span></i> ] [ <strong><span>peer</span></strong> <i><span class="varname">ipv4-address2</span></i> [ <strong><span>udp-port</span></strong> <i><span class="varname">portnum</span></i> ] ] [<strong> timeout</strong> <em>seconds</em> ]</pre>
+</li><li><div class="p">Bind an IPv6 address and a VPN instance to the DFS group.<pre class="screen"><a href="cmdqueryname=dual-active+detection+source+ipv6"><b><span class="cmdname">dual-active detection source ipv6</span></b></a> <i><span class="varname">ipv6-address1</span></i> [ <a href="cmdqueryname=vpn-instance"><b><span class="cmdname">vpn-instance</span></b></a> <i><span class="varname">vpn-instance-name</span></i> ] [ <strong><span>peer</span></strong> <i><span class="varname">ipv6-address</span></i>2 [ <strong><span>udp-port</span></strong> <i><span class="varname">portnum</span></i> ] ] [<strong> timeout</strong> <em>seconds</em> ]</pre>
+</div>
+</li></ul>
+<p>By default, no IP address is bound to a DFS group.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>A link cannot function as both the DAD link and peer-link. Otherwise, if the link is down, DAD packets cannot be forwarded over this link, resulting in a DAD failure. As a result, interfaces on one M-LAG member device will not enter the error-down state, leading to abnormal packet forwarding.</li><li>If the M-LAG DAD link is not set up between Ethernet management interfaces, you must run the <strong>m-lag unpaired-port reserved</strong> command on the interfaces at both ends of the DAD link. If this command is not run, two master devices may exist when the peer-link fails, causing abnormal traffic forwarding.</li><li>When binding an IP address to the DFS group, you are advised to configure the <strong>peer </strong><em>ip-address</em> parameter. Otherwise, enhanced DAD for double-fault failures does not take effect.</li><li>The UDP port number of the local device must be the same as that of the peer device. To prevent a UDP port number conflict, you are advised to manually configure the <strong><span>udp-port</span></strong> <i><span class="varname">portnum</span></i> parameter.</li><li>If the peer-link is configured before the DAD link is configured, configure the DAD link when the peer-link interfaces are up to prevent interfaces on one M-LAG member device from entering the error-down state incorrectly.</li></ul>
+</div></div>
+</p></li><li><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001563769157__en-us_task_0228023023_en-us_task_0228023023_screen163801330213"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001563769157__en-us_task_0228023023_en-us_task_0228023023_en-us_concept_0141113565_cmdname1667501373175340">commit</span></b></a></pre>
+</p></li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../dc/dc_cfg_m-lag_0020.html">Configuring an M-LAG
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../dc/dc_cfg_m-lag_0008.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../dc/dc_cfg_m-lag_0009.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

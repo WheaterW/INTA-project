@@ -1,0 +1,584 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring an ERPS Single Ring">
+<meta name="abstract" content="This section provides an example for configuring an ERPS single ring.">
+<meta name="description" content="This section provides an example for configuring an ERPS single ring.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_erps_cfg_0018.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_erps_cfg_0020.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="wwx1238417">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="ERPS(G.8032)">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="ERPS(G.8032)">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="featurename" content="ERPS(G.8032)">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="featurename" content="ERPS">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="OWNER" content="c00648116,w00437000">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="wwx1238417">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172363481">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring an ERPS Single Ring</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172363481"></a><a name="EN-US_TASK_0172363481"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring an ERPS Single Ring</h1>
+<div class="taskbody"><p>This section provides an example for configuring an ERPS single ring.</p>
+<div class="context"><a name="EN-US_TASK_0172363481__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>Generally, redundant links are used on an Ethernet switching network to provide link backup and enhance network reliability. The use of redundant links, however, may produce loops, causing broadcast storms and rendering the MAC address table unstable. As a result, the communication quality deteriorates, and communication services may even be interrupted.</p>
+<p>To prevent loops caused by redundant links, enable ERPS on the <span class="keyword">devices</span> of the ring network. As shown in <a href="#EN-US_TASK_0172363481__fig_dc_vrp_erps_cfg_001901">Figure 1</a>, <span class="keyword">Device</span> A through <span class="keyword">Device</span> D constitute an aggregation ring that provides Layer 2 aggregation services and accesses a Layer 3 network for service processing. The aggregation ring runs ERPS, providing protection switching for Layer 2 redundant links. ERPS ring1 and ERPS ring2 are configured on <span class="keyword">Device</span> A through <span class="keyword">Device</span> D. P1 on <span class="keyword">Device</span> B is a blocked port on ERPS ring1, and P2 on <span class="keyword">Device</span> A is a blocked port on ERPS ring2, implementing load balancing and link backup.</p>
+<div class="fignone" id="EN-US_TASK_0172363481__fig_dc_vrp_erps_cfg_001901"><a name="EN-US_TASK_0172363481__fig_dc_vrp_erps_cfg_001901"></a><a name="fig_dc_vrp_erps_cfg_001901"></a><span class="figcap"><b>Figure 1 </b>ERPS multi-instance networking</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interfaces 1 and 2 represent GE<span>0/1/1</span> and GE<span>0/1/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_erps_cfg_001901.png"></span><br></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172363481__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure the trunk link type for all ports to be added to ERPS rings.</p>
+</li><li><p>Create ERPS rings and configure control VLANs and ERP instances for them.</p>
+</li><li><p>Add Layer 2 ports to the ERPS rings and specify port roles.</p>
+</li><li><p>Configure the guard timer and WTR timer for the ERPS rings.</p>
+</li><li><p>Configure the Layer 2 forwarding function on <span class="keyword">Device</span> A through <span class="keyword">Device</span> D.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172363481__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>ERPS ring ID, control VLAN ID, and ERP instance ID</p>
+</li><li><p>Guard timer and WTR timer values</p>
+</li><li><p>VLAN ID for Layer 2 forwarding</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172363481__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure the trunk link type for all ports to be added to ERPS rings.</span><p><p># Configure <span class="keyword">Device</span> A.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt;<strong> system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname <span class="keyword">Device</span>A</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/1</span>]<strong> portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/1</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/1</span>]<strong> port link-type trunk</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>interface gigabitethernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>]<strong> portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>]<strong> port link-type trunk</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+<p># Configure <span class="keyword">Device</span> B.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt;<strong> system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname <span class="keyword">Device</span>B</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/1</span>]<strong> portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/1</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/1</span>]<strong> port link-type trunk</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>interface gigabitethernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/2</span>]<strong> portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/2</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/2</span>]<strong> port link-type trunk</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/2</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+<p># Configure <span class="keyword">Device</span> C.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt;<strong> system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname <span class="keyword">Device</span>C</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/1</span>]<strong> portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/1</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/1</span>]<strong> port link-type trunk</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>interface gigabitethernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/2</span>]<strong> portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/2</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/2</span>]<strong> port link-type trunk</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/2</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>commit</strong></pre>
+<p># Configure <span class="keyword">Device</span> D.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt;<strong> system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname <span class="keyword">Device</span>D</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D] <strong>interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/1</span>]<strong> portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/1</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/1</span>]<strong> port link-type trunk</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D] <strong>interface gigabitethernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/2</span>]<strong> portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/2</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/2</span>]<strong> port link-type trunk</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/2</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D] <strong>commit</strong></pre>
+</p></li><li><span>Create ERPS ring1 and ERPS ring2 and configure ERP instances for the two rings. Set the control VLAN ID of ERPS ring1 to 10 and the control VLAN ID of ERPS ring2 to 20. Enable ERPS ring1 to transmit data packets carrying VLAN IDs from 100 to 200 and enable ERPS ring2 to transmit data packets carrying VLAN IDs from 300 to 400.</span><p><p># Configure <span class="keyword">Device</span> A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>erps ring 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-erps-ring1] <strong>control-vlan 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-erps-ring1] <strong>protected-instance 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-erps-ring1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>vlan instance</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-vlan-instance] <strong>instance 1 vlan 10 100 to 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-vlan-instance] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-vlan-instance] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>erps ring 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-erps-ring2] <strong>control-vlan 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-erps-ring2] <strong>protected-instance 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-erps-ring2] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>vlan instance</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-vlan-instance] <strong>instance 2 vlan 20 300 to 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-vlan-instance] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-vlan-instance] <strong>quit</strong></pre>
+<p># Configure <span class="keyword">Device</span> B.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>erps ring 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-erps-ring1] <strong>control-vlan 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-erps-ring1] <strong>protected-instance 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-erps-ring1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>vlan instance</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-vlan-instance] <strong>instance 1 vlan 10 100 to 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-vlan-instance] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-vlan-instance] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>erps ring 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-erps-ring2] <strong>control-vlan 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-erps-ring2] <strong>protected-instance 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-erps-ring2] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>vlan instance</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-vlan-instance] <strong>instance 2 vlan 20 300 to 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-vlan-instance] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-vlan-instance] <strong>quit</strong></pre>
+<p># Configure <span class="keyword">Device</span> C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>erps ring 1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-erps-ring1] <strong>control-vlan 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-erps-ring1] <strong>protected-instance 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-erps-ring1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>vlan instance</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-vlan-instance] <strong>instance 1 vlan 10 100 to 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-vlan-instance] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-vlan-instance] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>erps ring 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-erps-ring2] <strong>control-vlan 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-erps-ring2] <strong>protected-instance 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-erps-ring2] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>vlan instance</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-vlan-instance] <strong>instance 2 vlan 20 300 to 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-vlan-instance] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-vlan-instance] <strong>quit</strong></pre>
+<p># Configure <span class="keyword">Device</span> D.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D] <strong>erps ring 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-erps-ring1] <strong>control-vlan 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-erps-ring1] <strong>protected-instance 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-erps-ring1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D] <strong>vlan instance</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-vlan-instance] <strong>instance 1 vlan 10 100 to 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-vlan-instance] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D-vlan-instance] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D] <strong>erps ring 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-erps-ring2] <strong>control-vlan 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-erps-ring2] <strong>protected-instance 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-erps-ring2] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D] <strong>vlan instance</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-vlan-instance] <strong>instance 2 vlan 20 300 to 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-vlan-instance] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D-vlan-instance] <strong>quit</strong></pre>
+</p></li><li><span>Add Layer 2 ports to the ERPS rings and specify port roles. Specifically, configure GE<span>0/1/1</span> on <span class="keyword">Device</span>A and GE<span>0/1/2</span> on <span class="keyword">Device</span>B as their respective RPL owner ports.</span><p><p># Configure <span class="keyword">Device</span> A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/1</span>]<strong> stp disable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/1</span>]<strong> erps ring 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/1</span>]<strong> erps ring 2 rpl owner</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>interface gigabitethernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>]<strong> stp disable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>]<strong> erps ring 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>]<strong> erps ring 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+<p># Configure <span class="keyword">Device</span> B.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/1</span>]<strong> stp disable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/1</span>]<strong> erps ring 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/1</span>]<strong> erps ring 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>interface gigabitethernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/2</span>]<strong> stp disable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/2</span>]<strong> erps ring 1 rpl owner</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>]<strong> erps ring 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/2</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+<p># Configure <span class="keyword">Device</span> C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/1</span>]<strong> stp disable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/1</span>]<strong> erps ring 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/1</span>]<strong> erps ring 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>interface gigabitethernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/2</span>]<strong> stp disable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/2</span>]<strong> erps ring 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/2</span>]<strong> erps ring 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/2</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>commit</strong></pre>
+<p># Configure <span class="keyword">Device</span> D.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D] <strong>interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/1</span>]<strong> stp disable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/1</span>]<strong> erps ring 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/1</span>]<strong> erps ring 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D] <strong>interface gigabitethernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/2</span>]<strong> stp disable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/2</span>]<strong> erps ring 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/2</span>]<strong> erps ring 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/2</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D] <strong>commit</strong></pre>
+</p></li><li><span>Configure the guard timer and WTR timer for the ERPS rings.</span><p><p># Configure <span class="keyword">Device</span> A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>erps ring 1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-erps-ring1] <strong>wtr-timer 6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-erps-ring1] <strong>guard-timer 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-vlan-instance] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>erps ring 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-erps-ring2] <strong>wtr-timer 6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-erps-ring2] <strong>guard-timer 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-vlan-instance] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+<p># Configure <span class="keyword">Device</span> B.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>erps ring 1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-erps-ring1] <strong>wtr-timer 6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-erps-ring1] <strong>guard-timer 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-vlan-instance] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>erps ring 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-erps-ring2] <strong>wtr-timer 6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-erps-ring2] <strong>guard-timer 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-vlan-instance] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+<p># Configure <span class="keyword">Device</span> C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>erps ring 1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-erps-ring1] <strong>wtr-timer 6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-erps-ring1] <strong>guard-timer 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-vlan-instance] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>erps ring 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-erps-ring2] <strong>wtr-timer 6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-erps-ring2] <strong>guard-timer 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-vlan-instance] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>commit</strong></pre>
+<p># Configure <span class="keyword">Device</span> D.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D] <strong>erps ring 1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D-erps-ring1] <strong>wtr-timer 6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-erps-ring1] <strong>guard-timer 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-vlan-instance] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D] <strong>erps ring 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-erps-ring2] <strong>wtr-timer 6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-erps-ring2] <strong>guard-timer 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-vlan-instance] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D] <strong>commit</strong></pre>
+</p></li><li><span>Configure the Layer 2 forwarding function on <span class="keyword">Device</span> A through <span class="keyword">Device</span> D.</span><p><p># Configure <span class="keyword">Device</span> A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>vlan batch 100 to 200 300 to 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/1</span>]<strong> port trunk allow-pass vlan 100 to 200 300 to 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>interface gigabitethernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>]<strong> port trunk allow-pass vlan 100 to 200 300 to 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+<p># Configure <span class="keyword">Device</span> B.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>vlan batch 100 to 200 300 to 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/1</span>]<strong> port trunk allow-pass vlan 100 to 200 300 to 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>interface gigabitethernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/2</span>]<strong> port trunk allow-pass vlan 100 to 200 300 to 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/2</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+<p># Configure <span class="keyword">Device</span> C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>vlan batch 100 to 200 300 to 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/1</span>]<strong> port trunk allow-pass vlan 100 to 200 300 to 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>interface gigabitethernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/2</span>]<strong> port trunk allow-pass vlan 100 to 200 300 to 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/2</span>]<strong> quit</strong></pre>
+<p># Configure <span class="keyword">Device</span> D.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D] <strong>vlan batch 100 to 200 300 to 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D] <strong>interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/1</span>]<strong> port trunk allow-pass vlan 100 to 200 300 to 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D] <strong>interface gigabitethernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/2</span>]<strong> port trunk allow-pass vlan 100 to 200 300 to 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/2</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D] <strong>commit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p>After completing the configurations, run either of the following commands to verify the configuration. The following example uses the command output on <span class="keyword">Device</span> B.</p>
+<ul><li><p>Run the <a href="cmdqueryname=display+erps"><b><span class="cmdname">display erps</span></b></a> command on <span class="keyword">Device</span> B. The command output shows summary configurations of <span class="keyword">Device</span> B ports added to the ERPS ring and ring configurations.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>display erps</strong></pre>
+<pre class="screen">D  : Discarding
+F  : Forwarding
+R  : RPL Owner
+N  : RPL Neighbour
+FS : Forced Switch
+MS : Manual Switch
+Total number of rings configured = 2
+Ring  Control  WTR Timer  Guard Timer  Port 1              Port 2
+ID    VLAN     (min)      (csec)
+--------------------------------------------------------------------------------
+   1       10          6          100  (F)GE<span>0/1/1</span>          (D,R)GE<span>0/1/2</span>
+   2       20          6          100  (F)GE<span>0/1/1</span>          (F)GE<span>0/1/2</span>
+--------------------------------------------------------------------------------
+</pre>
+</li><li><p>Run the <a href="cmdqueryname=display+erps+verbose"><b><span class="cmdname">display erps verbose</span></b></a> command on <span class="keyword">Device</span> B. The command output shows detailed configurations of <span class="keyword">Device</span> B ports added to the ERPS ring and ring configurations.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>display erps verbose</strong></pre>
+<pre class="screen">Ring ID                             : 1
+Description                         : Ring 1
+Control Vlan                        : 10
+Protected Instance                  : 1
+Service Vlan                        : 100 to 200
+WTR Timer Setting (min)             : 6      Running (s)           : 0
+Guard Timer Setting (csec)          : 100    Running (csec)        : 0
+Holdoff Timer Setting (deciseconds) : 0      Running (deciseconds) : 0
+WTB Timer Running (csec)            : 0
+Ring State                          : Idle
+RAPS_MEL                            : 7
+Revertive Mode                      : Revertive
+R-APS Channel Mode                  : -
+Version                             : 1
+Sub-ring                            : No
+Forced Switch Port                  : -
+Manual Switch Port                  : -
+TC-Notify                           : -
+Time since last topology change     : 0 days 0h:35m:5s
+--------------------------------------------------------------------------------
+Port                Port Role     Port Status     Signal Status
+--------------------------------------------------------------------------------
+GE<span>0/1/1</span>             Common        Forwarding      Non-failed
+GE<span>0/1/2</span>             RPL Owner     Discarding      Non-failed
+
+Ring ID                             : 2
+Description                         : Ring 2
+Control Vlan                        : 20
+Protected Instance                  : 2
+Service Vlan                        : 300 to 400
+WTR Timer Setting (min)             : 6      Running (s)           : 0
+Guard Timer Setting (csec)          : 100    Running (csec)        : 0
+Holdoff Timer Setting (deciseconds) : 0      Running (deciseconds) : 0
+WTB Timer Running (sec)             : 0
+Ring State                          : Idle
+RAPS_MEL                            : 7
+Revertive Mode                      : Revertive
+R-APS Channel Mode                  : -
+Version                             : 1
+Sub-ring                            : No 
+Forced Switch Port                  : -
+Manual Switch Port                  : -
+TC-Notify                           : -
+Time since last topology change     : 0 days 0h:35m:30s
+--------------------------------------------------------------------------------
+Port                Port Role     Port Status     Signal Status
+--------------------------------------------------------------------------------
+GE<span>0/1/1</span>             Common        Forwarding      Non-failed
+GE<span>0/1/2</span>             Common        Forwarding      Non-failed</pre>
+</li></ul>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172363481__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p><span class="keyword">Device</span> A configuration file</p>
+<pre class="screen">#
+ sysname <span class="keyword">Device</span>A
+#
+ vlan batch 100 to 200 300 to 400
+#
+vlan instance
+ instance 1 vlan 10 100 to 200
+ instance 2 vlan 20 300 to 400
+#
+erps ring 1
+ control-vlan 10
+ protected-instance 1
+ wtr-timer 6
+ guard-timer 100
+#
+erps ring 2
+ control-vlan 20
+ protected-instance 2
+ wtr-timer 6
+ guard-timer 100
+#
+interface GigabitEthernet<span>0/1/1</span>
+ portswitch
+ undo shutdown
+ port link-type trunk
+ port trunk allow-pass vlan 10 20 100 to 200 300 to 400
+ stp disable
+ erps ring 1
+ erps ring 2 rpl owner
+#
+interface GigabitEthernet<span>0/1/2</span>
+ portswitch
+ undo shutdown
+ port link-type trunk
+ port trunk allow-pass vlan 10 20 100 to 200 300 to 400
+ stp disable
+ erps ring 1
+ erps ring 2
+#
+return</pre>
+</li><li><p><span class="keyword">Device</span> B configuration file</p>
+<pre class="screen">#
+ sysname <span class="keyword">Device</span>B
+#
+ vlan batch 100 to 200 300 to 400
+#
+vlan instance
+ instance 1 vlan 10 100 to 200
+ instance 2 vlan 20 300 to 400
+#
+erps ring 1
+ control-vlan 10
+ protected-instance 1
+ wtr-timer 6
+ guard-timer 100
+#
+erps ring 2
+ control-vlan 20
+ protected-instance 2
+ wtr-timer 6
+ guard-timer 100
+#
+interface GigabitEthernet<span>0/1/1</span>
+ portswitch
+ undo shutdown
+ port link-type trunk
+ port trunk allow-pass vlan 10 20 100 to 200 300 to 400
+ stp disable
+ erps ring 1
+ erps ring 2
+#
+interface GigabitEthernet<span>0/1/2</span>
+ portswitch
+ undo shutdown
+ port link-type trunk
+ port trunk allow-pass vlan 10 20 100 to 200 300 to 400
+ stp disable
+ erps ring 1 rpl owner
+ erps ring 2
+#
+return</pre>
+</li><li><p><span class="keyword">Device</span> C configuration file</p>
+<pre class="screen">#
+ sysname <span class="keyword">Device</span>C
+#
+ vlan batch 100 to 200 300 to 400
+#
+vlan instance
+ instance 1 vlan 10 100 to 200
+ instance 2 vlan 20 300 to 400
+#
+erps ring 1
+ control-vlan 10
+ protected-instance 1
+ wtr-timer 6
+ guard-timer 100
+#
+erps ring 2
+ control-vlan 20
+ protected-instance 2
+ wtr-timer 6
+ guard-timer 100
+#
+interface GigabitEthernet<span>0/1/1</span>
+ portswitch
+ undo shutdown
+ port link-type trunk
+ port trunk allow-pass vlan 10 20 100 to 200 300 to 400
+ stp disable
+ erps ring 1
+ erps ring 2
+#
+interface GigabitEthernet<span>0/1/2</span>
+ portswitch
+ undo shutdown
+ port link-type trunk
+ port trunk allow-pass vlan 10 20 100 to 200 300 to 400
+ stp disable
+ erps ring 1
+ erps ring 2
+#
+return</pre>
+</li><li><p><span class="keyword">Device</span> D configuration file</p>
+<pre class="screen">#
+ sysname <span class="keyword">Device</span>D
+#
+ vlan batch 100 to 200 300 to 400
+#
+vlan instance
+ instance 1 vlan 10 100 to 200
+ instance 2 vlan 20 300 to 400
+#
+erps ring 1
+ control-vlan 10
+ protected-instance 1
+ wtr-timer 6
+ guard-timer 100
+#
+erps ring 2
+ control-vlan 20
+ protected-instance 2
+ wtr-timer 6
+ guard-timer 100
+#
+interface GigabitEthernet<span>0/1/1</span>
+ portswitch
+ undo shutdown
+ port link-type trunk
+ port trunk allow-pass vlan 10 20 100 to 200 300 to 400
+ stp disable
+ erps ring 1
+ erps ring 2
+#
+interface GigabitEthernet<span>0/1/2</span>
+ portswitch
+ undo shutdown
+ port link-type trunk
+ port trunk allow-pass vlan 10 20 100 to 200 300 to 400
+ stp disable
+ erps ring 1
+ erps ring 2
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_erps_cfg_0018.html">Configuration Examples for ERPS
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_erps_cfg_0020.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

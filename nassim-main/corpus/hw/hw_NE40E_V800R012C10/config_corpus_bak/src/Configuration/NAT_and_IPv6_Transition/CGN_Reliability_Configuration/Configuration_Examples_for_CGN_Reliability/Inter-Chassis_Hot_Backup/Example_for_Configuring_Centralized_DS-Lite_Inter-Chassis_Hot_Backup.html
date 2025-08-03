@@ -1,0 +1,361 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Centralized DS-Lite Inter-Chassis Hot Backup">
+<meta name="abstract" content="This section provides an example for configuring inter-chassis HA backup for DS-Lite services in centralized deployment scenarios.">
+<meta name="description" content="This section provides an example for configuring inter-chassis HA backup for DS-Lite services in centralized deployment scenarios.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0043.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0037.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0046.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="c00549182">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="OWNER" content="c00549182">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="m00390128">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172362470">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/jquery.min.idp.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/RowOrColfreezeSupport.js"></script>
+
+<script type="text/javascript">
+setTimeout(function(){
+	jQueryHW(document).ready(function(){
+		jQueryHW("table[rowfreeze='yes']").rowfreeze();
+		jQueryHW("table[colfreeze='yes']").colfreeze();
+	});
+},500);
+</script>
+<title>Example for Configuring Centralized DS-Lite Inter-Chassis Hot Backup</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172362470"></a><a name="EN-US_TASK_0172362470"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Centralized DS-Lite Inter-Chassis Hot Backup</h1>
+<div class="taskbody"><p>This section provides an example for configuring inter-chassis HA backup for DS-Lite services in centralized deployment scenarios.</p>
+<div class="context"><a name="EN-US_TASK_0172362470__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In centralized deployment scenarios, CGN1 and CGN2 are deployed close to two CRs on the MAN core as the standalone devices. CGN boards are installed on the CGN devices. The two CGN devices use GE interfaces to establish a VRRP channel. To implement inter-chassis HA backup for DS-Lite services, configure VRRP to determine the master/backup CGN status, and associate HA with VRRP. As shown in <a href="#EN-US_TASK_0172362470__fig_dc_ne_cgn-reliability_cfg_003801">Figure 1</a>, home users using private IPv4 addresses access an IPv6 MAN through the CPE that supports dual stack and DS-Lite. A DS-Lite tunnel is established between the CPE and DS-Lite device. The CPE transmits traffic with the private IPv4 address along the DS-Lite tunnel to the DS-Lite device. The DS-Lite device decapsulates traffic, uses NAT to translate the private IPv4 address to a public IPv4 address, and forwards the traffic to the IPv4 Internet.</p>
+<div class="fignone" id="EN-US_TASK_0172362470__fig_dc_ne_cgn-reliability_cfg_003801"><a name="EN-US_TASK_0172362470__fig_dc_ne_cgn-reliability_cfg_003801"></a><a name="fig_dc_ne_cgn-reliability_cfg_003801"></a><span class="figcap"><b>Figure 1 </b>Inter-chassis backup networking</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interface1, interface2, and interface3 in this example represent GE<span>0/1/1</span>, GE<span>0/1/2</span>, and GE<span>0/1/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_ne_cgn-reliability_cfg_003801.png" width="NaN" height="NaN"></span></div>
+<h4 class="sectiontitle">Scenario Requirements</h4><p>A service board is installed on CGN1 and is located in slot <span>1</span>. A service board is installed on CGN2 and is located in slot <span>2</span>. Configure the two CGN devices to implement HA backup for DS-Lite services between CPU 0 in CGN1's slot <span>1</span> and CPU 0 in CGN2's slot <span>2</span>.</p>
+<div class="fignone"><span class="figcap"><b>Figure 2 </b>Inter-chassis HA backup</span><br><span><img class="vsd" src="images/fig_fig_dc_ne_cgn-reliability_cfg_003802.png" width="NaN" height="NaN"></span></div>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172362470__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Enable HA hot backup.</li><li><p>Create and configure a VRRP group.</p>
+</li><li><p>Create an HA backup group, add members to the group, and configure a VRRP channel.</p>
+</li><li><p>Associate HA with VRRP.</p>
+</li><li><p>Bind the HA backup group to the VRRP group.</p>
+</li><li><p>Create a service-instance group and bind it to the HA backup group.</p>
+</li><li><p>Create a DS-Lite instance, bind the DS-Lite instance to the service-instance group, and configure an address pool and an address translation policy.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172362470__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" rowfreeze="yes" frame="border" border="1" rules="all"><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="11.87%" id="mcps1.4.3.3.1.3.1.1" liSelected="liSelected"><p>No.</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="88.13%" id="mcps1.4.3.3.1.3.1.2" liSelected="liSelected"><p>Data</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="11.87%" headers="mcps1.4.3.3.1.3.1.1 "><p>1</p>
+</td>
+<td class="cellrowborder" valign="top" width="88.13%" headers="mcps1.4.3.3.1.3.1.2 "><p>ID of an HA backup group</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="11.87%" headers="mcps1.4.3.3.1.3.1.1 "><p>2</p>
+</td>
+<td class="cellrowborder" valign="top" width="88.13%" headers="mcps1.4.3.3.1.3.1.2 "><p>Slot ID and CPU ID of CGN1's active service board (CPU 0 in slot <span>1</span>)</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="11.87%" headers="mcps1.4.3.3.1.3.1.1 "><p>3</p>
+</td>
+<td class="cellrowborder" valign="top" width="88.13%" headers="mcps1.4.3.3.1.3.1.2 "><p>Slot ID and CPU ID of CGN2's standby service board (CPU 0 in slot <span>2</span>)</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="11.87%" headers="mcps1.4.3.3.1.3.1.1 "><p>4</p>
+</td>
+<td class="cellrowborder" valign="top" width="88.13%" headers="mcps1.4.3.3.1.3.1.2 "><p>VRRP interfaces on CGN1 and CGN2</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="11.87%" headers="mcps1.4.3.3.1.3.1.1 "><p>5</p>
+</td>
+<td class="cellrowborder" valign="top" width="88.13%" headers="mcps1.4.3.3.1.3.1.2 "><p>IP addresses of VRRP interfaces on CGN1 and CGN2</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="11.87%" headers="mcps1.4.3.3.1.3.1.1 "><p>6</p>
+</td>
+<td class="cellrowborder" valign="top" width="88.13%" headers="mcps1.4.3.3.1.3.1.2 "><p>Index of a VRRP group</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="11.87%" headers="mcps1.4.3.3.1.3.1.1 "><p>7</p>
+</td>
+<td class="cellrowborder" valign="top" width="88.13%" headers="mcps1.4.3.3.1.3.1.2 "><p>Virtual IP address of the VRRP group</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="11.87%" headers="mcps1.4.3.3.1.3.1.1 "><p>8</p>
+</td>
+<td class="cellrowborder" valign="top" width="88.13%" headers="mcps1.4.3.3.1.3.1.2 "><p>Priorities of VRRP group members</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="11.87%" headers="mcps1.4.3.3.1.3.1.1 "><p>9</p>
+</td>
+<td class="cellrowborder" valign="top" width="88.13%" headers="mcps1.4.3.3.1.3.1.2 "><p>VRRP preemption delay</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="11.87%" headers="mcps1.4.3.3.1.3.1.1 "><p>10</p>
+</td>
+<td class="cellrowborder" valign="top" width="88.13%" headers="mcps1.4.3.3.1.3.1.2 "><p>Name of a service-instance group</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="11.87%" headers="mcps1.4.3.3.1.3.1.1 "><p>11</p>
+</td>
+<td class="cellrowborder" valign="top" width="88.13%" headers="mcps1.4.3.3.1.3.1.2 "><p>Name and index of a DS-Lite instance</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172362470__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enable HA hot backup in the system view of master and backup devices.</span><p><p># Enable HA hot backup on CGN1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN1] <strong>vsm on-board-mode disable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN1] <strong>service-ha hot-backup enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN1] <strong>commit</strong></pre>
+</p><p><p># Enable HA hot backup on CGN2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN2] <strong>vsm on-board-mode disable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN2] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN2] <strong>service-ha hot-backup enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN2] <strong>commit</strong></pre>
+</p></li><li><span>Create and configure a VRRP group on CGN1 and CGN2.</span><p><p># Enter the GE <span>0/1/3</span> interface view on CGN1, create VRRP group 10, and set the virtual IP address of the VRRP group to 10.0.0.3. Configure the VRRP group as an mVRRP group and enable the VRRP group to ignore an interface Down event. Set CGN1's priority in the VRRP group to 150 and the VRRP preemption delay to 1500s. Configure the VRRP group to monitor GE <span>0/1/2</span> and GE <span>0/1/1</span>, and set the value by which CGN1's priority decreases to 50 if the status of GE <span>0/1/2</span> or GE <span>0/1/1</span> changes to Down.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN1] <strong>interface GigabitEthernet <span>0/1/3</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN1-GigabitEthernet<span>0/1/3</span>] <strong>ip address 10.0.0.1 255.255.255.0</strong>
+[<span class="keyword">*</span>CGN1-GigabitEthernet<span>0/1/3</span>] <strong>vrrp vrid 10 virtual-ip 10.0.0.3</strong>
+[<span class="keyword">*</span>CGN1-GigabitEthernet<span>0/1/3</span>] <strong>admin-vrrp vrid 10 ignore-if-down</strong>
+[<span class="keyword">*</span>CGN1-GigabitEthernet<span>0/1/3</span>] <strong>vrrp vrid 10 priority 150</strong>
+[<span class="keyword">*</span>CGN1-GigabitEthernet<span>0/1/3</span>] <strong>vrrp vrid 10 preempt-mode timer delay 1500</strong>
+[<span class="keyword">*</span>CGN1-GigabitEthernet<span>0/1/3</span>] <strong>vrrp recover-delay 20</strong>
+[<span class="keyword">*</span>CGN1-GigabitEthernet<span>0/1/3</span>] <strong>vrrp vrid 10 track interface GigabitEthernet <span>0/1/2</span> reduced 50</strong>
+[<span class="keyword">*</span>CGN1-GigabitEthernet<span>0/1/3</span>] <strong>vrrp vrid 10 track interface GigabitEthernet <span>0/1/1</span> reduced 50</strong>
+[<span class="keyword">*</span>CGN1-GigabitEthernet<span>0/1/3</span>] <strong>quit</strong>
+[<span class="keyword">*</span>CGN1] <strong>commit</strong></pre>
+<p># Enter the GE <span>0/1/3</span> interface view on CGN2, create VRRP group 10, and set the virtual IP address of the VRRP group to 10.0.0.3. Configure the VRRP group as an mVRRP group and enable the VRRP group to ignore an interface Down event. Set CGN2's priority in the VRRP group to 120.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN2] <strong>interface GigabitEthernet <span>0/1/3</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN2-GigabitEthernet<span>0/1/3</span>] <strong>ip address 10.0.0.2 255.255.255.0</strong>
+[<span class="keyword">*</span>CGN2-GigabitEthernet<span>0/1/3</span>] <strong>vrrp vrid 10 virtual-ip 10.0.0.3</strong>
+[<span class="keyword">*</span>CGN2-GigabitEthernet<span>0/1/3</span>] <strong>admin-vrrp vrid 10 ignore-if-down</strong>
+[<span class="keyword">*</span>CGN2-GigabitEthernet<span>0/1/3</span>] <strong>vrrp vrid 10 priority 120</strong>
+[<span class="keyword">*</span>CGN2-GigabitEthernet<span>0/1/3</span>] <strong>quit</strong>
+[<span class="keyword">*</span>CGN2] <strong>commit</strong></pre>
+</p></li><li><span>Create an HA backup group on CGN1 and CGN2, add members to the group, and configure a VRRP channel.</span><p><div class="note" id="EN-US_TASK_0172362470__en-us_task_0172362454_note111357234319"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p id="EN-US_TASK_0172362470__en-us_task_0172362454_p2135823431">Service-location IDs and the number of service-location groups configured on the master and backup devices must be the same. Otherwise, backup may fail, affecting services.</p>
+</div></div>
+</p><p><p># Create HA backup group 21 on CGN1, add CPU 0 in slot <span>1</span> to the group, and set the local VRRP outbound interface to GE <span>0/1/3</span> and the peer IP address to 10.0.0.2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN1] <strong>service-location 21</strong>
+[<span class="keyword">*</span>CGN1-service-location-21] <strong>location slot <span>1</span> </strong>
+[<span class="keyword">*</span>CGN1-service-location-21] <strong>remote-backup interface GigabitEthernet <span>0/1/3</span> peer 10.0.0.2</strong>
+[<span class="keyword">*</span>CGN1-service-location-21] <strong>quit</strong>
+[<span class="keyword">*</span>CGN1] <strong>commit</strong></pre>
+<p># Create HA backup group 21 on CGN2, add CPU 0 in slot <span>2</span> to the group, and set the local VRRP outbound interface to GE <span>0/1/3</span> and the peer IP address to 10.0.0.1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN2] <strong>service-location 21</strong>
+[<span class="keyword">*</span>CGN2-service-location-21] <strong>location slot <span>2</span> </strong>
+[<span class="keyword">*</span>CGN2-service-location-21] <strong>remote-backup interface GigabitEthernet <span>0/1/3</span> peer 10.0.0.1</strong>
+[<span class="keyword">*</span>CGN2-service-location-21] <strong>quit</strong>
+[<span class="keyword">*</span>CGN2] <strong>commit</strong></pre>
+</p></li><li><span>Associate HA with VRRP on CGN1 and CGN2.</span><p><p># Enter the GE <span>0/1/3</span> interface view on CGN1, and associate HA backup group 21 with VRRP group 10.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN1] <strong>interface GigabitEthernet <span>0/1/3</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN1-GigabitEthernet<span>0/1/3</span>] <strong>vrrp vrid 10 track service-location 21 reduced 50</strong>
+[<span class="keyword">*</span>CGN1-GigabitEthernet<span>0/1/3</span>] <strong>quit</strong>
+[<span class="keyword">*</span>CGN1] <strong>commit</strong></pre>
+<p># Enter the GE <span>0/1/3</span> interface view on CGN2, and associate HA backup group 21 with VRRP group 10.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN2] <strong>interface GigabitEthernet <span>0/1/3</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN2-GigabitEthernet<span>0/1/3</span>] <strong>vrrp vrid 10 track service-location 21 reduced 50</strong>
+[<span class="keyword">*</span>CGN2-GigabitEthernet<span>0/1/3</span>] <strong>quit</strong>
+[<span class="keyword">*</span>CGN2] <strong>commit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Run the <a href="cmdqueryname=display+vrrp+10"><b><span class="cmdname">display vrrp 10</span></b></a> command on CGN1 and CGN2 to view the master/backup VRRP status, which reflects the master/backup status of the HA backup group. Master in the command output indicates that CGN1 is the master device.</p>
+</div></div>
+</p></li><li><span>Bind the HA backup group to the VRRP group on CGN1 and CGN2.</span><p><p># Bind HA backup group 21 to VRRP group 10 on CGN1, and specify the interface for establishing a VRRP connection with CGN2 as GE <span>0/1/3</span>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN1] <strong>service-location 21</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN1-service-location-21] <strong>vrrp vrid 10 interface GigabitEthernet <span>0/1/3</span></strong>
+[<span class="keyword">*</span>CGN1-service-location-21] <strong>quit</strong>
+[<span class="keyword">*</span>CGN1] <strong>commit</strong></pre>
+<p># Bind HA backup group 21 to VRRP group 10 on CGN2, and specify the interface for establishing a VRRP connection with CGN1 as GE <span>0/1/3</span>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN2] <strong>service-location 21</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN2-service-location-21] <strong>vrrp vrid 10 interface GigabitEthernet <span>0/1/3</span></strong>
+[<span class="keyword">*</span>CGN2-service-location-21] <strong>quit</strong>
+[<span class="keyword">*</span>CGN2] <strong>commit</strong></pre>
+</p></li><li><span>Create a service-instance group on CGN1 and CGN2 and bind it to the HA backup group.</span><p><p># Create service-instance group 21 on CGN1 and bind it to HA backup group 21.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN1] <strong>service-instance-group 21</strong>
+[<span class="keyword">*</span>CGN1-service-instance-group-21] <strong>service-location 21</strong>
+[<span class="keyword">*</span>CGN1-service-instance-group-21] <strong>quit</strong>
+[<span class="keyword">*</span>CGN1] <strong>commit</strong></pre>
+<p># Create service-instance group 21 on CGN2 and bind it to HA backup group 21.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN2] <strong>service-instance-group 21</strong>
+[<span class="keyword">*</span>CGN2-service-instance-group-21] <strong>service-location 21</strong>
+[<span class="keyword">*</span>CGN2-service-instance-group-21] <strong>quit</strong>
+[<span class="keyword">*</span>CGN2] <strong>commit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Run the <a href="cmdqueryname=display+service-location+21"><b><span class="cmdname">display service-location 21</span></b></a> command on CGN1 and CGN2 to view HA information. <strong>Vrrp state</strong> in the command output reflects the status of HA backup group 21, which must be consistent with the CGN's VRRP status. <strong>Batch-backup state</strong> in the command output indicates whether batch backup has been finished.</p>
+</div></div>
+</p></li><li><span>Create a DS-Lite instance on CGN1 and CGN2, bind the DS-Lite instance to the service-instance group, and configure an address pool and an address translation policy.</span><p><p># Create a DS-Lite instance named <strong>dslite1</strong> on CGN1, bind the DS-Lite instance to service-instance group 21, and set the port range to 4096. Configure a DS-Lite address pool named <strong>group1</strong> in dslite1, and configure an address segment for the DS-Lite address pool. Set the DS-Lite action to <strong>any</strong> so that traffic does not need to match any ACL rule and DS-Lite translation is performed for traffic using addresses from the DS-Lite address pool. Configure local and remote IP addresses for the DS-Lite tunnel, enable DS-Lite ALG for all protocols, and set the DS-Lite address translation mode to <strong>full-cone</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN1] <strong>ds-lite instance dslite1 id 21</strong>
+[<span class="keyword">*</span>CGN1-ds-lite-instance-dslite1] <strong>port-range 4096</strong>
+[<span class="keyword">*</span>CGN1-ds-lite-instance-dslite1] <strong>service-instance-group 21</strong>
+[<span class="keyword">*</span>CGN1-ds-lite-instance-dslite1] <strong>ds-lite address-group group1 group-id 1</strong>
+[<span class="keyword">*</span>CGN1-ds-lite-instance-dslite1-ds-lite-address-group-group1] <strong>section 0 1.1.1.1 mask 24</strong>
+[<span class="keyword">*</span>CGN1-ds-lite-instance-dslite1-ds-lite-address-group-group1] <strong>quit</strong>
+[<span class="keyword">*</span>CGN1-ds-lite-instance-dslite1] <strong>ds-lite outbound any address-group group1</strong>
+[<span class="keyword">*</span>CGN1-ds-lite-instance-dslite1] <strong>local-ipv6 2001:db8:2::12 prefix-length 128</strong>
+[<span class="keyword">*</span>CGN1-ds-lite-instance-dslite1] <strong>remote-ipv6 2001:db8:1:: prefix-length 41</strong>
+[<span class="keyword">*</span>CGN1-ds-lite-instance-dslite1] <strong>ds-lite alg all</strong>
+[<span class="keyword">*</span>CGN1-ds-lite-instance-dslite1] <strong>ds-lite filter mode full-cone</strong>
+[<span class="keyword">*</span>CGN1-ds-lite-instance-dslite1] <strong>quit</strong>
+[<span class="keyword">*</span>CGN1] <strong>commit</strong></pre>
+<p># Create a DS-Lite instance named <strong>dslite1</strong> on CGN2, bind the DS-Lite instance to service-instance group 21, and set the port range to 4096. Configure a DS-Lite address pool named <strong>group1</strong> in dslite1, and configure an address segment for the DS-Lite address pool. Set the DS-Lite action to <strong>any</strong> so that traffic does not need to match any ACL rule and DS-Lite translation is performed for traffic using addresses from the DS-Lite address pool. Configure local and remote IP addresses for the DS-Lite tunnel, enable DS-Lite ALG for all protocols, and set the DS-Lite address translation mode to<strong> full-cone</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN2] <strong>ds-lite instance dslite1 id 21</strong>
+[<span class="keyword">*</span>CGN2-ds-lite-instance-dslite1] <strong>port-range 4096</strong>
+[<span class="keyword">*</span>CGN2-ds-lite-instance-dslite1] <strong>service-instance-group 21</strong>
+[<span class="keyword">*</span>CGN2-ds-lite-instance-dslite1] <strong>ds-lite address-group group1 group-id 1</strong>
+[<span class="keyword">*</span>CGN2-ds-lite-instance-dslite1-ds-lite-address-group-group1] <strong>section 0 1.1.1.1 mask 24</strong>
+[<span class="keyword">*</span>CGN2-ds-lite-instance-dslite1-ds-lite-address-group-group1] <strong>quit</strong>
+[<span class="keyword">*</span>CGN2-ds-lite-instance-dslite1] <strong>ds-lite outbound any address-group group1</strong>
+[<span class="keyword">*</span>CGN2-ds-lite-instance-dslite1] <strong>local-ipv6 2001:db8:2::12 prefix-length 128</strong>
+[<span class="keyword">*</span>CGN2-ds-lite-instance-dslite1] <strong>remote-ipv6 2001:db8:1:: prefix-length 41</strong>
+[<span class="keyword">*</span>CGN2-ds-lite-instance-dslite1] <strong>ds-lite alg all</strong>
+[<span class="keyword">*</span>CGN2-ds-lite-instance-dslite1] <strong>ds-lite filter mode full-cone</strong>
+[<span class="keyword">*</span>CGN2-ds-lite-instance-dslite1] <strong>quit</strong>
+[<span class="keyword">*</span>CGN2] <strong>commit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>For details about how to configure basic DS-Lite services, see <em>DS-Lite Configuration</em>.</p>
+</div></div>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172362470__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><p>CGN1 configuration file</p>
+<pre class="screen">#
+sysname CGN1
+#
+vsm on-board-mode disable
+#
+interface GigabitEthernet<span>0/1/3</span>
+ ip address 10.0.0.1 255.255.255.0
+ vrrp vrid 10 virtual-ip 10.0.0.3
+ admin-vrrp vrid 10 ignore-if-down 
+ vrrp vrid 10 priority 150
+ vrrp vrid 10 preempt-mode timer delay 1500
+ vrrp recover-delay 20
+ vrrp vrid 10 track interface GigabitEthernet<span>0/1/2</span> reduced 50
+ vrrp vrid 10 track interface GigabitEthernet<span>0/1/1</span> reduced 50
+ vrrp vrid 10 track service-location 21 reduced 50 
+#
+service-ha hot-backup enable
+#
+service-location 21
+ location slot <span>1</span>  
+ remote-backup interface GigabitEthernet<span>0/1/3</span> peer 10.0.0.2 
+ vrrp vrid 10 interface GigabitEthernet<span>0/1/3</span>    
+#
+service-instance-group 21                    
+ service-location 21
+#
+ds-lite instance dslite1 id 21
+ port-range 4096    
+ service-instance-group 21
+ ds-lite address-group group1 group-id 1  
+ section 0 1.1.1.1 mask  24  
+ ds-lite outbound any address-group group1
+ local-ipv6 2001:db8:2::12 prefix-length 128 
+ remote-ipv6 2001:db8:1:: prefix-length 41        
+ ds-lite alg all   
+ ds-lite filter mode full-cone 
+#
+return</pre>
+<p>CGN2 configuration file</p>
+<pre class="screen">#
+sysname CGN2
+#
+vsm on-board-mode disable
+#
+interface GigabitEthernet<span>0/1/3</span>
+ ip address 10.0.0.2 255.255.255.0
+ vrrp vrid 10 virtual-ip 10.0.0.3
+ admin-vrrp vrid 10 ignore-if-down
+ vrrp vrid 10 priority 120
+ vrrp vrid 10 track service-location 21 reduced 50
+#
+service-ha hot-backup enable
+#   
+service-location 21
+ location slot <span>2</span>  
+ remote-backup interface GigabitEthernet<span>0/1/3</span> peer 10.0.0.1     
+ vrrp vrid 10 interface GigabitEthernet<span>0/1/3</span> 
+#                        
+service-instance-group 21              
+ service-location 21
+#
+ds-lite instance dslite1 id 21
+ port-range 4096    
+ service-instance-group 21
+ ds-lite address-group group1 group-id 1  
+ section 0 1.1.1.1 mask  24  
+ ds-lite outbound any address-group group1
+ local-ipv6 2001:db8:2::12 prefix-length 128 
+ remote-ipv6 2001:db8:1:: prefix-length 41     
+ ds-lite alg all   
+ ds-lite filter mode full-cone  
+#
+return</pre>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0043.html">Inter-Chassis Hot Backup
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0037.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0046.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

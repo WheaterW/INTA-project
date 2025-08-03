@@ -1,0 +1,93 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding BGP Load Balancing">
+<meta name="abstract" content="">
+<meta name="description" content="">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0065.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0067.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001176663637">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding BGP Load Balancing</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001176663637"></a><a name="EN-US_CONCEPT_0000001176663637"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding BGP Load Balancing</h1>
+<div><p></p>
+<p>There may be multiple valid routes to the same destination on a large network. BGP advertises only the optimal routes to its peers, which may result in traffic imbalance. </p>
+<p>Either of the following methods can be used to resolve the problem:</p>
+<ul><li><p>Use BGP route-policies for load balancing. For example, use a route-policy to modify the Local_Pref, AS_Path, Origin, or MED attribute of BGP routes to control traffic forwarding paths, helping implement load balancing.</p>
+</li><li><p>Using multiple paths to implement traffic load balancing. This method requires that multiple equal-cost routes exist. The number of routes that are allowed to participate in load balancing can be set. Load balancing can be implemented globally or for a specified peer or peer group.</p>
+</li></ul>
+<div class="section"><h4 class="sectiontitle">Conditions for Load Balancing Among BGP Routes</h4><p>After BGP load balancing is configured, the BGP routes that meet all of the following conditions are equal-cost routes that carry out load balancing:</p>
+<ul><li><p>Route origins are the same.</p>
+</li><li><p>PrefVal values are the same.</p>
+</li><li><p>Local_Pref values are the same.</p>
+</li><li><p>All the routes are summary routes, or none of them are summary routes.</p>
+</li><li><p>AIGP values are the same.</p>
+</li><li><p>AS_Path attributes are the same.</p>
+</li><li><p>Origin types (IGP, EGP, or incomplete) are the same.</p>
+</li><li><p>MED values are the same. If the <a href="cmdqueryname=load-balancing+med-ignore"><b><span class="cmdname">load-balancing med-ignore</span></b></a> command is run, BGP does not compare the MED attributes of routes when deciding the routes used for load balancing.</p>
+</li><li><p>All the routes are EBGP or IBGP routes. After the <a href="cmdqueryname=maximum+load-balancing+eibgp"><b><span class="cmdname">maximum load-balancing eibgp</span></b></a> command is run, BGP does not use this rule in optimal VPN route selection.</p>
+</li><li><p>The metric values of the IGP routes to which BGP routes recurse within an AS are the same. After the <a href="cmdqueryname=maximum+load-balancing+eibgp"><b><span class="cmdname">maximum load-balancing eibgp</span></b></a> command is run, BGP does not use this rule in optimal VPN route selection.</p>
+</li></ul>
+<p>Even if the preceding conditions are met, load balancing cannot be implemented among labeled BGP routes and non-labeled BGP routes.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">UCMP Based on the BGP Link Bandwidth Extended Community Attribute of Routes</h4><p>In a scenario where load balancing is performed among outbound routes on some devices, equal-cost multi-path (ECMP) results may fail to meet expectations due to uneven outbound link bandwidth. To solve this problem, you can configure the BGP Link Bandwidth extended community attribute function on corresponding devices. With the function, the devices add the BGP Link Bandwidth extended community attribute that reflects link bandwidth to BGP routes so that unequal cost multipath (UCMP) is implemented based on the outbound link bandwidth proportion.</p>
+<p>In <a href="#EN-US_CONCEPT_0000001176663637__fig92385441276">Figure 1</a>, Device A and Device B reside in AS 100, whereas devices C through F reside in AS 200. After Device C receives a route from its directly connected EBGP peer (Device A), Device C adds the Link Bandwidth extended community attribute (indicating the bandwidth of external links) to the route and advertises the route to its IBGP peers.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The next hops of the routes that form UCMP must be of the same type.</p>
+</div></div>
+<div class="fignone" id="EN-US_CONCEPT_0000001176663637__fig92385441276"><a name="EN-US_CONCEPT_0000001176663637__fig92385441276"></a><a name="fig92385441276"></a><span class="figcap"><b>Figure 1 </b>UCMP based on the BGP Link Bandwidth extended community attribute</span><br><span><img class="vsd" src="figure/en-us_image_0000001194905447.png" width="NaN" height="NaN"></span></div>
+<p>The process to implement UCMP is as follows:</p>
+<p>1. Device A and Device B advertise the BGP route 10.10.10.10/32 without the BGP Link Bandwidth extended community attribute to Device C. </p>
+<p>2. Device C selects both the links to A and B to implement load balancing, with each link's outbound bandwidth being 200 Gbit/s. </p>
+<p>3. Device C sends the route with the BGP Link Bandwidth extended community attribute (400 Gbit/s) to Device F.</p>
+<p>4. Device D and Device E perform similar operations to those performed by Device C.</p>
+<p>5. Device F receives three routes destined for 10.10.10.10/32 from Device C, Device D, and Device E, with the bandwidth values being 400 Gbit/s, 200 Gbit/s, and 200 Gbit/s, respectively.</p>
+<p>6. Device F implements UCMP among the three links based on the outbound link bandwidth proportion of 2:1:1.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bgp_cfg_0065.html">Configuring BGP Load Balancing
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bgp_cfg_0067.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

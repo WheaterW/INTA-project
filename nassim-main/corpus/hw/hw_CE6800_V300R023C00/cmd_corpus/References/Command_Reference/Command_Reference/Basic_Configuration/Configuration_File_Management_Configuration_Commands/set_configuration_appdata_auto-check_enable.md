@@ -1,0 +1,61 @@
+set configuration appdata auto-check enable
+===========================================
+
+set configuration appdata auto-check enable
+
+Function
+--------
+
+
+
+The **set configuration appdata auto-check enable** command enables the function to automatically check whether data in the service process database is the same as that in the central database.
+
+The **undo set configuration appdata auto-check enable** command disables the function to automatically check whether data in the service process database is the same as that in the central database.
+
+
+
+By default, this function is disabled.
+
+
+Format
+------
+
+**set configuration appdata auto-check enable**
+
+**undo set configuration appdata auto-check enable**
+
+
+Parameters
+----------
+
+None
+
+Views
+-----
+
+System view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+The device data is saved in the central database and service process databases. Each service process database needs to synchronize data from the central database. If the data in a service process database is inconsistent with that in the central database, the host behaviors may not meet operator expectations, causing service function exceptions. Therefore, automatic data verification needs to be enabled to periodically check data consistency between service process databases and the central database. If any inconsistency is detected, an alarm is reported immediately, notifying you of analyzing the impact on services timely. You can restart the board or device to rectify the fault.To enable or disable the automatic data verification function, run the set configuration appdata command.
+
+
+Example
+-------
+
+# Disable the function to automatically check whether data in the service process database is the same as that in the central database.
+```
+<HUAWEI> system-view
+[~HUAWEI] undo set configuration appdata auto-check enable
+
+```

@@ -1,0 +1,115 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring a Community Filter">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_route-policy_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_route-policy_cfg_0007.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_route-policy_cfg_0009.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Routing Policy">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Routing Policy">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001176743443">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Configuring a Community Filter</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001176743443"></a><a name="EN-US_TASK_0000001176743443"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring a Community Filter</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001176743443__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>A Community filter is used to filter BGP routes based on Community attributes contained in the BGP routes. A Community attribute is a set of destination addresses with the same characteristics. Filtering rules defined based on Community attributes can be used to filter BGP routes. Before advertising a route carrying a Community attribute to peers, a BGP device can be configured to change the original Community attribute of this route.</p>
+<ul><li>The Community attribute is a 4-byte value in the format of <em>aa</em>:<em>nn</em>. According to standards, the most significant 2 bytes indicate an AS number, and the least significant 2 bytes indicate an identifier for management purposes.</li><li>The Community attribute is a BGP route tag used to simplify the execution of route-policies. You can assign a specific Community attribute value to certain routes. Then, the routes can be filtered based on the Community attribute value and the corresponding policies can be executed.<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Like an AS_Path attribute, a Community attribute is used to filter only BGP routes because the Community attribute is also a private attribute of BGP.</p>
+</div></div>
+</li></ul>
+<div class="fignone" id="EN-US_TASK_0000001176743443__fig_dc_feature_route-policy_000801"><a name="EN-US_TASK_0000001176743443__fig_dc_feature_route-policy_000801"></a><a name="fig_dc_feature_route-policy_000801"></a><span class="figcap"><b>Figure 1 </b>Application scenario of Community attributes</span><br><span><img class="vsd" src="figure/en-us_image_0000001176743451.png"></span></div>
+<p>As shown in <a href="#EN-US_TASK_0000001176743443__fig_dc_feature_route-policy_000801">Figure 1</a>, a large number of routes in AS 100 are imported to the BGP routing table. These routes are used to transmit voice call and video surveillance services. The routes are advertised to AS 200 through BGP. Devices in AS 200 need to enforce different route-policies for routes used to transmit voice calls and video surveillance. ACLs or IP prefixes can be used to match routes one by one. However, there are a large number of route prefixes, which leads to heavy workload and low efficiency.</p>
+<p>You can use the Community attribute to solve the problems. When a device in AS 100 imports these routes, the device adds the corresponding community values to distinguish the routes for voice calls from those for video surveillance. The routes for voice calls are assigned the community value of 100:1, and the routes for video surveillance are assigned the community value of 100:2. The attribute values are transmitted to AS 200 along with the routes. When route-policies need to be configured for the voice call and video surveillance routes on a device in AS 200, the device only needs to match the routes against the community values. For example, if routes match the community value of 100:1, routes for all voice services are filtered based on the policy.</p>
+<p>BGP defines some well-known Community attributes, which can be directly used. <a href="#EN-US_TASK_0000001176743443__tab_001">Table 1</a> describes common Community attributes.</p>
+
+<div class="tableBorder"><a name="EN-US_TASK_0000001176743443__tab_001"></a><a name="tab_001"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_TASK_0000001176743443__tab_001" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Well-known Community attributes of BGP</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="25.27%" id="mcps1.3.1.7.2.3.1.1" liSelected="liSelected"><p>Community Attribute</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="74.72999999999999%" id="mcps1.3.1.7.2.3.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="25.27%" headers="mcps1.3.1.7.2.3.1.1 "><p>internet</p>
+</td>
+<td class="cellrowborder" valign="top" width="74.72999999999999%" headers="mcps1.3.1.7.2.3.1.2 "><p>By default, all routes belong to the Internet community. A route with this attribute can be advertised to all BGP peers.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="25.27%" headers="mcps1.3.1.7.2.3.1.1 "><p>no-advertise</p>
+</td>
+<td class="cellrowborder" valign="top" width="74.72999999999999%" headers="mcps1.3.1.7.2.3.1.2 "><p>After being received, a route with this attribute cannot be advertised to any other BGP peers.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="25.27%" headers="mcps1.3.1.7.2.3.1.1 "><p>no-export</p>
+</td>
+<td class="cellrowborder" valign="top" width="74.72999999999999%" headers="mcps1.3.1.7.2.3.1.2 "><p>After being received, a route with this attribute cannot be advertised outside the local AS. If a confederation is defined, the route with this attribute cannot be advertised to the ASs outside the confederation, but can be advertised to other sub-ASs in the confederation.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="25.27%" headers="mcps1.3.1.7.2.3.1.1 "><p>no-export-subconfed</p>
+</td>
+<td class="cellrowborder" valign="top" width="74.72999999999999%" headers="mcps1.3.1.7.2.3.1.2 "><p>After being received, a route with this attribute cannot be advertised outside the local AS or to other sub-ASs in the confederation.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001176743443__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li><span>Configure a Community filter.</span><p><ul><li>Configure a basic Community filter.<pre class="screen"><a href="cmdqueryname=ip+community-filter"><b><span class="cmdname">ip community-filter</span></b></a> <strong><span>basic</span></strong> <i><span class="varname">basCfName</span></i> <span>[ <strong><span>index</span></strong> <i><span class="varname">index-val</span></i> ]</span> <i><span class="varname">matchMode</span></i> <span>[</span> <i><span class="varname">cmntyStr</span></i> <span>]</span> &amp;&lt;1-20&gt;</pre>
+</li><li>Configure an advanced Community filter.<pre class="screen"><a href="cmdqueryname=ip+community-filter"><b><span class="cmdname">ip community-filter</span></b></a> <strong><span>advanced</span></strong> <i><span class="varname">comm-filter-name</span></i> <span>[ <strong><span>index</span></strong> <i><span class="varname">index-number</span></i> ]</span> <i><span class="varname">matchMode</span></i> <i><span class="varname">regular-expression</span></i></pre>
+</li></ul>
+</p></li><li><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001176743443__en-us_task_0234857734_screen163801330213"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001176743443__en-us_task_0234857734_en-us_concept_0141113565_cmdname1667501373175340">commit</span></b></a></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001176743443__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>Run the <a href="cmdqueryname=display+ip+community-filter"><b><span class="cmdname">display ip community-filter</span></b></a> [ <i><span class="varname">basic-comm-filter-num</span></i> | <i><span class="varname">adv-comm-filter-num</span></i> | <i><span class="varname">comm-filter-name</span></i> ] command to check information about the configured Community filter.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_route-policy_cfg_0001.html">Routing Policy Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_route-policy_cfg_0007.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_route-policy_cfg_0009.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,819 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="gRPC Data Processing Based on gNMI">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_gRPC_cfg_0003.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_gRPC_cfg_0012.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="gRPC">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="gRPC">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featurename" content="gRPC">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001564006061">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>gRPC Data Processing Based on gNMI</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_CONCEPT_0000001564006061"></a><a name="EN-US_CONCEPT_0000001564006061"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">gRPC Data Processing Based on gNMI</h1>
+<div><p>In <a href="#EN-US_CONCEPT_0000001564006061__fig192693715416">Figure 1</a>, in dial-in mode, gRPC provides data configuration and query functions using the Capabilities, Set, Get, and Subscribe methods defined in the gRPC Network Management Interface (gNMI) protocol.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001564006061__fig192693715416"><a name="EN-US_CONCEPT_0000001564006061__fig192693715416"></a><a name="fig192693715416"></a><span class="figcap"><b>Figure 1 </b>gRPC-based data query and configuration fundamentals diagram</span><br><span><img class="vsd" src="figure/en-us_image_0000001513045838.png"></span></div>
+<div class="section"><h4 class="sectiontitle">Capabilities Method</h4><p><strong>The Capabilities method is used to obtain device model capabilities. Its process is as follows:</strong></p>
+<ol><li>The gRPC client sends an RPC request (Capabilities) defined in the gNMI protocol.<ul><li>gNMI defines the RPC method and packet structure in the <strong>gnmi.proto</strong> file. To obtain the <strong>gnmi.proto</strong> file, see <a href="https://github.com/openconfig/gnmi/blob/master/proto/gnmi/gnmi.proto" target="_blank" rel="noopener noreferrer">Obtaining the gnmi.proto File</a>.</li></ul>
+</li><li>The gRPC server parses the request packet and detects that a Capabilities method is used in the RPC request.<ul><li>Operation authentication: All users who successfully log in to the device can use the Capabilities method to obtain device capabilities.</li><li>Log recording: The gRPC server records logs.</li></ul>
+</li><li>The gRPC server obtains the existing model capability set on the device. The model information includes:<ul><li>Model name, such as huawei-ifm</li><li>Organization, such as Huawei Technologies Co., Ltd.</li><li>Model version, such as 2018-11-23 and 1.0.0.</li></ul>
+</li><li>The gRPC server returns the capability set to the client.</li></ol>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>If the YANG model changes due to a patch installation, the gRPC server loads the new model and ensures it takes effect.</li><li>If the Capabilities method contains unimplemented parameters, parameters fail verification, or an error occurs on the model obtaining interface, the gRPC server records a Capabilities method execution failure log and waits for the client to re-send a correct Capabilities request.</li><li>When the YANG model on the gRPC server changes, the gRPC server does not notify the client. To obtain the latest YANG model, the client must call the Capabilities method.</li></ul>
+</div></div>
+<p><strong>The Capabilities packet format is as follows</strong>:</p>
+<div class="p"># Response packet.<pre class="screen">++++++++ Received get response: ++++++++  
+ supported_models { 
+name:"openconfig-interfaces"  
+organization:"OpenConfig workinggroup"  
+version:"2.3.0" 
+} 
+supported_models { 
+name:"huawei-ifm" 
+organization:"Huawei Technologies Co.,Ltd."  
+version:"2018-11-23" 
+} 
+supported_encodings:JSON 
+gNMI_version:"0.7.0"</pre>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Get Method</h4><p><strong>The process of the Get method is as follows</strong>:</p>
+<ol><li>The gRPC client sends an RPC request (Get) defined in the gNMI protocol.<ul><li>gNMI defines the RPC method and packet structure in the <strong>gnmi.proto</strong> file. To obtain the <strong>gnmi.proto</strong> file, see <a href="https://github.com/openconfig/gnmi/blob/master/proto/gnmi/gnmi.proto" target="_blank" rel="noopener noreferrer">Obtaining the gnmi.proto File</a>.</li><li>The Get method uses JSON to encode service data.</li><li>The Get method includes the following parameters.
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Parameters in the Get method</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="50%" id="mcps1.3.4.3.1.1.3.1.2.3.1.1" liSelected="liSelected"><p>Parameter</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="50%" id="mcps1.3.4.3.1.1.3.1.2.3.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.4.3.1.1.3.1.2.3.1.1 "><p>ALL</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.4.3.1.1.3.1.2.3.1.2 "><p>Corresponds to NETCONF &lt;get&gt; and includes configuration data and status data.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.4.3.1.1.3.1.2.3.1.1 "><p>CONFIG</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.4.3.1.1.3.1.2.3.1.2 "><p>Corresponds to NETCONF &lt;get-config&gt; and includes configuration data.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li></ul>
+</li><li>The gRPC server queries data.<ul><li>Operation authentication: During a Get operation, the system performs authentication to check whether the user has sufficient permission to access the specified path. If the authentication fails, the system returns an authentication failure error and terminates the operation.</li><li>Log recording: The gRPC server records operation logs that contain service data. Sensitive information in the service data will be shielded.</li><li>Transaction management: Query for multiple paths in a request packet is supported. All path query results are returned only after the query is complete. If an error occurs (for example, NotFound) during the query for multiple paths, the query is terminated, an error message is displayed, and all cached query results are discarded.</li><li>Object: The Get operation can be performed on a container and its sub-nodes, or on a leaf node.</li><li>Capacity: The maximum size of a response packet is 20 MB. If the maximum size is exceeded, an error is reported.</li></ul>
+</li></ol>
+<p><strong>The Get packet format is as follows</strong>:</p>
+<ul><li>Input path for a container or list node: openconfig-telemetry:telemetry-system/sensor-groups/sensor-group[sensor-group-id=s1]<div class="p"># Query packet.<pre class="screen">++++++++ Sending get request: ++++++++
+path {
+  elem {
+    name: "openconfig-telemetry:telemetry-system"
+  }
+  elem {
+    name: "sensor-groups"
+  }
+  elem {
+    name: "sensor-group"
+    key {
+      key: "sensor-group-id"
+      value: "s1"
+    }
+  }
+}
+type: CONFIG
+encoding: JSON</pre>
+</div>
+<div class="p"># Response packet.<pre class="screen">notification {
+  timestamp: 1717732971365270000
+  update {
+    path {
+      elem {
+        name: "openconfig-telemetry:telemetry-system"
+      }
+      elem {
+        name: "sensor-groups"
+      }
+      elem {
+        name: "sensor-group"
+        key {
+          key: "sensor-group-id"
+          value: "s1"
+        }
+      }
+    }
+    val {
+      json_val: "{\n\t\"sensor-group-id\":\t\"s1\",\n\t\"config\":\t{\n\t\t\"sensor-group-id\":\t\"s1\"\n\t},\n\t\"state\":\t{\n\t\t\"sensor-group-id\":\t\"s1\"\n\t},\n\t\"sensor-paths\":\t{\n\t\t\"sensor-path\":\t[{\n\t\t\t\t\"path\":\t\"huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test\",\n\t\t\t\t\"config\":\t{\n\t\t\t\t\t\"path\":\t\"huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test\",\n\t\t\t\t\t\"huawei-openconfig-telemetry-ext:reset-when-start\":\tfalse,\n\t\t\t\t\t\"huawei-openconfig-telemetry-ext:depth\":\t1\n\t\t\t\t},\n\t\t\t\t\"state\":\t{\n\t\t\t\t\t\"path\":\t\"huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test\",\n\t\t\t\t\t\"huawei-openconfig-telemetry-ext:reset-when-start\":\tfalse,\n\t\t\t\t\t\"huawei-openconfig-telemetry-ext:depth\":\t1\n\t\t\t\t}\n\t\t\t}]\n\t}\n}"
+    }
+  }
+}</pre>
+</div>
+</li><li>Input path for a leaf node: openconfig-telemetry:telemetry-system/sensor-groups/sensor-group[sensor-group-id=s1]/sensor-paths/sensor-path/path<div class="p"># Query request packet.<pre class="screen">++++++++ Sending get request: ++++++++
+path {
+  elem {
+    name: "openconfig-telemetry:telemetry-system"
+  }
+  elem {
+    name: "sensor-groups"
+  }
+  elem {
+    name: "sensor-group"
+    key {
+      key: "sensor-group-id"
+      value: "s1"
+    }
+  }
+  elem {
+    name: "sensor-paths"
+  }
+  elem {
+    name: "sensor-path"
+  }
+  elem {
+    name: "path"
+  }
+}
+type: CONFIG
+encoding: JSON</pre>
+</div>
+<div class="p"># Response packet.<pre class="screen">notification {
+  timestamp: 1717735053530627000
+  update {
+    path {
+      elem {
+        name: "openconfig-telemetry:telemetry-system"
+      }
+      elem {
+        name: "sensor-groups"
+      }
+      elem {
+        name: "sensor-group"
+        key {
+          key: "sensor-group-id"
+          value: "s1"
+        }
+      }
+      elem {
+        name: "sensor-paths"
+      }
+      elem {
+        name: "sensor-path"
+        key {
+          key: "path"
+          value: "huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test"
+        }
+      }
+      elem {
+        name: "path"
+      }
+    }
+    val {
+      json_val: "\"huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test\""
+    }
+  }
+}
+</pre>
+</div>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Set Method</h4><p><strong>The Set method is used to deliver configurations to the device. The process is as follows:</strong></p>
+<ol><li>The gRPC client sends an RPC request (Set) defined in the gNMI protocol.<ul><li>gNMI defines the RPC method and packet structure in the <strong>gnmi.proto</strong> file. To obtain the <strong>gnmi.proto</strong> file, see <a href="https://github.com/openconfig/gnmi/blob/master/proto/gnmi/gnmi.proto" target="_blank" rel="noopener noreferrer">Obtaining the gnmi.proto File</a>.</li><li>The Set method uses JSON to encode service data. Each field can carry a namespace. If no namespace is carried, the namespace of the parent container node is inherited by default.</li><li>The Set method includes the following parameters.
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 2 </b>Parameters in the Set method</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="50%" id="mcps1.3.5.3.1.1.3.1.2.3.1.1" liSelected="liSelected"><p>Parameter</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="50%" id="mcps1.3.5.3.1.1.3.1.2.3.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.5.3.1.1.3.1.2.3.1.1 "><p>DELETE</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.5.3.1.1.3.1.2.3.1.2 "><p>Corresponds to NETCONF &lt;delete&gt; and is used to delete configuration data.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.5.3.1.1.3.1.2.3.1.1 "><p>REPLACE</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.5.3.1.1.3.1.2.3.1.2 "><p>Corresponds to NETCONF &lt;replace&gt; and is used to replace configuration data.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.5.3.1.1.3.1.2.3.1.1 "><p>UPDATE</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.5.3.1.1.3.1.2.3.1.2 "><p>Corresponds to NETCONF &lt;merge&gt; and is used to update or create configuration data.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li></ul>
+</li><li>The gRPC server modifies the device data based on the request.<ul><li>Operation authentication: During a Set operation, the system performs authentication to check whether the user has sufficient permission to access the specified path. If the authentication fails, the system returns an authentication failure error and terminates the operation.</li><li>Log recording: The gRPC server records operation logs that contain service data. Sensitive information in the service data will be shielded.</li><li>Transaction management: When a request packet carries multiple operations such as the delete, replace, and update operations, the gRPC server sequentially performs the operations in compliance with the gNMI protocol.</li><li>Object operation: The Set operation can be performed on a container and its sub-nodes, or on a leaf node.</li><li>Capacity: The maximum size of a request packet is 1 MB.</li></ul>
+</li><li>The gRPC server returns data to the client.</li></ol>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Operations take effect when they are all successfully performed. If any operation fails, all operations do not take effect and a failure message is returned.</p>
+</div></div>
+<p><strong>The Set packet format is as follows</strong>:</p>
+<ul><li>Input path for a Delete operation: openconfig-telemetry:telemetry-system/sensor-groups/sensor-group[sensor-group-id=s1]<div class="p"># Configuration request packet.<pre class="screen">++++++++ Sending set request: ++++++++
+path {
+  elem {
+    name: "openconfig-telemetry:telemetry-system"
+  }
+  elem {
+    name: "sensor-groups"
+  }
+  elem {
+    name: "sensor-group"
+    key {
+      key: " sensor-group-id"
+      value: "s1"
+    }
+  }
+}
+</pre>
+</div>
+<div class="p"># Response packet.<pre class="screen">++++++++ Received set response: ++++++++
+response {
+  path {
+    elem {
+      name: "openconfig-telemetry:telemetry-system"
+    }
+    elem {
+      name: "sensor-groups"
+    }
+    elem {
+      name: "sensor-group"
+      key {
+        key: "sensor-group-id"
+        value: "s1"
+      }
+    }
+  }
+  op: DELETE
+}
+timestamp: 1717685040830542000</pre>
+</div>
+</li><li>Replace operation (without a key).<ul><li>Input path: openconfig-telemetry:telemetry-system/sensor-groups</li><li>Input data in JSON format:<pre class="screen">{
+  "sensor-group": {
+	"sensor-group-id": "s1",
+    "config": { "sensor-group-id": "s1" },
+    "sensor-paths": {
+      "sensor-path": {
+        "path": "huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test",
+        "config": { "path": "huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test" }
+      }
+    }
+  }
+}</pre>
+</li></ul>
+<div class="p"># Configuration request packet.<pre class="screen">++++++++ Sending set request: ++++++++
+path {
+    elem {
+      name: "openconfig-telemetry:telemetry-system"
+    }
+    elem {
+      name: "sensor-groups"
+    }
+  val {
+    json_val: "{
+	"sensor-group": {
+	  "sensor-group-id": "s1",
+      "config": { "sensor-group-id": "s1" },
+      "sensor-paths": {
+        "sensor-path": {
+          "path": "huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test",
+          "config": { "path": "huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test" }
+        }
+      }
+    }
+    }"
+  }
+}</pre>
+</div>
+<div class="p"># Response packet.<pre class="screen">++++++++ Received set response: ++++++++
+response {
+  path {
+    elem {
+      name: "openconfig-telemetry:telemetry-system"
+    }
+    elem {
+      name: "sensor-groups"
+    }
+  }
+  op: REPLACE
+}
+timestamp: 1717729434261195000</pre>
+</div>
+</li><li>Replace operation (with a key).<ul><li>Input path: openconfig-telemetry:telemetry-system/sensor-groups/sensor-group[sensor-group-id=s1]</li><li>Input data in JSON format:<pre class="screen">{
+  "sensor-paths": {
+    "sensor-path": {
+      "path": "huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test",
+      "config": { "path": "huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test" }
+    }
+  }
+}</pre>
+</li></ul>
+<div class="p"># Configuration request packet.<pre class="screen">++++++++ Sending set request: ++++++++
+path {
+  elem {
+    name: "openconfig-telemetry:telemetry-system"
+  }
+  elem {
+    name: "sensor-groups"
+  }
+  elem {
+    name: "sensor-group"
+    key {
+      key: "sensor-group-id"
+      value: "s1"
+    }
+  }
+  val {
+    json_val: "{
+	"sensor-paths": {
+	  "sensor-path": {
+        "path": "huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test",
+        "config": { "path": "huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test" }
+      }
+    }
+	}"
+  }
+}</pre>
+</div>
+<div class="p"># Response packet.<pre class="screen">++++++++ Received set response: ++++++++
+response {
+  path {
+    elem {
+      name: "openconfig-telemetry:telemetry-system"
+    }
+    elem {
+      name: "sensor-groups"
+    }
+    elem {
+      name: "sensor-group"
+      key {
+        key: "sensor-group-id"
+        value: "s1"
+      }
+    }
+  }
+  op: REPLACE
+}
+timestamp: 1717731861486329000</pre>
+</div>
+</li><li>Update operation (without a key).<ul><li>Input path: openconfig-telemetry:telemetry-system/sensor-groups</li><li>Input data in JSON format:<pre class="screen">{
+  "sensor-group": {
+	"sensor-group-id": "s1",
+    "config": { "sensor-group-id": "s1" },
+    "sensor-paths": {
+      "sensor-path": {
+        "path": "huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test",
+        "config": { "path": "huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test" }
+      }
+    }
+  }
+}</pre>
+</li></ul>
+<div class="p"># Configuration request packet.<pre class="screen">++++++++ Sending set request: ++++++++
+path {
+    elem {
+      name: "openconfig-telemetry:telemetry-system"
+    }
+    elem {
+      name: "sensor-groups"
+    }
+  val {
+    json_val: "{
+	"sensor-group": {
+	  "sensor-group-id": "s1",
+      "config": { "sensor-group-id": "s1" },
+      "sensor-paths": {
+        "sensor-path": {
+          "path": "huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test",
+          "config": { "path": "huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test" }
+        }
+      }
+    }
+    }"
+  }
+}</pre>
+</div>
+<div class="p"># Response packet.<pre class="screen">++++++++ Received set response: ++++++++
+response {
+  path {
+    elem {
+      name: "openconfig-telemetry:telemetry-system"
+    }
+    elem {
+      name: "sensor-groups"
+    }
+  }
+  op: UPDATE
+}
+timestamp: 1717731674036991000</pre>
+</div>
+</li><li>Update operation (with a key).<ul><li>Input path: openconfig-telemetry:telemetry-system/sensor-groups/sensor-group[sensor-group-id=s1]</li><li>Input data in JSON format:<pre class="screen">{
+  "sensor-paths": {
+    "sensor-path": {
+      "path": "huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test",
+      "config": { "path": "huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test" }
+    }
+  }
+}
+</pre>
+</li></ul>
+<div class="p"># Configuration request packet.<pre class="screen">++++++++ Sending set request: ++++++++
+path {
+  elem {
+    name: "openconfig-telemetry:telemetry-system"
+  }
+  elem {
+    name: "sensor-groups"
+  }
+  elem {
+    name: "sensor-group"
+    key {
+      key: "sensor-group-id"
+      value: "s1"
+    }
+  }
+  val {
+    json_val: "{
+	"sensor-paths": {
+	  "sensor-path": {
+        "path": "huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test",
+        "config": { "path": "huawei-telemetry-sample-test:telemetry-sample-test/datatype-tests/datatype-test" }
+      }
+    }
+	}"
+  }
+}</pre>
+</div>
+<div class="p"># Response packet.<pre class="screen">++++++++ Received set response: ++++++++
+response {
+  path {
+    elem {
+      name: "openconfig-telemetry:telemetry-system"
+    }
+    elem {
+      name: "sensor-groups"
+    }
+    elem {
+      name: "sensor-group"
+      key {
+        key: "sensor-group-id"
+        value: "s1"
+      }
+    }
+  }
+  op: UPDATE
+}
+timestamp: 1717732374267855000</pre>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Restrictions on leafref: When a parent node is associated with a child node through leafref, these two nodes must be both in a path or defined in JSON_VAL. Otherwise, the operations on these two nodes will be different and will fail to be executed.</p>
+<p>Cause: The operation on nodes in a path is None, while the operation on nodes defined in JSON_VAL is REPLACE or UPDATE. If one of two nodes associated through leafref is in a path and the other is defined in JSON_VAL, operation consistency check will fail.</p>
+<p>For example, in the openconfig-telemetry.yang model, the key defined in the parent node <strong>list subscription</strong> is <strong>subscription-name</strong>, which is associated with <strong>subscription-name</strong> in child node <strong>config</strong> through leafref. The preceding restriction applies to data in <strong>config</strong>. If the path is set to:</p>
+<pre class="screen">"openconfig-telemetry:telemetry-system/subscriptions/persistent/subscription[subscription-name=abc]</pre>
+<p>If JSON_VAL is defined as:</p>
+<pre class="screen">{"config": {"originated-qos-marking": "30","encoding":"openconfig-telemetry-types:ENC_PROTO3"}}</pre>
+<p>The following error is returned:</p>
+<pre class="screen">The target node of the leafref type and the source node have different operations.</pre>
+<p>To rectify the error, set the path to:</p>
+<pre class="screen">"openconfig-telemetry:telemetry-system/subscriptions/persistent/subscription[subscription-name=abc]/config"</pre>
+<p>Define JSON_VAL as:</p>
+<pre class="screen">{"originated-qos-marking": "30","encoding":"openconfig-telemetry-types:ENC_PROTO3"}</pre>
+<p>In this case, the parent and child nodes associated through leafref are both in a path and can be correctly executed.</p>
+</div></div>
+</div>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Subscribe Method</h4><p><strong>The Subscribe method is used to collect device status and configurations periodically or in event-driven mode. Its process is as follows:</strong></p>
+<ol><li>The gRPC client sends an RPC request (Subscribe) defined in the gNMI protocol.<ul><li>gNMI defines the RPC method and packet structure in the <strong>gnmi.proto</strong> file. To obtain the <strong>gnmi.proto</strong> file, see <a href="https://github.com/openconfig/gnmi/blob/master/proto/gnmi/gnmi.proto" target="_blank" rel="noopener noreferrer">Obtaining the gnmi.proto File</a>.</li><li>The Subscribe method uses JSON/PROTO/JSON_IETF to encode service data.</li><li>The Subscribe method includes the following parameters.
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 3 </b>Parameters in a Subscribe request</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="14.72852714728527%" id="mcps1.3.6.3.1.1.3.1.2.5.1.1" liSelected="liSelected"><p>Layer 1 Parameter</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="15.918408159184082%" id="mcps1.3.6.3.1.1.3.1.2.5.1.2" liSelected="liSelected"><p>Layer 1 Parameter Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="19.918008199180083%" id="mcps1.3.6.3.1.1.3.1.2.5.1.3" liSelected="liSelected"><p>Layer 2 Parameter</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="49.43505649435057%" id="mcps1.3.6.3.1.1.3.1.2.5.1.4" liSelected="liSelected"><p>Layer 2 Parameter Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" rowspan="2" valign="top" width="14.72852714728527%" headers="mcps1.3.6.3.1.1.3.1.2.5.1.1 "><p>Prefix</p>
+<p></p>
+</td>
+<td class="cellrowborder" rowspan="2" valign="top" width="15.918408159184082%" headers="mcps1.3.6.3.1.1.3.1.2.5.1.2 "><p>Prefix.</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.918008199180083%" headers="mcps1.3.6.3.1.1.3.1.2.5.1.3 "><p>path</p>
+</td>
+<td class="cellrowborder" valign="top" width="49.43505649435057%" headers="mcps1.3.6.3.1.1.3.1.2.5.1.4 "><p>Sampling path prefix.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.6.3.1.1.3.1.2.5.1.1 "><p>target</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.6.3.1.1.3.1.2.5.1.2 "><p>When the target parameter is set on the client, the response message from the server needs to carry the parameter.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="3" valign="top" width="14.72852714728527%" headers="mcps1.3.6.3.1.1.3.1.2.5.1.1 "><p>Subscription</p>
+</td>
+<td class="cellrowborder" rowspan="3" valign="top" width="15.918408159184082%" headers="mcps1.3.6.3.1.1.3.1.2.5.1.2 "><p>There can be one or more groups of subscription parameters of this level in a Subscribe request.</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.918008199180083%" headers="mcps1.3.6.3.1.1.3.1.2.5.1.3 "><p>path</p>
+</td>
+<td class="cellrowborder" valign="top" width="49.43505649435057%" headers="mcps1.3.6.3.1.1.3.1.2.5.1.4 "><p>Sampling path.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.6.3.1.1.3.1.2.5.1.1 "><p>mode</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.6.3.1.1.3.1.2.5.1.2 "><p>Sampling mode. Currently, the following modes are supported:</p>
+<ul><li>ON_CHANGE</li><li>SAMPLE</li></ul>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.6.3.1.1.3.1.2.5.1.1 "><p>sample_interval</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.6.3.1.1.3.1.2.5.1.2 "><p>Sampling interval.</p>
+<ul><li>The sampling interval takes effect only when the sampling mode is SAMPLE.</li><li>When the sampling mode is ON_CHANGE, the sampling interval must be set to 0.</li></ul>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="5" valign="top" width="14.72852714728527%" headers="mcps1.3.6.3.1.1.3.1.2.5.1.1 "><p>SubscriptionListData</p>
+</td>
+<td class="cellrowborder" rowspan="5" valign="top" width="15.918408159184082%" headers="mcps1.3.6.3.1.1.3.1.2.5.1.2 "><p>There can be only one group of subscription parameters of this level in a Subscribe request.</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.918008199180083%" headers="mcps1.3.6.3.1.1.3.1.2.5.1.3 "><p>marking</p>
+</td>
+<td class="cellrowborder" valign="top" width="49.43505649435057%" headers="mcps1.3.6.3.1.1.3.1.2.5.1.4 "><p>Configured DSCP value. The value ranges from 0 to 63.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.6.3.1.1.3.1.2.5.1.1 "><p>mode</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.6.3.1.1.3.1.2.5.1.2 "><p>Subscription mode. Currently, STREAM is supported.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.6.3.1.1.3.1.2.5.1.1 "><p>allow_aggregation</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.6.3.1.1.3.1.2.5.1.2 "><p>Whether the client allows elements with the aggregation flag to be combined in a gNMI message. This parameter is valid only in PROTO encoding mode.</p>
+<div class="p">The values are as follows:<ul><li>TRUE: Aggregation is allowed.</li><li>FALSE: Aggregation is not allowed.</li></ul>
+</div>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.6.3.1.1.3.1.2.5.1.1 "><p>encoding</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.6.3.1.1.3.1.2.5.1.2 "><div class="p">Encoding mode. Currently, the following modes are supported:<ul><li>JSON</li><li>PROTO</li><li>JSON_IETF</li></ul>
+</div>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.6.3.1.1.3.1.2.5.1.1 "><p>updates_only</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.6.3.1.1.3.1.2.5.1.2 "><p>Only incremental data is sent. This parameter is valid when the device sampling mode is ON_CHANGE+.</p>
+<div class="note"><span class="notetitle"> NOTE: </span><div class="notebody"><p>There are two modes for the device to implement ON_CHANGE. In mode 1, only incremental data is sent. In mode 2, full data is sent for the first time, and only incremental data is sent subsequently.</p>
+</div></div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li></ul>
+</li><li>The gRPC server parses the request packet and detects that a Subscribe method is used in the RPC request. The server collects data based on the parameters set in the packet and sends the collected data to the client.</li></ol>
+<p><strong>The Subscribe packet format is as follows</strong>:</p>
+<pre class="screen"># Subscribe request packet
+++++++++ Sending subscribe request: ++++++++
+prefix {
+	elem {
+		name: "huawei-debug:debug"
+	}
+	target: "TARGET"
+}
+Subscription {
+	path {
+	  elem {
+		name: "cpu-infos"
+	  }
+	  elem {
+		name: "cpu-info"
+	  }
+	}
+	mode: SAMPLE
+	sample_interval: 1000
+}
+SubscriptionListData {
+	marking: 63
+	mode: STREAM
+	allow_aggregation: false
+	encoding: JSON
+	updates_only: false
+}</pre>
+<p># JSON response packet.</p>
+<pre class="screen">++++++++ Received subscribe response: ++++++++
+&lt;subscibegNMI&gt;: update {
+  timestamp: 1626429829051000000
+  update {
+    path {
+      elem {
+        name: "huawei-debug:debug"
+      }
+      elem {
+        name: "cpu-infos"
+      }
+      elem {
+        name: "cpu-info"
+      }
+    }
+    val {
+      json_val: "[{\"position\":\"17\",\"overload-threshold\":90,\"unoverload-threshold\":75,\"interval\":8,\"index\":17891329,\"system-cpu-usage\":6,\"monitor-number\":48,\"monitor-cycle\":10,\"overload-state-change-time\":\"0000-00-00 00:00:00\",\"current-overload-state\":\"Unoverload\"}]"
+    }
+  }
+  delete {
+  }
+}
+
+&lt;subscibegNMI&gt;: sync_response: true</pre>
+<p># PROTO response packet (allow_aggregation = false).</p>
+<pre class="screen">++++++++ Received subscribe response: ++++++++
+&lt;subscibegNMI&gt;: update {
+  timestamp: 1626430004019000000
+  prefix {
+    elem {
+      name: "huawei-debug:debug"
+    }
+    elem {
+      name: "cpu-infos"
+    }
+    elem {
+      name: "cpu-info"
+      key {
+        key: "position"
+        value: "17"
+      }
+    }
+  }
+  update {
+    path {
+      elem {
+        name: "overload-threshold"
+      }
+    }
+    val {
+      uint_val: 90
+    }
+  }
+  update {
+    path {
+      elem {
+        name: "unoverload-threshold"
+      }
+    }
+    val {
+      uint_val: 75
+    }
+  }
+  update {
+    path {
+      elem {
+        name: "interval"
+      }
+    }
+    val {
+      uint_val: 8
+    }
+  }
+  update {
+    path {
+      elem {
+        name: "index"
+      }
+    }
+    val {
+      uint_val: 17891329
+    }
+  }
+  update {
+    path {
+      elem {
+        name: "system-cpu-usage"
+      }
+    }
+    val {
+      uint_val: 3
+    }
+  }
+  update {
+    path {
+      elem {
+        name: "monitor-number"
+      }
+    }
+    val {
+      uint_val: 48
+    }
+  }
+  update {
+    path {
+      elem {
+        name: "monitor-cycle"
+      }
+    }
+    val {
+      uint_val: 10
+    }
+  }
+  update {
+    path {
+      elem {
+        name: "overload-state-change-time"
+      }
+    }
+    val {
+      string_val: "0000-00-00 00:00:00"
+    }
+  }
+  update {
+    path {
+      elem {
+        name: "current-overload-state"
+      }
+    }
+    val {
+      string_val: "Unoverload"
+    }
+  }
+  delete {
+  }
+}
+
+&lt;subscibegNMI&gt;: sync_response: true</pre>
+<p># PROTO response packet (allow_aggregation = true).</p>
+<pre class="screen">++++++++ Received subscribe response: ++++++++
+&lt;subscibegNMI&gt;: update {
+  timestamp: 1626430056356000000
+  update {
+    path {
+      elem {
+        name: "huawei-debug:debug"
+      }
+      elem {
+        name: "cpu-infos"
+      }
+      elem {
+        name: "cpu-info"
+      }
+    }
+    val {
+      proto_bytes: "0a023137105a184b2008288180c40830033830400a4a13303030302d30302d30302030303a30303a3030520a556e6f7665726c6f6164"
+    }
+  }
+  delete {
+  }
+}
+
+&lt;subscibegNMI&gt;: sync_response: true</pre>
+</div>
+<div class="section"><h4 class="sectiontitle">Common Error Logs</h4><ol><li>The TLS encryption channel does not support the Capabilities, Get, Set, and Subscribe methods.<pre class="screen">rpc error: code = PermissionDenied desc = Need use tls.</pre>
+</li><li>The user name or password is incorrect.<pre class="screen">rpc error: code = Unauthenticated desc = Invalid authentication credentials.</pre>
+</li><li>Parameters are invalid.<ul><li>The input <strong>Path</strong> field is invalid.<pre class="screen">rpc error: code = InvalidArgument desc = Argument 'Path' error.</pre>
+</li><li>The input JSON data is invalid.<pre class="screen">rpc error: code = InvalidArgument desc = The JSON value is invalid.</pre>
+</li></ul>
+</li><li>No data is available.<pre class="screen">rpc error: code = NotFound desc = Not found.</pre>
+</li></ol>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_gRPC_cfg_0003.html">Understanding gRPC
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_gRPC_cfg_0012.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

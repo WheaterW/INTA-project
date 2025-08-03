@@ -1,0 +1,396 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Establishing IPv6 VXLAN Tunnels in BGP EVPN Mode (Centralized VXLAN Gateway)">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_vrp_vxlan6_cfg_1072.html">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_vrp_vxlan6_cfg_1049.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001134307098">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Example for Establishing IPv6 VXLAN Tunnels in BGP EVPN Mode (Centralized VXLAN Gateway)</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001134307098"></a><a name="EN-US_TASK_0000001134307098"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Establishing IPv6 VXLAN Tunnels in BGP EVPN Mode (Centralized VXLAN Gateway)</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001134307098__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0000001134307098__fig_dc_cfg_vxlan_cfgcase_000201">Figure 1</a>, an enterprise has VMs deployed in different data centers. VM1 on Server1 (Server1 VM1 for short) belongs to VLAN 10, Server2 VM1 belongs to VLAN 20, and Server3 VM1 belongs to VLAN 30. Server1 and Server2 reside on different network segments, and Server3 and Server2 reside on the same network segment. Server1 VM1, Server3 VM1, and Server2 VM1 need to communicate with each other through a Layer 3 IPv6 VXLAN gateway.</p>
+<div class="fignone" id="EN-US_TASK_0000001134307098__fig_dc_cfg_vxlan_cfgcase_000201"><a name="EN-US_TASK_0000001134307098__fig_dc_cfg_vxlan_cfgcase_000201"></a><a name="fig_dc_cfg_vxlan_cfgcase_000201"></a><span class="figcap"><b>Figure 1 </b>IPv6 VXLAN in centralized gateway mode</span><div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interfaces 1 through 3 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, and <span>100GE</span><span>1/0/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001134307112.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001134307098__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Precautions</h4><p>If M-LAG is used for Layer 3 gateway access, you need to configure a bypass VXLAN tunnel and enable ARP route advertisement.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001134307098__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><div class="p">The configuration roadmap is as follows:<ol><li><p>Configure an IPv6 routing protocol on Device1, Device2, and Device3 to ensure Layer 3 connectivity on the network.</p>
+</li><li><p>Configure service access points on Device1 and Device3 to distinguish service traffic.</p>
+</li><li><p>Enable EVPN to function as the VXLAN control plane.</p>
+</li><li><p>Configure BGP EVPN peer relationships.</p>
+</li><li><p>Configure EVPN instances.</p>
+</li><li><p>Configure ingress replication.</p>
+</li><li><p>Configure Device2 as an IPv6 Layer 3 VXLAN gateway.</p>
+</li></ol>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001134307098__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure an IPv6 routing protocol.</span><p><p># Configure Device1. The configurations of Device2 and Device3 are similar to the configuration of Device1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname Device1</strong>
+[<span><span class="keyword">*</span></span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1]<strong> interface loopback 1</strong>
+[<span><span class="keyword">*</span></span>Device1-LoopBack1] <strong>ipv6 enable</strong>
+[<span><span class="keyword">*</span></span>Device1-LoopBack1]<strong> ipv6 address 2001:DB8:1::1 128</strong>
+[<span><span class="keyword">*</span></span>Device1-LoopBack1]<strong> quit</strong>
+[<span><span class="keyword">*</span></span>Device1]<strong> interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span><span class="keyword">*</span></span>Device1-<span>100GE</span><span>1/0/1</span>]<strong> undo portswitch</strong>
+[<span><span class="keyword">*</span></span>Device1-<span>100GE</span><span>1/0/1</span>]<strong> ipv6 enable</strong>
+[<span><span class="keyword">*</span></span>Device1-<span>100GE</span><span>1/0/1</span>]<strong> ipv6 address 2001:DB8:4::1 64</strong>
+[<span><span class="keyword">*</span></span>Device1-<span>100GE</span><span>1/0/1</span>]<strong> quit</strong>
+[<span><span class="keyword">*</span></span>Device1]<strong> ospfv3 1</strong>
+[<span><span class="keyword">*</span></span>Device1-ospfv3-1]<strong> </strong><strong>router-id 1.1.1.1</strong>
+[<span><span class="keyword">*</span></span>Device1-ospfv3-1]<strong> area 0</strong>
+[<span><span class="keyword">*</span></span>Device1-ospfv3-1-area-0.0.0.0]<strong> quit</strong>
+[<span><span class="keyword">*</span></span>Device1-ospfv3-1]<strong> quit</strong>
+[<span><span class="keyword">*</span></span>Device1] <strong>interface loopback 1</strong>
+[<span><span class="keyword">*</span></span>Device1-LoopBack1] <strong>ospfv3 1 area 0</strong>
+[<span><span class="keyword">*</span></span>Device1-LoopBack1] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>Device1]<strong> interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span><span class="keyword">*</span></span>Device1-<span>100GE</span><span>1/0/1</span>]<strong> ospfv3 1 area 0</strong>
+[<span><span class="keyword">*</span></span>Device1-<span>100GE</span><span>1/0/1</span>]<strong> quit</strong>
+[<span><span class="keyword">*</span></span>Device1]<strong> commit</strong></pre>
+<p>After OSPFv3 is configured, the devices can learn the IPv6 address of each other's loopback interface using OSPFv3 and successfully ping each other. The following example shows the command output on Device1 after it pings Device3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>ping ipv6 2001:DB8:3::3</strong>
+  PING 2001:DB8:3::3: 56  data bytes, press CTRL_C to break
+    Reply from 2001:DB8:3::3
+    bytes=56 Sequence=1 hop limit=64 time=115 ms
+    Reply from 2001:DB8:3::3
+    bytes=56 Sequence=2 hop limit=64 time=1 ms
+    Reply from 2001:DB8:3::3
+    bytes=56 Sequence=3 hop limit=64 time=1 ms
+    Reply from 2001:DB8:3::3
+    bytes=56 Sequence=4 hop limit=64 time=1 ms
+    Reply from 2001:DB8:3::3
+    bytes=56 Sequence=5 hop limit=64 time=1 ms
+---2001:DB8:3::3 ping statistics---
+    5 packet(s) transmitted
+    5 packet(s) received
+    0.00% packet loss
+    round-trip min/avg/max=1/23/115 ms
+</pre>
+</p></li><li><span>Configure service access points on Device1 and Device3.</span><p><p># Configure Device1. The configuration of Device3 is similar to that of Device1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>bridge-domain 10</strong>
+[<span><span class="keyword">*</span></span>Device1-bd10] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>Device1] <strong>interface <span>100ge</span> <span>1/0/2</span>.1 mode l2</strong>
+[<span><span class="keyword">*</span></span>Device1-<span>100GE</span><span>1/0/2</span>.1] <strong>encapsulation dot1q vid 10</strong>
+[<span><span class="keyword">*</span></span>Device1-<span>100GE</span><span>1/0/2</span>.1] <strong>bridge-domain 10</strong>
+[<span><span class="keyword">*</span></span>Device1-<span>100GE</span><span>1/0/2</span>.1] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>Device1] <strong>bridge-domain 20</strong>
+[<span><span class="keyword">*</span></span>Device1-bd20] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>Device1] <strong>interface <span>100ge</span> <span>1/0/3</span>.1 mode l2</strong>
+[<span><span class="keyword">*</span></span>Device1-<span>100GE</span><span>1/0/3</span>.1] <strong>encapsulation dot1q vid 30</strong>
+[<span><span class="keyword">*</span></span>Device1-<span>100GE</span><span>1/0/3</span>.1] <strong>bridge-domain 20</strong>
+[<span><span class="keyword">*</span></span>Device1-<span>100GE</span><span>1/0/3</span>.1] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>Device1] <strong>commit</strong></pre>
+</p></li><li><span>Enable EVPN to function as the VXLAN control plane protocol on Device1, Device2, and Device3.</span><p><p># Configure Device1. The configurations of Device2 and Device3 are similar to the configuration of Device1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>evpn-overlay enable</strong>
+[<span><span class="keyword">*</span></span>Device1] <strong>commit</strong></pre>
+</p></li><li><span>Configure a BGP EVPN peer relationship.</span><p><p># Configure Device1. The configurations of Device2 and Device3 are similar to the configuration of Device1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>bgp 100</strong>
+[<span><span class="keyword">*</span></span>Device1-bgp] <strong>peer 2001:DB8:2::2 as-number 100</strong>
+[<span><span class="keyword">*</span></span>Device1-bgp] <strong>peer 2001:DB8:2::2 connect-interface LoopBack1</strong>
+[<span><span class="keyword">*</span></span>Device1-bgp] <strong>peer 2001:DB8:3::3 as-number 100</strong>
+[<span><span class="keyword">*</span></span>Device1-bgp] <strong>peer 2001:DB8:3::3 connect-interface LoopBack1</strong>
+[<span><span class="keyword">*</span></span>Device1-bgp] <strong>l2vpn-family evpn</strong>
+[<span><span class="keyword">*</span></span>Device1-bgp-af-evpn] <strong>peer 2001:DB8:2::2 enable</strong>
+Warning: This operation will reset the peer session. Continue? [Y/N]: <strong>y</strong>
+[<span><span class="keyword">*</span></span>Device1-bgp-af-evpn] <strong>peer 2001:DB8:3::3 enable</strong>
+Warning: This operation will reset the peer session. Continue? [Y/N]: <strong>y</strong>
+[<span><span class="keyword">*</span></span>Device1-bgp-af-evpn] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>Device1-bgp] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>Device1] <strong>commit</strong></pre>
+</p></li><li><span>Configure EVPN instances on Device1, Device2, and Device3.</span><p><p># Configure Device1. The configurations of Device2 and Device3 are similar to the configuration of Device1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>bridge-domain 10</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-bd10] <strong>vxlan vni 5010</strong>
+[<span><span class="keyword">*</span></span>Device1-bd10] <strong>evpn</strong>
+[<span><span class="keyword">*</span></span>Device1-bd10-evpn] <strong>route-distinguisher 10:11</strong>
+[<span><span class="keyword">*</span></span>Device1-bd10-evpn] <strong>vpn-target 100:5010</strong>
+[<span><span class="keyword">*</span></span>Device1-bd10-evpn] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>Device1-bd10] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>Device1] <strong>bridge-domain 20</strong>
+[<span><span class="keyword">*</span></span>Device1-bd20] <strong>vxlan vni 5020</strong>
+[<span><span class="keyword">*</span></span>Device1-bd20] <strong>evpn</strong>
+[<span><span class="keyword">*</span></span>Device1-bd20-evpn] <strong>route-distinguisher 10:12</strong>
+[<span><span class="keyword">*</span></span>Device1-bd20-evpn] <strong>vpn-target 100:5020</strong>
+[<span><span class="keyword">*</span></span>Device1-bd20-evpn] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>Device1-bd20] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>Device1] <strong>commit</strong></pre>
+</p></li><li><span>Configure ingress replication.</span><p><p># Configure Device1. The configurations of Device2 and Device3 are similar to the configuration of Device1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>interface nve 1</strong>
+[<span><span class="keyword">*</span></span>Device1-Nve1] <strong>source 2001:DB8:1::1</strong>
+[<span><span class="keyword">*</span></span>Device1-Nve1] <strong>vni 5010 head-end peer-list protocol bgp</strong>
+[<span><span class="keyword">*</span></span>Device1-Nve1] <strong>vni 5020 head-end peer-list protocol bgp</strong>
+[<span><span class="keyword">*</span></span>Device1-Nve1] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>Device1] <strong>commit</strong></pre>
+</p></li><li><span>Configure a Layer 3 VXLAN gateway on Device2.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device2] <strong>interface vbdif 10</strong>
+[<span><span class="keyword">*</span></span>Device2-Vbdif10] <strong>ip address 192.168.10.10 24</strong>
+[<span><span class="keyword">*</span></span>Device2-Vbdif10] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>Device2] <strong>interface vbdif 20</strong>
+[<span><span class="keyword">*</span></span>Device2-Vbdif20] <strong>ip address 192.168.20.10 24</strong>
+[<span><span class="keyword">*</span></span>Device2-Vbdif20] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>Device2] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001134307098__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>After completing the configuration, run the <a href="cmdqueryname=display+vxlan+tunnel"><b><span class="cmdname">display vxlan tunnel</span></b></a> command to check IPv6 VXLAN tunnel information and run the <a href="cmdqueryname=display+vxlan+vni"><b><span class="cmdname">display vxlan vni</span></b></a> command on Device1, Device2, and Device3 to check the VNI status. The command outputs show that the VNI status is up. The following example uses the command output on Device1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>display vxlan tunnel</strong>
+Number of vxlan tunnel : 2
+Tunnel ID   Source                Destination           State  Type     Uptime
+-----------------------------------------------------------------------------------
+4026531864  2001:DB8:1::1         2001:DB8:2::2         up     dynamic  0035h21m
+4026531865  2001:DB8:1::1         2001:DB8:3::3         up     dynamic  0036h21m</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>display vxlan vni</strong>
+Number of vxlan vni : 2
+VNI            BD-ID            State
+---------------------------------------
+5010           10               up
+5020           20               up</pre>
+<p>VM1s on different servers can communicate.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001134307098__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>Device1</p>
+<pre class="screen">#
+sysname Device1
+#
+evpn-overlay enable
+#
+bridge-domain 10
+ vxlan vni 5010
+ #
+ evpn
+  route-distinguisher 10:11
+  vpn-target 100:5010 export-extcommunity
+  vpn-target 100:5010 import-extcommunity
+#
+bridge-domain 20
+ vxlan vni 5020
+ #
+ evpn
+  route-distinguisher 10:12
+  vpn-target 100:5020 export-extcommunity
+  vpn-target 100:5020 import-extcommunity
+#
+ospfv3 1
+ router-id 1.1.1.1
+ area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8:4::1/64
+ ospfv3 1 area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/2</span>.1 mode l2
+ encapsulation dot1q vid 10
+ bridge-domain 10
+#
+interface <span>100GE</span><span>1/0/3</span>.1 mode l2
+ encapsulation dot1q vid 30
+ bridge-domain 20
+#
+interface LoopBack1
+ ipv6 enable
+ ipv6 address 2001:DB8:1::1/128
+ ospfv3 1 area 0.0.0.0
+#
+interface Nve1
+ source 2001:DB8:1::1
+ vni 5010 head-end peer-list protocol bgp
+ vni 5020 head-end peer-list protocol bgp
+#
+bgp 100
+ private-4-byte-as enable
+ peer 2001:DB8:2::2 as-number 100
+ peer 2001:DB8:2::2 connect-interface LoopBack1
+ peer 2001:DB8:3::3 as-number 100
+ peer 2001:DB8:3::3 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+ #
+ l2vpn-family evpn
+  policy vpn-target
+  peer 2001:DB8:2::2 enable
+  peer 2001:DB8:3::3 enable
+#
+return</pre>
+</li><li><p>Device2</p>
+<pre class="screen">#
+sysname Device2
+#
+evpn-overlay enable
+#
+bridge-domain 10
+ vxlan vni 5010
+ #
+ evpn
+  route-distinguisher 10:21
+  vpn-target 100:5010 export-extcommunity
+  vpn-target 100:5010 import-extcommunity
+#
+bridge-domain 20
+ vxlan vni 5020
+ #
+ evpn
+  route-distinguisher 10:22
+  vpn-target 100:5020 export-extcommunity
+  vpn-target 100:5020 import-extcommunity
+#
+ospfv3 1
+ router-id 2.2.2.2
+ area 0.0.0.0
+#
+interface Vbdif10
+ ip address 192.168.10.10 255.255.255.0
+#
+interface Vbdif20
+ ip address 192.168.20.10 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8:4::2/64
+ ospfv3 1 area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8:5::1/64
+ ospfv3 1 area 0.0.0.0
+#
+interface LoopBack1
+ ipv6 enable
+ ipv6 address 2001:DB8:2::2/128
+ ospfv3 1 area 0.0.0.0
+#
+interface Nve1
+ source 2001:DB8:2::2
+ vni 5010 head-end peer-list protocol bgp
+ vni 5020 head-end peer-list protocol bgp
+#
+bgp 100
+ private-4-byte-as enable
+ peer 2001:DB8:1::1 as-number 100
+ peer 2001:DB8:1::1 connect-interface LoopBack1
+ peer 2001:DB8:3::3 as-number 100
+ peer 2001:DB8:3::3 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+ #
+ l2vpn-family evpn
+  policy vpn-target
+  peer 2001:DB8:1::1 enable
+  peer 2001:DB8:3::3 enable
+#
+return</pre>
+</li><li><p>Device3</p>
+<pre class="screen">#
+sysname Device3
+#
+evpn-overlay enable
+#
+bridge-domain 20
+ vxlan vni 5020
+ #
+ evpn
+  route-distinguisher 10:31
+  vpn-target 100:5020 export-extcommunity
+  vpn-target 100:5020 import-extcommunity
+#
+ospfv3 1
+ router-id 3.3.3.3
+ area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8:5::2/64
+ ospfv3 1 area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/2</span>.1 mode l2
+ encapsulation dot1q vid 20
+ bridge-domain 20
+#
+interface LoopBack1
+ ipv6 enable
+ ipv6 address 2001:DB8:3::3/128
+ ospfv3 1 area 0.0.0.0
+#
+interface Nve1
+ source 2001:DB8:3::3
+ vni 5020 head-end peer-list protocol bgp
+#
+bgp 100
+ private-4-byte-as enable
+ peer 2001:DB8:1::1 as-number 100
+ peer 2001:DB8:1::1 connect-interface LoopBack1
+ peer 2001:DB8:2::2 as-number 100
+ peer 2001:DB8:2::2 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+ #
+ l2vpn-family evpn
+  policy vpn-target
+  peer 2001:DB8:1::1 enable
+  peer 2001:DB8:2::2 enable
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../dc/dc_vrp_vxlan6_cfg_1072.html">Establishing IPv6 VXLAN Tunnels in BGP EVPN Mode (Centralized VXLAN Gateway)
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../dc/dc_vrp_vxlan6_cfg_1049.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

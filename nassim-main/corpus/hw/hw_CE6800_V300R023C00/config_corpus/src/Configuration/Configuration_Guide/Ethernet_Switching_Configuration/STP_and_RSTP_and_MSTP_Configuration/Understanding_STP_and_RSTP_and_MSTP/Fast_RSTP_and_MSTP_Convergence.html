@@ -1,0 +1,94 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Fast RSTP and MSTP Convergence">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_stp_cfg_1065.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_stp_cfg_1072.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_stp_cfg_1074.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="MSTP">
+<meta name="featurename" content="RSTP">
+<meta name="featurename" content="STP">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="MSTP">
+<meta name="featurename" content="RSTP">
+<meta name="featurename" content="STP">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="featurename" content="MSTP">
+<meta name="featurename" content="RSTP">
+<meta name="featurename" content="STP">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001345318749">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Fast RSTP and MSTP Convergence</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001345318749"></a><a name="EN-US_CONCEPT_0000001345318749"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Fast RSTP and MSTP Convergence</h1>
+<div><p>The key to RSTP and MSTP fast convergence is the introduction of the <a href="#EN-US_CONCEPT_0000001345318749__section8346742194216">Proposal/Agreement Mechanism</a>, <a href="#EN-US_CONCEPT_0000001345318749__section475992312432">Fast Switchover of the Root Port</a>, and <a href="#EN-US_CONCEPT_0000001345318749__section92892052115">Edge Port</a>.</p>
+<div class="section" id="EN-US_CONCEPT_0000001345318749__section8346742194216"><a name="EN-US_CONCEPT_0000001345318749__section8346742194216"></a><a name="section8346742194216"></a><h4 class="sectiontitle">Proposal/Agreement Mechanism</h4><p>The Proposal/Agreement (P/A for short) mechanism enables a designated port to quickly transition to Forwarding state. The P/A mechanism is classified into the common P/A mechanism and the enhanced P/A mechanism.</p>
+<p><strong>Common P/A mechanism</strong></p>
+<p>In <a href="#EN-US_CONCEPT_0000001345318749__fig1649671517299">Figure 1</a>, a new link is added between DeviceB and the root bridge DeviceA. On DeviceB, p2 is an alternate port, p3 is a designated port in Forwarding state, and p4 is an edge port.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001345318749__fig1649671517299"><a name="EN-US_CONCEPT_0000001345318749__fig1649671517299"></a><a name="fig1649671517299"></a><span class="figcap"><b>Figure 1 </b>Common P/A negotiation process</span><br><span><img class="vsd" src="figure/en-us_image_0000001345238533.png"></span></div>
+<div class="p">The common P/A mechanism works as follows:<ol><li>p0 and p1 become designated ports and send RST BPDUs to each other.</li><li>The RST BPDU sent from p0 is superior to that of p1. Therefore, p1 becomes a root port and stops sending RST BPDUs.</li><li>p0 enters the Discarding state and sets the Proposal and Agreement fields in its RST BPDU to 1.</li><li>After receiving an RST BPDU with the Proposal field set to 1, DeviceB sets the sync variable to 1 for all its ports.</li><li>As p2 has been blocked, its state remains unchanged. p4 is an edge port and does not participate in spanning tree calculation. Therefore, only the non-edge designated port p3 needs to be blocked.</li><li>When the sync variable of each port is set to 1, p2 and p3 enter the Discarding state. p1 enters the Forwarding state and sends an RST BPDU with the Agreement field set to 1 to DeviceA.</li><li>Upon receipt of this RST BPDU, DeviceA identifies that the RST BPDU is a response to the RST BPDU sent with the Proposal field. p0 then immediately enters the Forwarding state.</li></ol>
+</div>
+<p>The P/A process can proceed to downstream devices.</p>
+<p>Although STP can select designated ports quickly, to prevent loops, all ports must wait at least one interval of the Forward Delay timer before forwarding traffic. To overcome this bottleneck, RSTP blocks non-root ports to prevent loops, and uses the P/A mechanism to shorten the time that an upstream port waits before transitioning to Forwarding state.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The P/A mechanism requires a P2P full-duplex link between two devices. If P/A fails, a designated port is elected after two intervals of the Forward Delay timer. This is the same as designated port election in STP.</p>
+</div></div>
+<p><strong>Enhanced P/A mechanism</strong></p>
+<p>In <a href="#EN-US_CONCEPT_0000001345318749__fig2655133419412">Figure 2</a>, the enhanced P/A mechanism works as follows:</p>
+<ol><li><p>At the beginning of negotiation, all devices consider themselves as the root bridge, on which all ports are designated ports in Discarding state. When the synced variable is set to 1, the Proposal and Agreement fields are also set to 1. The upstream device sends a proposal BPDU to the downstream device, requesting that the port connected to the downstream device rapidly enters the Forwarding state. After receiving this BPDU, the downstream device sets its port connected to the upstream device as the root port and blocks all non-edge ports.</p>
+</li><li><p>The upstream device sends an agreement BPDU. After receiving this BPDU, the root port on the downstream enters the Forwarding state.</p>
+</li><li><p>The downstream device replies with an agreement BPDU. After receiving this BPDU, the upstream device sets its port connected to the downstream device as the designated port, and the port then enters the Forwarding state.</p>
+</li></ol>
+<p>By default, Huawei devices use the enhanced P/A mechanism for fast convergence. In order to enable a Huawei device to communicate with a third-party device that uses the common P/A mechanism, you can configure Huawei devices to use the common P/A mechanism.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001345318749__fig2655133419412"><a name="EN-US_CONCEPT_0000001345318749__fig2655133419412"></a><a name="fig2655133419412"></a><span class="figcap"><b>Figure 2 </b>Enhanced P/A negotiation process</span><br><span><img class="vsd" src="figure/en-us_image_0000001345478677.png"></span></div>
+</div>
+<div class="section" id="EN-US_CONCEPT_0000001345318749__section475992312432"><a name="EN-US_CONCEPT_0000001345318749__section475992312432"></a><a name="section475992312432"></a><h4 class="sectiontitle">Fast Switchover of the Root Port</h4><p>If a root port fails on an RSTP or MSTP network, the best alternate port becomes the root port and enters the Forwarding state. This is because the network segment connected to this alternate port has a designated port connected to the root bridge.</p>
+<p>In <a href="#EN-US_CONCEPT_0000001345318749__fig169043585126">Figure 3</a>, DeviceA is the root bridge, DeviceB is the secondary root bridge, and interface 2 on DeviceC is the alternate port. If interface 1 (root port) on DeviceC fails: In STP mode, interface 2 on DeviceC becomes the root port and enters the Discarding state. It then waits for an interval of the Forward Delay timer (15 seconds by default), enters the Learning state, then waits for another interval of the Forward Delay timer before entering the Forwarding state. However, in RSTP/MSTP mode, interface 2 on DeviceC becomes the root port and immediately enters the Forwarding state.</p>
+<p>Compared with STP, RSTP/MSTP reduces service traffic loss because the new root port can immediately enter the Forwarding state without waiting for two intervals of the Forward Delay timer.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001345318749__fig169043585126"><a name="EN-US_CONCEPT_0000001345318749__fig169043585126"></a><a name="fig169043585126"></a><span class="figcap"><b>Figure 3 </b>Fast switchover of the root port</span><br><span><img class="vsd" src="figure/en-us_image_0000001292398396.png"></span></div>
+</div>
+<div class="section" id="EN-US_CONCEPT_0000001345318749__section92892052115"><a name="EN-US_CONCEPT_0000001345318749__section92892052115"></a><a name="section92892052115"></a><h4 class="sectiontitle">Edge Port</h4><p>An edge port is located at the edge of an RSTP or MSTP network and directly connected to a terminal.</p>
+<p>This port does not participate in spanning tree calculation and can transition from the Disabled state to the Forwarding state immediately. It becomes a common port once it receives a BPDU. The spanning tree then needs to be recalculated, leading to network flapping, which can be addressed by <a href="vrp_stp_cfg_1110.html#EN-US_CONCEPT_0000001291918968__section8356190195615">BPDU protection</a>.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_stp_cfg_1065.html">Understanding STP/RSTP/MSTP
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_stp_cfg_1072.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_stp_cfg_1074.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

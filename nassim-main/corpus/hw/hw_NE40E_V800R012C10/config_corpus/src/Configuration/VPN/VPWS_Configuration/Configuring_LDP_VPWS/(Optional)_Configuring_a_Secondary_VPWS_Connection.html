@@ -1,0 +1,113 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="(Optional) Configuring a Secondary VPWS Connection">
+<meta name="abstract" content="This section describes how to configure a secondary VPWS connection for VLL FRR, so that L2VPN traffic can be quickly switched to the backup path if the primary path fails. After the primary path recovers, the L2VPN traffic can be switched back to it according to the corresponding revertive switching policy.">
+<meta name="description" content="This section describes how to configure a secondary VPWS connection for VLL FRR, so that L2VPN traffic can be quickly switched to the backup path if the primary path fails. After the primary path recovers, the L2VPN traffic can be switched back to it according to the corresponding revertive switching policy.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_3004.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_3007.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_5003.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="VPWS">
+<meta name="featuretype" content="VPN">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VPWS">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="VPWS">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="VPWS">
+<meta name="featuretype" content="VPN">
+<meta name="OWNER" content="l00415692">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="q00824768">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172369803">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>(Optional) Configuring a Secondary VPWS Connection</title>
+</head>
+<body><a name="EN-US_TASK_0172369803"></a><a name="EN-US_TASK_0172369803"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">(Optional) Configuring a Secondary VPWS Connection</h1>
+<div class="taskbody"><p>This section describes how to configure a secondary VPWS connection for VLL FRR, so that L2VPN traffic can be quickly switched to the backup path if the primary path fails. After the primary path recovers, the L2VPN traffic can be switched back to it according to the corresponding revertive switching policy.</p>
+<div class="context"><a name="EN-US_TASK_0172369803__1.4.1"></a><a name="1.4.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>A secondary VPWS connection is mainly used in the following networking modes:</p>
+<ul><li><p>CEs symmetrically dual-homed to PEs</p>
+<p>Two communication paths exist between the CEs on the two ends of the VC. One is the primary PW path, and the other is the secondary PW path.</p>
+</li><li><p>CEs asymmetrically connecting to PEs</p>
+<div class="fignone" id="EN-US_TASK_0172369803__fig_dc_vrp_vpws_cfg_500201"><a name="EN-US_TASK_0172369803__fig_dc_vrp_vpws_cfg_500201"></a><a name="fig_dc_vrp_vpws_cfg_500201"></a><span class="figcap"><b>Figure 1 </b>CEs asymmetrically connecting to PEs</span><br><span><img class="vsd" src="images/fig_dc_vrp_vpws_cfg_500201.png" width="NaN" height="NaN"></span><br></div>
+<p>On the network shown in <a href="#EN-US_TASK_0172369803__fig_dc_vrp_vpws_cfg_500201">Figure 1</a>, a pair of primary and secondary PWs need to be configured on PE1. Only one PW needs to be configured on PE2 and another on PE3. Therefore, PE2 and PE3 do not determine whether their PW is a primary or secondary one.</p>
+<p>The CE on one end of the VC accesses a higher-reliability PE over a single reliable link. The CE on the other end is dual-homed to lower-reliability PEs. The two CEs can communicate over two paths. The higher-reliability path serves as the primary path, and the lower-reliability path serves as the backup path.</p>
+<p>In a scenario where CEs asymmetrically connect to PEs, configure both primary and secondary PWs. The primary and secondary PWs must be of the same type.</p>
+<p>In addition, the interface used by the singled-homed CE to connect to the corresponding PE requires both primary and secondary IP addresses. If the primary path is available, the CE uses the primary IP address to communicate with the remote CE. If a fault occurs on the primary path, this CE uses the secondary IP address to communicate with the remote CE.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If the IP addresses of AC interfaces used to connect to CEs at both ends of a PW are on different network segments, the AC type must be PPP. In this case, the <a href="cmdqueryname=ppp+peer+hostroute-suppress"><b><span class="cmdname">ppp peer hostroute-suppress</span></b></a> command cannot be used.</p>
+<p>On a network where CEs asymmetrically connect to PEs, the secondary PW does not transmit data when the primary and backup paths both work properly. If the secondary PW AC interface borrows the IP address of the primary PW AC interface, the following situations arise:</p>
+<ul><li><p>Non-revertive switching cannot be configured.</p>
+</li><li><p>The local CE has two equal-cost direct routes to the remote CE, with both routes having the same destination address and same next hop. The route that passes through the secondary PW is actually an invalid route.</p>
+</li><li><p>If CEs exchange routing information using routing protocols, you need to change the cost or metric of the backup path AC interface to be greater than that of the primary path AC interface. In this case, the local CE may fail to communicate with the remote CE, but can communicate with other user devices on the remote end.</p>
+</li><li><p>If CEs use static routes to exchange routing information, ensure that the preference of the backup route is lower than that of the primary route (a larger value indicates a lower preference). To do so, run the <a href="cmdqueryname=ip+route-static"><b><span class="cmdname">ip route-static</span></b></a> <i><span class="varname">dest-ip-address</span></i> <i><span class="varname">mask</span></i> <i><span class="varname">out-interface</span></i> <strong><span>preference</span></strong> <i><span class="varname">preference-value</span></i> command.</p>
+</li></ul>
+</div></div>
+<p>Perform the following steps on the PE to which a CE is single-homed:</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172369803__1.4.2"></a><a name="1.4.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Run <a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span><p><p>The system view is displayed.</p>
+</p></li><li><span>Run <a href="cmdqueryname=mpls+l2vpn"><b><span class="cmdname">mpls l2vpn</span></b></a></span><p><p>MPLS L2VPN is enabled.</p>
+</p></li><li><span>Run <a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></span><p><p>Return to the system view.</p>
+</p></li><li><span>Run <a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> [ .<i><span class="varname">subinterface-number</span></i> ]</span><p><p>The AC interface view is displayed.</p>
+</p></li><li><span>Run one of the following commands to create a secondary VPWS connection according to the interface type:</span><p><ul><li><p>Ethernet interface:</p>
+<p><span><span><a href="cmdqueryname=mpls+l2vc"><b><span class="cmdname">mpls l2vc</span></b></a></span> { <i><span class="varname">ip-address</span></i> | <strong><span>pw-template</span></strong> <i><span class="varname">template-name</span></i> } <sup>*</sup> <i><span class="varname">vc-id</span></i> [ <strong><span>access-port</span></strong> | [ <strong><span>control-word</span></strong> | <strong><span>no-control-word</span></strong> ] | <strong><span>ignore-standby-state</span></strong> | [ <strong><span>raw</span></strong> | <strong><span>tagged</span></strong> ] | <strong><span>tunnel-policy</span></strong> <i><span class="varname">policy-name</span></i><span> [ { <strong><span>endpoint</span></strong> <i><span class="varname">endpoint-address</span></i> | [ <strong><span>endpoint</span></strong> <i><span class="varname">endpoint4-address</span></i> ] } <strong><span>color</span></strong> <i><span class="varname">color-value</span></i> ]</span> | <strong><span>secondary </span></strong>]*</span></p>
+</li><li><span>PPP</span><span>/HDLC</span> interface:<p><span><span><a href="cmdqueryname=mpls+l2vc"><b><span class="cmdname">mpls l2vc</span></b></a></span> { <i><span class="varname">ip-address</span></i> | <strong><span>pw-template</span></strong> <i><span class="varname">template-name</span></i> } <sup>*</sup> <i><span class="varname">vc-id</span></i> [ <strong><span>access-port</span></strong> | [ <strong><span>control-word</span></strong> | <strong><span>no-control-word</span></strong> ] | <strong><span>ignore-standby-state</span></strong> | [ <strong><span>raw</span></strong> | <strong><span>tagged</span></strong> ] | <strong><span>tunnel-policy</span></strong> <i><span class="varname">policy-name</span></i><span> [ { <strong><span>endpoint</span></strong> <i><span class="varname">endpoint-address</span></i> | [ <strong><span>endpoint</span></strong> <i><span class="varname">endpoint4-address</span></i> ] } <strong><span>color</span></strong> <i><span class="varname">color-value</span></i> ]</span> | <strong><span>secondary </span></strong>]*</span></p>
+</li><li><p>ATM interface:</p>
+<p><span><span><a href="cmdqueryname=mpls+l2vc"><b><span class="cmdname">mpls l2vc</span></b></a>{ <i><span class="varname">ip-address</span></i> | <strong><span>pw-template</span></strong> <i><span class="varname">template-name</span></i> } <sup>*</sup> <i><span class="varname">vc-id</span></i> [ <strong><span>tunnel-policy</span></strong> <i><span class="varname">policy-name</span></i><span> [ <strong><span>endpoint</span></strong> <i><span class="varname">endpoint-address</span></i> <strong><span>color</span></strong> <i><span class="varname">color-value</span></i> ]</span> | [ <strong><span>control-word</span></strong> | [ <strong><span>seq-number</span></strong> ] | <strong><span>no-control-word</span></strong> ] | <strong><span>max-atm-cells</span></strong> <i><span class="varname">cells-value</span></i> | <strong><span>atm-pack-overtime</span></strong> <i><span class="varname">atm-pack-overtime</span></i> | <strong><span>transmit-atm-cells</span></strong> <i><span class="varname">transmit-atm-cell-value</span></i> | <strong><span>ignore-standby-state</span></strong> | <strong><span>secondary </span></strong>]<span><span><sup> *</sup></span></span></span></span></p>
+</li><li><p>TDM interface:</p>
+<p><span><span><a href="cmdqueryname=mpls+l2vc"><b><span class="cmdname">mpls l2vc</span></b></a></span> { <i><span class="varname">ip-address</span></i> | <strong><span>pw-template</span></strong> <i><span class="varname">template-name</span></i> } <sup>*</sup> <i><span class="varname">vc-id</span></i> [ <strong><span>tunnel-policy</span></strong> <i><span class="varname">tnl-policy-name</span></i><span> [ <strong><span>endpoint</span></strong> <i><span class="varname">endpoint-address</span></i> <strong><span>color</span></strong> <i><span class="varname">color-value</span></i> ]</span> | [ <strong><span>control-word</span></strong> | <strong><span>no-control-word</span></strong> ] | [ <strong><span>jitter-buffer</span></strong> <i><span class="varname">depth</span></i> ] | [ <strong><span>tdm-encapsulation-number</span></strong> <i><span class="varname">number</span></i> ] | [ <strong><span>tdm-sequence-number</span></strong> ] | [ <strong><span>rtp-header</span></strong> ] | <strong><span>ignore-standby-state</span></strong> | <strong><span>secondary</span></strong> ] <span><span><span><span><sup>*</sup></span></span></span></span></span></p>
+</li></ul>
+</p><p><p>When configuring a secondary VPWS PW, ensure that the parameter settings for the primary, secondary, and bypass PWs are consistent. Parameter setting inconsistencies may result in the secondary or bypass PW failing to take over traffic if the primary PW fails.</p>
+<p>In the scenario where CEs asymmetrically connect to PEs, note the following:</p>
+<ul><li>Only the PE to which a CE is single-homed requires the configuration of both the primary and secondary PWs. The PEs to which a CE is dual-homed require only the configuration of the primary PW.</li><li>The control word configurations for the primary and secondary PWs must be the same. Otherwise, a large number of packets will be lost after a primary/secondary PW switchover.</li><li><p>If CEs connect to PEs over PPP<span>/HDLC</span> links:</p>
+<ul><li><p>PEs can only have heterogeneous interworking configured.</p>
+</li><li>The interface connecting CE1 to PE1 can be configured with both primary and secondary IP addresses. The primary PW forwards packets to the primary IP address, and the secondary PW forwards packets to the secondary IP address.</li><li>CEs can advertise routes to each other using OSPF. OSPF, however, cannot advertise routes destined for the secondary IP address.</li></ul>
+</li></ul>
+</p></li><li><span>(Optional) Run <a href="cmdqueryname=undo+interface-parameter-type+vccv"><b><span class="cmdname">undo interface-parameter-type vccv</span></b></a></span><p><p>The function to delete the VCCV byte (an interface parameter) from the Label Mapping message is enabled.</p>
+</p><p><p>Run this command if LDP VPWS is configured for a device running VRP V800R005 or later and this device communicates with another device running VRP V300R001 or any branch version of VRP V300R001.</p>
+</p></li><li><span>(Optional) Run <a href="cmdqueryname=mpls+l2vpn+service-name"><b><span class="cmdname">mpls l2vpn service-name</span></b></a> <i><span class="varname">service-name</span></i></span><p><p>An L2VPN service name is specified. The L2VPN service can then be maintained through an NMS based on the specified name.</p>
+</p></li><li><span>Run <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span><p><p>The configuration is committed.</p>
+</p></li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_3004.html">Configuring LDP VPWS
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_3007.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_5003.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

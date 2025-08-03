@@ -1,0 +1,354 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring QPPB (BGP)">
+<meta name="abstract" content="This section provides an example for configuring QPPB (BGP).">
+<meta name="description" content="This section provides an example for configuring QPPB (BGP).">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_qos_cfg_2037.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_qos_cfg_5097.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00606909,m00390128">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="QPPB">
+<meta name="featuretype" content="QOS">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="QPPB">
+<meta name="featuretype" content="QOS">
+<meta name="featurename" content="QPPB">
+<meta name="featuretype" content="QOS">
+<meta name="featurename" content="QPPB">
+<meta name="featuretype" content="QOS">
+<meta name="OWNER" content="m00390128">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="m00915594">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172371445">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring QPPB (BGP)</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172371445"></a><a name="EN-US_TASK_0172371445"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring QPPB (BGP)</h1>
+<div class="taskbody"><p>This section provides an example for configuring QPPB (BGP).</p>
+<div class="context"><a name="EN-US_TASK_0172371445__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0172371445__fig_dc_ne_qos_cfg_203801">Figure 1</a>, <span class="keyword">Device</span>B advertises BGP routes with community attributes to <span class="keyword">Device</span>A, and <span class="keyword">Device</span>A matches the community attributes against the community list, associates traffic behaviors with QoS local IDs for the matched routes, and applies a QPPB local policy to the traffic transmitted along the routes.</p>
+<p>Traffic is sent from <span class="keyword">Device</span>B to <span class="keyword">Device</span>C by passing through <span class="keyword">Device</span>A. <span class="keyword">Device</span>B functions as a BGP route sender, and <span class="keyword">Device</span>A functions as a BGP route receiver. It is required that source-based QPPB be applied to the incoming traffic on <span class="keyword">Device</span>A.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 and interface2 represent GE <span>0/1/0</span> and GE <span>0/2/0</span>, respectively.</p>
+</div></div>
+<div class="fignone" id="EN-US_TASK_0172371445__fig_dc_ne_qos_cfg_203801"><a name="EN-US_TASK_0172371445__fig_dc_ne_qos_cfg_203801"></a><a name="fig_dc_ne_qos_cfg_203801"></a><span class="figcap"><b>Figure 1 </b>Networking diagram for configuring QPPB</span><br><span><img class="vsd" src="images/fig_dc_ne_qos_cfg_203801.png"></span><br></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172371445__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure basic BGP functions.</p>
+</li><li><p>Configure a routing policy to set community attributes for the routes to be advertised and advertise routes on <span class="keyword">Device</span>B.</p>
+</li><li><p>Configure a routing policy on <span class="keyword">Device</span>A to match the community attributes against the community list, and associate traffic behaviors with QoS local IDs for the matched routes.</p>
+</li><li><p>Apply the QPPB local policy to the inbound interface of <span class="keyword">Device</span>A.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172371445__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>IP address of each interface</p>
+</li><li><p>Routing policy name, matching rule, and route attribute</p>
+</li><li><p>QPPB local policy name</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172371445__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure basic BGP functions on <span class="keyword">Device</span>A and <span class="keyword">Device</span>B.</span><p><p># Configure loopback interfaces on <span class="keyword">Device</span>A and <span class="keyword">Device</span>B.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>interface loopback 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-LoopBack0] <strong>ip address 1.1.1.1 255.255.255.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-LoopBack0]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-LoopBack0]<strong> return</strong></pre>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceB</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>interface loopback 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-LoopBack0] <strong>ip address 2.2.2.2 255.255.255.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-LoopBack0]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-LoopBack0]<strong> return</strong></pre>
+<p># Configure interfaces connecting <span class="keyword">Device</span>A and <span class="keyword">Device</span>B and interfaces connecting <span class="keyword">Device</span>A and <span class="keyword">Device</span>C.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> interface GigabitEthernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>] <strong>ip address 10.10.1.1 255.255.255.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>ip address 10.20.1.2 255.255.255.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>]<strong> return</strong></pre>
+<pre class="screen">&lt;<span class="keyword">Device</span>B&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B]<strong> interface GigabitEthernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/0</span>] <strong>ip address 10.10.1.2 255.255.255.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/0</span>]<strong> return</strong></pre>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceC</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/0</span>]<strong> ip address 10.20.1.1 255.255.255.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/0</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/0</span>]<strong> return</strong></pre>
+<p># Enable OSPF to advertise route information containing the interface addresses.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ospf-1] <strong>area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ospf-1-area-0.0.0.0] <strong>network 1.1.1.1 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ospf-1-area-0.0.0.0]<strong> network 10.10.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ospf-1-area-0.0.0.0]<strong> network 10.20.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-ospf-1-area-0.0.0.0] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-ospf-1-area-0.0.0.0]<strong> return</strong></pre>
+<pre class="screen">&lt;<span class="keyword">Device</span>B&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf] <strong>area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1-area-0.0.0.0] <strong>network 2.2.2.2 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1-area-0.0.0.0] <strong>network 10.10.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1-area-0.0.0.0] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-ospf-1-area-0.0.0.0]<strong> return</strong></pre>
+<pre class="screen">&lt;<span class="keyword">Device</span>C&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf] <strong>area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf-1-area-0.0.0.0] <strong>network 10.20.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf-1-area-0.0.0.0] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-ospf-1-area-0.0.0.0] <strong>return</strong></pre>
+<p># Configure BGP and set up an EBGP peer relationship between <span class="keyword">Device</span>A and <span class="keyword">Device</span>B.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>peer 2.2.2.2 as-number 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>peer 2.2.2.2 ebgp-max-hop 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp]<strong> peer 2.2.2.2 connect-interface loopback 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-bgp]<strong> return</strong></pre>
+<pre class="screen">&lt;<span class="keyword">Device</span>B&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>bgp 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>peer 1.1.1.1 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>peer 1.1.1.1 ebgp-max-hop 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>peer 1.1.1.1 connect-interface loopback 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-bgp]<strong> return</strong></pre>
+<p># Configure BGP and set up an IBGP peer relationship between <span class="keyword">Device</span>A and <span class="keyword">Device</span>C.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp]<strong> peer 10.20.1.1 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-bgp]<strong> quit</strong></pre>
+<pre class="screen">&lt;<span class="keyword">Device</span>C&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp] <strong>peer 10.20.1.2 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp] <strong>import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-bgp]<strong> quit</strong></pre>
+<p>After the configuration is complete, <span class="keyword">Device</span>A can communicate with <span class="keyword">Device</span>B and <span class="keyword">Device</span>C.</p>
+</p></li><li><span>Configure and apply a routing policy on <span class="keyword">Device</span>B.</span><p><p># Configure an IP prefix on <span class="keyword">Device</span>B.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>B&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B]<strong> ip ip-prefix bb permit 10.10.1.0 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B]<strong> return</strong></pre>
+<p># Configure a routing policy on <span class="keyword">Device</span>B.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>B&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B]<strong> route-policy aa permit node 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-route-policy]<strong> if-match ip-prefix bb</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-route-policy]<strong> apply community 10:10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-route-policy]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-route-policy]<strong> return</strong></pre>
+<p># Configure a policy for advertising routes through BGP on <span class="keyword">Device</span>B.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>B&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>bgp 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>peer 1.1.1.1 route-policy aa export</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>peer 1.1.1.1 advertise-community</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-bgp]<strong> return</strong></pre>
+</p></li><li><span>Configure a policy for receiving routes on <span class="keyword">Device</span>A, and apply traffic behaviors to the route that matches the route attribute.</span><p><p># Configure a traffic behavior.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>traffic behavior dd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-dd]<strong> remark dscp af11</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-dd]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-behavior-dd]<strong> return</strong></pre>
+<p># Configure a routing policy and apply the traffic behavior to the route that matches the route attribute.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> ip community-filter 10 permit 10:10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A]<strong> route-policy aa permit node 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-route-policy]<strong> if-match community-filter 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-route-policy]<strong> apply qos-local-id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-route-policy]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-route-policy]<strong> return</strong></pre>
+<p># Configure a QPPB local policy on <span class="keyword">Device</span>A.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>qppb local-policy ac</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-localpolicy-ac] <strong>qos-local-id 1 behavior dd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-localpolicy-ac] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-localpolicy-ac] <strong>return</strong></pre>
+<p># Apply the routing policy to the routes sent from <span class="keyword">Device</span>B on <span class="keyword">Device</span>A.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp]<strong> peer 2.2.2.2 route-policy aa import</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-bgp] <strong>return</strong></pre>
+</p></li><li><span>Apply the QPPB local policy to the incoming traffic on <span class="keyword">Device</span>A.</span><p><pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>interface GigabitEthernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>]<strong> qppb-policy ac source inbound</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>]<strong> return</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p># Display the QPPB local policy information on <span class="keyword">Device</span>A.</p>
+<pre class="screen">&lt;<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A&gt;<strong> display qppb local-policy configuration ac</strong></pre>
+<pre class="screen">qppb local-policy: ac
+ statistics disable
+ service-class outbound disable
+ is-used yes
+ qos-local-id 1 behavior dd </pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172371445__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p><span class="keyword">Device</span>A configuration file</p>
+<pre class="screen">#
+sysname <span class="keyword">Device</span>A
+#
+traffic behavior dd
+ remark dscp af11
+#
+qppb local-policy ac
+ qos-local-id 1 behavior dd
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.20.1.2 255.255.255.0
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.10.1.1 255.255.255.0
+ qppb-policy ac source inbound
+#
+interface LoopBack0
+ ip address 1.1.1.1 255.255.255.255
+#
+bgp 100
+ peer 2.2.2.2 as-number 200
+ peer 2.2.2.2 ebgp-max-hop 2
+ peer 2.2.2.2 connect-interface LoopBack0
+ peer 10.20.1.1 as-number 100
+#
+ipv4-family unicast
+  undo synchronization
+  import-route direct
+  peer 2.2.2.2 enable
+  peer 2.2.2.2 route-policy aa import
+  peer 10.20.1.1 enable     
+#
+ospf 1
+ area 0.0.0.0
+  network 1.1.1.1 0.0.0.0
+  network 10.10.1.0 0.0.0.255
+  network 10.20.1.0 0.0.0.255
+#
+ip community-filter 10 index 10 permit 10:10
+# 
+route-policy aa permit node 10
+ if-match community-filter 10
+ apply qos-local-id 1
+#
+return</pre>
+</li><li><p><span class="keyword">Device</span>B configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname <span class="keyword">Device</span>B</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.10.1.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack0</pre>
+<pre class="screen"> ip address 2.2.2.2 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 200</pre>
+<pre class="screen"> peer 1.1.1.1 as-number 100</pre>
+<pre class="screen"> peer 1.1.1.1 ebgp-max-hop 2</pre>
+<pre class="screen"> peer 1.1.1.1 connect-interface LoopBack0</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  undo synchronization</pre>
+<pre class="screen">  import-route direct</pre>
+<pre class="screen">  peer 1.1.1.1 enable</pre>
+<pre class="screen">  peer 1.1.1.1 route-policy aa export</pre>
+<pre class="screen">  peer 1.1.1.1 advertise-community</pre>
+<pre class="screen">  quit</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 2.2.2.2 0.0.0.0</pre>
+<pre class="screen">  network 10.10.1.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">route-policy aa permit node 10</pre>
+<pre class="screen"> if-match ip-prefix bb</pre>
+<pre class="screen"> apply community 10:10</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ip ip-prefix bb index 10 permit 10.10.1.0 24</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p><span class="keyword">Device</span>C configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname <span class="keyword">Device</span>C</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.20.1.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 100</pre>
+<pre class="screen"> peer 10.20.1.2 as-number 100</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  undo synchronization</pre>
+<pre class="screen">  import-route direct</pre>
+<pre class="screen">  peer 10.20.1.2 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 10.20.1.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_qos_cfg_2037.html">Configuration Examples for QPPB
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_qos_cfg_5097.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

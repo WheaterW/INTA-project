@@ -1,0 +1,675 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Inter-AS BGP VPLS in Option B Mode (ASBRs Functioning as PEs)">
+<meta name="abstract" content="The backbone network spans two ASs. ASBRs are connected through MP-EBGP and function as PEs.">
+<meta name="description" content="The backbone network spans two ASs. ASBRs are connected through MP-EBGP and function as PEs.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpls_cfg_5029.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpls_cfg_6021_1.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpls_cfg_6022.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,w00556928,w00606909">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="VPLS">
+<meta name="featuretype" content="VPN">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VPLS">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="VPLS">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="VPLS">
+<meta name="featuretype" content="VPN">
+<meta name="OWNER" content="l00415692">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00415692">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0190963351">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Inter-AS BGP VPLS in Option B Mode (ASBRs Functioning as PEs)</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0190963351"></a><a name="EN-US_TASK_0190963351"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Inter-AS BGP VPLS in Option B Mode (ASBRs Functioning as PEs)</h1>
+<div class="taskbody"><p>The backbone network spans two ASs. ASBRs are connected through MP-EBGP and function as PEs.</p>
+<div class="context"><a name="EN-US_TASK_0190963351__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the inter-AS BGP VPLS Option B network shown in <a href="#EN-US_TASK_0190963351__fig_dc_vrp_vpls_cfg_602101">Figure 1</a>, ASBRs advertise routes and function as PEs to manage VPN routes. This reduces the number of PEs to be deployed and increases the performance requirements for ASBRs.</p>
+<div class="fignone" id="EN-US_TASK_0190963351__fig_dc_vrp_vpls_cfg_602101"><a name="EN-US_TASK_0190963351__fig_dc_vrp_vpls_cfg_602101"></a><a name="fig_dc_vrp_vpls_cfg_602101"></a><span class="figcap"><b>Figure 1 </b>Configuring inter-AS BGP VPLS in Option B mode (ASBRs function as PEs)</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1, subinterface1.1, interface2, and subinterface2.1 represent GE<span>0/2/0</span>, GE<span>0/2/0</span>.1, GE<span>0/1/0</span>, and GE<span>0/1/0</span>.1, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0191796483.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0190963351__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Establish an EBGP peer relationship between ASBRs, enable the L2VPN-AD address family, and trigger the establishment of a local IFNET tunnel. Configure a common BGP VPLS service and bind the corresponding AC interface to the service.</p>
+</li><li><p>Establish an MP-IBGP peer relationship between each PE and its ASBR in each AS.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0190963351__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>MPLS LSR IDs of PEs and ASBRs</p>
+</li><li><p>RDs, VPN targets, and site IDs of VSIs on PEs</p>
+</li><li>VPN-target filtering enabled on PEs and disabled on ASBRs</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0190963351__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure interface IP addresses.</span><p><p># Configure CE1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname CE1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>interface gigabitethernet <span>0/1/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>.1] <strong>ip address 10.1.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>commit</strong></pre>
+<p># Configure PE1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname PE1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>interface loopback1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Loopback1] <strong>ip address 1.1.1.1 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Loopback1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface gigabitethernet <span>0/1/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>ip address 10.10.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure ASBR1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname ASBR1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1] <strong>interface loopback1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-Loopback1] <strong>ip address 2.2.2.2 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-Loopback1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/1/0</span>] <strong>ip address 10.10.2.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/2/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/2/0</span>] <strong>ip address 10.10.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>commit</strong></pre>
+<p># Configure ASBR2.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname ASBR2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR2] <strong>interface loopback1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-Loopback1] <strong>ip address 3.3.3.3 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-Loopback1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>interface gigabitethernet </strong><strong><span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/1/0</span>] <strong>ip address 10.10.3.3 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/1/0</span>]  <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>interface gigabitethernet </strong><strong><span>0/1/0</span></strong><strong>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>interface gigabitethernet </strong><strong><span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/2/0</span>]  <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/2/0</span>] <strong>ip address 10.10.2.3 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>commit</strong></pre>
+<p># Configure CE2.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname CE2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2] <strong>interface gigabitethernet <span>0/1/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>.1] <strong>ip address 10.1.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2] <strong>commit</strong></pre>
+</p></li><li><span>Configure an IGP on the backbone network.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1] <strong>bgp-ls enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1] <strong>area 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1-area-0.0.0.0] <strong>network 1.1.1.1 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1-area-0.0.0.0] <strong>network 10.10.1.0 0.0.0.255 </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure ASBR1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-ospf-1] <strong>bgp-ls enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-ospf-1] <strong>area 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-ospf-1-area-0.0.0.0] <strong>network 2.2.2.2 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-ospf-1-area-0.0.0.0] <strong>network 10.10.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-ospf-1-area-0.0.0.0] <strong>network 10.10.2.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-ospf-1-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-ospf-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>commit</strong></pre>
+<p># Configure ASBR2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR2] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-ospf-1] <strong>bgp-ls enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-ospf-1] <strong>area 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-ospf-1-area-0.0.0.0] <strong>network 3.3.3.3 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-ospf-1-area-0.0.0.0] <strong>network 10.10.2.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-ospf-1-area-0.0.0.0] <strong>network 10.10.3.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-ospf-1-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-ospf-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>commit</strong></pre>
+</p></li><li><span>Enable MPLS and establish LSPs.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>mpls lsr-id 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface gigabitethernet </strong><strong><span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure ASBR1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1] <strong>mpls lsr-id 2.2.2.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>interface gigabitethernet </strong><strong><span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/2/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/2/0</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/1/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>commit</strong></pre>
+<p># Configure ASBR2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR2] <strong>mpls lsr-id 3.3.3.3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/2/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/1/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>commit</strong></pre>
+</p></li><li><span>Configure BGP VPLS.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-l2vpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>tunnel-policy p1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-tunnel-policy-p1] <strong>tunnel select-seq bgp ldp load-balance-number 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-tunnel-policy-p1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>tunnel-selector s1 permit node 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-tunnel-selector]<strong> apply tunnel-policy p1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-tunnel-selector] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>vsi v1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vsi-v1] <strong>pwsignal bgp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vsi-v1-bgp] <strong>route-distinguisher 10.10.1.1:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vsi-v1-bgp] <strong>vpn-target 100:1 import-extcommunity</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vsi-v1-bgp] <strong>vpn-target 100:1 export-extcommunity</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vsi-v1-bgp] <strong>site 1 range 10 default-offset 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vsi-v1-bgp] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls-ldp] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls-ldp-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface gigabitethernet<span>0/1/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>.1] <strong>shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>.1] <strong>vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>.1] <strong>l2 binding vsi v1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>.1] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure ASBR1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1] <strong>mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-l2vpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>tunnel-policy p1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-tunnel-policy-p1] <strong>tunnel select-seq ldp bgp load-balance-number 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-tunnel-policy-p1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>tunnel-selector s1 permit node 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-tunnel-selector]<strong> apply tunnel-policy p1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-tunnel-selector] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>commit</strong></pre>
+<p># Configure ASBR2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR2] <strong>mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-l2vpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>tunnel-policy p1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-tunnel-policy-p1] <strong>tunnel select-seq ldp bgp load-balance-number 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-tunnel-policy-p1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>tunnel-selector s1 permit node 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-tunnel-selector]<strong> apply tunnel-policy p1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-tunnel-selector] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>vsi v1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-vsi-v1] <strong>pwsignal bgp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-vsi-v1-bgp] <strong>route-distinguisher 10.10.3.3:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-vsi-v1-bgp] <strong>vpn-target 100:1 import-extcommunity</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-vsi-v1-bgp] <strong>vpn-target 100:1 export-extcommunity</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-vsi-v1-bgp] <strong>site 2 range 10 default-offset 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-vsi-v1-bgp] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-mpls-ldp] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-mpls-ldp-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>interface gigabitethernet<span>0/1/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/1/0</span>.1]<strong> shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/1/0</span>.1]<strong> </strong><strong>vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/1/0</span>.1] <strong>l2 binding vsi v1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/1/0</span>.1]<strong> </strong><strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/1/0</span>.1]<strong> </strong><strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>commit</strong></pre>
+</p></li><li><span>Configure MP-IBGP peer relationships in each AS.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>peer 2.2.2.2 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>peer 2.2.2.2 connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>l2vpn-ad-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-l2vpn-ad] <strong>policy vpn-target</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-l2vpn-ad] <strong>tunnel-selector s1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-l2vpn-ad] <strong>signaling vpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-l2vpn-ad] <strong>peer 2.2.2.2 enable</strong></pre>
+<pre class="screen">Warning: This operation will reset the peer session. Continue? [Y/N]:<strong>y</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-l2vpn-ad] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure ASBR1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp] <strong>peer 1.1.1.1 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp] <strong>peer </strong><strong>1.1.1.1</strong><strong> connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp] <strong>peer 10.10.2.3 as-number 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp] <strong>peer </strong><strong>10.10.2.3</strong><strong> connect-interface </strong><strong>gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp] <strong>l2vpn-ad-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-l2vpn-ad] <strong>undo policy vpn-target</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-l2vpn-ad] <strong>tunnel-selector s1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-l2vpn-ad] <strong>signaling vpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-l2vpn-ad] <strong>peer </strong><strong>1.1.1.1</strong> <strong>enable</strong></pre>
+<pre class="screen">Warning: This operation will reset the peer session. Continue? [Y/N]:<strong>y</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-l2vpn-ad] <strong>peer </strong><strong>10.10.2.3</strong> <strong>enable</strong></pre>
+<pre class="screen">Warning: This operation will reset the peer session. Continue? [Y/N]:<strong>y</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-l2vpn-ad] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>commit</strong></pre>
+<p># Configure ASBR2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR2] <strong>bgp 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp] <strong>peer 10.10.2.2 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp] <strong>peer </strong><strong>10.10.2.2</strong><strong> connect-interface </strong><strong>gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp] <strong>l2vpn-ad-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp-af-l2vpn-ad] <strong>undo policy vpn-target</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp-af-l2vpn-ad] <strong>tunnel-selector s1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp-af-l2vpn-ad] <strong>signaling vpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp-af-l2vpn-ad] <strong>peer </strong><strong>10.10.2.2</strong> <strong>enable</strong></pre>
+<pre class="screen">Warning: This operation will reset the peer session. Continue? [Y/N]:<strong>y</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp-af-l2vpn-ad] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>commit</strong></pre>
+<p>After the configuration is complete, run the <a href="cmdqueryname=display+bgp+l2vpn-ad+peer"><b><span class="cmdname">display bgp l2vpn-ad peer</span></b></a> command on each PE or ASBR. The command output shows that the MP-IBGP peer relationship status is <strong>Established</strong>. </p>
+<p>The following example uses the command output on ASBR2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR2] <strong>display bgp l2vpn-ad peer</strong></pre>
+<pre class="screen"> BGP local router ID : 3.3.3.3                                                  
+ Local AS number : 200                                                          
+ Total number of peers : 1                  Peers in established state : 1      
+  Peer            V         AS       MsgRcvd  MsgSent  OutQ  Up/Down       State          PrefRcv    
+  10.10.2.2       4         100      189      187      0     02:39:53      <strong>Established</strong>   1 </pre>
+</p></li><li><span>Configure CEs to permit packets from VLAN 10.</span><p><p># Configure CE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>interface gigabitethernet<span>0/1/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>.1] <strong>vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>commit</strong></pre>
+<p># Configure CE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2] <strong>interface gigabitethernet<span>0/1/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>.1] <strong>vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2] <strong>commit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p>Run the <strong>display vpls connection bgp verbose</strong> command on PEs to check VSI information. The command output shows that <strong>VC State</strong> is <strong>up</strong>.</p>
+<p>The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display vpls connection bgp verbose</strong></pre>
+<pre class="screen">VSI Name: v1                               Signaling: bgp                       
+  **Remote Site ID     : 2                                                      
+    VC State           : <strong>up </strong>                                                    
+    RD                 : 10.10.1.1:1                                            
+    Encapsulation      : bgp vpls                                               
+    MTU                : 1500                                                   
+    Peer Ip Address    : 2.2.2.2                                                
+    PW Type            : label                                                  
+    Local VC Label     : 368642                                                 
+    Remote VC Label    : 368649                                                 
+    Tunnel Policy      : --                                                     
+    Tunnel ID          : 0x0000000001004c4b42                                   
+    Remote Label Block : 368648/8/0                                             
+    Export vpn target  : 100:1   </pre>
+<p>CE1 and CE2 can ping each other.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1]<strong> ping 10.1.1.2</strong></pre>
+<pre class="screen">   PING 10.10.1.2: 56  data bytes, press CTRL_C to break                         
+    Reply from 10.10.1.2: bytes=56 Sequence=1 ttl=255 time=149 ms               
+    Reply from 10.10.1.2: bytes=56 Sequence=2 ttl=255 time=4 ms                 
+    Reply from 10.10.1.2: bytes=56 Sequence=3 ttl=255 time=4 ms                 
+    Reply from 10.10.1.2: bytes=56 Sequence=4 ttl=255 time=4 ms                 
+    Reply from 10.10.1.2: bytes=56 Sequence=5 ttl=255 time=4 ms                 
+
+  --- 10.10.1.2 ping statistics ---                                             
+    5 packet(s) transmitted                                                     
+    5 packet(s) received                                                        
+    0.00% packet loss                                                           
+    round-trip min/avg/max = 4/33/149 ms                                        
+</pre>
+<p>Run the <strong>display vsi name v1 </strong><strong>verbose</strong> command on a PE or ASBR to view information about the VPLS instance of a specified VSI. The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display vsi name v1 </strong><strong>verbose</strong></pre>
+<pre class="screen"> ***VSI Name               : <strong>v1</strong>
+    Work Mode              : normal 
+    Administrator VSI      : no 
+    Isolate Spoken         : disable 
+    VSI Index              : 1 
+    PW Signaling           : bgp 
+    Member Discovery Style : -- 
+    Bridge-domain Mode     : disable 
+    PW MAC Learn Style     : unqualify 
+    Encapsulation Type     : vlan 
+    MTU                    : 1500 
+    Diffserv Mode          : uniform 
+    Service Class          : -- 
+    Color                  : -- 
+    DomainId               : 255 
+    Domain Name            :  
+    Ignore AcState         : disable 
+    P2P VSI                : disable 
+    Multicast Fast Switch  : disable 
+    Create Time            : 0 days, 9 hours, 8 minutes, 35 seconds 
+    VSI State              : up 
+    Resource Status        : -- 
+
+    BGP RD                 : 10.10.1.1:1 
+    SiteID/Range/Offset    : 1/10/0 
+    Import vpn target      : 100:1                   
+    Export vpn target      : 100:1                   
+    Remote Label Block     : 368648/8/0  
+    Local Label Block      : 0/368640/8/0  
+
+    Interface Name         : GigabitEthernet<span>0/2/0</span>.1 
+    State                  : up 
+    Ac Block State         : unblocked 
+    Access Port            : false 
+    Last Up Time           : 2019/08/26 03:56:35 
+    Total Up Time          : 0 days, 8 hours, 51 minutes, 8 seconds 
+    Interface Name         : GigabitEthernet<span>0/1/0</span>.1 
+    State                  : up 
+    Ac Block State         : unblocked 
+    Access Port            : false 
+    Last Up Time           : 2019/08/26 12:07:53 
+    Total Up Time          : 0 days, 0 hours, 39 minutes, 50 seconds 
+
+  **PW Information: 
+
+   *Peer Ip Address        : 2.2.2.2
+    PW State               : <strong>up</strong> 
+    Local VC Label         : 368642 
+    Remote VC Label        : 368649 
+    Remote Control Word    : disable 
+    Negotiated Control Word: disable 
+    PW Type                : label 
+    Tunnel ID              : 0x0000000001004c4b42  
+    Broadcast Tunnel ID    : -- 
+    Broad BackupTunnel ID  : -- 
+    Ckey                   : 1 
+    Nkey                   : 16777327 
+    Main PW Token          : 0x0 
+    Slave PW Token         : 0x0 
+    Tnl Type               : ldp 
+    OutInterface           : -- 
+    Backup OutInterface    : -- 
+    Stp Enable             : 0 
+    Mac Flapping           : 0 
+    Monitor Group Name     : -- 
+    PW Last Up Time        : 2019/08/26 06:06:19 
+    PW Total Up Time       : 0 days, 6 hours, 41 minutes, 25 seconds</pre>
+<p>Example</p>
+<p>Configuration Files</p>
+<ul><li><p>CE1 configuration file </p>
+<pre class="screen">#
+sysname CE1
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+#
+interface GigabitEthernet<span>0/1/0</span>.1
+ undo shutdown
+ vlan-type dot1q 10
+ ip address 10.1.1.1 255.255.255.0
+#
+return</pre>
+</li><li><p>PE1 configuration file</p>
+<pre class="screen">#
+sysname name PE1
+#
+router id 1.1.1.1
+#
+tunnel-selector s1 permit node 10
+ apply tunnel-policy p1
+#
+mpls lsr-id 1.1.1.1
+#
+mpls
+#
+mpls l2vpn
+#
+vsi v1
+ pwsignal bgp
+  route-distinguisher 10.10.1.1:1
+  vpn-target 100:1 import-extcommunity
+  vpn-target 100:1 export-extcommunity
+  site 1 range 10 default-offset 0
+#
+mpls ldp
+ #
+ ipv4-family
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.10.1.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 1.1.1.1 255.255.255.255
+#
+bgp 100
+ peer 2.2.2.2 as-number 100
+ peer 2.2.2.2 connect-interface LoopBack1
+ #
+ l2vpn-ad-family
+  policy vpn-target
+  tunnel-selector s1  
+  signaling vpls
+  peer 2.2.2.2 enable
+#
+ospf 1
+ bgp-ls enable
+ area 0.0.0.0
+  network 1.1.1.1 0.0.0.0
+  network 10.10.1.0 0.0.0.255
+#
+route-policy p1 permit node 10
+ apply mpls-label
+#
+tunnel-policy p1
+ tunnel select-seq bgp ldp load-balance-number 1
+#
+return
+</pre>
+</li><li><p>ASBR1 configuration file</p>
+<pre class="screen">#
+sysname name ASBR1
+#
+router id 2.2.2.2
+#
+tunnel-selector s1 permit node 10
+ apply tunnel-policy p1
+#
+mpls lsr-id 2.2.2.2
+#
+mpls
+#
+mpls l2vpn
+#
+mpls ldp
+ #
+ ipv4-family
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.10.2.2 255.255.255.0
+ mpls
+ #
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.10.1.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 2.2.2.2 255.255.255.255
+#
+bgp 100
+ peer 1.1.1.1 as-number 100
+ peer 1.1.1.1 connect-interface LoopBack1
+ peer 10.10.2.3 as-number 200
+ peer 10.10.2.3 connect-interface GigabitEthernet<span>0/1/0</span>
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 1.1.1.1 enable
+  peer 10.10.2.3 enable
+ #
+ l2vpn-ad-family
+  undo policy vpn-target
+  tunnel-selector s1  
+  signaling vpls
+  peer 1.1.1.1 enable
+  peer 10.10.2.3 enable
+#
+ospf 1
+ bgp-ls enable
+ area 0.0.0.0
+  network 2.2.2.2 0.0.0.0
+  network 10.10.1.0 0.0.0.255
+  network 10.10.2.0 0.0.0.255
+#
+tunnel-policy p1
+ tunnel select-seq ldp bgp load-balance-number 1
+#
+return
+</pre>
+</li><li><p>ASBR2 configuration file</p>
+<pre class="screen">#
+sysname name ASBR2
+#
+router id 3.3.3.3
+#
+tunnel-selector s1 permit node 10
+<strong> </strong>apply tunnel-policy p1
+#
+mpls lsr-id 3.3.3.3
+#
+mpls
+#
+mpls l2vpn
+#
+vsi v1
+ pwsignal bgp
+  route-distinguisher 10.10.3.3:1
+  vpn-target 100:1 import-extcommunity
+  vpn-target 100:1 export-extcommunity
+  site 2 range 10 default-offset 0
+#
+mpls ldp
+ #
+ ipv4-family
+#
+interface GigabitEthernet<span>0/1/0</span>.1
+ vlan-type dot1q 10
+ l2 binding vsi v1
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.10.3.3 255.255.255.0
+ mpls
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.10.2.3 255.255.255.0
+ mpls
+#
+interface LoopBack1
+ ip address 3.3.3.3 255.255.255.255
+#
+bgp 200
+ peer 10.10.2.2 as-number 100
+ peer 10.10.2.2 connect-interface GigabitEthernet<span>0/2/0</span>
+ #
+ l2vpn-ad-family
+  undo policy vpn-target
+  tunnel-selector s1  
+  signaling vpls
+  peer 10.10.2.2 enable
+#
+ospf 1
+ bgp-ls enable
+ area 0.0.0.0
+  network 3.3.3.3 0.0.0.0
+  network 10.10.2.0 0.0.0.255
+  network 10.10.3.0 0.0.0.255
+#
+tunnel-policy p1
+ tunnel select-seq ldp bgp load-balance-number 1
+#
+return
+</pre>
+</li><li><p>CE2 configuration file </p>
+<pre class="screen">#
+sysname CE2
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+#
+interface GigabitEthernet<span>0/1/0</span>.1
+ undo shutdown
+ vlan-type dot1q 10
+ ip address 10.1.1.2 255.255.255.0
+#
+return</pre>
+</li></ul>
+</p></li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpls_cfg_5029.html">Configuration Examples for VPLS
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpls_cfg_6021_1.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpls_cfg_6022.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

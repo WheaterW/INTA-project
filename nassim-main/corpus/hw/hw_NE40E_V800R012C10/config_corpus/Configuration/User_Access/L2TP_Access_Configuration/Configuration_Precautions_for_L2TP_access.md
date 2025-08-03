@@ -1,0 +1,14 @@
+Configuration Precautions for L2TP access
+=========================================
+
+Configuration Precautions for L2TP access
+
+#### Feature Requirements
+
+**Table 1** Feature requirements
+| Feature Requirements | Series | Models |
+| --- | --- | --- |
+| In LAC hot backup scenarios, when the RBS is disconnected, LAC-side users cannot be logged out based on domains on the backup device. To forcibly log out LAC-side users, disconnect the backup device and delete LAC-side users from the backup device based on the domain or delete the tunnel where the LAC-side users reside. | NE40E-M2 | NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| 1. The L2TP LTS/LNS does not support isolation of online and offline users.  2. The LTS does not support HQoS. After HQoS is configured on the outbound interface of the LNS, TM implements HQoS for the traffic before it passes through the NP.  3. The LAC and LTS do not support DAA/EDSG. DAA/EDSG on an LNS supports only CAR. If rate limit is performed in SQ mode, the user traffic quota is occupied.  4. Forwarding performance of LTSs and LNSs: ingress board (A) + tunnel board (C) + egress board (B)  A=C, B=C, or A=B=C, SQ is not configured, and no replication service is configured. If a board has multiple forwarding modules, the traffic ingress forwarding module must be the same as the forwarding module established by the tunnel to reach the board forwarding bandwidth. If the preceding conditions are not met, the forwarding performance is reduced by half.  5. L2TP LAC/LTS/LNS users do not support user-side sampling.  6. Statistics about IPv4 and IPv6 traffic cannot be collected separately on the LAC and LTS in L2TP scenarios.  7. Flexible access to VPNs is not supported for L2TP LAC/LTS/LNS users. | NE40E-M2 | NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| When PPP and LAC users share an interface, if PPP dual-device hot backup is deployed but LAC hot backup is not, L2TP users are logged out due to detection failures during a master/backup device switchover. LAC dual-device hot backup must be deployed. Otherwise, the LAC cannot ensure the reliability for users. | NE40E-M2 | NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| In L2TP LNS user traffic forwarding scenarios, the high-performance forwarding mode can be configured only when the board where the outbound interface resides has an eTM subcard installed. Otherwise, you need to run the forward-mode { through | loopback } l2tp command to configure the board from which LNS users go online to work in half-line-rate forwarding mode. If the half-line-rate forwarding mode is not configured, packet loss may occur during LNS user traffic forwarding. | NE40E-M2 | NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |

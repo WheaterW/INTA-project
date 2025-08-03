@@ -1,0 +1,24 @@
+Configuration Precautions for NQA
+=================================
+
+Configuration_Precautions_for_NQA
+
+#### Feature Requirements
+
+**Table 1** Feature requirements
+| Feature Requirements | Series | Models |
+| --- | --- | --- |
+| In an SRv6 TE Policy scenario, when the binding SID list contains only one SID that is the local SID, the tracert operation for the SRv6 TE Policy fails. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| If a static route is associated with NQA and the path tested by NQA also depends on the static route, only direct connection is supported. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| The server and client of an ICMP jitter, UDP jitter, or TCP test case must be VRP-based devices. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| The destination IP address configured on the client does not support the scenario where the outbound interface of the route is the management network interface. Do not deploy any test instance for which the outbound interface of a route is a management interface. Otherwise, hardware-based packet sending measurement results obtained during a jitter test are inaccurate. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| The client supports hardware-based packet sending, and the board must support 1588v2 clock synchronization. Select a board that supports 1588v2 clock synchronization for packet sending. Otherwise, hardware-based packet sending measurement results obtained during a jitter test are inaccurate. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| NQA ICMP jitter supports hardware-based packet sending and reflector interconnection.  The reflector must support standard ICMP timestamp packets. If the reflector does not support ICMP timestamp packets, the reflector cannot be interconnected. Additionally, when replying with an ICMP timestamp response packet, the reflector must include the request packet's private extended load information in the response packet. If the reflector allows load information to be carried, the hardware-based packet sending process is used and the delay is more accurate. If the reflector does not allow load information to be carried, the software-based packet sending process is used. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| The MTU of the tested link cannot be less than 64. Properly plan the MTU on the network link to be measured. Otherwise, the jitter measurement result is inaccurate. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| The RFC 2544 initiator's inward measurement supports flexible access sub-interfaces. If different sub-interfaces of an interface are configured with the same VLAN, only one sub-interface can be measured. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| When the RFC 2544 initiator is bound to a flexible access sub-interface to initiate a measurement, configuring static ARP entry learning for the source and destination IP addresses causes a failure in learning the RFC 2544 measurement path. Dynamic ARP entry learning for the source and destination IP addresses must be configured. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| If the server end supports hardware-based packet reply, the board that replies packets must support 1588v2 clock synchronization. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| 1588v2 clock synchronization must be deployed for one-way delay measurement. Otherwise, the measurement result of jitter hardware-based packet sending is inaccurate. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| The server and client of an ICMP jitter, UDP jitter, or TCP test instance must be VRP-based devices. The test result depends on the board hardware capabilities. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| 1. Y.1564 supports only unicast detection and does not support broadcast detection.  2. Y.1564 does not support flexible access of EVC sub-interfaces. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| 1. A third-party responder does not send response packets carrying payload that contains Huawei proprietary extended information. In this scenario, the delay and jitter of ICMP jitter single-ended detection are large in inter-board scenarios.  2. A third-party responder does not support ICMP timestamp packets (standard non-private packets). ICMP timestamp packets are parsed as ICMP echo packets. In this scenario, ICMP jitter single-ended detection supports only two-way delay measurement but does not support one-way delay measurement. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |

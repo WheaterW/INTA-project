@@ -1,0 +1,71 @@
+work-mode priority
+==================
+
+work-mode priority
+
+Function
+--------
+
+
+
+The **work-mode priority** command is used to set the working mode of a destination group to priority.
+
+The **undo work-mode priority** command is used to restore the working mode of a destination group to the default value.
+
+
+
+By default, a destination group works in default mode. That is, the device establishes telemetry connections with all IP addresses in the destination group.
+
+
+Format
+------
+
+**work-mode priority**
+
+**undo work-mode priority**
+
+
+Parameters
+----------
+
+None
+
+Views
+-----
+
+Destination group view
+
+
+Default Level
+-------------
+
+3: Management level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+After a destination group is created, you can run this command to set the working mode of the destination group to priority. In priority mode, the device establishes a telemetry connection with only one destination collector in the destination group.If the working mode of a destination group is priority, the device first initiates a telemetry connection with the highest-priority destination collector in the destination group. If the connection fails, the device attempts to establish a telemetry connection with the second-priority destination collector, and so on and so forth. If the current connection is not of the highest priority, the device continuously attempts to establish a telemetry connection with a higher-priority destination collector.You can run the ipv4-address port priority or ipv6-address port priority command to configure the priority of the destination collector. A device establishes a telemetry connection with a destination collector in descending order of priority: high > medium > low. If destination collectors have the same priority, they are first sorted based on the VPN name, then based on IP addresses (in ascending order), and finally based on port numbers (in ascending order).
+
+* Priorities of VPN names: A public VPN has a higher priority than a private VPN. The priorities of private VPNs are sorted in the lexicographic order (ASCII code) of VPN names.
+* Priorities of IP addresses: An IPv4 address has a higher priority than an IPv6 address. IP addresses of the same type are sorted in ascending order.
+* Priorities of port numbers: Port numbers are sorted in ascending order.
+
+**Precautions**
+
+* The device supports a maximum of two destination groups working in priority mode.
+* If a destination group has destination IP addresses, you cannot run this command to switch the working mode of the destination group.
+
+Example
+-------
+
+# Set the working mode of the destination group d1 to priority.
+```
+<HUAWEI> system-view
+[HUAWEI] telemetry
+[HUAWEI-telemetry] destination-group d1
+[HUAWEI-telemetry-destination-group-d1] work-mode priority
+
+```

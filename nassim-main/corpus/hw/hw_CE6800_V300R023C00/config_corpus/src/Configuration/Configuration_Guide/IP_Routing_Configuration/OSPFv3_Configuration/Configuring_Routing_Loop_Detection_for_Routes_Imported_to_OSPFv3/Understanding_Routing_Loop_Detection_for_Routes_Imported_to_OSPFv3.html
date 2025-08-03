@@ -1,0 +1,187 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding Routing Loop Detection for Routes Imported to OSPFv3">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_ospfv3_cfg_0165.html">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_ospfv3_cfg_0162.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="OSPFv3">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="OSPFv3">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001223706301">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/imagePopup.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/customQuery.js"></script>
+<script language="javascript" type="text/javascript" src="../public_sys-resources/imagePopup.js"></script>
+<title>Understanding Routing Loop Detection for Routes Imported to OSPFv3</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001223706301"></a><a name="EN-US_CONCEPT_0000001223706301"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding Routing Loop Detection for Routes Imported to OSPFv3</h1>
+<div><p>Routes of an OSPFv3 process can be redistributed by another OSPFv3 process or the process of another protocol (such as IS-IS or BGP) through route import or default route distribution. However, if a device that performs such a route import or default route distribution is incorrectly configured, routing loops may occur. OSPFv3 can use the routing loop detection function to detect routing loops.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>When OSPFv3 is configured to import routes or distribute default routes, routing loop detection can be deployed to proactively detect whether routing loops exist in the topology and whether the routing loop prevention mechanism of the import route-policy takes effect. Routing loop alarms can be reported to locate configuration errors in time.</p>
+<p>Generally, routing loop detection cannot eliminate routing loops. Increasing the metric value or adjusting the route preference value after a routing loop alarm is reported can temporarily prevent routing loops but may cause the traffic to be forwarded in an unexpected path. Therefore, routing loop detection can only be used temporarily. To eliminate routing loops in the long run, re-plan network configurations.</p>
+</div></div>
+<div class="section"><h4 class="sectiontitle">Related Concepts</h4><p><strong>Redistribute ID</strong></p>
+<p>IS-IS uses a system ID as a redistribution identifier, OSPF and OSPFv3 use a router ID + process ID as a redistribution identifier, and BGP uses a VrfID + random number as a redistribution identifier. For ease of understanding, the redistribution identifiers of different protocols are all called Redistribute IDs. When routes are distributed, the information carried in the routes contains Redistribute IDs.</p>
+<p><strong>Redistribute List</strong></p>
+<p>A Redistribute list may consist of multiple Redistribute IDs. Each Redistribute list of BGP contains a maximum of four Redistribute IDs, and each Redistribute list of any other routing protocol contains a maximum of two Redistribute IDs. When the number of Redistribute IDs exceeds the corresponding limit, the old ones are discarded according to the sequence in which Redistribute IDs are added.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">OSPFv3 Redistribute ID Format</h4><p>OSPFv3 Redistribute IDs are distributed through the sub-TLV of the OSPFv3 External-Prefix TLV carried in OSPFv3 E-AS-External-LSAs. <a href="#EN-US_CONCEPT_0000001223706301__fig191609246418">Figure 1</a> shows the format of the Redistribute ID TLV.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001223706301__fig191609246418"><a name="EN-US_CONCEPT_0000001223706301__fig191609246418"></a><a name="fig191609246418"></a><span class="figcap"><b>Figure 1 </b>Redistribute ID TLV format</span><br><span><img class="vsd" src="figure/en-us_image_0000001831182341.png" width="NaN" height="NaN"></span></div>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Fields in the Redistribute ID TLV format</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="17.411741174117413%" id="mcps1.3.4.4.2.4.1.1" liSelected="liSelected"><p>Field</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="18.961896189618958%" id="mcps1.3.4.4.2.4.1.2" liSelected="liSelected"><p>Length</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="63.62636263626362%" id="mcps1.3.4.4.2.4.1.3" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="17.411741174117413%" headers="mcps1.3.4.4.2.4.1.1 "><p>Type</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.961896189618958%" headers="mcps1.3.4.4.2.4.1.2 "><p>16 bits</p>
+</td>
+<td class="cellrowborder" valign="top" width="63.62636263626362%" headers="mcps1.3.4.4.2.4.1.3 "><p>TLV type. The value is 32770.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="17.411741174117413%" headers="mcps1.3.4.4.2.4.1.1 "><p>Length</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.961896189618958%" headers="mcps1.3.4.4.2.4.1.2 "><p>16 bits</p>
+</td>
+<td class="cellrowborder" valign="top" width="63.62636263626362%" headers="mcps1.3.4.4.2.4.1.3 "><p>Total length of the TLV (excluding the Type and Length fields).</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="17.411741174117413%" headers="mcps1.3.4.4.2.4.1.1 "><p>Flags</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.961896189618958%" headers="mcps1.3.4.4.2.4.1.2 "><p>8 bits</p>
+</td>
+<td class="cellrowborder" valign="top" width="63.62636263626362%" headers="mcps1.3.4.4.2.4.1.3 "><p>Flags. Currently, the value is 0.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="17.411741174117413%" headers="mcps1.3.4.4.2.4.1.1 "><p>Reserved</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.961896189618958%" headers="mcps1.3.4.4.2.4.1.2 "><p>24 bits</p>
+</td>
+<td class="cellrowborder" valign="top" width="63.62636263626362%" headers="mcps1.3.4.4.2.4.1.3 "><p>Reserved field.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="17.411741174117413%" headers="mcps1.3.4.4.2.4.1.1 "><p>Redistribute ID1</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.961896189618958%" headers="mcps1.3.4.4.2.4.1.2 "><p>64 bits</p>
+</td>
+<td class="cellrowborder" valign="top" width="63.62636263626362%" headers="mcps1.3.4.4.2.4.1.3 "><p>Device that imported the route last time and the Redistribute ID of a protocol on the device.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="17.411741174117413%" headers="mcps1.3.4.4.2.4.1.1 "><p>Redistribute ID2</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.961896189618958%" headers="mcps1.3.4.4.2.4.1.2 "><p>64 bits</p>
+</td>
+<td class="cellrowborder" valign="top" width="63.62636263626362%" headers="mcps1.3.4.4.2.4.1.3 "><p>Device that imported the route last but one time and the Redistribute ID of a protocol on the device. This field is optional.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Currently, OSPFv3 allows a TLV to carry a maximum of two Redistribute IDs. If more than two routes corresponding to a prefix are imported, only the latest two Redistribute IDs are retained. If the received TLV carries more than two Redistribute IDs, only the first two Redistribute IDs are processed.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Cause (OSPFv3 Inter-Process Mutual Route Import)</h4><p>In <a href="#EN-US_CONCEPT_0000001223706301__fig28588511242">Figure 2</a>, DeviceA, DeviceB, and DeviceC run OSPFv3 process 1; DeviceF and DeviceG run OSPFv3 process 2; DeviceD and DeviceE run both of the processes. DeviceD imports routes from OSPFv3 process 1 to OSPFv3 process 2 for distribution. DeviceE imports the routes from OSPFv3 process 2 to OSPFv3 process 1. In this case, the routes are re-distributed back to OSPFv3 process 1. As the costs of the routes newly distributed by DeviceE are smaller, they are preferentially selected by OSPFv3 process 1, resulting in routing loops.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001223706301__fig28588511242"><a name="EN-US_CONCEPT_0000001223706301__fig28588511242"></a><a name="fig28588511242"></a><span class="figcap"><b>Figure 2 </b>Typical network diagram of OSPFv3 inter-process mutual route import</span><br><span><img class="imgResize" src="figure/en-us_image_0000001187901616.png" width="523.6875" height="197.957466" title="Click to enlarge"></span></div>
+<p>Take the route distributed by DeviceA as an example. A stable routing loop is formed through the following phases:</p>
+<p><strong>Phase 1</strong></p>
+<p>On the network shown in <a href="#EN-US_CONCEPT_0000001223706301__fig32561325134118">Figure 3</a>, OSPFv3 process 1 on DeviceA imports the static route 2001:DB8:1::1 and floods a Type 5 AS-External-LSA in OSPFv3 process 1. After receiving the LSA, OSPFv3 process 1 on DeviceD and OSPFv3 process 1 on DeviceE each calculate a route to 2001:DB8:1::1, with the outbound interfaces being interface1 on DeviceD and interface1 on DeviceE, respectively, and the cost being 102. At this point, the routes to 2001:DB8:1::1 in OSPFv3 process 1 in the routing tables of DeviceD and DeviceE are active.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001223706301__fig32561325134118"><a name="EN-US_CONCEPT_0000001223706301__fig32561325134118"></a><a name="fig32561325134118"></a><span class="figcap"><b>Figure 3 </b>Phase 1</span><br><span><img class="imgResize" src="figure/en-us_image_0000001233382691.png" width="523.6875" height="183.520449" title="Click to enlarge"></span></div>
+<p><strong>Phase 2</strong></p>
+<p>OSPFv3 process 2 on DeviceD is configured to import routes from OSPFv3 process 1, and no import route-policy is configured or the configured route-policy is improper. In <a href="#EN-US_CONCEPT_0000001223706301__fig647512502514">Figure 4</a>, DeviceD imports routes from OSPFv3 process 1 to OSPFv3 process 2, and the advertised Type 5 AS-External LSA is flooded in OSPFv3 process 2. After receiving the LSA, OSPFv3 process 2 on DeviceE calculates a route to 2001:DB8:1::1, with the cost being 2, which is smaller than that (102) of the route calculated by OSPFv3 process 1. As a result, the active route to 2001:DB8:1::1 in the routing table of DeviceE is switched from the one calculated by OSPFv3 process 1 to the one calculated by OSPFv3 process 2, and the outbound interface of the route is sub-interface2.1.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001223706301__fig647512502514"><a name="EN-US_CONCEPT_0000001223706301__fig647512502514"></a><a name="fig647512502514"></a><span class="figcap"><b>Figure 4 </b>Phase 2</span><br><span><img class="imgResize" src="figure/en-us_image_0000001233581119.png" width="523.6875" height="194.44945800000002" title="Click to enlarge"></span></div>
+<p><strong>Phase 3</strong></p>
+<p>In <a href="#EN-US_CONCEPT_0000001223706301__fig191141331165910">Figure 5</a>, DeviceE imports the route from OSPFv3 process 2 to OSPFv3 process 1 and floods a Type 5 AS-External LSA in OSPFv3 process 1. After receiving the LSA, OSPFv3 process 1 on DeviceE recalculates the route to 2001:DB8:1::1. The cost of the route becomes 2, which is smaller than that of the previously calculated route. Therefore, the route to 2001:DB8:1::1 in OSPFv3 process 1 on DeviceD is changed to the route distributed by DeviceE, and the outbound interface is interface 2.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001223706301__fig191141331165910"><a name="EN-US_CONCEPT_0000001223706301__fig191141331165910"></a><a name="fig191141331165910"></a><span class="figcap"><b>Figure 5 </b>Phase 3</span><br><span><img class="imgResize" src="figure/en-us_image_0000001188061528.png" width="523.6875" height="179.60506200000003" title="Click to enlarge"></span></div>
+<p><strong>Phase 4</strong></p>
+<p>After the route to 2001:DB8:1::1 on DeviceD is updated, OSPFv3 process 2 still imports the route from OSPFv3 process 1 because the route remains active, and continues to distribute/update a Type 5 AS-External-LSA.</p>
+<p>By now, a stable routing loop is formed. Assuming that traffic is injected from DeviceF, <a href="#EN-US_CONCEPT_0000001223706301__fig850684615511">Figure 6</a> shows the traffic flow when the routing loop occurs.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001223706301__fig850684615511"><a name="EN-US_CONCEPT_0000001223706301__fig850684615511"></a><a name="fig850684615511"></a><span class="figcap"><b>Figure 6 </b>Traffic flow when the routing loop occurs</span><br><span><img class="vsd" src="figure/en-us_image_0000001233462637.png" width="NaN" height="NaN"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Implementation (OSPFv3 Inter-Process Mutual Route Import)</h4><p>Routing loop detection for the routes imported between OSPFv3 processes can resolve the routing loops in the preceding scenario.</p>
+<p>When distributing a Type 5 AS-External LSA for an imported route, OSPFv3 also uses an E-AS-External-LSA to distribute to other devices the Redistribute ID of the device that redistributes the imported route. If the route is redistributed by different protocols through multiple devices, all the Redistribute IDs of these protocols on the devices are distributed through an E-AS-External-LSA. When receiving the E-AS-External-LSA, a route calculation device saves the Redistribute ID and route information of the route redistribution device. When another process of a route calculation device imports the route, the device checks whether a routing loop occurs according to the route redistribution information. If a routing loop occurs, the device attaches a large route cost to the AS-External-LSA for the imported route so that other devices preferentially select other paths after learning the route. This prevents routing loops.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>The prefixes distributed through Type 5 AS-External LSAs are used for route calculation. E-AS-External-LSAs are used to distribute extended TLVs for specified prefixes without affecting OSPFv3 route calculation results, and the device stores the information carried in the Redistribute ID TLV as route attributes in its routing table.</li><li>When a routing loop is detected, if the original cost of the corresponding route is less than 10223715, the cost of the route is adjusted to 10223715; if the original cost is greater than or equal to 10223715, the cost of the route is adjusted to 16777214. For ease of understanding, the following section assumes that the original route cost is less than 10223715.</li><li>After the cost of a route distributed through an LSA is increased, the device does not proactively withdraw the routing loop state. Instead, it keeps distributing the new route cost. To manually exit the routing loop state, you need to run the clear command.</li></ul>
+</div></div>
+<div class="fignone" id="EN-US_CONCEPT_0000001223706301__fig18981473557"><a name="EN-US_CONCEPT_0000001223706301__fig18981473557"></a><a name="fig18981473557"></a><span class="figcap"><b>Figure 7 </b>Typical network diagram for routing loop detection when routes are imported between OSPFv3 processes</span><br><span><img class="imgResize" src="figure/en-us_image_0000001187743052.png" width="523.6875" height="353.594864" title="Click to enlarge"></span></div>
+<p>On the network shown in <a href="#EN-US_CONCEPT_0000001223706301__fig18981473557">Figure 7</a>, assume that the router ID of OSPFv3 process 2 on DeviceD is 4.4.4.2 (the Redistribute ID is 0x0404040200000002) and that the router ID of OSPFv3 process 1 on DeviceE is 5.5.5.1 (the Redistribute ID is 0x0505050100000001).</p>
+<p>Routing loops are detected and resolved as follows:</p>
+<ol><li>Through OSPFv3 process 1, DeviceD learns the route 2001:DB8:1::1/128 distributed by DeviceB, imports the route from OSPFv3 process 1 to OSPFv3 process 2, and adds Redistribute ID information to the route to be distributed through an E-AS-External-LSA.</li><li>Through OSPFv3 process 2, DeviceE learns the route distributed by DeviceD and saves the Redistribute list distributed by DeviceD through OSPFv3 process 2 to the routing table when calculating routes. At this point, the next hop of the route 2001:DB8:1::1 in OSPFv3 process 2 on DeviceE is DeviceD.</li><li>DeviceE imports the route from OSPFv3 process 2 to OSPFv3 process 1 and redistributes the route through OSPFv3 process 1. The corresponding E-AS-External-LSA contains the Redistribute ID of OSPFv3 process 1 on DeviceE and the Redistribute ID of OSPFv3 process 2 on DeviceD.</li><li>OSPFv3 process 1 on DeviceD learns the Redistribute List corresponding to the route distributed by DeviceE and saves the Redistribute List in the routing table. At this point, the next hop of the route 2001:DB8:1::1 in OSPFv3 process 1 on DeviceD is DeviceE, indicating that a routing loop occurs.</li><li>When importing the route from OSPFv3 process 1 to OSPFv3 process 2, DeviceD finds that the Redistribute List of the route contains its own Redistribute ID, considers that a routing loop is detected, and reports an alarm. When re-distributing the route, OSPFv3 process 2 on DeviceD attaches a large cost to the route in the AS-External LSA.</li><li>After learning the route, OSPFv3 process 2 on DeviceE does not preferentially select it because of the large cost. Therefore, the route is not optimal in the IP routing table.</li><li>DeviceE fails to import the route from OSPFv3 process 2 to OSPFv3 process 1 and therefore withdraws the route through OSPFv3 process 1.</li><li>Unable to learn the route 2001:DB8:1::1 distributed by DeviceE, OSPFv3 process 1 on DeviceD updates the next hop of the route to DeviceB, indicating that the routing loop is resolved.<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In the preceding typical networking:</p>
+<ul><li>Routing loop detection is performed randomly. In the preceding process, it is assumed that DeviceD distributes a Redistribute ID and detects a routing loop first. In this case, DeviceD distributes a large route cost. If due to another time sequence, DeviceE distributes a Redistribute ID and detects a routing loop first, OSPFv3 process 1 on DeviceE distributes a large route cost.</li><li>Distributing a large route cost does not necessarily resolve routing loops. For example, if routes are imported between two routing protocols, a route with a larger cost may be preferentially selected.</li><li>If routes are imported within a protocol on a device and the device detects a routing loop, it increases the cost of the route to be distributed. After the remote device learns this route with a large cost, it does not preferentially select this route as the optimal route in the IP routing table. In this manner, the routing loop is resolved. In the case of inter-protocol route import, if a routing protocol with a higher priority detects a routing loop, although this protocol increases the cost of the corresponding route, the cost increase will not render the route inactive. As a result, the routing loop cannot be eliminated. If the routing protocol with a lower priority detects a routing loop and increases the cost of the corresponding route, the originally imported route is preferentially selected. In this case, the routing loop can be eliminated.</li></ul>
+</div></div>
+</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Cause (Mutual Route Import Between OSPFv3 and IS-IS)</h4><p>On the network shown in <a href="#EN-US_CONCEPT_0000001223706301__fig154351016135419">Figure 8</a>, DeviceA, DeviceB, and DeviceC run OSPFv3 process 1, DeviceF and DeviceG run IS-IS process 2, and DeviceD and DeviceE run both processes. DeviceD imports routes from OSPFv3 process 1 to IS-IS process 2. DeviceE imports routes from IS-IS process 2 to OSPFv3 process 1. The routes imported by IS-IS process 2 on DeviceD are re-distributed back to OSPFv3 process 1 on DeviceE. As the costs of the routes newly distributed by DeviceE are smaller, they are preferentially selected by OSPFv3 process 1, resulting in routing loops.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001223706301__fig154351016135419"><a name="EN-US_CONCEPT_0000001223706301__fig154351016135419"></a><a name="fig154351016135419"></a><span class="figcap"><b>Figure 8 </b>Traffic flow when a routing loop occurs during route import between OSPFv3 and IS-IS</span><br><span><img class="imgResize" src="figure/en-us_image_0000001187583070.png" width="523.6875" height="200.01949800000003" title="Click to enlarge"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Implementation (Mutual Route Import Between OSPFv3 and IS-IS)</h4><p>Redistribute IDs of IS-IS routes are delivered to the IP routing table along with the routes. The IP routing table stores Redistribute IDs in a unified format. When OSPFv3 imports the IS-IS routes, the processing of Redistribute IDs is the same as that in a scenario where routes are mutually imported between OSPFv3 processes.</p>
+<p>On the network shown in <a href="#EN-US_CONCEPT_0000001223706301__fig11173182413446">Figure 9</a>, assume that the system ID of IS-IS process 2 on DeviceD is 0000.0000.000d (the Redistribute ID is 0x00000000000d0000) and that the router ID of OSPFv3 process 1 on DeviceE is 5.5.5.1 (the Redistribute ID is 0x0505050100000001).</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001223706301__fig11173182413446"><a name="EN-US_CONCEPT_0000001223706301__fig11173182413446"></a><a name="fig11173182413446"></a><span class="figcap"><b>Figure 9 </b>Typical network diagram for routing loop detection when OSPFv3 and IS-IS import routes from each other</span><br><span><img class="imgResize" src="figure/en-us_image_0000001784362146.png" width="523.6875" height="330.284087" title="Click to enlarge"></span></div>
+<p>Routing loops are detected and resolved as follows:</p>
+<ol><li>Through OSPFv3 process 1, DeviceD learns the route distributed by DeviceB and imports the route from OSPFv3 process 1 to IS-IS process 2. When IS-IS process 2 on DeviceD distributes route information, it uses the extended prefix sub-TLV to distribute the Redistribute ID of IS-IS process 2 through an LSP.</li><li>IS-IS process 2 on DeviceE learns the route distributed by DeviceD and saves the Redistribute ID distributed by IS-IS process 2 on DeviceD in the routing table during route calculation. At this point, the next hop of the route 2001:DB8:1::1 in IS-IS process 2 on DeviceE is DeviceD.</li><li>DeviceE imports the route from IS-IS process 2 to OSPFv3 process 1 and uses an E-AS-External-LSA to distribute the Redistribute ID of OSPFv3 process 1 on DeviceE when distributing route information.</li><li>Similarly, after OSPFv3 process 1 on DeviceD learns the route from DeviceE, DeviceD saves the Redistribute ID distributed by OSPFv3 process 1 on DeviceE in the routing table during route calculation. At this point, the next hop of the route 2001:DB8:1::1 in OSPFv3 process 1 on DeviceD is DeviceE, indicating that a routing loop occurs.</li><li>When importing the route from OSPFv3 process 1 to IS-IS process 2, DeviceD finds that the Redistribute List of the route contains its own Redistribute ID, considers that a routing loop is detected, and reports an alarm. IS-IS process 2 on DeviceD distributes a large cost along with the imported route.</li><li>Because IS-IS has a higher priority than OSPFv3 ASE, the route selection result remains unchanged, and the routing loop persists.</li><li>DeviceE imports the route from IS-IS process 2 to OSPFv3 process 1, finds that the Redistribute List of the route contains its own Redistribute ID, considers that a routing loop is detected, and reports an alarm. OSPFv3 process 1 on DeviceE distributes a large route cost through an AS-External LSA along with the imported route.</li><li>After learning the LSA with a large cost from DeviceE, OSPFv3 process 1 on DeviceD preferentially selects the LSA distributed by DeviceB and updates the next hop of the route 2001:DB8:1::1 to DeviceB, indicating that the routing loop is resolved.<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In the preceding typical networking:</p>
+<p>If routes are imported within a protocol on a device and the device detects a routing loop, it increases the cost of the route to be distributed. After the remote device learns this route with a large cost, it does not preferentially select this route as the optimal route in the IP routing table. In this manner, the routing loop is resolved.</p>
+<p>In the case of inter-protocol route import, if a routing protocol with a higher priority detects a routing loop, although this protocol increases the cost of the corresponding route, the cost increase will not render the route inactive. As a result, the routing loop cannot be eliminated. If the routing protocol with a lower priority detects a routing loop and increases the cost of the corresponding route, the originally imported route is preferentially selected. In this case, the routing loop can be eliminated.</p>
+</div></div>
+</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Cause (Mutual Route Import Between OSPFv3 and BGP)</h4><p>On the network shown in <a href="#EN-US_CONCEPT_0000001223706301__fig199452121070">Figure 10</a>, DeviceA, DeviceB, and DeviceC run a BGP process, DeviceF and DeviceG run OSPFv3 process 2, and DeviceD and DeviceE run both processes. A BGP peer relationship is established between DeviceD and DeviceE. DeviceD imports routes from BGP to OSPFv3 process 2 for distribution. DeviceE imports routes from OSPFv3 process 2 to BGP, indicating that the routes are re-distributed back to BGP. Because no import route-policy is configured or the configured route-policy is improper, the route newly distributed by DeviceD may be selected as the optimal route by BGP, causing a routing loop.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001223706301__fig199452121070"><a name="EN-US_CONCEPT_0000001223706301__fig199452121070"></a><a name="fig199452121070"></a><span class="figcap"><b>Figure 10 </b>Traffic flow when a routing loop occurs during route import between OSPFv3 and BGP</span><br><span><img class="imgResize" src="figure/en-us_image_0000001233181195.png" width="523.6875" height="200.01949800000003" title="Click to enlarge"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Implementation (Mutual Route Import Between OSPFv3 and BGP)</h4><p>Redistribute IDs of BGP routes are delivered to the IP routing table along with the routes. The IP routing table stores Redistribute IDs in a unified format. When OSPFv3 imports the BGP routes, the processing of Redistribute IDs is the same as that in a scenario where routes are mutually imported between OSPFv3 processes.</p>
+<p>On the network shown in <a href="#EN-US_CONCEPT_0000001223706301__fig167183331883">Figure 11</a>, assume that the router ID of OSPFv3 process 2 on DeviceD is 4.4.4.2 (the Redistribute ID is 0x0404040200000002) and that BGP on DeviceE uses VrfID 0 and random number 7 (the Redistribute ID is 0x0000000000000007).</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001223706301__fig167183331883"><a name="EN-US_CONCEPT_0000001223706301__fig167183331883"></a><a name="fig167183331883"></a><span class="figcap"><b>Figure 11 </b>Typical network diagram for routing loop detection when OSPFv3 and BGP import routes from each other</span><br><span><img class="imgResize" src="figure/en-us_image_0000001831301901.png" width="523.6875" height="332.275363" title="Click to enlarge"></span></div>
+<p>Routing loops are detected and resolved as follows:</p>
+<ol><li>Through BGP, DeviceD learns the route distributed by DeviceB and imports the BGP route to OSPFv3 process 2. When DeviceD distributes the imported route through OSPFv3 process 2, the extended prefix E-AS-External-LSA contains the Redistribute ID of OSPFv3 process 2 on DeviceD.</li><li>Through OSPFv3 process 2, DeviceE learns the route distributed by DeviceD and saves the Redistribute List distributed by OSPFv3 process 2 on DeviceD to the routing table when calculating routes. At this point, the next hop of the route 2001:DB8:1::1 in OSPFv3 process 2 on DeviceE is DeviceD.</li><li>After DeviceE imports routes from OSPFv3 process 2 to BGP, the Redistribute ID information of OSPFv3 process 2 is inherited by the generated BGP routes, and BGP routing loop attributes are generated and distributed.</li><li>After BGP on DeviceD learns the route distributed by DeviceE, DeviceD saves the Redistribute ID distributed by BGP on DeviceE to the routing table when calculating routes. At this point, the next hop of the BGP route 2001:DB8:1::1 on DeviceD is DeviceE, indicating that a routing loop occurs.</li><li>When importing the route from BGP to OSPFv3 process 2, DeviceD finds that the Redistribute List of the route contains its own Redistribute ID, considers that a routing loop is detected, and reports an alarm. OSPFv3 process 2 on DeviceD distributes a large cost along with the imported route.</li><li>Because OSPFv3 has a higher priority than BGP, the route selection result remains unchanged, and the routing loop persists.</li><li>OSPFv3 on DeviceE learns the route distributed by OSPFv3 on DeviceD. When importing the route from OSPFv3 process 2 to BGP, DeviceE finds that the Redistribute List of the route contains its own Redistribute ID, considers that a routing loop is detected, and reports an alarm. In addition, DeviceE reduces the priority of the imported route when distributing it through BGP.</li><li>After learning this route from DeviceE, BGP on DeviceD preferentially selects the route distributed by DeviceB. In this case, the next hop of the route 2001:DB8:1::1 in OSPFv3 process 2 on DeviceD is DeviceB, indicating that the routing loop is resolved.<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In the preceding typical networking:</p>
+<p>If routes are imported within a protocol on a device and the device detects a routing loop, it increases the cost of the route to be distributed. After the remote device learns this route with a large cost, it does not preferentially select this route as the optimal route in the IP routing table. In this manner, the routing loop is resolved.</p>
+<p>In the case of inter-protocol route import, if a routing protocol with a higher priority detects a routing loop, although this protocol increases the cost of the corresponding route, the cost increase will not render the route inactive. As a result, the routing loop cannot be eliminated. If the routing protocol with a lower priority detects a routing loop and increases the cost of the corresponding route, the originally imported route is preferentially selected. In this case, the routing loop can be eliminated.</p>
+</div></div>
+</li></ol>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../vrp/vrp_ospfv3_cfg_0165.html">Configuring Routing Loop Detection for Routes Imported to OSPFv3
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../vrp/vrp_ospfv3_cfg_0162.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+
+<script language="JavaScript">
+<!--
+initImageViewer('.imgResize');
+var msg_imageMax = "view original image";
+var msg_imageClose = "close";
+//--></script></body>
+</html>

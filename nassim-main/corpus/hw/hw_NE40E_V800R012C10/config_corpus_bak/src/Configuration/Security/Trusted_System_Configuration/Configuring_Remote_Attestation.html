@@ -1,0 +1,94 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring Remote Attestation">
+<meta name="abstract" content="This section describes how to configure the remote attestation (RA) function to allow an RA server to authenticate a device and determine whether the device is trustworthy.">
+<meta name="description" content="This section describes how to configure the remote attestation (RA) function to allow an RA server to authenticate a device and determine whether the device is trustworthy.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_trust_cfg_0137.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_trust_cfg_overview.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,z00603461,l30033680,w00606909,h00522387,z00805567">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="Trust Environment Management">
+<meta name="featurename" content="Trusted System">
+<meta name="featuretype" content="Security">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Trust Environment Management">
+<meta name="featurename" content="Trusted System">
+<meta name="featuretype" content="Security">
+<meta name="featurename" content="Trusted System">
+<meta name="featuretype" content="Security">
+<meta name="OWNER" content="y00852169">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="y00852169">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0235278869">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Configuring Remote Attestation</title>
+</head>
+<body><a name="EN-US_TASK_0235278869"></a><a name="EN-US_TASK_0235278869"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring Remote Attestation</h1>
+<div class="taskbody"><p>This section describes how to configure the remote attestation (RA) function to allow an RA server to authenticate a device and determine whether the device is trustworthy.</p>
+<div class="context"><a name="EN-US_TASK_0235278869__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Pre-configuration Tasks</h4><p>In a trusted environment, after the RA function is enabled on a device that supports trusted startup, the device sends information to a remote RA server. The remote RA server then compares the information it receives with locally stored information to determine whether the device is trustworthy. Therefore, RA provides users with a method of remotely checking device trustworthiness.</p>
+<p>Before configuring RA, complete the following tasks:</p>
+<ul><li>Configure the device to communicate with the RA server, and configure the RA function on the RA server.</li><li>Obtain the CA certificate chain used to issue the LAK certificate as well as the Huawei root certificates and Huawei level-2 CA certificates used to issue IAK certificates, and transfer these certificates to the <strong>home</strong> directory of the device through FTP.<p>Huawei provides two sets of certificates, each with one Huawei root certificate and one Huawei level-2 CA certificate, for issuing IAK certificates. The two sets of certificates are as follows:</p>
+<ul><li>Huawei root certificate: Huawei Equipment CA; Huawei level-2 CA certificate: Huawei Enterprise Network Product CA</li><li>Huawei root certificate: Huawei RSA Equipment Root CA 2; Huawei level-2 CA certificate: Huawei DataCom RSA Equipment CA 2</li></ul>
+<p>You are advised to load the two sets of certificates on the RA server. To download Huawei root certificates and Huawei level-2 CA certificates, visit <a href="https://support.huawei.com/additionalres/pki" target="_blank" rel="noopener noreferrer">https://support.huawei.com/pki/pkidetail</a>.</p>
+<p>You can perform the following steps to view the IAK certificate currently used by the RA client, so as to obtain the matching Huawei root certificate and Huawei level-2 CA certificate.</p>
+<ol><li>Run the <strong>display remote-attestation iak certificate slot</strong> <em>slotid</em> command in the diagnostic view to check IAK certificate information. Copy the content from <strong>-----BEGIN CERTIFICATE-----</strong> to <strong>-----END CERTIFICATE-----</strong> in the command output, including <strong>-----BEGIN CERTIFICATE-----</strong> and <strong>-----END CERTIFICATE-----</strong>, and save such information to the user PC in .pem format.</li><li>Install OpenSSL on the user PC.</li><li>On the CLI of the PC, run the <strong>openssl x509 -in</strong> <em>filename</em> <strong>-text -noout</strong> command to check the CN in the <strong>Issue</strong><strong>r</strong> field. <em>filename</em> specifies a certificate path (including the certificate name).</li><li>Download the Huawei level-2 CA certificate at <a href="https://support.huawei.com/additionalres/pki" target="_blank" rel="noopener noreferrer">https://support.huawei.com/pki/pkidetail</a> based on the queried CN, and then download the Huawei root certificate based on the Huawei level-2 CA certificate.</li></ol>
+</li><li>(Optional) Create a public key infrastructure (PKI) domain on the device to implement PKI certificate management between the CA and device through the Certificate Management Protocol (CMP).</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0235278869__1.4.2"></a><a name="1.4.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Run <strong>system-view</strong></span><p><p>The system view is displayed.</p>
+</p></li><li><span>Run <a href="cmdqueryname=trustem"><b><span class="cmdname">trustem</span></b></a></span><p><p>The trusted management view is displayed.</p>
+</p></li><li><span>Run <a href="cmdqueryname=remote-attestation+enable"><b><span class="cmdname">remote-attestation enable</span></b></a></span><p><p>RA is enabled.</p>
+</p></li><li><span>Run <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span><p><p>The configuration is committed.</p>
+</p></li><li><span>Run <strong>quit</strong></span><p><p>Return to the system view.</p>
+</p></li><li><span>(Optional) Apply for an LAK certificate for RA.</span><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If the RA client uses an LAK certificate, you also need to obtain the CA certificate chain used to issue the LAK certificate. Then, upload the obtained certificate chain file to the RA server.</p>
+</div></div>
+</p><ol type="a"><li class="substepexpand"><span>Run the <a href="cmdqueryname=pki+entity"><b><span class="cmdname">pki entity</span></b></a> <i><span class="varname">entity-name</span></i> command to create a PKI entity and enter its view.</span></li><li class="substepexpand"><span>Run the <a href="cmdqueryname=common-name"><b><span class="cmdname">common-name</span></b></a> <i><span class="varname">common-name</span></i> command to configure a common name for the entity.</span></li><li class="substepexpand"><span>Run the <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a> command to commit the configuration.</span></li><li class="substepexpand"><span>Run the <strong>quit</strong> command to return to the system view.</span></li><li class="substepexpand"><span>Run the <a href="cmdqueryname=pki+domain"><b><span class="cmdname">pki domain</span></b></a> <i><span class="varname">domain-name</span></i> command to create a PKI domain and enter the PKI domain name configuration view.</span></li><li class="substepexpand"><span>Run the <a href="cmdqueryname=pki+cmp+session"><b><span class="cmdname">pki cmp session</span></b></a> <i><span class="varname">session-name</span></i> command to create a PKI CMP session and enter its view.</span></li><li class="substepexpand"><span>Run the <a href="cmdqueryname=cmp+request+entity"><b><span class="cmdname">cmp request entity</span></b></a> <i><span class="varname">entity-name</span></i> command to specify a PKI entity used to initiate a CMP request.</span></li><li class="substepexpand"><span>Run the <a href="cmdqueryname=cmp+request+ca-name"><b><span class="cmdname">cmp request ca-name</span></b></a> <i><span class="varname">ca-name</span></i> command to specify the name of the CA server receiving the CMP request.</span></li><li class="substepexpand"><span>Run the <a href="cmdqueryname=cmp+request+server+url"><b><span class="cmdname">cmp request server url</span></b></a> <i><span class="varname">url-address</span></i> command to specify the URL of the CMP server receiving the CMP request.</span></li><li class="substepexpand"><span>Run the <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a> command to commit the configuration.</span></li><li class="substepexpand"><span>Run the <strong>quit</strong> command to return to the PKI domain name configuration view.</span></li><li class="substepexpand"><span>Run the <strong>quit</strong> command to return to the system view.</span></li><li class="substepexpand"><span>Run the <a href="cmdqueryname=pki+import-certificate+ca+file-name"><b><span class="cmdname">pki import-certificate ca file-name</span></b></a> <i><span class="varname">file-name</span></i> command to import the CA certificate chain used to issue the LAK certificate as well as the Huawei root certificates and Huawei level-2 CA certificates used to issue IAK certificates to the device.</span><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>You are advised to import the two sets of certificates, each with one Huawei root certificate and one Huawei level-2 CA certificate. The same CA certificate cannot be imported repeatedly.</p>
+<p>If the current CA server does not verify IAK certificates, you do not need to import Huawei root certificates and Huawei level-2 CA certificates.</p>
+</div></div>
+</p></li><li class="substepexpand"><span>Run the <a href="cmdqueryname=trustem"><b><span class="cmdname">trustem</span></b></a> command to enter the trusted management view.</span></li><li class="substepexpand"><span>(Optional) Run the <a href="cmdqueryname=remote-attestation+pki+bind+domain"><b><span class="cmdname">remote-attestation pki bind domain</span></b></a> <i><span class="varname">domainName</span></i> command to bind the created PKI domain to RA.</span></li><li class="substepexpand"><span>(Optional) If the LAK certificate is invalid, run the <a href="cmdqueryname=remote-attestation"><b><span class="cmdname">remote-attestation</span></b></a><strong><span> pki update-request</span></strong> { <strong><span>all</span></strong> | <strong><span>slot</span></strong> <i><span class="varname">slotID</span></i> } command to update LAK certificate information.</span></li><li class="substepexpand"><span>Run the <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a> command to commit the configuration.</span></li><li class="substepexpand"><span>Run the <strong>quit</strong> command to return to the system view.</span></li></ol>
+</li><li><span>Run <strong>quit</strong></span><p><p>Return to the user view.</p>
+</p></li><li><span>(Optional) Run <a href="cmdqueryname=set+tpm+password"><b><span class="cmdname">set tpm password</span></b></a> { <strong><span>slot</span></strong> <i><span class="varname">slotId</span></i> | <strong><span>all</span></strong> }</span><p><p>The TPM password is changed.</p>
+</p><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If the device needs to be rolled back to a version that does not support TPM password configuration, run the <a href="cmdqueryname=set+tpm+password"><b><span class="cmdname">set tpm password</span></b></a> { <strong><span>slot</span></strong> <i><span class="varname">slotId</span></i> | <strong><span>all</span></strong> } command to restore the TPM password to the default value <strong>Changeme_123</strong> before performing the rollback.</p>
+<p>After running the <a href="cmdqueryname=set+tpm+password"><b><span class="cmdname">set tpm password</span></b></a> { <strong><span>slot</span></strong> <i><span class="varname">slotId</span></i> | <strong><span>all</span></strong> } command, restart the device. Otherwise, the TPM cannot be accessed, and the RA function is unavailable.</p>
+</div></div>
+</p></li></ol></div>
+<div class="postreq"><a name="EN-US_TASK_0235278869__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>Run the <a href="cmdqueryname=display+trustem+remote-attestation+bd-status"><b><span class="cmdname">display trustem remote-attestation bd-status</span></b></a> { <strong><span>slot</span></strong> <i><span class="varname">slotId</span></i> | <strong><span>all</span></strong> } command to check the RA status.</p>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_trust_cfg_0137.html">Trusted System Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_trust_cfg_overview.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

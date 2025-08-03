@@ -1,0 +1,75 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="PFC Deadlock Detection">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_dcb_cfg_0004.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_pfc_cfg_0001.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="DCB">
+<meta name="featuretype" content="DCN and Network Management">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="DCB">
+<meta name="featuretype" content="DCN and Network Management">
+<meta name="featurename" content="DCB">
+<meta name="featuretype" content="DCN and Network Management">
+<meta name="featurename" content="DCB">
+<meta name="featuretype" content="DCN and Network Management">
+<meta name="featuretype" content="DCN and Network Management">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001512830090">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>PFC Deadlock Detection</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001512830090"></a><a name="EN-US_CONCEPT_0000001512830090"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">PFC Deadlock Detection</h1>
+<div id="conbody1588729792491"><div class="section" id="EN-US_CONCEPT_0000001512830090__section43631217121119"><h4 class="sectiontitle">PFC Deadlock</h4><p id="EN-US_CONCEPT_0000001512830090__p1126291594217">PFC deadlock is a network state that is caused by the following situation: congestion occurs on multiple switches simultaneously due to a loop or some other reason, the interface buffer usage of each switch exceeds the threshold, the switches wait for each other to release resources, and consequently data flows on all switches are permanently blocked.</p>
+<p id="EN-US_CONCEPT_0000001512830090__p10263715144218">Under normal circumstances, a PFC-enabled device only pauses traffic in one or several priority queues of an interface, rather than on the entire interface. Each queue can be paused or restarted individually, without affecting traffic in other queues. In this way, PFC enables traffic of various types to share one link. However, when a link or device fails, a temporary loop may occur on the network during route re-convergence, resulting in a cyclic buffer dependency. This then leads to the PFC thresholds being reached on the devices, such as the four switches in <a href="#EN-US_CONCEPT_0000001512830090__fig1829710437420">Figure 1</a>, which then send PFC frames to peer devices. In this case, all of the switches in the topology stop sending traffic, resulting in PFC deadlock.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001512830090__fig1829710437420"><a name="EN-US_CONCEPT_0000001512830090__fig1829710437420"></a><a name="fig1829710437420"></a><span class="figcap"><b>Figure 1 </b>PFC deadlock</span><br><span><img class="vsd" id="EN-US_CONCEPT_0000001512830090__image85981172322" src="figure/en-us_image_0000001513029706.png"></span></div>
+</div>
+<div class="section" id="EN-US_CONCEPT_0000001512830090__section1925562513152"><h4 class="sectiontitle">PFC Deadlock Detection Implementation</h4><p id="EN-US_CONCEPT_0000001512830090__p19267145011109">PFC deadlock detection allows a device to monitor a PFC deadlock through the following processes. Then, if the device continuously receives PFC frames during deadlock detection, the device does not respond.</p>
+<ol id="EN-US_CONCEPT_0000001512830090__ol96337495178"><li id="EN-US_CONCEPT_0000001512830090__li116331649101715"><strong id="EN-US_CONCEPT_0000001512830090__b966532412285">Deadlock detection</strong><p id="EN-US_CONCEPT_0000001512830090__p5872161715208">Once an interface of Device2 receives PFC frames from Device1, the internal scheduler of Device2 stops sending traffic in a specified priority queue, and Device2 starts a timer to detect PFC frames received by the queue according to the configured deadlock detection and precision.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001512830090__fig138711634151"><span class="figcap"><b>Figure 2 </b>Enabling deadlock detection</span><br><span><img class="vsd" id="EN-US_CONCEPT_0000001512830090__image1411019307433" src="figure/en-us_image_0000001563750009.png"></span></div>
+</li><li id="EN-US_CONCEPT_0000001512830090__li134781314181918"><strong id="EN-US_CONCEPT_0000001512830090__b32587426198">Deadlock determination</strong><p id="EN-US_CONCEPT_0000001512830090__p1388194811262">If the queue is in the PFC-XOFF (flow-controlled) state throughout the specified PFC deadlock detection period, the system determines that a PFC deadlock occurs. In this case, the PFC deadlock recovery process needs to be performed.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001512830090__fig342217282313"><span class="figcap"><b>Figure 3 </b>Determining deadlock occurrence</span><br><span><img class="vsd" id="EN-US_CONCEPT_0000001512830090__image14381505478" src="figure/en-us_image_0000001564109749.png"></span></div>
+</li><li id="EN-US_CONCEPT_0000001512830090__li74671636101913"><strong id="EN-US_CONCEPT_0000001512830090__b382409102317">Deadlock recovery</strong><p id="EN-US_CONCEPT_0000001512830090__p1996495593119">During PFC deadlock recovery, PFC frames received by the interface are ignored. The internal scheduler resumes traffic sending or discards traffic in the specified priority queue. After the recovery period expires, the normal flow control mechanism of PFC resumes. If the system still determines that a deadlock occurs in the next deadlock detection period, the deadlock recovery process starts again.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001512830090__fig7183193653719"><span class="figcap"><b>Figure 4 </b>Entering the deadlock recovery process</span><br><span><img class="vsd" id="EN-US_CONCEPT_0000001512830090__image18605213185112" src="figure/en-us_image_0000001563989913.png"></span></div>
+</li><li id="EN-US_CONCEPT_0000001512830090__li77821940161918"><strong id="EN-US_CONCEPT_0000001512830090__b1793317298575">Deadlock control</strong><p id="EN-US_CONCEPT_0000001512830090__p179777465376">If the deadlock recovery process does not work and PFC deadlocks persist, you can configure the system to forcibly enter the deadlock control process after a specified number of deadlocks occur in a period of time. In this case, the system considers that deadlocks occur frequently on the network, posing high risk. In response, the system enters the deadlock control process, and the PFC function is automatically disabled on the device. If you want to re-enable the PFC function, you must do so manually.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001512830090__fig4198710184519"><span class="figcap"><b>Figure 5 </b>Disabling the PFC function upon frequent deadlocks</span><br><span><img class="vsd" id="EN-US_CONCEPT_0000001512830090__image1730881417563" src="figure/en-us_image_0000001563750013.png"></span></div>
+</li></ol>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_dcb_cfg_0004.html">PFC
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_pfc_cfg_0001.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,89 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Logout of 802.1X Users">
+<meta name="abstract" content="">
+<meta name="description" content="">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_nac_cfg_0038.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_nac_cfg_0043.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_nac_cfg_0045.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="802.1X Authentication">
+<meta name="featurename" content="NAC">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="802.1X Authentication">
+<meta name="featurename" content="NAC">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="featurename" content="802.1X Authentication">
+<meta name="featurename" content="MAC Address Authentication">
+<meta name="featurename" content="NAC">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="featurename" content="802.1X Authentication">
+<meta name="featurename" content="MAC Address Authentication">
+<meta name="featurename" content="NAC">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001513160198">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Logout of 802.1X Users</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001513160198"></a><a name="EN-US_CONCEPT_0000001513160198"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Logout of 802.1X Users</h1>
+<div><p></p>
+<div class="p">If a user goes offline but the access device and RADIUS server do not detect this event, the following problems may occur:<ul><li>The RADIUS server still performs accounting for the user, causing incorrect accounting.</li><li>An unauthorized user can use this user's IP address and MAC address to access the network.</li><li>If there are many offline users, these users continue to occupy user specifications, meaning that other users may fail to access the network.</li></ul>
+</div>
+<p>To avoid such problems, the access device needs to detect the user logout immediately, delete the user entry, and notify the RADIUS server to stop accounting for the user.</p>
+<p>A user may log out in the following scenarios: The user proactively logs out of the client, the access device controls user logout, and the RADIUS server controls user logout.</p>
+<div class="section"><h4 class="sectiontitle">The Client Proactively Logs Out</h4><p>A user sends an EAPoL-Logoff packet through the client software to log out. Upon receipt of the packet, the access device returns an EAP-Failure packet to the client and changes the port state from authorized to unauthorized.</p>
+<div class="fignone"><span class="figcap"><b>Figure 1 </b>Client logout process</span><br><span><img class="vsd" src="figure/en-us_image_0000001512681274.png"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">The Access Device Controls User Logout</h4><p>You can enable the access device to control user logout using the following methods:</p>
+<ul><li>Configure user detection on the access device to check whether a user is online. If the user does not respond within a specified period, the access device considers the user offline and deletes the user entry.</li></ul>
+<p>If an administrator detects that an unauthorized user is online or wants a user to go offline and then go online again for testing purposes, the administrator can run a command on the access device to disconnect the user. For a user in normal access state, the access device checks the user state through ARP probing. If the access device detects that the user goes offline, it disconnects the user and deletes the user entry.</p>
+<div class="fignone"><span class="figcap"><b>Figure 2 </b>User logout detection process (using the default three handshakes as an example)</span><br><span><img class="vsd" src="figure/en-us_image_0000001563880401.png"></span></div>
+<p></p>
+<ol><li>The user sends a packet to trigger 802.1X authentication through the client, and the detection timer starts.</li><li>If the access device receives traffic from the client within several T periods, it determines that the user is online.</li><li>The user sends the last packet. If the access device receives traffic from the client when the current T period ends, the access device determines that the user is online and resets the detection timer. Assume that the handshake period is T and the number of handshakes is 3 (configured using the <strong>authentication timer handshake-period</strong> <em>handshake-period </em><strong>handshake-times</strong><em><strong> </strong>handshake-times-value</em> command), that is, <em>handshake-period</em> is T and <em>handshake-times-value</em> is 3. In the following situations, the access device deletes the user entry and logs out the user.<ol type="a"><li>If the access device does not receive traffic from the client within the first T period, the access device sends the first ARP request and the client does not respond.</li><li>If the access device does not receive traffic from the client within the second T period, the access device sends the second ARP request and the client does not respond.</li><li>If the access device does not receive traffic from the client after the third T period, ARP probing fails and the access device deletes the user entry.</li></ol>
+</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">The RADIUS Server Controls User Logout</h4><p>The RADIUS server controls user logout using either of the following methods:</p>
+<ul><li>Sends a Disconnect Message (DM) to the access device to disconnect a user who needs to be disconnected.</li><li>Uses the standard RADIUS attributes Session-Timeout and Termination-Action. Session-Timeout specifies the online duration timer value of a user. If the value of Termination-Action is set to 0, the user is disconnected when the online duration timer expires.</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_nac_cfg_0038.html">Understanding 802.1X Authentication
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_nac_cfg_0043.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="galaxy_nac_cfg_0045.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

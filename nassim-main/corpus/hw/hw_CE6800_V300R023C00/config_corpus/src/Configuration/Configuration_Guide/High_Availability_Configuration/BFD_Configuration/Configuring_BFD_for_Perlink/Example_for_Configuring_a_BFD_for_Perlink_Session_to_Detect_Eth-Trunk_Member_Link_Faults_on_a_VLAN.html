@@ -1,0 +1,318 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring a BFD for Perlink Session to Detect Eth-Trunk Member Link Faults on a VLAN">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bfd_cfg_0042.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bfd_cfg_0044.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BFD">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BFD">
+<meta name="featuretype" content="High Availability">
+<meta name="featurename" content="BFD">
+<meta name="featuretype" content="High Availability">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130782130">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring a BFD for Perlink Session to Detect Eth-Trunk Member Link Faults on a VLAN</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130782130"></a><a name="EN-US_TASK_0000001130782130"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring a BFD for Perlink Session to Detect Eth-Trunk Member Link Faults on a VLAN</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130782130__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0000001130782130__fig_dc_vrp_bfd_cfg_011401">Figure 1</a>, DeviceA and DeviceB are directly connected through Eth-Trunk interfaces. The Eth-Trunk interfaces on the two devices are added to VLAN 100. BFD is required to detect faults on the link between DeviceA and DeviceB. If a single-hop BFD session is bound to the VLANIF interface to detect Eth-Trunk link faults, BFD selects one of the Eth-Trunk member links as the detection path and monitors only this member link. Once BFD detects that the selected member link is down, it assumes that the Eth-Trunk link is down even if the other Eth-Trunk member links are up. To prevent BFD from incorrectly reporting link faults, deploy BFD for Perlink sessions instead of single-hop BFD sessions.</p>
+<div class="fignone" id="EN-US_TASK_0000001130782130__fig_dc_vrp_bfd_cfg_011401"><a name="EN-US_TASK_0000001130782130__fig_dc_vrp_bfd_cfg_011401"></a><a name="fig_dc_vrp_bfd_cfg_011401"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring a BFD for Perlink session to detect Eth-Trunk member link faults on a VLAN</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 and interface 2 represent <span>100GE</span><span>1/0/1</span> and <span>100GE</span><span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001130782160.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130782130__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Create an Eth-Trunk interface on DeviceA and DeviceB, and add Ethernet physical interfaces to each Eth-Trunk interface.</p>
+</li><li>Create a VLAN on DeviceA and DeviceB, add the Eth-Trunk interface to the VLAN, and create a VLANIF interface to implement Layer 3 interworking between the two devices through the VLANIF interface.</li><li><p>Configure a BFD for Perlink session on DeviceA and DeviceB to monitor the Eth-Trunk member links between the devices.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130782130__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Procedure</h4><ol><li>Create an Eth-Trunk interface on DeviceA and DeviceB, and add Ethernet physical interfaces to each Eth-Trunk interface.<p># Configure DeviceA.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface Eth-Trunk 1</strong>
+[<span class="keyword">*</span>DeviceA-Eth-Trunk1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>eth-trunk 1</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>eth-trunk 1</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p>The configuration of DeviceB is similar to the configuration of DeviceA. For detailed configurations, see <a href="#EN-US_TASK_0000001130782130__context197516915919">Configuration Scripts</a>.</p>
+</li><li>Create a VLAN on DeviceA and DeviceB, add the Eth-Trunk interface to the VLAN, and create a VLANIF interface to implement Layer 3 interworking between the two devices through the VLANIF interface.<p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>vlan 100</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-vlan100] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface Eth-Trunk 1</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-Eth-Trunk1] <strong>portswitch</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-Eth-Trunk1] <strong>port link-type access</strong>
+[<span class="keyword">*</span>DeviceA-Eth-Trunk1] <strong>port default vlan 100</strong>
+[<span class="keyword">*</span>DeviceA-Eth-Trunk1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface Vlanif 100</strong>
+[<span class="keyword">*</span>DeviceA-Vlanif100] <strong>ip address 10.1.1.1 24</strong>
+[<span class="keyword">*</span>DeviceA-Vlanif100] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>vlan 100</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-vlan100] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface Eth-Trunk 1</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-Eth-Trunk1] <strong>portswitch</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-Eth-Trunk1] <strong>port link-type access</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk1] <strong>port default vlan 100</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface Vlanif 100</strong>
+[<span class="keyword">*</span>DeviceB-Vlanif100] <strong>ip address 10.1.1.2 24</strong>
+[<span class="keyword">*</span>DeviceB-Vlanif100] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</li><li>Configure a BFD for Perlink session on DeviceA and DeviceB to monitor the Eth-Trunk member links between the devices.<p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> bfd</strong>
+[<span class="keyword">*</span>DeviceA-bfd]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>bfd atob bind peer-ip 10.1.1.2 interface Vlanif 100 source-ip 10.1.1.1 per-link one-arm-echo</strong>
+[<span class="keyword">*</span>DeviceA-bfd-session-atob] <strong>min-rx-interval 10</strong>
+[<span class="keyword">*</span>DeviceA-bfd-session-atob] <strong>min-tx-interval 10</strong>
+[<span class="keyword">*</span>DeviceA-bfd-session-atob] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130782130__1.3.4"></a><a name="1.3.4"></a>
+<div class="p"><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check that the VLANIF interfaces on DeviceA and DeviceB can ping each other.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ping 10.1.1.1</strong>
+  PING 10.1.1.1: 56  data bytes, press CTRL_C to break
+    Reply from 10.1.1.1: bytes=56 Sequence=1 ttl=255 time=10 ms
+    Reply from 10.1.1.1: bytes=56 Sequence=2 ttl=255 time=2 ms
+    Reply from 10.1.1.1: bytes=56 Sequence=3 ttl=255 time=2 ms
+    Reply from 10.1.1.1: bytes=56 Sequence=4 ttl=255 time=1 ms
+    Reply from 10.1.1.1: bytes=56 Sequence=5 ttl=255 time=2 ms
+  --- 10.1.1.1 ping statistics ---
+    5 packet(s) transmitted
+    5 packet(s) received
+    0.00% packet loss
+    round-trip min/avg/max = 1/3/10 ms</pre>
+<p># Run the <strong>display bfd session all verbose</strong> command on DeviceA to check the BFD session status.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display bfd session all verbose</strong>
+<span>(w): State in WTR 
+(*): State is invalid</span>
+Total UP/DOWN Session Number : 3/0
+--------------------------------------------------------------------------------
+  Name : atob                  (<strong>Single Hops</strong>)   State : <strong>Up</strong>
+--------------------------------------------------------------------------------
+  Local Discriminator    : <strong>1048576</strong>            Remote Discriminator   : <strong>1048576</strong>
+  Session Detect Mode    : Asynchronous Mode With Echo Function
+  BFD Bind Type          : <strong>Interface(Vlanif100)</strong>  
+  Bind Session Type      : Static_Auto(Bundle_Main) 
+  Bind Peer IP Address   : 10.1.1.2        
+  Bind Interface         : Vlanif100                                         
+  Bind Source IP Address : 10.1.1.1   
+  FSM Board ID           : -                ToS-EXP                : 7
+  Min Tx Interval (ms)   : 10               Min Rx Interval (ms)   : 10
+  Actual Tx Interval (ms): -                Actual Rx Interval (ms): - 
+  WTR Interval (ms)      : -                Detect Interval (ms)   : - 
+  Local Detect Multi     : 3                Active Multi           : -  
+  Echo Passive           : Disable          Acl Number             : -
+  Destination Port       : 3784             TTL                    : 255
+  Proc Interface Status  : Disable          Process PST            : Disable
+  Config PST             : Disable
+  Last Local Diagnostic  : Control Detection Time Expired
+  Bind Application       : AUTO   
+  Session Description    : - 
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+  Name : dyn_16386             (Single Hops)   State : <strong>Up</strong>
+--------------------------------------------------------------------------------
+  Local Discriminator    : <strong>16386</strong>            Remote Discriminator   : <strong>16386</strong>
+  Session Detect Mode    : Asynchronous Mode With Echo Function
+  BFD Bind Type          : <strong>Interface(<span>100GE</span><span>1/0/1</span>)</strong>  
+  Bind Session Type      : Dynamic(Bundle_Sub) 
+  Bind Peer IP Address   : 10.1.1.2        
+  Bind Interface         : <span>100GE</span><span>1/0/1</span>                                     
+  Bind Source IP Address : 10.1.1.1   
+  FSM Board ID           : 3                ToS-EXP                : 7
+  Min Tx Interval (ms)   : 10               Min Rx Interval (ms)   : 10
+  Actual Tx Interval (ms): 10               Actual Rx Interval (ms): 10 
+  WTR Interval (ms)      : -                Detect Interval (ms)   : 30 
+  Local Detect Multi     : 3                Active Multi           : 3 
+  Echo Passive           : Disable          Acl Number             : -
+  Destination Port       : 3784             TTL                    : 255
+  Proc Interface Status  : Disable          Process PST            : Disable
+  Config PST             : Disable
+  Last Local Diagnostic  : Control Detection Time Expired
+  Bind Application       : BFD   
+  Session Description    : - 
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+  Name : dyn_16387             (Single Hops)   State : <strong>Up</strong>
+--------------------------------------------------------------------------------
+  Local Discriminator    : <strong>16387</strong>            Remote Discriminator   : <strong>16387</strong>
+  Session Detect Mode    : Asynchronous Mode With Echo Function
+  BFD Bind Type          : <strong>Interface(<span>100GE</span><span>1/0/2</span>)</strong>  
+  Bind Session Type      : Dynamic(Bundle_Sub) 
+  Bind Peer IP Address   : 10.1.1.2        
+  Bind Interface         : <span>100GE</span><span>1/0/2</span>                                     
+  Bind Source IP Address : 10.1.1.1   
+  FSM Board ID           : 3                ToS-EXP                : 7
+  Min Tx Interval (ms)   : 10               Min Rx Interval (ms)   : 10
+  Actual Tx Interval (ms): 10               Actual Rx Interval (ms): 10 
+  WTR Interval (ms)      : -                Detect Interval (ms)   : 30 
+  Local Detect Multi     : 3                Active Multi           : 3 
+  Echo Passive           : Disable          Acl Number             : -
+  Destination Port       : 3784             TTL                    : 255
+  Proc Interface Status  : Disable          Process PST            : Disable
+  Config PST             : Disable
+  Last Local Diagnostic  : Control Detection Time Expired
+  Bind Application       : BFD   
+  Session Description    : - 
+--------------------------------------------------------------------------------</pre>
+<p>The command output shows that three BFD sessions have been established on DeviceA and are in the <strong>Up</strong> state. The discriminators of the three BFD sessions are dynamically allocated. The BFD session bound to VLANIF 100 is a management session, and the other two BFD sessions are sub-sessions. The BFD sub-sessions are bound to Ethernet physical interfaces <span>100GE</span><span>1/0/1</span> and <span>100GE</span><span>1/0/2</span>, respectively.</p>
+<p># Shut down the Ethernet physical interface <span>100GE</span><span>1/0/1</span> on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>shutdown</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Run the <strong>display bfd session all</strong> command on DeviceA to check the states of the three BFD sessions.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display bfd session all</strong>
+S: Static session
+D: Dynamic session
+IP: IP session
+IF: Single-hop session
+PEER: Multi-hop session
+AUTO: Automatically negotiated session
+<span>(w): State in WTR 
+(*): State is invalid</span>
+Total UP/DOWN Session Number : 2/1
+--------------------------------------------------------------------------------
+Local      Remote     PeerIpAddr      State     Type        InterfaceName 
+--------------------------------------------------------------------------------
+16385      16385      10.1.1.2       Up        S/AUTO-IF   Vlanif100
+16386      16386      10.1.1.2       Down      D/IP-IF     <span>100GE</span><span>1/0/1</span>
+16387      16387      10.1.1.2       Up        D/IP-IF     <span>100GE</span><span>1/0/2</span>
+--------------------------------------------------------------------------------</pre>
+<p>The command output shows that the BFD sub-session bound to <span>100GE</span><span>1/0/1</span> is in the <strong>Down</strong> state, but the BFD management session bound to VLANIF 100 remains in the <strong>Up</strong> state.</p>
+<p># Shut down the physical Ethernet interface <span>100GE</span><span>1/0/2</span> on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface </strong><strong><span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>shutdown</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Run the <strong>display bfd session all</strong> command on DeviceA to check the states of the three BFD sessions.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display bfd session all</strong>
+S: Static session
+D: Dynamic session
+IP: IP session
+IF: Single-hop session
+PEER: Multi-hop session
+AUTO: Automatically negotiated session
+<span>(w): State in WTR 
+(*): State is invalid</span>
+Total UP/DOWN Session Number : 0/3
+--------------------------------------------------------------------------------
+Local      Remote     PeerIpAddr      State     Type        InterfaceName 
+--------------------------------------------------------------------------------
+16385      16385      10.1.1.2       Down      S/AUTO-IF   Vlanif100
+16386      16386      10.1.1.2       Down      D/IP-IF     <span>100GE</span><span>1/0/1</span>
+16387      16387      10.1.1.2       Down      D/IP-IF     <span>100GE</span><span>1/0/2</span>
+--------------------------------------------------------------------------------</pre>
+<p>The command output shows that the three BFD sessions are in the <strong>Down</strong> state.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130782130__1.3.5"></a><a name="1.3.5"></a>
+<div class="p" id="EN-US_TASK_0000001130782130__context197516915919"><a name="EN-US_TASK_0000001130782130__context197516915919"></a><a name="context197516915919"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li>DeviceA<pre class="screen">#
+ sysname DeviceA
+#
+ vlan 100
+#
+ bfd
+#
+interface Vlanif100
+ ip address 10.1.1.1 255.255.255.0
+#
+interface Eth-Trunk1
+ port default vlan 100
+#
+interface <span>100GE</span><span>1/0/1</span>
+ eth-trunk 1
+#
+interface <span>100GE</span><span>1/0/2</span>
+ eth-trunk 1
+#
+bfd atob bind peer-ip 10.1.1.2 interface Vlanif100 source-ip 10.1.1.1 per-link one-arm-echo
+ min-tx-interval 10
+ min-rx-interval 10
+#
+return</pre>
+</li><li>DeviceB<pre class="screen">#
+sysname DeviceB
+#
+vlan batch 100
+#
+interface Vlanif100
+ ip address 10.1.1.2 255.255.255.0
+#
+interface Eth-Trunk1
+ port default vlan 100
+#
+interface <span>100GE</span><span>1/0/1</span>
+ eth-trunk 1
+#
+interface <span>100GE</span><span>1/0/2</span>
+ eth-trunk 1
+#
+return</pre>
+</li></ul>
+</div></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bfd_cfg_0042.html">Configuring BFD for Perlink
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bfd_cfg_0044.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

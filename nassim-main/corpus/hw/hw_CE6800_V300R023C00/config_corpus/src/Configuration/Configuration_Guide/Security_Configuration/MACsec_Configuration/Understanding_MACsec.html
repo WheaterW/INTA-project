@@ -1,0 +1,72 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding MACsec">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_macsec_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_macsec_cfg_0002.html">
+<meta name="DC.Relation" scheme="URI" content="spec/MACsec_limitation_CE_v6r23c00.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featuretype" content="Security">
+<meta name="featuretype" content="Security Protection">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001513048366">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding MACsec</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001513048366"></a><a name="EN-US_CONCEPT_0000001513048366"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding MACsec</h1>
+<div><p>MACsec is used on a point-to-point link between interfaces of two devices. The local and remote ends use security keys to encrypt and decrypt data packets. The MACsec Key Agreement (MKA) protocol provides key negotiation as well as establishment and management of secure channels. The MKA protocol defines a complex key generation system to ensure the security of MACsec data transmission. A Connectivity Association Key (CAK) is configured on a device but not directly used to encrypt data packets. Data encryption is performed using a Secure Association Key (SAK) derived from the CAK and other parameters. For details about MACsec key derivation relationships, see the <a href="#EN-US_CONCEPT_0000001513048366__section1012193110135">MACsec key system</a>.</p>
+<div class="section"><h4 class="sectiontitle">MACsec Implementation</h4><p>The implementation of MACsec between two devices comprises three stages: session negotiation, secure communication, and session keepalive.</p>
+<div class="fignone"><span class="figcap"><b>Figure 1 </b>MACsec implementation</span><br><span><img class="vsd" src="figure/en-us_image_0000001512689222.png" width="NaN" height="NaN"></span></div>
+<ol><li>Session negotiation<p>After the connected interfaces of the two devices are enabled with MACsec and configured with the same CAK, the two devices elect a key server through the MKA protocol. The key server generates an SAK for encrypting data packets based on the CAK and sends the SAK to the remote device.</p>
+</li><li>Secure communication<p>The sender uses the SAK to encrypt data packets, and the receiver uses the SAK to decrypt data packets. Both devices can function as the sender or receiver, and their communication is protected by MACsec.</p>
+</li><li>Session keepalive<p>The MKA protocol defines an MKA session keepalive timer that specifies the timeout period of an MKA session. After MKA session negotiation is successful, the two devices exchange MKA protocol packets to ensure that the session is alive. The local device starts the timer after receiving MKA protocol packets from the remote device.</p>
+<ul><li>If the local device receives subsequent MKA protocol packets within the timeout period, it restarts the timer.</li><li>If the local device does not receive subsequent MKA protocol packets within the timeout period, it considers the session insecure, deletes the session, and performs MKA session negotiation again.</li></ul>
+</li></ol>
+</div>
+<div class="section" id="EN-US_CONCEPT_0000001513048366__section1012193110135"><a name="EN-US_CONCEPT_0000001513048366__section1012193110135"></a><a name="section1012193110135"></a><h4 class="sectiontitle">MACsec Key System</h4><p>After the same CAK is configured on two devices, the key server generates an SAK and sends it to the remote device, as shown in <a href="#EN-US_CONCEPT_0000001513048366__fig1921453625619">Figure 2</a>. The related concepts are as follows:</p>
+<ul><li>CAK: The same CAK must be configured on the connected interfaces of the two devices. The CAK is not directly used to encrypt data packets. Instead, it is used together with a Connectivity Association Key Name (CKN) to derive the SAK for data encryption.</li><li>CKN: A CKN is the name of a CAK. The same CKN must be configured on the connected interfaces of the two devices.</li><li>SAK: An SAK is generated by the key server based on the CAK and CKN. The SAK is used to encrypt and decrypt data packets.</li><li>Key Encrypting Key (KEK): The two devices generate the same KEK based on the same CAK and CKN. The KEK is used to encrypt and decrypt the SAK, ensuring secure transmission of the SAK.</li><li>Integrity Check Value (ICV): The sender calculates an ICV based on a packet to be sent and adds the ICV to the end of the packet. The receiver uses the same algorithm to calculate an ICV and compares it with the ICV carried in the packet. If the two ICVs are the same, the packet is not modified and therefore passes the verification. If they are different, the packet is considered modified and is therefore discarded.</li><li>ICV Key (ICK): The two devices generate the same ICK based on the same CAK and CKN to calculate the ICV of MKA protocol packets. The ICK is used only for the ICV calculation of MKA protocol packets. The ICV calculation of data packets does not require an ICK.</li></ul>
+<div class="fignone" id="EN-US_CONCEPT_0000001513048366__fig1921453625619"><a name="EN-US_CONCEPT_0000001513048366__fig1921453625619"></a><a name="fig1921453625619"></a><span class="figcap"><b>Figure 2 </b>MACsec key derivation relationships</span><br><span><img class="vsd" src="figure/en-us_image_0000001563888333.png" width="NaN" height="NaN"></span></div>
+<p>The process of generating and installing an SAK is as follows:</p>
+<ol><li>Configure the same CAK and CKN on both devices to generate other keys.<ul><li>Key server: generates the SAK, KEK, and ICK based on the CAK and CKN, and installs the SAK locally for encrypting and decrypting data packets.</li><li>Remote device: generates the KEK and ICK based on the CAK and CKN. Because the remote device has the same CAK and CKN as those of the key server, the KEK and ICK generated by the remote device are also the same as those of the key server.</li></ul>
+</li><li>The key server sends the SAK to the remote device through MKA protocol packets.<ul><li>The key server uses the KEK to encrypt the SAK.</li><li>The key server generates an ICV based on the ICK and adds the ICV to the end of MKA protocol packets for integrity check of the packets.</li><li>The key server sends the encrypted SAK to the remote device through MKA protocol packets.</li></ul>
+</li><li>The remote device installs the SAK after receiving MKA protocol packets.<ul><li>After receiving MKA protocol packets, the remote device searches for the matching CAK and ICK locally based on the CKN in the packets. If the matching CAK and ICK exist, the remote device performs the next step.</li><li>The remote device calculates an ICV based on the ICK. If the ICV is different from that carried in the packets, the packets are considered modified. If the ICVs are the same, the remote device considers the packets complete and performs the next step.</li><li>The remote device uses the KEK to decrypt the SAK and installs the SAK locally for encrypting and decrypting data packets.</li></ul>
+</li></ol>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_macsec_cfg_0001.html">MACsec Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_macsec_cfg_0002.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="spec/MACsec_limitation_CE_v6r23c00.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

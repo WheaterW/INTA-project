@@ -1,0 +1,66 @@
+{
+    "PageTitle": "dampening (BGP multi-instance VPN instance IPv4 address family view)",
+    "FuncDef": "The dampening command enables route flapping dampening for EBGP peers or modifies route flapping dampening parameters for EBGP peers.\nThe undo dampening command cancels the dampening on the flapping of EBGP routes.\nThe dampening ibgp command enables IBGP peer route flapping dampening or modifies various IBGP peer route flapping dampening parameters.\nThe undo dampening ibgp command disables IBGP route flapping dampening. The dampening command enables route flapping dampening for EBGP peers or modifies route flapping dampening parameters for EBGP peers. The undo dampening command cancels the dampening on the flapping of EBGP routes. The dampening ibgp command enables IBGP peer route flapping dampening or modifies various IBGP peer route flapping dampening parameters. The undo dampening ibgp command disables IBGP route flapping dampening. By default, BGP route flapping suppression is disabled.",
+    "CLIs": [
+        "dampening [ <half-life-reach> <reuse> <suppress> <ceiling> | [ route-policy <route-policy-name> ] ] [ update-standard ]",
+        "dampening ibgp [ <half-life-reach> <reuse> <suppress> <ceiling> | [ route-policy <route-policy-name> ] ] [ update-standard ]",
+        "undo dampening",
+        "undo dampening ibgp"
+    ],
+    "ParentView": [
+        "BGP multi-instance VPN instance IPv4 address family view"
+    ],
+    "ParaDef": [
+        {
+            "Parameters": "<half-life-reach>",
+            "Info": "Specifies the half life of a reachable route.\nThe value is an integer ranging from 1 to 45, in minutes. The default value is 15."
+        },
+        {
+            "Parameters": "<reuse>",
+            "Info": "Specifies a Reuse value. If the penalty value of a route falls below the Reuse value, the route is reused.\nThe value is an integer ranging from 1 to 20000. The default value is 750."
+        },
+        {
+            "Parameters": "<suppress>",
+            "Info": "Specifies a Suppress value. If the penalty value of a route exceeds the Suppress value, the route is dampened.\nThe value is an integer ranging from 1 to 20000 and must be greater than the value of reuse. The default value is 2000."
+        },
+        {
+            "Parameters": "<ceiling>",
+            "Info": "Specifies a penalty ceiling.\nThe value is an integer ranging from 1001 to 20000. The configured value must be greater than the value of suppress. The default value is 16000."
+        },
+        {
+            "Parameters": "route-policy <route-policy-name>",
+            "Info": "Specifies the name of a route-policy.\nThe name is a string of 1 to 200 case-sensitive characters, with spaces not supported. When double quotation marks are used around the string, spaces are allowed in the string."
+        },
+        {
+            "Parameters": "update-standard",
+            "Info": "Enables BGP to add a penalty value (500) to the route carried in each received Update message (excluding Withdraw message).\n-"
+        }
+    ],
+    "Examples": [
+        [
+            "<HUAWEI> system-view",
+            "[~HUAWEI] ip vpn-instance vpna",
+            "[*HUAWEI-vpn-instance-vpna] ipv4-family",
+            "[*HUAWEI-vpn-instance-vpna-af-ipv4] route-distinguisher 100:1",
+            "[*HUAWEI-vpn-instance-vpna-af-ipv4] vpn-target 111:1 both",
+            "[*HUAWEI-vpn-instance-vpna-af-ipv4] quit",
+            "[*HUAWEI-instance-vpna] quit",
+            "[*HUAWEI] bgp 100 instance a",
+            "[*HUAWEI-bgp-instance-a] ipv4-family vpn-instance vrf1",
+            "[*HUAWEI-bgp-instance-a-vrf1] dampening 10 1000 2000 5000"
+        ],
+        [
+            "<HUAWEI> system-view",
+            "[~HUAWEI] ip vpn-instance vpna",
+            "[*HUAWEI-vpn-instance-vpna] ipv4-family",
+            "[*HUAWEI-vpn-instance-vpna-af-ipv4] route-distinguisher 100:1",
+            "[*HUAWEI-vpn-instance-vpna-af-ipv4] vpn-target 111:1 both",
+            "[*HUAWEI-vpn-instance-vpna-af-ipv4] quit",
+            "[*HUAWEI-instance-vpna] quit",
+            "[*HUAWEI] bgp 100 instance a",
+            "[*HUAWEI-bgp-instance-a] ipv4-family vpn-instance vrf1",
+            "[*HUAWEI-bgp-instance-a-vrf1] dampening ibgp 10 1000 2000 5000"
+        ]
+    ],
+    "ExtraInfo": "When a dampening policy is configured for routes, routes preferentially match the dampening parameters of the dampening policy.\nIf no parameter is set, the default value of each parameter is used. The four parameters of attenuation are interdependent. Therefore, if any of the preceding parameters is used, all parameters must be specified.\nBGP route flapping suppression measures the stability of a route by using a penalty value. The greater the penalty value, the less stable the route. Each time route flapping occurs, that is, when a device receives a Withdraw message for a route, BGP adds a penalty value (1000) to the route.\nWhen the penalty value of a route exceeds the suppression threshold, the route is suppressed. The device does not add the route to the IP routing table or advertise Update messages to other BGP peers. BGP removes the best flag of the route. If the last message received by the device is an Update message, the route is marked with the d flag. If the last message received by the device is a Withdraw message, the route is marked with the h flag. The route can have both the d and h flags. In this case, the d flag takes effect. When the penalty value reaches a certain value, the penalty value does not increase any more. This value is called the penalty upper limit.\nAt the same time, the penalty value of the suppressed route decreases by half each time the route passes through a period of time. This period is called half-life. If the last route received by a device is an Update message, when the penalty value of the route falls below the reuse threshold, the device removes the d flag from the route. The route becomes available and is preferentially selected. Then, the device adds the route to the IP routing table and advertises an Update message to other BGP peers. If the last message received by a device is a Withdraw message and the penalty value of the route decreases to 0, the device deletes the route from the BGP routing table or BGP labeled routing table.\nAfter BGP route flapping suppression is configured, any parameter in the command can be used to suppress flapping routes. The purpose of adjusting parameters is to adjust the suppression time as required. To increase the suppression time of flapping routes, perform the following operations (or reduce the suppression time):"
+}

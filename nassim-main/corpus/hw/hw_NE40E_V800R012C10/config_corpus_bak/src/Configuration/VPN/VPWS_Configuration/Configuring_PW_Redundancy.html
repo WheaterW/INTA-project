@@ -1,0 +1,144 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring PW Redundancy">
+<meta name="abstract" content="To build a virtual private line from a gNodeB to an NGC, you can configure SS-PWs or MS-PWs between CSGs and RSGs. In addition, PW redundancy needs to be configured for link reliability.">
+<meta name="description" content="To build a virtual private line from a gNodeB to an NGC, you can configure SS-PWs or MS-PWs between CSGs and RSGs. In addition, PW redundancy needs to be configured for link reliability.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_3000.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_5001.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_6072.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_5008.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_5009.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_6020.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_6019.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_5012-01.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_6077.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_5010.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,vpws,w00556928,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="VPWS">
+<meta name="featuretype" content="VPN">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VPWS">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="VPWS">
+<meta name="featuretype" content="VPN">
+<meta name="OWNER" content="l00415692">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00415692">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172369834">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Configuring PW Redundancy</title>
+</head>
+<body><a name="EN-US_TASK_0172369834"></a><a name="EN-US_TASK_0172369834"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring PW Redundancy</h1>
+<div class="taskbody"><p>To build a virtual private line from a gNodeB to an NGC, you can configure SS-PWs or MS-PWs between CSGs and RSGs. In addition, PW redundancy needs to be configured for link reliability.</p>
+<div class="context"><a name="EN-US_TASK_0172369834__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Usage Scenario</h4><p>Network deployment requires high L2VPN service reliability. Currently, many fast fault detection and protection switching mechanisms are available, such as BFD, OAM, and FRR. These mechanisms, however, address only link or node failures within a PSN, but not PE failures or AC link failures between PEs and CEs.</p>
+<p>PW redundancy resolves problems related to AC link and PE failures. Its goal is to eliminate single points of failure on an emulated service path through AC link, PE, and PW redundancy. If two or more paths exist between CEs, how can we ensure that only one primary path exists at any time? In other words, how can we select a PW from two or more PWs on a PE to forward data packets? How can we quickly switch traffic to the backup path when a PE or AC fails? These are issues that PW redundancy addresses.</p>
+<p><a href="#EN-US_TASK_0172369834__fig_dc_vrp_vpws_cfg_500701">Figure 1</a> shows a typical PW redundancy scenario. On the network shown in the figure, MS-PWs have been deployed between PE1 and PE2 and between PE1 and PE3. To improve network reliability, configure PW redundancy on SPEs or PE1.</p>
+<div class="fignone" id="EN-US_TASK_0172369834__fig_dc_vrp_vpws_cfg_500701"><a name="EN-US_TASK_0172369834__fig_dc_vrp_vpws_cfg_500701"></a><a name="fig_dc_vrp_vpws_cfg_500701"></a><span class="figcap"><b>Figure 1 </b>Configuring PW redundancy for MS-PWs</span><br><span><img class="vsd" src="images/fig_dc_vrp_vpws_cfg_500701.png" width="NaN" height="NaN"></span></div>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><div class="p"><ul><li>Only PWE3 VPWS supports PW redundancy. After the <a href="cmdqueryname=mpls+l2vpn+default+martini"><b><span class="cmdname">mpls l2vpn default martini</span></b></a> command is run, VPWS does not support PW redundancy any longer.</li><li>When configuring PW redundancy, be sure to configure the primary, secondary, and bypass PW parameters consistently. Otherwise, the secondary or bypass PW may fail to take over services when the primary PW fails.</li></ul>
+</div>
+</div></div>
+<p>The active/standby status of PWs is determined in the following modes:</p>
+<ul><li>FRR: This is the default mode and does not need to be configured.</li><li>Negotiation: This mode needs to be configured using a command.<ul><li>Master/slave mode: The active and standby PWs are manually specified on the master device, which then notifies the slave device of the PW active/standby status. The combined use of PW redundancy in master/slave mode and the bypass PW can prevent network-side faults from affecting the AC side and AC-side faults from affecting the network side.</li><li>Independent mode: The active/standby status is determined through negotiation. When creating PWs on the local end, configure two PWs, with each connecting to a remote PE. At this time, the two remote PEs are both in the master state locally. The remote PEs then determine their status by means of E-Trunk or mVRRP, with one PE in the master state and the other in the backup state. Finally, the PW endpoints determine the active and standby PWs through negotiation. The independent mode applies to scenarios where PW redundancy is associated with E-Trunk. The independent mode, together with the bypass PW, can protect links on the AC side against faults on the network side, but cannot protect links on the network side against faults on the AC side.</li></ul>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172369834__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Pre-configuration Tasks</h4><p>Before configuring PW redundancy, complete the following tasks:</p>
+<ul><li><p>Configure IP addresses and an IGP on PEs and SPEs.</p>
+</li><li><p>Configure basic MPLS functions on PEs.</p>
+</li><li><p>Establish a public network tunnel between PE1 and each SPE and between PE2 and PE3. The public network tunnel can be an LDP or TE tunnel.</p>
+</li></ul>
+</div></div>
+</div>
+
+<ul class="ullinks">
+<dl>
+<dt>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_5008.html">Configuring the Master/Slave Mode of PW Redundancy</a>
+</dt>
+<dd>
+PW redundancy in master/slave mode implements fault isolation for public and AC links.</dd>
+</dl>
+<dl>
+<dt>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_5009.html">Configuring the Independent PW Redundancy Mode</a>
+</dt>
+<dd>
+The independent PW redundancy mode allows a public network fault to trigger only the public network link switchover.</dd>
+</dl>
+<dl>
+<dt>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_6020.html">Configuring PW Status Negotiation</a>
+</dt>
+<dd>
+In independent PW redundancy mode, the master/backup status of the local PE is determined by the signaling status sent from the remote PE.</dd>
+</dl>
+<dl>
+<dt>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_6019.html">Binding Service PWs to an mPW</a>
+</dt>
+<dd>
+After service PWs are bound to an mPW, the service PW status is determined by the mPW status.</dd>
+</dl>
+<dl>
+<dt>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_5012-01.html">Configuring BFD for VPWS PW</a>
+</dt>
+<dd>
+Configuring BFD for VPWS PW accelerates PW fault detection, resulting in fast switching of upper-layer applications.</dd>
+</dl>
+<dl>
+<dt>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_6077.html">(Optional) Configuring a Switching Delay for PW Switching</a>
+</dt>
+<dd>
+When a switching delay is configured for a PW, the master PW fails, the traffic switches to the slave PW after the delay period expires.</dd>
+</dl>
+<dl>
+<dt>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_5010.html">Verifying the Configuration</a>
+</dt>
+<dd>
+</dd>
+</dl>
+</ul>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_3000.html">VPWS Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_5001.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_6072.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

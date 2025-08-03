@@ -1,0 +1,196 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Basic DLDP Functions">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_dldp_cfg_0050.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_dldp_cfg_0051.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="DLDP">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="DLDP">
+<meta name="featuretype" content="High Availability">
+<meta name="featurename" content="DLDP">
+<meta name="featuretype" content="High Availability">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001465455585">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Basic DLDP Functions</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001465455585"></a><a name="EN-US_TASK_0000001465455585"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Basic DLDP Functions</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001465455585__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>Device A and Device B are connected by an optical fiber pair as shown in <a href="#EN-US_TASK_0000001465455585__fig_dc_vrp_dldp_cfg_201601">Figure 1</a>. Each fiber in the pair is connected to the Tx end (used for sending packets) on one device and the Rx end (used for receiving packets) on the other device. DLDP is configured on the interfaces connecting the two devices. If the optical fiber connected to the Rx end of DeviceA fails, DeviceA cannot receive optical signals. <span>100GE</span><span>1/0/1</span> on DeviceA goes down and cannot send or receive packets. However, DeviceB can send and receive packets through the optical fibers connected to its Tx and Rx ends, respectively. Therefore, the link of DeviceB remains up. If DeviceB fails to receive DLDPDUs from DeviceA before the Entry Aging timer of the neighbor expires, <span>100GE</span><span>1/0/1</span> of DeviceB becomes unidirectional. DLDP can automatically shut down <span>100GE</span><span>1/0/1</span> on DeviceB to prevent network faults.</p>
+<div class="fignone" id="EN-US_TASK_0000001465455585__fig_dc_vrp_dldp_cfg_201601"><a name="EN-US_TASK_0000001465455585__fig_dc_vrp_dldp_cfg_201601"></a><a name="fig_dc_vrp_dldp_cfg_201601"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring basic DLDP functions</span><br><span><img src="figure/en-us_image_0000001698951613.png" width="NaN" height="NaN"></span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 represents <span>100GE</span><span>1/0/1</span>.</p>
+</div></div>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001465455585__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Enable DLDP to detect unidirectional links.</p>
+</li><li><p>Set an interval for sending Advertisement packets so that DLDP can promptly detect unidirectional links.</p>
+</li><li><p>Set the timeout period of the DelayDown timer to prevent the DLDP-enabled interface from entering the Inactive state and deleting neighbor entries when the neighbor interface frequently alternates between up and down.</p>
+</li><li><p>Configure the authentication mode of DLDPDUs to prevent network attacks.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001465455585__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enable DLDP globally.</span><p><p># Enable DLDP on DeviceA.</p>
+<pre class="screen">&lt;<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname Device</strong><strong>A</strong>
+<span>[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></span>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>dldp enable</strong>
+<span>[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></span></pre>
+<p># Enable DLDP on DeviceB.</p>
+<pre class="screen">&lt;<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname Device</strong><strong>B</strong>
+<span>[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></span>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>dldp enable</strong>
+<span>[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></span></pre>
+</p></li><li><span>Enable DLDP on interfaces.</span><p><p># Enable DLDP on DeviceA's interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>dldp enable</strong>
+[<span><span class="keyword">*</span></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceA] <strong>commit</strong></span></pre>
+</p><p><p># Enable DLDP on DeviceB's interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>dldp enable</strong>
+[<span><span class="keyword">*</span></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceB] <strong>commit</strong></span></pre>
+</p></li><li><span>Set the working mode of DLDP to normal.</span><p><p># Set the working mode of DLDP on DeviceA's interface to normal.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <a href="cmdqueryname=dldp+work-mode"><b><span class="cmdname">dldp work-mode</span></b></a> <strong><span>normal</span></strong>
+[<span><span class="keyword">*</span></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceA] <strong>commit</strong></span></pre>
+</p><p><p># Set the working mode of DLDP on DeviceB's interface to normal.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <a href="cmdqueryname=dldp+work-mode"><b><span class="cmdname">dldp work-mode</span></b></a> <strong><span>normal</span></strong>
+[<span><span class="keyword">*</span></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceB] <strong>commit</strong></span></pre>
+</p></li><li><span>Configure a DLDP-compatible mode.</span><p><p># Configure the DLDP compatible mode on DeviceA's interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <a href="cmdqueryname=dldp+compatible-mode+enable"><b><span class="cmdname">dldp compatible-mode enable</span></b></a> 
+[<span><span class="keyword">*</span></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceA] <strong>commit</strong></span></pre>
+</p><p><p># Configure the DLDP compatible mode on DeviceB's interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <a href="cmdqueryname=dldp+compatible-mode+enable"><b><span class="cmdname">dldp compatible-mode enable</span></b></a>
+[<span><span class="keyword">*</span></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceB] <strong>commit</strong></span></pre>
+</p></li><li><span>Set the DLDP shutdown mode to manual.</span><p><p># Set the DLDP shutdown mode to manual for DeviceA's interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>]<a href="cmdqueryname=dldp+unidirectional-shutdown"><b><span class="cmdname">dldp unidirectional-shutdown</span></b></a> <strong><span>manual</span></strong> 
+[<span><span class="keyword">*</span></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceA] <strong>commit</strong></span></pre>
+</p><p><p># Set the DLDP shutdown mode to manual for DeviceB's interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <a href="cmdqueryname=dldp+unidirectional-shutdown"><b><span class="cmdname">dldp unidirectional-shutdown</span></b></a> <strong><span>manual</span></strong>
+[<span><span class="keyword">*</span></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceB] <strong>commit</strong></span></pre>
+</p></li></ol></div>
+<div class="postreq"><a name="EN-US_TASK_0000001465455585__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># After the configuration is complete, check the status of the DLDP-enabled interface. The command output shows that the interface is in the <strong>advertisement</strong> state.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>display dldp</strong>
+DLDP global status              : enable 
+DLDP work mode                  : normal
+DLDP unidirectional shutdown    : manual
+The number of enabled ports     : 2
+The number of global neighbors  : 2
+
+Interface  <span>100GE</span><span>1/0/1</span>
+DLDP port state                 : <strong>advertisement</strong>
+DLDP link state                 : up 
+The neighbor number of the port : 1
+
+   Neighbor  address         : 00-e0-fc-12-34-56
+   Neighbor port index          : 5
+   Neighbor state               : two way
+   Neighbor aged time(s)        : 203
+   Neighbor created time        : 2012-04-11 06:16:23
+</pre>
+<p>As shown in <a href="#EN-US_TASK_0000001465455585__fig_dc_vrp_dldp_cfg_201601">Figure 1</a>, the optical fiber connected to the receive end of DeviceA is removed to simulate a disconnection fault. When a unidirectional link occurs between <span>100GE</span><span>1/0/1</span> on DeviceA and DeviceB, DLDP automatically shuts down <span>100GE</span><span>1/0/1</span> on DeviceB.</p>
+<p># Run the <strong>display dldp</strong> command. The command output shows that the DLDP status of <span>100GE</span><span>1/0/1</span> on DeviceA is <strong>inactive</strong>. The DLDP status of <span>100GE</span><span>1/0/1</span> on Device B is <strong>disable</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display dldp interface <span>100ge</span> <span>1/0/1</span></strong>
+Interface  <span>100GE</span><span>1/0/1</span>
+DLDP port state                 : <strong>inactive</strong>
+DLDP link state                 : down 
+The neighbor number of the port : 0</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display dldp interface <span>100ge</span> <span>1/0/1</span></strong>
+Interface  <span>100GE</span><span>1/0/1</span> 
+DLDP port state                 : <strong>disable</strong>
+DLDP link state                 : up 
+The neighbor number of the port : 0</pre>
+<h4 class="sectiontitle">Configuration Scripts</h4><ul><li>DeviceA<pre class="screen">#
+ sysname DeviceA
+#
+ dldp enable
+#
+ dldp work-mode normal
+ dldp unidirectional-shutdown manual
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ dldp enable
+ dldp compatible-mode enable
+#
+return</pre>
+</li></ul>
+<ul><li><div class="p">DeviceB<pre class="screen">#
+ sysname DeviceB
+#
+ dldp enable
+#
+ dldp work-mode normal
+ dldp unidirectional-shutdown manual
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ dldp enable 
+ dldp compatible-mode enable
+ #
+return</pre>
+</div>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_dldp_cfg_0050.html">Configuring Basic DLDP Functions
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_dldp_cfg_0051.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

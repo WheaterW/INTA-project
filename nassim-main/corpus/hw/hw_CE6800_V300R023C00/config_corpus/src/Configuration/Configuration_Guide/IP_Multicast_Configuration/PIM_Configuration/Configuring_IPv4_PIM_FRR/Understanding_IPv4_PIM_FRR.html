@@ -1,0 +1,91 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding IPv4 PIM FRR">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_pim_cfg_0073.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_pim_cfg_0069.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="PIM">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="PIM">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="PIM">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001314140801">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<link rel="stylesheet" type="text/css" href="public_sys-resources/imagePopup.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/customQuery.js"></script>
+<script language="javascript" type="text/javascript" src="public_sys-resources/imagePopup.js"></script>
+<title>Understanding IPv4 PIM FRR</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001314140801"></a><a name="EN-US_CONCEPT_0000001314140801"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding IPv4 PIM FRR</h1>
+<div><p>PIM FRR establishes primary and backup links through unicast backup FRR paths to provide link protection for PIM-SM or PIM-SSM shortest path trees (SPTs). This  and implements fast switchover after a link fault occurs, reducing multicast traffic loss.</p>
+<div class="section"><h4 class="sectiontitle">Background</h4><p>The setup of an MDT depends on unicast routes. If a link on the network fails, a new MDT can be set up only after unicast route convergence is completed; however, this process takes a long time and causes excessive multicast traffic loss.</p>
+<p>PIM FRR solves this problem. It allows a device to send Join messages to the multicast source based on primary and backup unicast FRR routes to establish primary and backup MDTs. In this case, the cross-connect nodes of the primary and backup links receive multicast traffic from both the primary and backup links. The forwarding plane accepts traffic from the primary link and discards traffic from the backup link. However, if the primary link fails, the forwarding plane immediately accepts traffic from the backup link, reducing multicast traffic loss.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Implementation</h4><p>PIM FRR implementation involves three steps:</p>
+<ol><li><p>Establishment of primary and backup MDTs</p>
+<p>After the primary inbound interface is added to the PIM-SM (S, G) entries in which SPT switchover information has been updated or added to PIM-SSM (S, G) entries according to unicast routes, the device checks whether a backup FRR route exists. If it exists, the system also adds the backup inbound interface to the entries. The device then sends a PIM Join message along both the primary and backup routes to the multicast source to set up primary and backup MDTs. <a href="#EN-US_CONCEPT_0000001314140801__fig_dc_vrp_feature_new_00727106">Figure 1</a> shows the process of setting up primary and backup MDTs.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001314140801__fig_dc_vrp_feature_new_00727106"><a name="EN-US_CONCEPT_0000001314140801__fig_dc_vrp_feature_new_00727106"></a><a name="fig_dc_vrp_feature_new_00727106"></a><span class="figcap"><b>Figure 1 </b>Setting up primary and backup MDTs</span><br><span><img class="imgResize" src="figure/en-us_image_0000001314065453.png" width="497.42003325" height="NaN" title="Click to enlarge"></span></div>
+</li><li><p>Fault detection and protection</p>
+<p>After the primary and backup MDTs are set up, each device with primary and backup routes (such as DeviceA) receives two copies of multicast traffic. In normal cases, the forwarding plane accepts traffic from the primary link and discards traffic from the backup link. If the primary link fails, the forwarding plane detects that the primary link is down and accepts traffic from the backup link immediately. If two devices are connected through a link that passes through another device (such as a multiplexer/demultiplexer device), the link may still be up after the link fails. In this case, PIM FRR cannot trigger a fast switchover through link state detection. In this case, you can deploy single-hop BFD to solve the problem. If Eth-Trunk is used, you are advised to configure BFD link-bundle. After a multicast inbound interface is bound to a BFD session, PIM FRR can detect the BFD session to implement fast switchover.</p>
+<p>In <a href="#EN-US_CONCEPT_0000001314140801__fig115225916260">Figure 2</a>, DeviceA accepts traffic from the primary link and discards traffic from the backup link.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001314140801__fig115225916260"><a name="EN-US_CONCEPT_0000001314140801__fig115225916260"></a><a name="fig115225916260"></a><span class="figcap"><b>Figure 2 </b>PIM FRR implementation before the failure occurs</span><br><span><img class="imgResize" src="figure/en-us_image_0000001375889514.png" width="328.35206250000005" height="158.20599375000003" title="Click to enlarge"></span></div>
+<p>In <a href="#EN-US_CONCEPT_0000001314140801__fig14130103202611">Figure 3</a>, DeviceA accepts multicast traffic from the backup link (DeviceB -&gt; DeviceD -&gt; DeviceA) immediately after detecting the failure on the local primary link.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001314140801__fig14130103202611"><a name="EN-US_CONCEPT_0000001314140801__fig14130103202611"></a><a name="fig14130103202611"></a><span class="figcap"><b>Figure 3 </b>PIM FRR implementation after the failure occurs</span><br><span><img class="imgResize" src="figure/en-us_image_0000001375729950.png" width="328.35206250000005" height="165.1710375" title="Click to enlarge"></span></div>
+</li><li><p>Switchback process</p>
+<p>After a link fault is rectified, the PIM protocol layer starts route switchback upon detection of the route change. To ensure sufficient time for forwarding entry restoration, the forwarding plane enters the WTR state for a delayed switchback. After the WTR time expires, traffic is smoothly converged to the optimal primary path.</p>
+</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Benefits</h4><p>PIM FRR provides link protection for multicast services with high requirements on real-time transmission.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Usage Limitations</h4><p>PIM FRR has the following limitations:</p>
+<ul><li>It applies only to IPv4 networks.</li><li>Node protection cannot be preferentially used in equal-cost multiple path (ECMP) scenarios because IGPs cannot compute backup paths in these scenarios.</li><li>PIM FRR has the following limitations in non-ECMP scenarios:<ul><li>On an IGP network with PIM FRR deployed, the IGP does not back up information about the backup link. After a primary/backup link switchover occurs, the multicast backup link may be deleted during data smoothing. As a result, rapid switchover cannot be implemented if the primary link fails.</li><li>Only LFA FRR-based non-ECMP PIM FRR is supported, but not remote FRR-based non-ECMP PIM FRR.</li></ul>
+</li><li>If PIM FRR is deployed on a network with LFA FRR configured, PIM FRR inherits the limitations of IGP LFA FRR.</li><li>If PIM FRR is deployed on a network with LFA FRR configured, rapid primary/backup link switchover is not supported if the backup link is an ECMP one.</li><li>PIM FRR supports only PIM-SM SPT (S, G) entries. Backup paths and PIM-SSM entries are generated only when multicast traffic is available.</li><li>The primary and secondary inbound interfaces supported by PIM FRR can be physical interfaces, physical sub-interfaces, Eth-Trunk interfaces, Eth-Trunk sub-interfaces, or VLANIF interfaces (the primary and secondary inbound interfaces cannot be both VLANIF interfaces).</li><li>PIM FRR cannot be used in IPv4 Layer 3 multicast over VXLAN scenarios.</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_pim_cfg_0073.html">Configuring IPv4 PIM FRR
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_pim_cfg_0069.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+
+<script language="JavaScript">
+<!--
+initImageViewer('.imgResize');
+var msg_imageMax = "view original image";
+var msg_imageClose = "close";
+//--></script></body>
+</html>

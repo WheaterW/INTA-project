@@ -1,0 +1,296 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring a BGP4+ RR">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp6_cfg_0037.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp6_cfg_0038.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BGP4+">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP4+">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="BGP4+">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130622438">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring a BGP4+ RR</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130622438"></a><a name="EN-US_TASK_0000001130622438"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring a BGP4+ RR</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130622438__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>As shown in <a href="#EN-US_TASK_0000001130622438__fig_dc_vrp_bgp6_cfg_006601">Figure 1</a>, DeviceB receives an EBGP Update message and sends it to DeviceC. DeviceC is configured as an RR and has two clients: DeviceB and DeviceD.</p>
+<p>DeviceB and DeviceD do not need to establish an IBGP connection. After receiving an Update message from DeviceB, DeviceC reflects it to DeviceD. Similarly, after receiving an Update message from DeviceD, DeviceC reflects it to DeviceB.</p>
+<div class="fignone" id="EN-US_TASK_0000001130622438__fig_dc_vrp_bgp6_cfg_006601"><a name="EN-US_TASK_0000001130622438__fig_dc_vrp_bgp6_cfg_006601"></a><a name="fig_dc_vrp_bgp6_cfg_006601"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring a BGP RR</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 and interface 2 represent <span>100GE</span><span>1/0/1</span> and <span>100GE</span><span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001176741909.png"></span></div>
+<p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Router IDs of DeviceA, DeviceB, DeviceC, and DeviceD</p>
+</li><li><p>AS numbers of DeviceA, DeviceB, DeviceC, and DeviceD</p>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130622438__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>Note the following during the configuration:</p>
+<ul><li>To improve security, you are advised to deploy BGP4+ security measures. For details, see "Configuring BGP4+ Authentication." Keychain authentication is used as an example. For details, see Example for Configuring Keychain Authentication for BGP4+.</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130622438__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure basic BGP4+ functions on each device.</p>
+</li><li><p>Configure an RR and its clients to establish IBGP connections.</p>
+</li><li><p>Configure DeviceC as an RR.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130622438__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IPv6 address to each involved interface. For detailed configurations, see <a href="#EN-US_TASK_0000001130622438__postreq107715332544">Configuration Scripts</a>.</span></li><li><span>Configure basic BGP4+ functions.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>router-id 1.1.1.1</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 2001:db8:100::2 as-number 200</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>ipv6-family unicast</strong>
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv6] <strong>peer 2001:db8:100::2 enable</strong>
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv6] <strong>network 2001:db8:1:: 64</strong>
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv6] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>bgp 200</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>router-id 2.2.2.2</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 2001:db8:100::1 as-number 100</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 2001:db8:101::1 as-number 200</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>ipv6-family unicast</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv6] <strong>peer 2001:db8:100::1 enable</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv6] <strong>peer 2001:db8:101::1 enable</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv6] <strong>peer 2001:db8:101::1 next-hop-local</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv6] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>bgp 200</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>router-id 3.3.3.3</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 2001:db8:101::2 as-number 200</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 2001:db8:102::2 as-number 200</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>ipv6-family unicast</strong>
+[<span class="keyword">*</span>DeviceC-bgp-af-ipv6] <strong>peer 2001:db8:101::2 enable</strong>
+[<span class="keyword">*</span>DeviceC-bgp-af-ipv6] <strong>peer 2001:db8:102::2 enable</strong>
+[<span class="keyword">*</span>DeviceC-bgp-af-ipv6] <strong>network 2001:db8:101:: 96</strong>
+[<span class="keyword">*</span>DeviceC-bgp-af-ipv6] <strong>network 2001:db8:102:: 96</strong>
+[<span class="keyword">*</span>DeviceC-bgp-af-ipv6] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>bgp 200</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>router-id 4.4.4.4</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 2001:db8:102::1 as-number 200</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>ipv6-family unicast</strong>
+[<span class="keyword">*</span>DeviceD-bgp-af-ipv6] <strong>peer 2001:db8:102::1 enable</strong>
+[<span class="keyword">*</span>DeviceD-bgp-af-ipv6] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+</p></li><li><span>Configure an RR.</span><p><p># Configure DeviceC as an RR, with DeviceB and DeviceD as its clients.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>bgp 200</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-bgp] <strong>ipv6-family unicast</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-bgp-af-ipv6] <strong>peer 2001:db8:101::2 reflect-client</strong>
+[<span class="keyword">*</span>DeviceC-bgp-af-ipv6] <strong>peer 2001:db8:102::2 reflect-client</strong>
+[<span class="keyword">*</span>DeviceC-bgp-af-ipv6] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001130622438__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check the BGP4+ routing table of DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display bgp ipv6 routing-table</strong>
+
+ BGP Local router ID is 2.2.2.2
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+ RPKI validation codes: V - valid, I - invalid, N - not-found
+
+ Total Number of Routes: 3
+ <strong>*&gt;  Network  : 2001:DB8:1::                             PrefixLen : 64</strong>  
+     NextHop  : 2001:DB8:100::1                          LocPrf    :   
+     MED      : 0                                        PrefVal   : 0
+     Label    : 
+     Path/Ogn : 100i
+   i Network  : 2001:DB8:101::                           PrefixLen : 96  
+     NextHop  : 2001:DB8:101::1                          LocPrf    : 100 
+     MED      : 0                                        PrefVal   : 0
+     Label    : 
+     Path/Ogn :  i
+ *&gt;i Network  : 2001:DB8:102::                           PrefixLen : 96  
+     NextHop  : 2001:DB8:101::1                          LocPrf    : 100 
+     MED      : 0                                        PrefVal   : 0
+     Label    : 
+     Path/Ogn :  i</pre>
+<p># Check the BGP4+ routing table of DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>display bgp ipv6 routing-table</strong>
+
+ BGP Local router ID is 4.4.4.4
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+ RPKI validation codes: V - valid, I - invalid, N - not-found
+
+ Total Number of Routes: 3
+ <strong>*&gt;i Network  : 2001:DB8:1::                             PrefixLen : 64  </strong>
+     NextHop  : 2001:DB8:101::2                          LocPrf    : 100 
+     MED      : 0                                        PrefVal   : 0
+     Label    : 
+     Path/Ogn : 100i
+ *&gt;i Network  : 2001:DB8:101::                           PrefixLen : 96  
+     NextHop  : 2001:DB8:102::1                          LocPrf    : 100 
+     MED      : 0                                        PrefVal   : 0
+     Label    : 
+     Path/Ogn :  i
+   i Network  : 2001:DB8:102::                           PrefixLen : 96  
+     NextHop  : 2001:DB8:102::1                          LocPrf    : 100 
+     MED      : 0                                        PrefVal   : 0
+     Label    : 
+     Path/Ogn :  i</pre>
+<p>The preceding command output shows that DeviceD has learned from DeviceC the BGP4+ route advertised by DeviceA.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001130622438__postreq107715332544"></a><a name="postreq107715332544"></a><a name="EN-US_TASK_0000001130622438__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8:1::1/64
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8:100::1/96
+#
+bgp 100
+ router-id 1.1.1.1
+ peer 2001:DB8:100::2 as-number 200
+ #
+ ipv4-family unicast
+ #
+ ipv6-family unicast
+  network 2001:DB8:1:: 64
+  peer 2001:DB8:100::2 enable
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8:101::2/96
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8:100::2/96
+#
+bgp 200
+ router-id 2.2.2.2
+ peer 2001:DB8:100::1 as-number 100
+ peer 2001:DB8:101::1 as-number 200
+ #
+ ipv4-family unicast
+ #
+ ipv6-family unicast
+  peer 2001:DB8:100::1 enable
+  peer 2001:DB8:101::1 enable
+  peer 2001:DB8:101::1 next-hop-local
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8:102::1/96
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8:101::1/96
+#
+bgp 200
+ router-id 3.3.3.3
+ peer 2001:DB8:101::2 as-number 200
+ peer 2001:DB8:102::2 as-number 200
+ #
+ ipv4-family unicast
+ #
+ ipv6-family unicast
+  network 2001:DB8:101:: 96
+  network 2001:DB8:102:: 96
+  peer 2001:DB8:101::2 enable
+  peer 2001:DB8:101::2 reflect-client
+  peer 2001:DB8:102::2 enable
+  peer 2001:DB8:102::2 reflect-client
+#
+return</pre>
+</li><li><p>DeviceD</p>
+<pre class="screen">#
+sysname DeviceD
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8:102::2/96
+#
+bgp 200
+ router-id 4.4.4.4
+ peer 2001:DB8:102::1 as-number 200
+ #
+ ipv4-family unicast
+ #
+ ipv6-family unicast
+  peer 2001:DB8:102::1 enable
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bgp6_cfg_0037.html">Configuring BGP4+ RRs
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bgp6_cfg_0038.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

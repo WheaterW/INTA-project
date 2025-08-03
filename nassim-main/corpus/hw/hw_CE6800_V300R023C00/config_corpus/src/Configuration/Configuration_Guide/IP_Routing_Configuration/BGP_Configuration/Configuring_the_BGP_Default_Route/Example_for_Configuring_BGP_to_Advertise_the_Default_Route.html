@@ -1,0 +1,434 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring BGP to Advertise the Default Route">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0050.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0052.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130783900">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring BGP to Advertise the Default Route</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130783900"></a><a name="EN-US_TASK_0000001130783900"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring BGP to Advertise the Default Route</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130783900__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0000001130783900__fig_dc_vrp_bgp_cfg_308001">Figure 1</a>, all devices run BGP. EBGP connections are established between DeviceA and DeviceB, between DeviceC and DeviceE, and between DeviceD and DeviceF. IBGP connections are established between DeviceB and DeviceC, and between DeviceB and DeviceD.</p>
+<p>You can configure DeviceE to advertise the default route to DeviceC and configure DeviceF to advertise the default route to DeviceD. In this way, AS 200 will have two equal-cost default routes, ensuring that traffic exiting AS 200 can be load-balanced between DeviceE and DeviceF.</p>
+<div class="fignone" id="EN-US_TASK_0000001130783900__fig_dc_vrp_bgp_cfg_308001"><a name="EN-US_TASK_0000001130783900__fig_dc_vrp_bgp_cfg_308001"></a><a name="fig_dc_vrp_bgp_cfg_308001"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring BGP to advertise the default route</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1, interface 2, and interface 3 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, and <span>100GE</span><span>1/0/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001130624184.png"></span></div>
+<p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Router ID and AS number of each device: DeviceA, DeviceB, DeviceC, DeviceD, DeviceE, and DeviceF</p>
+</li><li><p>Names of the import policies to be configured on DeviceC and DeviceD</p>
+</li><li><p>Local_Pref value to be set for the default route to be accepted on DeviceD</p>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130783900__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>During the configuration, note the following:</p>
+<ul><li><p>A default route can represent all routes on the entire network. For example, in a stub AS scenario, the local device can use a default route, instead of advertising network-wide routes, to forward traffic to an external network. A default route can also represent all routes except specific ones. For example, it can be used in multi-homing load balancing scenarios.</p>
+</li><li><p>During the establishment of a peer relationship, if the IP address of the specified peer is a loopback interface address or a sub-interface address, the <strong>peer connect-interface</strong> command must be run on both ends to ensure correct connection.</p>
+</li><li>To improve security, you are advised to deploy BGP security measures. For details, see "Configuring BGP Authentication." Keychain authentication is used as an example. For details, see Example for Configuring Keychain Authentication for BGP.</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130783900__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure OSPF on DeviceB, DeviceC, and DeviceD.</p>
+</li><li><p>Configure EBGP connections between DeviceA and DeviceB, between DeviceC and DeviceE, and between DeviceD and DeviceF.</p>
+</li><li><p>Configure IBGP connections between DeviceB and DeviceC, and between DeviceB and DeviceD.</p>
+</li><li><p>Configure an import routing policy on DeviceC to accept only the default route.</p>
+</li><li><p>Configure an import routing policy on DeviceD to accept the default route and all specific routes, and set a Local_Pref value for the accepted default route.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130783900__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface involved. For detailed configurations, see configuration scripts.</span></li><li><span>Configure OSPF.</span><p><p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> ospf 1</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1]<strong> area 0</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0]<strong> network 10.0.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0]<strong> network 10.0.3.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0]<strong> network 10.2.2.2 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC]<strong> ospf 1</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1]<strong> area 0</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0]<strong> network 10.0.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0]<strong> network 10.0.2.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0]<strong> network 10.3.3.3 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD]<strong> ospf 1</strong>
+[<span class="keyword">*</span>DeviceD-ospf-1]<strong> area 0</strong>
+[<span class="keyword">*</span>DeviceD-ospf-1-area-0.0.0.0]<strong> network 10.0.2.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceD-ospf-1-area-0.0.0.0]<strong> network 10.0.3.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceD-ospf-1-area-0.0.0.0]<strong> network 10.4.4.4 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceD-ospf-1-area-0.0.0.0]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceD-ospf-1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+</p></li><li><span>Configure BGP connections.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> bgp 100</strong>
+[<span class="keyword">*</span>DeviceA-bgp]<strong> router-id 10.1.1.1</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.20.1.2 as-number 200</strong>
+[<span class="keyword">*</span>DeviceA-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> bgp 200</strong>
+[<span class="keyword">*</span>DeviceB-bgp]<strong> router-id 10.2.2.2</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.20.1.1 as-number 100</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>network 10.20.1.0 24</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.3.3.3 as-number 200</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.3.3.3 connect-interface LoopBack0</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.4.4.4 as-number 200</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.4.4.4 connect-interface LoopBack0</strong>
+[<span class="keyword">*</span>DeviceB-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC]<strong> bgp 200</strong>
+[<span class="keyword">*</span>DeviceC-bgp]<strong> router-id 10.3.3.3</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 10.20.2.1 as-number 300</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>network 10.20.2.0 24</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 10.2.2.2 as-number 200</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 10.2.2.2 connect-interface LoopBack0</strong>
+[<span class="keyword">*</span>DeviceC-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD]<strong> bgp 200</strong>
+[<span class="keyword">*</span>DeviceD-bgp]<strong> router-id 10.4.4.4</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 10.20.3.1 as-number 400</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>network 10.20.3.0 24</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 10.2.2.2 as-number 200</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 10.2.2.2 connect-interface LoopBack0</strong>
+[<span class="keyword">*</span>DeviceD-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+<p># Configure DeviceE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceE]<strong> bgp 300</strong>
+[<span class="keyword">*</span>DeviceE-bgp]<strong> router-id 10.5.5.5</strong>
+[<span class="keyword">*</span>DeviceE-bgp] <strong>peer 10.20.2.2 as-number 200</strong>
+[<span class="keyword">*</span>DeviceE-bgp] <strong>network 10.1.1.0 24</strong>
+[<span class="keyword">*</span>DeviceE-bgp] <strong>commit</strong></pre>
+<p># Configure DeviceF.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceF]<strong> bgp 400</strong>
+[<span class="keyword">*</span>DeviceF-bgp]<strong> router-id 10.6.6.6</strong>
+[<span class="keyword">*</span>DeviceF-bgp] <strong>peer 10.20.3.2 as-number 200</strong>
+[<span class="keyword">*</span>DeviceF-bgp] <strong>network 10.11.1.0 24</strong>
+[<span class="keyword">*</span>DeviceF-bgp] <strong>commit</strong></pre>
+</p></li><li><span>Configure DeviceE and DeviceF to advertise the default route.</span><p><p># Configure DeviceE to advertise the default route.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceE-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword">*</span>DeviceE-bgp-af-ipv4] <strong>peer 10.20.2.2 default-route-advertise</strong>
+[<span class="keyword">*</span>DeviceE-bgp-af-ipv4] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceE-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceE] <strong>commit</strong></pre>
+<p># Configure DeviceF to advertise the default route.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceF-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword">*</span>DeviceF-bgp-af-ipv4] <strong>peer 10.20.3.2 default-route-advertise</strong>
+[<span class="keyword">*</span>DeviceF-bgp-af-ipv4] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceF-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceF] <strong>commit</strong></pre>
+<p># Check the routing table of DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display bgp routing-table</strong>
+ BGP Local router ID is 10.2.2.2
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+<span> RPKI validation codes: V - valid, I - invalid, N - not-found</span>
+
+Total Number of Routes: 7
+     Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *&gt;i  <strong>0.0.0.0</strong>            10.20.2.1       0          <strong>100</strong>        0      <strong>300i</strong>
+ * i  <strong>       </strong>            10.20.3.1       0          <strong>100</strong>        0      <strong>400i</strong>
+ *&gt;i  <strong>10.1.1.0/24</strong>        10.20.2.1       0          100        0      <strong>300i</strong>
+ *&gt;i  <strong>10.11.1.0/24</strong>        10.20.3.1       0          100        0      <strong>400i</strong>
+ *&gt;   10.20.1.0          0.0.0.0         0                     0      i
+ *&gt;i  10.20.2.0          10.3.3.3         0          100        0      i
+ *&gt;i  10.20.3.0          10.4.4.4         0          100        0      i</pre>
+<p>The command output shows that DeviceB has received the default route and all specific routes from AS 300 and AS 400.</p>
+</p></li><li><span>Configure import routing policies.</span><p><p># Configure an IP prefix list named <strong>default</strong> on DeviceC to accept only the default route.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC]<strong> ip ip-prefix default permit 0.0.0.0 0</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC]<strong> bgp 200</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-bgp] <strong>peer 10.20.2.1 ip-prefix default import</strong>
+[<span class="keyword">*</span>DeviceC-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure a route-policy named <strong>set-default-low</strong> on DeviceD to accept the default route and all specific routes, and set a Local_Pref value for the accepted default route.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD]<strong> ip as-path-filter 10 permit ^(400_)+$</strong>
+[<span class="keyword">*</span>DeviceD]<strong> ip as-path-filter 10 permit ^(400_)+_[0-9]+$</strong>
+[<span class="keyword">*</span>DeviceD]<strong> ip ip-prefix default permit 0.0.0.0 0</strong>
+[<span class="keyword">*</span>DeviceD] <strong>route-policy set-default-low permit node 10</strong>
+[<span class="keyword">*</span>DeviceD-route-policy] <strong>if-match ip-prefix default</strong>
+[<span class="keyword">*</span>DeviceD-route-policy] <strong>apply local-preference 80</strong>
+[<span class="keyword">*</span>DeviceD-route-policy] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>route-policy set-default-low permit node 20</strong>
+[<span class="keyword">*</span>DeviceD-route-policy] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD]<strong> bgp 200</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 10.20.3.1 as-path-filter 10 import</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 10.20.3.1 route-policy set-default-low import</strong>
+[<span class="keyword">*</span>DeviceD-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001130783900__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check the routing table of DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display bgp routing-table</strong>
+ BGP Local router ID is 10.2.2.2
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+<span> RPKI validation codes: V - valid, I - invalid, N - not-found</span>
+
+ Total Number of Routes: 6
+     Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *&gt;i  <strong>0.0.0.0</strong>            10.20.2.1       0          <strong>100</strong>        0      300i
+ * i  <strong>       </strong>            10.20.3.1       0          <strong>80</strong>         0      400i
+ *&gt;i  <strong>10.11.1.0/24</strong>        10.20.3.1       0          100        0      <strong>400i</strong>
+ *&gt;   10.20.1.0          0.0.0.0         0                     0      i
+ *&gt;i  10.20.2.0          10.3.3.3         0          100        0      i
+ *&gt;i  10.20.3.0          10.4.4.4         0          100        0      i    </pre>
+<p>The command output shows that DeviceB has accepted only the default route from AS 300 and has accepted the default route and all specific routes from AS 400. It also shows that the Local_Pref value of the default route accepted from AS 400 has been set to 80.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001130783900__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.20.1.1 255.255.255.0
+#
+interface LoopBack0
+ ip address 10.1.1.1 255.255.255.255
+#
+bgp 100
+ peer 10.20.1.2 as-number 200
+ #
+ ipv4-family unicast
+  peer 10.20.1.2 enable
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.20.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.0.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.0.3.2 255.255.255.0
+#
+interface LoopBack0
+ ip address 10.2.2.2 255.255.255.255
+#
+bgp 200
+ peer 10.3.3.3 as-number 200
+ peer 10.3.3.3 connect-interface LoopBack0
+ peer 10.4.4.4 as-number 200
+ peer 10.4.4.4 connect-interface LoopBack0
+ peer 10.20.1.1 as-number 100
+ #
+ ipv4-family unicast
+  network 10.20.1.0 255.255.255.0
+  peer 10.3.3.3 enable
+  peer 10.4.4.4 enable
+  peer 10.20.1.1 enable
+#
+ospf 1
+ area 0.0.0.0
+  network 10.2.2.2 0.0.0.0
+  network 10.0.1.0 0.0.0.255
+  network 10.0.3.0 0.0.0.255
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.20.2.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.0.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.0.2.1 255.255.255.0
+#
+interface LoopBack0
+ ip address 10.3.3.3 255.255.255.255
+#
+bgp 200
+ peer 10.2.2.2 as-number 200
+ peer 10.2.2.2 connect-interface LoopBack0
+ peer 10.20.2.1 as-number 300
+ #
+ ipv4-family unicast
+  network 10.20.2.0 255.255.255.0
+  peer 10.2.2.2 enable
+  peer 10.20.2.1 enable
+  peer 10.20.2.1 ip-prefix default import
+#
+ospf 1
+ area 0.0.0.0
+  network 10.3.3.3 0.0.0.0
+  network 10.0.1.0 0.0.0.255
+  network 10.0.2.0 0.0.0.255
+#
+ip ip-prefix default index 10 permit 0.0.0.0 0
+#
+return</pre>
+</li><li><p>DeviceD</p>
+<pre class="screen">#
+sysname DeviceD
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.20.3.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.0.3.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.0.2.2 255.255.255.0
+#
+interface LoopBack0
+ ip address 10.4.4.4 255.255.255.255
+#
+bgp 200
+ peer 10.2.2.2 as-number 200
+ peer 10.2.2.2 connect-interface LoopBack0
+ peer 10.20.3.1 as-number 400
+ #
+ ipv4-family unicast
+  network 10.20.3.0 255.255.255.0
+  peer 10.2.2.2 enable
+  peer 10.20.3.1 enable
+  peer 10.20.3.1 as-path-filter 10 import
+  peer 10.20.3.1 route-policy set-default-low import
+#
+ospf 1
+ area 0.0.0.0
+  network 10.4.4.4 0.0.0.0
+  network 10.0.2.0 0.0.0.255
+  network 10.0.3.0 0.0.0.255
+#
+ip ip-prefix default index 10 permit 0.0.0.0 0
+#
+ip as-path-filter 10<span> index 10</span> permit ^(400_)+$
+ip as-path-filter 10<span> index 20</span> permit ^(400_)+_[0-9]+$
+#
+route-policy set-default-low permit node 10
+ if-match ip-prefix default
+ apply local-preference 80
+#
+route-policy set-default-low permit node 20
+#
+return</pre>
+</li><li><p>DeviceE</p>
+<pre class="screen">#
+sysname DeviceE
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.20.2.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 172.17.1.1 255.255.255.0
+#
+interface LoopBack0
+ ip address 10.5.5.5 255.255.255.255
+#
+bgp 300
+ peer 10.20.2.2 as-number 200
+ #
+ ipv4-family unicast
+  network 10.1.1.0 255.255.255.0
+  peer 10.20.2.2 enable
+  peer 10.20.2.2 default-route-advertise
+#
+return</pre>
+</li><li><p>DeviceF</p>
+<pre class="screen">#
+sysname DeviceF
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.20.3.1 255.255.255.0
+#
+interface <span><span>100GE</span><span>1/0/2</span></span>
+ undo portswitch
+ ip address 172.18.1.1 255.255.255.0
+#
+interface LoopBack0
+ ip address 10.6.6.6 255.255.255.255
+#
+bgp 400
+ peer 10.20.3.2 as-number 200
+ #
+ ipv4-family unicast
+  network 10.11.1.0 255.255.255.0
+  peer 10.20.3.2 enable
+  peer 10.20.3.2 default-route-advertise
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bgp_cfg_0050.html">Configuring the BGP Default Route
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bgp_cfg_0052.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

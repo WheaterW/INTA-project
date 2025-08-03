@@ -1,0 +1,672 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring Priority Mappings for IP Packets">
+<meta name="abstract" content="This section describes how to configure the mappings between DSCP values of IP packets, QoS service classes, and colors to implement QoS scheduling of IP packets.">
+<meta name="description" content="This section describes how to configure the mappings between DSCP values of IP packets, QoS service classes, and colors to implement QoS scheduling of IP packets.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_qos_cfg_0037.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_qos_cfg_0040.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_qos_cfg_0091.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00606909,m00390128">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="Class-based QoS">
+<meta name="featuretype" content="QOS">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Class-based QoS">
+<meta name="featuretype" content="QOS">
+<meta name="featurename" content="Class-based QoS">
+<meta name="featuretype" content="QOS">
+<meta name="OWNER" content="m00390128">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="m00915594">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172371256">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/jquery.min.idp.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/RowOrColfreezeSupport.js"></script>
+
+<script type="text/javascript">
+setTimeout(function(){
+	jQueryHW(document).ready(function(){
+		jQueryHW("table[rowfreeze='yes']").rowfreeze();
+		jQueryHW("table[colfreeze='yes']").colfreeze();
+	});
+},500);
+</script>
+<title>Configuring Priority Mappings for IP Packets</title>
+</head>
+<body><a name="EN-US_TASK_0172371256"></a><a name="EN-US_TASK_0172371256"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring Priority Mappings for IP Packets</h1>
+<div class="taskbody"><p>This section describes how to configure the mappings between DSCP values of IP packets, QoS service classes, and colors to implement QoS scheduling of IP packets.</p>
+<div class="context"><a name="EN-US_TASK_0172371256__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Context</h4><p>Traffic policy based on BA classification is used to map the priority of traffic on one type of network to another type. That is, to transmit the traffic in the other network according to the original priority.</p>
+<p>When the <span class="keyword">NE40E</span> serves as the border <span class="keyword">Router</span> for different networks, the original external priorities (DSCP values) in the IP packets that go into the <span class="keyword">NE40E</span> are all mapped to the internal priorities of the router represented by service classes of DiffServ and colors. When the <span class="keyword">NE40E</span> sends out the packets, the internal priority is mapped back to the external priority.</p>
+<p>BA classification is usually implemented on the core devices of the network. It can be implemented on both physical and logical interfaces. If implemented on the logical interface, BA classification can limit traffic congestion on member ports of the logical interface and restrict the priority of packets on the logical interface.</p>
+<p>A DiffServ (DS) domain is a group of DiffServ nodes that adopt the same service policies and implement the same PHB aggregate.</p>
+<p>The priority of packets is usually accepted or re-defined on the core <span class="keyword">Router</span>. On the border <span class="keyword">Router</span> in the IP domain or MPLS domain, DSCP and EXP values also need to be mapped.</p>
+<p>The BA classification can map the internal priority to the external priority, and the external priority to the internal priority. However, mapping between traffic of the same type, for example, IP traffic or MPLS traffic, is not supported.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If unified scheduling is required for all upstream traffic on an interface, you can run the <a href="cmdqueryname=qos+default-service-class"><b><span class="cmdname">qos default-service-class</span></b></a> command to configure the upstream traffic on the interface to enter the specific queues and provide corresponding services. After this command is run, other packets cannot be enabled to enter the queues, and BA classification cannot be enabled.</p>
+</div></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172371256__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Pre-configuration Tasks</h4><div class="p">Before configuring priority mappings for IP packets, complete the following tasks:<ul><li><p>Configure physical parameters for interfaces.</p>
+</li><li><p>Configure link layer attributes for interfaces to work properly.</p>
+</li><li><p>Configure IP addresses for interfaces.</p>
+</li><li><p>Enable a routing protocol for communication between devices.</p>
+</li></ul>
+</div>
+</div></div>
+<div class="steps-unordered"><a name="EN-US_TASK_0172371256__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ul><li><span>Configure the mappings between DSCP values of IP packets, service classes, and colors.</span><ol><li class="substepexpand"><span>Run <span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span></span><p><p>The system view is displayed.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=diffserv+domain"><b><span class="cmdname">diffserv domain</span></b></a> { <i><span class="varname">ds-domain-name</span></i> | <strong><span>default</span></strong><span> | <strong><span>5p3d</span></strong> </span>}<span> [ <strong><span>domain-id</span></strong> <i><span class="varname">domain-id-value</span></i> ]</span></span><p><p>A DiffServ domain is defined, and the DiffServ domain view is displayed.</p>
+</p></li><li class="substepexpand" id="EN-US_TASK_0172371256__substep1903366711214058"><a name="EN-US_TASK_0172371256__substep1903366711214058"></a><a name="substep1903366711214058"></a><span id="EN-US_TASK_0172371256__">Define traffic policies on the <span class="keyword">Router</span> based on the actual situation.</span><p><ul><li><p>To define a traffic policy for both incoming IPv4 and IPv6 traffic, run the <a href="cmdqueryname=ip-dscp-inbound"><b><span class="cmdname">ip-dscp-inbound</span></b></a> <i><span class="varname">dscp-value</span></i> <strong><span>phb</span></strong> <i><span class="varname">service-class</span></i> [ <i><span class="varname">color</span></i> ] or <a href="cmdqueryname=ip-dscp-inbound"><b><span class="cmdname">ip-dscp-inbound</span></b></a> <i><span class="varname">dscp-value1</span></i> <strong><span>to</span></strong> <i><span class="varname">dscp-value2</span></i> <strong><span>phb</span></strong> <i><span class="varname">service-class</span></i> [ <i><span class="varname">color</span></i> ] [ <strong><strong><span>exclude-user-defined</span></strong></strong> ] command.</p>
+</li><li><p>To define a traffic policy for both outgoing IPv4 and IPv6 traffic, run the <a href="cmdqueryname=ip-dscp-outbound"><b><span class="cmdname">ip-dscp-outbound</span></b></a> <i><span class="varname">service-class</span></i> <i><span class="varname">color</span></i> <strong><span>map</span></strong> <i><span class="varname">dscp-value</span></i> command.</p>
+</li><li>To define a traffic policy for incoming IPv4 traffic, run the <a href="cmdqueryname=ipv4-dscp-inbound"><b><span class="cmdname">ipv4-dscp-inbound</span></b></a> <i><span class="varname">dscp-value</span></i> <strong><span>phb</span></strong> <i><span class="varname">service-class</span></i> [ <i><span class="varname">color</span></i> ] or <a href="cmdqueryname=ipv4-dscp-inbound"><b><span class="cmdname">ipv4-dscp-inbound</span></b></a> <i><span class="varname">dscp-value1</span></i> <strong><span>to</span></strong> <i><span class="varname">dscp-value2</span></i> <strong><span>phb</span></strong> <i><span class="varname">service-class</span></i> [ <i><span class="varname">color</span></i> ] [ <strong><strong><span>exclude-user-defined</span></strong></strong> ] command.</li><li>To define a traffic policy for outgoing IPv4 traffic, run the <a href="cmdqueryname=ipv4-dscp-outbound"><b><span class="cmdname">ipv4-dscp-outbound</span></b></a> <i><span class="varname">service-class</span></i> <i><span class="varname">color</span></i> <strong><span>map</span></strong> <i><span class="varname">dscp-value</span></i> command.</li><li>To define a traffic policy for incoming IPv6 traffic, run the <a href="cmdqueryname=ipv6-dscp-inbound"><b><span class="cmdname">ipv6-dscp-inbound</span></b></a> <i><span class="varname">dscp-value</span></i> <strong><span>phb</span></strong> <i><span class="varname">service-class</span></i> [ <i><span class="varname">color</span></i> ] or <a href="cmdqueryname=ipv6-dscp-inbound"><b><span class="cmdname">ipv6-dscp-inbound</span></b></a> <i><span class="varname">dscp-value1</span></i> <strong><span>to</span></strong><i><span class="varname"> dscp-value2</span></i> <strong><span>phb</span></strong> <i><span class="varname">service-class</span></i> [ <i><span class="varname">color</span></i> ] [ <strong><strong><span>exclude-user-defined</span></strong></strong> ] command.</li><li>To define a traffic policy for outgoing IPv6 traffic, run the <a href="cmdqueryname=ipv6-dscp-outbound"><b><span class="cmdname">ipv6-dscp-outbound</span></b></a> <i><span class="varname">service-class</span></i> <i><span class="varname">color</span></i> <strong><span>map</span></strong> <i><span class="varname">dscp-value</span></i> command.</li></ul>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If both the <a href="cmdqueryname=ipv4-dscp-inbound"><b><span class="cmdname">ipv4-dscp-inbound</span></b></a> (or <a href="cmdqueryname=ipv6-dscp-inbound"><b><span class="cmdname">ipv6-dscp-inbound</span></b></a>) and <a href="cmdqueryname=ip-dscp-inbound"><b><span class="cmdname">ip-dscp-inbound</span></b></a> commands are run, the traffic policy configured using the <a href="cmdqueryname=ipv4-dscp-inbound"><b><span class="cmdname">ipv4-dscp-inbound</span></b></a> (or <a href="cmdqueryname=ipv6-dscp-inbound"><b><span class="cmdname">ipv6-dscp-inbound</span></b></a>) command takes effect preferentially, and the traffic policy configured using the <a href="cmdqueryname=ip-dscp-inbound"><b><span class="cmdname">ip-dscp-inbound</span></b></a> command takes effect for traffic that is not separately configured. The preceding rules also apply in the outbound direction.</p>
+</div></div>
+<p>The system predefines a domain named <strong>default</strong> for IP packets. You are not allowed to delete the default domain.</p>
+<p>If the priority mapping in <a href="#EN-US_TASK_0172371256__substep1903366711214058">Step 3</a> is not set in the DiffServ domain, the system uses the default mapping. The default domain describes the default mappings between the DSCP values, QoS service classes, and colors for IP packets. You can change the mappings in the domain. In the default domain, the DSCP values of the packets from an upstream device are mapped to QoS service classes and colors. Their mappings are shown in <a href="#EN-US_TASK_0172371256__tab_dc_ne_qos_cfg_005002">Table 1</a>. The QoS service classes and colors of the packets entering a downstream device are mapped to DSCP values. Their mappings are shown in <a href="#EN-US_TASK_0172371256__tab_dc_ne_qos_cfg_005004">Table 2</a>.</p>
+
+<div class="tableBorder"><a name="EN-US_TASK_0172371256__tab_dc_ne_qos_cfg_005002"></a><a name="tab_dc_ne_qos_cfg_005002"></a><table cellpadding="4" cellspacing="0" summary="" rowfreeze="yes" id="EN-US_TASK_0172371256__tab_dc_ne_qos_cfg_005002" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Default mappings between DSCP values and service classes in the default domain</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="14.8014801480148%" id="mcps1.4.3.1.2.3.2.5.2.7.1.1" liSelected="liSelected"><p>DSCP</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="17.65176517651765%" id="mcps1.4.3.1.2.3.2.5.2.7.1.2" liSelected="liSelected"><p>Service</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="16.68166816681668%" id="mcps1.4.3.1.2.3.2.5.2.7.1.3" liSelected="liSelected"><p>Color</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="16.051605160516054%" id="mcps1.4.3.1.2.3.2.5.2.7.1.4" liSelected="liSelected"><p>DSCP</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="16.09160916091609%" id="mcps1.4.3.1.2.3.2.5.2.7.1.5" liSelected="liSelected"><p>Service</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="18.72187218721872%" id="mcps1.4.3.1.2.3.2.5.2.7.1.6" liSelected="liSelected"><p>Color</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>00</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>32</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>AF4</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>01</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>33</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>02</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>34</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>AF4</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>03</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>35</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>04</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>36</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>AF4</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Yellow</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>05</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>37</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>06</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>38</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>AF4</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Red</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>07</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>39</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>08</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>AF1</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>40</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>EF</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>09</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>41</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>10</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>AF1</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>42</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>11</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>43</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>12</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>AF1</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Yellow</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>44</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>13</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>45</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>14</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>AF1</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Red</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>46</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>EF</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>15</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>47</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>16</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>AF2</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>48</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>CS6</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>17</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>49</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>18</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>AF2</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>50</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>19</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>51</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>20</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>AF2</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Yellow</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>52</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>21</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>53</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>22</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>AF2</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Red</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>54</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>23</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>55</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>24</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>AF3</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>56</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>CS7</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>25</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>57</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>26</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>AF3</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>58</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>27</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>59</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>28</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>AF3</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Yellow</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>60</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>29</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>61</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>30</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>AF3</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Red</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>62</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.8014801480148%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.1 "><p>31</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.65176517651765%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.2 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.68166816681668%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.3 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.051605160516054%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.4 "><p>63</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.09160916091609%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.5 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.72187218721872%" headers="mcps1.4.3.1.2.3.2.5.2.7.1.6 "><p>Green</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><a href="#EN-US_TASK_0172371256__tab_dc_ne_qos_cfg_005004">Table 2</a> shows the default mappings between internal service classes, colors, and DSCP values for IP packets.</p>
+
+<div class="tableBorder"><a name="EN-US_TASK_0172371256__tab_dc_ne_qos_cfg_005004"></a><a name="tab_dc_ne_qos_cfg_005004"></a><table cellpadding="4" cellspacing="0" summary="" rowfreeze="yes" id="EN-US_TASK_0172371256__tab_dc_ne_qos_cfg_005004" frame="border" border="1" rules="all"><caption><b>Table 2 </b>Default mappings between service classes and DSCP values</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="33.32%" id="mcps1.4.3.1.2.3.2.7.2.4.1.1" liSelected="liSelected"><p>Service</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="33.339999999999996%" id="mcps1.4.3.1.2.3.2.7.2.4.1.2" liSelected="liSelected"><p>Color</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="33.339999999999996%" id="mcps1.4.3.1.2.3.2.7.2.4.1.3" liSelected="liSelected"><p>DSCP</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="33.32%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.1 "><p>BE</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.2 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.3 "><p>0</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.32%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.1 "><p>AF1</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.2 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.3 "><p>10</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.32%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.1 "><p>AF1</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.2 "><p>Yellow</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.3 "><p>12</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.32%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.1 "><p>AF1</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.2 "><p>Red</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.3 "><p>14</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.32%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.1 "><p>AF2</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.2 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.3 "><p>18</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.32%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.1 "><p>AF2</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.2 "><p>Yellow</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.3 "><p>20</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.32%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.1 "><p>AF2</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.2 "><p>Red</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.3 "><p>22</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.32%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.1 "><p>AF3</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.2 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.3 "><p>26</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.32%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.1 "><p>AF3</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.2 "><p>Yellow</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.3 "><p>28</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.32%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.1 "><p>AF3</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.2 "><p>Red</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.3 "><p>30</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.32%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.1 "><p>AF4</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.2 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.3 "><p>34</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.32%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.1 "><p>AF4</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.2 "><p>Yellow</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.3 "><p>36</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.32%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.1 "><p>AF4</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.2 "><p>Red</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.3 "><p>38</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.32%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.1 "><p>EF</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.2 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.3 "><p>46</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.32%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.1 "><p>CS6</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.2 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.3 "><p>48</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.32%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.1 "><p>CS7</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.2 "><p>Green</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.339999999999996%" headers="mcps1.4.3.1.2.3.2.7.2.4.1.3 "><p>56</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</p></li><li class="substepexpand"><span>Run <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span></span><p><p>The configuration is committed.</p>
+</p></li><li class="substepexpand"><span>Run <span><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></span></span><p><p>Return to the system view.</p>
+</p></li><li class="substepexpand"><span>Run <span><a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i></span></span><p><p>The interface view is displayed.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=trust+upstream"><b><span class="cmdname">trust upstream</span></b></a> { <span><strong><span>5p3d</span></strong> | </span><i><span class="varname">ds-domain-name</span></i> | <strong><span>default</span></strong> }<span> [ <strong><span>inbound</span></strong> | <strong><span>outbound</span></strong> ]</span> </span><p><p>The DiffServ domain is bound to the interface, and BA classification is enabled on the interface.</p>
+</p></li><li class="substepexpand"><span>Run <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span></span><p><p>The configuration is committed.</p>
+</p></li></ol>
+</li></ul></div>
+<div class="postreq"><a name="EN-US_TASK_0172371256__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>Run the following commands to check the previous configuration.</p>
+<ul><li>Run the <a href="cmdqueryname=display+diffserv+domain"><b><span class="cmdname">display diffserv domain</span></b></a> [ <i><span class="varname">ds-domain-name</span></i> ] [ <strong><span>8021p</span></strong> | <strong><span>dscp</span></strong> [ <strong><span>ipv4</span></strong> | <strong><span>ipv6</span></strong> ] | <strong><span>exp</span></strong> <span> </span>] [ <strong><span>inbound</span></strong> | <strong><span>outbound</span></strong> ] command to check the DiffServ domain configuration.</li><li>Run the <a href="cmdqueryname=display+diffserv+domain+application"><b><span class="cmdname">display diffserv domain application</span></b></a> <i><span class="varname">ds-domain-name</span></i> command to check the interface list applied to a specified DiffServ domain.</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_qos_cfg_0037.html">Class-based QoS Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_qos_cfg_0040.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_qos_cfg_0091.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

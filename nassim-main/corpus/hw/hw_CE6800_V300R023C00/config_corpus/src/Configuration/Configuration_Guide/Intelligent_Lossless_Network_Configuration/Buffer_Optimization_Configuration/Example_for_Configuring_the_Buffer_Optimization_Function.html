@@ -1,0 +1,192 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring the Buffer Optimization Function">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ai_buffer_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ai_buffer_cfg_0009.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Buffer Optimization">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Buffer Optimization">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001513160398">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring the Buffer Optimization Function</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001513160398"></a><a name="EN-US_TASK_0000001513160398"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring the Buffer Optimization Function</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001513160398__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In <a href="#EN-US_TASK_0000001513160398__fig19978171395514">Figure 1</a>, a lossless service is deployed on both Host1 and Host2. The physical distance between DeviceA and DeviceB is 90 km (a relatively long distance), which may cause packet loss in the lossless service. To ensure sufficient buffer space for queues carrying the lossless service, you can configure long-distance plane buffer optimization and distance-based headroom buffer check on DeviceA and DeviceB.</p>
+<div class="fignone" id="EN-US_TASK_0000001513160398__fig19978171395514"><a name="EN-US_TASK_0000001513160398__fig19978171395514"></a><a name="fig19978171395514"></a><span class="figcap"><b>Figure 1 </b>Network diagram of the buffer optimization function</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 and interface 2 represent <span>100GE</span> <span>1/0/1</span> and <span>100GE</span> <span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001563880409.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001513160398__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>The parameter settings in this example are for reference only. You need to configure each device based on the traffic model on your network.</p>
+<p>Only the <span>CE6866, CE6860-SAN, CE6866K, CE6860-HAM, CE8851-32CQ8DQ-P, CE8850-SAN, CE8851K, CE8850-HAM</span> support the plane buffer optimization function.</p>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001513160398__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure PFC.</span><p><p># In this example, queue 4 carries the lossless service as planned, so enable PFC for queue 4 on the interface of DeviceA. The configurations on DeviceB are similar to those on DeviceA.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[*<span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>qos buffer headroom-pool size</strong><strong> 4 mbytes slot <span>1</span></strong>      //This command is required only on the <span>CE6855-48XS8CQ, CE6863E-48S8CQ, CE6885, CE6885-LL (standard forwarding mode), CE6885-SAN, CE6885-T, CE8851-32CQ4BQ, CE8855</span>.
+[*DeviceA] <strong>dcb pfc</strong>
+[*DeviceA-dcb-pfc-default] <strong>priority 4</strong>
+[*DeviceA-dcb-pfc-default] <strong>quit</strong>
+[*DeviceA] <strong>port-group all_using</strong>   
+[*DeviceA-port-group-all_using] <strong>group-member <span>100ge</span> <span>1/0/1</span> to <span>100ge</span> <span>1/0/2</span></strong>
+[*DeviceA-port-group-all_using] <strong>dcb pfc enable mode manual</strong>
+[*DeviceA-port-group-all_using] <strong>quit</strong>
+[*DeviceA] <strong>commit</strong></pre>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>After PFC is configured, queue 4 is a lossless queue and requires the headroom buffer. For details about other PFC configurations, see <a href="galaxy_dcb_cfg_0004.html">PFC</a>.</p>
+</div></div>
+</p></li><li><span>Configure the long-distance plane buffer optimization function.</span><p><p># Set the plane buffer optimization mode to long-distance mode on DeviceA. The configuration takes effect after DeviceA is restarted. The configurations on DeviceB are similar to those on DeviceA.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>ai-service</strong>
+[*DeviceA-ai-service]<strong> </strong><strong>buffer optimization mode long-distance</strong>
+[*DeviceA-ai-service] <strong>quit</strong>
+[*DeviceA] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>quit</strong>
+&lt;DeviceA&gt; <strong>reboot</strong> 
+The system will reboot. Continue? [Y/N]:Y</pre>
+</p></li><li><span>Configure the distance-based headroom buffer check function.</span><p><p># Configure DeviceA. Because the distance between DeviceA and DeviceB is 90 km, set the long-distance mode of the interface on DeviceA to <strong><span>level-100</span></strong> and enable the distance-based headroom buffer check function.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>long-distance mode level-100</strong>
+[<span class="keyword">*DeviceA</span>-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[*DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceB. Specifically, set the long-distance mode of the interface on DeviceB to <strong><span>level-100</span></strong> and enable the distance-based headroom buffer check function.</p>
+<pre class="screen">&lt;DeviceB&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceB] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>long-distance mode level-100</strong>
+[<span class="keyword">*DeviceB</span>-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[*DeviceB] <strong>commit</strong></pre>
+<p># When the distance-based headroom buffer check function is enabled on DeviceA but not enabled on DeviceB, the detection fails. You need to trigger the interface on DeviceA to send a detection packet.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>start long-distance detect</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font>DeviceA</span>-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001513160398__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Display buffer optimization information.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>display buffer optimization configuration slot 1</strong>  
+-----------------------------------------------------------------------------------------------------------------------
+Buffer unit: KB
+Configure buffer optimization mode: Long-distance
+Current buffer optimization mode: Long-distance
+Interface that can be enabled with both PFC and long-distance mode:                                                    
+<span>100GE</span><span>1/0/1</span>       <span>100GE</span><span>1/0/2</span>      
+
+-----------------------------------------------------------------------------------------------------------------------
+Pipe                       Buffer
+-----------------------------------------------------------------------------------------------------------------------
+   0                        20480
+   1                         3072  
+   2                        20480
+   3                         3072
+   4                         3072
+   5                         3072
+
+-----------------------------------------------------------------------------------------------------------------------
+Interface        Port        Chip        Pipe       PFC          Mode         DetectHdrmResult     RequiredHdrm
+-----------------------------------------------------------------------------------------------------------------------
+<span>100GE</span><span>1/0/1</span>          16           0           0       Enable       level-100               12496            12500
+-----------------------------------------------------------------------------------------------------------------------</pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001513160398__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><p><span class="keyword">DeviceA</span></p>
+<pre class="screen">#
+sysname <span class="keyword">DeviceA</span>
+#
+dcb pfc
+ priority 4
+#
+qos buffer headroom-pool size 4 mbytes slot <span>1</span>      //This command is required only on the <span>CE6855-48XS8CQ, CE6863E-48S8CQ, CE6885, CE6885-LL (standard forwarding mode), CE6885-SAN, CE6885-T, CE8851-32CQ4BQ, CE8855</span>.
+#
+interface <span><span>100GE</span><span>1/0/1</span></span>
+ long-distance mode level-100
+ dcb pfc enable mode manual
+#
+interface <span>100GE</span><span>1/0/2</span>
+ dcb pfc enable mode manual
+#
+ai-service 
+ #
+<strong> </strong>buffer optimization mode long-distance
+#
+port-group all_using        
+ group-member <span>100GE</span><span>1/0/1</span>   
+ group-member <span>100GE</span><span>1/0/2</span> 
+#
+return
+</pre>
+<p><span class="keyword">DeviceB</span></p>
+<pre class="screen">#
+sysname <span class="keyword">DeviceB</span>
+#
+dcb pfc
+ priority 4
+#
+qos buffer headroom-pool size 4 mbytes slot <span>1</span>      //This command is required only on the <span>CE6855-48XS8CQ, CE6863E-48S8CQ, CE6885, CE6885-LL (standard forwarding mode), CE6885-SAN, CE6885-T, CE8851-32CQ4BQ, CE8855</span>.
+#
+interface <span><span>100GE</span><span>1/0/1</span></span>
+ long-distance mode level-100
+ dcb pfc enable mode manual
+#
+interface <span>100GE</span><span>1/0/2</span>
+ dcb pfc enable mode manual
+#
+ai-service 
+ #
+<strong> </strong>buffer optimization mode long-distance
+#
+port-group all_using        
+ group-member <span>100GE</span><span>1/0/1</span>  
+ group-member <span>100GE</span><span>1/0/2</span> 
+#
+return
+</pre>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_ai_buffer_cfg_0001.html">Buffer Optimization Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_ai_buffer_cfg_0009.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

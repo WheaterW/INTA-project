@@ -1,0 +1,71 @@
+dhcp client hostname
+====================
+
+dhcp client hostname
+
+Function
+--------
+
+
+
+The **dhcp client hostname** command configures a host name for a DHCP/BOOTP client.
+
+The **undo dhcp client hostname** command deletes the configured host name of a DHCP/BOOTP client.
+
+
+
+By default, no host name is configured for a DHCP/BOOTP client.
+
+
+Format
+------
+
+**dhcp client hostname** *hostname*
+
+**undo dhcp client hostname**
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| *hostname* | Specifies the name of a DHCP/BOOTP client. | The value is a string of 1 to 64 case-sensitive characters, spaces supported. |
+
+
+
+Views
+-----
+
+100ge sub-interface view,100GE interface view,10GE sub-interface view,10GE interface view,200GE sub-interface view,200GE interface view,25GE sub-interface view,25GE interface view,400GE sub-interface view,400GE interface view,50GE sub-interface view,50GE interface view,Eth-Trunk sub-interface view,Eth-Trunk interface view,VBDIF interface view,VLANIF interface view,Management interface view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+A DHCP server must obtain the host name of a client before assigning an IP address to the client. To configure a host name for a DHCP/BOOTP client, run the **dhcp client hostname** command. The host name is used to match the local domain name of the DHCP/BOOTP client.
+
+**Follow-up Procedure**
+
+After DHCP/BOOTP client is enabled, the device can use DHCP to obtain an IP address.
+
+
+Example
+-------
+
+# Set the host name of a DHCP client to huawei gateway on 100GE1/0/1.
+```
+<HUAWEI> system-view
+[~HUAWEI] interface 100GE 1/0/1
+[*HUAWEI-100GE1/0/1] undo portswitch
+[*HUAWEI-100GE1/0/1] dhcp client hostname "huawei gateway"
+
+```

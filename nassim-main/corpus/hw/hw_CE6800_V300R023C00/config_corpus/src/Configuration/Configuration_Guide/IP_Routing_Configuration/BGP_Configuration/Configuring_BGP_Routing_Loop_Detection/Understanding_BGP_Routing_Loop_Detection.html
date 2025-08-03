@@ -1,0 +1,164 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding BGP Routing Loop Detection">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_05020.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_05021.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001196503391">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding BGP Routing Loop Detection</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_CONCEPT_0000001196503391"></a><a name="EN-US_CONCEPT_0000001196503391"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding BGP Routing Loop Detection</h1>
+<div><div class="section"><h4 class="sectiontitle">Fundamentals of BGP Routing Loop Detection</h4><p>Once a routing loop occurs on a Layer 3 network, packets cannot be forwarded, which may cause losses to carriers or users.</p>
+<p>To detect potential routing loops on the network, BGP defines the Loop-detection attribute. The fundamentals of BGP routing loop detection are as follows:</p>
+<ol><li>After BGP routing loop detection is enabled, the local device generates a random number, adds the Loop-detection attribute to the routes to be advertised to EBGP peers or the locally imported routes to be advertised to peers, and encapsulates the attribute with the random number and the local <strong>vrfID</strong>. The local <strong>vrfID</strong> is automatically generated and globally unique. In the public network scenario, the <strong>vrfID</strong> is 0. In the private network scenario, the <strong>vrfID</strong> is automatically generated after a VPN instance is created. When OSPF/IS-IS routes are imported to BGP, the routing loop attributes of the OSPF/IS-IS routes are inherited.</li><li>When the local device receives a route with the Loop-detection attribute from another device, the local device performs the following checks:<ul><li>Compares the Loop-detection attribute of the received route with the combination of the <strong>vrfID</strong> and random number that are locally stored.<ul><li>If they are the same, the local device determines that a routing loop occurs.</li><li>If they are different, the local device determines that no routing loop occurs, and the route participates in route selection.</li></ul>
+</li><li>Checks whether the received route has a routing loop record.<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Routing loop records are affected by the following commands:</p>
+<ul><li>For the routes that already have routing loop records before routing loop alarms are cleared using the <strong>clear route loop-detect bgp alarm</strong> command, the records always exist.</li><li>For the routes that have routing loop records but no longer carry the routing loop attribute of the local device after routing loop alarms are cleared using the <strong>clear route loop-detect bgp alarm</strong> command, the records of these routes are deleted.</li><li>If the <strong>undo route loop-detect bgp enable</strong> command is run, the routing loop records of all looped routes are deleted.</li></ul>
+</div></div>
+<ul><li>If a route has a routing loop record, a routing loop once occurred. Such a route is considered to be a looped route even if it does not carry the routing loop attribute of the local device.</li><li>If there is no routing loop record and the Loop-detection attribute of the received route is different from the combination of the <strong>vrfID</strong> and random number that are locally stored, the local device determines that no routing loop occurs, and the route participates in route selection.</li><li>If there is no routing loop record but the Loop-detection attribute of the received route is the same as the combination of the <strong>vrfID</strong> and random number that are locally stored, the local device determines that a routing loop occurs.</li></ul>
+</li></ul>
+</li><li>If a routing loop is detected and the looped route is preferentially selected, the local device reports an alarm to notify the user of the routing loop risk, enters the loop prevention state, and performs the following operations:<ul><li>Preferentially selects non-looped routes when the BGP routing table contains multiple routes with the same destination as the looped route.</li><li>Increases the MED value and reduces the local preference of the looped route when advertising it.</li></ul>
+</li><li>After the device processes a looped route, the routing loop may be resolved. If the routing loop persists, you need to locate the cause of the loop and resolve the loop. As the device cannot detect when the loop risk is eliminated, the routing loop alarm will not be cleared automatically. To manually clear the alarm after the loop risk is eliminated, you can run a related command.</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Implementation</h4><p>The Loop-detection attribute is a private BGP attribute. It uses a reserved value (type=255) to implement routing loop detection in some scenarios. <a href="#EN-US_CONCEPT_0000001196503391__fig3677420152013">Figure 1</a> shows the Loop-detection attribute TLV, and <a href="#EN-US_CONCEPT_0000001196503391__table1755319320291">Table 1</a> describes the fields in it.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Currently, the Loop-detection attribute is supported only in the BGP IPv4 public network, BGP IPv4 private network, BGP IPv6 public network, BGP IPv6 private network, BGP VPNv4, and BGP VPNv6 address families.</p>
+</div></div>
+<div class="fignone" id="EN-US_CONCEPT_0000001196503391__fig3677420152013"><a name="EN-US_CONCEPT_0000001196503391__fig3677420152013"></a><a name="fig3677420152013"></a><span class="figcap"><b>Figure 1 </b>Loop-detection attribute TLV extension</span><br><span><img class="vsd" src="figure/en-us_image_0000001196424949.png" width="NaN" height="NaN"></span></div>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001196503391__table1755319320291"></a><a name="table1755319320291"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001196503391__table1755319320291" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Fields in the Loop-detection attribute TLV</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="50%" id="mcps1.3.2.5.2.3.1.1" liSelected="liSelected"><p>Field</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="50%" id="mcps1.3.2.5.2.3.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.5.2.3.1.1 "><p>Attr.Flags</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.5.2.3.1.2 "><p>Attribute flag, which occupies one byte (eight bits). The meaning of each bit is as follows:</p>
+<p>O (Optional bit): defines whether the attribute is optional. The value 1 indicates an optional attribute, whereas the value 0 indicates a well-known attribute.</p>
+<p>T (Transitive bit): defines whether the attribute is transitive. For an optional attribute, the value 1 indicates that the attribute is transitive, whereas the value 0 indicates that the attribute is non-transitive. For a well-known attribute, the value must be set to 1.</p>
+<p>P (Partial bit): defines whether the attribute is partial. If the optional transitive attribute is partial, the value is set to 1; if the attribute is complete, the value is set to 0. For well-known attributes and for optional non-transitive attributes, the value must be set to 0.</p>
+<p>E (Extended Length bit): defines whether the length (Attr. Length) of the attribute needs to be extended. If the attribute length does not need to be extended, the value is set to 0 and the Attr. Length is 1 octet. If the attribute length needs to be extended, the value is set to 1 and the Attr. Length is 2 octets.</p>
+<p>U (Unused bits): indicates that the lower-order 4 bits are not used. These bits must be set to 0s upon transmission and ignored upon receipt.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.5.2.3.1.1 "><p>Attr.Type Code</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.5.2.3.1.2 "><p>Attribute type, which occupies one byte. The value is an unsigned integer, with the initial value being 0xFF.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.5.2.3.1.1 "><p>Attr.Length</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.5.2.3.1.2 "><p>Length of the attribute.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.5.2.3.1.1 "><p>Attr.Value</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.5.2.3.1.2 "><p>Huawei's organizationally unique identifier (OUI), with the value being 0x0030FBB8, which is used to differentiate Huawei from other vendors.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>BGP also defines a sub-TLV for Attr.Value to identify the device that detects a routing loop. <a href="#EN-US_CONCEPT_0000001196503391__fig1413194121720">Figure 2</a> shows the sub-TLV, and <a href="#EN-US_CONCEPT_0000001196503391__table4161185582017">Table 2</a> describes the fields in the sub-TLV.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>A maximum of four Loop-detection attribute sub-TLVs can be carried. If more than four sub-TLVs exist, they are overwritten according to the first-in-first-out rule.</p>
+</div></div>
+<div class="fignone" id="EN-US_CONCEPT_0000001196503391__fig1413194121720"><a name="EN-US_CONCEPT_0000001196503391__fig1413194121720"></a><a name="fig1413194121720"></a><span class="figcap"><b>Figure 2 </b>Loop-detection attribute sub-TLV</span><br><span><img class="vsd" src="figure/en-us_image_0000001150585080.png" width="NaN" height="NaN"></span></div>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001196503391__table4161185582017"></a><a name="table4161185582017"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001196503391__table4161185582017" frame="border" border="1" rules="all"><caption><b>Table 2 </b>Fields in the Loop-detection attribute sub-TLV</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="50%" id="mcps1.3.2.9.2.3.1.1" liSelected="liSelected"><p>Field</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="50%" id="mcps1.3.2.9.2.3.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.9.2.3.1.1 "><p>Attr.Type</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.9.2.3.1.2 "><p>The value is 0xFF.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.9.2.3.1.1 "><p>Attr.Length</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.9.2.3.1.2 "><p>Length of the attribute. The value is 0x08, 0x10, 0x18, or 0x20.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.9.2.3.1.1 "><p>Attr.Value</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.9.2.3.1.2 "><pre class="screen">0            31            63
++-------------+-------------+
+| vrfID | Random number |
++-------------+-------------+</pre>
+<p><strong>vrfID</strong> specifies a system-allocated VPN ID. The value ranges from 0 to 0xFFFFFFFF.</p>
+<div class="note"><span class="notetitle"> NOTE: </span><div class="notebody"><p>For BGP VPNv4 and BGP VPNv6 routes, the system only checks the random number when determining whether a routing loop occurs; that is, it does not check the <strong>vrfID</strong>.</p>
+</div></div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Application Scenario</h4><p>BGP routing loops may occur in the following scenarios. You are advised to enable BGP routing loop detection during network planning.</p>
+<ul><li>On the network shown in <a href="#EN-US_CONCEPT_0000001196503391__fig12318936133717">Figure 3</a>, DeviceA and DeviceC belong to AS 100, and DeviceB belongs to AS 200. An export policy is configured on DeviceB to delete the original AS numbers from the routes to be advertised to DeviceC. After receiving a BGP route that originates from DeviceC, DeviceA advertises the route to DeviceB. After receiving the route, DeviceB advertises the route back to DeviceC. As a result, a BGP routing loop occurs on DeviceC. After BGP routing loop detection is enabled on the entire network, DeviceC adds Loop-detection attribute 1 to the BGP route (locally imported) before advertising the route to DeviceA. After receiving the route, DeviceA adds Loop-detection attribute 2 to the route before advertising the route to DeviceB (EBGP peer). After receiving the route, DeviceB adds Loop-detection attribute 3 to the route before advertising the route to DeviceC (EBGP peer). After receiving the Loop-detection attributes, DeviceC discovers that these attributes contain Loop-detection attribute 1 which was added by itself, and then reports a routing loop alarm.<div class="fignone" id="EN-US_CONCEPT_0000001196503391__fig12318936133717"><a name="EN-US_CONCEPT_0000001196503391__fig12318936133717"></a><a name="fig12318936133717"></a><span class="figcap"><b>Figure 3 </b>Typical networking 1 with a BGP routing loop</span><br><span><img class="vsd" src="figure/en-us_image_0000001150425258.png" width="NaN" height="NaN"></span></div>
+</li><li>On the network shown in <a href="#EN-US_CONCEPT_0000001196503391__fig1076313911216">Figure 4</a>, DeviceA resides in AS 100; DeviceB resides in AS 200; DeviceC and DeviceD reside in AS 300. An export policy is configured on DeviceD to delete the original AS numbers from the routes to be advertised to DeviceB. In this scenario, a BGP routing loop occurs on DeviceB.<div class="fignone" id="EN-US_CONCEPT_0000001196503391__fig1076313911216"><a name="EN-US_CONCEPT_0000001196503391__fig1076313911216"></a><a name="fig1076313911216"></a><span class="figcap"><b>Figure 4 </b>Typical networking 2 with a BGP routing loop</span><br><span><img class="vsd" src="figure/en-us_image_0000001196504839.png" width="NaN" height="NaN"></span></div>
+</li><li>On the network shown in <a href="#EN-US_CONCEPT_0000001196503391__fig127071748161714">Figure 5</a>, the PE advertises a VPN route through VPN1, and then receives this route through VPN1, indicating that a routing loop occurs on the PE.<div class="fignone" id="EN-US_CONCEPT_0000001196503391__fig127071748161714"><a name="EN-US_CONCEPT_0000001196503391__fig127071748161714"></a><a name="fig127071748161714"></a><span class="figcap"><b>Figure 5 </b>Typical networking 3 with a BGP routing loop</span><br><span><img class="vsd" src="figure/en-us_image_0000001196424947.png" width="NaN" height="NaN"></span></div>
+</li><li>On the network shown in <a href="#EN-US_CONCEPT_0000001196503391__fig20671159523">Figure 6</a>, DeviceA, DeviceB, and DeviceC belong to AS 100. An IBGP peer relationship is established between DeviceA and the RR, between the RR and DeviceB, and between the RR and DeviceC. OSPF runs on DeviceB and DeviceC. DeviceB is configured to import BGP routes to OSPF, and DeviceC is configured to import OSPF routes to BGP. An export policy is configured on DeviceA to add AS numbers to the AS_Path attribute for the routes to be advertised to the RR. After receiving a BGP route from DeviceA, the RR advertises this route to DeviceB. DeviceB then imports the BGP route to convert it to an OSPF route and advertises the OSPF route to DeviceC. DeviceC then imports the OSPF route to convert it to a BGP route and advertises the BGP route to the RR. When comparing the route advertised by DeviceA and the route advertised by DeviceC, the RR prefers the one advertised by DeviceC because the AS_Path of the route advertised by DeviceA is longer than that of the route advertised by DeviceC. As a result, a stable routing loop occurs.<p id="EN-US_CONCEPT_0000001196503391__p264913884819">To avoid this problem, enable BGP routing loop detection on DeviceC. After BGP routing loop detection is enabled, DeviceC adds Loop-detection attribute 1 to the BGP route imported from OSPF and advertises the BGP route to the RR. After receiving this BGP route, the RR advertises it (carrying Loop-detection attribute 1) to DeviceB. As OSPF routing loop detection is enabled by default, when the BGP route is imported to become an OSPF route on DeviceB, the OSPF route inherits the routing loop attribute of the BGP route and has an OSPF routing loop attribute added as well before the OSPF route is advertised to DeviceC. Upon receipt of the OSPF route, DeviceC imports it to convert it to a BGP route. Because BGP routing loop detection is enabled, the BGP route inherits the routing loop attributes of the OSPF route. Upon receipt of the route, DeviceC finds that the routing loop attributes in the received route contain its own routing loop attribute and therefore determines that a routing loop has occurred. In this case, DeviceC generates an alarm, and reduces the local preference and increases the MED value of the route before advertising the route to the RR. After receiving the route, the RR compares this route with the route advertised by DeviceA. Because the route advertised by DeviceC has a lower local preference and a larger MED value, the RR preferentially selects the route advertised by DeviceA. This resolves the routing loop.</p>
+<p id="EN-US_CONCEPT_0000001196503391__p772264616555">When the OSPF route is transmitted to DeviceC again, DeviceC imports it to convert it to a BGP route. At this point, the route carries only the OSPF routing loop attribute added by DeviceB. However, DeviceC still considers the route as a looped route because the route has a routing loop record. In this case, the RR does not preferentially select the route after receiving it from DeviceC. Then routes converge normally.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001196503391__fig20671159523"><a name="EN-US_CONCEPT_0000001196503391__fig20671159523"></a><a name="fig20671159523"></a><span class="figcap"><b>Figure 6 </b>Typical networking 4 with a BGP routing loop</span><br><span><img class="vsd" src="figure/en-us_image_0000001150425260.png" width="NaN" height="NaN"></span></div>
+</li></ul>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>This function is not supported in the following scenarios:</p>
+<ul><li>When BGP is configured to advertise the default route, the Loop-detection attribute is not added to the default route.</li><li>When BGP Add-Path is configured, the Loop-detection attribute is not added to routes.</li><li>When the route server function is configured, the Loop-detection attribute is not added to the routes advertised by the server.</li><li>The Loop-detection attribute is not added to the received routes to be advertised to IBGP peers.</li></ul>
+</div></div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bgp_cfg_05020.html">Configuring BGP Routing Loop Detection
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bgp_cfg_05021.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

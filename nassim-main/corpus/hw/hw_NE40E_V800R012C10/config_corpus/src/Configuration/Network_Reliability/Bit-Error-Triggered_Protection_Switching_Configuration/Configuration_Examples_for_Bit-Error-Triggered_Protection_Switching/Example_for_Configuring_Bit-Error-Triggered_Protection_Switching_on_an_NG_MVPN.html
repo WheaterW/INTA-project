@@ -1,0 +1,786 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Bit-Error-Triggered Protection Switching on an NG MVPN">
+<meta name="abstract" content="This section provides an example for configuring bit-error-triggered protection switching in an NG MVPN scenario.">
+<meta name="description" content="This section provides an example for configuring bit-error-triggered protection switching in an NG MVPN scenario.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfg_error-code_000010.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfg_error-code_evpn_0002.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_error-code_0005.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00606909,m00390128,q00824768,z00545680">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="Bit-Error-Triggered Protection Switching">
+<meta name="featuretype" content="Network Reliability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Bit-Error-Triggered Protection Switching">
+<meta name="featuretype" content="Network Reliability">
+<meta name="featurename" content="Bit-Error-Triggered Protection Switching">
+<meta name="featuretype" content="Network Reliability">
+<meta name="featurename" content="Bit-Error-Triggered Protection Switching">
+<meta name="featuretype" content="Network Reliability">
+<meta name="OWNER" content="z00545680">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="z00545680">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172362311">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Bit-Error-Triggered Protection Switching on an NG MVPN</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172362311"></a><a name="EN-US_TASK_0172362311"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Bit-Error-Triggered Protection Switching on an NG MVPN</h1>
+<div class="taskbody"><p>This section provides an example for configuring bit-error-triggered protection switching in an NG MVPN scenario. </p>
+<div class="context"><a name="EN-US_TASK_0172362311__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In an NG MVPN scenario, multicast data flows must be transmitted on a link that has no or few bit errors because even low bit error rates may cause black screen, erratic display, or frame interruption. You can configure IS-IS bit error detection and bit-error-triggered protection switching, allowing the mLDP tunnel end to select a new outbound interface if the interface in use is suffering a high bit error rate.</p>
+<p>If no bit error occurs on the links, the primary NG MVPN mLDP link is Leaf-P1-Root. If bit errors occur on interface 2 of the leaf node, the link Leaf-P2-Root becomes the primary one. P2 receives the bit error rate information sent by the leaf node, triggering the mLDP tunnel to select interface 1 as the downstream outbound interface. In this example, the advanced IS-IS topology is configured across the entire network, and the primary LSP tunnel of MPLS mLDP is created in the advanced topology.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1, interface2, interface3, and interface4 represent GE<span>0/1/0</span>, GE<span>0/1/1</span>, GE<span>0/1/2</span>, and GE<span>0/1/3</span>, respectively.</p>
+</div></div>
+<div class="fignone" id="EN-US_TASK_0172362311__fig_dc_vrp_cfg_error-code_ngmvpn_000102"><a name="EN-US_TASK_0172362311__fig_dc_vrp_cfg_error-code_ngmvpn_000102"></a><a name="fig_dc_vrp_cfg_error-code_ngmvpn_000102"></a><span class="figcap"><b>Figure 1 </b>Configuring bit-error-triggered protection switching on an NG MVPN</span><br><span><img class="vsd" src="images/fig_dc_vrp_cfg_error-code_ngmvpn_000102.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172362311__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Bind the interfaces connecting P1 and the leaf node to Eth-Trunk 1. Bind the interfaces connecting P2 and the root node to Eth-Trunk 1.</p>
+</li><li><p>Establish a VLL PW between P1 and the root node.</p>
+</li><li><p>Configure the interfaces Eth-Trunk 1.1 of the leaf node and P2 as AC interfaces for the access to the root node and P1.</p>
+</li><li><p>Configure an IP address for each interface and routing protocols, so that all devices can communicate at the network layer. This example uses the advanced topology of IS-IS routes.</p>
+</li><li><p>Establish an NG MVPN neighbor relationship between the root and leaf nodes. Configure the leaf node as the mLDP leaf node, and the root node as the mLDP root node.</p>
+</li><li><p>Enable BFD globally, enable IS-IS bit error detection on the logical direct interfaces Eth-Trunk 1.1 of the leaf node and P2. Enable bit-error-triggered IGP route switching on the interfaces Eth-Trunk 1 of the leaf node and P1.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172362311__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>IP address of each interface as listed in <a href="#EN-US_TASK_0172362311__fig_dc_vrp_cfg_error-code_ngmvpn_000102">Figure 1</a></p>
+</li><li><p>IS-IS instance ID: 1; advanced topology name: advancedtop; network entity names of P1, root node, leaf node, and P2: 10.0000.0000.0001.00, 10.0000.0000.0002.00, 10.0000.0000.0003.00, and 10.0000.0000.0004.00, respectively</p>
+</li><li><p>VPN instance name: vpna; RD and vpn-target: 100:100</p>
+</li><li><p>MPLS L2VPN VSI name: VSI1; VSI ID: 1112</p>
+</li><li><p>BGP instance ID: 100</p>
+</li><li><p>VLAN ID of Eth-Trunk 1.1: 100</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172362311__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Bind the interfaces connecting P1 and the leaf node to Eth-Trunk 1. Bind the interfaces connecting P2 and the root node to Eth-Trunk 1.</span><p><p># Bind GE <span>0/1/1</span> and GE <span>0/1/2</span> of the leaf node to Eth-Trunk 1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname Leaf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf] <strong>interface Eth-Trunk 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-Eth-Trunk1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>interface GigabitEthernet<span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-GigabitEthernet<span>0/1/1</span>] <strong>eth-trunk 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>interface GigabitEthernet<span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-GigabitEthernet<span>0/1/2</span>] <strong>eth-trunk 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-GigabitEthernet<span>0/1/2</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>commit</strong></pre>
+<p># Bind GE <span>0/1/0</span> and GE <span>0/1/2</span> of P1 to Eth-Trunk 1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname P1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>interface Eth-Trunk 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-Eth-Trunk1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>interface GigabitEthernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/0</span>] <strong>eth-trunk 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>interface GigabitEthernet<span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/2</span>] <strong>eth-trunk 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/2</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>commit</strong></pre>
+<p># Bind GE <span>0/1/1</span> and GE <span>0/1/2</span> of P2 to Eth-Trunk 1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname P2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2] <strong>interface Eth-Trunk 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-Eth-Trunk1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>interface GigabitEthernet<span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/1/1</span>] <strong>eth-trunk 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>interface GigabitEthernet<span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/1/2</span>] <strong>eth-trunk 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/1/2</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>commit</strong></pre>
+<p># Bind GE <span>0/1/1</span> and GE <span>0/1/2</span> of the root node to Eth-Trunk 1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname Root</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Root] <strong>interface Eth-Trunk 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-Eth-Trunk1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root] <strong>interface GigabitEthernet<span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-GigabitEthernet<span>0/1/1</span>] <strong>eth-trunk 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root] <strong>interface GigabitEthernet<span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-GigabitEthernet<span>0/1/2</span>] <strong>eth-trunk 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-GigabitEthernet<span>0/1/2</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root] <strong>commit</strong></pre>
+</p></li><li><span>Configure the sub-interfaces Eth-Trunk 1.1 on the leaf node and P2. Configure IP addresses for the interfaces according to <a href="#EN-US_TASK_0172362311__fig_dc_vrp_cfg_error-code_ngmvpn_000102">Figure 1</a>. For details, see the configuration files.</span></li><li><span>Establish a VLL PW between P1 and the root node.</span><p><p># Configure the VLL on P1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-l2vpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>vsi vsi1 static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-vsi-vsi1] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-vsi-vsi1-ldp] <strong>vsi-id 1112</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-vsi-vsi1-ldp] <strong>peer 4.4.4.4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-vsi-vsi1-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-vsi-vsi1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>commit</strong></pre>
+<p># Configure the VLL on the root node.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Root] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root] <strong>mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-l2vpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root] <strong>vsi vsi1 static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-vsi-vsi1] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-vsi-vsi1-ldp] <strong>vsi-id 1112</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-vsi-vsi1-ldp] <strong>peer 2.2.2.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-vsi-vsi1-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-vsi-vsi1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root] <strong>commit</strong></pre>
+</p></li><li><span>Configure the sub-interfaces Eth-Trunk 1.1 on the leaf node and P2. Configure the sub-interfaces as AC interfaces for the access to P1 and the root node.</span><p><p># Configure the AC interface on P1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>interface Eth-Trunk 1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-Eth-Trunk1.1] <strong>vlan-type dot1q 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-Eth-Trunk1.1] <strong>l2 binding vsi vsi1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-Eth-Trunk1.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>commit</strong></pre>
+<p># Configure the AC interface on the root node.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Root] <strong>interface Eth-Trunk 1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-Eth-Trunk1.1] <strong>vlan-type dot1q 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-Eth-Trunk1.1] <strong>l2 binding vsi vsi1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-Eth-Trunk1.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root] <strong>commit</strong></pre>
+</p></li><li><span>The sub-interfaces of the leaf node and P2 reside on the same network segment. Run the <strong>ping 10.1.3.2</strong> command on the leaf node. The ping operation succeeds.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf] <strong>ping 10.1.3.2</strong>
+</pre>
+<pre class="screen">PING 10.1.3.2: 56  data bytes, press CTRL_C to break
+    Reply from 10.1.3.2: bytes=56 Sequence=1 ttl=255 time=45 ms
+    Reply from 10.1.3.2: bytes=56 Sequence=2 ttl=255 time=3 ms
+    Reply from 10.1.3.2: bytes=56 Sequence=3 ttl=255 time=3 ms
+    Reply from 10.1.3.2: bytes=56 Sequence=4 ttl=255 time=2 ms
+    Reply from 10.1.3.2: bytes=56 Sequence=5 ttl=255 time=2 ms
+  --- 10.1.3.2 ping statistics ---
+    5 packet(s) transmitted
+    5 packet(s) received
+    0.00% packet loss
+    round-trip min/avg/max = 2/11/45 ms</pre>
+</p></li><li><span>Enable IS-IS on the interfaces of P1, P2, root node, and leaf node. Bind the interfaces to the advanced IS-IS topology. On the leaf node, set the cost values of Eth-Trunk 1.1 and GE <span>0/1/0</span> to 100 in the advanced IS-IS topology, so that P1 is preferentially selected as the next hop on the route from the leaf node to the root node 4.4.4.4. Enable LDP and mLDP globally on the four devices. Enable LDP on interfaces. For details, see the configuration files. Configure an advanced IS-IS topology across the entire network. Create the primary LSP of MPLS mLDP in the advanced topology.</span><p><p># Configure the advanced IS-IS topology on the leaf node.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf] <strong>ip topology advancedtop</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-isis-1] <strong>cost-style wide</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-isis-1] <strong>network-entity 10.0000.0000.0003.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-isis-1] <strong>topology advancedtop topology-id 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-isis-1-topology-advancedtop] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-ldp] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-ldp-ipv4] <strong>mldp p2mp topo advancedtop</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-ldp-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>commit</strong></pre>
+<p># Configure the advanced IS-IS topology on P1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>ip topology advancedtop</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-isis-1] <strong>cost-style wide</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-isis-1] <strong>network-entity 10.0000.0000.0001.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-isis-1] <strong>topology advancedtop topology-id 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-isis-1-topology-advancedtop] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-ldp] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-ldp-ipv4] <strong>mldp p2mp topo advancedtop</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-ldp-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>commit</strong></pre>
+<p># Configure the advanced IS-IS topology on the root node.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Root] <strong>ip topology advancedtop</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-isis-1] <strong>cost-style wide</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-isis-1] <strong>network-entity 10.0000.0000.0002.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-isis-1] <strong>topology advancedtop topology-id 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-isis-1-topology-advancedtop] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-ldp] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-ldp-ipv4] <strong>mldp p2mp topo advancedtop</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-ldp-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root] <strong>commit</strong></pre>
+<p># Configure the advanced IS-IS topology on P2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2] <strong>ip topology advancedtop</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-isis-1] <strong>cost-style wide</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-isis-1] <strong>network-entity 10.0000.0000.0004.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-isis-1] <strong>topology advancedtop topology-id 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-isis-1-topology-advancedtop] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-ldp] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-ldp-ipv4] <strong>mldp p2mp topo advancedtop</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-ldp-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>commit</strong></pre>
+</p></li><li><span>Configure NG MVPN. For details about VPN configurations, see the configuration files.</span><p><p># Configure NG MVPN on the root node.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Root] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-bgp] <strong>peer 1.1.1.1 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-bgp] <strong>peer 1.1.1.1 connect-interface LoopBack0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-bgp] <strong>ipv4-family mvpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-bgp-af-mvpn] <strong>peer 1.1.1.1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-bgp-af-mvpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-bgp] <strong>ipv4-family vpnv4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-bgp-af-vpnv4] <strong>peer 1.1.1.1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-bgp-af-vpnv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root] <strong>commit</strong></pre>
+<p># Configure NG MVPN on the leaf node.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp] <strong>peer 4.4.4.4 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp] <strong>peer 4.4.4.4 connect-interface LoopBack0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp] <strong>ipv4-family mvpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp-af-mvpn] <strong>peer 4.4.4.4 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp-af-mvpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp] <strong>ipv4-family vpnv4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp-af-vpnv4] <strong>peer 4.4.4.4 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp-af-vpnv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>commit</strong></pre>
+</p></li><li><span>Enable BFD globally on the leaf node, P1, and P2.</span><p><p># Enable BFD globally on the leaf node.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf] <strong>bfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bfd] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>commit</strong></pre>
+<p># Enable BFD globally on P1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>bfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-bfd] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>commit</strong></pre>
+<p># Enable BFD globally on P2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2] <strong>bfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-bfd] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>commit</strong></pre>
+</p></li><li><span>Enable IS-IS bit error detection on the logical direct sub-interfaces Eth-Trunk 1.1 between the leaf node and P2. Enable bit-error-rate-triggered IGP route switching on the interfaces Eth-Trunk 1 between the leaf node and P1.</span><p><p># Enable bit-error-rate-triggered IGP route switching on Eth-Trunk 1 of the leaf node.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf] <strong>interface Eth-Trunk1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf-Eth-Trunk1] <strong>isis topology advancedtop link-quality low incr-cost max-reachable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-Eth-Trunk1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>commit</strong></pre>
+<p># Enable IS-IS bit error detection on Eth-Trunk 1.1 of the leaf node.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf] <strong>interface Eth-Trunk1.1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf-Eth-Trunk1.1] <strong>isis bfd bit-error enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-Eth-Trunk1.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>commit</strong></pre>
+<p># Enable bit-error-rate-triggered IGP route switching on Eth-Trunk 1 of P1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>interface Eth-Trunk1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1-Eth-Trunk1] <strong>isis topology advancedtop link-quality low incr-cost max-reachable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-Eth-Trunk1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>commit</strong></pre>
+<p># Enable IS-IS bit error detection on Eth-Trunk 1.1 of P2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2] <strong>interface Eth-Trunk1.1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2-Eth-Trunk1.1] <strong>isis bfd bit-error enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-Eth-Trunk1.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>commit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p># After the configuration is complete, run the <strong>display mpls mldp lsp p2mp</strong> command on the leaf node. The command output shows that the LSP to the root node is Leaf-P1-Root.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf] <strong>display mpls mldp lsp p2mp</strong></pre>
+<pre class="screen"> An asterisk (*) before a Label means the USCB or DSCB is stale
+ An asterisk (*) before a Peer means the session is stale
+ -------------------------------------------------------------------------------
+                        LSP Information: mLDP P2MP-LSP
+ -------------------------------------------------------------------------------
+ Root IP        : 4.4.4.4              Instance         : --  
+ Opaque decoded : LSP-ID 32769 
+ Opaque value   : 01000400008001
+ Lsr Type       : Egress
+ Trigger Type   : MVPN
+ Upstream Count : 1                    Downstream Count : 0
+ Upstream:
+   In Label  Peer              MBB State 
+      48144  <strong>2.2.2.2</strong>           --
+ --------------------------------------------------------------------------------</pre>
+<p># If bit errors occur on two devices on the network shown in <a href="#EN-US_TASK_0172362311__fig_dc_vrp_cfg_error-code_ngmvpn_000102">Figure 1</a>, run the <strong>display bfd bit-error-detection session all</strong> command on the leaf node and P2. The command outputs show the local bit error rate of the leaf node and the remote bit error rate received by P2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf] <strong>display bfd bit-error-detection session all</strong></pre>
+<pre class="screen">--------------------------------------------------------------------------------
+BFD Bit Error Information:
+--------------------------------------------------------------------------------
+Session Type            : IP Peer
+FSM Board Id            : 3 
+Fault Type              : Local Interface Fault
+Min Tx Interval (ms)    : 1000
+Max Tx Interval (ms)    : 30000
+Actual Tx Interval (ms) : 30000
+Detect Multi            : 3
+Destination Port        : 3784
+TOS-EXP                 : 7
+Local BER               : <strong>1e-2</strong>
+Remote BER              : 0e-0
+--------------------------------------------------------------------------------
+IP Peer Information:
+-----------------------------------------------------------------------------
+Interface               : Eth-Trunk1.1 
+Source IP Address       : 10.1.3.1
+Destination IP Address  : 10.1.3.2
+--------------------------------------------------------------------------------
+
+     Total Session Number : 1</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2] <strong>display bfd bit-error-detection session all</strong></pre>
+<pre class="screen">--------------------------------------------------------------------------------
+BFD Bit Error Information:
+--------------------------------------------------------------------------------
+Session Type            : IP Peer
+FSM Board Id            : - 
+Fault Type              : Remote Interface Fault
+Min Tx Interval (ms)    : 1000
+Max Tx Interval (ms)    : 30000
+Actual Tx Interval (ms) : 30000
+Detect Multi            : 3
+Destination Port        : 3784
+TOS-EXP                 : 7
+Local BER               : 0e-0
+Remote BER              : <strong>1e-2</strong>
+--------------------------------------------------------------------------------
+IP Peer Information:
+-----------------------------------------------------------------------------
+Interface               : Eth-Trunk1.1 
+Source IP Address       : 10.1.3.2
+Destination IP Address  : 10.1.3.1
+--------------------------------------------------------------------------------
+
+     Total Session Number : 1</pre>
+<p># After bit errors occur on the link of the leaf end, IS-IS is triggered to adjust the cost value. Run the <strong>display mpls mldp lsp p2mp</strong> command on the leaf node. The command output shows that the MPLS path to the root node is Leaf-P2-Root. P2 learns the bit error rate through IGP association. mLDP excludes Eth-Trunk 1.1 from the outbound interface selection list and selects GE <span>0/1/0</span> as the outbound interface. Run the <strong>display mpls mldp lsp p2mp</strong> command on P2 to check the outbound interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2] <strong>display mpls mldp lsp  p2mp</strong></pre>
+<pre class="screen"> An asterisk (*) before a Label means the USCB or DSCB is stale
+ An asterisk (*) before a Peer means the session is stale
+ -------------------------------------------------------------------------------
+                        LSP Information: mLDP P2MP-LSP
+ -------------------------------------------------------------------------------
+ Root IP        : 4.4.4.4              Instance         : --  
+ Opaque decoded : LSP-ID 32769 
+ Opaque value   : 01000400008001
+ Lsr Type       : Egress
+ Trigger Type   : MVPN
+ Upstream Count : 1                    Downstream Count : 0
+ Upstream:
+   In Label  Peer              MBB State 
+      48139  <strong>3.3.3.3</strong>           --
+ -------------------------------------------------------------------------------</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2] <strong>display mpls mldp lsp  p2mp</strong></pre>
+<pre class="screen"> An asterisk (*) before a Label means the USCB or DSCB is stale
+ An asterisk (*) before a Peer means the session is stale
+ -------------------------------------------------------------------------------
+                        LSP Information: mLDP P2MP-LSP
+ -------------------------------------------------------------------------------
+ Root IP        : 4.4.4.4              Instance         : --  
+ Opaque decoded : LSP-ID 32769 
+ Opaque value   : 01000400008001
+ Lsr Type       : Transit
+ Trigger Type   : --
+ Upstream Count : 1                    Downstream Count : 1
+ Upstream:
+   In Label  Peer              MBB State 
+      48133  4.4.4.4           --
+ Downstream:              
+  Out Label  Peer              MBB State     Next Hop        Out Interface
+      48145  1.1.1.1           --            10.1.4.1        <strong>GigabitEthernet<span>0/1/0</span></strong>
+ -------------------------------------------------------------------------------</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172362311__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>Leaf node configuration file</p>
+<pre class="screen">#
+sysname Leaf
+#
+multicast mvpn 1.1.1.1
+#
+ip vpn-instance vpna
+ ipv4-family
+  route-distinguisher 100:100
+  apply-label per-instance
+  vpn-target 200:200 export-extcommunity
+  vpn-target 200:200 import-extcommunity
+  multicast routing-enable
+  mvpn
+   c-multicast signaling bgp
+   rpt-spt mode
+#
+ip topology advancedtop
+#
+bfd
+#
+mpls lsr-id 1.1.1.1
+#
+mpls
+#
+mpls ldp
+ mldp p2mp
+ #
+ ipv4-family
+  mldp p2mp topo advancedtop
+#
+mpls ldp remote-peer 3.3.3.3
+#
+mpls ldp remote-peer 2.2.2.2
+#
+isis 1
+ cost-style wide
+ network-entity 10.0000.0000.0003.00
+ #
+ topology advancedtop topology-id 10
+#
+interface Eth-Trunk1
+ ip address 10.1.1.1 255.255.255.0
+ ip topology advancedtop enable
+ isis enable 1
+ isis topology advancedtop
+ isis topology advancedtop link-quality low incr-cost max-reachable
+ mpls
+ mpls ldp
+#
+interface Eth-Trunk1.1
+ vlan-type dot1q 100
+ ip address 10.1.3.1 255.255.255.0
+ ip topology advancedtop enable
+ isis enable 1
+ isis bfd bit-error enable
+ isis topology advancedtop
+ isis topology advancedtop cost 100
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.4.1 255.255.255.0
+ ip topology advancedtop enable
+ isis enable 1
+ isis topology advancedtop
+ isis topology advancedtop cost 100
+ mpls           
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ eth-trunk 1
+#
+interface GigabitEthernet<span>0/1/3</span>
+ undo shutdown
+ ip binding vpn-instance vpna
+ ip address 192.168.1.1 255.255.255.0
+ #
+interface GigabitEthernet<span>0/1/2</span>
+ undo shutdown
+ eth-trunk 1
+#
+interface LoopBack0
+ ip address 1.1.1.1 255.255.255.255
+ ip topology advancedtop enable
+ isis enable 1
+ isis topology advancedtop
+#
+bgp 100
+ peer 4.4.4.4 as-number 100
+ peer 4.4.4.4 connect-interface LoopBack0
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 4.4.4.4 enable
+ #              
+ ipv4-family mvpn
+  policy vpn-target
+  peer 4.4.4.4 enable
+ #
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 4.4.4.4 enable
+ #
+ ipv4-family vpn-instance vpna
+  import-route direct
+#
+return</pre>
+</li><li><p>P1 configuration file</p>
+<pre class="screen">#
+sysname P1
+#
+ip topology advancedtop
+#
+mpls lsr-id 2.2.2.2
+#
+mpls
+#
+mpls l2vpn
+#               
+vsi vsi1 static
+ pwsignal ldp
+  vsi-id 1112
+  peer 4.4.4.4 
+#
+mpls ldp
+ mldp p2mp
+ #
+ ipv4-family
+  mldp p2mp topo advancedtop
+#
+mpls ldp remote-peer 4.4.4.4
+#
+mpls ldp remote-peer 1.1.1.1
+#
+isis 1
+ cost-style wide
+ network-entity 10.0000.0000.0001.00
+ #
+ topology advancedtop topology-id 10
+#
+interface Eth-Trunk1
+ ip address 10.1.1.2 255.255.255.0
+ ip topology advancedtop enable
+ isis enable 1
+ isis bfd enable
+ isis bfd bit-error enable
+ isis topology advancedtop
+ isis topology advancedtop link-quality low incr-cost max-reachable
+ mpls
+ mpls ldp
+#
+interface Eth-Trunk1.1
+ vlan-type dot1q 100
+ l2 binding vsi vsi1
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ eth-trunk 1
+#
+bfd
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown  
+ ip address 10.1.5.1 255.255.255.0
+ ip topology advancedtop enable
+ isis enable 1
+ isis topology advancedtop
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/2</span>
+ undo shutdown
+ eth-trunk 1
+#
+interface LoopBack0
+ ip address 2.2.2.2 255.255.255.255
+ ip topology advancedtop enable
+ isis enable 1
+ isis topology advancedtop
+#
+return
+</pre>
+</li><li><p>P2 configuration file</p>
+<pre class="screen">#
+sysname P2
+#
+ip topology advancedtop
+#
+bfd
+#
+mpls lsr-id 3.3.3.3
+#
+mpls
+#
+mpls ldp
+ mldp p2mp      
+ #
+ ipv4-family
+  mldp p2mp topo advancedtop
+#
+mpls ldp remote-peer 4.4.4.4
+#
+mpls ldp remote-peer 1.1.1.1
+#
+isis 1
+ cost-style wide
+ network-entity 10.0000.0000.0004.00
+ #
+ topology advancedtop topology-id 10
+#
+interface Eth-Trunk1
+ ip address 10.1.2.1 255.255.255.0
+ ip topology advancedtop enable
+ isis enable 1
+ isis topology advancedtop
+ mpls
+ mpls ldp
+#
+interface Eth-Trunk1.1
+ vlan-type dot1q 100
+ ip address 10.1.3.2 255.255.255.0
+ ip topology advancedtop enable
+ isis enable 1
+ isis bfd bit-error enable
+ isis topology advancedtop
+ mpls
+ mpls ldp
+#
+interface Ethernet3/0/0
+ undo shutdown
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.4.2 255.255.255.0
+ ip topology advancedtop enable
+ isis enable 1
+ isis topology advancedtop
+ mpls
+ mpls ldp
+ #
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ eth-trunk 1
+#
+interface GigabitEthernet<span>0/1/2</span>
+ undo shutdown
+ eth-trunk 1
+#
+interface LoopBack0
+ ip address 3.3.3.3 255.255.255.255
+ ip topology advancedtop enable
+ isis enable 1
+ isis topology advancedtop
+#
+return</pre>
+</li><li><p>Root node configuration file</p>
+<pre class="screen">#
+sysname Root
+#
+multicast mvpn 4.4.4.4
+#
+ip vpn-instance vpna
+ ipv4-family
+  route-distinguisher 100:100
+  apply-label per-instance
+  vpn-target 100:100 export-extcommunity
+  vpn-target 200:200 export-extcommunity
+  vpn-target 100:100 import-extcommunity
+  vpn-target 200:200 import-extcommunity
+  multicast routing-enable
+  mvpn
+   sender-enable
+   c-multicast signaling bgp
+   rpt-spt mode
+   ipmsi-tunnel
+    mldp
+#
+ip topology advancedtop
+#
+mpls lsr-id 4.4.4.4
+#
+mpls
+#
+mpls l2vpn
+#
+vsi vsi1 static
+ pwsignal ldp
+  vsi-id 1112
+  peer 2.2.2.2 
+#
+mpls ldp        
+ mldp p2mp
+ #
+ ipv4-family
+  mldp p2mp topo advancedtop
+#
+mpls ldp remote-peer 2.2.2.2
+#
+mpls ldp remote-peer 3.3.3.3
+#
+isis 1
+ cost-style wide
+ network-entity 10.0000.0000.0002.00
+ #
+ topology advancedtop topology-id 10
+#
+interface Eth-Trunk1
+ ip address 10.1.2.2 255.255.255.0
+ ip topology advancedtop enable
+ isis enable 1
+ isis topology advancedtop
+ mpls           
+ mpls ldp
+#
+interface Eth-Trunk1.1
+ vlan-type dot1q 100
+ l2 binding vsi vsi1
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.5.2 255.255.255.0
+ ip topology advancedtop enable
+ isis enable 1
+ isis topology advancedtop
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ eth-trunk 1
+#
+interface GigabitEthernet<span>0/1/2</span>
+ undo shutdown
+ eth-trunk 1
+#
+interface LoopBack0
+ ip address 4.4.4.4 255.255.255.255
+ ip topology advancedtop enable
+ isis enable 1
+ isis topology advancedtop
+#
+bgp 100
+ peer 1.1.1.1 as-number 100
+ peer 1.1.1.1 connect-interface LoopBack0
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 1.1.1.1 enable
+ #
+ ipv4-family mvpn
+  policy vpn-target
+  peer 1.1.1.1 enable
+ #
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 1.1.1.1 enable
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfg_error-code_000010.html">Configuration Examples for Bit-Error-Triggered Protection Switching
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfg_error-code_evpn_0002.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_error-code_0005.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

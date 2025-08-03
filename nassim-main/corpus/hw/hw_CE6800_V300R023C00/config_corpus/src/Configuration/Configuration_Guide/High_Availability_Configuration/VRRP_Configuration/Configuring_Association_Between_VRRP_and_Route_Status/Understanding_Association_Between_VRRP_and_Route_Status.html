@@ -1,0 +1,73 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding Association Between VRRP and Route Status">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_vrrp_cfg_0016.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_vrrp_cfg_0017.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001176743731">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding Association Between VRRP and Route Status</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001176743731"></a><a name="EN-US_CONCEPT_0000001176743731"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding Association Between VRRP and Route Status</h1>
+<div><div class="section"><h4 class="sectiontitle">Application Scenarios</h4><p>After a VRRP group is configured, VRRP devices negotiate the master/backup state through VRRP Advertisement packets. If an interface or a link fails, or the network topology changes, devices in the VRRP group cannot immediately detect the failure or change. Consequently, the master/backup VRRP switchover is delayed. Additionally, after a master/backup VRRP switchover is complete, route switching fails to be performed because no route is associated with the VRRP group, interrupting the normal forwarding of traffic.</p>
+<p>To resolve these problems, configure VRRP association. If an object associated with a VRRP group fails, the VRRP group is notified and performs a primary/secondary link switchover. In addition, when a master/backup VRRP switchover is performed, the VRRP group instructs its associated object to perform a switchover accordingly. VRRP association ensures proper traffic forwarding and improves link reliability.</p>
+<p>A VRRP group can monitor an uplink route. If the uplink route is withdrawn or becomes inactive, the VRRP group is instructed to reduce the master's priority to trigger a master/backup VRRP switchover.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Fundamentals</h4><p>A VRRP group can be configured to track an uplink route to determine whether the route is reachable. If the uplink route is withdrawn or becomes inactive after the uplink fails or the network topology changes, hosts on the LAN cannot access the external network through gateways. Then, after being notified of the failure or change, the master device in the VRRP group reduces its priority by a specified value to allow the backup device with a higher priority to preempt the master role. This process ensures uninterrupted communication between the hosts and external network. The master device is restored to its original priority after the uplink recovers.</p>
+<p>In <a href="#EN-US_CONCEPT_0000001176743731__fig1077233935817">Figure 1</a>, a VRRP group is configured on DeviceA and DeviceB. DeviceA is the master and forwards user-to-network traffic, and DeviceB is the backup. DeviceA in the VRRP group is configured to track the 10.1.2.0/24 route.</p>
+<p>When the uplink between DeviceA and DeviceC fails, the route to 10.1.2.0/24 becomes unreachable. As such, DeviceA reduces its VRRP priority by a specified value so that its new priority is lower than the priority of DeviceB. DeviceB preempts the master role and takes over traffic forwarding, thereby preventing user traffic loss.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001176743731__fig1077233935817"><a name="EN-US_CONCEPT_0000001176743731__fig1077233935817"></a><a name="fig1077233935817"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring association between VRRP and route status</span><br><span><img class="vsd" src="figure/en-us_image_0000001176663853.png"></span></div>
+<p>VRRP device configurations are as follows:</p>
+<ul><li>DeviceA functions as the master in the VRRP group with a priority of 120.</li><li>DeviceB works in immediate preemption mode and functions as the backup in the VRRP group with a priority of 100.</li><li>DeviceA tracks the 10.1.2.0/24 route and reduces its VRRP priority by 40 if it is notified that the route is unreachable.</li></ul>
+<p>The implementation is as follows:</p>
+<ol><li>Normally, DeviceA periodically sends VRRP Advertisement packets to inform DeviceB that it is working properly.</li><li>When the uplink between DeviceA and DeviceC fails, the 10.1.2.0/24 route becomes unreachable, and the VRRP group is notified of the route status change. After receiving this notification, DeviceA reduces its VRRP priority to 80 (120 â 40 = 80). Because the VRRP priority of DeviceB, which is working in immediate preemption mode, is now higher than the priority of DeviceA, DeviceB immediately preempts the master role and sends gratuitous ARP packets to allow DeviceE to update address entries.</li><li><p>When the faulty link recovers, the 10.1.2.0/24 route becomes reachable again. DeviceA then restores its VRRP priority to 120 (80 + 40 = 120), preempts the master role, and sends VRRP Advertisement and gratuitous ARP packets. After DeviceB receives the Advertisement packet carrying a priority higher than its own, it switches to the Backup state.</p>
+</li><li>Both DeviceA and DeviceB are restored to their original statuses. As such, DeviceA forwards user-to-network traffic again.</li></ol>
+<p>The preceding process shows that association between a VRRP group and an uplink route can prevent traffic loss. In situations where the uplink route is unreachable, the VRRP group triggers a master/backup VRRP switchover through priority adjustment so that the backup device can take over user-to-network traffic.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_vrrp_cfg_0016.html">Configuring Association Between VRRP and Route Status
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_vrrp_cfg_0017.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

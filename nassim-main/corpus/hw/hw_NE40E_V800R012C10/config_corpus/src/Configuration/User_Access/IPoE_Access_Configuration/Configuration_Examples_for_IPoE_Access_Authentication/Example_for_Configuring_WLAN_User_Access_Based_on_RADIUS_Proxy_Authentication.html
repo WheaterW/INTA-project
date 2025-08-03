@@ -1,0 +1,529 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring WLAN User Access Based on RADIUS Proxy Authentication">
+<meta name="abstract" content="This section provides an example for configuring WLAN user access based on RADIUS proxy authentication.">
+<meta name="description" content="This section provides an example for configuring WLAN user access based on RADIUS proxy authentication.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_ipox_cfg_0083.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_013611.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_013600_vlan.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z50024784,z00603461,w00800033,z00588052,ipoxne,c00549182,w00556928,l00593348,w00606909,w00447999,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+<meta name="OWNER" content="c00549182">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="z00588052">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172374060">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring WLAN User Access Based on RADIUS Proxy Authentication</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172374060"></a><a name="EN-US_TASK_0172374060"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring WLAN User Access Based on RADIUS Proxy Authentication</h1>
+<div class="taskbody"><p>This section provides an example for configuring WLAN user access based on RADIUS proxy authentication.</p>
+<div class="context"><a name="EN-US_TASK_0172374060__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><div class="p">On the network shown in <a href="#EN-US_TASK_0172374060__fig_dc_ne_cfg_bras_001001">Figure 1</a>, to allow WLAN users to access the network, RADIUS authentication needs to be performed on the AC through the EAP authentication mode, and RADIUS accounting needs to be performed through the <span class="keyword">Router</span>. The user access process is as follows:<ol><li>A WLAN user sends an EAP packet to the AC. The AC terminates the EAP packet and sends a RADIUS packet to the <span class="keyword">Router</span>.</li><li>The <span class="keyword">Router</span> functions as a RADIUS proxy to listen to and forward authentication packets sent by the AC to the RADIUS server, as well as authentication response packets sent in reply by the RADIUS server to the AC. During this process, the <span class="keyword">Router</span> saves the authorization information delivered by the RADIUS server to the account.</li><li>After the authentication is successful, the user sends DHCP messages to the <span class="keyword">Router</span> to obtain an IP address. The <span class="keyword">Router</span> uses the user's MAC address to query the authorization information saved for the user account in the proxy process. If the user account's authorization information exists, the <span class="keyword">Router</span> assigns an idle IP address to the user and uses the saved authorization information to authorize the user. The <span class="keyword">Router</span> also sends an Accounting Start packet to the RADIUS server for user accounting.</li><li>The device responds to the accounting packets sent by the AC, without sending them to the RADIUS server.<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If a large number of ACs or APs are connected to a BRAS, RADIUS proxy authentication is used to prevent these ACs or APs from sending authentication packets to the RADIUS server. RADIUS proxy authentication reduces the number of RADIUS clients that need to be managed by the RADIUS server. The BRAS transparently transmits RADIUS packets of specified RADIUS clients to the RADIUS server, records authorization information delivered by the RADIUS server, and transparently transmits authentication response packets to the RADIUS server.</p>
+</div></div>
+</li></ol>
+</div>
+<div class="fignone" id="EN-US_TASK_0172374060__fig_dc_ne_cfg_bras_001001"><a name="EN-US_TASK_0172374060__fig_dc_ne_cfg_bras_001001"></a><a name="fig_dc_ne_cfg_bras_001001"></a><span class="figcap"><b>Figure 1 </b>Networking for configuring WLAN user access based on RADIUS proxy authentication</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 and 2 in this example represent GE <span>0/1/1</span> and GE <span>0/1/2</span>, respectively.</p>
+</div></div>
+<br><span><img src="figure/en-us_image_0000002132051718.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172374060__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Configure address pools.</li><li>Configure a RADIUS server group.</li><li>Configure AAA schemes.</li><li>Configure an AAA domain.</li><li>Configure an IP address for AC access on the interface.</li><li>Configure RADIUS proxy.</li><li>Configure RADIUS proxy for avalanche prevention.</li><li>Configure a DUID for the device.</li><li>Configure BAS access on an interface.</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172374060__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li>IP address of the RADIUS authentication server</li><li>IP address of the RADIUS accounting server</li><li>Interface IP address for the AC to send RADIUS packets</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172374060__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure address pools.</span><p><p># Configure a local IPv4 address pool.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>ip pool wifi1x bas local</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-ip-pool-wifi1x] <strong>gateway 172.30.0.1 24</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-ip-pool-wifi1x] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-ip-pool-wifi1x] <strong>section 0 172.30.0.2 172.30.0.254</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-ip-pool-wifi1x] <strong>quit</strong></pre>
+</p><p><p># Configure a local IPv6 prefix pool.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>ipv6 prefix wifi local</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-ipv6-prefix-wifi] <strong>prefix 2001:db8:3::/48</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-ipv6-prefix-wifi] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-ipv6-prefix-wifi] <strong>quit</strong></pre>
+<p># Configure a local IPv6 address pool, and bind the prefix pool to this address pool.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>ipv6 pool wifi bas local</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-ipv6-pool-wifi] <strong>prefix wifi</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-ipv6-pool-wifi] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-ipv6-pool-wifi] <strong>quit</strong></pre>
+</p></li><li><span>Configure a RADIUS server group.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>radius-server group shiva</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-radius-shiva] <strong>radius-server shared-key-cipher YsHsjx_202206</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-radius-shiva] <strong>radius-server authentication 10.1.123.151 1812</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-radius-shiva] <strong>radius-server accounting 10.1.123.151 1813</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-radius-shiva] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-radius-shiva] <strong>quit</strong></pre>
+</p></li><li><span>Configure AAA schemes.</span><p><p># Configure a password for an IPoE user.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> aaa</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa]<strong> default-password cipher YsHsjx_202207</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa]<strong> commit</strong></pre>
+</p><p><p># Configure the pure username generation mode for the IPoE user.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa]<strong> default-user-name include mac-address -</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa]<strong> commit</strong></pre>
+<p># Configure an authentication scheme and set the authentication mode to RADIUS proxy authentication.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa] <strong>authentication-scheme rdp</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa-authen-rdp] <strong>authentication-mode radius-proxy</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa-authen-rdp] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa-authen-rdp] <strong>quit</strong></pre>
+</p><p><p># Configure an accounting scheme named <strong>rds</strong>, with RADIUS accounting specified.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa] <strong>accounting-scheme rds</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa-accounting-rds] <strong>accounting-mode radius</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa-accounting-rds] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa-accounting-rds] <strong>quit</strong></pre>
+</p></li><li><span>Configure an AAA domain and apply the authentication scheme <strong>rdp</strong>, accounting scheme <strong>rds</strong>, and RADIUS server group <strong>shiva</strong> to the domain.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa] <strong>domain radiusproxy</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa-domain-radiusproxy] <strong>authentication-scheme rdp</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa-domain-radiusproxy] <strong>accounting-scheme rds</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa-domain-radiusproxy] <strong>radius-server group shiva</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa-domain-radiusproxy] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa-domain-radiusproxy] <strong>ip-pool wifi1x</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa-domain-radiusproxy] <strong>ipv6-pool wifi</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa-domain-radiusproxy] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa] <strong>quit</strong></pre>
+</p></li><li><span>Configure an IP address for AC access.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>interface gigabitethernet <span>0/1/2</span></strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>] <strong>ip address 10.1.0.197 8</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>] <strong>quit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>This IP address is used for AC access. RADIUS authentication packets sent by the AC must be sent to this address. If the device has another IP address for communication with the AC, this configuration is not needed.</p>
+</div></div>
+</p></li><li><span>Configure RADIUS proxy.</span><p><p># Configure the RADIUS client.</p>
+</p><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>radius-client 10.1.0.201 server-group shiva shared-key-cipher YsHsjx_202208</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The IP address configured after <a href="cmdqueryname=radius-client"><b><span class="cmdname">radius-client</span></b></a> is the interface IP address to which the AC sends RADIUS packets. In this example, the RADIUS server group bound to the domain is the same as that for RADIUS proxy. In practice, the RADIUS server group bound to a domain may be different from that for RADIUS proxy.</p>
+</div></div>
+<p># Configure the local IP address used by the RADIUS server to create UDP sockets with local ports 1645, 1646, and 3799.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>radius local-ip 10.1.0.197</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong></pre>
+<p># (Optional) Configure a DSCP value for RADIUS packets sent from the BRAS to the AC.</p>
+<p>To prevent RADIUS packets from being discarded due to network congestion, run the following commands to increase the DSCP value of RADIUS packets sent from the BRAS to a RADIUS proxy.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>radius-client packet dscp 48</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong></pre>
+</p></li><li><span>(Optional) Configure RADIUS proxy for avalanche prevention.</span><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>To view RADIUS proxy statistics, run the <a href="cmdqueryname=display+radius-client+statistics+global"><b><span class="cmdname">display radius-client statistics global</span></b></a> command. If the RADIUS proxy continuously discards a large number of packets, you need to decrease the first packet processing rate of the RADIUS proxy, increase the suppression and recovery thresholds for the number of active RADIUS sessions, and increase the CPCAR and total CAR bandwidth for the RADIUS whitelist based on the processing capability of the BRAS.</p>
+</div></div>
+<p># Set the first packet processing rate of the RADIUS proxy.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>radius-client first-packet rate 100</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<p># Configure the suppression and recovery thresholds for the number of active sessions on the RADIUS proxy.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>aaa</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa] <strong>access-speed adjustment system-state radius-proxy active-session threshold restrain 200 resume 70</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa] <strong>quit</strong></pre>
+<p># Configure CPCAR for the RADIUS whitelist.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>cpu-defend policy 6</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-cpu-defend-policy-6] <strong>car whitelist radius cir 4000 cbs 1024000</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-cpu-defend-policy-6] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-cpu-defend-policy-6] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong>slot <span>1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-slot-<strong><span>1</span></strong>] <strong>cpu-defend-policy 6</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-slot-<strong><span>1</span></strong>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-slot-<strong><span>1</span></strong>] <strong>quit</strong></pre>
+<p># Set the total rate for sending packets to the CPU.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>cpu-defend policy 6</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-cpu-defend-policy-6] <strong>car total-packet high</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-cpu-defend-policy-6] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-cpu-defend-policy-6] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>slot <span>1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-slot-<strong><span>1</span></strong>] <strong>cpu-defend-policy 6</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-slot-<strong><span>1</span></strong>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-slot-<strong><span>1</span></strong>] <strong>quit</strong></pre>
+</p></li><li><span>Configure a DUID for the device.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> dhcpv6 duid llt</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+</p></li><li><span>Configure BAS access on an interface.</span><p><p># Configure a sub-interface and a user-side VLAN.</p>
+</p><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>interface gigabitethernet <span>0/1/1</span>.1</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1] <strong>user-vlan 3000 3799 qinq 2700 2955</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1<strong>-</strong>vlan-3000-3799-QinQ-2700-2955] <strong>quit</strong></pre>
+<p># Enable IPv6 and configure stateful address autoconfiguration on the interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1] <strong>ipv6 enable</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1] <strong>ipv6 address auto link-local</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1] <strong>ipv6 nd autoconfig managed-address-flag</strong> 
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1] <strong>commit</strong></pre>
+<p># Configure BAS access on the interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1] <strong>bas</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>access-type layer2-subscriber default-domain authentication radiusproxy</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>authentication-method bind</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>authentication-method-ipv6</strong><strong> bind</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1] <strong>quit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The BAS access configuration on an interface in RADIUS proxy scenarios is the same as that in IPoE access scenarios. RADIUS proxy applies only to IPoE users, not PPPoE users.</p>
+</div></div>
+</p></li><li><span>Verify the configuration.</span><p><p>Run the <a href="cmdqueryname=display+radius-server+configuration+group+shiva"><b><span class="cmdname">display radius-server configuration group shiva</span></b></a> command on the device to view RADIUS server group configurations.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>display radius-server configuration group shiva</strong>
+  -------------------------------------------------------
+-------------------------------------------------------
+  Server-group-name    :  shiva
+  Authentication-server:  IP:10.1.123.151 Port:1812 Weight[0] [UP] [MASTER] 
+                          Vpn: -
+  Authentication-server:  -
+  Authentication-server:  -
+  Authentication-server:  -
+  Authentication-server:  -
+  Authentication-server:  -
+  Authentication-server:  -
+  Authentication-server:  -
+  Authentication-server:  -
+  Authentication-server:  -
+  Authentication-server:  -
+  Authentication-server:  -
+  Authentication-server:  -
+  Authentication-server:  -
+  Authentication-server:  -
+  Authentication-server:  -
+  Accounting-server    :  IP:10.1.123.151 Port:1813 Weight[0] [UP] [MASTER] 
+                          Vpn: -
+  Accounting-server    :  -
+  Accounting-server    :  -
+  Accounting-server    :  -
+  Accounting-server    :  -
+  Accounting-server    :  -
+  Accounting-server    :  -
+  Accounting-server    :  -
+  Accounting-server    :  -
+  Accounting-server    :  -
+  Accounting-server    :  -
+  Accounting-server    :  -
+  Accounting-server    :  -
+  Accounting-server    :  -
+  Accounting-server    :  -
+  Accounting-server    :  -
+  Protocol-version     :  radius
+  Shared-secret-key    :  ******
+  Retransmission       :  3
+  Timeout-interval(s)  :  5
+  Acct-Start-Packet Resend  :  NO
+  Acct-Start-Packet Resend-Times  :  0
+  Acct-Stop-Packet Resend  :  NO
+  Acct-Stop-Packet Resend-Times  :  0
+  Traffic-unit         :  B
+  ClassAsCar           :  NO
+  User-name-format     :  Domain-included
+  Option82 parse mode  :  -
+  Attribute-translation:  NO
+  Packet send algorithm:  Master-Backup
+  Tunnel password      :  cipher
+  Attribute decode-error-policy list: -
+  Trust server username:  NO
+  Attach username in ACK:  -
+  Qos-profile no-exist-policy  :  Offline
+  Policy-name no-exist-policy  :  Offline
+  Hw-domain-name block policy  :  Online
+  Accounting-merge max-length  :  --
+  Radius-attribute include agent-circuit-id value-added-service  :  FALSE
+  Radius-attribute include agent-remote-id value-added-service  :  FALSE
+  Radius-attribute include hw-avpair nat:nat-vpn :  FALSE
+  Radius-attribute include hw-avpair nat:nat-export :  FALSE
+  Radius-attribute include hw-avpair subscriber:fq :  FALSE
+  Radius-attribute include class edsg :  FALSE
+  Radius-attribute include class daa :  FALSE
+  Radius-attribute include hw-acct-terminate-subcause :  FALSE
+  Radius-attribute include hw-acct-terminate-subcause edsg :  FALSE
+  Radius-attribute include hw-avpair subscriber:vpnid :  FALSE
+  Radius-attribute include replymessage :  FALSE
+  Acct-Interim-Packet Resend  :  NO
+  Acct-Interim-Packet Resend-Times  :  0
+  Nasport Bypass enable  :  0
+  NAS-IP-Address using remote-ip: NO
+  NAS-PORT using user-id: NO
+  Radius-server alarm enable :  YES</pre>
+<p>Run the <a href="cmdqueryname=display+domain"><b><span class="cmdname">display domain</span></b></a> command on the device to view domain configurations.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>display domain radiusproxy</strong>
+  ------------------------------------------------------------------------------
+<strong>  </strong>Domain-name                     : radiusproxy                     
+  Domain-state                    : Active
+  Authentication-scheme-name      : rdp
+  Accounting-scheme-name          : rds
+  Authorization-scheme-name       : -
+  Primary-DNS-IP-address          : -
+  Second-DNS-IP-address           : -
+  Primary-DNS-IPV6-address        : -
+  Second-DNS-IPV6-address         : -
+  Web-server-URL-parameter        : No
+  Portal-server-URL-parameter     : No
+  Primary-NBNS-IP-address         : -
+  Second-NBNS-IP-address          : -
+  Time-range                      : Disable
+  Idle-cut direction              : Both
+  Idle-data-attribute (time,flow) : 0, 60
+  User detect interval            : 0s
+  User detect retransmit times    : 0
+  Install-BOD-Count               : 0
+  Report-VSM-User-Count           : 0
+  Value-added-service             : default
+  User-access-limit               : 246272
+  Online-number                   : 0
+  Web-IP-address                  : -
+  Web-IPv6-address                : -
+  Dns-redirect-IP-address         : -
+  Web-URL                         : -
+  Web-auth-server                 : -
+  Web-auth-state                  : -
+  Web-server-mode                 : get
+  Slave Web-IP-address            : -
+  Slave Web-IPv6-address          : -
+  Slave Web-URL                   : -
+  Slave Web-auth-server           : -
+  Slave Web-auth-state            : -
+  Web-server identical-url        : Disable
+  Portal-server-IP                : -
+  Portal-URL                      : -
+  Portal-force-times              : 2
+  Portal-server identical-url     : Disable 
+  Service-policy(Portal)          : - 
+  Ds-lite IPv4 portal             : Disable
+  PPPoE-user-URL                  : Disable
+  AdminUser-priority              : 16
+  IPUser-ReAuth-Time              : 300s
+  mscg-name-portal-key            : -
+  Portal-user-first-url-key       : -
+  User-session-limit              : 4294967295
+  Ancp auto qos adapt             : Disable
+  L2TP-group-name                 : -
+  User-lease-time-no-response     : 0s
+  RADIUS-server-template          : shiva
+  Two-acct-template               : -
+  RADIUS-server-pre-template      : -
+                                    -
+                                    -
+  RADIUS-server-llid-first-template: -
+  HWTACACS-server-template        : -
+  Bill Flow                       : Disable
+  Tunnel-acct-2867                : Disable
+  Qos-profile-name inbound        : -
+  Qos-profile-name outbound       : -
+ 
+  Flow Statistic:
+  Flow-Statistic-Up               : Yes
+  Flow-Statistic-Down             : Yes
+  Source-IP-route                 : Disable
+  IP-warning-threshold            : -
+  IP-warning-threshold(Low)       : -
+  IPv6-warning-threshold          : -
+  IPv6-warning-threshold(Low)     : -
+  Multicast Forwarding            : Yes
+  Multicast Virtual               : No
+  Max-multilist num               : 4
+  Multicast-profile               : -
+  Multicast-profile ipv6          : - 
+  Multicast-policy                : - 
+  Multicast-bandwidth             : - 
+  Multicast-bandwidth-level-1     : -
+  IP-address-pool-name            : wifi1x
+  IPv6-Pool-name                  : wifi
+  Quota-out                       : Offline
+  Service-type                    : -
+  User-basic-service-ip-type      : -/-/-
+  PPP-ipv6-address-protocol       : Ndra
+  IPv6-information-protocol       : Stateless dhcpv6
+  IPv6-PPP-assign-interfaceid     : Disable
+  IPv6-PPP-NDRA-halt              : Disable
+  IPv6-PPP-NDRA-unicast           : Disable
+  Trigger-packet-wait-delay       : 60s
+  Peer-backup                     : Enable
+  Reallocate-ip-address           : Disable
+  Cui  enable                     : Disable 
+  Igmp enable                     : Enable 
+  CPE IP address                  : -
+  Pim snooping enable             : Enable
+  L2tp-user radius-force          : Disable
+  Accounting dual-stack           : Separate
+  Radius server domain-annex      : -
+  Dhcp-option64-service           : Disable
+  Parse-separator                 : -
+  Parse-segment-value             : -
+  Dhcp-receive-server-packet      : -
+  Http-hostcar                    : Disable
+  Public-address assign-first     : Disable 
+  Public-address nat              : Enable
+  Dhcp-user auto-save             : Disable
+  IP-pool usage-status threshold  : 255 , 255 
+  Select-Pool-Rule                : gateway + local priority 
+  AFTR name                       : - 
+  Traffic-rate-mode               : Separate 
+  Traffic-statistic-mode          : Separate 
+  Rate-limit-mode-inbound         : Car 
+  Rate-limit-mode-outbound        : Car 
+  Service-change-mode             : Stop-start 
+  DAA Direction                   : both 
+  Session Volumequota apply direction: both
+  Nas logic-sysname               : -
+  Accounting exclude-type vlan    : -/-
+  Framed-ip urpf                  : Enable
+  RA link-prefix                  : Disable 
+  Dslam connect speed             : Disable 
+  Local backup                    : Enable 
+  DAA start accounting merge      : disable 
+  DAA stop accounting merge       : disable 
+  DAA interim accounting merge    : disable 
+  DAA merged interim accounting interval(minute) : -- 
+  DAA merged interim accounting hash  : disable 
+  EDSG stop accounting merge      : disable 
+  EDSG interim accounting merge   : disable 
+  EDSG merged interim accounting interval(minute): -- 
+  EDSG merged interim accounting hash : disable 
+  Stop dropped flow direction     : - 
+  Interval dropped flow direction : - 
+  Edsg family-schedule inbound    : Disable 
+  Edsg family-schedule outbound   : Disable 
+  Layer2 IPoE ip-pool select-mode : Local 
+  Layer2 PPPoE ip-pool select-mode: Local
+  access-trigger loose time(minute)   : 0
+  access-trigger loose infinite-lease : Disable
+  IPv6 address assignment mode    : - 
+  LNS Tcp-Ack Priority-Car        : Disable 
+  EDSG Tcp-Ack Priority-Car       : Disable 
+  Include LNS-IPv6                : Disable
+  Map priority                    : MAP-E
+  Coa-zero-lease Dual-cut         : Disable
+  COA lease zero policy           : -
+  Authentication fail online domain : -
+  ipv6-address authorization      : Enable
+  Traffic-policy ucl upstream match-source-ip : Disable
+  ------------------------------------------------------------------------------</pre>
+<p>Run the <a href="cmdqueryname=display+radius-client+configuration"><b><span class="cmdname">display radius-client configuration</span></b></a> command on the device to view RADIUS proxy configurations.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>display radius-client configuration</strong>
+<strong> </strong> Radius-client packet dscp value: 48
+  Radius-client first packet rate (unit: pps): 100
+  Radius-client nas-ip-address from packet : SOURCE_IP
+  -----------------------------------------------------------------------------
+  IP-Address       Mask             VPN-instance          Group
+  Domain-authorization   Roam-domain      Trigger-web
+  -----------------------------------------------------------------------------
+  10.1.0.201       255.255.255.255  --                    shiva           
+  NO                     --               ACCT_TRIGGER
+ 
+  -----------------------------------------------------------------------------
+  1 Radius client(s) in total  </pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172374060__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><pre class="screen">#
+sysname <span class="keyword">HUAWEI</span>
+#
+cpu-defend policy 6
+ car whitelist radius cir 4000 cbs 1024000
+ car total-packet high
+#
+slot <strong><span>1</span></strong>
+ cpu-defend-policy 6
+#
+radius-server group shiva
+ radius-server shared-key-cipher %+%##!!!!!!!!!"!!!!'!!!!(!!!!*j}18H7WTV^zEAUblld-@40X-I[F@/Qly@ALX^F%2jp5!!!!!!A!!!!B9yVKme:499+wNV&gt;.W7&gt;+-!GWwqyaJ%6B3,=e<font style="font-size:8pt" Face="Courier New" >~</font>rO%+%#
+ radius-server authentication 10.1.123.151 1812 weight 0
+ radius-server accounting 10.1.123.151 1813 weight 0
+#
+radius local-ip 10.1.0.197
+#
+ip pool wifi1x bas local
+ gateway 172.30.0.1 255.255.255.0
+ section 0 172.30.0.2 172.30.0.254
+#
+ipv6 prefix wifi local
+ prefix 2001:DB8:3::/48
+#
+ipv6 pool wifi bas local
+ prefix wifi
+#
+dhcpv6 duid 000100012ba5fc198038bc19704d
+#
+aaa
+ default-password cipher %@%##!!!!!!!!!"!!!!'!!!!(!!!!*j}18H7WTVZ&amp;V`0v5PlMaY,&lt;<font style="font-size:8pt" Face="Courier New" >~</font>8'a+L*fILUqdM,22jp5!!!!!!A!!!!0+1,B8UxW(2M8i$X1T_,iL*C%Yu=jLP9vH2v&amp;q|;%@%#
+ default-user-name include mac-address -
+<strong> </strong>access-speed adjustment system-state radius-proxy active-session threshold restrain 200 resume 70
+ #
+ authentication-scheme rdp
+  authentication-mode radius-proxy
+ #
+ accounting-scheme rds
+ #
+ domain radiusproxy
+  authentication-scheme rdp
+  accounting-scheme rds
+  radius-server group shiva 
+  ip-pool wifi1x
+  ipv6-pool wifi
+#
+radius-client packet dscp 48
+radius-client first-packet rate 100
+radius-client 10.1.0.201 mask 255.255.255.255 shared-key-cipher %^%#}v{/ZA}&gt;yTiC'[0bvy'X"N[+,uj*U)L0^5;4Jtf6%^%# server-group shiva
+#
+license
+ active bas slot <strong><span>1</span></strong>
+#
+interface GigabitEthernet <span>0/1/1</span>.1
+ ipv6 enable
+ ipv6 address auto link-local
+ statistic enable
+ user-vlan 3000 3799 qinq 2700 2955
+ ipv6 nd autoconfig managed-address-flag
+ bas
+ #
+  access-type layer2-subscriber default-domain authentication radiusproxy
+  authentication-method bind
+  authentication-method-ipv6 bind
+ #
+#
+interface GigabitEthernet <span>0/1/2</span>
+ undo shutdown
+ ip address 10.1.0.197 255.0.0.0
+#
+return</pre>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_ipox_cfg_0083.html">Configuration Examples for IPoE Access Authentication
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_013611.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_013600_vlan.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

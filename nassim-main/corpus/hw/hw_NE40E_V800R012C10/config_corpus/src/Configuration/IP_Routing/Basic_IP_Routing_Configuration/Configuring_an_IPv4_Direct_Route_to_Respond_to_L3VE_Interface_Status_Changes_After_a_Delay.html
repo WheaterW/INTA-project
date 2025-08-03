@@ -1,0 +1,89 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring an IPv4 Direct Route to Respond to L3VE Interface Status Changes After a Delay">
+<meta name="abstract" content="This section describes how to configure an IPv4 direct route to respond to Layer 3 virtual Ethernet (L3VE) interface status changes after a delay on an IP radio access network (RAN). During traffic switchback after the master AGG recovers, this configuration can reduce traffic loss and improve network reliability.">
+<meta name="description" content="This section describes how to configure an IPv4 direct route to respond to Layer 3 virtual Ethernet (L3VE) interface status changes after a delay on an IP radio access network (RAN). During traffic switchback after the master AGG recovers, this configuration can reduce traffic loss and improve network reliability.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ip-route_cfg_0000.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ip-route_cfg_0029.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ip-route_cfg_0060.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,w00556928,ip-routevrp,s00526617,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="IP Routing Basis">
+<meta name="featuretype" content="IP Route">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IP Routing Basis">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="IP Routing Basis">
+<meta name="featuretype" content="IP Routing Basis">
+<meta name="OWNER" content="z00809835">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="ccms">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172365339">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Configuring an IPv4 Direct Route to Respond to L3VE Interface Status Changes After a Delay</title>
+</head>
+<body><a name="EN-US_TASK_0172365339"></a><a name="EN-US_TASK_0172365339"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring an IPv4 Direct Route to Respond to L3VE Interface Status Changes After a Delay</h1>
+<div class="taskbody"><p>This section describes how to configure an IPv4 direct route to respond to Layer 3 virtual Ethernet (L3VE) interface status changes after a delay on an IP radio access network (RAN). During traffic switchback after the master AGG recovers, this configuration can reduce traffic loss and improve network reliability.</p>
+<div class="context"><a name="EN-US_TASK_0172365339__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Usage Scenario</h4><p>On the network shown in <a href="#EN-US_TASK_0172365339__fig_dc_vrp_ip-route_cfg_003501">Figure 1</a>, a Layer 2 virtual private network (VPN) connection is set up between each AGG and the CSG through L2VE interfaces, and Border Gateway Protocol (BGP) VPNv4 peer relationships are set up between the AGGs and RSGs on an L3VPN. L3VE interfaces are configured on the AGGs, and VPN instances are bound to the L3VE interfaces so that the CSG can access the L3VPN. BGP is configured on the AGGs to import IPv4 direct routes between the CSG and AGGs. The AGGs convert these IPv4 direct routes to BGP VPNv4 routes before advertising them to the RSGs.</p>
+<div class="fignone" id="EN-US_TASK_0172365339__fig_dc_vrp_ip-route_cfg_003501"><a name="EN-US_TASK_0172365339__fig_dc_vrp_ip-route_cfg_003501"></a><a name="fig_dc_vrp_ip-route_cfg_003501"></a><span class="figcap"><b>Figure 1 </b>Networking for the IPv4 direct route responding to L3VE interface status changes after a delay</span><br><span><img class="vsd" src="images/fig_dc_vrp_ip-route_cfg_003501.png"></span></div>
+<p>AGG1 functions as the master device. In most cases, the RSGs select routes advertised by AGG1, and traffic travels along Link A. If AGG1 or the CSG-AGG1 link fails, traffic switches over to Link B. After AGG1 or the CSG-AGG1 link recovers, the L3VE interface on AGG1 goes from down to up, and AGG1 immediately generates an IPv4 direct route and advertises the route to the corresponding RSG. Downstream traffic then switches back to Link A. However, AGG1 has not learned the MAC address of the base station yet. As a result, downstream traffic is lost.</p>
+<p>After a delay is configured for IPv4 direct routes to respond to L3VE interface status changes, the cost of the IPv4 direct route increases when the L3VE interface on AGG1 goes from down to up. In this case, RSGs do not preferentially select the route advertised by AGG1. Therefore, downstream traffic still travels along Link B. After the specified delay elapses, AGG1 learns the MAC address of the base station, and the cost of the IPv4 direct route restores to the default value 0. In this case, RSGs preferentially select the IPv4 direct route advertised by AGG1, preventing downstream traffic loss during switchback.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172365339__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Pre-configuration Tasks</h4><p>Before you configure an IPv4 direct route to respond to L3VE interface status changes after a delay, configure link-layer protocol parameters and IP addresses for interfaces and ensure that the link layer protocol of each interface is Up.</p>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172365339__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Run <span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span></span><p><p>The system view is displayed.</p>
+</p></li><li><span>Run <span><a href="cmdqueryname=interface+virtual-ethernet"><b><span class="cmdname">interface virtual-ethernet</span></b></a> <i><span class="varname">interface-number</span></i></span></span><p><p>A VE interface is created, and the VE interface view is displayed.</p>
+</p></li><li><span>Run <span><a href="cmdqueryname=ve-group"><b><span class="cmdname">ve-group</span></b></a> <i><span class="varname">ve-group-id</span></i> <span><strong><span>l3-access</span></strong></span></span></span><p><p>The VE interface is configured as an L3VE interface for MPLS L3VPN access and bound to a VE-group.</p>
+</p><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The L2VPN can access the L3VPN only if the L2VE and L3VE interfaces are bound to the same VE-group and reside on the same board.</p>
+</div></div>
+</p></li><li><span>Run <span><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></span></span><p><p>Return to the system view.</p>
+</p></li><li><span>Run <span><a href="cmdqueryname=interface+virtual-ethernet"><b><span class="cmdname">interface virtual-ethernet</span></b></a> <i><span class="varname">interface-number.subinterface-number</span></i></span></span><p><p>A VE sub-interface is created, and the VE sub-interface view is displayed.</p>
+</p></li><li><span>Run <span><a href="cmdqueryname=direct-route+degrade-delay"><b><span class="cmdname">direct-route degrade-delay</span></b></a> <i><span class="varname">delay-time</span></i> <strong><span>degrade-cost</span></strong> <i><span class="varname">cost</span></i></span></span><p><p>The IPv4 direct route is configured to respond to L3VE interface status changes after a delay.</p>
+</p><p><p>After you run the <a href="cmdqueryname=direct-route+degrade-delay"><b><span class="cmdname">direct-route degrade-delay</span></b></a> command on an L3VE interface, and the L3VE interface goes from Down to Up, the cost of the L3VE interface's IPv4 direct route to the CSG is modified to the configured cost. After the configured <i><span class="varname">delay-time</span></i> expires, the IPv4 direct route cost is restored to the default value 0.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The <a href="cmdqueryname=direct-route+track+pw-state"><b><span class="cmdname">direct-route track pw-state</span></b></a>, <a href="cmdqueryname=direct-route+degrade-delay"><b><span class="cmdname">direct-route degrade-delay</span></b></a>, and <a href="cmdqueryname=direct-route+track+vrrp"><b><span class="cmdname">direct-route track vrrp</span></b></a> commands cannot all be configured on one L3VE interface. If you run the three commands on one L3VE interface, the latest configuration overrides the previous ones.</p>
+</div></div>
+</p></li><li><span>Run <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span></span><p><p>The configuration is committed.</p>
+</p></li></ol></div>
+<div class="postreq"><a name="EN-US_TASK_0172365339__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Checking the Configurations</h4><p>If an AGG's L3VE interface goes from Down to Up, run the <a href="cmdqueryname=display+ip+routing-table+vpn-instance"><b><span class="cmdname">display ip routing-table vpn-instance</span></b></a> <i><span class="varname">vpn-instance-name</span></i> [ <i><span class="varname">ip-address</span></i> ] [ <strong><span>verbose</span></strong> ] command on the AGG. The command output shows that the cost of the L3VE interface's IPv4 direct route to the CSG is the configured cost. After the configured <i><span class="varname">delay-time</span></i> expires, run the <a href="cmdqueryname=display+ip+routing-table+vpn-instance"><b><span class="cmdname">display ip routing-table vpn-instance</span></b></a> <i><span class="varname">vpn-instance-name</span></i> [ <i><span class="varname">ip-address</span></i> ] [ <strong><span>verbose</span></strong> ] command on the AGG. The command output shows that the cost of the IPv4 direct route to the L3VE interface is the default value 0.</p>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ip-route_cfg_0000.html">Basic IP Routing Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ip-route_cfg_0029.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ip-route_cfg_0060.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

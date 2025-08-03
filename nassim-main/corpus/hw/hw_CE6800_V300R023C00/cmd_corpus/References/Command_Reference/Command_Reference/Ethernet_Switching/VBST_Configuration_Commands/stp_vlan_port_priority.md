@@ -1,0 +1,71 @@
+stp vlan port priority
+======================
+
+stp vlan port priority
+
+Function
+--------
+
+
+
+The **stp vlan port priority** command sets the priority of a port in a spanning tree.
+
+The **undo stp vlan port priority** command restores the default priority.
+
+
+
+By default, the priority of a port in a spanning tree is 128.
+
+
+Format
+------
+
+**stp vlan** *vlan-id* [ **to** *vlan-id* ] [ *vlan-id* [ **to** *vlan-id* ] ] &<1-9> **port** **priority** *priority-value*
+
+**undo stp vlan** *vlan-id* [ **to** *vlan-id* ] [ *vlan-id* [ **to** *vlan-id* ] ] &<1-9> **port** **priority** [ *priority-value* ]
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| **to** *vlan-id* | Configures the priority of a port in VLANs. vlan-id specifies the start VLAN ID.   * vlan-id to vlan-id indicates that the two VLAN IDs determine a range. The value of the latter vlan-id must be greater than or equal to the value of the former one. * If the to vlan-id parameter is not specified, the configured port priority is the VLAN specified by the former vlan-id.   In the stp port priority command, you can specify a maximum of 10 VLAN ranges.  VLANs can be specified only when VBST is running. | For the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ:The value is an integer ranging from 1 to 4094.  For the CE6885-LL (low latency mode):The value is an integer ranging from 1 to 1023. |
+| *priority-value* | Specifies the priority of a port in spanning tree calculation. | The value is an integer that ranges from 0 to 240, with a step of 16. For example, the value can be 0, 16, or 32. |
+
+
+
+Views
+-----
+
+Layer 2 100GE interface view,Layer 2 10GE interface view,Layer 2 200GE interface view,25GE-L2 view,400GE-L2 view,Layer 2 50GE interface view,Layer 2 Eth-Trunk interface view,Interface group view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+When ports participate in spanning tree calculation, the PIDs of these ports on the devices may affect the ports role election result.
+
+**Precautions**
+
+* The member ports of an Eth-Trunk do not support this command.- When the priority of a port changes, a spanning tree protocol recalculates the role of the port and performs status transition for the port.
+
+Example
+-------
+
+# Set the priority of the specified interface in VLAN 10 to 32 when VBST is running.
+```
+<HUAWEI> system-view
+[~HUAWEI] interface 100GE 1/0/1
+[~HUAWEI-100GE1/0/1] portswitch
+[~HUAWEI-100GE1/0/1] stp vlan 10 port priority 32
+
+```

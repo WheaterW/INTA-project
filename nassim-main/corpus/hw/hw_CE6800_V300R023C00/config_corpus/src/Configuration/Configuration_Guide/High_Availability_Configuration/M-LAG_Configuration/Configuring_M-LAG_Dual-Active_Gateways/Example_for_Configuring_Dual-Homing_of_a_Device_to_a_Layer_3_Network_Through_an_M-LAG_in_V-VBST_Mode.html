@@ -1,0 +1,466 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Dual-Homing of a Device to a Layer 3 Network Through an M-LAG in V-VBST Mode">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_cfg_m-lag_0015.html">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_cfg_m-lag_0017_1.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="M-LAG">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="M-LAG">
+<meta name="featuretype" content="High Availability">
+<meta name="featurename" content="M-LAG">
+<meta name="featuretype" content="High Availability">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001757597241">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Dual-Homing of a Device to a Layer 3 Network Through an M-LAG in V-VBST Mode</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001757597241"></a><a name="EN-US_TASK_0000001757597241"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Dual-Homing of a Device to a Layer 3 Network Through an M-LAG in V-VBST Mode</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001757597241__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In <a href="#EN-US_TASK_0000001757597241__fig1327610128711">Figure 1</a>, a device is dual-homed to a Layer 3 network through an M-LAG, with the following requirements:</p>
+<ul><li>High reliability: If one access link fails, traffic needs to be quickly switched to the other link.</li><li>High bandwidth utilization: Both access links are in active state and can load balance traffic.</li></ul>
+<div class="fignone" id="EN-US_TASK_0000001757597241__fig1327610128711"><a name="EN-US_TASK_0000001757597241__fig1327610128711"></a><a name="fig1327610128711"></a><span class="figcap"><b>Figure 1 </b>Network diagram for dual-homing a device to a Layer 3 network through an M-LAG</span><div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1, interface 2, interface 3, interface 4, interface 5, and interface 6 on DeviceA represent <span>100GE</span> <span>1/0/1</span>, <span>100GE</span> <span>1/0/2</span>, <span>100GE</span> <span>1/0/3</span>, <span>100GE</span> <span>1/0/4</span>, <span>100GE</span> <span>1/0/5</span>, and MEth0/0/0, respectively.</p>
+<p>In this example, interface 1, interface 2, interface 3, interface 4, interface 5, and interface 6 on DeviceB represent <span>100GE</span> <span>1/0/1</span>, <span>100GE</span> <span>1/0/2</span>, <span>100GE</span> <span>1/0/3</span>, <span>100GE</span> <span>1/0/4</span>, <span>100GE</span> <span>1/0/5</span>, and MEth0/0/0, respectively.</p>
+<p>In this example, interface 1 and interface 2 on DeviceC represent <span>100GE</span> <span>1/0/1</span> and <span>100GE</span> <span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000002159568657.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001757597241__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>On DeviceD, bind uplink interfaces to an Eth-Trunk interface.</p>
+</li><li><p>On DeviceA and DeviceB, configure V-VBST, create a DFS group, bind IP addresses of management interfaces to the DFS group, and configure peer-link interfaces and M-LAG member interfaces.</p>
+</li><li><p>On DeviceA and DeviceB, configure IP and MAC addresses for VLANIF interfaces so that DeviceA and DeviceB function as dual-active gateways for access devices.</p>
+</li><li><p>On DeviceA, DeviceB, and DeviceC, configure OSPF to ensure Layer 3 connectivity.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>To prevent an interface from being blocked by a spanning tree protocol in a V-VBST scenario, you can configure main interfaces to implement Layer 3 connectivity or disable the spanning tree protocol on the device on the IP network side.</p>
+</div></div>
+</li><li><p>On DeviceA and DeviceB, add uplink and downlink interfaces to a Monitor Link group to prevent user-side traffic forwarding failures and traffic loss due to possible uplink faults.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001757597241__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>On DeviceD, bind uplink interfaces to an Eth-Trunk interface.</span><p><p># Configure DeviceD.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceD</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD]<strong> vlan batch 11</strong>
+[<span class="keyword">*</span>DeviceD]<strong> interface eth-trunk 20</strong>
+[<span class="keyword">*</span>DeviceD-Eth-Trunk20]<strong> mode lacp-static</strong>
+[<span class="keyword">*</span>DeviceD-Eth-Trunk20]<strong> port link-type trunk</strong>
+[<span class="keyword">*</span>DeviceD-Eth-Trunk20]<strong> port trunk allow-pass vlan 11</strong>
+[<span class="keyword">*</span>DeviceD-Eth-Trunk20]<strong> trunkport <span>100ge</span> <span>1/0/1</span> to <span>1/0/4</span></strong>
+[<span class="keyword">*</span>DeviceD-Eth-Trunk20]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceD]<strong> commit</strong></pre>
+</p></li><li><span>On DeviceA and DeviceB, configure V-VBST, create a DFS group, bind IP addresses of management interfaces to the DFS group, and configure peer-link interfaces and M-LAG member interfaces.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> stp mode vbst</strong>
+[<span class="keyword">*</span>DeviceA]<strong> stp enable</strong>
+[<span class="keyword">*</span>DeviceA]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> interface meth 0/0/0</strong>
+[<span class="keyword">*</span>DeviceA-MEth0/0/0]<strong> ip address 10.200.1.1 24</strong>
+[<span class="keyword">*</span>DeviceA-MEth0/0/0]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA]<strong> dfs-group 1</strong>
+[<span class="keyword">*</span>DeviceA-dfs-group-1]<strong> dual-active detection source ip 10.200.1.1</strong><strong> peer </strong><strong>10.200.1.2</strong>
+[<span class="keyword">*</span>DeviceA-dfs-group-1]<strong> priority 150</strong>
+[<span class="keyword">*</span>DeviceA-dfs-group-1] <strong>authentication-mode hmac-sha256 password </strong><strong>YsHsjx_202206</strong>
+[<span class="keyword">*</span>DeviceA-dfs-group-1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface eth-trunk 1</strong>
+[<span class="keyword">*</span>DeviceA-Eth-Trunk1] <strong>trunkport <span>100ge</span> <span>1/0/4</span></strong>
+[<span class="keyword">*</span>DeviceA-Eth-Trunk1] <strong>trunkport <span>100ge</span> <span>1/0/5</span></strong>
+[<span class="keyword">*</span>DeviceA-Eth-Trunk1] <strong>mode lacp-static</strong>
+[<span class="keyword">*</span>DeviceA-Eth-Trunk1] <strong>peer-link 1</strong>
+[<span class="keyword">*</span>DeviceA-Eth-Trunk1] <strong>port vlan exclude 1</strong>
+[<span class="keyword">*</span>DeviceA-Eth-Trunk1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA]<strong> vlan batch 11</strong>
+[<span class="keyword">*</span>DeviceA]<strong> interface eth-trunk 10</strong>
+[<span class="keyword">*</span>DeviceA-Eth-Trunk10]<strong> mode lacp-static</strong>
+[<span class="keyword">*</span>DeviceA-Eth-Trunk10]<strong> port link-type trunk</strong>
+[<span class="keyword">*</span>DeviceA-Eth-Trunk10]<strong> port trunk allow-pass vlan 11</strong>
+[<span class="keyword">*</span>DeviceA-Eth-Trunk10]<strong> trunkport <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceA-Eth-Trunk10]<strong> trunkport <span>100ge</span> <span>1/0/3</span></strong>
+[<span class="keyword">*</span>DeviceA-Eth-Trunk10]<strong> dfs-group 1 m-lag 1</strong>
+[<span class="keyword">*</span>DeviceA-Eth-Trunk10]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA]<strong> commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceB</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> stp mode vbst</strong>
+[<span class="keyword">*</span>DeviceB]<strong> stp enable</strong>
+[<span class="keyword">*</span>DeviceB]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> interface meth 0/0/0</strong>
+[<span class="keyword">*</span>DeviceB-MEth0/0/0]<strong> ip address 10.200.1.2 24</strong>
+[<span class="keyword">*</span>DeviceB-MEth0/0/0]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB]<strong> dfs-group 1</strong>
+[<span class="keyword">*</span>DeviceB-dfs-group-1]<strong> dual-active detection source ip 10.200.1.2</strong> <strong>peer </strong><strong>10.200.1.1</strong>
+[<span class="keyword">*</span>DeviceB-dfs-group-1]<strong> priority 120</strong>
+[<span class="keyword">*</span>DeviceB-dfs-group-1] <strong>authentication-mode hmac-sha256 password</strong> <strong>YsHsjx_202206</strong>
+[<span class="keyword">*</span>DeviceB-dfs-group-1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>interface eth-trunk 1</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk1] <strong>trunkport <span>100ge</span> <span>1/0/4</span></strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk1] <strong>trunkport <span>100ge</span> <span>1/0/5</span></strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk1] <strong>mode lacp-static</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk1] <strong>peer-link 1</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk1] <strong>port vlan exclude 1</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB]<strong> vlan batch 11</strong>
+[<span class="keyword">*</span>DeviceB]<strong> interface eth-trunk 10</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk10]<strong> mode lacp-static</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk10]<strong> port link-type trunk</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk10]<strong> port trunk allow-pass vlan 11</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk10]<strong> trunkport <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk10]<strong> trunkport <span>100ge</span> <span>1/0/3</span></strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk10]<strong> dfs-group 1 m-lag 1</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk10]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB]<strong> commit</strong></pre>
+</p></li><li><span>On DeviceA and DeviceB, configure IP and MAC addresses for VLANIF interfaces so that DeviceA and DeviceB function as dual-active gateways for access devices.</span><p><p>DeviceA and DeviceB must be configured with the same virtual IP address and virtual MAC address.</p>
+<div class="p"># Configure DeviceA.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> interface vlanif 11</strong>
+[<span class="keyword">*</span>DeviceA-Vlanif11]<strong> ip address 10.2.1.1 24</strong>
+[<span class="keyword">*</span>DeviceA-Vlanif11]<strong> mac-address 0000-5e00-0101</strong>
+[<span class="keyword">*</span>DeviceA-Vlanif11]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA]<strong> commit</strong></pre>
+</div>
+<div class="p"># Configure DeviceB.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> interface vlanif 11</strong>
+[<span class="keyword">*</span>DeviceB-Vlanif11]<strong> ip address 10.2.1.1 24</strong>
+[<span class="keyword">*</span>DeviceB-Vlanif11]<strong> mac-address 0000-5e00-0101</strong>
+[<span class="keyword">*</span>DeviceB-Vlanif11]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB]<strong> commit</strong></pre>
+</div>
+</p></li><li><span>On DeviceA, DeviceB, and DeviceC, configure OSPF to ensure Layer 3 connectivity. The ID of the OSPF area to which DeviceA, DeviceB, and DeviceC belong must be different from the ID of the OSPF area to which DeviceA, DeviceB, and DeviceD belong.</span><p><div class="p"># Configure DeviceA.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>]<strong> undo portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>]<strong> ip address 10.3.1.1 24</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA]<strong> ospf 1</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1]<strong> area 0</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0]<strong> network 10.3.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1]<strong> area 1</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.1]<strong> network 10.2.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA]<strong> commit</strong></pre>
+</div>
+<div class="p"># Configure DeviceB.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>]<strong> undo portswitch</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>]<strong> ip address 10.4.1.1 24</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB]<strong> ospf 1</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1]<strong> area 0</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0]<strong> network 10.4.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1]<strong> area 1</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.1]<strong> network 10.2.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB]<strong> commit</strong></pre>
+</div>
+<p># Configure DeviceC.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceC</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC]<strong> interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-<span>100GE</span><span>1/0/1</span>]<strong> undo portswitch</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/1</span>]<strong> ip address 10.3.1.2 24</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/1</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceC]<strong> interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>]<strong> undo portswitch</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>]<strong> ip address 10.4.1.2 24</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceC]<strong> ospf 1</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1]<strong> area 0</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0]<strong> network 10.3.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0]<strong> network 10.4.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceC]<strong> commit</strong></pre>
+</p></li><li><span>On DeviceA and DeviceB, add uplink and downlink interfaces to a Monitor Link group.</span><p><div class="p"># Configure DeviceA.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> monitor-link group 1</strong>
+[<span class="keyword">*</span>DeviceA-mtlk-group1]<strong> port <span>100ge</span> <span>1/0/1</span> uplink</strong>
+[<span class="keyword">*</span>DeviceA-mtlk-group1]<strong> port eth-trunk 10 downlink 1</strong>
+[<span class="keyword">*</span>DeviceA-mtlk-group1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA]<strong> commit</strong></pre>
+</div>
+<div class="p"># Configure DeviceB.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> monitor-link group 1</strong>
+[<span class="keyword">*</span>DeviceB-mtlk-group1]<strong> port <span>100ge</span> <span>1/0/1</span> uplink</strong>
+[<span class="keyword">*</span>DeviceB-mtlk-group1]<strong> port eth-trunk 10 downlink 1</strong>
+[<span class="keyword">*</span>DeviceB-mtlk-group1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB]<strong> commit</strong></pre>
+</div>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001757597241__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Display information about the M-LAG with DFS group ID 1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> display dfs-group 1 m-lag</strong>
+*                     : Local node
+Heart beat state      : <strong>OK</strong>
+Node 1 *
+  Dfs-Group ID        : 1
+  Priority            : 150
+  Dual-active Address : 10.200.1.1
+  VPN-Instance        : public net
+  State               : <strong>Master</strong>
+  Causation           : -
+  System ID           : 00e0-fc12-3457
+  SysName             : DeviceA
+  Version             : <span class="keyword">V300R023C00</span>
+  Device Type         : <span>CE6860-SAN</span>
+Node 2
+  Dfs-Group ID        : 1
+  Priority            : 120
+  Dual-active Address : 10.200.1.2
+  VPN-Instance        : public net
+  State               : <strong>Backup</strong>
+  Causation           : -
+  System ID           : 00e0-fc12-3458
+  SysName             : DeviceB
+  Version             : <span class="keyword">V300R023C00</span>
+  Device Type         : <span>CE6860-SAN</span></pre>
+<p>In the preceding command output, the <span class="parmname"><b>Heart beat state</b></span> field displays <span class="parmname"><b>OK</b></span>, indicating that the heartbeat status is normal. DeviceA is node 1 with a priority of 150 and serves as the M-LAG master device (the <span class="parmname"><b>State</b></span> field displays <span class="parmname"><b>Master</b></span>), whereas DeviceB is node 2 with a priority of 120 and serves as the M-LAG backup device (the <span class="parmname"><b>State</b></span> field displays <span class="parmname"><b>Backup</b></span>). In addition, the <span class="parmname"><b>Causation</b></span> field displays <span class="parmname"><b>-</b></span>, indicating that the M-LAG is set up successfully.</p>
+<p># Display M-LAG information on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> display dfs-group 1 node 1 m-lag brief</strong>
+* - Local node
+
+M-Lag ID     Interface      Port State    Status                Consistency-check
+       1     Eth-Trunk 10   <strong>Up</strong>            active(*)-active      --              
+
+
+Failed reason:                                                                  
+    1 -- Relationship between vlan and port is inconsistent                     
+    2 -- STP configuration under the port is inconsistent                       
+    3 -- STP port priority configuration is inconsistent                        
+    4 -- LACP mode of M-LAG is inconsistent                                     
+    5 -- M-LAG configuration is inconsistent                                    
+    6 -- The number of M-LAG members is inconsistent
+    7 -- LACP system-id of M-LAG is inconsistent
+    8 -- LACP priority of M-LAG is inconsistent
+    9 -- STP port edged configuration is inconsistent
+    10 -- M-LAG mode configuration is inconsistent</pre>
+<p># Display M-LAG information on DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> display dfs-group 1 node 2 m-lag brief</strong>
+* - Local node
+
+M-Lag ID     Interface      Port State    Status                Consistency-check
+       1     Eth-Trunk 10   <strong>Up</strong>            active-active(*)      -- 
+
+
+Failed reason:                                                                  
+    1 -- Relationship between vlan and port is inconsistent                     
+    2 -- STP configuration under the port is inconsistent                       
+    3 -- STP port priority configuration is inconsistent                        
+    4 -- LACP mode of M-LAG is inconsistent                                     
+    5 -- M-LAG configuration is inconsistent                                    
+    6 -- The number of M-LAG members is inconsistent  
+    7 -- LACP system-id of M-LAG is inconsistent
+    8 -- LACP priority of M-LAG is inconsistent
+    9 -- STP port edged configuration is inconsistent
+    10 -- M-LAG mode configuration is inconsistent</pre>
+<p>In the preceding command outputs, the <span class="parmname"><b>Port State</b></span> fields of node 1 and node 2 display <span class="parmname"><b>Up</b></span>, and the M-LAG status of node 1 and node 2 is <span class="parmname"><b>active</b></span>, indicating that the M-LAG configuration is correct.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001757597241__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+dfs-group 1
+ priority 150
+<strong> </strong>dual-active detection source ip 10.200.1.1 peer 10.200.1.2
+ authentication-mode hmac-sha256 password %+%##!!!!!!!!!"!!!!"!!!!*!!!!C+tR0CW9x*eB&amp;pWp`t),Azgw-h\o8#4LZPD!!!!!!!!!!!!!!!9!!!!&gt;fwJ)I0E{=:%,*,XRhbH&amp;t0MCy_8=7!!!!!!!!!!%+%#
+#
+vlan batch 11
+#
+stp mode vbst
+#
+interface Vlanif11
+ ip address 10.2.1.1 255.255.255.0
+ mac-address 0000-5e00-0101  
+#
+interface Eth-Trunk1
+ mode lacp-static
+ peer-link 1
+ port vlan exclude 1
+#
+interface Eth-Trunk10
+ port link-type trunk
+ port trunk allow-pass vlan 11
+ mode lacp-static
+ dfs-group 1 m-lag 1
+#
+interface MEth0/0/0
+ ip address 10.200.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.3.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ eth-trunk 10
+#
+interface <span>100GE</span><span>1/0/3</span>
+ eth-trunk 10
+#
+interface <span>100GE</span><span>1/0/4</span>
+ eth-trunk 1
+#
+interface <span>100GE</span><span>1/0/5</span>
+ eth-trunk 1
+#
+monitor-link group 1
+ port <span>100GE</span><span>1/0/1</span> uplink
+ port Eth-Trunk10 downlink 1
+#
+ospf 1
+ area 0.0.0.0
+  network 10.3.1.0 0.0.0.255
+ area 0.0.0.1
+  network 10.2.1.0 0.0.0.255
+#
+return
+</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+dfs-group 1
+ priority 120
+ dual-active detection source ip 10.200.1.2 peer 10.200.1.1
+ authentication-mode hmac-sha256 password %+%##!!!!!!!!!"!!!!"!!!!*!!!!=I9f8&gt;C{!P_bhB31@7r-=jrS8c|_"(Bn<font style="font-size:8pt" Face="Courier New" >~</font>#=!!!!!!!!!!!!!!!9!!!!kx-6@.tGA(wAt/IQXl6&gt;[g{6YlOi9$!!!!!!!!!!%+%#
+#
+vlan batch 11
+#
+stp mode vbst
+#
+interface Vlanif11
+ ip address 10.2.1.1 255.255.255.0
+ mac-address 0000-5e00-0101  
+#
+interface Eth-Trunk1
+ mode lacp-static
+ peer-link 1
+ port vlan exclude 1
+#
+interface Eth-Trunk10
+ port link-type trunk
+ port trunk allow-pass vlan 11
+ mode lacp-static
+ dfs-group 1 m-lag 1
+#
+interface MEth0/0/0
+ ip address 10.200.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.4.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ eth-trunk 10
+#
+interface <span>100GE</span><span>1/0/3</span>
+ eth-trunk 10
+#
+interface <span>100GE</span><span>1/0/4</span>
+ eth-trunk 1
+#
+interface <span>100GE</span><span>1/0/5</span>
+ eth-trunk 1
+#
+monitor-link group 1
+ port <span>100GE</span><span>1/0/1</span> uplink
+ port Eth-Trunk10 downlink 1
+#
+ospf 1
+ area 0.0.0.0
+  network 10.4.1.0 0.0.0.255
+ area 0.0.0.1
+  network 10.2.1.0 0.0.0.255
+#
+return
+</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.3.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.4.1.2 255.255.255.0
+#
+ospf 1
+ area 0.0.0.0
+  network 10.3.1.0 0.0.0.255
+  network 10.4.1.0 0.0.0.255
+#
+return
+</pre>
+</li><li><p>DeviceD</p>
+<pre class="screen">#
+sysname DeviceD
+#
+vlan batch 11
+#
+interface Eth-Trunk20
+ port link-type trunk
+ port trunk allow-pass vlan 11
+ mode lacp-static
+#
+interface <span>100GE</span><span>1/0/1</span>
+ eth-trunk 20
+#
+interface <span>100GE</span><span>1/0/2</span>
+ eth-trunk 20
+#
+interface <span>100GE</span><span>1/0/3</span>
+ eth-trunk 20
+#
+interface <span>100GE</span><span>1/0/4</span>
+ eth-trunk 20
+#
+return
+</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../dc/dc_cfg_m-lag_0015.html">Configuring M-LAG Dual-Active Gateways
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../dc/dc_cfg_m-lag_0017_1.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

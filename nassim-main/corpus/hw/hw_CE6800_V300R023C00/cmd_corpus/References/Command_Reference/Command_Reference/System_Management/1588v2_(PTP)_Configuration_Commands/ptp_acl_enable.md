@@ -1,0 +1,70 @@
+ptp acl enable
+==============
+
+ptp acl enable
+
+Function
+--------
+
+
+
+The **ptp acl enable** command enables access control of clock sources.
+
+The **undo ptp acl enable** command disables access control of clock sources.
+
+
+
+By default, access control of clock sources is disabled.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H-48S6CQ, CE6881H-48S6CQ-K, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**ptp acl enable**
+
+**undo ptp acl enable**
+
+
+Parameters
+----------
+
+None
+
+Views
+-----
+
+System view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+To prevent network-wide clock flapping caused by malicious clock attacks or incorrect configurations, you can specify the clock source selection range for 1588v2 devices in advance. Then, the 1588v2 clock source is selected only from the configured clock ID list.
+
+**Follow-up Procedure**
+
+This command must be used together with the **ptp acl-permit-clockid** command.
+
+
+Example
+-------
+
+# Enable access control of clock sources.
+```
+<HUAWEI> system-view
+[~HUAWEI] ptp acl enable
+
+```

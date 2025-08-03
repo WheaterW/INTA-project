@@ -1,0 +1,523 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="EVA Implementation Based on Python Scripts">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../toctopics/en-us_topic_0000001513030598.html">
+<meta name="DC.Relation" scheme="URI" content="../toctopics/en-us_concept_0000001512831026.html">
+<meta name="DC.Relation" scheme="URI" content="../toctopics/en-us_concept_0000001563990837.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="EVA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="EVA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featurename" content="EVA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featurename" content="EVA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001584547617">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>EVA Implementation Based on Python Scripts</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_CONCEPT_0000001584547617"></a><a name="EN-US_CONCEPT_0000001584547617"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">EVA Implementation Based on Python Scripts</h1>
+<div><p>EVA adds a data subscription module to the Python framework of the OPS and obtains data by loading and parsing Python scripts. Some Python scripts are preset on the device before delivery. EVA also provides Python script-based functions that allow you to customize a Python script to subscribe to required data.</p>
+<div class="section"><h4 class="sectiontitle">Python Scripts</h4><ul><li>Preset Python scripts<p>EVA presets two Python scripts on the device to process CPU usage and memory usage. Data concerning CPU usage and memory usage in these scripts come from the huawei-cpu-memory.yang model used for telemetry data collection. The thresholds of CPU usage and memory usage are both set to 90 in these scripts. When the average value of last three CPU usages or memory usages exceeds the threshold, a log is generated in the script to record the IDs of the involved slot and CPU.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>After the device starts for the first time, you need to configure gRPC to register the preset Python scripts because the addkpi function is used in the preset Python scripts.</p>
+</div></div>
+<ul><li>cpuHigh.py<pre class="screen">def condition():
+    e1 = eva.Event()
+    kpi1 = e1.addkpi("huawei-cpu-memory:cpu-memory/board-cpu-infos/board-cpu-info/system-cpu-usage")
+    e1.ret = eva.avg(kpi1, 3) &gt; 90
+     
+    s1 = eva.Strategy()
+    s1.formula = e1
+    action1 = eva.log("board  ${e1.slot-id}--${e1.cpu-id} overload")
+    s1.addaction(action1)</pre>
+</li><li>memHigh.py<pre class="screen">def condition(): 
+    e1 = eva.Event()
+    kpi1 = e1.addkpi("huawei-cpu-memory:cpu-memory/board-memory-infos/board-memory-info/os-memory-usage")
+    e1.ret = eva.avg(kpi1, 3) &gt; 90
+     
+    s1 = eva.Strategy()
+    s1.formula = e1
+    action1 = eva.log("board  ${e1.slot-id}--${e1.cpu-id} mem overload")
+    s1.addaction(action1)</pre>
+</li></ul>
+</li><li>Customized Python scripts<p>EVA also supports customized Python scripts. For details about the classes and functions used for customizing a script, see <a href="#EN-US_CONCEPT_0000001584547617__en-us_concept_0000001175292940_section181111048125912">Python Function Types Supported by EVA</a>.</p>
+</li></ul>
+</div>
+<div class="section" id="EN-US_CONCEPT_0000001584547617__en-us_concept_0000001175292940_section181111048125912"><a name="EN-US_CONCEPT_0000001584547617__en-us_concept_0000001175292940_section181111048125912"></a><a name="en-us_concept_0000001175292940_section181111048125912"></a><h4 class="sectiontitle">Python Function Types Supported by EVA</h4><p>The EVA Python module consists of three classes and three types of functions, which comply with the Python syntax.</p>
+<ul><li>Classes built in the EVA Python module<ul><li>Event class: describes data subscription, processing, and judgment.
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Event class description</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="13.29132913291329%" id="mcps1.3.3.3.1.1.1.1.2.4.1.1" liSelected="liSelected"><p>Class</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="25.772577257725775%" id="mcps1.3.3.3.1.1.1.1.2.4.1.2" liSelected="liSelected"><p>Example</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="60.93609360936094%" id="mcps1.3.3.3.1.1.1.1.2.4.1.3" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="13.29132913291329%" headers="mcps1.3.3.3.1.1.1.1.2.4.1.1 "><p>Event</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.772577257725775%" headers="mcps1.3.3.3.1.1.1.1.2.4.1.2 "><p>e1=eva.Event()</p>
+</td>
+<td class="cellrowborder" valign="top" width="60.93609360936094%" headers="mcps1.3.3.3.1.1.1.1.2.4.1.3 "><p>Complies with the standard Python syntax and is used to generate objects of the Event class.</p>
+<p>The constructor has no parameter. Its return value is an object of the Event class, which contains a maximum of 15 bytes.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 2 </b>Member functions of the Event class</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="14.12%" id="mcps1.3.3.3.1.1.1.2.2.6.1.1" liSelected="liSelected"><p>Function Name</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="23.29%" id="mcps1.3.3.3.1.1.1.2.2.6.1.2" liSelected="liSelected"><p>Function Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="20.13%" id="mcps1.3.3.3.1.1.1.2.2.6.1.3" liSelected="liSelected"><p>Example</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="23.57%" id="mcps1.3.3.3.1.1.1.2.2.6.1.4" liSelected="liSelected"><p>Parameter</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="18.89%" id="mcps1.3.3.3.1.1.1.2.2.6.1.5" liSelected="liSelected"><p>Return Value</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="14.12%" headers="mcps1.3.3.3.1.1.1.2.2.6.1.1 "><p>addkpi</p>
+</td>
+<td class="cellrowborder" valign="top" width="23.29%" headers="mcps1.3.3.3.1.1.1.2.2.6.1.2 "><p>Subscribes to telemetry data.</p>
+</td>
+<td class="cellrowborder" valign="top" width="20.13%" headers="mcps1.3.3.3.1.1.1.2.2.6.1.3 "><p>e1=eva.Event()</p>
+<p>kpi1=e1.addkpi(arg1)</p>
+</td>
+<td class="cellrowborder" valign="top" width="23.57%" headers="mcps1.3.3.3.1.1.1.2.2.6.1.4 "><p><strong>arg1</strong> indicates the sampling path XPath that can be configured for the telemetry function.</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.89%" headers="mcps1.3.3.3.1.1.1.2.2.6.1.5 "><p>Data returned by the XPath.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.12%" headers="mcps1.3.3.3.1.1.1.2.2.6.1.1 "><p>addinnerkpi</p>
+</td>
+<td class="cellrowborder" valign="top" width="23.29%" headers="mcps1.3.3.3.1.1.1.2.2.6.1.2 "><p>Subscribes to internal KPI data.</p>
+</td>
+<td class="cellrowborder" valign="top" width="20.13%" headers="mcps1.3.3.3.1.1.1.2.2.6.1.3 "><p>e1 = eva.Event()</p>
+<p>kpi1 = e1.addinnerkpi(arg1, arg2)</p>
+</td>
+<td class="cellrowborder" valign="top" width="23.57%" headers="mcps1.3.3.3.1.1.1.2.2.6.1.4 "><p><strong>arg1</strong> indicates the ID of a component, which is an integer. You can run the <strong>display middleware litedb</strong> { <strong>slot </strong><em>slotId</em> [ <strong>cpu</strong> <em>cpuId </em>] } <strong>command</strong> "record kpimappingdata" command in the diagnostic view to check the <strong>component ID</strong> field.</p>
+<p><strong>arg2</strong> indicates the ID of an internal KPI, which is an integer. You can run the <strong>display middleware litedb</strong> { <strong>slot </strong><em>slotId</em> [ <strong>cpu</strong> <em>cpuId </em>] } <strong>command</strong> "record kpimappingdata" command in the diagnostic view to check the <strong>kpi ID</strong> field.</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.89%" headers="mcps1.3.3.3.1.1.1.2.2.6.1.5 "><p>Internal KPI data returned by the specified component.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 3 </b>Member attributes of the Event class</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="12.661266126612661%" id="mcps1.3.3.3.1.1.1.3.2.4.1.1" liSelected="liSelected"><p>Attribute</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="54.005400540054005%" id="mcps1.3.3.3.1.1.1.3.2.4.1.2" liSelected="liSelected"><p>Example</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="33.33333333333333%" id="mcps1.3.3.3.1.1.1.3.2.4.1.3" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="12.661266126612661%" headers="mcps1.3.3.3.1.1.1.3.2.4.1.1 "><p>ret</p>
+</td>
+<td class="cellrowborder" valign="top" width="54.005400540054005%" headers="mcps1.3.3.3.1.1.1.3.2.4.1.2 "><p>e1=eva.Event()</p>
+<p>kpi1=e1.addkpi(arg1)</p>
+<p>e1.ret=kpi1 &gt;M</p>
+<p><strong>M</strong> is a positive integer, and <strong>&gt;</strong> is a comparison operator of Python. <a href="#EN-US_CONCEPT_0000001584547617__en-us_concept_0000001175292940_table555316451110">Table 4</a> lists the comparison operators supported by EVA.</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.3.3.1.1.1.3.2.4.1.3 "><p><strong>ret</strong> indicates the logical operation result of the telemetry data <strong>kpi1</strong> and threshold <strong>M</strong>.</p>
+<ul><li>True: <strong>kpi1</strong> is greater than <strong>M</strong>.</li><li>False: <strong>kpi1</strong> is less than or equal to <strong>M</strong>.</li></ul>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.661266126612661%" headers="mcps1.3.3.3.1.1.1.3.2.4.1.1 "><p>frequency</p>
+</td>
+<td class="cellrowborder" valign="top" width="54.005400540054005%" headers="mcps1.3.3.3.1.1.1.3.2.4.1.2 "><p>e1=eva.Event()</p>
+<p>e1.frequency=N</p>
+<p><strong>N</strong> is a positive integer.</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.3.3.1.1.1.3.2.4.1.3 "><p><strong>frequency</strong> indicates the number of consecutive times an event occurs. When the number reaches the value of <strong>frequency</strong>, the event is identified as a fault.</p>
+<p></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001584547617__en-us_concept_0000001175292940_table555316451110"></a><a name="en-us_concept_0000001175292940_table555316451110"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001584547617__en-us_concept_0000001175292940_table555316451110" frame="border" border="1" rules="all"><caption><b>Table 4 </b>Comparison operators supported by EVA</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="14.051405140514053%" id="mcps1.3.3.3.1.1.1.4.2.4.1.1" liSelected="liSelected"><p>Operator</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="24.74247424742474%" id="mcps1.3.3.3.1.1.1.4.2.4.1.2" liSelected="liSelected"><p>Example</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="61.2061206120612%" id="mcps1.3.3.3.1.1.1.4.2.4.1.3" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="14.051405140514053%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.1 "><p>==</p>
+</td>
+<td class="cellrowborder" valign="top" width="24.74247424742474%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.2 "><p>a==b</p>
+</td>
+<td class="cellrowborder" valign="top" width="61.2061206120612%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.3 "><p>Whether <strong>a</strong> is equal to <strong>b</strong>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.051405140514053%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.1 "><p>!=</p>
+</td>
+<td class="cellrowborder" valign="top" width="24.74247424742474%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.2 "><p>a!=b</p>
+</td>
+<td class="cellrowborder" valign="top" width="61.2061206120612%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.3 "><p>Whether <strong>a</strong> is not equal to <strong>b</strong>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.051405140514053%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.1 "><p>&gt;</p>
+</td>
+<td class="cellrowborder" valign="top" width="24.74247424742474%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.2 "><p>a&gt;b</p>
+</td>
+<td class="cellrowborder" valign="top" width="61.2061206120612%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.3 "><p>Whether <strong>a</strong> is greater than <strong>b</strong>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.051405140514053%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.1 "><p>&lt;</p>
+</td>
+<td class="cellrowborder" valign="top" width="24.74247424742474%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.2 "><p>a&lt;b</p>
+</td>
+<td class="cellrowborder" valign="top" width="61.2061206120612%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.3 "><p>Whether <strong>a</strong> is less than <strong>b</strong>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.051405140514053%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.1 "><p>&gt;=</p>
+</td>
+<td class="cellrowborder" valign="top" width="24.74247424742474%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.2 "><p>a&gt;=b</p>
+</td>
+<td class="cellrowborder" valign="top" width="61.2061206120612%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.3 "><p>Whether <strong>a</strong> is greater than or equal to <strong>b</strong>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.051405140514053%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.1 "><p>&lt;=</p>
+</td>
+<td class="cellrowborder" valign="top" width="24.74247424742474%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.2 "><p>a&lt;=b</p>
+</td>
+<td class="cellrowborder" valign="top" width="61.2061206120612%" headers="mcps1.3.3.3.1.1.1.4.2.4.1.3 "><p>Whether <strong>a</strong> is less than or equal to <strong>b</strong>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li><li>LogEvent class: describes the subscription to device logs.
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 5 </b>LogEvent class description</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="12.411241124112411%" id="mcps1.3.3.3.1.1.2.1.2.4.1.1" liSelected="liSelected"><p>Class</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="26.652665266526654%" id="mcps1.3.3.3.1.1.2.1.2.4.1.2" liSelected="liSelected"><p>Example</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="60.93609360936093%" id="mcps1.3.3.3.1.1.2.1.2.4.1.3" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="12.411241124112411%" headers="mcps1.3.3.3.1.1.2.1.2.4.1.1 "><p>LogEvent</p>
+</td>
+<td class="cellrowborder" valign="top" width="26.652665266526654%" headers="mcps1.3.3.3.1.1.2.1.2.4.1.2 "><p>e1=eva.LogEvent (arg1,arg2)</p>
+</td>
+<td class="cellrowborder" valign="top" width="60.93609360936093%" headers="mcps1.3.3.3.1.1.2.1.2.4.1.3 "><p>Complies with the standard Python syntax and is used to generate objects of the LogEvent class.</p>
+<p>The constructor supports the <strong>arg1</strong> and <strong>arg2</strong> parameters, each of which is a string of characters. <strong>arg1</strong> indicates the name of a module to be subscribed to, and <strong>arg2</strong> indicates a system event name of this module.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li><li>Strategy class: describes the orchestration and execution actions of events.
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 6 </b>Strategy class description</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="12.280000000000001%" id="mcps1.3.3.3.1.1.3.1.2.4.1.1" liSelected="liSelected"><p>Class</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="26.790000000000003%" id="mcps1.3.3.3.1.1.3.1.2.4.1.2" liSelected="liSelected"><p>Example</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="60.92999999999999%" id="mcps1.3.3.3.1.1.3.1.2.4.1.3" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="12.280000000000001%" headers="mcps1.3.3.3.1.1.3.1.2.4.1.1 "><p>Strategy</p>
+</td>
+<td class="cellrowborder" valign="top" width="26.790000000000003%" headers="mcps1.3.3.3.1.1.3.1.2.4.1.2 "><p>s1=eva.Strategy()</p>
+</td>
+<td class="cellrowborder" valign="top" width="60.92999999999999%" headers="mcps1.3.3.3.1.1.3.1.2.4.1.3 "><p>Complies with the standard Python syntax and is used to generate objects of the Strategy class.</p>
+<p>The constructor has no parameter. Its return value is an object of the Strategy class, which contains a maximum of 15 bytes.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 7 </b>Member functions of the Strategy class</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="12.030000000000001%" id="mcps1.3.3.3.1.1.3.2.2.6.1.1" liSelected="liSelected"><p>Function Name</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="22.13%" id="mcps1.3.3.3.1.1.3.2.2.6.1.2" liSelected="liSelected"><p>Function Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="21.15%" id="mcps1.3.3.3.1.1.3.2.2.6.1.3" liSelected="liSelected"><p>Example</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="29.5%" id="mcps1.3.3.3.1.1.3.2.2.6.1.4" liSelected="liSelected"><p>Parameter</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="15.190000000000001%" id="mcps1.3.3.3.1.1.3.2.2.6.1.5" liSelected="liSelected"><p>Return Value</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="12.030000000000001%" headers="mcps1.3.3.3.1.1.3.2.2.6.1.1 "><p>addaction</p>
+</td>
+<td class="cellrowborder" valign="top" width="22.13%" headers="mcps1.3.3.3.1.1.3.2.2.6.1.2 "><p>Adds actions to the action list of the strategy object.</p>
+</td>
+<td class="cellrowborder" valign="top" width="21.15%" headers="mcps1.3.3.3.1.1.3.2.2.6.1.3 "><p>s1=eva.Strategy()</p>
+<p>s1.addaction(arg1)</p>
+</td>
+<td class="cellrowborder" valign="top" width="29.5%" headers="mcps1.3.3.3.1.1.3.2.2.6.1.4 "><p><strong>arg1</strong> indicates an action function built in the EVA module. For details about the action functions supported by the EVA module, see <a href="#EN-US_CONCEPT_0000001584547617__en-us_concept_0000001175292940_table1456815410112">Table 11</a>.</p>
+<p>A strategy can contain a maximum of five actions.</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.190000000000001%" headers="mcps1.3.3.3.1.1.3.2.2.6.1.5 "><p>None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 8 </b>Member attributes of the Strategy class</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="12.23877612238776%" id="mcps1.3.3.3.1.1.3.3.2.4.1.1" liSelected="liSelected"><p>Attribute</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="42.11578842115789%" id="mcps1.3.3.3.1.1.3.3.2.4.1.2" liSelected="liSelected"><p>Example</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="45.64543545645436%" id="mcps1.3.3.3.1.1.3.3.2.4.1.3" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="12.23877612238776%" headers="mcps1.3.3.3.1.1.3.3.2.4.1.1 "><p>formula</p>
+</td>
+<td class="cellrowborder" valign="top" width="42.11578842115789%" headers="mcps1.3.3.3.1.1.3.3.2.4.1.2 "><p>s1=eva.Strategy()</p>
+<p>s1.formula = e1 &amp; e2</p>
+<p><strong>e1</strong> and <strong>e2</strong> indicate the event objects defined in the script. <strong>&amp;</strong> indicates the logical relationship between the events.</p>
+<div class="note"><span class="notetitle"> NOTE: </span><div class="notebody"><p><strong>e1</strong> and <strong>e2</strong> must be objects of the Event class.</p>
+</div></div>
+</td>
+<td class="cellrowborder" valign="top" width="45.64543545645436%" headers="mcps1.3.3.3.1.1.3.3.2.4.1.3 "><p>Strategy formula, which consists of event objects and logical operators. For details about the logical operators supported by EVA, see <a href="#EN-US_CONCEPT_0000001584547617__en-us_concept_0000001175292940_table205611146115">Table 9</a>.</p>
+<p>s1.formula = e1 &amp; e2</p>
+<p>If both <strong>e1</strong> and <strong>e2</strong> occur within the time period specified by <strong>validTime</strong>, the strategy is matched successfully.</p>
+<div class="note"><span class="notetitle"> NOTE: </span><div class="notebody"><p>A strategy formula can contain a maximum of five event objects.</p>
+</div></div>
+<p></p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.23877612238776%" headers="mcps1.3.3.3.1.1.3.3.2.4.1.1 "><p>validTime</p>
+</td>
+<td class="cellrowborder" valign="top" width="42.11578842115789%" headers="mcps1.3.3.3.1.1.3.3.2.4.1.2 "><p>s1=eva.Strategy()</p>
+<p>s1. validTime = N</p>
+<p><strong>N</strong> is a positive integer.</p>
+</td>
+<td class="cellrowborder" valign="top" width="45.64543545645436%" headers="mcps1.3.3.3.1.1.3.3.2.4.1.3 "><p>Validity period, in seconds.</p>
+<p>Describes the time difference between the first event and the last event when multiple events in a formula occur.</p>
+<p>All events in a strategy formula are considered to have occurred only when the time difference between the first event and the last event is less than or equal to the time period specified by <strong>validTime</strong>.</p>
+<p></p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001584547617__en-us_concept_0000001175292940_table205611146115"></a><a name="en-us_concept_0000001175292940_table205611146115"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001584547617__en-us_concept_0000001175292940_table205611146115" frame="border" border="1" rules="all"><caption><b>Table 9 </b>Logical operators supported by EVA</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="11.341134113411341%" id="mcps1.3.3.3.1.1.3.4.2.4.1.1" liSelected="liSelected"><p>Operator</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="41.23412341234123%" id="mcps1.3.3.3.1.1.3.4.2.4.1.2" liSelected="liSelected"><p>Example</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="47.42474247424743%" id="mcps1.3.3.3.1.1.3.4.2.4.1.3" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="11.341134113411341%" headers="mcps1.3.3.3.1.1.3.4.2.4.1.1 "><p>&amp;</p>
+</td>
+<td class="cellrowborder" valign="top" width="41.23412341234123%" headers="mcps1.3.3.3.1.1.3.4.2.4.1.2 "><p>arg1&amp;arg2</p>
+</td>
+<td class="cellrowborder" valign="top" width="47.42474247424743%" headers="mcps1.3.3.3.1.1.3.4.2.4.1.3 "><p><strong>arg1</strong> and <strong>arg2</strong> are event objects. The expression result is true only when both <strong>arg1</strong> and <strong>arg2</strong> are true.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="11.341134113411341%" headers="mcps1.3.3.3.1.1.3.4.2.4.1.1 "><p>|</p>
+</td>
+<td class="cellrowborder" valign="top" width="41.23412341234123%" headers="mcps1.3.3.3.1.1.3.4.2.4.1.2 "><p>arg1|arg2</p>
+</td>
+<td class="cellrowborder" valign="top" width="47.42474247424743%" headers="mcps1.3.3.3.1.1.3.4.2.4.1.3 "><p><strong>arg1</strong> and <strong>arg2</strong> are event objects. The expression result is false only when both <strong>arg1</strong> and <strong>arg2</strong> are false.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="11.341134113411341%" headers="mcps1.3.3.3.1.1.3.4.2.4.1.1 "><p>()</p>
+</td>
+<td class="cellrowborder" valign="top" width="41.23412341234123%" headers="mcps1.3.3.3.1.1.3.4.2.4.1.2 "><p>(arg1|arg2)&amp;arg3</p>
+</td>
+<td class="cellrowborder" valign="top" width="47.42474247424743%" headers="mcps1.3.3.3.1.1.3.4.2.4.1.3 "><p><strong>arg1</strong>, <strong>arg2</strong>, and <strong>arg3</strong> are event objects. () is a priority symbol, indicating that the | operation is performed on <strong>arg1</strong> and <strong>arg2</strong> first, and then the &amp; operation is performed on the | operation result and <strong>arg3</strong>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li></ul>
+</li><li>Functions built in the EVA Python module<ul><li>Calculation function: calculates the data subscribed through telemetry and KPI data.
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 10 </b>Built-in calculation functions</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="12.78%" id="mcps1.3.3.3.2.1.1.1.2.5.1.1" liSelected="liSelected"><p>Function Name</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="37.22%" id="mcps1.3.3.3.2.1.1.1.2.5.1.2" liSelected="liSelected"><p>Function Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="25%" id="mcps1.3.3.3.2.1.1.1.2.5.1.3" liSelected="liSelected"><p>Usage</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="25%" id="mcps1.3.3.3.2.1.1.1.2.5.1.4" liSelected="liSelected"><p>Parameter Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="12.78%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.1 "><p>eva.avg</p>
+</td>
+<td class="cellrowborder" valign="top" width="37.22%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.2 "><p>Calculates the average value of data obtained the last <em>N</em> times. The return value is a floating-point number.</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.3 "><p>eva.avg(arg1,arg2)</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.4 "><ul><li><strong>arg1</strong> indicates the data defined in the EVA script.</li><li><strong>arg2</strong> indicates the value of <em>N</em>, which is an integer in the range from 1 to 3. If the value of <em>N</em> is greater than 3, the value 3 is used.</li></ul>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.78%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.1 "><p>eva.max</p>
+</td>
+<td class="cellrowborder" valign="top" width="37.22%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.2 "><p>Calculates the maximum value of data obtained the last <em>N</em> times. The return value is a floating-point number.</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.3 "><p>eva. max (arg1,arg2)</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.4 "><ul><li><strong>arg1</strong> indicates the data defined in the EVA script.</li><li><strong>arg2</strong> indicates the value of <em>N</em>, which is an integer in the range from 1 to 3. If the value of <em>N</em> is greater than 3, the value 3 is used.</li></ul>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.78%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.1 "><p>eva.min</p>
+</td>
+<td class="cellrowborder" valign="top" width="37.22%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.2 "><p>Calculates the minimum value of data obtained the last <em>N</em> times. The return value is a floating-point number.</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.3 "><p>eva.min(arg1,arg2)</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.4 "><ul><li><strong>arg1</strong> indicates the data defined in the EVA script.</li><li><strong>arg2</strong> indicates the value of <em>N</em>, which is an integer in the range from 1 to 3. If the value of <em>N</em> is greater than 3, the value 3 is used.</li></ul>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.78%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.1 "><p>eva.minus</p>
+</td>
+<td class="cellrowborder" valign="top" width="37.22%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.2 "><p>Calculates the difference between the current and previous data values.</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.3 "><p>eva.minus (arg1)</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.4 "><p><strong>arg1</strong> indicates the KPI value defined in the EVA script.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.78%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.1 "><p>eva.roc</p>
+</td>
+<td class="cellrowborder" valign="top" width="37.22%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.2 "><p>Calculates the change ratio of data values using the following formula: Change ratio = (Current data value â Previous data value/Previous data value)</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.3 "><p>eva.roc(arg1)</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.3.3.2.1.1.1.2.5.1.4 "><p><strong>arg1</strong> indicates the data defined in the EVA script.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li><li>Action function: defines the actions to be executed in a strategy.
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001584547617__en-us_concept_0000001175292940_table1456815410112"></a><a name="en-us_concept_0000001175292940_table1456815410112"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001584547617__en-us_concept_0000001175292940_table1456815410112" frame="border" border="1" rules="all"><caption><b>Table 11 </b>Action functions</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="13.420000000000002%" id="mcps1.3.3.3.2.1.2.1.2.5.1.1" liSelected="liSelected"><p>Function Name</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="27.79%" id="mcps1.3.3.3.2.1.2.1.2.5.1.2" liSelected="liSelected"><p>Function Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="26.87%" id="mcps1.3.3.3.2.1.2.1.2.5.1.3" liSelected="liSelected"><p>Usage</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="31.919999999999998%" id="mcps1.3.3.3.2.1.2.1.2.5.1.4" liSelected="liSelected"><p>Parameter Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="13.420000000000002%" headers="mcps1.3.3.3.2.1.2.1.2.5.1.1 "><p>eva.log</p>
+</td>
+<td class="cellrowborder" valign="top" width="27.79%" headers="mcps1.3.3.3.2.1.2.1.2.5.1.2 "><p>Displays logs.</p>
+</td>
+<td class="cellrowborder" valign="top" width="26.87%" headers="mcps1.3.3.3.2.1.2.1.2.5.1.3 "><p>eva.log(arg1)</p>
+</td>
+<td class="cellrowborder" valign="top" width="31.919999999999998%" headers="mcps1.3.3.3.2.1.2.1.2.5.1.4 "><p><strong>arg1</strong> is a character string. You can use $ in the character string to reference the data attributes obtained from the XPath.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="13.420000000000002%" headers="mcps1.3.3.3.2.1.2.1.2.5.1.1 "><p>eva.exescript</p>
+</td>
+<td class="cellrowborder" valign="top" width="27.79%" headers="mcps1.3.3.3.2.1.2.1.2.5.1.2 "><p>Runs the next script.</p>
+</td>
+<td class="cellrowborder" valign="top" width="26.87%" headers="mcps1.3.3.3.2.1.2.1.2.5.1.3 "><p>eva.exescript (arg1,arg2)</p>
+</td>
+<td class="cellrowborder" valign="top" width="31.919999999999998%" headers="mcps1.3.3.3.2.1.2.1.2.5.1.4 "><ul><li><strong>arg1</strong> indicates the name of the EVA script to be executed.</li><li><strong>arg2</strong> indicates the maximum duration for running the EVA script. The unit is second.</li></ul>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="13.420000000000002%" headers="mcps1.3.3.3.2.1.2.1.2.5.1.1 "><p>eva.get</p>
+</td>
+<td class="cellrowborder" valign="top" width="27.79%" headers="mcps1.3.3.3.2.1.2.1.2.5.1.2 "><p>Obtains data.</p>
+</td>
+<td class="cellrowborder" valign="top" width="26.87%" headers="mcps1.3.3.3.2.1.2.1.2.5.1.3 "><p>eva.get(arg1)</p>
+</td>
+<td class="cellrowborder" valign="top" width="31.919999999999998%" headers="mcps1.3.3.3.2.1.2.1.2.5.1.4 "><p><strong>arg1</strong> indicates the XPath supported by NETCONF.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li><li>Cross-script parameter transfer function: includes the output parameter and input parameter functions, which are used to transfer parameters between multiple scripts.<ul><li>Output parameter function: sends parameters from the current script to the script that invokes them.</li><li>Input parameter function: receives parameters from the script that provides them.</li></ul>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 12 </b>Cross-script parameter transfer functions</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="14.05%" id="mcps1.3.3.3.2.1.3.2.2.5.1.1" liSelected="liSelected"><p>Function Name</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="35.949999999999996%" id="mcps1.3.3.3.2.1.3.2.2.5.1.2" liSelected="liSelected"><p>Function Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="25%" id="mcps1.3.3.3.2.1.3.2.2.5.1.3" liSelected="liSelected"><p>Usage</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="25%" id="mcps1.3.3.3.2.1.3.2.2.5.1.4" liSelected="liSelected"><p>Parameter Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="14.05%" headers="mcps1.3.3.3.2.1.3.2.2.5.1.1 "><p>eva.outPara</p>
+</td>
+<td class="cellrowborder" valign="top" width="35.949999999999996%" headers="mcps1.3.3.3.2.1.3.2.2.5.1.2 "><p>Output parameter function.</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.3.3.2.1.3.2.2.5.1.3 "><p>eva.outPara(arg1,arg2)</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.3.3.2.1.3.2.2.5.1.4 "><ul><li><strong>arg1</strong> indicates the alias of the output parameter.</li><li><strong>arg2</strong> indicates the output parameter of the EVA script. Generally, <strong>arg2</strong> comes from a key node in an XPath.</li></ul>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="14.05%" headers="mcps1.3.3.3.2.1.3.2.2.5.1.1 "><p>eva.getPara</p>
+</td>
+<td class="cellrowborder" valign="top" width="35.949999999999996%" headers="mcps1.3.3.3.2.1.3.2.2.5.1.2 "><p>Input parameter function.</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.3.3.2.1.3.2.2.5.1.3 "><p>eva.getPara (arg1)</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.3.3.2.1.3.2.2.5.1.4 "><p><strong>arg1</strong> indicates the alias of the output parameter of the invoked script.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li></ul>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../toctopics/en-us_topic_0000001513030598.html">Understanding EVA
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../toctopics/en-us_concept_0000001512831026.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../toctopics/en-us_concept_0000001563990837.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

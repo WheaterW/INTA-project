@@ -1,0 +1,76 @@
+certificate auto-update enable
+==============================
+
+certificate auto-update enable
+
+Function
+--------
+
+
+
+The **certificate auto-update enable** command enables CMPv2-based automatic certificate update.
+
+The **undo certificate auto-update enable** command disables CMPv2-based automatic certificate update.
+
+
+
+By default, the CMPv2-based automatic certificate update is disabled.
+
+
+Format
+------
+
+**certificate auto-update enable**
+
+**undo certificate auto-update enable**
+
+
+Parameters
+----------
+
+None
+
+Views
+-----
+
+PKI CMP session view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+
+
+If a certificate obtained through CMPv2 is about to expire, run this command to enable CMPv2-based automatic certificate update to ensure certificate validity. After the command is executed, the system performs checks (for example, referenced PKI entity, URL for the CMPv2 server, RSA key pair for CMPv2-based certificate application). The configuration is successful only when the conditions are met. After this command is configured, the system checks configurations. If conditions are met, configurations succeed. When the system detects that the remaining validity period of the local certificate has reached the value specified in certificate update expire-time, the system automatically initiates the certificate update request and decides whether to create an RSA key pair based on the cmp-request rsa local-key-pair configuration. After the new certificate is obtained, the system replaces the previous certificate and RSA key pair with the new ones.
+
+
+
+
+Example
+-------
+
+# Enable CMPv2-based automatic certificate update.
+```
+<HUAWEI> system-view
+[~HUAWEI] pki entity entity_test
+[*HUAWEI-pki-entity-entity_test] common-name e1
+[*HUAWEI-pki-entity-entity_test] quit
+[~HUAWEI] pki rsa local-key-pair create key1
+[~HUAWEI] pki import-certificate local filename cert_local.cer
+[~HUAWEI] pki cmp session test
+[*HUAWEI-pki-cmp-session-test] cmp-request entity entity_test
+[*HUAWEI-pki-cmp-session-test] cmp-request ca-name "C=cn,ST=beijing,L=shangdi,O=BB,OU=BB,CN=BB"
+[*HUAWEI-pki-cmp-session-test] cmp-request server url http://172.16.73.168:8080
+[*HUAWEI-pki-cmp-session-test] cmp-request rsa local-key-pair key1
+[*HUAWEI-pki-cmp-session-test] cmp-request authentication-cert cert_local.cer
+[*HUAWEI-pki-cmp-session-test] certificate auto-update enable
+
+```

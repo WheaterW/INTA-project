@@ -1,0 +1,124 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding MLD SSM Mapping">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_mld_cfg_0022.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_mld_cfg_0024.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="MLD">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="MLD">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="MLD">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001538416578">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding MLD SSM Mapping</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001538416578"></a><a name="EN-US_CONCEPT_0000001538416578"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding MLD SSM Mapping</h1>
+<div><p>Source-specific multicast (SSM) requires a device to know the multicast sources specified when hosts join a multicast group. A host running MLDv2 can specify a multicast source address in an MLDv2 Report message. However, in some cases, hosts can run only MLDv1. To enable these hosts to use the SSM service, a device needs to provide the MLD SSM mapping function.</p>
+<p>MLD SSM mapping is implemented based on static SSM mapping entries. A device converts (*, G) information in MLDv1 Report messages into (G, INCLUDE, (S1, S2...)) information to provide the SSM service.</p>
+<div class="p">After SSM mapping entries are configured, an MLD querier checks the group address G in each MLDv1 Report message received from a host, and processes the message based on the check result:<ul><li>If G is in the any-source multicast (ASM) group address range, the querier provides the ASM service for the host.</li><li>If G is in the SSM group address range (FF3<em>x</em>::/32 by default, where <em>x</em> cannot be 1 or 2):<ul><li>If the device has no SSM mapping entry matching G, it cannot provide the SSM service and therefore discards the message.</li><li>If the device has an SSM mapping entry matching G, it converts (*, G) information in the Report message into (G, INCLUDE, (S1, S2...)) information and provides the SSM service.</li></ul>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Implementation of Static SSM Mapping</h4><p>On the SSM network's user network segment shown in <a href="#EN-US_CONCEPT_0000001538416578__fig_01">Figure 1</a>, HostA, HostB, and HostC run MLDv2, MLDv1, and MLDv1, respectively. HostB and HostC cannot run MLDv2. To provide the SSM service for all the hosts on the network segment, enable MLD SSM mapping on the MLD querier (Device) and configure mapping rules.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001538416578__fig_01"><a name="EN-US_CONCEPT_0000001538416578__fig_01"></a><a name="fig_01"></a><span class="figcap"><b>Figure 1 </b>Network diagram of MLD SSM mapping</span><br><span><img class="vsd" src="figure/en-us_image_0000001589336537.png" width="NaN" height="NaN"></span></div>
+<p>Assume that the following mappings are configured on Device.</p>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="50%" id="mcps1.3.4.5.1.3.1.1" liSelected="liSelected"><p>Multicast Group Address</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="50%" id="mcps1.3.4.5.1.3.1.2" liSelected="liSelected"><p>Mapped Multicast Source Address</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.4.5.1.3.1.1 "><p>FF11::/16</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.4.5.1.3.1.2 "><p>2001:db8:1::1</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.4.5.1.3.1.1 "><p>FF11:1::/32</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.4.5.1.3.1.2 "><p>2001:db8:2::2</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.4.5.1.3.1.1 "><p>FF11:1::/32</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.4.5.1.3.1.2 "><p>2001:db8:3::3</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.4.5.1.3.1.1 "><p>FF11:1:1::/64</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.4.5.1.3.1.2 "><p>2001:db8:4::4</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>When Device receives Report messages from HostB and HostC, it checks whether the group addresses in the messages are in the SSM group address range. If they are, Device generates multicast entries based on the configured mappings. If a group address is mapped to multiple sources, Device generates multiple (S, G) entries.</p>
+<p>Device generates an entry based on each mapping entry that matches a group address. Therefore, Device generates four entries for FF11:1:1::8 and three entries for FF11:1:2::8.</p>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="50%" id="mcps1.3.4.8.1.3.1.1" liSelected="liSelected"><p>Group Address in an MLDv1 Report Message</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="50%" id="mcps1.3.4.8.1.3.1.2" liSelected="liSelected"><p>Generated Multicast Entry</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.4.8.1.3.1.1 "><p>FF11:1:1::8 (from HostC)</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.4.8.1.3.1.2 "><p>(2001:db8:1::1, FF11:1:1::8)</p>
+<p>(2001:db8:2::2, FF11:1:1::8)</p>
+<p>(2001:db8:3::3, FF11:1:1::8)</p>
+<p>(2001:db8:4::4, FF11:1:1::8)</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.4.8.1.3.1.1 "><p>FF11:1:2::8 (from HostB)</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.4.8.1.3.1.2 "><p>(2001:db8:1::1, FF11:1:2::8)</p>
+<p>(2001:db8:2::2, FF11:1:2::8)</p>
+<p>(2001:db8:3::3, FF11:1:2::8)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_mld_cfg_0022.html">Configuring MLD SSM Mapping
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_mld_cfg_0024.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,164 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Static Subscription (IPv4 Collector)">
+<meta name="abstract" content="">
+<meta name="description" content="">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_telemetry_cfg_0008_c.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_telemetry_cfg_0012_c.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Telemetry">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Telemetry">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featurename" content="Telemetry">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featurename" content="Telemetry">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001563994425">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Static Subscription (IPv4 Collector)</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001563994425"></a><a name="EN-US_TASK_0000001563994425"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Static Subscription (IPv4 Collector)</h1>
+<div class="taskbody"><p></p>
+<div class="context"><a name="EN-US_TASK_0000001563994425__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>As the network scale increases, you need to optimize networks and rectify faults based on device information. For example, if the CPU usage of a device exceeds a specified threshold, the device reports data to a collector so that network traffic can be monitored and optimized in a timely manner.</p>
+<p>As shown in <a href="#EN-US_TASK_0000001563994425__en-us_task_0275777943_fig117736513266">Figure 1</a>, DeviceA supports telemetry and establishes a gRPC connection with the collector. When the CPU usage of DeviceA exceeds 40%, data needs to be sent to the collector. When the system memory usage of DeviceA exceeds 50%, data needs to be sent to the collector.</p>
+<div class="fignone" id="EN-US_TASK_0000001563994425__en-us_task_0275777943_fig117736513266"><a name="EN-US_TASK_0000001563994425__en-us_task_0275777943_fig117736513266"></a><a name="en-us_task_0275777943_fig117736513266"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring gRPC-based static subscription</span><br><span><img class="vsd" src="figure/en-us_image_0000001513034246.png"></span></div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001563994425__1.4.2"></a><a name="1.4.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure a destination collector for receiving sampled data.</span><p><p># On <span class="keyword">Device</span>A, create the destination group <strong>destination1</strong> to which a destination collector belongs, set the IP address and port number of the destination collector to 10.20.2.1 and 10001, respectively, and set the gRPC encryption mode to TLS.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname <span class="keyword">Device</span></strong><strong>A</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>telemetry</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-telemetry] <strong>destination-group destination1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-telemetry-destination-group-destination1] <strong>ipv4-address 10.20.2.1 port 10001 protocol gRPC</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-telemetry-destination-group-destination1] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-telemetry] <strong>commit</strong></pre>
+</p></li><li><span>Configure the sampling path and filter criteria.</span><p><p># Configure the sampling sensor group <strong>sensor1</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-telemetry] <strong>sensor-group sensor1</strong>
+[<span class="keyword">*</span><span class="keyword">DeviceA</span>-telemetry] <strong>commit</strong></pre>
+<p># Configure a sampling path and customized event for sampling CPU usage data. In this example, the sampling path is <strong>huawei-cpu-memory:cpu-memory/board-cpu-infos/board-cpu-info</strong>, the filtering field is <strong>system-cpu-usage</strong>, and the filter criterion is that the CPU usage is greater than 40%.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-telemetry-sensor-group-sensor1] <strong>sensor-path huawei-cpu-memory:cpu-memory/board-cpu-infos/board-cpu-info</strong> <strong>self-defined-event</strong> 
+[<span class="keyword">*</span><span class="keyword">Device</span>A-telemetry-sensor-group-sensor1-self-defined-event-path] <strong>filter cpuinfo</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-telemetry-sensor-group-sensor1-self-defined-event-path-filter-cpuinfo] <strong>o</strong><strong>p-field </strong><strong><span>system-cpu-usage</span> </strong><strong>op-type gt op-value 40</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-telemetry-sensor-group-sensor1-self-defined-event-path-filter-cpuinfo] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-telemetry-sensor-group-sensor1-self-defined-event-path] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-telemetry-sensor-group-sensor1] <strong>commit</strong></pre>
+<p># Configure a sampling path and customized event for sampling system memory usage data. In this example, the sampling path is <span><strong>huawei-cpu-memory:cpu-memory/board-memory-infos/board-memory-info</strong></span>, the filtering field is <strong>os-memory-usage</strong>, and the filter criterion is that the system memory usage is greater than 50%.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-telemetry-sensor-group-sensor1] <strong>sensor-path <span>huawei-cpu-memory:cpu-memory/board-memory-infos/board-memory-info</span> self-defined-event</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-telemetry-sensor-group-sensor1-self-defined-event-path] <strong>filter meminfo</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-telemetry-sensor-group-sensor1-self-defined-event-path-filter-meminfo] <strong>o</strong><strong>p-field os-memory-usage op-type gt op-value 50</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-telemetry-sensor-group-sensor1-self-defined-event-path-filter-meminfo] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-telemetry-sensor-group-sensor1-self-defined-event-path] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-telemetry-sensor-group-sensor1] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-telemetry] <strong>commit</strong></pre>
+</p></li><li><span>Create a static subscription.</span><p><p># On <span class="keyword">Device</span>A, create a subscription named <strong>subscription1</strong> and associate it with the sampling sensor group <strong>sensor1</strong> and destination group <strong>destination1</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-telemetry] <strong>subscription subscription1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-telemetry-subscription-subscription1] <strong>sensor-group sensor1</strong> <strong>sample-interval 60000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-telemetry-subscription-subscription1] <strong>destination-group destination1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-telemetry-subscription-subscription1] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001563994425__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>Check static subscription information after the configuration is complete.</p>
+<p># Display static subscription information.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>display telemetry subscription</strong> <strong>subscription1</strong>
+---------------------------------------------------------------------------     
+Sub-name           : subscription1                                              
+Source Address     : 10.1.1.1                                                          
+Dscp               : 0                                                          
+Protocol           : GRPC                                                       
+Encoding           : GPB                                                        
+Send bytes         : -                                                          
+Send packets       : -                                                          
+Total send delay   : -                                                         
+Total send error   : -                                                          
+Total send  drop   : -                                                          
+Total other error  : -                                                          
+Last send-time     : -                                       
+Sensor group:                                                                   
+---------------------------------------------------------------------------     
+Sensor-name  Sample-interval(ms) Heartbeat-interval(s) Suppression State        
+---------------------------------------------------------------------------     
+sensor1      60000               -                     NO          RESOLVED     
+---------------------------------------------------------------------------     
+Destination group:                                                              
+---------------------------------------------------------------------------     
+Dest-name    Dest-IP          Dest-port  State        Vpn-name      Protocol    Compression 
+---------------------------------------------------------------------------     
+destination1 10.20.2.1        10001      RESOLVED     -             GRPC        None
+---------------------------------------------------------------------------     
+Sub-state          : PASSIVE                                                    
+---------------------------------------------------------------------------     
+
+Total subscription number is :  1        </pre>
+<h4 class="sectiontitle">Configuration Scripts</h4><div class="p"><span class="keyword">Device</span>A<pre class="screen">#
+sysname DeviceA
+#
+telemetry
+ #
+ sensor-group sensor1
+  sensor-path <span>huawei-cpu-memory:cpu-memory/board-cpu-infos/board-cpu-info</span> self-defined-event              
+   filter cpuinfo                                                               
+    op-field <span>system-cpu-usage</span> op-type gt op-value 40  
+  sensor-path <span>huawei-cpu-memory:cpu-memory/board-memory-infos/board-memory-info</span> self-defined-event 
+    filter meminfo
+     op-field os-memory-usage op-type gt op-value 50
+ #
+ destination-group destination1
+  ipv4-address 10.20.2.1 port 10001 protocol gRPC
+ #
+ subscription subscription1
+  sensor-group sensor1 sample-interval 60000
+  destination-group destination1
+#
+return</pre>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_telemetry_cfg_0008_c.html">Configuring Static Subscription
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_telemetry_cfg_0012_c.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

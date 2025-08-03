@@ -1,0 +1,54 @@
+{
+    "PageTitle": "aggregate (BGP-IPv4 unicast address family view)",
+    "FuncDef": "The aggregate command adds a summarized route to the BGP routing table. The outbound interface of the summarized route on the local Router is NULL 0. When receiving the summarized route, each of the other devices automatically adds its local outbound interface to the summarized route.\nThe undo aggregate command disables the function. The aggregate command adds a summarized route to the BGP routing table. The outbound interface of the summarized route on the local Router is NULL 0. When receiving the summarized route, each of the other devices automatically adds its local outbound interface to the summarized route. The undo aggregate command disables the function. By default, no routes are summarized.",
+    "CLIs": [
+        "aggregate <ipv4-address> { <mask-length> | <mask> } [ as-set | detail-suppressed | attribute-policy <route-policy-name1> | origin-policy <route-policy-name2> | suppress-policy <route-policy-name3> ]",
+        "undo aggregate <ipv4-address> { <mask-length> | <mask> } [ as-set | detail-suppressed | attribute-policy <route-policy-name1> | origin-policy <route-policy-name2> | suppress-policy <route-policy-name3> ]"
+    ],
+    "ParentView": [
+        "BGP-IPv4 unicast address family view"
+    ],
+    "ParaDef": [
+        {
+            "Parameters": "<ipv4-address>",
+            "Info": "Specifies the IPv4 address of a summary route. The value is in dotted decimal notation.\nThe value is in the dotted decimal format."
+        },
+        {
+            "Parameters": "<mask-length>",
+            "Info": "Specifies the network mask length of the summary route.\nThe value is an integer ranging from 1 to 32."
+        },
+        {
+            "Parameters": "<mask>",
+            "Info": "Specifies the network mask of a summary route.\nIt is in dotted decimal notation."
+        },
+        {
+            "Parameters": "as-set",
+            "Info": "Generates a route carrying the AS-Set attribute.\n-"
+        },
+        {
+            "Parameters": "detail-suppressed",
+            "Info": "Advertises only the summary route.\n-"
+        },
+        {
+            "Parameters": "attribute-policy <route-policy-name1>",
+            "Info": "Specifies the name of a route-policy for setting attributes of a summary route.\nThe value is a string of 1 to 200 case-sensitive characters without spaces. The character string can contain spaces if it is enclosed with double quotation marks (\")."
+        },
+        {
+            "Parameters": "origin-policy <route-policy-name2>",
+            "Info": "Specifies the name of the route-policy that allows route summarization.\nThe value is a string of 1 to 200 case-sensitive characters without spaces. The character string can contain spaces if it is enclosed with double quotation marks (\")."
+        },
+        {
+            "Parameters": "suppress-policy <route-policy-name3>",
+            "Info": "Specifies the name of the route-policy for suppressing the advertisement of specified routes.\nThe value is a string of 1 to 200 case-sensitive characters without spaces. The character string can contain spaces if it is enclosed with double quotation marks (\")."
+        }
+    ],
+    "Examples": [
+        [
+            "<HUAWEI> system-view",
+            "[~HUAWEI] bgp 100",
+            "[*HUAWEI-bgp] ipv4-family unicast",
+            "[*HUAWEI-bgp-af-ipv4] aggregate 10.32.0.0 255.255.0.0 as-set"
+        ]
+    ],
+    "ExtraInfo": "BGP route summarization is classified into manual summarization and automatic summarization. The aggregate command is used to implement manual summarization. Manual summarization takes precedence over automatic summarization. The aggregate ipv4-address { mask | mask-length } command can be used to summarize specific routes in the local BGP routing table and advertise all summary routes and specific routes. The summary route inherits the Origin attribute of the specific routes. If the Origin attributes of the specific routes are different, the route with the largest Origin attribute priority (incomplete\\ > egp\\ > igp) is selected. In addition, the generated summary route carries the atomic-aggregate attribute. Except the Origin and Atomic-aggregate attributes, the summary route discards all other attributes of the specific routes.\nTo ensure that summary routes can prevent loops, you can specify the as-set keyword to create a summary route for loop detection. The summary route inherits the Origin, AS_Path (loop-proof), community, and large-community attributes of specific routes. The summary route also carries the community attributes of all specific routes. When the number of community attributes of the summary route exceeds 255, the summarization stops and the routes that are not summarized are advertised as specific routes. If multiple AS_Paths need to be summarized, exercise caution when using this parameter because frequent changes of specific routes may cause route flapping.\ndetail-suppressed is used to suppress the advertisement of all specific routes corresponding to the summary route. Only the summary route is advertised. The summary route carries the atomic-aggregate attribute but does not carry the community attribute of the specific routes.\nThe suppress-policy keyword can be used to generate summary routes but suppress the advertisement of specified routes. You can use the if-match clause of the route-policy to selectively suppress some specific routes. That is, the routes that match the route-policy are suppressed, but the routes that do not match the route-policy are still advertised. You can also run the peer route-policy command to achieve the same effect.\nIf origin-policy is specified, a summary route is generated only when the route-policy is matched.\nThe attribute-policy keyword can be used to set the attributes of the summary route. If the AS_Path attribute is set in the policy through the apply as-path command and the keyword as-set is set in the aggregate command, the apply as-path command in the policy does not take effect. You can also run the peer route-policy command to achieve the same effect."
+}

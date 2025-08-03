@@ -1,0 +1,320 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Dynamic BFD for TE CR-LSP">
+<meta name="abstract" content="This section provides an example for configuring dynamic BFD for TE CR-LSP to ensure that hot standby is enabled and a best-effect LSP is established in a tunnel.">
+<meta name="description" content="This section provides an example for configuring dynamic BFD for TE CR-LSP to ensure that hot standby is enabled and a best-effect LSP is established in a tunnel.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0093.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0130.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0131.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,te-p2pvrp,w00556928,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="OWNER" content="l00468467">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="w00845984">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172368360">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Dynamic BFD for TE CR-LSP</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172368360"></a><a name="EN-US_TASK_0172368360"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Dynamic BFD for TE CR-LSP</h1>
+<div class="taskbody"><p>This section provides an example for configuring dynamic BFD for TE CR-LSP to ensure that hot standby is enabled and a best-effect LSP is established in a tunnel.</p>
+<div class="context"><a name="EN-US_TASK_0172368360__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p><a href="#EN-US_TASK_0172368360__fig_dc_vrp_te-p2p_cfg_015001">Figure 1</a> illustrates CR-LSP hot standby. A TE tunnel between PE1 and PE2 is established. Hot standby and a best-effort LSP are configured for the TE tunnel. If the primary CR-LSP fails, traffic switches to the backup CR-LSP. After the primary CR-LSP recovers, traffic switches back to the primary CR-LSP after a 15-second delay. If both the primary and backup CR-LSPs fail, traffic switches to the best-effort path.</p>
+<p>Dynamic BFD for TE CR-LSP is required to detect the primary and backup CR-LSPs. After the configuration, the following objects should be achieved:</p>
+<ul><li><p>If the primary CR-LSP fails, traffic rapidly switches to the backup CR-LSP.</p>
+</li><li><p>If the primary CR-LSP recovers and the backup CR-LSP fails during the switchover time (15s), traffic switches back to the primary CR-LSP.</p>
+</li></ul>
+<div class="fignone" id="EN-US_TASK_0172368360__fig_dc_vrp_te-p2p_cfg_015001"><a name="EN-US_TASK_0172368360__fig_dc_vrp_te-p2p_cfg_015001"></a><a name="fig_dc_vrp_te-p2p_cfg_015001"></a><span class="figcap"><b>Figure 1 </b>Networking diagram for CR-LSP hot standby</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 through 3 in this example represent GE <span>0/1/0</span>, GE <span>0/2/0</span>, and GE <span>0/3/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_te-p2p_cfg_015001.png"></span></div>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Dynamic BFD configuration is simpler than static BFD configuration. In addition, dynamic BFD reduces the number of BFD sessions and uses less network resources because only a single BFD session can be created on a tunnel interface.</p>
+</div></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368360__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure CR-LSP hot standby according to <a href="dc_vrp_te-p2p_cfg_0109.html">Example for Configure a Hot-standby CR-LSP</a>.</p>
+</li><li><p>Enable BFD on the ingress of the tunnel. Configure MPLS TE BFD. Set the minimum intervals at which BFD packets are sent and received, and the local BFD detection multiplier.</p>
+</li><li><p>Enable the capability of passively creating BFD sessions on the egress.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368360__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Minimum intervals at which BFD packets are sent and received on the ingress</p>
+</li><li><p>Local BFD detection multiplier on the ingress</p>
+</li><li><p>For other data, see <a href="dc_vrp_te-p2p_cfg_0109.html">Example for Configure a Hot-standby CR-LSP</a>.</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172368360__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure CR-LSP hot standby.</span><p><p>Configure the primary CR-LSP, hot-standby CR-LSP, and best-effort LSP based on <a href="dc_vrp_te-p2p_cfg_0109.html">Example for Configure a Hot-standby CR-LSP</a>.</p>
+</p></li><li><span>Enable BFD on the ingress of the tunnel and configure MPLS TE BFD.</span><p><p># Enable MPLS TE BFD on the tunnel interface of PE1. Set the minimum intervals at which BFD packets are sent and received to 100 milliseconds and the local BFD detection multiplier to 3.</p>
+<pre class="screen">&lt;PE1&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>bfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface Tunnel 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel10]<strong> mpls te bfd enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunenl10]<strong> mpls te bfd min-tx-interval 100 min-rx-interval 100 detect-multiplier 3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunenl10]<strong> commit</strong></pre>
+</p></li><li><span>Enable the capability of passively creating BFD sessions on the egress of the tunnel.</span><p><pre class="screen">&lt;PE2&gt;<strong> system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong> bfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd] <strong>mpls-passive</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-bfd] <strong>quit</strong></pre>
+<p># Run the <strong>display bfd session mpls-te interface Tunnel</strong> command on PE1 and PE2. The status of BFD sessions is <strong>Up</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> display bfd session mpls-te interface Tunnel 10 te-lsp</strong></pre>
+<pre class="screen"><span>(w): State in WTR 
+(*): State is invalid</span>
+--------------------------------------------------------------------------------
+Local Remote     PeerIpAddr      State     Type        InterfaceName 
+--------------------------------------------------------------------------------
+16385 16385      3.3.3.3         Up        D_TE_LSP    Tunnel10
+--------------------------------------------------------------------------------
+    Total UP/DOWN Session Number : 1/0</pre>
+</p></li><li><span>Verify the configuration.</span><p><p>Connect Port 1 and Port 2 on a tester to PE1 and PE2, respectively. Set correct label values. Inject MPLS traffic destined for Port 2 into Port 1. After the cable is removed from GE <span>0/2/0</span> on PE1 or P1, the fault is rectified within milliseconds.</p>
+<p>After the cable is inserted into GE <span>0/2/0</span> and the cable is removed from GE <span>0/1/0</span> on PE1 after a 15-second delay, the fault is rectified within milliseconds.</p>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172368360__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>PE1 configuration file</p>
+<pre class="screen">#
+sysname PE1
+#
+bfd
+#
+mpls lsr-id 4.4.4.4
+#
+mpls
+ mpls te
+ mpls rsvp-te
+ mpls te cspf
+#
+explicit-path backup
+ next hop 10.3.1.2
+ next hop 10.5.1.2
+ next hop 3.3.3.3
+#
+explicit-path main
+ next hop 10.4.1.2
+ next hop 10.2.1.2
+ next hop 3.3.3.3             
+#
+isis 1
+ cost-style wide
+ network-entity 10.0000.0000.0004.00
+ traffic-eng level-1-2
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.3.1.1 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.4.1.1 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+#
+interface LoopBack1
+ ip address 4.4.4.4 255.255.255.255
+ isis enable 1
+#
+interface Tunnel10
+ ip address unnumbered interface LoopBack1
+ tunnel-protocol mpls te
+ destination 3.3.3.3
+ mpls te record-route
+ mpls te backup ordinary best-effort
+ mpls te backup hot-standby 
+ mpls te tunnel-id 502
+ mpls te path explicit-path main  
+ mpls te path explicit-path backup secondary
+ mpls te bfd enable
+ mpls te bfd min-tx-interval 100 min-rx-interval 100 detect-multiplier 3
+#
+return</pre>
+</li><li><p>P1 configuration file</p>
+<pre class="screen">#
+sysname P1
+#
+mpls lsr-id 1.1.1.1
+#
+mpls
+ mpls te
+ mpls rsvp-te
+#
+isis 1
+ cost-style wide
+ network-entity 10.0000.0000.0001.00
+ traffic-eng level-1-2
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.4.1.2 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.1.1 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown
+ ip address 10.2.1.1 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+#
+interface LoopBack1
+ ip address 1.1.1.1 255.255.255.255
+ isis enable 1
+#
+return</pre>
+</li><li><p>P2 configuration file</p>
+<pre class="screen">#
+sysname P2
+#
+mpls lsr-id 2.2.2.2
+#
+mpls
+ mpls te
+ mpls rsvp-te
+#
+isis 1
+ cost-style wide
+ network-entity 10.0000.0000.0002.00
+ traffic-eng level-1-2
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.1.2 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.5.1.1 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown
+ ip address 10.3.1.2 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+#
+interface LoopBack1
+ ip address 2.2.2.2 255.255.255.255
+ isis enable 1
+#
+return</pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#
+sysname PE2
+#
+bfd
+ mpls-passive
+#
+mpls lsr-id 3.3.3.3
+#
+mpls
+ mpls te
+ mpls rsvp-te
+#               
+isis 1
+ cost-style wide
+ network-entity 10.0000.0000.0003.00
+ traffic-eng level-1-2
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.2.1.2 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.5.1.2 255.255.255.252
+ isis enable 1
+ mpls
+ mpls te
+ mpls rsvp-te
+#
+interface LoopBack1
+ ip address 3.3.3.3 255.255.255.255
+ isis enable 1
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0093.html">Configuration Examples for MPLS TE
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0130.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0131.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

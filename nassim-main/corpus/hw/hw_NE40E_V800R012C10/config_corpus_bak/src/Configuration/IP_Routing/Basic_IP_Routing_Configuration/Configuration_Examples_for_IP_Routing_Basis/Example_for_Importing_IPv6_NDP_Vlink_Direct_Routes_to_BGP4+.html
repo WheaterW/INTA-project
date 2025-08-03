@@ -1,0 +1,549 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Importing IPv6 NDP Vlink Direct Routes to BGP4+">
+<meta name="abstract" content="By importing IPv6 NDP Vlink direct routes to BGP4+, you can enable the remote device to obtain information about detailed routes in the VLAN, allowing precise control of data traffic.">
+<meta name="description" content="By importing IPv6 NDP Vlink direct routes to BGP4+, you can enable the remote device to obtain information about detailed routes in the VLAN, allowing precise control of data traffic.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ip-route_cfg_0023.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ip-route_cfg_0057.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,w00556928,ip-routevrp,s00526617,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="IP Routing Basis">
+<meta name="featuretype" content="IP Route">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IP Routing Basis">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="IP Routing Basis">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="IP Routing Basis">
+<meta name="featuretype" content="IP Routing Basis">
+<meta name="OWNER" content="z00809835">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="s00826690">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172365391">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Importing IPv6 NDP Vlink Direct Routes to BGP4+</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172365391"></a><a name="EN-US_TASK_0172365391"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Importing IPv6 NDP Vlink Direct Routes to BGP4+</h1>
+<div class="taskbody"><p>By importing IPv6 NDP Vlink direct routes to BGP4+, you can enable the remote device to obtain information about detailed routes in the VLAN, allowing precise control of data traffic.</p>
+<div class="context"><a name="EN-US_TASK_0172365391__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>As networks develop, the VLAN technology is widely used. If a user outside a VLAN needs to communicate with users within the VLAN, advertising routes destined for the network segment of the VLAN can achieve this purpose. When users outside the VLAN need to know the IPv6 NDP Vlink direct routes of the VLAN, and apply different traffic policies to routes of the VLAN users, advertising the routes destined for the network segment of the VLAN cannot meet this requirement.</p>
+<p>In this case, you can enable the function of IPv6 NDP Vlink direct route advertisement. On the network shown in <a href="#EN-US_TASK_0172365391__fig_dc_vrp_ip-route_cfg_005801">Figure 1</a>, <span class="keyword">Device</span>C is connected to two users through VLANIF interfaces. <span class="keyword">Device</span>D needs to communicate with <span class="keyword">Device</span>B, but not with <span class="keyword">Device</span>A. In this case, you can enable the function of IPv6 NDP Vlink direct route advertisement on <span class="keyword">Device</span>C, and use a route-policy to filter out subnet routes and the route to <span class="keyword">Device</span>A.</p>
+<div class="fignone" id="EN-US_TASK_0172365391__fig_dc_vrp_ip-route_cfg_005801"><a name="EN-US_TASK_0172365391__fig_dc_vrp_ip-route_cfg_005801"></a><a name="fig_dc_vrp_ip-route_cfg_005801"></a><span class="figcap"><b>Figure 1 </b>Networking diagram of importing IPv6 NDP Vlink direct routes to BGP4+</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 through 3 in this example represent GE <span>0/1/0</span>, GE <span>0/2/0</span>, and GE <span>0/3/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_ip-route_cfg_005801.png" width="NaN" height="NaN"></span><br></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172365391__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Create VLANIF interfaces on SwitchA and <span class="keyword">Device</span>C and assign IPv6 addresses to the VLANIF interfaces, and ensure that <span class="keyword">Device</span>A, <span class="keyword">Device</span>B, SwitchA, and <span class="keyword">Device</span>C can communicate with each other.</p>
+</li><li>Enable BGP4+ on <span class="keyword">Device</span>C and <span class="keyword">Device</span>D, ensuring that <span class="keyword">Device</span>C and <span class="keyword">Device</span>D are able to advertise IPv6 routes to each other.</li><li><p>Enable the function of IPv6 NDP Vlink direct route advertisement on <span class="keyword">Device</span>C.</p>
+</li><li><p>Configure a route-policy on <span class="keyword">Device</span>C, allowing IPv6 routes only from <span class="keyword">Device</span>B to pass through.</p>
+</li><li><p>Enable BGP4+ on <span class="keyword">Device</span>C and import IPv6 direct routes to BGP4+, and use the route-policy to import IPv6 routes only from <span class="keyword">Device</span>B to BGP4+.</p>
+</li><li><p>Associate BGP4+ with the route-policy on <span class="keyword">Device</span>C to filter out the network segment route of the VLAN so that <span class="keyword">Device</span>D cannot learn the network segment route and can communicate with VLAN users based only on IPv6 NDP Vlink direct routes.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172365391__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>ID of the VLAN in which SwitchA and <span class="keyword">Device</span>C reside (the VLAN ID is 10 in this example)</p>
+</li><li><p>Router IDs and AS numbers of <span class="keyword">Device</span>s C and D (router ID of <span class="keyword">Device</span>C is 1.1.1.1 and router ID of <span class="keyword">Device</span>D is 2.2.2.2, and <span class="keyword">Device</span>s C and D are in AS 100 in this example)</p>
+</li><li><p>Route-policy used to filter direct routes (the route-policy is policy1 in this example)</p>
+</li><li><p>Route-policy used to advertise BGP4+ routes on <span class="keyword">Device</span>C (the route-policy is policy2 in this example)</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172365391__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure an IP address for each interface.</span><p><p># Configure <span class="keyword">Device</span>A.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt;<strong> system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname <span class="keyword">Device</span>A</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> </strong><strong>interface GigabitEthernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>]<strong> ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>]<strong> ipv6 address 2001:db8:2000::3 64</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<p># Configure <span class="keyword">Device</span>B.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt;<strong> system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname <span class="keyword">Device</span>B</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B]<strong> interface GigabitEthernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/0</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/0</span>]<strong> ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/0</span>]<strong> ipv6 address 2001:db8:2000::4 64</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/0</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<p># Configure <span class="keyword">Device</span>C.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt;<strong> system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname <span class="keyword">Device</span>C</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C]<strong> </strong><strong>interface GigabitEthernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/2/0</span>]<strong> ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/2/0</span>]<strong> ipv6 address 2001:db8:2001::1 64</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/2/0</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-GigabitEthernet<span>0/2/0</span>]<strong> quit</strong></pre>
+<p># Configure <span class="keyword">Device</span>D.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt;<strong> system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname <span class="keyword">Device</span>D</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D]<strong> </strong><strong>interface GigabitEthernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/0</span>]<strong> ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/0</span>]<strong> ipv6 address 2001:db8:2001::2 64</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/0</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+</p></li><li><span>Configure basic VLAN functions. Create VLANIF 10 on SwitchA and <span class="keyword">Device</span>C and assign IP addresses to the VLANIF interfaces.</span><p><p># Configure SwitchA.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt;<strong> system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname SwitchA</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>SwitchA]<strong> vlan 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA-vlan10]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA]<strong> interface GigabitEthernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA-GigabitEthernet<span>0/1/0</span>]<strong> portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA-GigabitEthernet<span>0/1/0</span>]<strong> port link-type access</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA-GigabitEthernet<span>0/1/0</span>]<strong> port default vlan 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA]<strong> interface GigabitEthernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA-GigabitEthernet<span>0/2/0</span>]<strong> portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA-GigabitEthernet<span>0/2/0</span>]<strong> port link-type access</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA-GigabitEthernet<span>0/2/0</span>]<strong> port default vlan 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA-GigabitEthernet<span>0/2/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA]<strong> interface GigabitEthernet <span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA-GigabitEthernet<span>0/3/0</span>]<strong> portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA-GigabitEthernet<span>0/3/0</span>]<strong> port link-type access</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA-GigabitEthernet<span>0/3/0</span>]<strong> port default vlan 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA-GigabitEthernet<span>0/3/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA]<strong> interface Vlanif 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA-Vlanif10]<strong> ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA-Vlanif10]<strong> ipv6 address 2001:db8:2000::2 64</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SwitchA-Vlanif10]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>SwitchA-Vlanif10]<strong> quit</strong></pre>
+<p># Configure <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C]<strong> vlan 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-vlan10]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C]<strong> interface GigabitEthernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/0</span>]<strong> portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/0</span>]<strong> port link-type access</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/0</span>]<strong> port default vlan 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C]<strong> interface Vlanif 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-Vlanif10]<strong> ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-Vlanif10]<strong> ipv6 address 2001:db8:2000::1 64</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-Vlanif10]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-Vlanif10]<strong> quit</strong></pre>
+</p></li><li><span>Configure BGP4+ between <span class="keyword">Device</span>C and <span class="keyword">Device</span>D.</span><p><p># Configure <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C]<strong> bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp]<strong> router-id 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp]<strong> peer 2001:db8:2001::2 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp]<strong> ipv6-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp-af-ipv6]<strong> peer 2001:db8:2001::2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp-af-ipv6]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-bgp-af-ipv6]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-bgp]<strong> quit</strong></pre>
+<p># Configure <span class="keyword">Device</span>D.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D]<strong> bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-bgp]<strong> router-id 2.2.2.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-bgp]<strong> peer 2001:db8:2001::1 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-bgp]<strong> ipv6-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-bgp-af-ipv6]<strong> peer 2001:db8:2001::1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-bgp-af-ipv6]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D-bgp-af-ipv6]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D-bgp]<strong> quit</strong></pre>
+<p>After the configuration is complete, run the <strong>display bgp ipv6 peer</strong> command to view status of BGP4+ peer relationships. The command output shows that the IBGP peer relationship has been established between <span class="keyword">Device</span>C and <span class="keyword">Device</span>D. Use the display on <span class="keyword">Device</span>D as an example.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D]<strong> display bgp ipv6 peer</strong></pre>
+<pre class="screen"> BGP local router ID : 2.2.2.2
+ Local AS number : 100
+ Total number of peers : 1                 Peers in established state : 1
+
+  Peer            V          AS  MsgRcvd  MsgSent  OutQ  Up/Down       State PrefRcv
+
+  2001:db8:2001::1         4         100       64       59     0 00:52:15 Established       0
+</pre>
+</p></li><li><span>Configure BGP4+ on <span class="keyword">Device</span>C and import direct routes to BGP4+. Then view the routing tables of <span class="keyword">Device</span>s C and D. </span><p><p># Configure <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C]<strong> bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp]<strong> ipv6-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp-af-ipv6]<strong> import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp-af-ipv6]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-bgp-af-ipv6]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-bgp]<strong> quit</strong></pre>
+<p># Display the BGP4+ routing table of <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C]<strong> display bgp ipv6 routing-table</strong></pre>
+<pre class="screen"> BGP Local router ID is 1.1.1.1
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+<span> RPKI validation codes: V - valid, I - invalid, N - not-found</span>
+
+ Total Number of Routes: 12
+ *&gt;  Network  : ::1                                      PrefixLen : 128
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : 2001:db8:2000::                          PrefixLen : 64
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : 2001:db8:2000::1                         PrefixLen : 128
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : 2001:db8:2000::2                         PrefixLen : 128
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : 2001:db8:2001::                          PrefixLen : 64
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : 2001:db8:2001::1                         PrefixLen : 128
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : FE80::                                   PrefixLen : 10
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : FE80::2E0:39FF:FE18:8300                 PrefixLen : 128
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : FE80::2E0:91FF:FE4F:8100                 PrefixLen : 128
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : FE80::2E0:9BFF:FE7E:7800                 PrefixLen : 128
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+</pre>
+<p># Display the BGP4+ routing table of <span class="keyword">Device</span>D.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D]<strong> display bgp ipv6 routing-table</strong></pre>
+<pre class="screen"> BGP Local router ID is 2.2.2.2
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+<span> RPKI validation codes: V - valid, I - invalid, N - not-found</span>
+
+ Total Number of Routes: 2
+ *&gt;i Network  : 2001:db8:2000::                          PrefixLen : 64
+     NextHop  : 2001:db8:2001::1                         LocPrf    : 100
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+   i Network  : 2001:db8:2001::                          PrefixLen : 64
+     NextHop  : 2001:db8:2001::1                         LocPrf    : 100
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+</pre>
+<p>You can see that <span class="keyword">Device</span>D has not learned the two IPv6 NDP Vlink direct routes 2001:db8:2000::3/128 and 2001:db8:2000::4/128.</p>
+</p></li><li><span>Enable the function of IPv6 NDP Vlink direct route advertisement on <span class="keyword">Device</span>C and configure the route-policy <strong>policy1</strong> to filter out the routes to the network segment of the VLAN and the IPv6 NDP Vlink direct route from <span class="keyword">Device</span>A, 2001:db8:2000::3/128.</span><p><p># Configure <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C]<strong> ip ipv6-prefix prefix1 index 10 permit 2001:db8:2000::4 128   </strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C]<strong> route-policy policy1 permit node 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-route-policy]<strong> if-match ipv6 address prefix-list prefix1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-route-policy]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C]<strong> ipv6 nd vlink-direct-route advertise route-policy policy1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C]<strong> commit</strong></pre>
+<p># Display the BGP4+ routing table of <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C]<strong> display bgp ipv6 routing-table</strong></pre>
+<pre class="screen"> BGP Local router ID is 1.1.1.1
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+<span> RPKI validation codes: V - valid, I - invalid, N - not-found</span>
+
+ Total Number of Routes: 12
+ *&gt;  Network  : ::1                                      PrefixLen : 128
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : 2001:db8:2000::                          PrefixLen : 64
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : 2001:db8:2000::1                         PrefixLen : 128
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : 2001:db8:2000::2                         PrefixLen : 128
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : 2001:db8:2000::3                         PrefixLen : 128
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : 2001:db8:2000::4                         PrefixLen : 128
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : 2001:db8:2001::                          PrefixLen : 64
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : 2001:db8:2001::1                         PrefixLen : 128
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : FE80::                                   PrefixLen : 10
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : FE80::2E0:39FF:FE18:8300                 PrefixLen : 128
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : FE80::2E0:91FF:FE4F:8100                 PrefixLen : 128
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;  Network  : FE80::2E0:9BFF:FE7E:7800                 PrefixLen : 128
+     NextHop  : ::                                       LocPrf    :
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+</pre>
+<p># Display the BGP4+ routing table of <span class="keyword">Device</span>D.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D]<strong> display bgp ipv6 routing-table</strong></pre>
+<pre class="screen"> BGP Local router ID is 2.2.2.2
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+<span> RPKI validation codes: V - valid, I - invalid, N - not-found</span>
+
+ Total Number of Routes: 3
+ *&gt;i Network  : 2001:db8:2000::                          PrefixLen : 64
+     NextHop  : 2001:db8:2001::1                         LocPrf    : 100
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+ *&gt;i Network  : 2001:db8:2000::4                         PrefixLen : 128
+     NextHop  : 2001:db8:2001::1                         LocPrf    : 100
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+   i Network  : 2001:db8:2001::                          PrefixLen : 64
+     NextHop  : 2001:db8:2001::1                         LocPrf    : 100
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+</pre>
+<p>You can see that <span class="keyword">Device</span>D has learned the IPv6 NDP Vlink direct route 2001:db8:2000::4/128, whereas the route 2001:db8:2000::3/128 has been filtered out.</p>
+</p></li><li><span>Use the route-policy <strong>policy2</strong> to filter out the network segment route 2001:db8:2000::/64 on <span class="keyword">Device</span>C when BGP4+ routes are advertised.</span><p><p># Configure <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C]<strong> ip ipv6-prefix prefix2 index 10 deny 2001:db8:2000:: 64</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C]<strong> ip ipv6-prefix prefix2 index 20 permit :: 0 less-equal 128</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C]<strong> route-policy policy2 permit node 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-route-policy]<strong> if-match ipv6 address prefix-list prefix2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-route-policy]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C]<strong> bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp]<strong> ipv6-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp-af-ipv6]<strong> peer 2001:db8:2001::2 route-policy policy2 export</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp-af-ipv6]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-bgp-af-ipv6]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-bgp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C]<strong> quit</strong></pre>
+<pre class="screen">&lt;<span class="keyword">Device</span>C&gt;<strong> refresh bgp all export</strong></pre>
+<p># Display the BGP4+ routing table of <span class="keyword">Device</span>D.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D]<strong> display bgp ipv6 routing-table</strong></pre>
+<pre class="screen"> BGP Local router ID is 2.2.2.2
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+<span> RPKI validation codes: V - valid, I - invalid, N - not-found</span>
+
+ Total Number of Routes: 2
+ *&gt;i Network  : 2001:db8:2000::4                         PrefixLen : 128
+     NextHop  : 2001:db8:2001::1                         LocPrf    : 100
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+   i Network  : 2001:db8:2001::                          PrefixLen : 64
+     NextHop  : 2001:db8:2001::1                         LocPrf    : 100
+     MED      : 0                                        PrefVal   : 0
+     Label    :
+     Path/Ogn : ?
+</pre>
+<p>You can see that the route 2001:db8:2000::/64 does not exist in the BGP4+ routing table of <span class="keyword">Device</span>D. As a result, <span class="keyword">Device</span>D can communicate with <span class="keyword">Device</span>B, but cannot communicate with <span class="keyword">Device</span>A.</p>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172365391__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>SwitchA configuration file</p>
+<pre class="screen">#
+sysname SwitchA
+#
+vlan batch 10
+#
+interface Vlanif10
+ ipv6 enable
+ ipv6 address 2001:db8:2000::2/64
+#
+interface GigabitEthernet<span>0/1/0</span>
+ portswitch
+ undo shutdown
+ port link-type access
+ port default vlan 10
+#
+interface GigabitEthernet<span>0/2/0</span>
+ portswitch
+ undo shutdown
+ port link-type access
+ port default vlan 10
+#
+interface GigabitEthernet<span>0/3/0</span>
+ portswitch
+ undo shutdown
+ port link-type access
+ port default vlan 10
+#
+return</pre>
+</li><li><p><span class="keyword">Device</span>A configuration file</p>
+<pre class="screen">#
+sysname <span class="keyword">Device</span>A
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ipv6 enable
+ ipv6 address 2001:db8:2000::3/64
+#
+return</pre>
+</li><li><p><span class="keyword">Device</span>B configuration file</p>
+<pre class="screen">#
+sysname <span class="keyword">Device</span>B
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ipv6 enable
+ ipv6 address 2001:db8:2000::4/64
+#
+return</pre>
+</li><li><p><span class="keyword">Device</span>C configuration file</p>
+<pre class="screen">#
+sysname <span class="keyword">Device</span>C
+#
+ip ipv6-prefix prefix1 index 10 permit 2001:db8:2000::4 128
+ip ipv6-prefix prefix2 index 10 deny 2001:db8:2000:: 64
+ip ipv6-prefix prefix2 index 20 permit :: 0 less-equal 128
+#
+route-policy policy1 permit node 10
+ if-match ip-prefix prefix1
+ if-match ipv6 address prefix-list prefix1
+#
+route-policy policy2 permit node 10
+ if-match ipv6 address prefix-list prefix2
+#
+ipv6 nd vlink-direct-route advertise route-policy policy1
+#
+vlan batch 10
+#
+interface Vlanif10
+ ipv6 enable
+ ipv6 address 2001:db8:2000::1/64
+#
+interface GigabitEthernet<span>0/1/0</span>
+ portswitch
+ undo shutdown
+ port link-type access
+ port default vlan 10
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ipv6 enable
+ ipv6 address 2001:db8:2001::1/64
+#
+bgp 100
+ router-id 1.1.1.1
+ peer 2001:db8:2001::2 as-number 100
+ #
+ ipv4-family unicast
+  undo synchronization 
+ #
+ ipv6-family unicast
+  undo synchronization 
+  import-route direct
+  peer 2001:db8:2001::2 enable
+  peer 2001:db8:2001::2 route-policy policy2 export
+#
+return</pre>
+</li><li><p><span class="keyword">Device</span>D configuration file</p>
+<pre class="screen">#
+sysname <span class="keyword">Device</span>D
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ipv6 enable
+ ipv6 address 2001:db8:2001::2/64
+#
+bgp 100
+ router-id 2.2.2.2
+ peer 2001:db8:2001::1 as-number 100
+ #
+ ipv4-family unicast
+  undo synchronization 
+ #
+ ipv6-family unicast
+  undo synchronization 
+  peer 2001:db8:2001::1 enable
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ip-route_cfg_0023.html">Configuration Examples for IP Routing Basis
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ip-route_cfg_0057.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

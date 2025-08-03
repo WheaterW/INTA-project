@@ -1,0 +1,211 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring a Device to Communicate with NMSs Through SNMPv2c">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_snmp_cfg_0024.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_snmp_cfg_0030.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="SNMP">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="SNMP">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="SNMP">
+<meta name="featuretype" content="System Management">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001513030410">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring a Device to Communicate with NMSs Through SNMPv2c</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001513030410"></a><a name="EN-US_TASK_0000001513030410"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring a Device to Communicate with NMSs Through SNMPv2c</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001513030410__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>As shown in <a href="#EN-US_TASK_0000001513030410__fig_dc_vrp_snmp_cfg_002401">Figure 1</a>, two NMSs (NMS1 and NMS2) connect to the device over a public network. According to the network planning, NMS2 can manage every MIB object on the device, whereas NMS1 does not manage the device.</p>
+<p>On the device, only the modules that are enabled by default are allowed to send alarms to NMS2. This prevents an excess of unwanted alarms from being sent to NMS2, which would otherwise make fault locating difficult. Inform messages need to be used to ensure that alarms are received by NMS2, because alarms sent by the device have to travel across the public network to reach NMS2. </p>
+<p>The contact information of the device administrator needs to be configured on the device, in order to help the NMS administrator contact the device administrator if a fault occurs.</p>
+<div class="fignone" id="EN-US_TASK_0000001513030410__fig_dc_vrp_snmp_cfg_002401"><a name="EN-US_TASK_0000001513030410__fig_dc_vrp_snmp_cfg_002401"></a><a name="fig_dc_vrp_snmp_cfg_002401"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring a device to communicate with an NMS through SNMPv2c</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 represents <span>100GE</span><span>1/0/1</span>.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001512830938.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001513030410__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>If the network environment is insecure, you are advised to use SNMPv3 for communication with the NMS.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001513030410__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Enable the SNMP agent function.</p>
+</li><li><p>Configure the device to run SNMPv2c.</p>
+</li><li><p>Configure an ACL to allow NMS2 to manage MIB objects on the device.</p>
+</li><li>Configure a source interface for SNMP to receive and respond to NMS request packets.</li><li><p>Configure the device to send Inform messages to NMS2.</p>
+</li><li><p>Configure the contact information of the device administrator.</p>
+</li><li><p>Configure NMS2.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001513030410__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Run the <strong><span>install feature-software WEAKEA</span></strong> command in the user view to install the weak security algorithm/protocol feature package (WEAKEA). By default, the device provides the weak security algorithm/protocol feature package WEAKEA.</span></li><li><span>Configure available routes between the device and the NMSs. Detailed configurations are not provided.</span></li><li><span>Enable the SNMP agent function.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt;<strong> system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>snmp-agent password min-length 9</strong>
+[<span class="keyword">*</span>DeviceA] <strong>snmp-agent</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>Configure the device to run SNMPv2c.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>snmp-agent sys-info version v2c</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>Configure a source interface for SNMP to receive and respond to NMS request packets.</span><p><pre class="screen">[<span class="keyword">*</span>DeviceA]<strong> snmp-agent protocol source-interface</strong> <strong><span>100ge</span></strong> <strong><span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>Configure the NMS access permission.</span><p><p># Configure an ACL to allow NMS2 to manage and disallow NMS1 from managing the device.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>acl 2001</strong>
+[<span class="keyword">*</span>DeviceA-acl4-basic-2001] <strong>rule 5 permit source 1.1.1.2 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceA-acl4-basic-2001] <strong>rule 6 deny source 1.1.1.1 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceAacl4-basic-2001] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-acl4-basic-2001] <strong>quit</strong></pre>
+<p># Configure a MIB view.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>snmp-agent mib-view excluded allexthgmp 1.3.6.1.4.1.2011.6.7</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure a community<span> to reference an ACL</span> to allow NMS2 to manage the objects in the MIB view.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>snmp-agent community write adminnms2 mib-view allexthgmp<span> acl 2001</span></strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>Configure the alarm function.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>snmp-agent target-host inform address udp-domain 1.1.1.2 params securityname Huawei-1234 v2c</strong>
+[<span class="keyword">*</span>DeviceA] <strong>snmp-agent inform timeout 5 resend-times 6 pending 7</strong>
+[<span class="keyword">*</span>DeviceA] <strong>snmp-agent trap enable</strong>
+[<span class="keyword">*</span>DeviceA] <strong>snmp-agent notification-log enable</strong>
+[<span class="keyword">*</span>DeviceA] <strong>snmp-agent notification-log global-ageout 36</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>Configure the contact information of the device administrator.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>snmp-agent sys-info contact call Operator at 010-12345678</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>Configure NMS2.</span><p><p>For details about NMS configuration, see the corresponding NMS configuration guide.</p>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001513030410__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check the configured SNMP version.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display snmp-agent sys-info version</strong>
+SNMP version running in the system:
+           SNMPv2c SNMPv3</pre>
+<p># Check information about the SNMP community name.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display snmp-agent community</strong>
+   Community name: %@%##!!!!!!!!!"!!!!"!!!!*!!!!PR=uJ|5'u%-3Bw@/&gt;NzBr/k=X0[ALT.K<font style="font-size:8pt" Face="Courier New" >~</font>:,!!!!!2jp5!!!!!!U!!!!%{+lTl_[/Jh&lt;3.&lt;4RvQ/.Z'33]YwP
+JkB^`J9g":TFqD-'B$kmL6;vyHwQ74KEFp22!!!!!!!!!!!!!!!%@%#                                                                             
+       Group name: %@%##!!!!!!!!!"!!!!"!!!!*!!!!PR=uJ|5'u%-3Bw@/&gt;NzBr/k=X0[ALT.K<font style="font-size:8pt" Face="Courier New" >~</font>:,!!!!!2jp5!!!!!!U!!!!%{+lTl_[/Jh&lt;3.&lt;4RvQ/.Z'33]YwP
+JkB^`J9g":TFqD-'B$kmL6;vyHwQ74KEFp22!!!!!!!!!!!!!!!%@%#                                                                             
+       Acl: 2001                                                                                                                    
+       Alias name: __CommunityAliasName_01_8357                                                                                     
+       Storage-type: nonVolatile </pre>
+<div class="p"># Check the configured ACL.<pre class="screen">&lt;DeviceA&gt; <strong>display acl 2001</strong>
+Basic ACL 2001, 2 rules
+Acl's step is 5
+ rule 5 permit source 1.1.1.2 0 (0 times matched)
+ rule 6 deny source 1.1.1.1 0 (0 times matched)</pre>
+</div>
+<p># Check the MIB view.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display snmp-agent mib-view viewname allexthgmp</strong>
+View name: allexthgmp
+       MIB Subtree: huaweiUtility.7
+       Subtree mask: FF80(Hex)
+       Storage-type: nonVolatile
+       View Type: excluded
+       View status: active</pre>
+<p># Check the target host.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display snmp-agent target-host</strong>
+Target host NO. 1
+---------------------------------------------------------------------------
+  Host name                        : __targetHost_1_41354
+  IP address                       : 1.1.1.2
+  Source interface                 : -
+  VPN instance                     : -
+  Security name                    : %+%##!!!!!!!!!"!!!!$!!!!*!!!!%&amp;K/U}|G\2KYm@@k}uDDU#gLLO&lt;J"0Q'/kH!!!!!2jp5!!!!!!&lt;!!!!rv4VL.ucqLA!PK/olg}.vn0tBf0m4'5^XcK!!!!!%+%# 
+  Alarm Port                       : 162 
+  Event Port                       : 162
+  Type                             : inform
+  Version                          : v2c
+  Level                            : No authentication and privacy
+  NMS type                         : NMS
+  With ext vb                      : No
+  Notification filter profile name : -
+  Heart beat required              : No
+---------------------------------------------------------------------------</pre>
+<p># Check the contact information of the device administrator.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display snmp-agent sys-info contact</strong>
+The contact person for this managed node:
+           call Operator at 010-12345678 </pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001513030410__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+ sysname DeviceA
+#
+acl number 2001
+ rule 5 permit source 1.1.1.2 0
+ rule 6 deny source 1.1.1.1 0
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 1.1.2.1 255.255.255.0
+ 
+#
+ospf 1
+ area 0.0.0.0
+  network 1.1.2.0 0.0.0.255
+#
+ snmp-agent 
+ snmp-agent local-engineid 800007DB0300FDFDFD2211
+ snmp-agent community write cipher %@%##!!!!!!!!!"!!!!"!!!!*!!!!PR=uJ|5'u%-3Bw@/&gt;NzBr/k=X0[ALT.K<font style="font-size:8pt" Face="Courier New" >~</font>:,!!!!!2jp5!!!!!!U!!!!%{+lTl_[/Jh&lt;3.&lt;4RvQ/.Z'33]YwPJkB^`J9g":TFqD-'B$kmL6;vyHwQ74KEFp22!!!!!!!!!!!!!!!%@%# mib-view allexthgmp acl 2001 alias __CommunityAliasName_01_8357
+#
+ snmp-agent sys-info contact call Operator at 010-12345678
+ snmp-agent sys-info version v2c
+ snmp-agent password min-length 9
+ snmp-agent target-host host-name __targetHost_1_11752 inform address udp-domain 1.1.1.2 params securityname cipher %+%##!!!!!!!!!"!!!!"!!!!*!!!!PR=uJ|5'u%&lt;OoF8<font style="font-size:8pt" Face="Courier New" >~</font>{B=#QW("E3cky"H*I%E!!!!!2jp5!!!!!!&lt;!!!!%m9qN;K61!+'7q&gt;-bKZ&amp;qJzJ3nQ\g)WWHkL!!!!!%+%# v2c
+#
+ snmp-agent mib-view excluded allexthgmp huaweiUtility.7
+#
+snmp-agent notification-log enable
+snmp-agent notification-log global-ageout 36
+snmp-agent inform timeout 5
+snmp-agent inform resend-times 6
+snmp-agent inform pending 7
+#
+snmp-agent protocol source-interface <span>100GE</span><span>1/0/1</span>
+#
+snmp-agent trap enable
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_snmp_cfg_0024.html">Configuring a Device to Communicate with an NMS Using SNMPv2c
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_snmp_cfg_0030.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

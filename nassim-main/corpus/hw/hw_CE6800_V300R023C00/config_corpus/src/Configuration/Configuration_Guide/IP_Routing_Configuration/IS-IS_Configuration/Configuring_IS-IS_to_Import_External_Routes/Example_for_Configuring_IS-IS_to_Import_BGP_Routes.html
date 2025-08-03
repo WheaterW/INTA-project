@@ -1,0 +1,276 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring IS-IS to Import BGP Routes">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0027.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0029.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IS-IS">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IS-IS">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001176663857">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring IS-IS to Import BGP Routes</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001176663857"></a><a name="EN-US_TASK_0000001176663857"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring IS-IS to Import BGP Routes</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001176663857__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0000001176663857__fig_dc_vrp_isis_cfg_008401">Figure 1</a>, DeviceA and DeviceB are IS-IS neighbors in the same AS. BGP is disabled on DeviceA, while DeviceB and DeviceC are EBGP peers. It is required that DeviceB be configured to import BGP routes to IS-IS and the costs of the imported routes be changed using a route-policy.</p>
+<div class="fignone" id="EN-US_TASK_0000001176663857__fig_dc_vrp_isis_cfg_008401"><a name="EN-US_TASK_0000001176663857__fig_dc_vrp_isis_cfg_008401"></a><a name="fig_dc_vrp_isis_cfg_008401"></a><span class="figcap"><b>Figure 1 </b>Network diagram for configuring IS-IS to import BGP routes</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interface 1 and interface 2 in this example represent <span>100GE</span> <span>1/0/1</span> and <span>100GE</span> <span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001130624360.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176663857__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Precautions</h4><p>To improve security, you are advised to configure IS-IS authentication. For details, see Configuring IS-IS Authentication. IS-IS interface authentication is used as an example. For details, see Example for Configuring Basic IS-IS Functions.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176663857__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Configure IPv4 addresses for interfaces on each routing device.</li><li><p>Enable IS-IS and specify a NET on DeviceA and DeviceB.</p>
+</li><li><p>Establish an EBGP connection between DeviceB and DeviceC.</p>
+</li><li><p>Configure IS-IS and BGP to import routes from each other on DeviceB, and then check the routing table on DeviceA.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001176663857__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure IPv4 addresses for interfaces on each routing device.</span><p><p># Configure DeviceA.</p>
+<pre class="screen"><span class="keyword">&lt;HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>undo </strong><strong>portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ip address 10.1.1.1 255.255.255.0</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p>The configurations of DeviceB, DeviceC, and DeviceD are similar to the configuration of DeviceA. For detailed configurations, see <a href="#EN-US_TASK_0000001176663857__postreq24192593172748">Configuration Scripts</a>.</p>
+</p></li><li><span>Enable IS-IS and specify a NET on DeviceA and DeviceB.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>isis 1</strong>
+[<span class="keyword">*</span>DeviceA-isis-1] <strong>network-entity 10.0000.0000.0001.00</strong>
+[<span class="keyword">*</span>DeviceA-isis-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>isis enable 1</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p>The configuration of DeviceB is similar to the configuration of DeviceA. For detailed configurations, see <a href="#EN-US_TASK_0000001176663857__postreq24192593172748">Configuration Scripts</a>.</p>
+</p></li><li><span>Establish an EBGP connection between DeviceB and DeviceC.</span><p><p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>bgp 65008</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>router-id 1.1.1.1</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.2.1.2 as-number 65009</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv4] <strong>network 10.2.1.0 255.255.255.0</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv4] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>bgp 65009</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>router-id 2.2.2.2</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 10.2.1.1 as-number 65008</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword">*</span>DeviceC-bgp-af-ipv4] <strong>network 10.2.1.0 255.255.255.0</strong>
+[<span class="keyword">*</span>DeviceC-bgp-af-ipv4] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li><li><span>Configure IS-IS to import BGP routes.</span><p><p># Configure a static route on DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>ip route-static 172.16.1.1 32 NULL 0</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># On DeviceC, configure BGP to import static routes.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>bgp 65009</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>import-route static</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># On DeviceB, configure IS-IS to import BGP routes.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>isis 1</strong>
+[<span class="keyword">*</span>DeviceB-isis-1] <strong>import-route bgp</strong>
+[<span class="keyword">*</span>DeviceB-isis-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Check the routing table of DeviceA. The command output shows that IS-IS successfully imports the BGP route 172.16.1.1/32.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display ip routing-table</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table: _public_
+         Destinations : 6        Routes : 6
+
+Destination/Mask    Proto  Pre  Cost     Flags NextHop         Interface
+
+       10.1.1.0/24  Direct 0    0           D  10.1.1.1        <span>100GE</span><span>1/0/1</span>
+       10.1.1.1/32  Direct 0    0           D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+       10.1.1.255/32  Direct 0    0           D  10.1.1.2        <span>100GE</span><span>1/0/1</span>
+       127.0.0.0/8  Direct 0    0           D  127.0.0.1       InLoopBack0
+      127.0.0.1/32  Direct 0    0           D  127.0.0.1       InLoopBack0
+      <strong>172.16.1.1/32</strong>  <strong>ISIS</strong>  <strong>15</strong>   <strong>74</strong>       <strong>D</strong>  <strong>10.1.1.2</strong>        <span>100GE</span><span>1/0/1</span>
+      127.255.255.255/32  Direct 0  0       D  127.0.0.1       InLoopBack0
+      255.255.255.255/32  Direct 0  0       D  127.0.0.1       InLoopBack0</pre>
+<p># On DeviceB, configure an AS_Path filter, and apply the filter in a route-policy named <strong>RTC</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ip as-path-filter 1 permit 65009</strong>
+[<span class="keyword">*</span>DeviceB] <strong>route-policy RTC permit node 0</strong>
+[<span class="keyword">*</span>DeviceB-route-policy] <strong>if-match as-path-filter 1</strong>
+[<span class="keyword">*</span>DeviceB-route-policy] <strong>apply cost + 20</strong>
+[<span class="keyword">*</span>DeviceB-route-policy] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># On DeviceB, configure IS-IS to import BGP routes.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>isis 1</strong>
+[<span class="keyword">*</span>DeviceB-isis-1] <strong>import-route bgp route-policy RTC</strong>
+[<span class="keyword">*</span>DeviceB-isis-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Check the routing table of DeviceA. The command output shows that the cost of the imported BGP route 172.16.1.1/32 changes from 74 to 94.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display ip routing-table</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table: _public_
+         Destinations : 6        Routes : 6
+
+Destination/Mask    Proto  Pre  Cost     Flags NextHop         Interface
+
+       10.1.1.0/24  Direct 0    0           D  10.1.1.1        <span>100GE</span><span>1/0/1</span>
+       10.1.1.1/32  Direct 0    0           D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+       10.1.1.2/32  Direct 0    0           D  10.1.1.2        <span>100GE</span><span>1/0/1</span>
+       127.0.0.0/8  Direct 0    0           D  127.0.0.1       InLoopBack0
+      127.0.0.1/32  Direct 0    0           D  127.0.0.1       InLoopBack0
+   <strong>172.16.1.1/32</strong>  <strong>ISIS</strong>  <strong>15</strong>   <strong>94</strong>          <strong>D</strong>  <strong>10.1.1.2</strong>        <strong><span>100GE</span><span>1/0/1</span></strong>
+      127.255.255.255/32  Direct 0  0       D  127.0.0.1       InLoopBack0
+      255.255.255.255/32  Direct 0  0       D  127.0.0.1       InLoopBack0</pre>
+</p></li><li><span>Configure BGP to import IS-IS routes.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>bgp 65008</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>import-route isis 1</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001176663857__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check the routing table of DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>display ip routing-table</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table: _public_
+         Destinations : 7        Routes : 7
+
+Destination/Mask    Proto  Pre  Cost     Flags NextHop         Interface
+
+      <strong>10.1.1.0/24</strong>  <strong>EBGP</strong> 255  0           D  10.2.1.1       <span>100GE</span><span>1/0/1</span>
+       10.2.1.0/24  Direct 0    0           D  10.2.1.2        <span>100GE</span><span>1/0/1</span>
+       10.2.1.1/32  Direct 0    0           D  10.2.1.1        <span>100GE</span><span>1/0/1</span>
+     10.2.1.255/32  Direct 0    0           D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+       127.0.0.0/8  Direct 0    0           D  127.0.0.1       InLoopBack0
+      127.0.0.1/32  Direct 0    0           D  127.0.0.1       InLoopBack0
+     172.16.1.1/32  Static 60   0           D  0.0.0.0         NULL0
+    192.168.0.2/32  Direct 0    0           D  127.0.0.1       LoopBack0
+127.255.255.255/32  Direct 0    0           D  127.0.0.1       InLoopBack0
+    192.168.0.1/32  EBGP 255    0          RD   10.2.1.1       <span>100GE</span><span>1/0/1</span>
+255.255.255.255/32  Direct 0    0           D  127.0.0.1       InLoopBack0</pre>
+<p>BGP successfully imports the IS-IS route 10.1.1.0/24.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001176663857__postreq24192593172748"></a><a name="postreq24192593172748"></a><a name="EN-US_TASK_0000001176663857__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+isis 1
+ network-entity 10.0000.0000.0001.00
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.0
+ isis enable 1
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+isis 1
+ import-route bgp route-policy RTC
+ network-entity 10.0000.0000.0002.00
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.2 255.255.255.0
+ isis enable 1
+#
+interface  <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.2.1.1 255.255.255.0
+#
+interface LoopBack0
+ ip address 1.1.1.1 255.255.255.255
+#
+bgp 65008
+ router-id 1.1.1.1
+ peer 10.2.1.2 as-number 65009
+ #
+ ipv4-family unicast
+  network 10.2.1.0 255.255.255.0
+  import-route static
+  import-route isis 1
+  peer 10.2.1.2 enable
+#
+ip as-path-filter 1 index 10 permit 65009
+#
+route-policy RTC permit node 0
+ if-match as-path-filter 1
+ apply cost 20
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.2.1.2 255.255.255.0
+#
+interface LoopBack0
+ ip address 2.2.2.2 255.255.255.255
+#
+bgp 65009
+ router-id 2.2.2.2
+ peer 10.2.1.1 as-number 65008
+ #
+ ipv4-family unicast
+  network 10.2.1.0 255.255.255.0
+  import-route static
+  peer 10.2.1.1 enable
+#
+ip route-static 172.16.1.1 255.255.255.255 NULL0
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_isis_ipv4_cfg_0027.html">Configuring IS-IS to Import External Routes
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_isis_ipv4_cfg_0029.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

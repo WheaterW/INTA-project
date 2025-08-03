@@ -1,0 +1,547 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring BGP4+ SoO">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp6_cfg_2111.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp6_cfg_2113.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BGP4+">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP4+">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="BGP4+">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001484849888">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring BGP4+ SoO</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001484849888"></a><a name="EN-US_TASK_0000001484849888"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring BGP4+ SoO</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001484849888__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0000001484849888__fig141211449172212">Figure 1</a>, DeviceA and DeviceB reside in different ASs, are connected to Server, and establish EBGP peer relationships with Leaf and Server to transmit public network unicast routes. To reduce redundant routes, configure the SoO function on DeviceA and DeviceB. When DeviceA advertises a route to Leaf, it adds the SoO attribute to the route. After receiving the route forwarded by Leaf, DeviceB checks the SoO attribute carried in the route. If the SoO attribute is the same as that configured on DeviceB, DeviceB does not accept this route, reducing memory usage and route selection costs.</p>
+<div class="fignone" id="EN-US_TASK_0000001484849888__fig141211449172212"><a name="EN-US_TASK_0000001484849888__fig141211449172212"></a><a name="fig141211449172212"></a><span class="figcap"><b>Figure 1 </b>BGP4+ SoO application in a public network IPv6 scenario</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 represents <span>100GE</span><span>1/0/1</span>.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001539291877.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001484849888__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>Note the following during the configuration:</p>
+<ul><li>During the establishment of a peer relationship, if the IPv6 address of the specified peer is a loopback interface address or a sub-interface IPv6 address, the <strong>peer connect-interface</strong> command must be run on both ends to ensure correct connection.</li><li>If there is no directly connected physical link between EBGP peers, run the <strong>peer ebgp-max-hop</strong> command to allow the EBGP peers to establish a TCP connection through multiple hops.</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001484849888__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><ol><li><p>Assign an IPv6 address to each interface.</p>
+</li><li>Enable IS-IS, configure the level, and specify a NET on each device.</li><li>Establish EBGP connections between Server and DeviceA, between Server and DeviceB, between Leaf and DeviceA, and between Leaf and DeviceB.</li><li>Configure an IPv6 static route on Server and import it to the BGP4+ routing table.</li><li>Configure BGP4+ SoO on DeviceA and DeviceB.</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001484849888__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enable IPv6 forwarding and configure an IPv6 address for each interface.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface loopback0</strong>     
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-LoopBack0]<strong> ipv6 enable</strong>
+[<span class="keyword">*</span>DeviceA-LoopBack0] <strong>ipv6 address 2001:db8:10::2 128</strong>        
+[<span class="keyword">*</span>DeviceA-LoopBack0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface </strong><strong>loopback1</strong>
+[<span class="keyword">*</span>DeviceA-LoopBack1]<strong> ipv6 enable</strong>
+[<span class="keyword">*</span>DeviceA-LoopBack1] <strong>ipv6 address 2001:db8:20::1 128</strong>
+[<span class="keyword">*</span>DeviceA-LoopBack1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface <span>100GE</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ipv6</strong><strong> enable</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ipv6 address 2001:db8:1::1 64</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure Leaf.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname Leaf</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf] <strong>interface loopback0</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf-LoopBack0]<strong> ipv6 enable</strong>
+[<span class="keyword">*</span>Leaf-LoopBack0] <strong>ipv6 address 2001:DB8:30::2 128</strong>
+[<span class="keyword">*</span>Leaf-LoopBack0] <strong>quit</strong>
+[<span class="keyword">*</span>Leaf] <strong>interface </strong><strong>loopback1</strong>
+[<span class="keyword">*</span>Leaf-LoopBack1] <strong>ipv6 enable</strong>
+[<span class="keyword">*</span>Leaf-LoopBack1] <strong>ipv6 address 2001:DB8:20::2 128</strong>
+[<span class="keyword">*</span>Leaf-LoopBack1] <strong>quit</strong>
+[<span class="keyword">*</span>Leaf] <strong>interface <span>100GE</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>Leaf-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>Leaf-<span>100GE</span><span>1/0/1</span>] <strong>ipv6</strong><strong> enable</strong>
+[<span class="keyword">*</span>Leaf-<span>100GE</span><span>1/0/1</span>] <strong>ipv6 address 2001:db8:1::3 64</strong>
+[<span class="keyword">*</span>Leaf-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>Leaf] <strong>commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceB</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface loopback0</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-LoopBack0]<strong> ipv6 enable</strong>
+[<span class="keyword">*</span>DeviceB-LoopBack0] <strong>ipv6 address 2001:DB8:30::1 128</strong>
+[<span class="keyword">*</span>DeviceB-LoopBack0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>interface </strong><strong>loopback1</strong>
+[<span class="keyword">*</span>DeviceB-LoopBack1] <strong>ipv6 enable</strong>
+[<span class="keyword">*</span>DeviceB-LoopBack1] <strong>ipv6 address 2001:DB8:40::2 128</strong>
+[<span class="keyword">*</span>DeviceB-LoopBack1] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface <span>100GE</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>ipv6</strong><strong> enable</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>ipv6 address 2001:db8:1::4 64</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure Server.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>sysname Server</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Server] <strong>interface loopback0</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Server-LoopBack0]<strong> ipv6 enable</strong>
+[<span class="keyword">*</span>Server-LoopBack0] <strong>ipv6 address 2001:DB8:10::1 128</strong>
+[<span class="keyword">*</span>Server-LoopBack0] <strong>quit</strong>
+[<span class="keyword">*</span>Server] <strong>interface </strong><strong>loopback1</strong>
+[<span class="keyword">*</span>Server-LoopBack1] <strong>ipv6 enable</strong>
+[<span class="keyword">*</span>Server-LoopBack1] <strong>ipv6 address 2001:DB8:40::1 128</strong>
+[<span class="keyword">*</span>Server-LoopBack1] <strong>quit</strong>
+[<span class="keyword">*</span>Server] <strong>interface <span>100GE</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>Server-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>Server-<span>100GE</span><span>1/0/1</span>] <strong>ipv6</strong><strong> enable</strong>
+[<span class="keyword">*</span>Server-<span>100GE</span><span>1/0/1</span>] <strong>ipv6 address 2001:db8:1::2 64</strong>
+[<span class="keyword">*</span>Server-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>Server] <strong>commit</strong></pre>
+</p></li><li><span>Enable IS-IS.</span><p><p># Configure DeviceA.</p>
+</p><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> isis 1</strong>
+[<span class="keyword">*</span>DeviceA-isis-1] <strong>cost-style wide</strong>
+[<span class="keyword">*</span>DeviceA-isis-1] <strong>network-entity 10.0000.0000.0000.0001.00</strong>
+[<span class="keyword">*</span>DeviceA-isis-1] <strong>ipv6 enable topology standard</strong>
+[<span class="keyword">*</span>DeviceA-isis-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface loopback0</strong>
+[<span class="keyword">*</span>DeviceA-LoopBack0] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>DeviceA-LoopBack0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface </strong><strong>loopback1</strong>
+[<span class="keyword">*</span>DeviceA-LoopBack1] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>DeviceA-LoopBack1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface <span>100GE</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure Leaf.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf]<strong> isis 1</strong>
+[<span class="keyword">*</span>Leaf-isis-1] <strong>cost-style wide</strong>
+[<span class="keyword">*</span>Leaf-isis-1] <strong>network-entity 10.0000.0000.0000.0003.00</strong>
+[<span class="keyword">*</span>Leaf-isis-1] <strong>ipv6 enable topology standard</strong>
+[<span class="keyword">*</span>Leaf-isis-1] <strong>quit</strong>
+[<span class="keyword">*</span>Leaf] <strong>interface loopback0</strong>
+[<span class="keyword">*</span>Leaf-LoopBack0] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>Leaf-LoopBack0] <strong>quit</strong>
+[<span class="keyword">*</span>Leaf] <strong>interface </strong><strong>loopback1</strong>
+[<span class="keyword">*</span>Leaf-LoopBack1] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>Leaf-LoopBack1] <strong>quit</strong>
+[<span class="keyword">*</span>Leaf] <strong>interface <span>100GE</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>Leaf-<span>100GE</span><span>1/0/1</span>] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>Leaf-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>Leaf] <strong>commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> isis 1</strong>
+[<span class="keyword">*</span>DeviceB-isis-1] <strong>cost-style wide</strong>
+[<span class="keyword">*</span>DeviceB-isis-1] <strong>network-entity 10.0000.0000.0000.0004.00</strong>
+[<span class="keyword">*</span>DeviceB-isis-1] <strong>ipv6 enable topology standard</strong>
+[<span class="keyword">*</span>DeviceB-isis-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>interface loopback0</strong>
+[<span class="keyword">*</span>DeviceB-LoopBack0] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>DeviceB-LoopBack0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>interface </strong><strong>loopback1</strong>
+[<span class="keyword">*</span>DeviceB-LoopBack1] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>DeviceB-LoopBack1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>interface <span>100GE</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure Server.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Server]<strong> isis 1</strong>
+[<span class="keyword">*</span>Server-isis-1] <strong>cost-style wide</strong>
+[<span class="keyword">*</span>Server-isis-1] <strong>network-entity 10.0000.0000.0000.0002.00</strong>
+[<span class="keyword">*</span>Server-isis-1] <strong>ipv6 enable topology standard</strong>
+[<span class="keyword">*</span>Server-isis-1] <strong>quit</strong>
+[<span class="keyword">*</span>Server] <strong>interface loopback0</strong>
+[<span class="keyword">*</span>Server-LoopBack0] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>Server-LoopBack0] <strong>quit</strong>
+[<span class="keyword">*</span>Server] <strong>interface </strong><strong>loopback1</strong>
+[<span class="keyword">*</span>Server-LoopBack1] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>Server-LoopBack1] <strong>quit</strong>
+[<span class="keyword">*</span>Server] <strong>interface <span>100GE</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>Server-<span>100GE</span><span>1/0/1</span>] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>Server-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>Server] <strong>commit</strong></pre>
+</p></li><li><span>Configure EBGP.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> bgp 100</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>router-id 11.11.11.11</strong>
+[<span class="keyword">*</span>DeviceA-bgp]<strong> peer </strong><strong>2001:db8:20::2</strong><strong> as-number 200</strong>  
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 2001:db8:20::2 ebgp-max-hop 10</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 2001:db8:20::2 connect-interface LoopBack1</strong>
+[<span class="keyword">*</span>DeviceA-bgp]<strong> peer </strong><strong>2001:db8:10::1</strong><strong> as-number 400</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 2001:db8:10::1 ebgp-max-hop 10</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 2001:db8:10::1 connect-interface LoopBack0</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>ipv6-family unicast</strong>
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv6] <strong>peer </strong><strong>2001:db8:20::2</strong> <strong>enable</strong>
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv6] <strong>peer </strong><strong>2001:db8:10::1</strong> <strong>enable</strong>
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv6]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure Leaf.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf]<strong> bgp 200</strong>
+[<span class="keyword">*</span>Leaf-bgp] <strong>router-id 22.22</strong>.<strong>22.22</strong>
+[<span class="keyword">*</span>Leaf-bgp]<strong> peer </strong><strong>2001:db8:20::1</strong><strong> as-number 100</strong>
+[<span class="keyword">*</span>Leaf-bgp]<strong> </strong><strong>peer 2001:db8:20::1 ebgp-max-hop 10</strong>
+[<span class="keyword">*</span>Leaf-bgp]<strong> </strong><strong>peer 2001:db8:20::1 connect-interface LoopBack0</strong>
+[<span class="keyword">*</span>Leaf-bgp]<strong> peer </strong><strong>2001:db8:30::1</strong><strong> as-number 300</strong>
+[<span class="keyword">*</span>Leaf-bgp]<strong> </strong><strong>peer 2001:db8:30::1 ebgp-max-hop 10</strong>
+[<span class="keyword">*</span>Leaf-bgp]<strong> </strong><strong>peer 2001:db8:30::1 connect-interface LoopBack1</strong>
+[<span class="keyword">*</span>Leaf-bgp] <strong>ipv6-family unicast</strong>
+[<span class="keyword">*</span>Leaf-bgp-af-ipv6] <strong>peer </strong><strong>2001:db8:20::1</strong> <strong>enable</strong>
+[<span class="keyword">*</span>Leaf-bgp-af-ipv6] <strong>peer 2001:db8:30::1 </strong><strong>enable</strong>
+[<span class="keyword">*</span>Leaf-bgp-af-ipv6]<strong> quit</strong>
+[<span class="keyword">*</span>Leaf-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>Leaf] <strong>commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> bgp 300</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>router-id 33.33.33.33</strong>
+[<span class="keyword">*</span>DeviceB-bgp]<strong> peer </strong><strong>2001:db8:30::2</strong><strong> as-number 200</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 2001:db8:30::2 ebgp-max-hop 10</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 2001:db8:30::2 connect-interface LoopBack0</strong>
+[<span class="keyword">*</span>DeviceB-bgp]<strong> </strong><strong>peer </strong><strong>2001:db8:40::1</strong><strong> as-number 400</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 2001:db8:40::1 ebgp-max-hop 10</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 2001:db8:40::1 connect-interface LoopBack1</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>ipv6-family unicast</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv6] <strong>peer </strong><strong>2001:db8:30::2</strong> <strong>enable</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv6] <strong>peer </strong><strong>2001:db8:40::1</strong> <strong>enable</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv6]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure Server.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Server]<strong> bgp 400</strong>
+[<span class="keyword">*</span>Server-bgp] <strong>router-id 44.44.44.44</strong>
+[<span class="keyword">*</span>Server-bgp]<strong> peer </strong><strong>2001:db8:10::2</strong><strong> as-number 100</strong>
+[<span class="keyword">*</span>Server-bgp] <strong>peer 2001:db8:10::2 ebgp-max-hop 10</strong>
+[<span class="keyword">*</span>Server-bgp] <strong>peer 2001:db8:10::2 connect-interface LoopBack0</strong>
+[<span class="keyword">*</span>Server-bgp]<strong> peer </strong><strong>2001:db8:40::2</strong><strong> as-number 300</strong>
+[<span class="keyword">*</span>Server-bgp] <strong>peer 2001:db8:40::2 ebgp-max-hop 10</strong>
+[<span class="keyword">*</span>Server-bgp] <strong>peer 2001:db8:40::2 connect-interface LoopBack1</strong>
+[<span class="keyword">*</span>Server-bgp] <strong>ipv6-family unicast</strong>
+[<span class="keyword">*</span>Server-bgp-af-ipv6] <strong>peer 2001:db8:10::2</strong> <strong>enable</strong>
+[<span class="keyword">*</span>Server-bgp-af-ipv6] <strong>peer 2001:db8:40::2</strong> <strong>enable</strong>
+[<span class="keyword">*</span>Server-bgp-af-ipv6]<strong> quit</strong>
+[<span class="keyword">*</span>Server-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>Server] <strong>commit</strong></pre>
+<p># Check the connection status of BGP peers. The following uses DeviceA as an example.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display bgp ipv6 peer</strong>
+Status codes: * - Dynamic
+ BGP local router ID        : 11.11.11.11
+ Local AS number            : 100
+ Total number of peers      : 2
+ Peers in established state : 2
+ Total number of dynamic peers : 0
+
+  Peer                             V          AS  MsgRcvd  MsgSent  OutQ  Up/Down       State  PrefRcv
+  2001:DB8:10::1                   4         400       20       21     0 00:14:33 <strong>Established</strong>       0
+  2001:DB8:20::2                   4         200       17       23     0 00:09:32 <strong>Established </strong>      0</pre>
+</p></li><li><span>Configure an IPv6 static route on Server and run the <strong>network</strong> command to import it.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Server]<strong> </strong><strong>ipv6 route-static 2001:db8:1::1 128 NULLO</strong>
+[<span class="keyword">*</span>Server] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Server] <strong>bgp 4</strong><strong>00</strong>
+[<span class="keyword">*</span>Server-bgp] <strong>ipv6-family unicast</strong>
+[<span class="keyword">*</span>Server-bgp-af-ipv6] <strong>network</strong> <strong>2001:db8:1::1</strong> <strong>128</strong>
+[<span class="keyword">*</span>Server-bgp-af-ipv6] <strong>quit</strong>
+[<span class="keyword">*</span>Server-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>Server] <strong>commit</strong></pre>
+</p></li><li><span>Configure the BGP4+ SoO function.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>bgp 1</strong><strong>00</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>ipv6-family unicast</strong>
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv6] <strong>peer </strong><strong>2001:db8:20::2 soo-reverse 10:10</strong>
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv6] <strong>peer 2001:db8:20::2 advertise-ext-community</strong>  
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv6] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure Leaf.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf]<strong> bgp 200</strong>
+[<span class="keyword">*</span>Leaf-bgp] <strong>ipv6-family unicast</strong>
+[<span class="keyword">*</span>Leaf-bgp-af-ipv6] <strong>peer 2001:db8:30::1 advertise-ext-community</strong>
+[<span class="keyword">*</span>Leaf-bgp-af-ipv6]<strong> quit</strong>
+[<span class="keyword">*</span>Leaf-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>Leaf] <strong>commit</strong></pre>
+<p># Check the BGP4+ routing table of DeviceA. The command output shows that the SoO attribute 10:10 has been added to the route sent by DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display bgp ipv6 routing-table peer 2001:db8:20::2 advertised-routes 2001:db8:1::1</strong>
+
+ BGP local router ID : 11.11.11.11
+ Local AS number : 100
+ BGP routing table entry information of 2001:db8:1::1/128:
+ From: 2001:db8:10::1 (2001:db8:10::1)
+ Route Duration: 0d00h14m11s
+ Relay IP Nexthop: FE80::3A71:1FF:FE41:300
+ Relay IP Out-Interface: <span>100GE</span><span>1/0/1</span>
+ Original nexthop: 2001:DB8:10::1
+ Advertised nexthop: 2001:DB8:20::1
+ <strong>Ext-Community: SoO &lt;10 : 10&gt;</strong>
+ AS-path 100 400, origin igp, pref-val 0, valid, external, best, select, pre 255, IGP cost 10
+ Advertised to such 1 peers:
+    2001:DB8:20::2</pre>
+<p># Check whether DeviceB can receive the route 2001:db8:1::1/128 that carries the SoO attribute.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display bgp routing-table peer 2001:db8:30::2 received-routes 2001:db8:1::1</strong>
+
+ BGP local router ID : 33.33.33.33
+ Local AS number : 300
+ BGP routing table entry information of 2001:db8:1::1/128:
+ <strong>From: 2001:db8:30::2 (2001:db8:30::2)</strong><strong> </strong><strong> </strong>
+ Relay IP Nexthop: FE80::3A71:1FF:FE21:300
+ Relay IP Out-Interface: <span>100GE</span><span>1/0/1</span>
+ Original nexthop: 2001:DB8:30::2
+ Qos information : 0x0
+ <strong>Ext-Community: SoO &lt;10 : 10&gt;</strong>
+ AS-path 200 100 400, origin igp, pref-val 0, valid, external, pre 255, IGP cost 10, not preferred for AS-Path
+ Not advertised to any peer yet</pre>
+</p><p><p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>bgp 3</strong><strong>00</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>ipv6-family unicast</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv6] <strong>peer </strong><strong>2001:db8:30::2 soo-reverse 10:10</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv6] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001484849888__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><div class="p"># Check the BGP4+ routing table of DeviceB. The <strong>display bgp routing-table peer 2001:db8:30::2 received-routes 2001:db8:1::1</strong> command output has no route information displayed. According to the <strong>display bgp routing-table 2001:db8:1::1</strong> command output, DeviceB discards the route received from 2001:db8:30::2 and accepts the route received from 2001:db8:40::1 after the BGP4+ SoO attribute is configured.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display </strong><strong>bgp routing-table 2001:db8:1::1 128</strong>
+
+ BGP local router ID : 33.33.33.33
+ Local AS number : 300
+ Paths:   1 available, 1 best, 1 select, 0 best-external, 0 add-path
+ BGP routing table entry information of 2001:db8:1::1/128:
+ <strong>From: 2001:DB8:40::1 </strong>(2001:DB8:40::1)
+ Route Duration: 0d00h06m39s
+ Relay IP Nexthop: FE80::3A71:1FF:FE41:300
+ Relay IP Out-Interface: <span>100GE</span><span>1/0/1</span>
+ Original nexthop: 2001:DB8:40::1
+ Qos information : 0x0
+ AS-path 400, origin igp, MED 0, pref-val 0, valid, external, best, select, pre 255, IGP cost 10
+ Advertised to such 1 peers:
+    2001:DB8:30::2</pre>
+</div>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001484849888__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+isis 1
+ cost-style wide
+ network-entity 10.0000.0000.0000.0001.00
+ #
+ ipv6 enable topology standard
+ #
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:db8:1::1/64       
+ isis ipv6 enable 1        
+#
+interface LoopBack0
+ ipv6 enable
+ ipv6 address 2001:db8:10::2/128
+ isis ipv6 enable 1
+#
+interface LoopBack1
+ ipv6 enable
+ ipv6 address 2001:DB8:20::1/128
+ isis ipv6 enable 1
+#
+bgp 100
+ private-4-byte-as enable
+ peer 2001:DB8:10::1 as-number 400
+ peer 2001:DB8:10::1 ebgp-max-hop 10
+ peer 2001:DB8:10::1 connect-interface LoopBack0
+ peer 2001:DB8:20::2 as-number 200
+ peer 2001:DB8:20::2 ebgp-max-hop 10
+ peer 2001:DB8:20::2 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+ #
+ ipv6-family unicast
+  peer 2001:DB8:10::1 enable
+  peer 2001:DB8:20::2 enable
+  peer 2001:DB8:20::2 soo-reverse 10:10
+  peer 2001:DB8:20::2 advertise-ext-community
+#
+return</pre>
+</li><li><p>Leaf</p>
+<pre class="screen">#
+sysname Leaf
+#
+isis 1
+ cost-style wide
+ network-entity 10.0000.0000.0000.0003.00
+ #
+ ipv6 enable topology standard
+ #
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:db8:1::3/64       
+ isis ipv6 enable 1 
+#
+interface LoopBack0
+ ipv6 enable
+ ipv6 address 2001:DB8:30::2/128
+ isis ipv6 enable 1
+#
+interface LoopBack1
+ ipv6 enable
+ ipv6 address 2001:DB8:20::2/128
+ isis ipv6 enable 1
+#
+bgp 200
+ private-4-byte-as enable
+ peer 2001:DB8:20::1 as-number 100
+ peer 2001:DB8:20::1 ebgp-max-hop 10
+ peer 2001:DB8:20::1 connect-interface LoopBack1
+ peer 2001:DB8:30::1 as-number 300
+ peer 2001:DB8:30::1 ebgp-max-hop 10
+ peer 2001:DB8:30::1 connect-interface LoopBack0
+ #
+ ipv4-family unicast
+ #
+ ipv6-family unicast
+  peer 2001:DB8:20::1 enable
+  peer 2001:DB8:30::1 enable
+  peer 2001:DB8:30::1 advertise-ext-community
+#
+return</pre>
+</li><li><div class="p">DeviceB<pre class="screen">#
+sysname DeviceB
+#
+isis 1
+ cost-style wide
+ network-entity 10.0000.0000.0000.0004.00
+ #
+ ipv6 enable topology standard
+ #
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:db8:1::4/64      
+ isis ipv6 enable 1
+#
+interface LoopBack0
+ ipv6 enable
+ ipv6 address 2001:DB8:30::1/128
+ isis ipv6 enable 1
+#
+interface LoopBack1
+ ipv6 enable
+ ipv6 address 2001:DB8:40::2/128
+ isis ipv6 enable 1
+#
+bgp 300
+ private-4-byte-as enable
+ peer 2001:DB8:30::2 as-number 200
+ peer 2001:DB8:30::2 ebgp-max-hop 10
+ peer 2001:DB8:30::2 connect-interface LoopBack0
+ peer 2001:DB8:40::1 as-number 400
+ peer 2001:DB8:40::1 ebgp-max-hop 10
+ peer 2001:DB8:40::1 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+ #
+ ipv6-family unicast
+  peer 2001:DB8:30::2 enable
+  peer 2001:DB8:30::2 soo-reverse 10:10
+  peer 2001:DB8:40::1 enable
+#
+return</pre>
+</div>
+</li><li><p>Server</p>
+<pre class="screen">#
+sysname Server
+#
+isis 1
+ cost-style wide
+ network-entity 10.0000.0000.0000.0002.00
+ #
+ ipv6 enable topology standard
+ #
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:db8:1::2/64   
+ isis ipv6 enable 1
+#
+interface LoopBack0
+ ipv6 enable
+ ipv6 address 2001:DB8:10::1/128
+ isis ipv6 enable 1
+#
+interface LoopBack1
+ ipv6 enable
+ ipv6 address 2001:DB8:40::1/128
+ isis ipv6 enable 1
+#
+bgp 400
+ private-4-byte-as enable
+ peer 2001:DB8:10::2 as-number 100
+ peer 2001:DB8:10::2 ebgp-max-hop 10
+ peer 2001:DB8:10::2 connect-interface LoopBack0
+ peer 2001:DB8:40::2 as-number 300
+ peer 2001:DB8:40::2 ebgp-max-hop 10
+ peer 2001:DB8:40::2 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+ #
+ ipv6-family unicast
+  network 2001:db8:1::1 128            
+  peer 2001:DB8:10::2 enable
+  peer 2001:DB8:40::2 enable
+#
+ipv6 route-static 2001:db8:1::1 128 NULL0   
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bgp6_cfg_2111.html">Configuring BGP4+ SoO
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bgp6_cfg_2113.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

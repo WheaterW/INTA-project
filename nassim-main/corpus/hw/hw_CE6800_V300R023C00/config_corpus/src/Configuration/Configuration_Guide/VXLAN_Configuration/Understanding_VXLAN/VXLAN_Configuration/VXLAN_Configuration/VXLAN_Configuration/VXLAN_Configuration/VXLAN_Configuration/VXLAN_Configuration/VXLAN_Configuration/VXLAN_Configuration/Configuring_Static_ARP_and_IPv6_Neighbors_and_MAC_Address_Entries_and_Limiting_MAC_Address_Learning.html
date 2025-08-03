@@ -1,0 +1,165 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring Static ARP/IPv6 Neighbors/MAC Address Entries and Limiting MAC Address Learning">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../toctopics/en-us_topic_0000001130784304.html">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_vrp_vxlan_cfg_1206.html">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_vrp_vxlan_cfg_1045.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001176743959">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Configuring Static ARP/IPv6 Neighbors/MAC Address Entries and Limiting MAC Address Learning</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001176743959"></a><a name="EN-US_TASK_0000001176743959"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring Static ARP/IPv6 Neighbors/MAC Address Entries and Limiting MAC Address Learning</h1>
+<div class="taskbody"><div class="prereq" style="margin-left:0"><a name="EN-US_TASK_0000001176743959__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Prerequisites</h4>
+<div class="p"><div class="p">Before configuring static ARP/IPv6 neighbors/MAC address entries and limiting MAC address learning, you have completed one of the following tasks:<ul><li><a href="dc_vrp_vxlan_cfg_1039.html">Establishing VXLAN Tunnels in Static Mode (Centralized VXLAN Gateway)</a></li><li><a href="dc_vrp_vxlan_cfg_1072.html">Establishing VXLAN Tunnels in BGP EVPN Mode (Centralized VXLAN Gateway)</a></li><li><a href="dc_vrp_vxlan_cfg_1066.html">Establishing VXLAN Tunnels in BGP EVPN Mode (Distributed VXLAN Gateway)</a></li></ul>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176743959__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>You can improve the VXLAN network security using the following methods:</p>
+<ul><li>Manually configure and maintain static ARP entries on Layer 3 VXLAN gateways. Static ARP entries can be neither aged nor overwritten by dynamic ARP entries. If a static ARP entry is configured on a device, the device can communicate with a peer device with a specified IP address only if the peer's MAC address is the bound one. Network attackers cannot modify the mapping between the IP and MAC addresses, improving communication security between the two devices.</li><li>If a Layer 3 gateway is not enabled to send ND protocol packets, manually configure a static IPv6 neighbor and specify the mapping between IPv6 and MAC addresses to prevent ND packet attacks.</li><li>Configure static MAC address entries to reduce broadcast traffic and prevent unauthorized data access from bogus users. In this case, when a source NVE on a VXLAN tunnel receives a BUM packet, the local VTEP sends a copy of the BUM packet only to the VTEPs in the ingress replication list. </li><li>Configure the maximum number of MAC addresses that a device can learn to limit the number of access users and defend against attacks on MAC address tables. If the device has learned the maximum, no more addresses can be learned. However, you can also configure the device to discard packets after learning the maximum allowed number of MAC addresses, improving network security.</li><li><p>Disable MAC address learning for a BD if a Layer 3 VXLAN gateway does not need to learn MAC addresses of packets in the BD, reducing the number of MAC address entries. You can also disable MAC address learning on Layer 2 gateways after the VXLAN network topology becomes stable and MAC address learning is complete.</p>
+</li></ul>
+<p>The following operations can be performed on a Layer 2 gateway:</p>
+<ul><li><p>Configure static MAC address entries.</p>
+</li><li><p>Limit MAC address learning.</p>
+</li><li><p>Disable MAC address learning.</p>
+</li></ul>
+<p>The following operations can be performed on a Layer 3 gateway:</p>
+<ul><li><p>Configure static ARP address entries.</p>
+</li><li><p>Configure static IPv6 neighbors on the VXLAN tunnel side.</p>
+</li><li><p>Configure static IPv6 neighbors for Layer 2 sub-interfaces.</p>
+</li><li><p>Disable MAC address learning.</p>
+</li></ul>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li><p>Static ARP entries can be configured only on IPv4 overlay networks.</p>
+</li><li><p>Static IPv6 neighbors can be configured only on IPv6 overlay networks.</p>
+</li></ul>
+</div></div>
+</div></div>
+<div class="steps-unordered"><a name="EN-US_TASK_0000001176743959__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ul><li><span>Configure a static ARP entry.</span><ol><li class="substepexpand"><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Configure a static ARP entry on the VXLAN tunnel side.</span><p><pre class="screen"><a href="cmdqueryname=arp+static"><b><span class="cmdname">arp static</span></b></a> <i><span class="varname">ip-address</span></i> <i><span class="varname">mac-address</span></i> <strong><span>vni</span></strong> <i><span class="varname">vni-id</span></i> <strong><span>source-ip</span></strong> <i><span class="varname">source-ip</span></i> <strong><span>peer-ip</span></strong> <i><span class="varname">peer-ip</span></i></pre>
+<div class="p">By default, no static ARP entry is configured on the VXLAN tunnel side.<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li><p><i><span class="varname">ip-address</span></i> must belong to the same network segment as the IP address of the Layer 3 gateway.</p>
+</li><li><p>Static ARP entries can be configured on the static VXLAN tunnel side only.</p>
+</li></ul>
+</div></div>
+</div>
+</p></li><li class="substepexpand"><span>If a VXLAN service access point is a Layer 2 sub-interface, mapping between IP and MAC addresses can be configured on the user access side.</span><p><p>Untagged encapsulation type:</p>
+<pre class="screen"><a href="cmdqueryname=arp+static"><b><span class="cmdname">arp static</span></b></a> <i><span class="varname">ip-address</span></i> <i><span class="varname">mac-address</span></i> <strong><span>interface</span></strong> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i></pre>
+<p>Dot1q encapsulation type:</p>
+<pre class="screen"><a href="cmdqueryname=arp+static"><b><span class="cmdname">arp static</span></b></a> <i><span class="varname">ip-address</span></i> <i><span class="varname">mac-address</span></i> { <strong><span>vlan</span></strong> <i><span class="varname">vlan-id</span></i> [ <strong><span>interface</span></strong> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> ] | <strong><span>interface</span></strong> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> }</pre>
+<p><strong><span>interface</span></strong> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> must specify a Layer 2 sub-interface. <strong><span>vlan</span></strong> <i><span class="varname">vlan-id</span></i> must be the same as the value specified in <a href="cmdqueryname=encapsulation"><b><span class="cmdname">encapsulation</span></b></a> <strong><span>dot1q</span></strong> [ <strong><span>vid</span></strong> <i><span class="varname">vid</span></i> ].</p>
+<p>QinQ encapsulation type:</p>
+<pre class="screen"><a href="cmdqueryname=arp+static"><b><span class="cmdname">arp static</span></b></a> <i><span class="varname">ip-address</span></i> <i><span class="varname">mac-address</span></i> <strong><span>vlan</span></strong> <i><span class="varname">pevlan-id</span></i> <strong><span>cevlan</span></strong> <i><span class="varname">cevlan-id</span></i> <strong><span>interface</span></strong> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i></pre>
+<p><strong><span>interface</span></strong> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> must specify a Layer 2 sub-interface. <i><span class="varname">pevlan-id</span></i> and <i><span class="varname">cevlan-id</span></i> must be the same as the values specified in <a href="cmdqueryname=encapsulation"><b><span class="cmdname">encapsulation</span></b></a> <strong><span>qinq</span></strong> [ <strong><span>vid</span></strong> <i><span class="varname">pe-vid</span></i> <strong><span>ce-vid</span></strong> <i><span class="varname">ce-vid</span></i> ].</p>
+</p></li><li class="substepexpand"><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001176743959__en-us_task_0234857734_screen14848162118611"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001176743959__en-us_task_0234857734_cmdname1784862115612">commit</span></b></a></pre>
+</p></li></ol>
+</li><li><span>Configure a static IPv6 neighbor on the VXLAN tunnel side.</span><ol><li class="substepexpand"><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Enter the VBDIF interface view.</span><p><pre class="screen"><a href="cmdqueryname=interface+vbdif"><b><span class="cmdname">interface vbdif</span></b></a> <i><span class="varname">bd-id</span></i></pre>
+</p></li><li class="substepexpand"><span>Configure a static IPv6 neighbor.</span><p><pre class="screen"><a href="cmdqueryname=ipv6+neighbor"><b><span class="cmdname">ipv6 neighbor</span></b></a> <i><span class="varname">ipv6-address</span></i> <i><span class="varname">mac-address</span></i> <strong><span>vni</span></strong> <i><span class="varname">vni-id</span></i> <strong><span>source-ip</span></strong> <i><span class="varname">source-ip</span></i> <strong><span>peer-ip</span></strong> <i><span class="varname">peer-ip-address</span></i></pre>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Static IPv6 neighbor relationships can be configured on the static VXLAN tunnel side only.</p>
+</div></div>
+</p></li><li class="substepexpand"><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001176743959__en-us_task_0234857734_screen14848162118611_1"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001176743959__en-us_task_0234857734_cmdname1784862115612_1">commit</span></b></a></pre>
+</p></li></ol>
+</li><li><span>Configure a static IPv6 neighbor for a Layer 2 sub-interface.</span><p><p>If a Layer 2 sub-interface functions as a service access point on the Layer 3 gateway, a static IPv6 neighbor can be configured for the Layer 2 sub-interface, which must be specified by <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i>.</p>
+</p><ol><li class="substepexpand"><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Enter the VBDIF interface view.</span><p><pre class="screen"><a href="cmdqueryname=interface+vbdif"><b><span class="cmdname">interface vbdif</span></b></a> <i><span class="varname">bd-id</span></i></pre>
+</p></li><li class="substepexpand"><span>Configure a static IPv6 neighbor for the Layer 2 sub-interface. Select the configuration command depending on its encapsulation type.</span><p><p>Untagged encapsulation type:</p>
+<pre class="screen"><a href="cmdqueryname=ipv6+neighbor"><b><span class="cmdname">ipv6 neighbor</span></b></a> <i><span class="varname">ipv6-address</span></i> <i><span class="varname">mac-address</span></i> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i></pre>
+<p>Dot1q encapsulation type:</p>
+<pre class="screen"><a href="cmdqueryname=ipv6+neighbor"><b><span class="cmdname">ipv6 neighbor</span></b></a> <i><span class="varname">ipv6-address</span></i> <i><span class="varname">mac-address</span></i> <strong><span>vlan</span></strong> <i><span class="varname">vlan-id</span></i> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i></pre>
+<p><strong><span>vlan</span></strong> <i><span class="varname">vlan-id</span></i> must be the same as the value specified in <a href="cmdqueryname=encapsulation"><b><span class="cmdname">encapsulation</span></b></a> <strong><span>dot1q</span></strong> [ <strong><span>vid</span></strong> <i><span class="varname">vid</span></i> ].</p>
+<p>QinQ encapsulation type:</p>
+<pre class="screen"><a href="cmdqueryname=ipv6+neighbor"><b><span class="cmdname">ipv6 neighbor</span></b></a> <i><span class="varname">ipv6-address</span></i> <i><span class="varname">mac-address</span></i> <strong><span>vlan</span></strong> <i><span class="varname">vlan-id</span></i> <strong><span>cevlan</span></strong> <i><span class="varname">ce-vid</span></i> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i></pre>
+<p><i><span class="varname">vlan-id</span></i> and <i><span class="varname">ce-vid</span></i> must be the same as the values specified in <a href="cmdqueryname=encapsulation"><b><span class="cmdname">encapsulation</span></b></a> <strong><span>qinq</span></strong> [ <strong><span>vid</span></strong> <i><span class="varname">pe-vid</span></i> <strong><span>ce-vid</span></strong> <i><span class="varname">ce-vid</span></i> ].</p>
+</p></li><li class="substepexpand"><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001176743959__en-us_task_0234857734_screen14848162118611_2"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001176743959__en-us_task_0234857734_cmdname1784862115612_2">commit</span></b></a></pre>
+</p></li></ol>
+</li><li><span>Configure a static MAC address entry.</span><ol><li class="substepexpand"><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Configure a static MAC address entry.</span><p><p>In IPv4 scenarios:</p>
+</p><p><pre class="screen"><a href="cmdqueryname=mac-address+static"><b><span class="cmdname">mac-address static</span></b></a> <i><span class="varname">mac-address</span></i> <strong><span>bridge-domain</span></strong> <i><span class="varname">bd-id</span></i> <strong><span>source</span></strong> <i><span class="varname">source-ip-address</span></i> <strong><span>peer</span></strong> <i><span class="varname">peer-ip</span></i> <strong><span>vni</span></strong> <i><span class="varname">vni-id</span></i></pre>
+<p>In IPv6 scenarios:</p>
+<pre class="screen"><a href="cmdqueryname=mac-address+static"><b><span class="cmdname">mac-address static</span></b></a> <i><span class="varname">mac-address</span></i> <strong><span>bridge-domain</span></strong> <i><span class="varname">bd-id</span></i> <strong><span>source-ipv6</span></strong> <i><span class="varname">source-ipv6-address</span></i> <strong><span>peer-ipv6</span></strong> <i><span class="varname">peer-ipv6</span></i> <strong><span>vni</span></strong> <i><span class="varname">vni-id</span></i></pre>
+<p>By default, no static MAC address entry is configured.</p>
+</p></li><li class="substepexpand"><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001176743959__en-us_task_0234857734_screen14848162118611_3"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001176743959__en-us_task_0234857734_cmdname1784862115612_3">commit</span></b></a></pre>
+</p></li></ol>
+</li><li><span>Limit MAC address learning.</span><ol><li class="substepexpand"><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li class="substepexpand"><span>MAC address learning limit rules can be configured in the following modes:</span><p><ul><li>Set the maximum number of MAC addresses that can be learned in a BD.<pre class="screen"><a href="cmdqueryname=bridge-domain"><b><span class="cmdname">bridge-domain</span></b></a> <i><span class="varname">bd-id</span></i>
+<a href="cmdqueryname=mac-address+limit"><b><span class="cmdname">mac-address limit</span></b></a> { <strong><span>action</span></strong> { <strong><span>discard</span></strong> | <strong><span>forward</span></strong> } | <strong><span>maximum</span></strong> <i><span class="varname">max</span></i> | <strong><span>alarm</span></strong> { <strong><span>disable</span></strong> | <strong><span>enable</span></strong> } } <sup>*</sup></pre>
+</li><li>Set the maximum number of MAC addresses that can be learned on a Layer 2 sub-interface.<pre class="screen">
+<a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> <i><span class="varname">interface-type interface-number.subnum</span></i> <strong><span>mode l2</span></strong>
+<a href="cmdqueryname=mac-address+limit"><b><span class="cmdname">mac-address limit</span></b></a> { <strong><span>action</span></strong> { <strong><span>discard</span></strong> | <strong><span>forward</span></strong> } | <strong><span>maximum</span></strong> <i><span class="varname">max</span></i> | <strong><span>alarm</span></strong> { <strong><span>disable</span></strong> | <strong><span>enable</span></strong> } } <sup>*</sup></pre>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Before creating a Layer 2 sub-interface, ensure that its Layer 2 main interface does not have the <a href="cmdqueryname=port+link-type"><b><span class="cmdname">port link-type</span></b></a> <strong><span>dot1q-tunnel</span></strong> command configuration. If this configuration exists, run the <a href="cmdqueryname=undo+port+link-type"><b><span class="cmdname">undo port link-type</span></b></a> command to delete it.</p>
+</div></div>
+</li><li>Set the maximum number of MAC addresses that can be learned from a remote VTEP.<pre class="screen"><a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> <strong><span>nve</span></strong> <i><span class="varname">nve-number</span></i>
+<a href="cmdqueryname=peer"><b><span class="cmdname">peer</span></b></a> <i><span class="varname">ip-address</span></i> <strong><span>mac-address limit</span></strong> { <strong><span>action</span></strong> { <strong><span>discard</span></strong> | <strong><span>forward</span></strong> } | <strong><span>maximum</span></strong> <i><span class="varname">max</span></i> | <strong><span>alarm</span></strong> { <strong><span>disable</span></strong> | <strong><span>enable</span></strong> } } <sup>*</sup></pre>
+<p>If the source VTEP address of a VXLAN tunnel is configured in a BD instance, set the maximum number of MAC addresses that can be learned from the remote VTEP as follows:</p>
+<pre class="screen"><a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> <strong><span>nve</span></strong> <i><span class="varname">nve-number</span></i>
+<a href="cmdqueryname=source"><b><span class="cmdname">source</span></b></a> <i><span class="varname">ip-address</span></i><a href="cmdqueryname=peer"><b><span class="cmdname"> peer</span></b></a> <i><span class="varname">ip-address</span></i> <strong><span>mac-address limit</span></strong> { <strong><span>action</span></strong> { <strong><span>discard</span></strong> | <strong><span>forward</span></strong> } | <strong><span>maximum</span></strong> <i><span class="varname">max</span></i> | <strong><span>alarm</span></strong> { <strong><span>disable</span></strong> | <strong><span>enable</span></strong> } } <sup>*</sup></pre>
+<p>After this step is performed, the device limits the maximum number of MAC addresses that can be learned from the specified remote VTEP of a VXLAN tunnel, protecting the device against MAC address attacks and limiting the number of access users. When the maximum number is reached, the device can discard subsequent packets and report an alarm if the alarming function is configured.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>This configuration can be performed only for remote VTEPs of static VXLAN tunnels.</p>
+</div></div>
+</li></ul>
+</p></li><li class="substepexpand"><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001176743959__en-us_task_0234857734_screen14848162118611_4"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001176743959__en-us_task_0234857734_cmdname1784862115612_4">commit</span></b></a></pre>
+</p></li></ol>
+</li><li><span>Disable MAC address learning.</span><ol><li class="substepexpand"><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Enter the BD view.</span><p><pre class="screen"><a href="cmdqueryname=bridge-domain"><b><span class="cmdname">bridge-domain</span></b></a> <i><span class="varname">bd-id</span></i></pre>
+</p></li><li class="substepexpand"><span>Disable MAC address learning.</span><p><pre class="screen"><span><a href="cmdqueryname=mac-address+learning+disable"><b><span class="cmdname">mac-address learning disable</span></b></a></span></pre>
+<p>By default, MAC address learning is enabled for a BD.</p>
+</p></li><li class="substepexpand"><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001176743959__en-us_task_0234857734_screen14848162118611_5"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001176743959__en-us_task_0234857734_cmdname1784862115612_5">commit</span></b></a></pre>
+</p></li></ol>
+</li></ul></div>
+<div class="example"><a name="EN-US_TASK_0000001176743959__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><ul><li>Run the <a href="cmdqueryname=display+arp"><b><span class="cmdname">display arp</span></b></a> [ <strong><span>network</span></strong> <i><span class="varname">network-address</span></i> [ <i><span class="varname">network-mask</span></i> | <i><span class="varname">mask-length</span></i> ] ] <strong><span>static</span></strong> command to check static ARP entries.</li><li>Run the <a href="cmdqueryname=display+ipv6+neighbors+brief"><b><span class="cmdname">display ipv6 neighbors brief</span></b></a> command to check static IPv6 neighbor information.</li><li>Run the <a href="cmdqueryname=display+mac-address"><b><span class="cmdname">display mac-address</span></b></a> <strong><span>static</span></strong> <strong><span>bridge-domain</span></strong> <i><span class="varname">bd-id</span></i> command to check static MAC address entries in a BD.</li><li>Run the <a href="cmdqueryname=display+mac-address+limit+bridge-domain"><b><span class="cmdname">display mac-address limit bridge-domain</span></b></a> <i><span class="varname">bd-id</span></i> command to check dynamic MAC address learning limiting configurations of a BD.</li><li>Run the <a href="cmdqueryname=display+mac-address+limit"><b><span class="cmdname">display mac-address limit</span></b></a> <strong><span>nve</span></strong> <i><span class="varname">nve-number</span></i> <a href="cmdqueryname=peer"><b><span class="cmdname">peer</span></b></a> <i><span class="varname">ip-address</span></i> command to check the MAC address learning limit rule configured on an NVE interface for a specified remote VTEP.</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../toctopics/en-us_topic_0000001130784304.html">VXLAN Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../dc/dc_vrp_vxlan_cfg_1206.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../dc/dc_vrp_vxlan_cfg_1045.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,132 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="topic">
+<meta name="DC.Title" content="Configuration Example for Data Plane Fast Recovery">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_dpfr_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_dpfr_cfg_0006.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TOPIC_0000001688535109">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Configuration Example for Data Plane Fast Recovery</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TOPIC_0000001688535109"></a><a name="EN-US_TOPIC_0000001688535109"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuration Example for Data Plane Fast Recovery</h1>
+<div><div class="section"><h4 class="sectiontitle">Networking Requirements</h4><p>An enterprise has high-performance database access services, which require DCNs to provide high performance and reliability. In this case, DPFR can be deployed to implement local or remote fast fault convergence based on the data plane, without affecting services.</p>
+<p>In <a href="#EN-US_TOPIC_0000001688535109__fig_dc_vrp_feature_new_ipfpm_000702">Figure 1</a>, service traffic is normally forwarded along the path Spine1 -&gt; Leaf1 -&gt; Server1. If the link between Leaf1 and Server1 fails, the enterprise expects the fault to be rapidly detected and service traffic be quickly switched to the backup link. In this case, DPFR can be configured. Once Leaf1 detects that interface1 fails and no redundant path to Server1 is available, it generates a fault advertisement packet and forwards the packet to the adjacent upstream device Spine1. Spine1 provides a redundant path to Server1 so that subsequent service traffic is switched to the standby link and forwarded along the path Spine1 -&gt; Leaf2 -&gt; Server1.</p>
+<div class="fignone" id="EN-US_TOPIC_0000001688535109__fig_dc_vrp_feature_new_ipfpm_000702"><a name="EN-US_TOPIC_0000001688535109__fig_dc_vrp_feature_new_ipfpm_000702"></a><a name="fig_dc_vrp_feature_new_ipfpm_000702"></a><span class="figcap"><b>Figure 1 </b>Network diagram of DPFR</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 represents <span>100GE</span><span>1/0/1</span>.</p>
+</div></div>
+<br><span><img src="figure/en-us_image_0000001724254074.png" width="NaN" height="NaN"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Enable DPFR globally, and set the sampling rate and aging time of entries in the fault table.</li><li>Configure fault detection on an interface for DPFR.</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Procedure</h4><ol><li>Configure DPFR on a device. The following uses Leaf1 as an example. The configurations of other devices are similar. For details, see the configuration script.<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">HUAWEI</span>] <strong>sysname Leaf1</strong>
+[*<span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>Leaf1] <strong>interface <span>100ge</span><span>1/0/1</span></strong>
+[*Leaf1-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[*Leaf1-<span>100GE</span><span>1/0/1</span>] <strong>ip address 10.1.1.1 24</strong>
+[*Leaf1-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[*Leaf1] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>Leaf1] <strong>dpfr enable sampler 1024 aging-time 10</strong>
+[*Leaf1] <strong>interface <span>100ge</span><span>1/0/1</span></strong>
+[*Leaf1-<span>100GE</span><span>1/0/1</span>] <strong>dpfr enable</strong></pre>
+</li></ol>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Only the interfaces enabled with fault detection can detect faults. You can configure fault detection on the corresponding interfaces as required. The following uses interface1 as an example.</p>
+</div></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Verifying the Configuration</h4><p>If Leaf1 fails and fault convergence is implemented after the preceding configurations are complete, you can check information about the fault table for DPFR on the device.</p>
+<div class="p"># Display detailed information about the fault table for DPFR.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf1] <strong>display dpfr cache slot 1</strong>
+ChipId: 0
+------------------------------------------------------------------                                  
+Protocol     DestinationIPv4     Interface    Time             
+------------------------------------------------------------------
+IPv4         1.1.1.1             <span>100GE</span><span>1/0/1</span>   2022-10-10 19:49:13
+------------------------------------------------------------------</pre>
+</div>
+<div class="p"># Display the fault table statistics about DPFR.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf1]<strong> display dpfr cache statistics slot 1</strong>
+ChipId: 0
+---------------------------------------------------------
+Protocol          Current           Aged          Created
+---------------------------------------------------------
+IPv4                    1               0               1
+---------------------------------------------------------</pre>
+</div>
+<p># Display the event logs of DPFR.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf1] <strong>display dpfr event-log slot 1</strong>
+Recover     : Data plane fast failover event.    
+ResourceFail: Resource failures causes DPFR function to fail. 
+PortStatus  : Port down event.
+--------------------------------------------------------------------------------
+EventType      Log
+--------------------------------------------------------------------------------
+recover        DIP:1.1.1.1,srcPort:<span>100GE</span><span>1/0/2</span>,dstPort:<span>100GE</span><span>1/0/1</span>
+               recover: 2000/12/12 12:00:00 
+--------------------------------------------------------------------------------</pre>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration Scripts</h4><ul><li>Leaf1<pre class="screen">#
+sysname Leaf1
+#
+dpfr enable sampler 1024 aging-time 10
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.0
+ dpfr enable</pre>
+</li><li>Spine1<pre class="screen">#
+sysname Spine1
+#
+dpfr enable sampler 1024 aging-time 10
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.2.2 255.255.255.0
+ dpfr enable</pre>
+</li></ul>
+<p></p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_dpfr_cfg_0001.html">Data Plane Fast Recovery Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_dpfr_cfg_0006.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

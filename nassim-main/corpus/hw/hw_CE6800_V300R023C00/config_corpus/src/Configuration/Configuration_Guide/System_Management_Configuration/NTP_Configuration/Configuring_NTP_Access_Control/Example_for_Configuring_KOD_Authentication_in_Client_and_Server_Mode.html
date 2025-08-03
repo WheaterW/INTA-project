@@ -1,0 +1,274 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring KOD Authentication in Client/Server Mode">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_ntp_cfg_0023.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_ntp_cfg_0045.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="NTP">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="NTP">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="NTP">
+<meta name="featuretype" content="System Management">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001513035382">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring KOD Authentication in Client/Server Mode</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001513035382"></a><a name="EN-US_TASK_0000001513035382"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring KOD Authentication in Client/Server Mode</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001513035382__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0000001513035382__fig_dc_vrp_ntp_cfg_002701">Figure 1</a>:</p>
+<ul><li><p><span class="keyword">Device</span>A functions as an NTP unicast server, and its local clock functions as a stratum 2 NTP master clock.</p>
+</li><li><p><span class="keyword">Device</span>B functions as an NTP unicast client that synchronizes its clock to <span class="keyword">Device</span>A.</p>
+</li><li><p><span class="keyword">Device</span>C and <span class="keyword">Device</span>D function as NTP clients and use <span class="keyword">Device</span>B as their respective NTP server.</p>
+</li><li><p>Enable NTP authentication</p>
+</li><li>KOD is enabled on <span class="keyword">Device</span>A so that <span class="keyword">Device</span>A can perform access control when the volume of packets received overloads its loadbearing capabilities.</li></ul>
+<div class="fignone" id="EN-US_TASK_0000001513035382__fig_dc_vrp_ntp_cfg_002701"><a name="EN-US_TASK_0000001513035382__fig_dc_vrp_ntp_cfg_002701"></a><a name="fig_dc_vrp_ntp_cfg_002701"></a><span class="figcap"><b>Figure 1 </b>Configuring the unicast client/server mode</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, Interface1 and Interface2 represent <span>100GE</span><span>1/0/1</span> and <span>100GE</span><span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001513035426.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001513035382__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><ul><li>Before configuring a key on the client or server, ensure that the key already exists.</li><li>The authentication key must be reliable on both the client and server. Authentication must be enabled on the client.</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001513035382__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure <span class="keyword">Device</span>A as an NTP server to provide the master clock.</p>
+</li><li><p>Configure <span class="keyword">Device</span>B as an NTP client to synchronize its clock to <span class="keyword">Device</span>A.</p>
+</li><li><p>Configure <span class="keyword">Device</span>C and <span class="keyword">Device</span>D as NTP clients to synchronize their clocks to <span class="keyword">Device</span>B.</p>
+</li><li><p>Configure all <span class="keyword">Device</span>s to participate in NTP authentication after passwords are encrypted using the HMAC-SHA256 algorithm.</p>
+</li></ol>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li><p>When configuring NTP authentication in the client/server mode, you must first enable NTP authentication on the client, specify the NTP server address, and specify the authentication key to be sent to the server. Otherwise, clock synchronization is directly implemented without NTP authentication.</p>
+</li><li><p>You must completely configure the client and server to ensure successful authentication.</p>
+</li></ul>
+</div></div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001513035382__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each device and ensure that the devices are routable.</span></li><li><span>On <span class="keyword">Device</span>A, configure the NTP master clock, specify a listening interface, and enable NTP authentication.</span><p><p># Configure the local clock on <span class="keyword">Device</span>A as a stratum 2 NTP master clock.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> ntp refclock-master 2</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Specify a listening interface on <span class="keyword">Device</span>A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>ntp server source-interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Enable NTP authentication and configure an authentication key. The authentication key configured on the client must be the same as that on the server.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> ntp authentication enable</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ntp authentication-keyid 42 authentication-mode hmac-sha256 ********</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure an ACL rule.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> acl 2000</strong>
+[<span class="keyword">*</span>DeviceA-acl4-basic-2000]<strong> rule 2000 permit source 10.1.1.11 0</strong>
+[<span class="keyword">*</span>DeviceA-acl4-basic-2000]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure access control.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> ntp access limited<span> 2000</span></strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure the minimum and average intervals for receiving NTP packets.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> ntp discard min-interval 4 avg-interval 4</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p>Enable KOD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> ntp kod-enable</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Enable the NTP server function on <span class="keyword">Device</span>A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>undo </strong><strong>ntp </strong><strong>server disable</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>On <span class="keyword">Device</span>B, configure the NTP master clock, specify a listening interface, and enable NTP authentication.</span><p><p># Enable NTP authentication on <span class="keyword">Device</span>B, configure an authentication key, and declare the authentication key as reliable.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>B&gt;<strong> system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B]<strong> ntp authentication enable</strong>
+[<span class="keyword">*</span>DeviceB]<strong> ntp authentication-keyid 42 authentication-mode hmac-sha256 ********</strong>
+[<span class="keyword">*</span>DeviceB]<strong> ntp trusted authentication-keyid 42</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Specify a listening interface on <span class="keyword">Device</span>B.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>ntp server source-interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Specify <span class="keyword">Device</span>A as the NTP server of <span class="keyword">Device</span>B, and configure <span class="keyword">Device</span>B to use the configured authentication key.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B]<strong> ntp unicast-server 2.2.2.2 authentication-keyid 42</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Enable the NTP server function on <span class="keyword">Device</span>B.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>undo </strong><strong>ntp </strong><strong>server disable</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li><li><span>Specify <span class="keyword">Device</span>B as the NTP server of <span class="keyword">Device</span>C.</span><p><pre class="screen">&lt;<span class="keyword">Device</span>C&gt;<strong> system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C]<strong> ntp authentication enable</strong>
+[<span class="keyword">*</span>DeviceC]<strong> ntp authentication-keyid 42 authentication-mode hmac-sha256 ********</strong>
+[<span class="keyword">*</span>DeviceC]<strong> ntp trusted authentication-keyid 42</strong>
+[<span class="keyword">*</span>DeviceC] <strong>ntp unicast-server 10.0.0.1 authentication-keyid 42</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li><li><span>Specify <span class="keyword">Device</span>B as the NTP server of <span class="keyword">Device</span>D.</span><p><pre class="screen">&lt;<span class="keyword">Device</span>D&gt;<strong> system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D]<strong> ntp authentication enable</strong>
+[<span class="keyword">*</span>DeviceD]<strong> ntp authentication-keyid 42 authentication-mode hmac-sha256 ********</strong>
+[<span class="keyword">*</span>DeviceD]<strong> ntp trusted authentication-keyid 42</strong>
+[<span class="keyword">*</span>DeviceD]<strong> ntp unicast-server 10.0.0.1 authentication-keyid 42</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001513035382__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check the NTP status of <span class="keyword">Device</span>B. The command output shows that the clock status is <strong>synchronized</strong>, indicating that clock synchronization is complete. The stratum of <span class="keyword">Device</span>B is 3, one stratum lower than <span class="keyword">Device</span>A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B]<strong> display ntp status</strong>
+ clock status: synchronized
+ clock stratum: 3
+ reference clock ID: 2.2.2.2
+ nominal frequency: 60.0002 Hz
+ actual frequency: 60.0002 Hz
+ clock precision: 2^18
+ clock offset: 3.8128 ms
+ root delay: 31.26 ms
+ root dispersion: 74.20 ms
+ peer dispersion: 34.30 ms
+ reference time: 11:55:56.833 UTC Feb 2 2020(C7B15BCC.D5604189)
+ synchronization state: spike (clock will be set in 1010 secs)</pre>
+<p># Check the NTP status of <span class="keyword">Device</span>C. The command output shows that the clock status is <strong>synchronized</strong>, indicating that clock synchronization is complete. The stratum of <span class="keyword">Device</span>C is 4, one stratum lower than <span class="keyword">Device</span>B.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C]<strong> display ntp status</strong>
+ clock status: synchronized
+ clock stratum: 4
+ reference clock ID: 10.0.0.1
+ nominal frequency: 60.0002 Hz
+ actual frequency: 60.0002 Hz
+ clock precision: 2^18
+ clock offset: 3.8128 ms
+ root delay: 31.26 ms
+ root dispersion: 74.20 ms
+ peer dispersion: 34.30 ms
+ reference time: 11:55:56.833 UTC Feb 2 2020(C7B15BCC.D5604189)
+ synchronization state: spike (clock will be set in 1010 secs)</pre>
+<p># Check the NTP status of <span class="keyword">Device</span>D. The command output shows that the clock status is <strong>synchronized</strong>, indicating that clock synchronization is complete. The stratum of <span class="keyword">Device</span>D is 4, one stratum lower than <span class="keyword">Device</span>B.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D]<strong> display ntp status</strong>
+ clock status: synchronized
+ clock stratum: 4
+ reference clock ID: 10.0.0.1
+ nominal frequency: 60.0002 Hz
+ actual frequency: 60.0002 Hz
+ clock precision: 2^18
+ clock offset: 3.8128 ms
+ root delay: 31.26 ms
+ root dispersion: 74.20 ms
+ peer dispersion: 34.30 ms
+ reference time: 11:55:56.833 UTC Feb 2 2020(C7B15BCC.D5604189)
+ synchronization state: spike (clock will be set in 1010 secs)</pre>
+<p># Check the NTP status of <span class="keyword">Device</span>A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>display ntp status</strong>
+ clock status: synchronized
+ clock stratum: 2
+ reference clock ID: LOCAL(0)
+ nominal frequency: 60.0002 Hz
+ actual frequency: 60.0002 Hz
+ clock precision: 2^18
+ clock offset: 0.0000 ms
+ root delay: 0.00 ms
+ root dispersion: 26.50 ms
+ peer dispersion: 10.00 ms
+ reference time: 12:01:48.377 UTC Feb 2 2020(C7B15D2C.60A15981)
+ synchronization state: spike (clock will be set in 1010 secs)</pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001513035382__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p><span class="keyword">Device</span>A</p>
+<pre class="screen">#
+sysname <span class="keyword">Device</span>A
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 2.2.2.2 255.255.255.0
+#
+ntp authentication-keyid 42 authentication-mode hmac-sha256 cipher %+%#JA!v6M22=Gg\{&gt;U.lx%#)c%yY}0*"/`5mi&gt;&lt;QS)L%+%#
+ntp refclock-master 2
+ntp access limited<span> 2000</span>
+ntp authentication enable
+ntp kod-enable
+ntp discard min-interval 4 avg-interval 4
+ntp server source-interface <span>100GE</span><span>1/0/1</span>
+#
+acl 2000
+ rule 2000 permit source 10.1.1.11 0
+#
+return</pre>
+</li><li><p><span class="keyword">Device</span>B</p>
+<pre class="screen">#
+sysname <span class="keyword">Device</span>B
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.0.0.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.0.1.1 255.255.255.0
+#
+ntp authentication-keyid 42 authentication-mode hmac-sha256 cipher %+%#&gt;hD8))_H-XZVut2u3!_0lq3,+Ph=:OE}pX;T2M'9%+%#
+ntp trusted authentication-keyid 42
+ntp unicast-server 2.2.2.2 authentication-keyid 42
+ntp authentication enable
+ntp server source-interface <span>100GE</span><span>1/0/1</span>
+#
+return</pre>
+</li><li><p><span class="keyword">Device</span>C</p>
+<pre class="screen">#
+sysname <span class="keyword">Device</span>C
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.0.0.2 255.255.255.0
+#
+ntp authentication-keyid 42 authentication-mode hmac-sha256 cipher %+%#m:fVJfk*r&amp;3x"1J`21^K`Y;LH;B+g(t2&lt;ZX^}Q_<font style="font-size:8pt" Face="Courier New" >~</font>%+%#
+ntp trusted authentication-keyid 42
+ntp authentication enable
+ntp unicast-server 10.0.0.1 authentication-keyid 42
+#
+return</pre>
+</li><li><p><span class="keyword">Device</span>D</p>
+<pre class="screen">#
+sysname <span class="keyword">Device</span>D
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.0.0.3 255.255.255.0
+#
+ntp authentication-keyid 42 authentication-mode hmac-sha256 cipher %+%#$\`_6BKWy1]kdR@=c;O@UX!)Vor5iYi|zIYEG_v5%+%#
+ntp trusted authentication-keyid 42
+ntp authentication enable
+ntp unicast-server 10.0.0.1 authentication-keyid 42
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_ntp_cfg_0023.html">Configuring NTP Access Control
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_ntp_cfg_0045.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

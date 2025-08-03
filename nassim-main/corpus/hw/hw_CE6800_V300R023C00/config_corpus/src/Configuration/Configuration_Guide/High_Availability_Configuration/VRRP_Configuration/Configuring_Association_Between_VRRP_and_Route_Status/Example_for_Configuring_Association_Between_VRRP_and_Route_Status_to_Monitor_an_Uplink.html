@@ -1,0 +1,472 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Association Between VRRP and Route Status to Monitor an Uplink">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_vrrp_cfg_0016.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_vrrp_cfg_0017.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001176663821">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Association Between VRRP and Route Status to Monitor an Uplink</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001176663821"></a><a name="EN-US_TASK_0000001176663821"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Association Between VRRP and Route Status to Monitor an Uplink</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001176663821__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In <a href="#EN-US_TASK_0000001176663821__fig_dc_cfg_vrrp_005001">Figure 1</a>, a host on a LAN accesses the external network through DeviceF, which is dual-homed to DeviceA and DeviceB. A VRRP group is deployed on DeviceA and DeviceB, of which DeviceA serves as the master. Normally, DeviceA functions as the gateway, and user traffic is forwarded along the path DeviceF -&gt; DeviceA -&gt; DeviceC -&gt; DeviceE.</p>
+<p>When the route between DeviceC and DeviceE is withdrawn or becomes inactive, the VRRP group is required to be notified of the fault and perform a master/backup switchover. DeviceB then takes over traffic forwarding to minimize the impact of the link fault on services.</p>
+<div class="fignone" id="EN-US_TASK_0000001176663821__fig_dc_cfg_vrrp_005001"><a name="EN-US_TASK_0000001176663821__fig_dc_cfg_vrrp_005001"></a><a name="fig_dc_cfg_vrrp_005001"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring a VRRP group to track an uplink route</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 and interface 2 represent <span>100GE</span><span>1/0/1</span> and <span>100GE</span><span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001176663845.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176663821__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><div class="p"><h4 class="sectiontitle">Precautions</h4><p>To improve security, you are advised to configure a VRRP security policy. For details, see <a href="vrp_vrrp_cfg_0121.html">Example for Configuring VRRP in Master/Backup Mode</a>.</p>
+<h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Assign an IP address to each interface on the devices and configure a routing protocol to ensure IP connectivity.</li><li>Configure a VRRP group on DeviceA and DeviceB. Configure a higher priority and a preemption delay of 20s for DeviceA to ensure it functions as the master and forwards traffic. Configure a lower priority for DeviceB so that it functions as the backup.</li><li>Configure the VRRP group on DeviceA to track an uplink route so that a master/backup VRRP switchover can be performed when the tracked route is withdrawn or becomes inactive.</li></ol>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176663821__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Procedure</h4><ol><li>Assign an IP address to each interface on DeviceA, DeviceB, DeviceC, DeviceD, and DeviceE. Then, configure OSPF to ensure that the devices can communicate with one another. For details about DeviceF's configurations, see <a href="#EN-US_TASK_0000001176663821__context123891331175616">Configuration Scripts</a>.<div class="p"># Configure DeviceA.<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface </strong><strong><span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ip address 10.1.1.1 24</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface </strong><strong><span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>ip address 192.168.1.1 24</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>network 10.1.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>network 192.168.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</div>
+<p># Configure DeviceB.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceB</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface </strong><strong><span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>ip address 10.1.1.2 24</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong>ip address 192.168.2.1 24</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0] <strong>network 10.1.1.0 0.0.0.25</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0] <strong>network 192.168.2.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<div class="p"># Configure DeviceC.<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceC</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>interface </strong><strong><span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>ip address 192.168.1.2 24</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>interface </strong><strong><span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>] <strong>ip address 172.16.1.1 24</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0] <strong>network </strong><strong>172.16.1</strong><strong>.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0] <strong>network 192.168.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</div>
+<div class="p"># Configure DeviceD.<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceD</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>interface </strong><strong><span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceD-<span>100GE</span><span>1/0/1</span>] <strong>ip address 192.168.2.2 24</strong>
+[<span class="keyword">*</span>DeviceD-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>interface </strong><strong><span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceD-<span>100GE</span><span>1/0/2</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceD-<span>100GE</span><span>1/0/2</span>] <strong>ip address 172.16.2.1 24</strong>
+[<span class="keyword">*</span>DeviceD-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceD-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>DeviceD-ospf-1-area-0.0.0.0] <strong>network </strong><strong>172.16.2</strong><strong>.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceD-ospf-1-area-0.0.0.0] <strong>network 192.168.2.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceD-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+</div>
+<div class="p"># Configure DeviceE.<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceE</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceE] <strong>interface </strong><strong><span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceE-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceE-<span>100GE</span><span>1/0/1</span>] <strong>ip address 172.16.1.2 24</strong>
+[<span class="keyword">*</span>DeviceE-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceE] <strong>interface </strong><strong><span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceE-<span>100GE</span><span>1/0/2</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceE-<span>100GE</span><span>1/0/2</span>] <strong>ip address 172.16.2.2 24</strong>
+[<span class="keyword">*</span>DeviceE-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceE] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceE-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>DeviceE-ospf-1-area-0.0.0.0] <strong>network </strong><strong>172.16.2</strong><strong>.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceE-ospf-1-area-0.0.0.0] <strong>network 172.16.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceE-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceE-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceE] <strong>commit</strong></pre>
+</div>
+</li><li>Configure a VRRP group on DeviceA and DeviceB.<p># Configure VRRP group 1 on DeviceA. Set the VRRP priority of DeviceA to 120 to ensure it functions as the master, and set the preemption delay to 20s.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> interface <span>100ge</span> </strong><strong><span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>vrrp vrid 1 virtual-ip 10.1.1.111</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>vrrp vrid 1 priority 120</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>vrrp vrid 1 preempt timer delay 20</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure VRRP group 1 on DeviceB, and use the default priority (100) to ensure it functions as the backup.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> interface <span>100ge</span> </strong><strong><span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>]<strong> vrrp vrid 1 virtual-ip 10.1.1.111</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</li><li>Configure the VRRP group on DeviceA to track an uplink route. When the tracked route is withdrawn or becomes inactive, DeviceA reduces its priority by 40.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>vrrp vrid 1 track ip route 172.16.1.0 24 reduce 30</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176663821__1.3.4"></a><a name="1.3.4"></a>
+<div class="p"><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check the VRRP status on DeviceA and DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display vrrp verbose</strong>
+<span>100GE</span><span>1/0/1</span> | Virtual Router 1
+State             : <strong>Master</strong>
+Virtual IP        : 10.1.1.111
+Master IP         : 10.1.1.1
+PriorityRun       : 120
+PriorityConfig    : 120
+MasterPriority    : 120
+Preempt           : YES      Delay Time : 20s    Remain : --
+Hold Multiplier   : 4
+TimerRun          : 1s
+TimerConfig       : 1s
+Auth Type         : NONE
+Virtual MAC       : 00-e0-fc-12-78-90
+Check TTL         : YES
+Config Type       : <span>Normal</span>
+Track IP Route    : 172.16.1.0/24  Priority Reduced : 40                         
+IP Route State    : <strong>Reachable</strong> 
+Create Time       : 2020-12-29 05:41:23
+Last Change Time  : 2020-12-29 05:41:33</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display vrrp verbose</strong>
+<span>100GE</span><span>1/0/1</span> | Virtual Router 1
+State             : <strong>Backup</strong>
+Virtual IP        : 10.1.1.111
+Master IP         : 10.1.1.1
+PriorityRun       : 100
+PriorityConfig    : 100
+MasterPriority    : 120
+Preempt           : YES      Delay Time : 0s    Remain : --
+Hold Multiplier   : 4
+TimerRun          : 1s
+TimerConfig       : 1s
+Auth Type         : NONE
+Virtual MAC       : 00-e0-fc-12-78-90
+Check TTL         : YES
+Config Type       : <span>Normal</span>
+Create Time       : 2020-12-29 05:41:23
+Last Change Time  : 2020-12-29 05:41:33</pre>
+<p>The command outputs show that DeviceA is in the <strong>Master</strong> state and DeviceB is in the <strong>Backup</strong> state.</p>
+<p># Check the routing table on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display ip routing-table</strong>
+Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route
+------------------------------------------------------------------------------
+Routing Table : _public_
+         Destinations : 14       Routes : 14        
+
+Destination/Mask    Proto  Pre  Cost        Flags NextHop         Interface
+
+       10.1.1.0/24  Direct 0    0             D  10.1.1.1        <span>100GE</span><span>1/0/1</span>
+       10.1.1.1/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+<strong>     </strong>10.1.1.111/32  Direct 0   0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+     10.1.1.255/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+   <strong>172.16.1.0/24  OSPF  10   2           D  192.168.1.2     <span>100GE</span><span>1/0/1</span></strong>
+      127.0.0.0/8   Direct 0    0             D  127.0.0.1       InLoopBack0
+      127.0.0.1/32  Direct 0    0             D  127.0.0.1       InLoopBack0
+127.255.255.255/32  Direct 0    0             D  127.0.0.1       InLoopBack0
+    192.168.1.0/24  Direct 0    0             D  192.168.1.1     <span>100GE</span><span>1/0/2</span>
+    192.168.1.1/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/2</span>
+    192.168.1.2/32  Direct 0    0             D  192.168.1.2     <span>100GE</span><span>1/0/2</span>
+  192.168.1.255/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/2</span>
+    192.168.2.0/24  OSPF   10   2             D  10.1.1.2        <span>100GE</span><span>1/0/1</span>
+255.255.255.255/32  Direct 0    0             D  127.0.0.1       InLoopBack0</pre>
+<p>The command output shows that the routing table of DeviceA contains a route to the network segment 172.16.1.0/24.</p>
+<p># Verify that DeviceB becomes the master after DeviceA fails. Run the <strong>shutdown</strong> command on DeviceE's <span>100GE</span><span>1/0/1</span> to simulate a fault on the link between DeviceC and DeviceE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display ip routing-table</strong>
+Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route
+------------------------------------------------------------------------------
+Routing Table : _public_
+         Destinations : 14       Routes : 14        
+
+Destination/Mask    Proto  Pre  Cost        Flags NextHop         Interface
+
+       10.1.1.0/24  Direct 0    0             D  10.1.1.1        <span>100GE</span><span>1/0/1</span>
+       10.1.1.1/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+<strong>     </strong>10.1.1.111/32  Direct 0   0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+     10.1.1.255/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+      127.0.0.0/8   Direct 0    0             D  127.0.0.1       InLoopBack0
+      127.0.0.1/32  Direct 0    0             D  127.0.0.1       InLoopBack0
+127.255.255.255/32  Direct 0    0             D  127.0.0.1       InLoopBack0
+    192.168.1.0/24  Direct 0    0             D  192.168.1.1     <span>100GE</span><span>1/0/2</span>
+    192.168.1.1/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/2</span>
+    192.168.1.2/32  Direct 0    0             D  192.168.1.2     <span>100GE</span><span>1/0/2</span>
+  192.168.1.255/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/2</span>
+    192.168.2.0/24  OSPF   10   2             D  10.1.1.2        <span>100GE</span><span>1/0/1</span>
+255.255.255.255/32  Direct 0    0             D  127.0.0.1       InLoopBack0</pre>
+<p>The preceding command output shows that the route to 172.16.1.0/24 on DeviceA is withdrawn.</p>
+<p># Check the VRRP status on DeviceA and DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display vrrp verbose</strong>
+<span>100GE</span><span>1/0/1</span> | Virtual Router 1
+State             : <strong>Backup</strong>
+Virtual IP        : 10.1.1.111
+Master IP         : 0.0.0.0
+PriorityRun       : 80
+PriorityConfig    : 120
+MasterPriority    : 0
+Preempt           : YES      Delay Time : 20s    Remain : --
+Hold Multiplier   : 4
+TimerRun          : 1s
+TimerConfig       : 1s
+Auth Type         : NONE
+Virtual MAC       : 00-e0-fc-12-78-90
+Check TTL         : YES
+Config Type       : <span>Normal</span>
+Track IP Route    : 172.16.1.0/24  Priority Reduced : 40                         
+IP Route State    : <strong>Unreachable</strong>
+Create Time       : 2020-12-29 05:51:23
+Last Change Time  : 2020-12-29 05:51:33</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display vrrp verbose</strong>
+<span>100GE</span><span>1/0/1</span> | Virtual Router 1
+State             : <strong>Master</strong>
+Virtual IP        : 10.1.1.111
+Master IP         : 10.1.1.2
+PriorityRun       : 100
+PriorityConfig    : 100
+MasterPriority    : 100
+Preempt           : YES      Delay Time : 0s    Remain : --
+Hold Multiplier   : 4
+TimerRun          : 1s
+TimerConfig       : 1s
+Auth Type         : NONE
+Virtual MAC       : 00-e0-fc-12-78-90
+Check TTL         : YES
+Config Type       : <span>Normal</span>
+Create Time       : 2020-12-29 05:51:23
+Last Change Time  : 2020-12-29 05:51:33</pre>
+<p>The command outputs show that DeviceA is in the <strong>Backup</strong> state and DeviceB is in the <strong>Master</strong> state in VRRP group 1. The tracked route is <strong>Unreachable</strong>.</p>
+<p># Verify that DeviceA can preempt the master role after the fault is rectified. Run the <strong>undo shutdown</strong> command on DeviceE's <span>100GE</span><span>1/0/1</span>. After the interface goes up, wait for 20 seconds or longer before you check the devices' states.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display vrrp verbose</strong>
+<span>100GE</span><span>1/0/1</span> | Virtual Router 1
+<strong>State</strong>            : <strong>Master</strong>
+Virtual IP        : 10.1.1.111
+Master IP         : 10.1.1.1
+PriorityRun       : 120
+PriorityConfig    : 120
+MasterPriority    : 120
+Preempt           : YES      Delay Time : 20s    Remain : --
+Hold Multiplier   : 4
+TimerRun          : 1s
+TimerConfig       : 1s
+Auth Type         : NONE
+Virtual MAC       : 00-e0-fc-12-78-90
+Check TTL         : YES
+Config Type       : <span>Normal</span>
+Track IP Route    : 172.16.1.0/24  Priority Reduced : 40                         
+IP Route State    : <strong>Reachable</strong> 
+Create Time       : 2020-12-29 05:56:23
+Last Change Time  : 2020-12-29 05:56:33</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display vrrp verbose</strong>
+<span>100GE</span><span>1/0/1</span> | Virtual Router 1
+<strong>State</strong>            : <strong>Backup</strong>
+Virtual IP        : 10.1.1.111
+Master IP         : 10.1.1.1
+PriorityRun       : 100
+PriorityConfig    : 100
+MasterPriority    : 120
+Preempt           : YES      Delay Time : 0s    Remain : --
+Hold Multiplier   : 4
+TimerRun          : 1s
+TimerConfig       : 1s
+Auth Type         : NONE
+Virtual MAC       : 00-e0-fc-12-78-90
+Check TTL         : YES
+Config Type       : <span>Normal</span>
+Create Time       : 2020-12-29 05:56:23
+Last Change Time  : 2020-12-29 05:56:33</pre>
+<p>Run the <strong>display vrrp verbose</strong> command on DeviceA and DeviceB. The command outputs show that the VRRP statuses of DeviceA and DeviceB switch to <strong>Master</strong> and <strong>Backup</strong>, respectively. The tracked route is in the <strong>Reachable</strong> state on DeviceA.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176663821__1.3.5"></a><a name="1.3.5"></a>
+<div class="p" id="EN-US_TASK_0000001176663821__context123891331175616"><a name="EN-US_TASK_0000001176663821__context123891331175616"></a><a name="context123891331175616"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li>DeviceA<pre class="screen">#
+sysname DeviceA
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.0
+ vrrp vrid 1 virtual-ip 10.1.1.111
+ vrrp vrid 1 priority 120
+<span> vrrp vrid 1 preempt timer delay 20</span>
+<strong> </strong>vrrp vrid 1 track ip route 172.16.1.0 24 reduce 30
+#
+ospf 1
+ area 0.0.0.0
+  network 192.168.1.0 0.0.0.255
+  network 10.1.1.0 0.0.0.255
+#
+return</pre>
+</li></ul>
+<ul><li><p>DeviceB</p>
+<pre class="screen">#
+ sysname DeviceB
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.2.1 255.255.255.0
+
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.1.2 255.255.255.0
+#
+ospf 1
+ area 0.0.0.0
+  network 192.168.2.0 0.0.0.255
+  network 10.1.1.0 0.0.0.255
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 172.16.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.1.2 255.255.255.0
+#
+ospf 1
+ area 0.0.0.0
+  network 192.168.1.0 0.0.0.255
+  network 172.16.1.0 0.0.0.255
+#
+return</pre>
+</li><li>DeviceD<pre class="screen">#
+sysname DeviceD
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 172.16.2.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.2.1 255.255.255.0
+#
+ospf 1
+ area 0.0.0.0
+  network 192.168.1.0 0.0.0.255
+  network 172.16.1.0 0.0.0.255
+#
+return</pre>
+</li><li><p>DeviceE</p>
+<pre class="screen">#
+ sysname DeviceE
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 172.16.2.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 172.16.1.2 255.255.255.0
+#
+ospf 1
+ area 0.0.0.0
+  network 172.16.1.0 0.0.0.255
+  network 172.16.2.0 0.0.0.255
+#
+return</pre>
+</li><li><p>DeviceF</p>
+<pre class="screen">#
+sysname DeviceF
+#
+ vlan 10
+#
+interface <span>100GE</span><span>1/0/1</span>
+ port default vlan 10
+#
+interface <span>100GE</span><span>1/0/2</span>
+ port default vlan 10
+#
+return</pre>
+</li></ul>
+</div></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_vrrp_cfg_0016.html">Configuring Association Between VRRP and Route Status
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_vrrp_cfg_0017.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

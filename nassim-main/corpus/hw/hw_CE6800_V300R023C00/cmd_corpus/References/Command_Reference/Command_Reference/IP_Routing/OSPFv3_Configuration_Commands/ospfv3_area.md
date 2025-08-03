@@ -1,0 +1,82 @@
+ospfv3 area
+===========
+
+ospfv3 area
+
+Function
+--------
+
+
+
+The **ospfv3 area** command enables an OSPFv3 process on an interface and specifies an area to which the process belongs.
+
+The **undo ospfv3 area** command disables the OSPFv3 process from the interface.
+
+
+
+By default, no OSPFv3 process is enabled on the interface.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**ospfv3** *process-id* **area** { *area-id* | *areaidipv4* } [ **instance** *instance-id* ]
+
+**undo ospfv3** *process-id* **area** { *area-id* | *areaidipv4* } [ **instance** *instance-id* ]
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| *process-id* | Specifies an OSPFv3 process ID. | The value is an integer ranging from 1 to 4294967295. |
+| **area** *area-id* | Specifies the ID of an area. | The value is an integer that ranges from 0 to 4294967295. |
+| **area** *areaidipv4* | Specifies the ID of an area. | The value is in dotted decimal notation. |
+| **instance** *instance-id* | Specifies the interface instance ID. | The value is an integer ranging from 0 to 255. The default value is 0. |
+
+
+
+Views
+-----
+
+100GE interface view,10GE sub-interface view,10GE interface view,200GE interface view,25GE sub-interface view,25GE interface view,400GE interface view,50GE sub-interface view,50GE interface view,Eth-Trunk interface view,Loopback interface view,VBDIF interface view,VLANIF interface view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+The number of devices increases with the network expansion, which leads to a large LSDB on each OSPFv3-enabled device on a large-scale network. Consequently, route flapping frequently occurs and thus a large number of OSPF packets are transmitted on the network, which wastes bandwidth resources. OSPFv3 addresses the preceding problem by logically partitioning an AS into different areas.OSPFv3 adds *instance-id*to identify interfaces. During the configuration, ensure that the *instance-id*values of the two devices that establish a neighbor relationship are the same. Different *instance-id*values identify different OSPFv3 logical interfaces.
+
+**Precautions**
+
+If the undo ospfv3 area command is run on an interface, all OSPFv3 configurations on the interface are deleted. Therefore, exercise caution when running this command.
+
+
+Example
+-------
+
+# Enable OSPFv3 in instance 1 on an interface and enable OSPFv3 in area 1.
+```
+<HUAWEI> system-view
+[~HUAWEI] ospfv3 1
+[*HUAWEI-ospfv3-1] quit
+[*HUAWEI] interface 100GE 1/0/1
+[*HUAWEI-100GE1/0/1] undo portswitch
+[*HUAWEI-100GE1/0/1] ipv6 enable
+[*HUAWEI-100GE1/0/1] ospfv3 1 area 1 instance 1
+
+```

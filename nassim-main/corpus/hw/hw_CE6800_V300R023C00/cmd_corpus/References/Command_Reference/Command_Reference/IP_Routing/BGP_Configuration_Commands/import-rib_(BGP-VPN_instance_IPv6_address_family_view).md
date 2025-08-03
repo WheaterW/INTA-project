@@ -1,0 +1,89 @@
+import-rib (BGP-VPN instance IPv6 address family view)
+======================================================
+
+import-rib (BGP-VPN instance IPv6 address family view)
+
+Function
+--------
+
+
+
+The **import-rib** command imports public network BGP routes or BGP routes in a specified VPN instance into a BGP-VPN instance routing table.
+
+The **undo import-rib** command cancels the configuration.
+
+
+
+By default, a device does not import public network BGP routes or BGP routes in a VPN instance into a BGP-VPN instance routing table.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**import-rib** { **public** | **vpn-instance** *vpn-instance-name* } [ **valid-route** ] [ **route-policy** *route-policy-name* ]
+
+**undo import-rib** { **public** | **vpn-instance** *vpn-instance-name* } [ **valid-route** ] [ **route-policy** *route-policy-name* ]
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| **public** | Imports routes from the public network BGP routing table. | - |
+| **vpn-instance** *vpn-instance-name* | Specifies the name of a VPN instance. | The value is a string of 1 to 31 case-sensitive characters without spaces. The VPN instance name cannot be \_public\_. If the character string is quoted by double quotation marks, the character string can contain spaces. |
+| **valid-route** | Imports valid routes of a specified type. Valid routes include optimal routes, routes for load balancing, FRR routes, and reachable routes that are not selected for packet forwarding. If this parameter is not specified, only optimal routes, load balancing routes, and FRR routes can be imported. | - |
+| **route-policy** *route-policy-name* | Specifies the name of a route-policy. | The value is a string of 1 to 200 case-sensitive characters without spaces. The character string can contain spaces if it is enclosed with double quotation marks ("). |
+
+
+
+Views
+-----
+
+BGP-VPN instance IPv6 address family view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+To configure a device to import public network BGP routes into a BGP-VPN instance IPv6 routing table, run the **import-rib public** command in the BGP-VPN instance IPv6 address family view.To configure a device to import BGP routes from a specified VPN instance into a BGP-VPN instance IPv6 routing table, run the **import-rib vpn-instance** command in the BGP-VPN instance IPv6 address family view.
+
+**Precautions**
+
+
+
+If the source of the invalid routes imported using the **import-rib** command matches the instance and address family in which the **routing-table rib-only** command is run, the import-rib and **routing-table rib-only** commands are mutually exclusive.If route-policy-name is specified in the command, the if-match interface or if-match route-type command configured in the route-policy does not take effect.The **import-rib** command does not take effect for non-labeled routes that are locally or remotely imported. This configuration also does not apply to the routes imported using the import-route or network command.Route import between VPN and public network instances may cause BGP routing loops.
+
+
+
+
+Example
+-------
+
+# Configure a device to import BGP routes from a public network to a specified VPN instance's BGP routing table.
+```
+<HUAWEI> system-view
+[~HUAWEI] ip vpn-instance vpna
+[*HUAWEI-vpn-instance-vpna] ipv6-family
+[*HUAWEI-vpn-instance-vpna-af-ipv6] route-distinguisher 100:1
+[*HUAWEI-vpn-instance-vpna-af-ipv6] vpn-target 111:1 both
+[*HUAWEI-vpn-instance-vpna-af-ipv6] quit
+[*HUAWEI-instance-vpna] quit
+[*HUAWEI] bgp 100
+[*HUAWEI-bgp] ipv6-family vpn-instance vpna
+[*HUAWEI-bgp-6-vpna] import-rib public
+
+```

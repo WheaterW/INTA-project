@@ -1,0 +1,87 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring IPsec NAT Traversal">
+<meta name="abstract" content="When an NAT device exists between IPsec peers, the NAT traversal function must be enabled on both ends.">
+<meta name="description" content="When an NAT device exists between IPsec peers, the NAT traversal function must be enabled on both ends.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ipsec_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ipsec_cfg_all_0022.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ipsec_cfg_all_0024.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,z00603461,ipsec,w00556928,w00606909,h00522387,l00455378,z00805567">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="IPSec">
+<meta name="featuretype" content="Security">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IPSec">
+<meta name="featuretype" content="Security">
+<meta name="featurename" content="IPSec">
+<meta name="featuretype" content="Security">
+<meta name="OWNER" content="z00485179">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="z00485179">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172372442">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Configuring IPsec NAT Traversal</title>
+</head>
+<body><a name="EN-US_TASK_0172372442"></a><a name="EN-US_TASK_0172372442"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring IPsec NAT Traversal</h1>
+<div class="taskbody"><p>When an NAT device exists between IPsec peers, the NAT traversal function must be enabled on both ends.</p>
+<div class="context"><a name="EN-US_TASK_0172372442__1.4.1"></a><a name="1.4.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>AH is mainly used to ensure the message integrity, including the IP packet headers. Because the IP packet headers are modified by NAT, the IP packet header verification by AH fails. Therefore, an IPsec tunnel protected by AH cannot traverse the NAT gateway. Packets encrypted by ESP do not encounter this problem because the integrity verification by ESP does not include IP packet headers (outer IP packet header in tunnel mode).</p>
+<div class="p">When an IPsec packet traverses the NAT gateway, a standard UDP packet header is added between the original IP header and the ESP header. When the ESP packet traverses the NAT gateway, the NAT translates the address and port number in the outer IP header and added UDP header. When the translated packet reaches the peer end of the IPsec tunnel, it is processed as a common packet. However, in a response packet, a UDP header also needs to be added between the IP header and ESP header. <a href="#EN-US_TASK_0172372442__fig_dc_vrp_ipsec_cfg_all_002601">Figure 1</a> shows a typical application of the IPsec NAT traversal. <div class="fignone" id="EN-US_TASK_0172372442__fig_dc_vrp_ipsec_cfg_all_002601"><a name="EN-US_TASK_0172372442__fig_dc_vrp_ipsec_cfg_all_002601"></a><a name="fig_dc_vrp_ipsec_cfg_all_002601"></a><span class="figcap"><b>Figure 1 </b>Typical application of the IPsec NAT traversal</span><br><span><img class="vsd" src="images/fig_dc_vrp_ipsec_cfg_all_002601.png"></span></div>
+</div>
+<p>When the NAT gateway is configured to allocate indexes dynamically, the same private network IP address can be mapped by NAT to different addresses and port numbers after the IPsec SA is disconnected and reconnected. When the NAT gateway is configured to allocate indexes statically, a private network IP address is mapped by NAT to only one IP address and port number. Configuring the NAT gateway to allocate indexes statically is recommended.</p>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172372442__1.4.2"></a><a name="1.4.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Run <span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span></span><p><p>The system view is displayed.</p>
+</p></li><li><span>Run the <a href="cmdqueryname=ike+peer"><b><span class="cmdname">ike peer</span></b></a> <i><span class="varname">peer-name</span></i> command to create an IKE peer and enter the IKE peer view.</span></li><li><span>Run the <a href="cmdqueryname=nat+traversal"><b><span class="cmdname">nat traversal</span></b></a> command to enable NAT traversal.</span></li><li><span>Run the <a href="cmdqueryname=remote-address+authentication-address+vpn-instance"><b><span class="cmdname">remote-address</span></b></a> [ <strong><span>authentication-address</span></strong> | <strong><span>vpn-instance</span></strong> <i><span class="varname">vpn-instance-name</span></i> ] <i><span class="varname">remote-low-address</span></i> [ <i><span class="varname">remote-high-address</span></i> ] command to configure the peer IP address or address segment.</span><p><ol type="a"><li><p>Configuration of device A:</p>
+<ul><li><p>If the HQ network does not need to initiate access, you can configure the IPsec policy template for device A. The IKE peer defined in the IPsec policy template may not specify the peer IP address (that is, the <a href="cmdqueryname=remote-address"><b><span class="cmdname">remote-address</span></b></a> command used to configure the translated IP address for device A and device B, is not configured).</p>
+</li><li><p>If the HQ network needs to initiate access, you must configure the IPsec policy in IKE mode for device A. The IKE peer defined in the IPsec policy must specify the peer IP address that is translated (running the <a href="cmdqueryname=remote-address"><b><span class="cmdname">remote-address</span></b></a> 172.16.0.1 command).</p>
+<p>If the local ID of device B is set to the IP address, you must run the <a href="cmdqueryname=remote-address+authentication-address"><b><span class="cmdname">remote-address</span></b></a> <strong><span>authentication-address</span></strong> command to set the outbound interface address or address segment (IP address before NAT) of gateway B as the verification address (<a href="cmdqueryname=remote-address+authentication-address"><b><span class="cmdname">remote-address</span></b></a> <strong><span>authentication-address</span></strong> 10.0.0.1) for device A.</p>
+</li></ul>
+</li><li><p>Configuration of device B:</p>
+<p>Configure the IPsec policy in IKE mode for device B. Specify the peer IP address (<a href="cmdqueryname=remote-address"><b><span class="cmdname">remote-address</span></b></a> 192.168.0.1) on the IKE peer defined in the IPsec policy.</p>
+</li></ol>
+</p></li><li><span>Run the <a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a> command to return to the system view.</span></li><li><span>Run the <a href="cmdqueryname=ike+sa+nat-keepalive-timer+interval"><b><span class="cmdname">ike sa nat-keepalive-timer interval</span></b></a> <i><span class="varname">seconds</span></i> command to set the interval at which NAT update packets are sent by IKE.</span><p><p>A NAT session has a certain survival period on the NAT gateway. After a tunnel is established, if no packet traverses the gateway for a long period of time, the NAT session is deleted. As a result, data cannot be transmitted over the tunnel. A NAT-keepalive message can be sent to the peer party before the NAT session expires to maintain the NAT session and address the preceding issue.</p>
+</p></li><li><span>Run the <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span> command to make the configuration take effect.</span></li></ol></div>
+<div class="postreq"><a name="EN-US_TASK_0172372442__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Follow-up Procedure</h4>
+<div class="p"><p>Run the <a href="cmdqueryname=display+ike+peer"><b><span class="cmdname">display ike peer</span></b></a> command to check the <strong>nat traversal</strong> field in the output and determine whether NAT traversal is enabled.</p>
+</div></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ipsec_cfg_0001.html">IPsec Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ipsec_cfg_all_0022.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ipsec_cfg_all_0024.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

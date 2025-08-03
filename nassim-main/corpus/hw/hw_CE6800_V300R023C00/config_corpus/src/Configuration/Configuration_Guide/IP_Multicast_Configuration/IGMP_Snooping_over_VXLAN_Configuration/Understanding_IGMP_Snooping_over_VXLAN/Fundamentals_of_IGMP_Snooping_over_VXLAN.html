@@ -1,0 +1,73 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Fundamentals of IGMP Snooping over VXLAN">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_l2mc_over_vxlan_cfg_0003.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IGMP Snooping over VXLAN">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IGMP Snooping over VXLAN">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="IGMP Snooping over VXLAN">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001192881643">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Fundamentals of IGMP Snooping over VXLAN</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001192881643"></a><a name="EN-US_CONCEPT_0000001192881643"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Fundamentals of IGMP Snooping over VXLAN</h1>
+<div><p>On a VXLAN network, a VXLAN tunnel endpoint (VTEP) broadcasts received multicast traffic to user hosts in a BD by default. This not only increases the traffic load of the data network, but also causes many user hosts that have not ordered the corresponding programs to receive unnecessary multicast traffic, wasting bandwidth. To solve these problems, you can deploy IGMP snooping over VXLAN â a Layer 2 multicast feature â on the VXLAN network to implement on-demand multicast traffic forwarding.</p>
+<p>Currently, IGMP snooping over VXLAN applies only to IPv4 underlay networks. This section describes only the fundamentals of IGMP snooping over VXLAN. For more information about IGMP snooping, see <a href="vrp/vrp_l2mc_cfg_0001.html">IGMP Snooping Configuration</a>.</p>
+<div class="section"><h4 class="sectiontitle">Networking Description</h4><p>On the IGMP snooping over VXLAN configured with ingress replication and unicast tunnels shown in <a href="#EN-US_CONCEPT_0000001192881643__fig_dc_vrp_feature_l2mc_100101">Figure 1</a>, the multicast source is connected to a leaf node, and multicast receivers are connected to other leaf nodes. VTEPs are configured on the leaf nodes that need to establish VXLAN tunnels. A VXLAN tunnel is established between VTEP1 and VTEP2, and another one is established between VTEP1 and VTEP3. HostA and HostB order a program, whereas HostC and HostD do not. IGMP snooping over VXLAN can be used to implement accurate multicast traffic forwarding in a BD, ensuring on-demand multicast data replication on VXLAN tunnels and user-side interfaces. Compared with the broadcast mode, this function effectively conserves VXLAN network bandwidth.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001192881643__fig_dc_vrp_feature_l2mc_100101"><a name="EN-US_CONCEPT_0000001192881643__fig_dc_vrp_feature_l2mc_100101"></a><a name="fig_dc_vrp_feature_l2mc_100101"></a><span class="figcap"><b>Figure 1 </b>Network diagram of IGMP snooping over VXLAN</span><br><span><img class="vsd" src="figure/en-us_image_0000001148381730.png" width="NaN" height="NaN"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Implementation</h4><p>IGMP snooping over VXLAN is implemented as follows:</p>
+<ul><li><p>Layer 2 multicast forwarding entries need to be created on the control plane. Each Layer 2 multicast forwarding entry consists of the BD name, multicast group address, router port, and dynamic multicast group member port.</p>
+<ol><li><p>Leaf1, Leaf2, and Leaf3 are each configured with a Layer 2 BD. Multicast data is forwarded between the leaf nodes and the multicast source or receivers through Layer 2 sub-interfaces within each BD.</p>
+</li><li>IGMP snooping is configured in the BD of each leaf node. The leaf nodes listen to IGMP messages to create Layer 2 multicast forwarding entries, based on which the leaf nodes forward multicast data on demand at the data link layer.</li><li><p>The querier function or IGMP snooping proxy is enabled in the BD on Leaf1. As such, Leaf1 functions as the querier and sends an IGMP Query message to Leaf2 and Leaf3.</p>
+</li><li><p>After receiving the IGMP Query message over the VXLAN tunnels, Leaf2 and Leaf3 forward the message to the hosts in the corresponding BDs and set their VXLAN tunnel interfaces (pseudo-interfaces) as router ports.</p>
+</li><li><p>After receiving the IGMP Query message, each user host that has ordered the program responds with an IGMP Report message. In this example, only HostA and HostB connected to Leaf2 respond with an IGMP Report message.</p>
+</li><li><p>After Leaf2 receives the IGMP Report messages, it parses them to obtain the address of the multicast group that the hosts want to join. It then sets the inbound interfaces of the messages as dynamic multicast group member ports (outbound interfaces used to forward multicast data) and sends the IGMP Report messages to Leaf1.</p>
+</li><li><p>After Leaf1 receives the IGMP Report messages through the VXLAN tunnel, it parses them to obtain the address of the multicast group that the hosts want to join. It then sets the VXLAN tunnel interface as a dynamic multicast group member port.</p>
+</li></ol>
+</li><li><p>On the forwarding plane, when multicast traffic passes through Leaf1 and Leaf2, they forward multicast data based on Layer 2 multicast forwarding entries. After multicast traffic enters a VXLAN tunnel, the encapsulated data is forwarded in ingress replication mode on the underlay network.</p>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_l2mc_over_vxlan_cfg_0003.html">Understanding IGMP Snooping over VXLAN
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,88 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Enabling Rapid VRRP Switchback">
+<meta name="abstract" content="This section describes how to enable rapid Virtual Router Redundancy Protocol (VRRP) switchback.">
+<meta name="description" content="This section describes how to enable rapid Virtual Router Redundancy Protocol (VRRP) switchback.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vrrp_cfg_0100.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vrrp_cfg_0135.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vrrp_cfg_0144.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00604599">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="Network Reliability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="Network Reliability">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="Network Reliability">
+<meta name="OWNER" content="w00604599">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00425560">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172361783">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Enabling Rapid VRRP Switchback</title>
+</head>
+<body><a name="EN-US_TASK_0172361783"></a><a name="EN-US_TASK_0172361783"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Enabling Rapid VRRP Switchback</h1>
+<div class="taskbody"><p>This section describes how to enable rapid Virtual Router Redundancy Protocol (VRRP) switchback.</p>
+<div class="context"><a name="EN-US_TASK_0172361783__1.4.1"></a><a name="1.4.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>The master device in a VRRP group monitors an interface with VRRP disabled or a session, for example, a Bidirectional Forwarding Detection (BFD) session. If the interface or session goes Down, the master device reduces its own VRRP priority to trigger a master/backup VRRP switchover. As shown in <a href="#EN-US_TASK_0172361783__fig_dc_vrp_vrrp_cfg_013701">Figure 1</a>, the network provider edges (NPEs) with VRRP enabled are connected to the provider edges (PEs) over the active and standby links. User-side traffic is transmitted to NPE1 (master) over the active link. NPE1 then forwards the user-side traffic to the Internet.</p>
+<p>If the interface monitored by NPE1 or the active link to NPE1 fails, NPE1 reduces its own VRRP priority and enters the Backup state. User-side traffic then switches to the standby link. After the fault is rectified, the monitored interface or active link goes Up and NPE1 increases its own VRRP priority. NPE1 can switch back to the Master state only after NPE1's VRRP priority is higher than NPE2's and NPE1 receives VRRP Advertisement packets from NPE2. If the active/standby link switchback is finished before the master/backup VRRP switchback, user-side traffic is lost. To resolve this issue, enable rapid VRRP switchback.</p>
+<p>When NPE1's VRRP priority is higher than NPE2's, rapid VRRP switchback enables NPE1 to immediately preempt the Master state without waiting for VRRP Advertisement packets from NPE2.</p>
+<div class="fignone" id="EN-US_TASK_0172361783__fig_dc_vrp_vrrp_cfg_013701"><a name="EN-US_TASK_0172361783__fig_dc_vrp_vrrp_cfg_013701"></a><a name="fig_dc_vrp_vrrp_cfg_013701"></a><span class="figcap"><b>Figure 1 </b>Enabling rapid VRRP switchback</span><br><span><img class="vsd" src="images/fig_dc_vrp_vrrp_cfg_013701.png" width="NaN" height="NaN"></span><br></div>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><div class="p">Rapid VRRP switchback takes effect only when all of the following conditions are true:<ul><li>The VRRP group is a management VRRP (mVRRP) group.</li><li>The master device is monitoring an interface with VRRP disabled or a session.</li><li>The master device reduces its own VRRP priority if the interface or session goes Down.</li></ul>
+</div>
+</div></div>
+<p>Perform the following steps on the master device in an mVRRP group:</p>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172361783__1.4.2"></a><a name="1.4.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Run <span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span></span><p><p>The system view is displayed.</p>
+</p></li><li><span>Run <span><a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i></span></span><p><p>The view of the interface on which an mVRRP group is configured is displayed.</p>
+</p></li><li><span>(Optional) Run <a href="cmdqueryname=vrrp+vrid"><b><span class="cmdname">vrrp vrid</span></b></a> <i><span class="varname">virtual-router-id</span></i> <a href="cmdqueryname=preempt-mode+timer+delay"><b><span class="cmdname">preempt-mode timer delay</span></b></a> <strong>0</strong></span><p><p>The preemption delay is set to 0 seconds.</p>
+</p><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>This step is required only when you have set the preemption delay to a non-zero value.</p>
+</div></div>
+</p></li><li><span>Run <span><a href="cmdqueryname=vrrp+vrid"><b><span class="cmdname">vrrp vrid</span></b></a> <i><span class="varname">virtual-router-id</span></i> <strong><span>fast-resume</span></strong></span></span><p><p>Rapid VRRP switchback is enabled.</p>
+</p><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The <a href="cmdqueryname=vrrp+vrid+fast-resume"><b><span class="cmdname">vrrp vrid fast-resume</span></b></a> command takes precedence over the <a href="cmdqueryname=vrrp+recover-delay"><b><span class="cmdname">vrrp recover-delay</span></b></a> command. For example, if you enable rapid VRRP switchback for VRRP group 1 and globally set the recovery delay to a non-zero value, the configured recovery delay does not take effect.</p>
+<div class="p">After you run the <a href="cmdqueryname=vrrp+vrid+fast-resume"><b><span class="cmdname">vrrp vrid fast-resume</span></b></a> command to enable rapid VRRP switchback, this function is disabled if any of the following conditions is true:<ul><li>The preemption delay is set to a non-zero value.</li><li>VRRP devices are disabled from preempting the Master state.</li><li>The mVRRP group is deleted.</li></ul>
+</div>
+</div></div>
+</p></li><li><span>Run <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span></span><p><p>The configuration is committed.</p>
+</p></li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vrrp_cfg_0100.html">VRRP Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vrrp_cfg_0135.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vrrp_cfg_0144.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

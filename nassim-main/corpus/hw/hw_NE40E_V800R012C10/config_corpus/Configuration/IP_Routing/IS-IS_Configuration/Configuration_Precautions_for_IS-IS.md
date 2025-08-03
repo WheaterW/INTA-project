@@ -1,0 +1,24 @@
+Configuration Precautions for IS-IS
+===================================
+
+Configuration Precautions for IS-IS
+
+#### Feature Requirements
+
+**Table 1** Feature requirements
+| Feature Requirements | Series | Models |
+| --- | --- | --- |
+| In IS-IS broadcast, P2P two-way handshake, IS-IS multi-instance, and IS-IS multi-topology networking scenarios, BFD session establishment check does not take effect even if the bfd session-up check command is run.  Association between BFD and IS-IS neighbor Up does not support broadcast interfaces or advanced MTs. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| After SR LSP strict check is configured, the SR capability of a node is strictly checked when LSPs are calculated from the current node to all nodes. If SR-LDP interworking has been deployed on the network, IS-IS SR-LDP interworking may fail, causing traffic interruptions. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| When an IS-IS Level-1-2 router imports a route with a priority lower than that of an IS-IS router, the route cannot be learned by another Level of the current router after the route is leaked.  When an IS-IS Level-1-2 router imports a route with a priority lower than that of an IS-IS route, ensure that the route is not learned by another level of the current device after the route is leaked. Otherwise, route flapping occurs. Currently, this problem can be avoided only through configuration. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| When services without private network labels enter a Policy, the last SID of the Policy must carry the USD attribute, and this SID must be the SID of the egress. Otherwise, traffic cannot be forwarded. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| In Encap mode, when the last SID of a Policy is a BSID, traffic fails to be forwarded. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| When an IS-IS Level-1-2 router imports a route with a lower priority than IS-IS, the route cannot be learned by another level of the current router after being leaked. Otherwise, route flapping occurs.  You are advised to plan the network properly. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| When multiple import points exist and different devices are configured with the same system ID, a false loop alarm may be reported. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| When load balancing is used:  1. TI-LFA backup next hop calculation is not supported in load balancing scenarios.  2. FRR is not supported in load balancing scenarios where multiple nodes advertise the same route.  3. FRR calculation is not supported in SR-MPLS BE load balancing scenarios.  Therefore, plan the network properly. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| 1. The mapping SID does not support priority comparison.  2. The mapping SID cannot be used in anycast FRR.  3. The mapping SID cannot be used in the SR anti-micro-loop function.  4. in cross-process and cross-protocol scenarios, when ASBRs function as interworking stitching nodes, mapping-SID mapping needs to be configured on the processes to be imported.  Properly plan the network. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| In SR and LDP interworking scenarios, only the mapping SID with the 32-bit mask IP prefix is supported. The SR interworking function does not take effect for the mapping SID mapped to an IP prefix with a non-32-bit mask.  Properly plan the network. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| In an SR-LDP interworking scenario, FRR does not take effect in the following scenarios:  In the SR-to-LDP direction, if there are NEs that do not support SR on the Q node and the path before the Q node,  In the LDP-to-SR direction, some NEs on the PQ and previous paths do not support LDP.  Plan the network properly. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| SBFD is not supported in SR and LDP interworking scenarios because LDP does not support SBFD.  Properly plan the network. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| After the device is restarted, if the BFD session of the local device or its neighbor is in Admin Down state, the IS-IS status is not affected. When the BFD session is renegotiated, if the BFD detection status reported by BFD is Down (used to be Up), the IS-IS neighbor is set to Down. In other cases, the IS-IS status is not affected. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| The association between BFD and IS-IS neighbor Up does not take effect on broadcast interfaces or advanced MT. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |

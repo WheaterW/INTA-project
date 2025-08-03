@@ -1,0 +1,191 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring a Timestamp-Refresh Instance">
+<meta name="abstract" content="This section provides an example for configuring timestamp-refresh for time synchronization between input and output signals of a camera. After timestamp-refresh is deployed on a router, the timestamps in packets can be synchronized with the time of the router, eliminating the impact of the transmission duration.">
+<meta name="description" content="This section provides an example for configuring timestamp-refresh for time synchronization between input and output signals of a camera. After timestamp-refresh is deployed on a router, the timestamps in packets can be synchronized with the time of the router, eliminating the impact of the transmission duration.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_timestamp_refresh_cfg_0006.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="c00819848,w00606909">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="Timestam Refresh">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="Timestam Refresh">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="Timestam Refresh">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="Timestam Refresh">
+<meta name="featuretype" content="IP Multicast">
+<meta name="OWNER" content="w00447999">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="w00447999">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001394385958">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring a Timestamp-Refresh Instance</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001394385958"></a><a name="EN-US_TASK_0000001394385958"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring a Timestamp-Refresh Instance</h1>
+<div class="taskbody"><p>This section provides an example for configuring timestamp-refresh for time synchronization between input and output signals of a camera. After timestamp-refresh is deployed on a router, the timestamps in packets can be synchronized with the time of the router, eliminating the impact of the transmission duration.</p>
+<div class="context"><a name="EN-US_TASK_0000001394385958__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>The timestamp-refresh feature is deployed on a transit router to solve the problem that the clock of the stream producer is not synchronized with that of the router. On the network shown in <a href="#EN-US_TASK_0000001394385958__fig11344539105117">Figure 1</a>, after multicast streams arrive at the PE, on which timestamp-refresh is deployed, the PE calculates the timestamp-refresh offset value according to the timestamps in multicast stream packets and the local time and then uses the offset value to refresh the timestamps of the multicast streams in a unified manner.</p>
+<div class="fignone" id="EN-US_TASK_0000001394385958__fig11344539105117"><a name="EN-US_TASK_0000001394385958__fig11344539105117"></a><a name="fig11344539105117"></a><span class="figcap"><b>Figure 1 </b>Networking diagram of timestamp-refresh</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 and interface2 represent GE<span>0/1/1</span> and GE<span>0/1/0</span>, respectively.</p>
+</div></div>
+<br><span><img src="figure/en-us_image_0000001494768697.png" width="NaN" height="NaN"></span></div>
+<h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Configure a timestamp-refresh instance.</li><li>Configure multicast NAT.</li><li>Configure an ACL.</li><li>Configure a traffic classifier.</li><li>Configure a traffic behavior and bind the traffic behavior to the timestamp-refresh instance and multicast NAT instance.</li><li>Configure a traffic policy.</li><li>Apply the traffic policy to the inbound interface of input streams.</li></ol>
+<h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data.</p>
+<ul><li>Format of video streams generated by the camera</li><li>Sampling rate on the camera</li></ul>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001394385958__1.4.2"></a><a name="1.4.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure a timestamp-refresh instance.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname PE</strong>
+[<span class="keyword">*</span>PE] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE] <strong>multicast timestamp-refresh instance one</strong>
+[<span class="keyword">*</span>PE-mc-ts-rfsh-instance-one]<strong> mode common</strong>
+[<span class="keyword">*</span>PE-mc-ts-rfsh-instance-one] <strong>type video-stream</strong>
+[<span class="keyword">*</span>PE-mc-ts-rfsh-instance-one] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE-mc-ts-rfsh-instance-one] <strong>quit</strong></pre>
+</p></li><li><span>Configure multicast NAT.</span><p><ol type="a"><li>Enable multicast NAT on the device.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE] <strong>multicast-nat enable</strong>
+[<span class="keyword">*</span>PE] <strong>commit</strong></pre>
+</li><li>Create a multicast NAT instance on the device.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE] <strong>multicast-nat instance id 1 name stream1 </strong>
+[<span class="keyword">*</span>PE-multicast-nat-instance-1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE-multicast-nat-instance-1] <strong>quit</strong></pre>
+</li><li>Configure characteristics for output multicast streams.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE] <strong>interface GigabitEthernet </strong><span>0/1/0</span>
+[<span class="keyword">*</span>PE-GigabitEthernet<span>0/1/0</span>] <strong>multicast-nat outbound id 1 name out1_1</strong>
+[<span class="keyword">*</span>PE-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+</li><li>Bind the output multicast streams to the multicast NAT instance.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE] <strong>multicast-nat bind-list</strong>
+[<span class="keyword">*</span>PE-multicast-nat-bind-list] <strong>multicast-nat outbound id 1 name out1_1 bind instance id 1 name stream1</strong>
+[<span class="keyword">*</span>PE-multicast-nat-bind-list] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE-multicast-nat-bind-list] <strong>quit</strong></pre>
+</li></ol>
+</p></li><li><span>Configure an ACL.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE] <strong>acl number 3001</strong>
+[<span class="keyword">*</span>PE-acl4-advance-3001] <strong>rule 1 permit udp source 10.10.10.10 0 destination 239.0.0.1 0 destination-port eq 10000</strong>
+[<span class="keyword">*</span>PE1-acl4-advance-3001] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-acl4-advance-3001] <strong>quit</strong></pre>
+</p></li><li><span>Configure a traffic classifier.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE] <strong>traffic classifier rule_ip1</strong>
+[<span class="keyword">*</span>PE-classifier-rule_ip1] <strong>if-match acl 3001</strong>
+[<span class="keyword">*</span>PE-classifier-rule_ip1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE-classifier-rule_ip1] <strong>quit</strong></pre>
+</p></li><li><span>Configure a traffic behavior and bind the traffic behavior to the timestamp-refresh instance and multicast NAT instance.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE] <strong>traffic behavior rule_ip1</strong>
+[<span class="keyword">*</span>PE-behavior-rule_ip1] <strong>multicast timestamp-refresh bind instance one</strong>
+[<span class="keyword">*</span>PE-behavior-rule_ip1] <strong>multicast-nat bind instance id 1 name stream1</strong>
+[<span class="keyword">*</span>PE-behavior-rule_ip1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE-behavior-rule_ip1] <strong>quit</strong></pre>
+</p></li><li><span>Configure a traffic policy.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE] <strong>traffic policy match1_ip_list1</strong>
+[<span class="keyword">*</span>PE-trafficpolicy-match1_ip_list1] <strong>classifier rule_ip1 behavior rule_ip1</strong>
+[<span class="keyword">*</span>PE-trafficpolicy-match1_ip_list1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE-trafficpolicy-match1_ip_list1] <strong>quit</strong></pre>
+</p></li><li><span>Apply the traffic policy to the inbound interface of input streams.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE] <strong>interface GigabitEthernet</strong> <span>0/1/1</span>
+[<span class="keyword">*</span>PE-GigabitEthernet<span>0/1/1</span>] <strong>traffic-policy match1_ip_list1 inbound</strong>
+[<span class="keyword">*</span>PE-GigabitEthernet<span>0/1/1</span>] <strong>multicast-nat inbound enable</strong>
+[<span class="keyword">*</span>PE-GigabitEthernet<span>0/1/1</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+</p></li><li><span>Verifying the Configuration</span><p><p># Run the <a href="cmdqueryname=display+multicast+timestamp-refresh"><b><span class="cmdname">display multicast timestamp-refresh</span></b></a><strong> </strong>[ <strong><span>instance</span></strong> <i><span class="varname">instance-name</span></i> ] command to check the local and global timestamp-refresh offset values.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE] <strong>display multicast timestamp-refresh instance one</strong>
+ Multicast timestamp-refresh instance one
+  Timestamp offset local: 0x16ae63b1
+  Timestamp offset global: 0x16ae63b1</pre>
+</p><p><p># Run the <a href="cmdqueryname=display+current-configuration"><b><span class="cmdname">display current-configuration</span></b></a> <strong><span>configuration</span></strong> <i><span class="varname">multicast-tsrefresh-instance</span></i> command to view the timestamp-refresh instance configuration.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE] <a href="cmdqueryname=display+current-configuration"><b><span class="cmdname">display current-configuration</span></b></a><strong> configuration multicast-tsrefresh-instance</strong>
+#
+multicast timestamp-refresh instance one
+ mode 2022-7
+ type video-stream
+#
+
+return</pre>
+</p><p><p># Run the <a href="cmdqueryname=display+current-configuration"><b><span class="cmdname">display current-configuration</span></b></a><strong> </strong><strong><span>configuration</span></strong> [ <i><span class="varname">behavior</span></i> ] command to check the configuration result of binding a traffic behavior to a timestamp-refresh instance.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE] <a href="cmdqueryname=display+current-configuration"><b><span class="cmdname">display current-configuration</span></b></a><strong> configuration behavior</strong>
+#
+traffic behavior 1
+#
+traffic behavior one
+ multicast timestamp-refresh bind instance one
+#
+return</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001394385958__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li>PE<pre class="screen"># 
+sysname PE 
+# 
+multicast-nat enable
+#
+multicast-nat instance id 1 name stream1
+#
+multicast timestamp-refresh instance one 
+ mode common 
+ type video-stream
+# 
+acl number 3001 
+ rule 1 permit udp source 10.10.10.10 0 destination 239.0.0.1 0 destination-port eq 10000 
+# 
+traffic classifier rule_ip1 operator or 
+ if-match acl 3001 precedence 1 
+# 
+traffic behavior rule_ip1 
+ multicast-nat bind instance id 1 name stream1
+ multicast timestamp-refresh bind instance one 
+# 
+traffic policy match1_ip_list1 
+ share-mode 
+ classifier rule_ip1 behavior rule_ip1 precedence 1 
+# 
+interface GigabitEthernet<span>0/1/0</span> 
+ undo shutdown 
+ multicast-nat outbound id 1 name out1_1 
+ undo dcn 
+#
+interface GigabitEthernet<span>0/1/1</span> 
+ undo shutdown 
+ traffic-policy match1_ip_list1 inbound 
+ undo dcn
+ multicast-nat inbound enable 
+#
+multicast-nat bind-list
+ multicast-nat outbound id 1 name out1_1 bind instance id 1 name stream1
+#</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_timestamp_refresh_cfg_0006.html">Configuration Examples
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,59 @@
+Path Selection
+==============
+
+Each node on the network has multiple forwarding paths available for selection. However, only the ingress node uses the adaptive routing algorithm to select the optimal packet forwarding path. Subsequent non-ingress nodes forward packets by looking up the routing table, without needing to reselect a path. The implementation of this path selection scheme consists of two parts:
+
+* The ingress node searches the best path table for the optimal packet forwarding path, determining the local outbound interface of the packets.
+* Non-ingress nodes forward the packets according to fixed rules. Provided that the inbound interface of the packets has been determined, the routing table to be looked up and the outbound interface of the packets can be determined.
+
+#### Path Selection Rules on the Ingress Node
+
+Based on routing information of nodes and congestion status of links, adaptive routing creates and maintains a best path table to store information about the optimal forwarding path, instructing the ingress nodes to select a packet forwarding path. Using a destination IP address as an example, if the shortest path is not congested, information about the shortest path destined for the IP address is stored in the best path table; otherwise, information about the non-shortest paths destined for the IP address is stored.
+
+* **Determining the congestion status**
+  
+  The congestion status of an interface is determined based on the bandwidth utilization level and queue depth level of the interface. Both parameters have default upper and lower thresholds, which can be set.
+  
+  + If the weighted sum of the two parameters is greater than the weighted sum of their upper thresholds, an interface is considered to be congested. If this interface is a global port, the network node where the global port resides continuously sends an Adaptive Routing Notification (ARN) message about congestion to other network nodes in the group. The ARN message about congestion contains the information about the peer group connected to the global port. The network nodes that receive the ARN message about congestion update the information about the path to this destination group in the best path table.
+  + If the weighted sum of the two parameters falls below the weighted sum of their upper thresholds and the interface is a global port, the network node where the global port resides stops sending the ARN message about congestion.
+  + If the weighted sum of the two parameters falls below the weighted sum of their lower thresholds, the interface is no longer considered congested. If this interface is a global port, the network node where the global port resides sends an ARN message about congestion relief to other network nodes in the group. The ARN message about congestion relief contains the information about the peer group connected to the global port. The network nodes that receive the ARN message about congestion relief update the information about the path to this destination group in the best path table.
+* **Maintaining best path entries**
+  
+  The rules for maintaining the best path entries are as follows:
+  
+  + If no links are congested, the best path table stores information about the shortest path to the destination IP address.
+  + The congestion status of the local port on a network node changes, affecting the switching between the intra-group shortest and non-shortest paths in the best path table of the network node.
+    - If the local port of a network node is congested and the optimal forwarding path stored in the best path table passes through the local port, this path is deleted from the best path table and replaced with a non-congested path of a lower cost.
+    - If the network node's local port is no longer congested and the forwarding path passing through the local port has a lower cost than that stored in the best path table, the former replaces the latter in the best path table.
+  + The congestion status of the global port on an edge node changes, affecting the switching between the shortest and non-shortest paths in the best path tables of other network nodes in the same group.
+    - If the global port of an edge node is congested, the edge node sends an ARN message about congestion to other network nodes in the same group. After the network nodes receive this message, if the optimal forwarding path stored in the best path table passes through the global port, this path is deleted from the best path table and replaced with a non-congested path of a lower cost.
+    - If the global port of the edge node is no longer congested, the edge node sends an ARN message about congestion relief to other network nodes in the same group. After the network nodes receive this message, if the forwarding path passing through the global port has a lower cost than that stored in the best path table, the former replaces the latter in the best path table.
+* **Path selection on the ingress node in an intra-group communication scenario**
+  
+  [Figure 1](#EN-US_CONCEPT_0000001564110473__fig62711926153410) shows the process of switching between the intra-group shortest and non-shortest paths in an intra-group communication scenario where compute node S sends packets to compute node D.
+  
+  **Figure 1** Switching between the intra-group shortest and non-shortest paths  
+  ![](figure/en-us_image_0000001564110517.png)
+  1. The intra-group shortest path along which compute node S sends packets to compute node D is S -> 1 -> 3 -> D, and the outbound interface interface1 of ingress node 1 on this path is not congested. Therefore, when receiving the packets sent by node S to node D, ingress node 1 searches the best path table and finds that the optimal forwarding path is the intra-group shortest path and the outbound interface is interface1. According to the search result in the best path table, ingress node 1 sends the packets to a non-ingress node through interface1.
+  2. Interface1 of ingress node 1 is congested (the weighted sum of the bandwidth utilization level and queue depth level is higher than the weighted sum of their upper thresholds). In this case, the shortest path passing through interface1 in the best path table is deleted and replaced with an intra-group non-shortest path. When receiving packets sent from node S to node D, ingress node 1 searches the best path table and finds that the optimal forwarding path is an intra-group non-shortest path and the outbound interface is interface2. According to the search result in the best path table, ingress node 1 sends the packets to a non-ingress node through interface2.
+  3. The weighted sum of the bandwidth utilization level and queue depth level of interface1 falls below the weighted sum of their upper thresholds. In this case, the optimal forwarding path stored in the best path table is still the intra-group non-shortest path. When receiving packets sent from node S to node D, ingress node 1 searches the best path table and finds that the optimal forwarding path is an intra-group non-shortest path and the outbound interface is interface2. According to the search result in the best path table, ingress node 1 sends the packets to a non-ingress node through interface2.
+  4. The weighted sum of the bandwidth utilization level and queue depth level of interface1 falls below the weighted sum of their lower thresholds. In this case, the optimal forwarding path stored in the best path table is changed to the intra-group shortest path. When receiving packets sent from node S to node D, ingress node 1 searches the best path table and finds that the optimal forwarding path is the intra-group shortest path and the outbound interface is interface1. According to the search result in the best path table, ingress node 1 sends the packets to a non-ingress node through interface1.
+* **Path selection on the ingress node in an inter-group communication scenario**
+  
+  [Figure 2](#EN-US_CONCEPT_0000001564110473__fig697034716545) shows the process of switching between the inter-group shortest and non-shortest paths in an inter-group communication scenario where compute node S sends packets to compute node D.
+  
+  **Figure 2** Switching between the inter-group shortest and non-shortest paths  
+  ![](figure/en-us_image_0000001512830902.png)
+  1. The inter-group shortest path along which compute node S sends packets to compute node D is source group -> interface3 of edge node 3 -> destination group, and interface3 is not congested. Therefore, when receiving the packets sent by node S to node D, ingress node 1 searches the best path table and finds that the optimal forwarding path is the inter-group shortest path and the outbound interface is interface1. According to the search result in the best path table, ingress node 1 sends the packets to a non-ingress node through interface1.
+  2. Interface3 of edge node 3 is congested (the weighted sum of the bandwidth utilization level and queue depth level of interface3 is higher than the weighted sum of their upper thresholds). In this case, edge node 3 sends an ARN message about congestion to other network nodes in the same group. After receiving this message, node 1 deletes the inter-group shortest path passing through interface3 from the best path table and replaces it with an inter-group non-shortest path. When receiving packets sent from node S to node D, ingress node 1 searches the best path table and finds that the optimal forwarding path is an inter-group non-shortest path and the outbound interface is interface2. According to the search result in the best path table, ingress node 1 sends the packets to a non-ingress node through interface2.
+  3. The weighted sum of the bandwidth utilization level and queue depth level of interface3 falls below the weighted sum of their upper thresholds. In this case, edge node 3 stops sending the ARN message about congestion to other network nodes in the same group, and the optimal forwarding path stored in the best path table of node 1 is still an inter-group non-shortest path. When receiving packets sent from node S to node D, ingress node 1 searches the best path table and finds that the optimal forwarding path is an inter-group non-shortest path and the outbound interface is interface2. According to the search result in the best path table, ingress node 1 sends the packets to a non-ingress node through interface2.
+  4. The weighted sum of the bandwidth utilization level and queue depth level of interface3 falls below the weighted sum of their lower thresholds. In this case, edge node 3 sends an ARN message about congestion relief to other network nodes in the same group. After receiving this message, node 1 changes the optimal forwarding path destined for node D in the best path table to the inter-group shortest path. When receiving packets sent from node S to node D, ingress node 1 searches the best path table and finds that the optimal forwarding path is the inter-group shortest path and the outbound interface is interface1. According to the search result in the best path table, ingress node 1 sends the packets to a non-ingress node through interface1.
+
+#### Packet Forwarding Rules on Non-Ingress Nodes
+
+The packet forwarding rules on a non-ingress node are as follows:
+
+* Receiving packets on a global port: The node searches the public network routing table for packet forwarding.
+* Receiving packets on a local port: Two Layer 3 sub-interfaces exist on a local port, and are called min sub-interface and non-min sub-interface.
+  + When receiving packets on a min sub-interface, the node searches the public network routing table for packet forwarding.
+  + When receiving packets on a non-min sub-interface, the node searches the routing table of the Non-min VPN instance for packet forwarding.

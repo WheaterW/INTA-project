@@ -1,0 +1,90 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="DLDP Detection Mechanism">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_dldp_cfg_0003.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_dldp_cfg_0004.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_dldp_cfg_0006.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="DLDP">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="DLDP">
+<meta name="featuretype" content="High Availability">
+<meta name="featurename" content="DLDP">
+<meta name="featuretype" content="High Availability">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001415619110">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>DLDP Detection Mechanism</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001415619110"></a><a name="EN-US_CONCEPT_0000001415619110"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">DLDP Detection Mechanism</h1>
+<div><p>DLDP has two detection mechanisms: single-neighbor detection and multi-neighbor detection.</p>
+<div class="section"><h4 class="sectiontitle">Single-Neighbor Detection</h4><p>This section describes how DLDP detects unidirectional links when a single neighbor exists.</p>
+<ul><li><strong>A link is unidirectional before DLDP is enabled</strong><p>On the network shown in <a href="#EN-US_CONCEPT_0000001415619110__fig692719811810">Figure 1</a>, the optical fibers connecting two devices are cross-connected (the two lines connecting each interface represent the Tx and Rx optical fibers).</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001415619110__fig692719811810"><a name="EN-US_CONCEPT_0000001415619110__fig692719811810"></a><a name="fig692719811810"></a><span class="figcap"><b>Figure 1 </b>Cross-connected fibers</span><br><span><img class="vsd" src="figure/en-us_image_0000001465215857.png"></span></div>
+<p>After DLDP is enabled, the four interfaces in the Up state enter the Active state and send Advertisement packets with RSY tags to notify neighbors and request neighbor information. The following uses interface 1 as an example to describe the detection process:</p>
+<ol><li>When receiving an Advertisement packet with RSY tags from interface 4, interface 1 determines that it has detected a neighbor. Interface 1 starts the Echo timer, sets up a neighbor entry, and starts the Entry Aging timer. Interface 1 then enters the Probe state and sends Probe packets to detect interface 4.</li><li>Interface 4 cannot receive the Probe packets from interface 1, meaning that interface 1 will not receive Echo packets from interface 4. When the Echo timer on interface 1 times out, interface 1 enters the Disable state.</li></ol>
+<p>The detection process on other interfaces is similar to that on interface 1. Finally, the four interfaces all enter the Disable state.</p>
+</li></ul>
+<ul><li><strong>A link changes from bidirectional to unidirectional after DLDP is enabled</strong><p>On the network shown in <a href="#EN-US_CONCEPT_0000001415619110__fig1432414478223">Figure 2</a>, optical fibers connect devices (the two lines connecting each interface represent the Tx and Rx optical fibers).</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001415619110__fig1432414478223"><a name="EN-US_CONCEPT_0000001415619110__fig1432414478223"></a><a name="fig1432414478223"></a><span class="figcap"><b>Figure 2 </b>Optical fiber connections when a single neighbor exists</span><br><span><img class="vsd" src="figure/en-us_image_0000001415619118.png"></span></div>
+<p>When the Tx and Rx optical fibers are working properly, DeviceA and DeviceB establish a bidirectional relationship as follows:</p>
+<ol><li><p>After DLDP is enabled, interface 1 in the Up state enters the Active state and sends Advertisement packets with RSY tags to notify the neighbor and request neighbor information.</p>
+</li><li><p>When receiving an Advertisement packet with RSY tags from interface 1, interface 2 determines that it has detected a neighbor. Interface 2 then starts the Echo timer, sets up a neighbor entry, and starts the Entry Aging timer. Interface 2 enters the Probe state and sends a Probe packet.</p>
+</li><li><p>Upon receiving the Probe packet, interface 1 sets up a neighbor entry, enters the Probe state, and returns an Echo packet to interface 2.</p>
+</li><li><p>When interface 2 receives the Echo packet, it finds that the neighbor entry exists and the neighbor information carried by the Echo packet is the same as that saved on the local device. Therefore, interface 2 marks this neighbor as a bidirectionally connected neighbor. Interface 2 transitions from the Probe state to the Advertisement state, and periodically sends Advertisement packets. Interface 2 in the Advertisement state resets the Entry Aging timer for a known neighbor each time a packet is received from the neighbor.</p>
+</li><li>After DLDP is enabled, the procedure for sending packets from interface 2 and setting up a neighbor on interface 1 is similar to steps 1 to 4.</li><li>At last, interface 1 and interface 2 regard each other as bidirectionally connected neighbors and enter the Advertisement state.</li></ol>
+<p>On the network shown in <a href="#EN-US_CONCEPT_0000001415619110__fig18856396312">Figure 3</a>, the Rx optical fiber of interface 2 has failed and cannot receive an optical signal. When this occurs, interface 2 enters the Inactive state and stops sending and receiving packets. However, the Tx optical fiber of interface 2 remains normal, meaning that interface 1 can receive signals and stay in the up state. Interface 1 cannot receive DLDPDUs from interface 2 before the Entry Aging timer times out. The procedure for detecting unidirectional links varies depending on the configured DLDP working mode.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001415619110__fig18856396312"><a name="EN-US_CONCEPT_0000001415619110__fig18856396312"></a><a name="fig18856396312"></a><span class="figcap"><b>Figure 3 </b>A disconnected optical fiber when a single neighbor exists</span><br><span><img class="vsd" src="figure/en-us_image_0000001465455589.png"></span></div>
+<div class="p"><ul><li>Normal mode: After the Entry Aging timer times out, interface 1 deletes the neighbor entry, enters the Active state, and sends an Advertisement packet with RSY tags. Interface 1 enters the Advertisement state after being in the Active state for 5 seconds. It then remains in the Advertisement state and has no neighbor. Interface 2 remains in the Inactive state. In this case, DLDP cannot detect unidirectional links.</li><li>Enhanced mode: After the Entry Aging timer times out, interface 1 starts the Enhanced timer and Echo timer and sends a Probe packet to the neighbor. The Tx optical fiber of interface 1 is disconnected, preventing interface 1 from receiving the Echo packet from interface 2. When the Echo timer times out, interface 1 enters the Disable state and sends a Disable packet to the neighbor. In addition, interface 1 deletes the neighbor entry and starts the RecoverProbe timer to check whether the Tx optical fiber is restored. During the preceding process, interface 2 remains in the Inactive state.</li></ul>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>In enhanced mode, interface 2 is physically down, but interface 1 cannot detect the change. DLDP supports the fast Link Down notification mechanism that can rapidly detect a fault on the link connecting interface 1 and interface 2 without waiting for the Entry Aging timer to time out. Upon detecting that interface 2 is down, the physical layer sends a Link Down packet to interface 1. When receiving the Link Down packet, interface 1 enters the Disable state.</li><li>The fast Link Down notification mechanism applies only to the enhanced mode.</li></ul>
+</div></div>
+</div>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Multi-Neighbor Detection</h4><p>DLDP can be configured on devices connected by hubs to detect unidirectional links. Each interface detects multiple neighbors.</p>
+<p>On the network shown in <a href="#EN-US_CONCEPT_0000001415619110__fig10200621952">Figure 4</a>, a hub connects DeviceA to DeviceB, DeviceC, and DeviceD through copper twisted pairs or optical fibers. All devices support DLDP. To detect unidirectional links on this network, DLDP needs to be enabled on all interfaces connected to the hub.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001415619110__fig10200621952"><a name="EN-US_CONCEPT_0000001415619110__fig10200621952"></a><a name="fig10200621952"></a><span class="figcap"><b>Figure 4 </b>Network diagram of multiple neighbors</span><br><span><img class="vsd" src="figure/en-us_image_0000001415015966.png"></span></div>
+<p>On a network with multiple neighbors, an interface immediately enters the Disable state when receiving a Disable packet from a neighbor or detecting that a neighbor is unidirectional. When DeviceA, DeviceB, and DeviceC detect a unidirectional link fault on DeviceD, they switch their involved interfaces to the Disable state. This prevents traffic forwarding errors when the topology changes in the multi-neighbor scenario. If the Rx optical fiber between DeviceB and the hub is disconnected when DeviceA is forwarding traffic to DeviceB, DeviceA shuts down its interface connected to the hub and stops sending packets to DeviceB, DeviceC, and DeviceD. If there is a backup link between DeviceA and DeviceB, STP immediately starts the backup link when DeviceA shuts down the interface.</p>
+<p>If the devices on the preceding network are connected by a device that has DLDP disabled but supports DLDPDU forwarding, DLDP still detects unidirectional links as if multiple neighbors exist.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_dldp_cfg_0003.html">Understanding DLDP
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_dldp_cfg_0004.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_dldp_cfg_0006.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

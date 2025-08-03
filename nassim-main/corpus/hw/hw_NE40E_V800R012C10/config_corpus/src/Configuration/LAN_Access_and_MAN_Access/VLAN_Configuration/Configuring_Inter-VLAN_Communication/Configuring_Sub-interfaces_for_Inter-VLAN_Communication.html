@@ -1,0 +1,92 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring Sub-interfaces for Inter-VLAN Communication">
+<meta name="abstract" content="If users belong to different VLANs and reside on different network segments, sub-interfaces can be created on an Layer 3 device and assigned IP addresses to allow these users to communicate with each other at the network layer.">
+<meta name="description" content="If users belong to different VLANs and reside on different network segments, sub-interfaces can be created on an Layer 3 device and assigned IP addresses to allow these users to communicate with each other at the network layer.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vlan_cfg_0017.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vlan_cfg_0020.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="wwx1238417">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="VLAN">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VLAN">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="featurename" content="VLAN">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="featurename" content="VLAN">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="OWNER" content="c00648116,w00437000">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="wWX1238417">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172363106">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Configuring Sub-interfaces for Inter-VLAN Communication</title>
+</head>
+<body><a name="EN-US_TASK_0172363106"></a><a name="EN-US_TASK_0172363106"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring Sub-interfaces for Inter-VLAN Communication</h1>
+<div class="taskbody"><p>If users belong to different VLANs and reside on different network segments, sub-interfaces can be created on an Layer 3 device and assigned IP addresses to allow these users to communicate with each other at the network layer.</p>
+<div class="context"><a name="EN-US_TASK_0172363106__1.4.1"></a><a name="1.4.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>During communication at the data link layer on a LAN, source MAC addresses identify where data comes from, and destination MAC addresses guide data to destinations. If the source and destination PCs reside on different network segments, a Layer 2 network is unable to send data from the source to the destination. In this case, data has to be forwarded at the network layer 3. After the default gateway address of the Layer 2 device is specified as the IP address of the Layer 3 device, the Layer 2 device sends data that needs to be forwarded at the network layer to the Layer 3 device. After receiving a packet, the Layer 3 device searches its routing table according to the destination address in the packet. If the Layer 3 device finds a matching route in the routing table, the Layer 3 device directly forwards the packet to another network segment. If the Layer 3 device does not find any matching route, it discards the packet.</p>
+<p>On the network shown in <a href="#EN-US_TASK_0172363106__fig_dc_vrp_vlan_cfg_001901">Figure 1</a>, VLANs 2 to n belong to different network segments. To allow users in VLANs 2 to n to communicate with each other, you can create a sub-interface on the PE for each VLAN and assign an IP address to each sub-interface. After VLANs are configured, the CE is logically divided into n parts. Accordingly, the Layer 3 device must have n logical interfaces corresponding to n VLANs. The detailed implementation process is as follows:</p>
+<ol><li>A PC in VLAN 2 checks the destination IP address and finds that the destination PC in VLAN n is on a different network segment.</li><li>The PC in VLAN 2 sends an ARP request. After receiving the request, the PE considers itself the destination, translates its MAC address into an IP address, and sends an ARP reply to the PC in VLAN 2.</li><li>After receiving data from the PC in VLAN 2, the CE adds a VLAN tag to the data and searches the MAC address table for an outbound port.</li><li>The PE receives the frame and sends it to sub-interface 2.</li><li>Sub-interface 2 removes the VLAN tag from the frame, searches for an ARP entry based on the IP address in the IP header, and forwards the packet at the network layer.</li><li>Sub-interface n receives the packet, reencapsulates the packet with the VLAN ID of n and the destination MAC address of the MAC address of the destination PC, and sends the frame.</li><li>After receiving the frame, the CE searches the MAC address table for the destination MAC address based on the VLAN ID carried in the packet to determine the outbound port.</li><li><p>The PC in VLAN n receives the frame from VLAN 2.</p>
+<p>If a PC in VLAN n sends a packet to a PC in VLAN 2, the process is similar and not described in this document.</p>
+</li></ol>
+<div class="fignone" id="EN-US_TASK_0172363106__fig_dc_vrp_vlan_cfg_001901"><a name="EN-US_TASK_0172363106__fig_dc_vrp_vlan_cfg_001901"></a><a name="fig_dc_vrp_vlan_cfg_001901"></a><span class="figcap"><b>Figure 1 </b>Configuring sub-interfaces for inter-VLAN communication</span><br><span><img class="vsd" src="images/fig_dc_vrp_vlan_cfg_001901.png" width="NaN" height="NaN"></span></div>
+<p>On the network shown in <a href="#EN-US_TASK_0172363106__fig_dc_vrp_vlan_cfg_001901">Figure 1</a>, downstream ports on the CE are separately added to VLAN 2 to VLAN n. The configuration roadmap for communication between these VLANs is as follows: </p>
+<ol><li><p>Create n-1 sub-interfaces on the Ethernet interface connecting the PE to the CE.</p>
+</li><li><p>The sub-interface is associated with a VLAN.</p>
+</li><li><p>Assign an IP address to each sub-interface for communication at the network layer.</p>
+</li><li><p>Configure the port connecting the CE to the PE as a trunk or hybrid port to allow frames with VLAN IDs from 2 to n to pass through.</p>
+</li></ol>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The default gateway address of each PC in a VLAN must be the IP address of the corresponding sub-interface. Otherwise, inter-VLAN communication fails.</p>
+</div></div>
+</div></div>
+<div class="steps-unordered"><a name="EN-US_TASK_0172363106__1.4.2"></a><a name="1.4.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ul><li><span>Do as follows on the PE:</span><ol><li class="substepexpand"><span>Run <span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span></span><p><p>The system view is displayed.</p>
+</p></li><li class="substepexpand"><span>Run <span><a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> { <strong><span>ethernet</span></strong> | <strong><span>gigabitethernet</span></strong> } <i><span class="varname">interface-number.subinterface-number</span></i></span></span><p><p>An Ethernet sub-interface is created, and its view is displayed.</p>
+</p><p><p>The Ethernet interface in this step is the interface connecting the PE to the CE.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=vlan-type+dot1q"><b><span class="cmdname">vlan-type dot1q</span></b></a> <i><span class="varname">vlan-id</span></i></span><p><p>The sub-interface is associated with a VLAN.</p>
+</p><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Sub-interfaces of different interfaces can be associated with the same VLAN; sub-interfaces of one interface cannot be associated with the same VLAN.</p>
+</div></div>
+</p></li><li class="substepexpand"><span>Run <span><a href="cmdqueryname=ip+address"><b><span class="cmdname">ip address</span></b></a> <i><span class="varname">ip-address</span></i> { <i><span class="varname">mask</span></i> | <i><span class="varname">mask-length</span></i> } [ <strong><span>sub</span></strong> ]</span></span><p><p>An IP address is assigned to the sub-interface for Layer 3 communication.</p>
+</p></li><li class="substepexpand"><span>Run <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span></span><p><p>The configuration is committed.</p>
+</p></li></ol>
+</li></ul></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vlan_cfg_0017.html">Configuring Inter-VLAN Communication
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vlan_cfg_0020.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

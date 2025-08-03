@@ -1,0 +1,74 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding NS Multicast Suppression">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_nd_cfg_0058.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_nd_cfg_0060.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="ND">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="ND">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featurename" content="ND">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001176662071">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding NS Multicast Suppression</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001176662071"></a><a name="EN-US_CONCEPT_0000001176662071"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding NS Multicast Suppression</h1>
+<div><p>On an IPv6 overlay network, IPv6 host neighbor discovery is implemented using NS multicast. When a gateway receives an NS message for IPv6 address resolution, it multicasts the message in its BD. If the gateway forwards a large number of NS messages that are received within a period of time, excessive VXLAN resources are consumed, affecting normal services. To address this issue, configure NS multicast suppression. After this function is configured, the gateway checks whether it can obtain the destination user information in a received NS message. If so, it performs proxy ND or multicast-to-unicast processing to reduce or suppress NS message flooding.</p>
+<p id="EN-US_CONCEPT_0000001176662071__p05581684113">Only VXLAN gateways support this function. For details about VXLAN support, see "<a href="spec/VXLAN_limitation_23.0.html">Configuration Precautions for VXLAN</a>" in VXLAN Configuration.</p>
+<div class="section"><h4 class="sectiontitle">NS Multicast Suppression</h4><p>When NS multicast suppression is enabled, a VXLAN gateway collects local IPv6 host information, generates an ND table (containing outbound interface information) or proxy ND table, and floods the ND table or proxy ND table through BGP EVPN routes (ND or IRBv6 routes). After receiving the ND table or proxy ND table, the other gateways generate proxy ND tables locally. In this way, after a gateway receives an NS message, it searches its local proxy ND table. If the gateway can find the corresponding IPv6 host information, it directly performs proxy ND or multicast-to-unicast processing.</p>
+<p>The following describes the implementation of NS multicast suppression, as shown in <a href="#EN-US_CONCEPT_0000001176662071__fig_dc_fd_vxlan_004101">Figure 1</a>.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The implementation process in a centralized gateway scenario is similar to that in a distributed gateway scenario. However, in a centralized gateway scenario, the BGP EVPN routes that flood an ND table or proxy ND table are ND routes, whereas those in a distributed gateway scenario can be either ND or IRBv6 routes. The following uses a distributed gateway scenario as an example.</p>
+</div></div>
+<div class="fignone" id="EN-US_CONCEPT_0000001176662071__fig_dc_fd_vxlan_004101"><a name="EN-US_CONCEPT_0000001176662071__fig_dc_fd_vxlan_004101"></a><a name="fig_dc_fd_vxlan_004101"></a><span class="figcap"><b>Figure 1 </b>Network diagram of NS multicast suppression</span><br><span><img class="vsd" src="figure/en-us_image_0000001130622574.png" width="NaN" height="NaN"></span></div>
+<ol><li><p>Host1 goes online from Leaf1. If no Layer 3 gateway exists, Leaf1 is enabled to generate a proxy ND table for Host1 in the BD and floods the table through a BGP EVPN route. If a Layer 3 gateway exists, Leaf1 is enabled to generate an ND table for Host1 and floods the table through a BGP EVPN route.</p>
+</li><li><p>Leaf2 receives the BGP EVPN route from Leaf1, extracts IPv6 host information from the route, and generates a proxy ND table for Host1 locally.</p>
+</li><li><p>Host2 sends an NS multicast message to Leaf2 for requesting the MAC address of Host1.</p>
+</li><li><p>Leaf2 searches the local proxy ND table based on the destination IPv6 address in the multicast NS message and finds the MAC address of Host1. Based on the user configuration, Leaf2 constructs a unicast NA message as a reply to Host2 or converts the multicast NS message into a unicast NS message for forwarding.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>After receiving the unicast NS message converted from a multicast NS message, Host1 replies with a unicast NA message. Host2 can then obtain the MAC address of Host1 from the unicast NA message.</p>
+</div></div>
+</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Application Scenarios</h4><p>In distributed or centralized VXLAN gateway deployment using BGP EVPN, when the overlay network is an IPv6 network, NS multicast suppression can be deployed to reduce or suppress NS message flooding, thereby alleviating network pressure and ensuring common user services.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_nd_cfg_0058.html">Configuring NS Multicast Suppression
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_nd_cfg_0060.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

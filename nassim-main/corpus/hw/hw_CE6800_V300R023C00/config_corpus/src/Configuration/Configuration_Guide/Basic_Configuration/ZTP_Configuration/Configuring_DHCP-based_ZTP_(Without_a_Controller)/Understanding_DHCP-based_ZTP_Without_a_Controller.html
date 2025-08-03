@@ -1,0 +1,94 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding DHCP-based ZTP Without a Controller">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ztp_cfg_0029.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ztp_cfg_0030.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="ZTP">
+<meta name="featuretype" content="Basic Configuration">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="ZTP">
+<meta name="featuretype" content="Basic Configuration">
+<meta name="featurename" content="ZTP">
+<meta name="featuretype" content="Basic Configuration">
+<meta name="featurename" content="ZTP">
+<meta name="featuretype" content="Basic Configuration">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001512834846">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding DHCP-based ZTP Without a Controller</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001512834846"></a><a name="EN-US_CONCEPT_0000001512834846"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding DHCP-based ZTP Without a Controller</h1>
+<div><div class="section"><h4 class="sectiontitle">Basic Networking</h4><p>In <a href="#EN-US_CONCEPT_0000001512834846__fig16534750131417">Figure 1</a>, the device functions as a DHCP client to periodically send DHCP request packets to the DHCP server in order to obtain configuration information. The DHCP server responds with DHCP reply packets that contain information about the IP address allocated to the device, IP address of the intermediate file server, and intermediate file server login method. After receiving the DHCP reply packets, the device connects to the intermediate file server to obtain the configuration information about the deployment files, based on which the device then automatically obtains deployment files from the specified deployment file server and sets them as the files to be loaded for the next startup. These deployment files are then automatically loaded by the device upon restart.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001512834846__fig16534750131417"><a name="EN-US_CONCEPT_0000001512834846__fig16534750131417"></a><a name="fig16534750131417"></a><span class="figcap"><b>Figure 1 </b>DHCP-based ZTP</span><br><span><img class="vsd" src="figure/en-us_image_0000001512834906.png" width="NaN" height="NaN"></span><ul><li><strong>DHCP server</strong>: allocates a temporary management IP address, default gateway address, DNS server address, and intermediate file server address to the device to be deployed.</li><li><p><strong>Syslog server</strong>: uploads user logs recorded during the ZTP process to the NMS.</p>
+</li><li><p><strong>DHCP relay agent</strong>: forwards packets exchanged between the device to be deployed and the DHCP server when they are located on different network segments.</p>
+</li><li><p><strong>Intermediate file server</strong>: stores the intermediate file required for ZTP, which can be an INI file or <span>a Python script</span>. By parsing the intermediate file, the device to be deployed obtains information about the deployment file server address and deployment files. An intermediate file server must be an SFTP, HTTP, TFTP, or FTP file server.</p>
+</li><li><p><strong>Deployment file server</strong>: stores the deployment files to be loaded to the device to be deployed, including the system software, configuration file, and patch file. The deployment file server and intermediate file server can be combined, which must be an SFTP, HTTP, TFTP, or FTP file server.</p>
+</li><li><p><strong>DNS server</strong>: provides mappings between domain names and IP addresses, and resolves the file server domain name to an IP address for the device to be deployed. Based on the resolved IP address, the device can obtain requested files from the file server.</p>
+</li></ul>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Deployment Process</h4><ul><li><a href="#EN-US_CONCEPT_0000001512834846__fig833142114548">Figure 2</a> shows the DHCP-based ZTP process.</li></ul>
+<div class="fignone" id="EN-US_CONCEPT_0000001512834846__fig833142114548"><a name="EN-US_CONCEPT_0000001512834846__fig833142114548"></a><a name="fig833142114548"></a><span class="figcap"><b>Figure 2 </b>DHCP-based ZTP process</span><br><span><img class="vsd" src="figure/en-us_image_0000001513154446.png" width="NaN" height="NaN"></span></div>
+<p>The ZTP process involves the following phases:</p>
+<ol><li><p>Powering on and starting the device</p>
+<p>If a non-factory configuration file is available, the device starts with that configuration file. Otherwise, the device automatically starts the ZTP process.</p>
+</li><li><p>Obtaining DHCP information</p>
+<p>The device broadcasts DHCP Request packets through its management network interface and Ethernet interfaces. After receiving the DHCP request packet, the DHCP server sends a DHCP reply packet to the device. Options in the packet contain the device-requested information, including the IP address allocated to the device, default gateway address, IP address of the intermediate file server, IP address of the Syslog server, and intermediate file name. The device obtains the IPv4 address of the Syslog server from the DHCP reply packet to enable the Syslog server function. Information about important phases during ZTP is recorded in user logs, which the Syslog server will upload to the NMS.</p>
+</li><li>Enabling the Syslog server<p>The device obtains the IPv4 address of the Syslog server from the DHCP reply packet to enable the Syslog server function. Information about important phases during ZTP is recorded in user logs, which the Syslog server will upload to the NMS.</p>
+</li><li><p>Obtaining the intermediate file and deployment files</p>
+<p>The device downloads the intermediate file from the intermediate file server according to the information carried in the DHCP reply packet, and then downloads deployment files from the deployment file server according to the intermediate file.</p>
+<p>If the intermediate file is an INI file, the device downloads deployment files based on the deployment file server address and deployment file names contained in the intermediate file. If the intermediate file is <span>a Python script</span>, the device automatically runs the script to download deployment files from the deployment file server.</p>
+</li><li><p>Restarting the device</p>
+<p>The device automatically sets the downloaded deployment files as those to be loaded for its next startup. The device then restarts to complete automatic deployment.</p>
+</li></ol>
+
+<ol><li><p>Powering on and starting the device</p>
+<p>If a non-factory configuration file is available, the device starts with that configuration file. Otherwise, the device automatically starts the ZTP process.</p>
+</li><li><p>Obtaining DHCP information</p>
+<p>The device sends a DHCP request packet through VLANIF 1. The DHCP server sends a DHCP reply packet to the device. Options in the packet contain the device-requested information, including the IP address allocated to the device, default gateway address, IP address of the file server, IP address of the Syslog server, and deployment file information. The device obtains the IPv4 address of the Syslog server from the DHCP reply packet to enable the Syslog server function. Information about important phases during ZTP is recorded in user logs, which the Syslog server will upload to the NMS.</p>
+</li><li>Enabling the Syslog server<p>The device obtains the IPv4 address of the Syslog server from the DHCP reply packet to enable the Syslog server function. Information about important phases during ZTP is recorded in user logs, which the Syslog server will upload to the NMS.</p>
+</li><li><p>Obtaining deployment files</p>
+<p>The device downloads deployment files from the deployment file server based on the information obtained from the DHCP reply packet.</p>
+</li><li><p>Restarting the device</p>
+<p>The device automatically sets the downloaded deployment files as those to be loaded for its next startup. The device then restarts to complete automatic deployment.</p>
+</li></ol>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_ztp_cfg_0029.html">Configuring DHCP-based ZTP (Without a Controller)
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_ztp_cfg_0030.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

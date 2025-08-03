@@ -1,0 +1,129 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="topic">
+<meta name="DC.Title" content="Subscription Event Notification">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_netconf_cfg1_0083.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_netconf_cfg1_0086.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_netconf_cfg1_0088.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TOPIC_0000001512682774">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Subscription Event Notification</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TOPIC_0000001512682774"></a><a name="EN-US_TOPIC_0000001512682774"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Subscription Event Notification</h1>
+<div><div class="section"><h4 class="sectiontitle">Basic Operations</h4><ul><li>Construct a notification subscription message.<pre class="screen">CREATE_SUBSCRIPTION = '''&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+  &lt;rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="{}"&gt;
+    &lt;create-subscription xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"&gt;
+      &lt;stream&gt;NETCONF&lt;/stream&gt;
+    &lt;/create-subscription&gt;
+  &lt;/rpc&gt;'''</pre>
+</li></ul>
+<ul><li>Deliver the notification subscription message.<pre class="screen">#Set the message-id for the rpc
+msgId = 1001
+rpc = CREATE_SUBSCRIPTION.format(msgId)
+#create subscription
+m._session.send(rpc)</pre>
+</li></ul>
+<ul><li>Wait for notification alarm reporting.<pre class="screen">m.take_notification(block=True, timeout=None)</pre>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Example</h4><div class="p">This example shows how to configure a simple Python script to connect to the device and implement event notification.<pre class="screen"><strong># test_notification.py</strong>
+import sys
+import logging
+from ncclient import manager
+from ncclient import operations
+log = logging.getLogger(__name__) 
+
+CREATE_SUBSCRIPTION = '''&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+  &lt;rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="{}"&gt;
+    &lt;create-subscription xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"&gt;
+      &lt;stream&gt;NETCONF&lt;/stream&gt;
+    &lt;/create-subscription&gt;
+  &lt;/rpc&gt;'''
+
+#Fill the device information and establish a NETCONF session
+def huawei_connect(host, port, user, password):
+    return manager.connect(host=host,
+                           port=port,
+                           username=user,
+                           password=password,
+                           hostkey_verify = False,
+                           device_params={'name': "huaweiyang"},
+                           allow_agent = False,
+                           look_for_keys = False)
+
+<strong>def test_notification(host, port, user, password):</strong>
+    #1.Create a NETCONF session
+    with huawei_connect(host, port=port, user=user, password=password) as m:
+
+        #2.Set the message-id for the rpc
+        msgId = 1001
+        rpc = CREATE_SUBSCRIPTION.format(msgId)
+
+        #3.Send rpc
+        result = m._session.send(rpc)
+        
+        #4.Attempt to retrieve one notification
+        ntf = m.take_notification(block=True, timeout=None) 
+        print("The notification message is %s." % (ntf))
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    test_notification(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])</pre>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_netconf_cfg1_0083.html">Examples for Basic NETCONF Operations
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_netconf_cfg1_0086.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_netconf_cfg1_0088.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

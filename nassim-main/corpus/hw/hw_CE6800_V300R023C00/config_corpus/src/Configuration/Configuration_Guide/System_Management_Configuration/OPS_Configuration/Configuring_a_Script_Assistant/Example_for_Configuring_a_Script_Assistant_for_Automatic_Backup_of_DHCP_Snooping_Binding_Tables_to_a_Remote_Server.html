@@ -1,0 +1,330 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring a Script Assistant for Automatic Backup of DHCP Snooping Binding Tables to a Remote Server">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_ops_cfg_0012.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_ops_cfg_0021.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_ops_cfg_0025.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="OPS">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="OPS">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="OPS">
+<meta name="featuretype" content="System Management">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001513165026">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring a Script Assistant for Automatic Backup of DHCP Snooping Binding Tables to a Remote Server</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001513165026"></a><a name="EN-US_TASK_0000001513165026"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring a Script Assistant for Automatic Backup of DHCP Snooping Binding Tables to a Remote Server</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001513165026__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><div class="p">As shown in <a href="#EN-US_TASK_0000001513165026__fig_dc_vrp_ops_cfg_new_001701">Figure 1</a>, the remote server is an SFTP server. DeviceA and the SFTP server have reachable routes to each other. The device is required to back up DHCP snooping binding tables to the remote SFTP server.<div class="fignone" id="EN-US_TASK_0000001513165026__fig_dc_vrp_ops_cfg_new_001701"><a name="EN-US_TASK_0000001513165026__fig_dc_vrp_ops_cfg_new_001701"></a><a name="fig_dc_vrp_ops_cfg_new_001701"></a><span class="figcap"><b>Figure 1 </b>Networking diagram for configuring automatic backup of DHCP snooping binding tables to a remote server</span><br><span><img class="vsd" src="figure/en-us_image_0000001513165050.png"></span></div>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001513165026__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Compile Python scripts.</span><p><p># Compile two Python scripts: SnpTblBakRmtPut.py and SnpTblBakRmtGet.py.</p>
+<p>In the SnpTblBakRmtGet.py script, set the execution of the script assistant to be triggered by a timer. In the SnpTblBakRmtPut.py script, set the execution of the script assistant to be triggered by a log.</p>
+<ul><li>The SnpTblBakRmtGet.py script is as follows:<pre class="screen">#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) Huawei Technologies Co., Ltd. 2021-2030. All rights reserved.
+
+import re
+import string
+import http.client
+import ops
+import sys, re, os, time
+
+# Variable parameters
+serverIpPara = "10.2.1.1"                     # IP address of the remote server.
+serverPortPara = "22"                       # Port number of the remote server. The port number of the SFTP server is fixed to 22.
+userNamePara = "huawei"                     # Username for logging in to the remote server.
+passWordPara = "YsHsjx_202206"                   # Password for logging in to the remote server.
+remotePathPara = "dhcpsnp.tbl"                 # Name of the backup file stored on the remote server.
+localPathPara = "flash:/dhcpsnprmt.tbl"        # Name of the file downloaded from the remote server to the local device. This name must be different from the name of the local backup file to avoid overwriting the existing local file.
+recoverFileNamePara = "flash:/dhcpsnprmt.tbl"        # Specify the file name used for a restored DHCP snooping binding table.
+# Variable parameters
+
+yang_func_ret_err = lambda ret, rsp_data: f'yang function returns {ret} and rsp_data: {rsp_data}'
+yang_func_ret_success = 'SUCCESS'
+yang_func_ret_not_found = 'NOT FOUND'
+
+# error code
+OK = 0
+ERR = 1
+
+def ops_conn_operation(func):
+    def wapper(*args, **kwargs):
+        ops_conn = ops.OPSConnection("localhost")
+        kwargs.update({"ops_conn": ops_conn})
+        try:
+            ret = func(*args, **kwargs)
+            return ret
+        except Exception as reason:
+            exception_info = \
+                "{} failed, reason = {}".format(func.__name__, reason)
+            raise Exception(exception_info)
+        finally:
+            ops_conn.close()
+    return wapper
+
+def ops_return_result(ret):
+    return ((ret != http.client.OK) and \
+            (ret != http.client.CREATED) and \
+            (ret != http.client.NO_CONTENT))
+
+@ops_conn_operation
+def download_file_by_sftp(ops_conn=None):
+
+        uri = '{}'.format('/restconf/operations/huawei-sshc:ssh-transfer-file')
+        # Do not change the sequence of options between <strong>&lt;input&gt;</strong> and <strong>&lt;/input&gt;</strong>. Otherwise, the operation may fail.
+        req_template = string.Template('''
+            &lt;input&gt;
+                &lt;server-port&gt;$serverPort&lt;/server-port&gt;
+                &lt;host-addr-ipv4&gt;$serverIp&lt;/host-addr-ipv4&gt;
+                &lt;command-type&gt;get&lt;/command-type&gt;
+                &lt;user-name&gt;$userName&lt;/user-name&gt;
+                &lt;password&gt;$password&lt;/password&gt;
+                &lt;local-file-name&gt;$localPath&lt;/local-file-name&gt;
+                &lt;remote-file-name&gt;$remotePath&lt;/remote-file-name&gt;
+            &lt;/input&gt;
+            ''')
+        req_data = req_template.substitute(serverIp=serverIpPara, 
+                                           serverPort=serverPortPara, 
+                                           userName=userNamePara, 
+                                           password=passWordPara, 
+                                           remotePath=remotePathPara, 
+                                           localPath=localPathPara)
+        ret, _, rsp_data = ops_conn.create(uri, req_data)
+        if ops_return_result(ret):
+            print(rsp_data)
+            return ERR, yang_func_ret_err(ret, rsp_data)
+        return OK, yang_func_ret_success
+
+@ops_conn_operation
+def recover_file(ops_conn=None):
+
+        uri = '{}'.format('/restconf/operations/huawei-dhcp:recover-user-bind-table')
+        # Do not change the sequence of options between <strong>&lt;input&gt;</strong> and <strong>&lt;/input&gt;</strong>. Otherwise, the operation may fail.
+        req_template = string.Template('''
+            &lt;input&gt;
+                &lt;user-bind-file-name&gt;$usrBindTblFileName&lt;/user-bind-file-name&gt;
+            &lt;/input&gt;
+            ''')
+        req_data = req_template.substitute(usrBindTblFileName=recoverFileNamePara)
+        ret, _, rsp_data = ops_conn.create(uri, req_data)
+        if ops_return_result(ret):
+            print(rsp_data)
+            return ERR, yang_func_ret_err(ret, rsp_data)
+        return OK, yang_func_ret_success
+
+if __name__ == "__main__":
+    for i in range(10):
+        ret, _ = download_file_by_sftp()
+        if ret == OK:
+            recover_file()
+            break</pre>
+</li><li>The SnpTblBakRmtPut.py script is as follows:<pre class="screen">#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) Huawei Technologies Co., Ltd. 2021-2030. All rights reserved.
+
+import re
+import string
+import http.client
+import ops
+import sys, re, os, time
+
+# Variable parameters
+serverIpPara = "10.2.1.1"             # IP address of the remote server.
+serverPortPara = "22"               # Port number of the remote server. The port number of the SFTP server is fixed to 22.
+userNamePara = "huawei"               # Username for logging in to the remote server.
+passWordPara = "YsHsjx_202206"          # Password for logging in to the remote server.
+remotePathPara = "dhcpsnp.tbl"       # Name used to rename the local backup file after it is uploaded to the remote server.
+localPathPara = "flash:/dhcpsnp.tbl"       # Name of the local backup file to be uploaded to the remote server.
+# Variable parameters
+
+yang_func_ret_err = lambda ret, rsp_data: f'yang function returns {ret} and rsp_data: {rsp_data}'
+yang_func_ret_success = 'SUCCESS'
+yang_func_ret_not_found = 'NOT FOUND'
+
+# error code
+OK = 0
+ERR = 1
+
+def ops_conn_operation(func):
+    def wapper(*args, **kwargs):
+        ops_conn = ops.OPSConnection("localhost")
+        kwargs.update({"ops_conn": ops_conn})
+        try:
+            ret = func(*args, **kwargs)
+            return ret
+        except Exception as reason:
+            exception_info = \
+                "{} failed, reason = {}".format(func.__name__, reason)
+            raise Exception(exception_info)
+        finally:
+            ops_conn.close()
+    return wapper
+
+def ops_return_result(ret):
+    return ((ret != http.client.OK) and \
+            (ret != http.client.CREATED) and \
+            (ret != http.client.NO_CONTENT))
+
+@ops_conn_operation
+def upload_file_by_sftp(ops_conn=None):
+
+        uri = '{}'.format('/restconf/operations/huawei-sshc:ssh-transfer-file')
+        # Do not change the sequence of options between <strong>&lt;input&gt;</strong> and <strong>&lt;/input&gt;</strong>. Otherwise, the operation may fail.
+        req_template = string.Template('''
+            &lt;input&gt;
+                &lt;server-port&gt;$serverPort&lt;/server-port&gt;
+                &lt;host-addr-ipv4&gt;$serverIp&lt;/host-addr-ipv4&gt;
+                &lt;command-type&gt;put&lt;/command-type&gt;
+                &lt;user-name&gt;$userName&lt;/user-name&gt;
+                &lt;password&gt;$password&lt;/password&gt;
+                &lt;local-file-name&gt;$localPath&lt;/local-file-name&gt;
+                &lt;remote-file-name&gt;$remotePath&lt;/remote-file-name&gt;
+            &lt;/input&gt;
+            ''')
+        req_data = req_template.substitute(serverIp=serverIpPara, 
+                                           serverPort=serverPortPara, 
+                                           userName=userNamePara, 
+                                           password=passWordPara, 
+                                           remotePath=remotePathPara, 
+                                           localPath=localPathPara)
+        ret, _, rsp_data = ops_conn.create(uri, req_data)
+        if ops_return_result(ret):
+            print(rsp_data)
+            return ERR, yang_func_ret_err(ret, rsp_data)
+        return OK, yang_func_ret_success
+
+if __name__ == "__main__":	
+    upload_file_by_sftp()
+		</pre>
+</li></ul>
+</p></li><li><span>Upload and install the Python scripts.</span><p><p># Upload the SnpTblBakRmtPut.py and SnpTblBakRmtGet.py scripts to DeviceA, which functions as an SFTP client. (The Python scripts are stored on the SFTP client.)</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>sftp 10.3.1.1</strong>
+Trying 10.3.1.1 ... 
+Press CTRL+K to abort 
+Connected to 10.3.1.1 ... 
+Please input the username: <strong>client001</strong>
+Enter password: 
+sftp-client&gt; <strong>get SnpTblBakRmtPut.py</strong>
+Warning: The file may not transfer correctly in ASCII mode.
+sftp-client&gt; <strong>get SnpTblBakRmtGet.py</strong>
+Warning: The file may not transfer correctly in ASCII mode.
+sftp-client&gt;<strong> quit</strong></pre>
+<p># Install the Python scripts on DeviceA.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>ops install file SnpTblBakRmtPut.py</strong>
+&lt;DeviceA&gt; <strong>ops install file SnpTblBakRmtGet.py</strong></pre>
+</p></li><li><span>Configure script assistants.</span><p><pre class="screen">&lt;DeviceA&gt; <strong>system-view</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ops</strong>
+[<span class="keyword">*</span>DeviceA-ops] <strong>assistant dhcpsnpget</strong>
+[<span class="keyword">*</span>DeviceA-ops-assistant-dhcpsnpget] <strong>execute 1 python SnpTblBakRmtGet.py</strong>
+[<span class="keyword">*</span>DeviceA-ops-assistant-dhcpsnpget] <strong>condition event feature dhcp name DHCPSNP_USERBINDTBL_RECOVER</strong>
+[<span class="keyword">*</span>DeviceA-ops-assistant-dhcpsnpget] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA-ops] <strong>assistant dhcpsnpput</strong>
+[<span class="keyword">*</span>DeviceA-ops-assistant-dhcpsnpput] <strong>execute 1 python SnpTblBakRmtPut.py</strong>
+[<span class="keyword">*</span>DeviceA-ops-assistant-dhcpsnpput] <strong>condition timer cron 0/30 * * * * *</strong>
+[<span class="keyword">*</span>DeviceA-ops-assistant-dhcpsnpput] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA-ops] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001513165026__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check the configuration of the script assistants.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display ops assistant verbose name dhcpsnpget</strong>
+Assistant information
+  Name                 : dhcpsnpget
+  State                : ready
+  Type                 : command
+  Default assistant    : no
+ Running statistics
+  Running times        : 0
+  Queue size/(free)    : 10/(10)
+  Skip for queue full  : 0
+  Skip for delay       : 0
+  Skip for suppression : 0
+  Skip for error       : 0
+ Execute information
+  Task abstract        : SnpTblBakRmtGet.py 
+ Trigger control
+  Occurs threshold     : 1
+  Period (s)           : 30
+  Delay (s)            : 0
+  Suppress max         : 0
+  Hits in period       : 0
+ Condition information
+  Correlate expression : 
+  Condition tag        : 
+    Condition type     : event
+    Subscribe result   : success
+    Occurs threshold   : 0
+    Period (s)         : 0
+    Hits in period     : 0</pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001513165026__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li>DeviceA<pre class="screen">#
+sysname DeviceA
+#
+ops
+ assistant dhcpsnpget
+  execute 1 python SnpTblBakRmtGet.py 
+  condition event feature dhcp name DHCPSNP_USERBINDTBL_RECOVER
+ assistant dhcpsnpput
+  execute 1 python SnpTblBakRmtPut.py 
+  condition timer cron 0/30 * * * * *
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_ops_cfg_0012.html">Configuring a Script Assistant
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_ops_cfg_0021.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_ops_cfg_0025.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

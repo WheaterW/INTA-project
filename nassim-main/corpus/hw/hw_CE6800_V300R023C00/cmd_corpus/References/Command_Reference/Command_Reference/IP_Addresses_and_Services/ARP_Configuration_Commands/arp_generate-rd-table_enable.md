@@ -1,0 +1,78 @@
+arp generate-rd-table enable
+============================
+
+arp generate-rd-table enable
+
+Function
+--------
+
+
+
+The **arp generate-rd-table enable** command enables a device to generate ARP entries based on host information synchronized from EVPN routes.
+
+The **undo arp generate-rd-table enable** command restores the default configuration and deletes ARP entries generated based on host information synchronized from EVPN routes.
+
+
+
+By default, a device is disabled from generating ARP entries based on host information synchronized from EVPN routes.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**arp generate-rd-table enable**
+
+**undo arp generate-rd-table enable**
+
+
+Parameters
+----------
+
+None
+
+Views
+-----
+
+VBDIF interface view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+In the NFVI distributed gateway scenario where BGP EVPN peer relationships are established between L2GWs/L3GWs and DC-GWs, L2GWs or L3GWs learn MAC address and ARP information of interface processing units through the data plane and advertise the information to DC-GWs through EVPN routes. This allows ARP entries to be generated for Layer 2 forwarding and ensures that user services run properly. To enable a device to generate ARP entries based on host information synchronized from EVPN routes, run the **arp generate-rd-table enable** command.
+
+**Configuration Impact**
+
+After the **undo arp generate-rd-table enable** command is run, the device deletes ARP entries generated based on host information synchronized from EVPN routes and will not generate ARP entries upon receipt of host information synchronized from EVPN routes advertised by the peer.
+
+**Follow-up Procedure**
+
+Run the **arp broadcast-detect enable** command in the VBDIF interface view to enable ARP broadcast probe implemented when a VXLAN tunnel or Layer 2 sub-interface goes Down.
+
+
+Example
+-------
+
+# Enable VBDIF 10 to generate ARP entries based on host information synchronized from EVPN routes.
+```
+<HUAWEI> system-view
+[~HUAWEI] bridge-domain 10
+[*HUAWEI-bd10] quit
+[*HUAWEI] interface vbdif 10
+[*HUAWEI-Vbdif10] arp generate-rd-table enable
+[*HUAWEI-Vbdif10] arp broadcast-detect enable
+
+```

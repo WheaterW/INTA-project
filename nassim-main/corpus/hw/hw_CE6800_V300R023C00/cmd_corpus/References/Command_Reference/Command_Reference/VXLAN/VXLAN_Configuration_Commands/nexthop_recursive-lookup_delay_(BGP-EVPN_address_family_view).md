@@ -1,0 +1,102 @@
+nexthop recursive-lookup delay (BGP-EVPN address family view)
+=============================================================
+
+nexthop recursive-lookup delay (BGP-EVPN address family view)
+
+Function
+--------
+
+
+
+The **nexthop recursive-lookup delay** command configures a delay in responding to changes in the next hop recursion result.
+
+The **undo nexthop recursive-lookup delay** command restores the default configuration.
+
+The **nexthop recursive-lookup non-critical-event delay** command configures a delay in responding to non-urgent next-hop recursion changes.
+
+The **undo nexthop recursive-lookup non-critical-event delay** command restores the default configuration.
+
+
+
+By default, the delay in responding to non-critical next hop recursion changes is 10s, and the device does not delay responding to critical next hop recursion changes.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**nexthop recursive-lookup delay** [ *delay-time* ]
+
+**nexthop recursive-lookup non-critical-event delay** [ *nonCrit-delay-time* ]
+
+**undo nexthop recursive-lookup delay**
+
+**undo nexthop recursive-lookup non-critical-event delay**
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| *delay-time* | Specifies the delay in responding to recursion changes. | The value is an integer that ranges from 1 to 100, in seconds. The default value is 5 seconds. |
+| *nonCrit-delay-time* | Indicates the delay in responding to non-critical recursion changes. | The value is an integer ranging from 0 to 100, in seconds. The default value is 10. |
+
+
+
+Views
+-----
+
+BGP-EVPN address family view,bgp-muli-instance-af-evpn view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+If the recursion result of BGP routes changes frequently, you can run the **nexthop recursive-lookup delay** command to configure BGP to respond to the recursion result change after a specified period of time. This can reduce unnecessary route re-selection and re-advertisement, but affects network convergence. Recursion result changes are classified into two types:
+
+* Urgent recursion result change: When the recursion result of the next hop changes, the reachability also changes. For example, if a fault occurs on the network, BGP routes cannot find the next hop route or tunnel to which BGP routes can recurse. As a result, traffic is interrupted.
+* Non-urgent recursion result change: The recursion result of the next hop changes, but the reachability does not change. For example, the interface or type of the tunnel to which the next hop of a BGP route recurses changes. That is, the tunnel to which the next hop of a BGP route recurses changes from tunnel A to tunnel B, but traffic is not interrupted. Only the tunnel to which the next hop of a BGP route recurses changes.
+
+**Configuration Impact**
+
+The rules for configuring a delay in response to next hop recursion changes and configuring a dedicated delay in response to non-critical recursion changes are as follows:
+
+* nexthop recursive-lookup delay //Configure the device to delay for 5s in response to critical recursion changes and delay for 10s in response to non-critical recursion changes.
+* nexthop recursive-lookup non-critical-event delay //Configure the device not to delay the responses to critical recursion changes but to delay for 10s in response to non-critical recursion changes.
+* nexthop recursive-lookup delay 3 //Configure the device to delay for 3s in response to critical recursion changes and delay for 10s in response to non-critical recursion changes.
+* nexthop recursive-lookup non-critical-event delay 6 //Configure the device not to delay the responses to critical recursion changes but to delay for 6s in response to non-critical recursion changes.
+* nexthop recursive-lookup delaynexthop recursive-lookup non-critical-event delay 0 //Configure the device to delay for 5s in response to both critical and non-critical recursion changes.
+* nexthop recursive-lookup delaynexthop recursive-lookup non-critical-event delay //Configure the device to delay for 5s in response to critical recursion changes and delay for 10s in response to non-critical recursion changes.
+* nexthop recursive-lookup delay 3nexthop recursive-lookup non-critical-event delay //Configure the device to delay for 3s in response to critical recursion changes and delay for 10s in response to non-critical recursion changes.
+* nexthop recursive-lookup delay 3nexthop recursive-lookup non-critical-event delay 6 //Configure the device to delay for 3s in response to critical recursion changes and delay for 6s in response to non-critical recursion changes.
+* nexthop recursive-lookup delaynexthop recursive-lookup non-critical-event delay 6 //Configure the device to delay for 5s in response to critical recursion changes and delay for 6s in response to non-critical recursion changes.
+
+**Precautions**
+
+Delayed response to BGP next hop recursion changes applies only to scenarios where multiple links exist between the downstream device and the same destination. If there is only one link between the downstream device and the destination, configuring delayed response to BGP next hop recursion changes may cause heavier traffic loss when the link fails because link switching is impossible.After the **nexthop recursive-lookup delay** command is run, if the delay in response to non-critical recursion changes is set to 0 using the **nexthop recursive-lookup non-critical-event delay** command, the actual delay in response to non-critical recursion changes is the same as the delay in response to next hop recursion changes specified in the **nexthop recursive-lookup delay** command.
+
+
+Example
+-------
+
+# Enable the device to respond to non-critical BGP recursion changes after a 10-second delay in the BGP-EVPN address family view.
+```
+<HUAWEI> system-view
+[~HUAWEI] bgp 100
+[*HUAWEI-bgp] l2vpn-family evpn
+[*HUAWEI-bgp-af-evpn] nexthop recursive-lookup non-critical-event delay 10
+
+```

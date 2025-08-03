@@ -1,0 +1,164 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring iQCN for a Lossless Queue">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ai_iqcn_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ai_iqcn_cfg_0010.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="iQCN">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="iQCN">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001564119653">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring iQCN for a Lossless Queue</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001564119653"></a><a name="EN-US_TASK_0000001564119653"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring iQCN for a Lossless Queue</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001564119653__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In <a href="#EN-US_TASK_0000001564119653__fig19978171395514">Figure 1</a>, a lossless service carried by RoCEv2 traffic is deployed on Host1 and Host2, and DeviceA is directly connected to both hosts. DCQCN is configured on Host1 and Host2. To ensure that Host1 and Host2 do not increase their packet sending rates if they do not receive CNPs in a timely manner when congestion occurs, configure iQCN for a lossless queue on DeviceA.</p>
+<div class="fignone" id="EN-US_TASK_0000001564119653__fig19978171395514"><a name="EN-US_TASK_0000001564119653__fig19978171395514"></a><a name="fig19978171395514"></a><span class="figcap"><b>Figure 1 </b>Network diagram for configuring iQCN for a lossless queue</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 and interface2 represent <span>100GE</span><span>1/0/1</span> and <span>100GE</span><span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001564119657.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001564119653__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>When configuring iQCN for a lossless queue, note the following:</p>
+<ul><li>NICs of the hosts must support RoCEv2 and DCQCN.</li><li>The parameter settings in this example are for reference only. You need to configure each device based on the traffic model in the actual networking.</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001564119653__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure DeviceA to implement PFC based on the DSCP value.</span><p><p># In this example, a queue with priority 4 is used to carry RoCEv2 traffic. Enable PFC for the queue with priority 4 on interfaces of DeviceA.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[*<span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>dcb pfc</strong>
+[*DeviceA-dcb-pfc-default] <strong>priority 4</strong>
+[*DeviceA-dcb-pfc-default] <strong>quit</strong>
+[*DeviceA] <strong>port-group all_using</strong>   
+[*DeviceA-port-group-all_using] <strong>group-member <span>100ge</span> <span>1/0/1</span> to <span>100ge</span> <span>1/0/2</span></strong>
+[*DeviceA-port-group-all_using] <strong>dcb pfc enable mode manual</strong>
+[*DeviceA-port-group-all_using] <strong>quit</strong>
+[*DeviceA] <strong>commit</strong></pre>
+<p># In this example, the DSCP value of RoCEv2 packets is 24, and the DSCP value of CNPs is 25. Configure the DiffServ domain <strong>ds1</strong> on DeviceA to map the DSCP value of RoCEv2 packets to 4 and that of CNPs to 6, ensuring that CNPs are transmitted through a queue with a higher priority. Then apply the DiffServ domain to interfaces.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>diffserv domain</strong><strong> ds1</strong> 
+[*DeviceA-dsdomain-ds1] <strong>ip-dscp-inbound 24 phb af4 green</strong>
+[*DeviceA-dsdomain-ds1] <strong>ip-dscp-inbound 25 phb cs6 green</strong>
+[*DeviceA-dsdomain-ds1] <strong>quit</strong> 
+[*DeviceA] <strong>port-group all_using</strong>
+[*DeviceA-port-group-all_using] <strong>trust dscp</strong>
+[*DeviceA-port-group-all_using] <strong>trust upstream ds1</strong>
+[*DeviceA-port-group-all_using] <strong>quit</strong>
+[*DeviceA] <strong>commit</strong></pre>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>After the preceding configurations are complete, RoCEv2 packets are transmitted through the queue with priority 4, which is a lossless queue.</p>
+</div></div>
+</p></li><li><span>Configure iQCN for a lossless queue.</span><p><p># Enable iQCN for lossless queue 4 on DeviceA. In this example, the interval between rate increase events of the NIC is 400 &micro;s.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>ai-service</strong>
+[*DeviceA-ai-service]<strong> </strong><strong>iqcn</strong>
+[*DeviceA-ai-service-iqcn] <strong>assign queue 4</strong>
+[*DeviceA-ai-service-iqcn] <strong>iqcn</strong><strong> enable</strong>
+[*DeviceA-ai-service-iqcn] <strong>rpg-time-reset 400</strong>
+[*DeviceA-ai-service-iqcn] <strong>quit</strong>
+[*DeviceA-ai-service] <strong>quit</strong>
+[*DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>iqcn</strong><strong> enable</strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[*DeviceA] <strong>interface <span>100ge</span> <span>1/0/2</span></strong>
+[*DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>iqcn</strong><strong> enable</strong>
+[*DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[*DeviceA] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001564119653__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check statistics about CNPs proactively sent by DeviceA.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>display iqcn statistics slot 1</strong>  
+iQCN: Enable
+Queue: 4 
+RPG Time Reset: <strong>400 us</strong>
+TX CNP Packets: 7891564
+TX CNP Rate(pps): 89898
+--------------------------------------------------
+Interface      RX CNP Packets    RX CNP Rate(pps) 
+<span>100GE</span><span>1/0/1</span>       158964894615              569874 
+<span>100GE</span><span>1/0/2</span>                 22                   9
+--------------------------------------------------</pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001564119653__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><p><span class="keyword">DeviceA</span></p>
+<pre class="screen">#
+sysname <span class="keyword">DeviceA</span>
+#
+dcb pfc
+ priority 4
+#
+diffserv domain ds1  
+ ip-dscp-inbound 24 phb af4 green
+ ip-dscp-inbound 25 phb cs6 green
+#
+interface <span>100GE</span><span>1/0/1</span>
+ iqcn enable
+ trust dscp
+ trust upstream ds1
+ dcb pfc enable mode manual
+#
+interface <span>100GE</span><span>1/0/2</span>
+ iqcn enable
+<strong> </strong>trust dscp
+ trust upstream ds1
+ dcb pfc enable mode manual
+#
+ai-service 
+ #
+<strong> </strong>iqcn
+  iqcn enable
+  assign queue 4
+  rpg-time-reset 400
+#
+port-group all_using        
+ group-member <span>100GE</span><span>1/0/1</span>   
+ group-member <span>100GE</span><span>1/0/2</span> 
+#
+return
+</pre>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_ai_iqcn_cfg_0001.html">iQCN Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_ai_iqcn_cfg_0010.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

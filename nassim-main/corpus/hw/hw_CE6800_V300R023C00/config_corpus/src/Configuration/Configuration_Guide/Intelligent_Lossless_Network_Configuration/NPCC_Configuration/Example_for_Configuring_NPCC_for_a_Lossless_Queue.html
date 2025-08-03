@@ -1,0 +1,171 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring NPCC for a Lossless Queue">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ai_npcc_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ai_npcc_cfg_0010.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="NPCC">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="NPCC">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001564119693">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring NPCC for a Lossless Queue</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001564119693"></a><a name="EN-US_TASK_0000001564119693"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring NPCC for a Lossless Queue</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001564119693__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p><a href="#EN-US_TASK_0000001564119693__fig19978171395514">Figure 1</a> shows a typical DCI scenario where a storage service carried over RoCEv2 is deployed on servers in multiple DCs. DeviceA and DeviceB function as egress devices for DCI, and they are far away from each other. To reduce congestion risks and improve RoCEv2 service performance, configure NPCC on DeviceA and DeviceB.</p>
+<div class="fignone" id="EN-US_TASK_0000001564119693__fig19978171395514"><a name="EN-US_TASK_0000001564119693__fig19978171395514"></a><a name="fig19978171395514"></a><span class="figcap"><b>Figure 1 </b>Network diagram for NPCC implementation in a DCI scenario</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 represents <span>100GE</span><span>1/0/1</span>.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001513159618.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001564119693__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>When configuring NPCC for a lossless queue, note the following:</p>
+<ul><li>NICs of the hosts must support RoCEv2 and DCQCN.</li><li>The parameter settings in this example are for reference only. You need to configure each device based on the traffic model on your network.</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001564119693__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure PFC.</span><p><p># In this example, queue 4 carries the RoCEv2 service as planned, so enable PFC for queue 4 on interface 1 of DeviceA. The configurations on DeviceB are similar.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[*<span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>dcb pfc</strong>
+[*DeviceA-dcb-pfc-default] <strong>priority 4</strong>
+[*DeviceA-dcb-pfc-default] <strong>quit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>dcb pfc enable mode manual</strong>
+[<span class="keyword">*DeviceA</span>-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[*DeviceA] <strong>commit</strong></pre>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>For details about other PFC configurations, see <a href="galaxy_dcb_cfg_0004.html">PFC</a>.</p>
+</div></div>
+</p></li><li><span>Configure NPCC for the lossless queue.</span><p><p># On DeviceA, enable NPCC for lossless queue 4. In this example, the storage service is deployed on servers, so the default high-throughput mode is used. The configurations on DeviceB are similar.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>ai-service</strong>
+[*DeviceA-ai-service]<strong> </strong><strong>npcc</strong>
+[*DeviceA-ai-service-npcc] <strong>assign queue 4</strong>
+[*DeviceA-ai-service-npcc] <strong>quit</strong>
+[*DeviceA-ai-service] <strong>quit</strong>
+[*DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>npcc</strong><strong> enable</strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[*DeviceA] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001564119693__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Display the NPCC configuration on DeviceA.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>display npcc configuration slot 1</strong>  
+NPCC mode: High-throughput
+NPCC Enabled Queue: 4
+NPCC Enabled Interface:
+<strong><span>100ge</span> <span>1/0/1</span></strong></pre>
+<p># Check statistics about CNPs proactively sent by DeviceA.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>display npcc statistics interface <span>100ge</span> <span>1/0/1</span></strong>  
+Chip Statistics:
+  Total Resent CNP Number: 601
+  IPv4 Resent CNP Number: 601
+  IPv6 Resent CNP Number: 0
+  Used Total Flow Entries: 1025
+  Used IPv4 Flow Entries: 1025
+  Used IPv6 Flow Entries: 0
+
+Interface Statistics:
+  Average Queue Length: 25KB
+  Total Resent CNP Number: 200
+  Associated Total Flow Entries: 1
+  IPv4 Info:
+    Recent CNP Number: 200
+    Associated Flow Entries: 1
+    ------------------------------------------
+    DIP              SIP              SQP
+    ------------------------------------------
+    192.168.20.27    192.168.10.29    156243
+    ------------------------------------------
+  IPv6 Info:
+    Recent CNP Number: 0
+    Associated Flow Entries: 0
+    ------------------------------------------
+    DIP              SIP              SQP
+    ------------------------------------------
+    ------------------------------------------</pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001564119693__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><p><span class="keyword">DeviceA</span></p>
+<pre class="screen">#
+sysname <span class="keyword">DeviceA</span>
+#
+dcb pfc
+ priority 4
+#
+interface <span>100GE</span><span>1/0/1</span>
+ npcc enable
+ dcb pfc enable mode manual
+#
+ai-service 
+ #
+<strong> </strong>npcc
+  assign queue 4
+#
+return
+</pre>
+<p><span class="keyword">DeviceB</span></p>
+<pre class="screen">#
+sysname <span class="keyword">DeviceB</span>
+#
+dcb pfc
+ priority 4
+#
+interface <span>100GE</span><span>1/0/1</span>
+ npcc enable
+ dcb pfc enable mode manual
+#
+ai-service 
+ #
+<strong> </strong>npcc
+  assign queue 4
+#
+return
+</pre>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_ai_npcc_cfg_0001.html">NPCC Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_ai_npcc_cfg_0010.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,203 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring a Script Assistant for Automatic Health Check">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_ops_cfg_0012.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_ops_cfg_0024.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_ops_cfg_0029.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="OPS">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="OPS">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="OPS">
+<meta name="featuretype" content="System Management">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001564125133">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring a Script Assistant for Automatic Health Check</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001564125133"></a><a name="EN-US_TASK_0000001564125133"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring a Script Assistant for Automatic Health Check</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001564125133__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><div class="p">As shown in <a href="#EN-US_TASK_0000001564125133__fig_dc_vrp_ops_cfg_new_001701">Figure 1</a>, the remote server is an SFTP server. DeviceA and the SFTP server have reachable routes to each other. To reduce maintenance workload, configure DeviceA to automatically collect daily health information.<div class="fignone" id="EN-US_TASK_0000001564125133__fig_dc_vrp_ops_cfg_new_001701"><a name="EN-US_TASK_0000001564125133__fig_dc_vrp_ops_cfg_new_001701"></a><a name="fig_dc_vrp_ops_cfg_new_001701"></a><span class="figcap"><b>Figure 1 </b>Networking diagram of automatic health check using a Python script</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 represents <span>100GE</span><span>1/0/1</span>.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001512685918.png"></span></div>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001564125133__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><div class="p">The configuration roadmap is as follows:<ol><li><p>Compile, upload, and install a Python script on DeviceA.</p>
+</li><li><p>Create a script assistant.</p>
+</li></ol>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001564125133__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Compile a Python script.</span><p><p># Compile a Python script named <strong>health.py</strong>.</p>
+<div class="p">In the Python script, set the trigger condition as the timer and the task as executing commands to collect device information (including hardware status, route status, and interface link status) and to send the collected information to the SFTP server. The Python script is as follows:<pre class="screen">#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) Huawei Technologies Co., Ltd. 2021-2030. All rights reserved.
+
+import ops
+
+# Define the function for uploading a file to the SFTP server.
+def upload_file_by_sftp(server_addr, username, passwd, local_file, remote_file):
+    # The parameters are described as follows.
+    # server_addr: IP address of the SFTP server
+    # username: username for logging in to the SFTP server
+    # passwd: password for logging in to the SFTP server
+    # local_file: file path on the device
+    # remote_file: destination file path (path to which the file is uploaded on the SFTP server)
+    ops_conn = ops.OPSConnection("localhost")
+    uri = '{}'.format('/restconf/operations/huawei-sshc:ssh-transfer-file')
+    req_data = '{}'.format(f'''
+        &lt;input&gt;
+            &lt;server-port&gt;22&lt;/server-port&gt;
+            &lt;host-addr-ipv4&gt;{server_addr}&lt;/host-addr-ipv4&gt;
+            &lt;command-type&gt;put&lt;/command-type&gt;
+            &lt;user-name&gt;{username}&lt;/user-name&gt;
+            &lt;password&gt;{passwd}&lt;/password&gt;
+            &lt;local-file-name&gt;{local_file}&lt;/local-file-name&gt;
+            &lt;remote-file-name&gt;{remote_file}&lt;/remote-file-name&gt;
+        &lt;/input&gt;
+    ''')
+    ret, _, rsp_data = ops_conn.create(uri, req_data)
+    ops_conn.close()
+    return
+# Define the function of the trigger condition.
+def ops_condition(_ops):
+	_ops.timer.cron("con1","0 1 * * * *")      # Set the timer event.
+	_ops.correlate("con1")
+
+# Define the functions for tasks.
+def ops_execute(_ops):
+        _ops.set_model_type("YANG")       # Configure the RESTful API to use the YANG model.
+	handle, err_desp  = _ops.cli.open()      # Enable the CLI channel.
+	_ops.cli.execute(handle,"display device &gt; health.txt")      # Run the <strong>display device</strong> command, clear the <strong>health.txt</strong> file, and save the command output to the <strong>health.txt</strong> file.
+	_ops.cli.execute(handle,"display health &gt;&gt; health.txt")     # Run the <strong>display health</strong> command and add the command output to the <strong>health.txt</strong> file.
+	_ops.cli.execute(handle,"display ip routing-table &gt;&gt; health.txt")
+	_ops.cli.execute(handle,"display lldp neighbor brief &gt;&gt; health.txt")
+	ret = _ops.cli.close(handle)      # Close the CLI channel.
+        upload_file_by_sftp("10.2.1.1", "user1", "password", "flash:/health.txt", "/usr1/logs/health.txt")    # Upload the file to the SFTP server. Specify the IP address, username, password, and other parameters in the <strong>upload_file_by_sftp</strong> function as required.
+	return 0
+</pre>
+</div>
+</p></li><li><span>Upload and install the Python script.</span><p><p># Configure DeviceA functioning as an SFTP client to download the Python script file <strong>health.py</strong> from the SFTP server. The Python script is stored on the SFTP server.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>sftp 10.2.1.1</strong>
+Trying 10.2.1.1 ... 
+Press CTRL+K to abort 
+Connected to 10.2.1.1 ... 
+Please input the username:  
+Enter password: 
+sftp-client&gt; <strong>get health.py</strong>
+Info: Transfer file in binary mode.
+Please wait for a while...
+/    635 bytes transferred
+Info: Downloaded the file successfully.</pre>
+<p># Install the Python script on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>quit</strong>
+&lt;DeviceA&gt; <strong>ops install file health.py</strong></pre>
+</p></li><li><span>Configure a script assistant.</span><p><pre class="screen">&lt;DeviceA&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>ops</strong>
+[<span class="keyword">*</span>DeviceA-ops] <strong>script-assistant python health.py</strong>
+[<span class="keyword">*</span>DeviceA-ops] <strong>return</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>Configure an IP address for the specified interface on DeviceA.</span><p><pre class="screen">&lt;DeviceA&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ip address 10.1.1.1 24</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001564125133__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check the configuration of the script assistant.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display ops assistant verbose name health.py</strong>
+Assistant information
+  Name                 : health.py
+  State                : ready
+  Type                 : script
+  Default assistant    : no
+ Running statistics
+  Running times        : 0
+  Queue size/(free)    : 10/(10)
+  Skip for queue full  : 0
+  Skip for delay       : 0
+  Skip for suppression : 0
+  Skip for error       : 0
+ Execute information
+  Task abstract        : health.py : ops_execute()
+ Trigger control
+  Occurs threshold     : 1
+  Period (s)           : 0
+  Delay (s)            : 0
+  Suppress max         : 0
+  Hits in period       : 0
+ Condition information
+  Correlate expression : con1
+  Condition tag        : con1
+    Condition type     : timer
+    Subscribe result   : success
+    Occurs threshold   : 0
+    Period (s)         : 0
+    Hits in period     : 0</pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001564125133__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li>DeviceA<pre class="screen">#
+sysname DeviceA
+#
+ops
+ script-assistant python health.py
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.1 24
+#</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_ops_cfg_0012.html">Configuring a Script Assistant
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_ops_cfg_0024.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_ops_cfg_0029.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

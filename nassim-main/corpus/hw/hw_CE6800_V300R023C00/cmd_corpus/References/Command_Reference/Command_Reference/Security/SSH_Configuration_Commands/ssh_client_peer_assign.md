@@ -1,0 +1,91 @@
+ssh client peer assign
+======================
+
+ssh client peer assign
+
+Function
+--------
+
+
+
+The **ssh client peer assign** command assigns a public key configured on the SSH client to the SSH server.
+
+The **undo ssh client peer assign** command unbinds the public key from the SSH server.
+
+
+
+By default, no public key is assigned to the SSH server.
+
+
+Format
+------
+
+**ssh client peer** *server-name* **assign** { **rsa-key** | **ecc-key** | **dsa-key** | **sm2-key** } *key-name*
+
+**undo ssh client peer** *server-name* **assign** { **rsa-key** | **ecc-key** | **dsa-key** | **sm2-key** }
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| *server-name* | Specifies the name of an SSH server. | The value is a string of 1 to 255 case-sensitive characters, spaces not supported. The string can contain only letters, digits, and underscores (\_). |
+| **rsa-key** | Specifies the RSA public key. | - |
+| **ecc-key** | Specifies the ECC public key. | - |
+| **dsa-key** | Specifies the DSA public key. | - |
+| **sm2-key** | Specifies the SM2 public key. | - |
+| *key-name* | Specifies the name of public key assigned to an SSH server. | The value is a string of 1 to 40 case-insensitive characters, spaces not supported. |
+
+
+
+Views
+-----
+
+System view
+
+
+Default Level
+-------------
+
+3: Management level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+* When the device functions as an SSH client and key authentication is used, you can run this command to assign a public key to the SSH server.
+* When the device functions as an STelnet client to connect to another server, the system asks you whether to save the public key of the peer server. If you enter Y, the corresponding configuration information is added.
+* If the **ssh client first-time enable** command is not run to enable the SSH client to log in to the SSH server for the first time, the STelnet client fails to log in to the SSH server because the validity check on the public key of the SSH server fails.
+* If the SSH server public key saved on the SSH client becomes invalid, run the **undo ssh client peer assign** command to unbind the SSH server from the specified public key, and then run the **ssh client peer assign** command to assign a new public key to the SSH server.
+* You can run the **display ssh server-info** command to view the binding information about the SSH client.
+
+
+Example
+-------
+
+# Assign an RSA key named key01 to the SSH server.
+```
+<HUAWEI> system-view
+[~HUAWEI] ssh client peer 10.1.1.1 assign rsa-key key01
+
+```
+
+# Assign the SM2 public key named sm2key001 to the SSH server at 10.1.1.1.
+```
+<HUAWEI> system-view
+[~HUAWEI] sm2 peer-public-key sm2key001
+Enter "SM2 public key" view, return system view with "peer-public-key end".
+[*HUAWEI-sm2-public-key] public-key-code begin
+Enter "SM2 public key" view, return system view with "peer-public-key end".
+[*HUAWEI-sm2-public-key-sm2-key-code] 0474F110 F90F131B B6F6D929 9A23A41E F1AB1666
+[*HUAWEI-sm2-public-key-sm2-key-code] AC4BE4EE EF2CD876 2B633F80 DD5CF42F 147A722F
+[*HUAWEI-sm2-public-key-sm2-key-code] DE527F39 247F3744 C23296BE FE3BE502 EEF7D9EC
+[*HUAWEI-sm2-public-key-sm2-key-code] BC28A576 7E
+[*HUAWEI-sm2-public-key-sm2-key-code] public-key-code end
+[*HUAWEI-sm2-public-key] peer-public-key end
+[*HUAWEI] ssh client peer 10.1.1.1 assign sm2-key sm2key001
+
+```

@@ -1,0 +1,395 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Basic IGMP Snooping over VXLAN Functions (Access Through an EVC Sub-interface)">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_l2mc_over_vxlan_cfg_0008.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_l2mc_over_vxlan_cfg_0013.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IGMP Snooping over VXLAN">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IGMP Snooping over VXLAN">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="IGMP Snooping over VXLAN">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001144940416">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Basic IGMP Snooping over VXLAN Functions (Access Through an EVC Sub-interface)</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001144940416"></a><a name="EN-US_TASK_0000001144940416"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Basic IGMP Snooping over VXLAN Functions (Access Through an EVC Sub-interface)</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001144940416__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On a VXLAN network, IGMP snooping over VXLAN prevents multicast traffic from being flooded in a BD and allows the ingress to forward the multicast traffic based on user requirements.</p>
+<p>On the network shown in <a href="#EN-US_TASK_0000001144940416__fig_dc_cfg_igmp_snp_014001">Figure 1</a>, an enterprise has VMs deployed on different servers. VM1 on Server1 and VM1 on Server2 belong to VLAN 10; VM1 on Server3 belongs to VLAN 20. VMs on Server1 are multicast sources, and VMs on Server2 and Server3 are multicast users. It is required that VXLAN and IGMP snooping be configured to allow the VM1 users in different servers to order multicast services provided by the multicast source VM1 on Server1.</p>
+<div class="fignone" id="EN-US_TASK_0000001144940416__fig_dc_cfg_igmp_snp_014001"><a name="EN-US_TASK_0000001144940416__fig_dc_cfg_igmp_snp_014001"></a><a name="fig_dc_cfg_igmp_snp_014001"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring IGMP snooping over VXLAN</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1, interface2, and interface3 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, and <span>100GE</span><span>1/0/3</span>, respectively.</p>
+</div></div>
+<p><span><img class="vsd" src="figure/en-us_image_0000001172640848.png"></span></p>
+</div>
+<h4 class="sectiontitle">Configuration Roadmap</h4><div class="p">The configuration roadmap is as follows:<ol><li>Configure a routing protocol on DeviceA, DeviceB, DeviceC, and DeviceD to ensure Layer 3 interworking.</li><li>Configure VXLAN service access points in EVC sub-interface access mode on DeviceA, DeviceB, and DeviceC to differentiate service traffic.</li><li>Configure EVPN as the VXLAN control plane protocol on DeviceA, DeviceB, DeviceC, and DeviceD. Configure DeviceD as an RR, and establish a BGP EVPN peer relationship between it and each of the other devices. Configure an EVPN instance and ingress replication on DeviceA, DeviceB, and DeviceC so that a VXLAN tunnel is established between DeviceA and DeviceB and between DeviceA and DeviceC.</li><li>Enable IGMP snooping globally and in the BD on all service access points (DeviceA, DeviceB, and DeviceC), and configure DeviceA as an IGMP snooping querier to implement Layer 2 multicast on the VXLAN network.</li></ol>
+</div>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001144940416__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure a routing protocol.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span><span class="keyword">*</span></span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface loopback 0</strong>
+[<span><span class="keyword">*</span></span>DeviceA-LoopBack0] <strong>ip address 1.1.1.1 32</strong>
+[<span><span class="keyword">*</span></span>DeviceA-LoopBack0] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span><span class="keyword">*</span></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[<span><span class="keyword">*</span></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ip address 192.168.1.1 24</strong>
+[<span><span class="keyword">*</span></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>DeviceA] <strong>bgp 100</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bgp] <strong>peer 192.168.1.2 as-number 400</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bgp] <strong>network 1.1.1.1 32</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bgp] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>DeviceA] <strong>commit</strong></pre>
+<p>The configurations of DeviceB, DeviceC, and DeviceD are similar to that of DeviceA. For detailed configurations, see Configuration Scripts.</p>
+</p></li><li><span>Configure service access points in EVC sub-interface access mode.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>bridge-domain 10</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bd10] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/2</span>.1 mode l2</strong>
+[<span><span class="keyword">*</span></span>DeviceA-<span>100GE</span><span>1/0/2</span>.1] <strong>encapsulation dot1q vid 10</strong>
+[<span><span class="keyword">*</span></span>DeviceA-<span>100GE</span><span>1/0/2</span>.1] <strong>bridge-domain 10</strong>
+[<span><span class="keyword">*</span></span>DeviceA-<span>100GE</span><span>1/0/2</span>.1] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>DeviceA] <strong>commit</strong></pre>
+<p>The configurations of DeviceB and DeviceC are similar to that of DeviceA. For detailed configurations, see Configuration Scripts.</p>
+</p></li><li><span>Configure VXLAN tunnels.</span><ol type="a"><li class="substepexpand"><span>Configure EVPN as the VXLAN control plane protocol.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>evpn-overlay enable</strong>
+[<span><span class="keyword">*</span></span>DeviceA] <strong>commit</strong></pre>
+<p>The configurations of DeviceB, DeviceC, and DeviceD are similar to that of DeviceA. For detailed configurations, see Configuration Scripts.</p>
+</p></li><li class="substepexpand"><span>Configure DeviceD to establish BGP EVPN peer relationships with DeviceA, DeviceB, and DeviceC. Configure DeviceD as an RR, and specify DeviceA, DeviceB, and DeviceC as its clients.</span><p><div class="p"># Configure BGP EVPN peer relationships on DeviceD and configure the RR function.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>bgp 100 instance evpn1</strong>
+[<span><span class="keyword">*</span></span>DeviceD-bgp-instance-evpn1] <strong>peer 1.1.1.1 as-number 100</strong>
+[<span><span class="keyword">*</span></span>DeviceD-bgp-instance-evpn1] <strong>peer 1.1.1.1 connect-interface LoopBack0</strong>
+[<span><span class="keyword">*</span></span>DeviceD-bgp-instance-evpn1] <strong>peer 2.2.2.2 as-number 100</strong>
+[<span><span class="keyword">*</span></span>DeviceD-bgp-instance-evpn1] <strong>peer 2.2.2.2 connect-interface LoopBack0</strong>
+[<span><span class="keyword">*</span></span>DeviceD-bgp-instance-evpn1] <strong>peer 3.3.3.3 as-number 100</strong>
+[<span><span class="keyword">*</span></span>DeviceD-bgp-instance-evpn1] <strong>peer 3.3.3.3 connect-interface LoopBack0</strong>
+[<span><span class="keyword">*</span></span>DeviceD-bgp-instance-evpn1] <strong>l2vpn-family evpn</strong>
+[<span><span class="keyword">*</span></span>DeviceD-bgp-instance-evpn1-af-evpn] <strong>peer 1.1.1.1 enable</strong>
+[<span><span class="keyword">*</span></span>DeviceD-bgp-instance-evpn1-af-evpn] <strong>peer 1.1.1.1 reflect-client</strong>
+[<span><span class="keyword">*</span></span>DeviceD-bgp-instance-evpn1-af-evpn] <strong>peer 2.2.2.2 enable</strong>
+[<span><span class="keyword">*</span></span>DeviceD-bgp-instance-evpn1-af-evpn] <strong>peer 2.2.2.2 reflect-client</strong>
+[<span><span class="keyword">*</span></span>DeviceD-bgp-instance-evpn1-af-evpn] <strong>peer 3.3.3.3 enable</strong>
+[<span><span class="keyword">*</span></span>DeviceD-bgp-instance-evpn1-af-evpn] <strong>peer 3.3.3.3 reflect-client</strong>
+[<span><span class="keyword">*</span></span>DeviceD-bgp-instance-evpn1-af-evpn] <strong>undo policy vpn-target</strong>
+[<span><span class="keyword">*</span></span>DeviceD-bgp-instance-evpn1-af-evpn] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>DeviceD-bgp-instance-evpn1] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>DeviceD] <strong>commit</strong></pre>
+</div>
+</p></li><li class="substepexpand"><span>Configure DeviceA, DeviceB, and DeviceC to establish BGP EVPN peer relationships with DeviceD.</span><p><div class="p"># Configure a BGP EVPN peer relationship on DeviceA.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>bgp 100 instance evpn1</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bgp-instance-evpn1] <strong>peer 4.4.4.4 as-number 100</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bgp-instance-evpn1] <strong>peer 4.4.4.4 connect-interface LoopBack0</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bgp-instance-evpn1] <strong>l2vpn-family evpn</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bgp-instance-evpn1-af-evpn] <strong>peer 4.4.4.4 enable</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bgp-instance-evpn1-af-evpn] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bgp-instance-evpn1] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>DeviceA] <strong>commit</strong></pre>
+</div>
+</p><p><p>The configurations of DeviceB and DeviceC are similar to that of DeviceA. For detailed configurations, see Configuration Scripts.</p>
+</p></li><li class="substepexpand"><span>Configure an EVPN instance on DeviceA, DeviceB, and DeviceC.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>bridge-domain 10</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bd10] <strong>vxlan vni 10</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bd10] <strong>evpn</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bd10-evpn] <strong>route-distinguisher 10:1</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bd10-evpn] <strong>vpn-target 10:1</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bd10-evpn] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bd10] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>DeviceA] <strong>commit</strong></pre>
+</p><p><p>The configurations of DeviceB and DeviceC are similar to that of DeviceA. For detailed configurations, see Configuration Scripts.</p>
+</p></li><li class="substepexpand"><span>Enable ingress replication on DeviceA, DeviceB, and DeviceC.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface nve 1</strong>
+[<span><span class="keyword">*</span></span>DeviceA-Nve1] <strong>source 1.1.1.1</strong>
+[<span><span class="keyword">*</span></span>DeviceA-Nve1] <strong>mac-address 00e0-fc12-3456</strong>
+[<span><span class="keyword">*</span></span>DeviceA-Nve1] <strong>vni 10 head-end peer-list protocol bgp</strong>
+[<span><span class="keyword">*</span></span>DeviceA-Nve1] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>DeviceA] <strong>commit</strong></pre>
+</p><p><p>The configurations of DeviceB and DeviceC are similar to that of DeviceA. For detailed configurations, see Configuration Scripts.</p>
+</p></li></ol>
+</li><li><span>Enable IGMP snooping globally and in the BD, and configure an IGMP snooping querier on DeviceA.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>igmp snooping enable</strong>
+[<span><span class="keyword">*</span></span>DeviceA] <strong>bridge-domain 10</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bd10] <strong>igmp snooping enable</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bd10] <strong>igmp snooping querier enable</strong>
+[<span><span class="keyword">*</span></span>DeviceA-bd10] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>DeviceA] <strong>commit</strong></pre>
+</p><p><p>The configurations of DeviceB and DeviceC are similar to that of DeviceA. For detailed configurations, see Configuration Scripts.</p>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001144940416__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Display VXLAN tunnel information.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display vxlan tunnel</strong>
+Number of vxlan tunnel : 2
+Tunnel ID   Source                Destination           State  Type     Uptime
+-----------------------------------------------------------------------------------
+4026531841  1.1.1.1               2.2.2.2               up     dynamic  00:14:45
+4026531842  1.1.1.1               3.3.3.3               up     dynamic  00:09:42</pre>
+<p># Display multicast member port information.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>display igmp snooping port-info bridge-domain 10 verbose </strong>
+The port information of Group 235.1.1.1 on Bridge-domain 10:
+  Time of this group has been up : 00:01:34
+
+  The port information of (*, 235.1.1.1):
+    Time of this source has been up : 00:01:34
+    Port Table on this source(*):
+    Source flags: IGMP Active
+    List of ports in include mode :
+      No.1
+        Port name :<strong> <span>100GE</span><span>1/0/2</span>.1</strong>(PE:20)
+        Time of this port has been up as a host-port : 00:01:35
+        Remain time of port expire as dynamic host-port : --
+        Host-port flags : <strong>Dynamic</strong>
+      No.2
+        Port name : <strong>vxlan-peer(1.1.1.1)</strong>
+        Time of this port has been up as a host-port : 00:01:36
+        Remain time of port expire as dynamic host-port : --
+        Host-port flags : <strong>Dynamic</strong>
+      No.3
+        Port name : <strong>vxlan-peer(2.2.2.2)</strong>
+        Time of this port has been up as a host-port : 00:01:35
+        Remain time of port expire as dynamic host-port : --
+        Host-port flags : <strong>Dynamic</strong>
+    There are 3 port(s) in include mode.</pre>
+<p>The command output shows that dynamic member ports <span>100GE</span><span>1/0/2</span>.1, vxlan-peer (1.1.1.1), and vxlan-peer (2.2.2.2) have been generated for multicast group 235.1.1.1 on DeviceC. The VMs on Server3 can order multicast traffic sent by the VMs on Server1.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001144940416__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li>DeviceA<pre class="screen">#
+sysname DeviceA
+#
+evpn-overlay enable
+#
+igmp snooping enable
+#
+bridge-domain 10
+ vxlan vni 10
+ evpn
+  route-distinguisher 10:1
+  vpn-target 10:1 export-extcommunity
+  vpn-target 10:1 import-extcommunity
+ igmp snooping enable
+ igmp snooping querier enable
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>.1 mode l2
+ encapsulation dot1q vid 10
+ bridge-domain 10
+#
+interface LoopBack0
+ ip address 1.1.1.1 255.255.255.255
+#
+interface Nve1
+ source 1.1.1.1
+ vni 10 head-end peer-list protocol bgp
+ mac-address 00e0-fc12-3456
+#
+bgp 100
+ peer 192.168.1.2 as-number 400
+ #
+ ipv4-family unicast
+  network 1.1.1.1 255.255.255.255
+  peer 192.168.1.2 enable
+#
+bgp 100 instance evpn1
+ peer 4.4.4.4 as-number 100
+ peer 4.4.4.4 connect-interface LoopBack0
+ #
+ l2vpn-family evpn
+  policy vpn-target
+  peer 4.4.4.4 enable
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+evpn-overlay enable
+#
+igmp snooping enable
+#
+bridge-domain 10
+ vxlan vni 10
+ evpn
+  route-distinguisher 40:1
+  vpn-target 10:1 export-extcommunity
+  vpn-target 10:1 import-extcommunity
+ igmp snooping enable
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.2.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>.1 mode l2
+ encapsulation dot1q vid 10
+ bridge-domain 10
+#
+interface LoopBack0
+ ip address 2.2.2.2 255.255.255.255
+#
+interface Nve1
+ source 2.2.2.2
+ vni 10 head-end peer-list protocol bgp
+ mac-address 00e0-fc12-3456
+#
+bgp 200
+ peer 192.168.2.2 as-number 400
+ #
+ ipv4-family unicast
+  network 2.2.2.2 255.255.255.255
+  peer 192.168.2.2 enable
+#
+bgp 100 instance evpn1
+ peer 4.4.4.4 as-number 100
+ peer 4.4.4.4 connect-interface LoopBack0
+ #
+ l2vpn-family evpn
+  policy vpn-target
+  peer 4.4.4.4 enable
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+evpn-overlay enable
+#
+igmp snooping enable
+#
+bridge-domain 10
+ vxlan vni 10
+ evpn
+  route-distinguisher 20:1
+  vpn-target 20:1 export-extcommunity
+  vpn-target 20:1 import-extcommunity
+ igmp snooping enable
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.3.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>.1 mode l2
+ encapsulation dot1q vid 20
+ bridge-domain 10
+#
+interface LoopBack0
+ ip address 3.3.3.3 255.255.255.255
+#
+interface Nve1
+ source 3.3.3.3
+ vni 10 head-end peer-list protocol bgp
+ mac-address 00e0-fc12-3456
+#
+bgp 300
+ peer 192.168.3.2 as-number 400
+ #
+ ipv4-family unicast
+  network 3.3.3.3 255.255.255.255
+  peer 192.168.3.2 enable
+#
+bgp 100 instance evpn1
+ peer 4.4.4.4 as-number 100
+ peer 4.4.4.4 connect-interface LoopBack0
+ #
+ l2vpn-family evpn
+  policy vpn-target
+  peer 4.4.4.4 enable
+#
+return</pre>
+</li><li><p>DeviceD</p>
+<pre class="screen">#
+sysname DeviceD
+#
+evpn-overlay enable
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.2.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 192.168.3.2 255.255.255.0
+#
+interface LoopBack0
+ ip address 4.4.4.4 255.255.255.255
+#
+bgp 400
+ peer 192.168.1.1 as-number 100
+ peer 192.168.2.1 as-number 200
+ peer 192.168.3.1 as-number 300
+ #
+ ipv4-family unicast
+  network 4.4.4.4 255.255.255.255
+  peer 192.168.2.1 enable
+  peer 192.168.3.1 enable
+  peer 192.168.1.1 enable
+#
+bgp 100 instance evpn1
+ peer 1.1.1.1 as-number 100
+ peer 1.1.1.1 connect-interface LoopBack0
+ peer 2.2.2.2 as-number 100
+ peer 2.2.2.2 connect-interface LoopBack0
+ peer 3.3.3.3 as-number 100
+ peer 3.3.3.3 connect-interface LoopBack0
+ #
+ l2vpn-family evpn
+  undo policy vpn-target
+  peer 1.1.1.1 enable
+  peer 1.1.1.1 reflect-client
+  peer 2.2.2.2 enable
+  peer 2.2.2.2 reflect-client
+  peer 3.3.3.3 enable
+  peer 3.3.3.3 reflect-client
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_l2mc_over_vxlan_cfg_0008.html">Configuring Basic Functions of IGMP Snooping over VXLAN
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_l2mc_over_vxlan_cfg_0013.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

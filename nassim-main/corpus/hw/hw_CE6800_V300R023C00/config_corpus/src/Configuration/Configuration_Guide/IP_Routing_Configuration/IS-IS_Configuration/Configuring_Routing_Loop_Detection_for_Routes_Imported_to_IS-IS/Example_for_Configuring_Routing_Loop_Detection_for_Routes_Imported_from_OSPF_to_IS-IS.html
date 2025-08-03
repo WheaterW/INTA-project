@@ -1,0 +1,513 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Routing Loop Detection for Routes Imported from OSPF to IS-IS">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0046.html">
+<meta name="DC.Relation" scheme="URI" content="vrp/vrp_isis_cfg_0300.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IS-IS">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IS-IS">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001208291951">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Routing Loop Detection for Routes Imported from OSPF to IS-IS</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001208291951"></a><a name="EN-US_TASK_0000001208291951"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Routing Loop Detection for Routes Imported from OSPF to IS-IS</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001208291951__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the live network, IS-IS routes can be imported to an OSPF process for redistribution. In such a scenario, routing policies are usually configured on multiple devices to prevent routing loops. If routing policies are incorrectly configured on the devices that import routes, routing loops may occur. To prevent this problem, configure routing loop detection for the routes imported to IS-IS.</p>
+<p>In <a href="#EN-US_TASK_0000001208291951__fig799521210588">Figure 1</a>, IS-IS process 2 is configured on DeviceA, DeviceB, and DeviceF. An OSPF process is configured on DeviceB, DeviceC, DeviceE, and DeviceF. IS-IS process 1 is configured on DeviceC, DeviceD, and DeviceE. DeviceC is configured to import routes from IS-IS process 1 to the OSPF process, DeviceB is configured to import routes from the OSPF process to IS-IS process 2, and DeviceF is configured to import routes from IS-IS process 2 to the OSPF process.</p>
+<div class="fignone" id="EN-US_TASK_0000001208291951__fig799521210588"><a name="EN-US_TASK_0000001208291951__fig799521210588"></a><a name="fig799521210588"></a><span class="figcap"><b>Figure 1 </b>Routing loop detection for routes imported from OSPF to IS-IS</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interface 1, interface 2, and interface 3 in this example represent <span>100GE</span> <span>1/0/1</span>, <span>100GE</span> <span>1/0/2</span>, and <span>100GE</span> <span>1/0/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001208658397.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001208291951__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>To improve security, you are advised to configure IS-IS authentication. For details, see Configuring IS-IS Authentication. IS-IS interface authentication is used as an example. For details, see Example for Configuring Basic IS-IS Functions.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001208291951__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure IP addresses for interfaces on each device to implement area connectivity.</p>
+</li><li><p>Enable IS-IS and OSPF, and configure basic IS-IS and OSPF functions.</p>
+</li><li>Configure route import to construct a routing loop.</li><li><p>Display routing entries to check whether a routing loop occurs.</p>
+</li><li>Enable routing loop detection and view routing entries to check whether the routing loop is eliminated.</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001208291951__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface.</span><p><p>DeviceA, DeviceB, DeviceC, and DeviceD are used as examples.</p>
+<p># Configure DeviceA.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100GE</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ip address 10.12.1.1 24</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface</strong> <strong><span>100GE</span><span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>ip address 10.16.1.1 24</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">&lt;DeviceB&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface</strong> <strong><span>100GE</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>ip address 10.12.1.2 24</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>interface</strong> <strong><span>100GE</span><span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong>ip address 10.26.1.2 24</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>interface</strong> <strong><span>100GE</span><span>1/0/3</span> </strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/3</span>] <strong>ip address 10.23.1.2 24</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/3</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">&lt;DeviceC&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>interface</strong> <strong><span>100GE</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>ip address 10.23.1.3 24</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>interface</strong> <strong><span>100GE</span><span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>] <strong>ip address 10.35.1.3 24</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>interface</strong> <strong><span>100GE</span><span>1/0/3</span> </strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/3</span>] <strong>ip address 10.34.1.3 24</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/3</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure DeviceD. The route 10.1.1.1/32 on the loopback interface of DeviceD is used as the locally originated route.</p>
+<pre class="screen">&lt;DeviceD&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>interface</strong> <strong>loopBack 1</strong>
+[<span class="keyword">*</span>DeviceD-LoopBack1] <strong>ip address 10.1.1.1 32</strong>
+[<span class="keyword">*</span>DeviceD-LoopBack1] <strong>isis enable 1 </strong>
+[<span class="keyword">*</span>DeviceD-LoopBack1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+<p>The configurations of other devices are similar to those of the preceding devices. For details, see <a href="#EN-US_TASK_0000001208291951__section_dc_vrp_isis_cfg_201205">Configuration Scripts</a> in this section.</p>
+</p></li><li><span>Enable IS-IS and OSPF, and configure basic IS-IS and OSPF functions and a link cost to implement intra-area interworking.</span><p><p># Configure IS-IS process 2 on DeviceA, DeviceB, and DeviceF. The configuration on DeviceA is used as an example.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>isis 2</strong>
+[<span class="keyword">*</span>DeviceA-isis-2] <strong>cost-style wide</strong>
+[<span class="keyword">*</span>DeviceA-isis-2] <strong>network-entity 10.1111.0000.0001.00</strong>
+[<span class="keyword">*</span>DeviceA-isis-2] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface <span>100GE</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>isis enable 2</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>isis circuit-type p2p</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>isis cost 10</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface <span>100GE</span><span>1/0/2</span> </strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>isis enable 2</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>isis circuit-type p2p</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>isis cost 10</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p>The configurations of DeviceB and DeviceF are similar to those of DeviceA. For configuration details, see <a href="#EN-US_TASK_0000001208291951__section_dc_vrp_isis_cfg_201205">Configuration Scripts</a> in this section.</p>
+<p># Configure IS-IS process 1 on DeviceC, DeviceD, and DeviceE. The configuration on DeviceD is used as an example.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>isis 1</strong>
+[<span class="keyword">*</span>DeviceD-isis-1] <strong>cost-style wide</strong>
+[<span class="keyword">*</span>DeviceD-isis-1] <strong>network-entity 10.4444.0000.0001.00</strong>
+[<span class="keyword">*</span>DeviceD-isis-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>interface </strong><strong><span>100GE</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceD-<span>100GE</span><span>1/0/1</span>] <strong>isis enable 1</strong>
+[<span class="keyword">*</span>DeviceD-<span>100GE</span><span>1/0/1</span>] <strong>isis circuit-type p2p</strong>
+[<span class="keyword">*</span>DeviceD-<span>100GE</span><span>1/0/1</span>] <strong>isis cost 10</strong>
+[<span class="keyword">*</span>DeviceD-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>interface <span>100GE</span><span>1/0/2</span> </strong>
+[<span class="keyword">*</span>DeviceD-<span>100GE</span><span>1/0/2</span>] <strong>isis enable 1</strong>
+[<span class="keyword">*</span>DeviceD-<span>100GE</span><span>1/0/2</span>] <strong>isis circuit-type p2p</strong>
+[<span class="keyword">*</span>DeviceD-<span>100GE</span><span>1/0/2</span>] <strong>isis cost 10</strong>
+[<span class="keyword">*</span>DeviceD-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+<p>The configurations of DeviceC and DeviceE are similar to those of DeviceD. For configuration details, see <a href="#EN-US_TASK_0000001208291951__section_dc_vrp_isis_cfg_201205">Configuration Scripts</a> in this section.</p>
+<p># Configure OSPF on DeviceB, DeviceC, DeviceE, and DeviceF. The configuration on DeviceB is used as an example.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ospf 1</strong> <strong>router-id 10.2.2.2</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0] <strong>network 10.23.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0] <strong>network 10.26.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>interface <span>100GE</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>ospf enable 1 area 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>interface <span>100GE</span><span>1/0/2</span> </strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong>ospf enable 1 area 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p>The configurations of DeviceC, DeviceD, and DeviceE are similar to those of DeviceB. For configuration details, see <a href="#EN-US_TASK_0000001208291951__section_dc_vrp_isis_cfg_201205">Configuration Scripts</a> in this section.</p>
+</p></li><li><span>Configure route import.</span><p><p># Configure DeviceC to import routes from IS-IS process 1 to the OSPF process.</p>
+</p><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>ospf 1</strong> <strong>router-id 10.3.3.3</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1] <strong>import-route isis 1 cost 100 type 2</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1] <strong>commit</strong></pre>
+<p># Configure DeviceB to import routes from the OSPF process to IS-IS process 2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>isis 2</strong>
+[<span class="keyword">*</span>DeviceB-isis-2] <strong>import-route ospf 1</strong>
+[<span class="keyword">*</span>DeviceB-isis-2] <strong>commit</strong></pre>
+<p># Configure DeviceF to import routes from IS-IS process 2 to the OSPF process.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceF] <strong>ospf 1</strong> <strong>router-id 10.6.6.6</strong>
+[<span class="keyword">*</span>DeviceF-ospf-1] <strong>import-route isis 2 cost 10 type 2</strong>
+[<span class="keyword">*</span>DeviceF-ospf-1] <strong>commit</strong></pre>
+</p></li><li><span>Display the routing tables on DeviceB, DeviceE, and DeviceF to check whether a routing loop occurs.</span><p><p># Check OSPF neighbor information on DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display ospf peer</strong></pre>
+<pre class="screen">OSPF Process 1 with Router ID 10.2.2.2
+ Area 0.0.0.0 interface 10.23.1.2 (<span>100GE</span><span>1/0/3</span>)'s neighbors
+ <strong>Router ID: 10.3.3.3</strong>             <strong> Address: 10.23.1.3</strong>
+   State: Full           Mode:Nbr is Master     Priority: 1
+   DR: 10.23.1.3        BDR: 10.23.1.2        MTU: 0
+   Dead timer due in  3  sec
+   Retrans timer interval: 5
+   Neighbor is up for 28h43m46s
+   Neighbor Up Time : 2021-08-23 09:20:09
+   Authentication Sequence: [ 0 ]
+
+ Area 0.0.0.0 interface 10.26.1.2 (<span>100GE</span><span>1/0/2</span>)'s neighbors
+ <strong>Router ID: 10.6.6.6</strong>             <strong> Address: 10.26.1.6</strong>
+   State: Full           Mode:Nbr is Master     Priority: 1
+   DR: None              BDR: None              MTU: 0
+   Dead timer due in  4  sec
+   Retrans timer interval: 5
+   Neighbor is up for 28h43m46s
+   Neighbor Up Time : 2021-08-23 09:20:09
+   Authentication Sequence: [ 0 ]</pre>
+<p># Check IS-IS neighbor information on DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display isis peer</strong></pre>
+<pre class="screen">Peer information for ISIS(2)
+--------------------------------------------------------------------------------
+
+System Id      Interface          Circuit Id        State HoldTime Type     PRI
+--------------------------------------------------------------------------------
+<strong>6666.0000.0001</strong>  <span>100GE</span><span>1/0/3</span>         0000000011         Up   29s      L1L2     --
+<strong>1111.0000.0001</strong>  <span>100GE</span><span>1/0/2</span>         0000000025         Up   27s      L1L2     --
+
+Total Peer(s): 2</pre>
+<p>The preceding command output shows that DeviceB has established connections with DeviceA, DeviceC, and DeviceF.</p>
+<p># Check the routing table of DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display ip routing-table 10.1.1.1</strong></pre>
+<pre class="screen">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route
+------------------------------------------------------------------------------
+Routing Table : _public_
+Summary Count : 1
+
+Destination/Mask    Proto   Pre  Cost        Flags NextHop         Interface
+
+        10.1.1.1/24  O_ASE   150  1             D   <strong>10.26.1.6</strong>     <span>100GE</span><span>1/0/3</span></pre>
+<p>The command output shows that the next hop of the route displayed on DeviceB is DeviceF.</p>
+</p><p><p># Check OSPF neighbor information on DeviceF.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceF] <strong>display ospf peer</strong></pre>
+<pre class="screen"> OSPF Process 1 with Router ID 10.6.6.6
+ Area 0.0.0.0 interface 10.56.1.6 (<span>100GE</span><span>1/0/3</span>)'s neighbors
+<strong> Router ID: 10.5.5.5              Address: 10.56.1.5</strong>
+   State: Full           Mode:Nbr is Slave      Priority: 1
+   DR: 10.56.1.6        BDR: 10.56.1.5        MTU: 0
+   Dead timer due in  4  sec
+   Retrans timer interval: 5
+   Neighbor is up for 28h52m49s
+   Neighbor Up Time : 2021-08-23 09:20:11
+   Authentication Sequence: [ 0 ]
+
+ Area 0.0.0.0 interface 10.26.1.6 (<span>100GE</span><span>1/0/2</span>)'s neighbors
+ <strong>Router ID: 10.2.2.2              Address: 10.26.1.2</strong>
+   State: Full           Mode:Nbr is Slave      Priority: 1
+   DR: None              BDR: None              MTU: 0
+   Dead timer due in  3  sec
+   Retrans timer interval: 5
+   Neighbor is up for 28h52m51s
+   Neighbor Up Time : 2021-08-23 09:20:09
+   Authentication Sequence: [ 0 ]</pre>
+<p># Check IS-IS neighbor information on DeviceF.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceF] <strong>display isis peer</strong></pre>
+<pre class="screen">Peer information for ISIS(2)
+--------------------------------------------------------------------------------
+
+System Id       Interface          Circuit Id        State HoldTime Type     PRI
+--------------------------------------------------------------------------------
+<strong>2222.0000.0001</strong>  <span>100GE</span><span>1/0/2</span>           0000000011         Up   28s      L1L2     --
+<strong>1111.0000.0001</strong>  <span>100GE</span><span>1/0/1</span>           0000000011         Up   25s      L1L2     --
+
+Total Peer(s): 2</pre>
+<p>The preceding command output shows that DeviceF has established connections with DeviceA, DeviceB, and DeviceE.</p>
+<p># Check the routing table of DeviceF.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceF] <strong>display ip routing-table 10.1.1.1</strong></pre>
+<pre class="screen">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route
+------------------------------------------------------------------------------
+Routing Table : _public_
+Summary Count : 1
+
+Destination/Mask    Proto   Pre  Cost        Flags NextHop         Interface
+
+        10.1.1.1/24  ISIS-L2 15   10            D  <strong> 10.26.1.2 </strong>    <span>100GE</span><span>1/0/2</span></pre>
+<p>The command output shows that the next hop of the route displayed on DeviceF is DeviceB.</p>
+<p>In this case, a routing loop is formed between DeviceB and DeviceF.</p>
+</p></li><li><span>Enable routing loop detection on each device.</span><p><p># Configure DeviceA, which is used as an example.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>route loop-detect isis enable</strong>
+[<span class="keyword">*</span>DeviceA] <strong>route loop-detect ospf enable</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p>The configurations of other devices are similar to those of DeviceA. For configuration details, see <a href="#EN-US_TASK_0000001208291951__section_dc_vrp_isis_cfg_201205">Configuration Scripts</a> in this section.</p>
+</p></li><li><span>Check whether the routing loop is eliminated.</span><p><p># Check the routing table of DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display ip routing-table 10.1.1.1</strong></pre>
+<pre class="screen">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route
+------------------------------------------------------------------------------
+Routing Table : _public_
+Summary Count : 1
+
+Destination/Mask    Proto   Pre  Cost        Flags NextHop         Interface
+
+        10.1.1.1/24  O_ASE   150  100           D   <strong>10.23.1.3 </strong>     <span>100GE</span><span>1/0/3</span></pre>
+<p>The command output shows that the next hop of the route displayed on DeviceB is DeviceC.</p>
+</p><p><p># Check the routing table of DeviceF.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceF] <strong>display ip routing-table 10.1.1.1</strong></pre>
+<pre class="screen">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route
+------------------------------------------------------------------------------
+Routing Table : _public_
+Summary Count : 1
+
+Destination/Mask    Proto   Pre  Cost        Flags NextHop         Interface
+
+        10.1.1.1/24  ISIS-L2 15   10            D   <strong>10.26.1.2</strong>      <span>100GE</span><span>1/0/2</span></pre>
+<p>The preceding command output shows that the next hop of the route displayed on DeviceF is DeviceB and that DeviceB no longer preferentially selects the route received from DeviceF. This means that the routing loop between DeviceB and DeviceF is eliminated.</p>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0000001208291951__section_dc_vrp_isis_cfg_201205"><a name="EN-US_TASK_0000001208291951__section_dc_vrp_isis_cfg_201205"></a><a name="section_dc_vrp_isis_cfg_201205"></a><a name="EN-US_TASK_0000001208291951__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+isis 2
+ cost-style wide
+ network-entity 10.1111.0000.0001.00
+#
+route loop-detect isis enable
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.12.1.1 255.255.255.0
+ isis enable 2
+ isis circuit-type p2p
+ isis cost 10
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.16.1.1 255.255.255.0
+ isis enable 2
+ isis circuit-type p2p
+ isis cost 10
+#
+route loop-detect ospf enable
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+isis 2
+ cost-style wide
+ network-entity 10.2222.0000.0001.00
+ import-route ospf 1 
+#
+route loop-detect isis enable
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.12.1.2 255.255.255.0
+ isis enable 2
+ isis circuit-type p2p
+ isis cost 10
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.26.1.2 255.255.255.0
+ ospf network-type p2p
+ ospf timer hello 1
+ ospf enable 1 area 0.0.0.0
+ isis enable 2
+ isis circuit-type p2p
+ isis cost 10
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.23.1.2 255.255.255.0
+ ospf timer hello 1
+ ospf enable 1 area 0.0.0.0
+ 
+#
+ospf 1 router-id 10.2.2.2
+ opaque-capability enable 
+ area 0.0.0.0
+#
+route loop-detect ospf enable
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+isis 1
+ cost-style wide
+ network-entity 10.3333.0000.0001.00
+#
+route loop-detect isis enable
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.23.1.3 255.255.255.0
+ ospf timer hello 1
+ ospf enable 1 area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.35.1.3 255.255.255.0
+ ospf timer hello 1
+ ospf enable 1 area 0.0.0.0
+ isis enable 1
+ isis circuit-type p2p
+ isis cost 10
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.34.1.3 255.255.255.0
+ isis enable 1
+ isis circuit-type p2p
+ isis cost 10
+#
+ospf 1 router-id 10.3.3.3
+ import-route isis 1 cost 100 type 2
+ opaque-capability enable 
+ area 0.0.0.0
+#
+route loop-detect ospf enable
+#
+return</pre>
+</li><li><p>DeviceD</p>
+<pre class="screen">#
+sysname DeviceD
+#
+isis 1
+ cost-style wide
+ network-entity 10.4444.0000.0001.00
+#
+route loop-detect isis enable
+#
+interface LoopBack1
+ ip address 10.1.1.1 255.255.255.255
+ isis enable 1
+ isis cost 10
+#
+route loop-detect ospf enable
+#
+return</pre>
+</li><li><p>DeviceE</p>
+<pre class="screen">#
+sysname DeviceE
+#
+isis 1
+ cost-style wide
+ network-entity 10.5555.0000.0001.00
+#
+route loop-detect isis enable
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.56.1.5 255.255.255.0
+ ospf timer hello 1
+ ospf enable 1 area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.35.1.5 255.255.255.0
+ ospf timer hello 1
+ ospf enable 1 area 0.0.0.0
+ isis enable 1
+ isis circuit-type p2p
+ isis cost 10
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.45.1.5 255.255.255.0
+ isis enable 1
+ isis circuit-type p2p
+ isis cost 10
+#
+ospf 1 router-id 10.5.5.5
+ import-route isis 1 cost 100 type 2
+ opaque-capability enable 
+ area 0.0.0.0
+#
+route loop-detect ospf enable
+#
+return</pre>
+</li><li><p>DeviceF</p>
+<pre class="screen">#
+sysname DeviceF
+#
+isis 2
+ cost-style wide
+ network-entity 10.6666.0000.0001.00
+#
+route loop-detect isis enable
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.16.1.6 255.255.255.0
+ isis enable 2
+ isis circuit-type p2p
+ isis cost 10
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.26.1.6 255.255.255.0
+ ospf network-type p2p
+ ospf timer hello 1
+ ospf enable 1 area 0.0.0.0
+ isis enable 2
+ isis circuit-type p2p
+ isis cost 10
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.56.1.6 255.255.255.0
+ ospf timer hello 1
+ ospf enable 1 area 0.0.0.0
+#
+ospf 1 router-id 6.6.6.6
+ import-route isis 2 cost 10 type 2
+ opaque-capability enable
+ area 0.0.0.0
+#
+route loop-detect ospf enable
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_isis_ipv4_cfg_0046.html">Configuring Routing Loop Detection for Routes Imported to IS-IS
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp/vrp_isis_cfg_0300.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,77 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding ND">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_nd_cfg_0000.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_nd_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="spec/ND_limitation_23.0.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="ND">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="ND">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001130622526">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding ND</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001130622526"></a><a name="EN-US_CONCEPT_0000001130622526"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding ND</h1>
+<div><div class="section"><h4 class="sectiontitle">IPv6 Address Resolution</h4><p>To communicate with a destination host, a source host needs to first obtain the destination host's link-layer address (MAC address). In IPv4, this is achieved through ARP, whereas in IPv6, this is achieved through NDP.</p>
+<p>ARP is defined as a protocol that runs between Layer 2 and Layer 3. Its messages are encapsulated in Ethernet packets, with the Ethernet type value set to 0x0806. ND is implemented through ICMPv6 messages, with the Ethernet type value set to 0x86DD. To signify that the messages are ICMPv6 messages, the Next Header value in the IPv6 header is set to 58. NDP, which is a Layer 3 protocol, uses ICMPv6-encapsulated messages. Layer 3 address resolution has the following advantages:</p>
+<ul><li><p>Layer 3 address resolution enables Layer 2 devices to use the same address resolution protocol.</p>
+</li><li><p>Layer 3 security mechanisms are used to prevent address resolution attacks.</p>
+</li><li><p>Request messages can be multicast, reducing loads on Layer 2 networks.</p>
+</li></ul>
+<div class="p">Address resolution uses ICMPv6 Neighbor Solicitation (NS) and Neighbor Advertisement (NA) messages.<ul><li>In NS messages, the Type and Code field values are 135 and 0, respectively. These messages are similar to IPv4 ARP Request messages.</li><li>In NA messages, the Type and Code field values are 136 and 0, respectively. These messages are similar to IPv4 ARP Reply messages.</li></ul>
+</div>
+<p><a href="#EN-US_CONCEPT_0000001130622526__fig647113313815">Figure 1</a> shows the IPv6 address resolution process.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130622526__fig647113313815"><a name="EN-US_CONCEPT_0000001130622526__fig647113313815"></a><a name="fig647113313815"></a><span class="figcap"><b>Figure 1 </b>IPv6 address resolution</span><br><span><img class="vsd" src="figure/en-us_image_0000001176742005.png"></span></div>
+<p>Before sending messages to HostB, HostA must obtain HostB's link-layer address. To accomplish this, HostA sends an NS message with its IPv6 address as the source address and the solicited-node multicast address of HostB as the destination address. The Options field in the NS message carries the link-layer address of HostA.</p>
+<p>After receiving the NS message, HostB replies with an NA message. In the NA message, the source address is HostB's IPv6 address, and the destination address is HostA's IPv6 address. The Options field carries HostB's link-layer address. This address resolution process enables HostA to obtain HostB's link-layer address.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Checking Neighbor Cache Entry States</h4><p>Hardware faults and hot swapping of interface cards interrupt communication with neighboring devices. Communication cannot be restored if the destination of a neighboring device becomes invalid, but it can be restored if the path fails. To monitor the state of each neighboring device, nodes therefore need to maintain a neighbor table.</p>
+<p>RFC standards define five neighbor cache entry states: Incomplete, Reachable, Stale, Delay, and Probe.</p>
+<p><a href="#EN-US_CONCEPT_0000001130622526__fig5966164321313">Figure 2</a> shows the transition of neighbor cache entry states. The Empty state indicates that the neighbor table is empty.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130622526__fig5966164321313"><a name="EN-US_CONCEPT_0000001130622526__fig5966164321313"></a><a name="fig5966164321313"></a><span class="figcap"><b>Figure 2 </b>Neighbor state transition</span><br><span><img class="vsd" src="figure/en-us_image_0000001176742003.png"></span></div>
+<p>The following example describes changes in neighbor cache entry state of node A during its first communication with node B.</p>
+<ol><li>Node A sends an NS message and generates a cache entry. The neighbor cache entry state is Incomplete.</li><li>If node B replies with an NA message, the neighbor cache entry state changes from Incomplete to Reachable. Otherwise, the neighbor cache entry state changes from Incomplete to Empty after a certain period of time, and node A deletes this entry.</li><li>After the neighbor reachable time expires, the neighbor cache entry state changes from Reachable to Stale, indicating that the neighbor reachable state is unknown.</li><li>If node A receives an unsolicited NA message from node B in the Reachable state, and the link-layer address of node B carried in the message is different from that learned by node A, the neighbor cache entry state changes to Stale.</li><li>After the aging time of ND entries in the Stale state expires, the neighbor cache entry state changes to Delay.</li><li>After a period of time (5s), the neighbor cache entry state changes from Delay to Probe. During this time, if node A receives an NA message, the neighbor cache entry state changes to Reachable.</li><li>Node A sends three unicast NS messages at the configured interval (1s) while node B is in the Probe state. If node A receives an NA message, the neighbor cache entry state changes from Probe to Reachable. Otherwise, the state changes to Empty and node A deletes the entry.</li></ol>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_nd_cfg_0000.html">ND Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_nd_cfg_0001.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="spec/ND_limitation_23.0.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

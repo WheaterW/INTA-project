@@ -1,0 +1,528 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring OSPF Local MT">
+<meta name="abstract" content="This section provides an example for configuring OSPF local multicast topology (MT).">
+<meta name="description" content="This section provides an example for configuring OSPF local multicast topology (MT).">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospf_cfg_0093.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospf_cfg_0101.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospf_cfg_2008.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,w00606909">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Route">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Routing Basis">
+<meta name="OWNER" content="z00875216">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="z00875216">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172365665">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/jquery.min.idp.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/RowOrColfreezeSupport.js"></script>
+
+<script type="text/javascript">
+setTimeout(function(){
+	jQueryHW(document).ready(function(){
+		jQueryHW("table[rowfreeze='yes']").rowfreeze();
+		jQueryHW("table[colfreeze='yes']").colfreeze();
+	});
+},500);
+</script>
+<title>Example for Configuring OSPF Local MT</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172365665"></a><a name="EN-US_TASK_0172365665"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring OSPF Local MT</h1>
+<div class="taskbody"><p>This section provides an example for configuring OSPF local multicast topology (MT).</p>
+<div class="context"><a name="EN-US_TASK_0172365665__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>When both multicast and MPLS TE tunnels are configured on a network and the TE tunnels are configured with IGP Shortcut, the outbound interface that an IGP calculates for a route may be not a physical interface but a TE tunnel interface. The TE tunnel interface on the <span class="keyword">Device</span> sends multicast Join packets over a unicast route to the multicast source address. The multicast Join packets are transparent to the <span class="keyword">Device</span> through which the TE tunnel passes. As a result, the <span class="keyword">Device</span> through which the TE tunnel passes cannot generate multicast forwarding entries.</p>
+<p>On the network shown in <a href="#EN-US_TASK_0172365665__fig_dc_vrp_ospf_cfg_201701">Figure 1</a>, <span class="keyword">Device</span>A, <span class="keyword">Device</span>B, <span class="keyword">Device</span>C, <span class="keyword">Device</span>D, and <span class="keyword">Device</span>E are running OSPF. <span class="keyword">Device</span>B and <span class="keyword">Device</span>D set up an MPLS TE tunnel with the tunnel interface Tunnel 10, and IGP Shortcut is enabled on Tunnel 10 of <span class="keyword">Device</span>B. The outbound interface calculated by <span class="keyword">Device</span>B may be the TE tunnel interface, not the physical interface GE <span>0/2/0</span>. Interface TE tunnel 10 on <span class="keyword">Device</span>B sends multicast Join messages over a unicast route to the multicast source address. The multicast Join messages are transparent to <span class="keyword">Device</span>C spanned by TE tunnel 10. As a result, <span class="keyword">Device</span>C cannot generate multicast forwarding entries.</p>
+<p>To resolve the problem, enable OSPF local MT on <span class="keyword">Device</span>B. After local MT is enabled, if the outbound interface of a calculated route is an IGP Shortcut-enabled TE tunnel interface, the route management (RM) module creates an independent Multicast IGP (MIGP) routing table for the multicast protocol, calculates a physical outbound interface for the route, and adds the route to the MIGP routing table. Multicast packets are then forwarded along this route.</p>
+<div class="fignone" id="EN-US_TASK_0172365665__fig_dc_vrp_ospf_cfg_201701"><a name="EN-US_TASK_0172365665__fig_dc_vrp_ospf_cfg_201701"></a><a name="fig_dc_vrp_ospf_cfg_201701"></a><span class="figcap"><b>Figure 1 </b>Configuring local OSPF MT</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 and 2 in this example represent GE <span>0/1/0</span> and GE <span>0/2/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_ospf_cfg_201701.png" width="NaN" height="NaN"></span><br></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172365665__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>To improve security, OSPF area authentication or interface authentication is recommended. For details, see "Improving OSPF Network Security". OSPF area authentication is used as an example. For details, see Example for Configuring Basic OSPF Functions.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172365665__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Enable OSPF and configure basic OSPF functions on each <span class="keyword">Device</span>.</p>
+</li><li><p>Enable PIM-SM on each <span class="keyword">Device</span>.</p>
+</li><li><p>Configure an MPLS Resource Reservation Protocol (RSVP)-TE tunnel.</p>
+</li><li><p>Configure an MPLS TE tunnel and enable IGP Shortcut for it on <span class="keyword">Device</span>B.</p>
+</li><li><p>Enable OSPF local MT on <span class="keyword">Device</span>B.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172365665__1.4.4"></a><a name="1.4.4"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><a href="#EN-US_TASK_0172365665__tab_dc_vrp_ospf_cfg_201701">Table 1</a> lists the IP addresses of interfaces on the <span class="keyword">Router</span>. 
+<div class="tableBorder"><a name="EN-US_TASK_0172365665__tab_dc_vrp_ospf_cfg_201701"></a><a name="tab_dc_vrp_ospf_cfg_201701"></a><table cellpadding="4" cellspacing="0" summary="" rowfreeze="yes" id="EN-US_TASK_0172365665__tab_dc_vrp_ospf_cfg_201701" frame="border" border="1" rules="all"><caption><b>Table 1 </b>IP address of each interface</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="46.5%" id="mcps1.4.4.3.1.3.2.3.1.1" liSelected="liSelected"><p><span class="keyword">Device</span></p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="53.5%" id="mcps1.4.4.3.1.3.2.3.1.2" liSelected="liSelected"><p>IP Address of Loopback 0</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="46.5%" headers="mcps1.4.4.3.1.3.2.3.1.1 "><p><span class="keyword">Device</span>A</p>
+</td>
+<td class="cellrowborder" valign="top" width="53.5%" headers="mcps1.4.4.3.1.3.2.3.1.2 "><p>1.1.1.1/32</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="46.5%" headers="mcps1.4.4.3.1.3.2.3.1.1 "><p><span class="keyword">Device</span>B</p>
+</td>
+<td class="cellrowborder" valign="top" width="53.5%" headers="mcps1.4.4.3.1.3.2.3.1.2 "><p>2.2.2.2/32</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="46.5%" headers="mcps1.4.4.3.1.3.2.3.1.1 "><p><span class="keyword">Device</span>C</p>
+</td>
+<td class="cellrowborder" valign="top" width="53.5%" headers="mcps1.4.4.3.1.3.2.3.1.2 "><p>3.3.3.3/32</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="46.5%" headers="mcps1.4.4.3.1.3.2.3.1.1 "><p><span class="keyword">Device</span>D</p>
+</td>
+<td class="cellrowborder" valign="top" width="53.5%" headers="mcps1.4.4.3.1.3.2.3.1.2 "><p>4.4.4.4/32</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="46.5%" headers="mcps1.4.4.3.1.3.2.3.1.1 "><p><span class="keyword">Device</span>E</p>
+</td>
+<td class="cellrowborder" valign="top" width="53.5%" headers="mcps1.4.4.3.1.3.2.3.1.2 "><p>5.5.5.5/32</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li><li><p>The TE tunnel interface Tunnel 10 uses the IP address of Loopback 0 and runs the MPLS TE protocol. The destination address of the TE tunnel is 4.4.4.4, and the tunnel ID is 100. The TE tunnel uses RSVP-TE as a signaling protocol.</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172365665__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface.</span><p><p><a href="#EN-US_TASK_0172365665__fig_dc_vrp_ospf_cfg_201701">Figure 1</a> shows how to assign an IP address to each interface. For configuration details, see <a href="#EN-US_TASK_0172365665__section_dc_vrp_ospf_cfg_201705">Configuration Files</a> in this section.</p>
+</p></li><li><span>Configure basic OSPF functions.</span><p><p><a href="dc_vrp_ospf_cfg_0003.html">Configuring Basic OSPF Functions</a> shows how to configure basic OSPF functions. For configuration details, see <a href="#EN-US_TASK_0172365665__section_dc_vrp_ospf_cfg_201705">Configuration Files</a> in this section.</p>
+</p></li><li><span>Configure Protocol Independent Multicast-Sparse Mode (PIM-SM).</span><p><p># Enable PIM-SM on <span class="keyword">Device</span>A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>multicast routing-enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>interface Gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>] <strong>pim sm</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>interface Gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>pim sm</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Enable PIM-SM on each <span class="keyword">Device</span>. The configurations for <span class="keyword">Device</span>B, <span class="keyword">Device</span>C, <span class="keyword">Device</span>D, and <span class="keyword">Device</span>E are similar to those on <span class="keyword">Device</span>A. For configuration details, see <a href="#EN-US_TASK_0172365665__section_dc_vrp_ospf_cfg_201705">Configuration Files</a> in this section.</p>
+</div></div>
+<p># Enable Internet Group Management Protocol (IGMP) on GE <span>0/1/0</span> of <span class="keyword">Device</span>A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>interface Gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>igmp enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>igmp version 3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<p># Configure a C-BSR and a C-RP. Set the service range of the RP on <span class="keyword">Device</span>D and specify the locations of the C-BSR and the C-RP.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D] <strong>pim</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-pim] <strong>c-bsr LoopBack0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-pim] <strong>c-rp LoopBack0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-pim] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D-pim] <strong>quit</strong></pre>
+<p># Check the multicast routing table on <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>display multicast routing-table</strong></pre>
+<pre class="screen">Multicast routing table of VPN-Instance: public net
+ Total 3 entries
+
+ 00001. (192.168.3.8, 224.31.31.31)
+       Uptime: 15:03:04
+       Upstream Interface: GigabitEthernet<span>0/2/0</span>
+       List of 1 downstream interface
+           1:  GigabitEthernet<span>0/1/0</span>
+
+ 00002. (192.168.3.9, 224.31.31.31)
+       Uptime: 15:03:04
+       Upstream Interface: GigabitEthernet<span>0/2/0</span>
+       List of 1 downstream interface
+           1:  GigabitEthernet<span>0/1/0</span>
+
+ 00003. (192.168.3.10, 224.31.31.31)
+       Uptime: 15:03:04
+       Upstream Interface: GigabitEthernet<span>0/2/0</span>
+       List of 1 downstream interface
+           1:  GigabitEthernet<span>0/1/0</span></pre>
+<p>The preceding command output shows information about the multicast routing table on <span class="keyword">Device</span>C.</p>
+</p></li><li><span>Configure an MPLS RSVP-TE tunnel.</span><p><p># Configure <span class="keyword">Device</span>B.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>mpls lsr-id 2.2.2.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-mpls] <strong>mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-mpls] <strong>mpls rsvp-te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-mpls] <strong>mpls te cspf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-mpls] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>interface Gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/2/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/2/0</span>] <strong>mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/2/0</span>] <strong>mpls rsvp-te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/2/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1] <strong>enable traffic-adjustment</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1] <strong>opaque-capability enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1] <strong>area 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1-area-0.0.0.0] <strong>mpls-te enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1-area-0.0.0.0] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1-area-0.0.0.0] <strong>quit</strong></pre>
+<p># Configure <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>mpls lsr-id 3.3.3.3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-mpls] <strong>mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-mpls] <strong>mpls rsvp-te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-mpls] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>interface Gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/0</span>] <strong>mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/0</span>] <strong>mpls rsvp-te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>interface Gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/2/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/2/0</span>] <strong>mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/2/0</span>] <strong>mpls rsvp-te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/2/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf-1] <strong>opaque-capability enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf-1] <strong>area 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf-1-area-0.0.0.0] <strong>mpls-te enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf-1-area-0.0.0.0] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf-1-area-0.0.0.0] <strong>quit</strong></pre>
+<p># Configure <span class="keyword">Device</span>D.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D] <strong>mpls lsr-id 4.4.4.4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-mpls] <strong>mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-mpls] <strong>mpls rsvp-te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-mpls] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D] <strong>interface Gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/2/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/2/0</span>] <strong>mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/2/0</span>] <strong>mpls rsvp-te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-GigabitEthernet<span>0/2/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-ospf-1] <strong>opaque-capability enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-ospf-1] <strong>area 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-ospf-1-area-0.0.0.0] <strong>mpls-te enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-ospf-1-area-0.0.0.0] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-ospf-1-area-0.0.0.0] <strong>quit</strong></pre>
+</p></li><li><span>Configure an MPLS TE tunnel and enable IGP Shortcut.</span><p><p># Configure an MPLS TE tunnel and enable IGP Shortcut for it on <span class="keyword">Device</span>B.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>interface Tunnel 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-Tunnel10] <strong>ip address unnumbered interface loopback 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-Tunnel10] <strong>tunnel-protocol mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-Tunnel10] <strong>destination 4.4.4.4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-Tunnel10] <strong>mpls te tunnel-id 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-Tunnel10] <strong>mpls te igp shortcut ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-Tunnel10] <strong>mpls te igp metric relative -10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-Tunnel10] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-Tunnel10] <strong>quit</strong></pre>
+<p># Check the OSPF routing table on <span class="keyword">Device</span>B. Information shows that an MPLS TE tunnel has been set up.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>display ip routing-table</strong></pre>
+<pre class="screen"><span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+----------------------------------------------------------------------------
+Routing Table: _public_
+         Destinations : 14       Routes : 14
+
+  Destination/Mask    Proto    Pre    Cost     Flags    NextHop      Interface
+        2.2.2.2/32    Direct   0      0        D        127.0.0.1    InLoopBack0
+        3.3.3.3/32    OSPF     10     1        D        10.0.1.1     GigabitEthernet<span>0/2/0</span>
+        <strong>4.4.4.4/32</strong>  <strong>OSPF</strong>   <strong>10</strong>   <strong>1</strong>     <strong>D</strong>     <strong>2.2.2.2</strong>   <strong>Tunnel10</strong>
+        <strong>5.5.5.5/32</strong>  <strong>OSPF</strong>   <strong>10</strong>   <strong>2</strong>     <strong>D</strong>     <strong>2.2.2.2</strong>   <strong>Tunnel10</strong>
+        10.0.0.0/24   Direct   0      0        D        10.0.0.2     GigabitEthernet<span>0/1/0</span>
+        10.0.0.2/32   Direct   0      0        D        127.0.0.1    InLoopBack0
+        10.0.1.0/24   Direct   0      0        D        10.0.1.2     GigabitEthernet<span>0/2/0</span>
+        10.0.1.2/32   Direct   0      0        D        127.0.0.1    InLoopBack0
+        10.0.2.0/24   OSPF     10     2        D        10.0.1.1     GigabitEthernet<span>0/2/0</span>
+                      OSPF     10     2        D        10.0.1.1     Tunnel10
+        <strong>10.0.3.0/24</strong> <strong>OSPF</strong>   <strong>10</strong>   <strong>2</strong>     <strong>D</strong>     <strong>2.2.2.2</strong>   <strong>Tunnel10</strong>
+        127.0.0.0/8   Direct   0      0        D        127.0.0.1    InLoopBack0
+        127.0.0.1/32  Direct   0      0        D        127.0.0.1    InLoopBack0
+        172.16.1.0/24 OSPF     10     2        D        10.0.0.1     GigabitEthernet<span>0/2/0</span>
+        <strong>192.168.3.0/24</strong> <strong>OSPF</strong> <strong>10</strong>  <strong>3</strong>     <strong>D</strong>     <strong>2.2.2.2</strong>   <strong>Tunnel10</strong></pre>
+<p># Check the multicast routing table on <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>display multicast routing-table</strong></pre>
+<p>No multicast entry is displayed, indicating that multicast packets are discarded.</p>
+</p></li><li><span>Enable OSPF local MT.</span><p><p># Enable OSPF local MT on <span class="keyword">Device</span>B.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1] <strong>local-mt enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1] <strong>quit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p># Check the multicast routing table on <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>display multicast routing-table</strong></pre>
+<pre class="screen">Multicast routing table of VPN-Instance: public net
+ Total 3 entries
+
+ 00001. (192.168.3.8, 224.31.31.31)
+       Uptime: 00:00:19
+       Upstream Interface: GigabitEthernet<span>0/2/0</span>
+       List of 1 downstream interface
+           1:  GigabitEthernet<span>0/1/0</span>
+
+ 00002. (192.168.3.9, 224.31.31.31)
+       Uptime: 00:00:19
+       Upstream Interface: GigabitEthernet<span>0/2/0</span>
+       List of 1 downstream interface
+           1:  GigabitEthernet<span>0/1/0</span>
+
+ 00003. (192.168.3.10, 224.31.31.31)
+       Uptime: 00:00:19
+       Upstream Interface: GigabitEthernet<span>0/2/0</span>
+       List of 1 downstream interface
+           1:  GigabitEthernet<span>0/1/0</span></pre>
+<p>The preceding command output shows information about the multicast routing table on <span class="keyword">Device</span>C.</p>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0172365665__section_dc_vrp_ospf_cfg_201705"><a name="EN-US_TASK_0172365665__section_dc_vrp_ospf_cfg_201705"></a><a name="section_dc_vrp_ospf_cfg_201705"></a><a name="EN-US_TASK_0172365665__1.4.6"></a><a name="1.4.6"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p><span class="keyword">Device</span>A configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname <span class="keyword">Device</span>A</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> router id 1.1.1.1</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> multicast routing-enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.0.0.1 255.255.255.0</pre>
+<pre class="screen"> pim sm</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 172.16.1.1 255.255.255.0</pre>
+<pre class="screen"> pim sm</pre>
+<pre class="screen"> igmp enable</pre>
+<pre class="screen"> igmp version 3</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack0</pre>
+<pre class="screen"> ip address 1.1.1.1 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 172.16.1.0 0.0.0.255</pre>
+<pre class="screen">  network 10.0.0.0 0.0.0.255</pre>
+<pre class="screen">  network 1.1.1.1 0.0.0.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p><span class="keyword">Device</span>B configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname <span class="keyword">Device</span>B</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> router id 2.2.2.2</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> multicast routing-enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls lsr-id 2.2.2.2</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen">  mpls te</pre>
+<pre class="screen">  mpls rsvp-te</pre>
+<pre class="screen">  mpls te cspf</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> opaque-capability enable</pre>
+<pre class="screen"> enable traffic-adjustment</pre>
+<pre class="screen"> local-mt enable</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 10.0.0.0 0.0.0.255</pre>
+<pre class="screen">  network 10.0.1.0 0.0.0.255</pre>
+<pre class="screen">  network 2.2.2.2 0.0.0.0</pre>
+<pre class="screen">  mpls-te enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.0.0.2 255.255.255.0</pre>
+<pre class="screen"> pim sm</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.0.1.2 255.255.255.0</pre>
+<pre class="screen"> pim sm</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls te</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack0</pre>
+<pre class="screen"> ip address 2.2.2.2 255.255.255.255</pre>
+<pre class="screen"> pim sm</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface Tunnel10</pre>
+<pre class="screen"> ip address unnumbered interface LoopBack0</pre>
+<pre class="screen"> tunnel-protocol mpls te</pre>
+<pre class="screen"> destination 4.4.4.4</pre>
+<pre class="screen"> mpls te tunnel-id 100</pre>
+<pre class="screen"> mpls te igp shortcut ospf</pre>
+<pre class="screen"> mpls te igp metric relative -10</pre>
+<pre class="screen">#</pre>
+<pre class="screen">pim</pre>
+<pre class="screen"> C-BSR LoopBack0</pre>
+<pre class="screen"> C-RP LoopBack0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p><span class="keyword">Device</span>C configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname <span class="keyword">Device</span>C</pre>
+<pre class="screen">#</pre>
+<pre class="screen">router id 3.3.3.3</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> multicast routing-enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls lsr-id 3.3.3.3</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen">  mpls te</pre>
+<pre class="screen">  mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> opaque-capability enable</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 10.0.1.0 0.0.0.255</pre>
+<pre class="screen">  network 10.0.2.0 0.0.0.255</pre>
+<pre class="screen">  network 3.3.3.3 0.0.0.0</pre>
+<pre class="screen">  mpls-te enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.0.1.1 255.255.255.0</pre>
+<pre class="screen"> pim sm</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls te</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.0.2.2 255.255.255.0</pre>
+<pre class="screen"> pim sm</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls te</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack0</pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 3.3.3.3 255.255.255.255</pre>
+<pre class="screen"> #</pre>
+<pre class="screen">return</pre>
+</li><li><p><span class="keyword">Device</span>D configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname <span class="keyword">Device</span>D</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> router id 4.4.4.4</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> multicast routing-enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls lsr-id 4.4.4.4</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen">  mpls te</pre>
+<pre class="screen">  mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.0.3.1 255.255.255.0</pre>
+<pre class="screen"> pim sm</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.0.2.1 255.255.255.0</pre>
+<pre class="screen"> pim sm</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls te</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack0</pre>
+<pre class="screen"> ip address 4.4.4.4 255.255.255.255</pre>
+<pre class="screen"> pim sm</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> opaque-capability enable</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 10.0.2.0 0.0.0.255</pre>
+<pre class="screen">  network 10.0.3.0 0.0.0.255</pre>
+<pre class="screen">  network 4.4.4.4 0.0.0.0</pre>
+<pre class="screen">  mpls-te enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">pim</pre>
+<pre class="screen"> C-BSR LoopBack0</pre>
+<pre class="screen"> C-RP LoopBack0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p><span class="keyword">Device</span> E configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname <span class="keyword">Device</span>E</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> router id 5.5.5.5</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> multicast routing-enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.0.3.2 255.255.255.0</pre>
+<pre class="screen"> pim sm</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 192.168.3.1 255.255.255.0</pre>
+<pre class="screen"> pim sm</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack0</pre>
+<pre class="screen"> ip address 5.5.5.5 255.255.255.255</pre>
+<pre class="screen"> pim sm</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 10.0.3.0 0.0.0.255</pre>
+<pre class="screen">  network 192.168.3.0 0.0.0.255</pre>
+<pre class="screen">  network 5.5.5.5 0.0.0.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospf_cfg_0093.html">Configuration Examples for OSPF
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospf_cfg_0101.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospf_cfg_2008.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

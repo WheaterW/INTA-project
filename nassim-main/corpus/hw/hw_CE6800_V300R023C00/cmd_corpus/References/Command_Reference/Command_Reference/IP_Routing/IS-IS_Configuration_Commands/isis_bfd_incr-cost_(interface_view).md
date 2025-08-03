@@ -1,0 +1,91 @@
+isis bfd incr-cost (interface view)
+===================================
+
+isis bfd incr-cost (interface view)
+
+Function
+--------
+
+
+
+The **isis bfd incr-cost** command configures an interface to adjust its cost based on the status of an associated BFD session.
+
+The **undo isis bfd incr-cost** command cancels this configuration.
+
+The **isis bfd incr-cost block** command blocks an interface from adjusting its cost based on the status of an associated BFD session.
+
+The **undo isis bfd incr-cost block** command cancels this configuration.
+
+
+
+By default, an IS-IS interface does not adjust its cost based on the status of an associated BFD session.
+
+By default, an IS-IS interface is not blocked from adjusting its cost based on the status of an associated BFD session.
+
+
+
+
+Format
+------
+
+**isis bfd incr-cost** { *cost-value* | **max-reachable** }
+
+**isis bfd incr-cost block**
+
+**undo isis bfd incr-cost** [ *cost-value* | **max-reachable** ]
+
+**undo isis bfd incr-cost block**
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| *cost-value* | Specifies a cost increment value for the interface. | The value is an integer ranging from 1 to 16777213. |
+| **max-reachable** | Changes the cost of the interface to the maximum value 16777214. | - |
+| **block** | Blocks the IS-IS interface from adjusting its cost based on the status of an associated BFD session. | - |
+
+
+
+Views
+-----
+
+100ge sub-interface view,100GE interface view,10GE interface view,200GE sub-interface view,200GE interface view,25GE sub-interface view,25GE interface view,400GE sub-interface view,400GE interface view,50GE sub-interface view,50GE interface view,Eth-Trunk sub-interface view,Eth-Trunk interface view,Tunnel interface view,VBDIF interface view,VLANIF interface view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+Either a link fault or topology change on a network will cause routes to be re-calculated within an area. As such, speeding up the convergence of a routing protocol is critical to improving the network performance.As link faults are inevitable, rapidly detecting these faults and notifying routing protocols is an effective way to quickly resolve such issues. This includes associating BFD with a routing protocol to speed up convergence of the routing protocol once a link fault occurs.On a network where BFD detects a link fault, even if the fault is rectified quickly, the involved interface is disconnected due to the fact that the associated BFD session is down. As a result, the link is unstable and traffic is lost. To ensure network reliability and solve the preceding problems, you can run the **isis bfd incr-cost** command on an IS-IS interface to adjust the link cost. When the IS-IS interface detects that BFD goes Down, the IS-IS interface automatically increases the link cost, the link in the BFD Down state is not preferentially selected, and traffic can be transmitted through other links.When the detects that the BFD session goes Up, the cost of the interface is automatically restored to the previous cost. However, to prevent frequent BFD status changes caused by link quality, traffic loss may occur due to link instability. To solve the preceding problem, run the **isis bfd incr-cost wtr** command on an IS-IS interface to set a delay for cost adjustment. BFD status changes within the delay do not cause path calculation changes, ensuring network reliability.
+
+**Prerequisites**
+
+BFD has been enabled on the interface using the **isis bfd enable** command.
+
+**Precautions**
+
+The cost associated with BFD configured on an interface takes precedence over that associated with BFD configured in a process.The delay for cost recovery associated with BFD configured on an interface takes precedence over the delay for cost recovery associated with BFD configured in a process.If the delay time for BFD to associate with the cost is not configured on the interface but is configured in the process, the delay time for BFD to associate with the cost is not configured on the interface.The isis bfd incr-cost and **isis bfd incr-cost block** commands are mutually exclusive. The latest configuration overrides the previous one.The link cost of an interface depends on the cost style:
+
+* When the cost style is narrow, narrow-compatible, or compatible, the value ranges from 1 to 63.
+* If the cost style is wide or wide-compatible, the value ranges from 1 to 16777214.
+
+Example
+-------
+
+# Configure an interface to adjust its cost based on the status of an associated BFD session, with the cost increment set to 2. If the associated BFD session goes down, the interface increases its cost by 2.
+```
+<HUAWEI> system-view
+[~HUAWEI] interface 100GE1/0/1
+[~HUAWEI-100GE1/0/1] undo portswitch
+[*HUAWEI-100GE1/0/1] isis bfd incr-cost 2
+
+```

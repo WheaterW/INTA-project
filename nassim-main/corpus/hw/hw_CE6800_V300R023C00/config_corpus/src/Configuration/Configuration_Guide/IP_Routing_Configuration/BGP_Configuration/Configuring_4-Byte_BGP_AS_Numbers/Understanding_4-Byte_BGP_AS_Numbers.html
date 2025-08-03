@@ -1,0 +1,100 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding 4-Byte BGP AS Numbers">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0011.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0013.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001176743547">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<link rel="stylesheet" type="text/css" href="public_sys-resources/imagePopup.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/customQuery.js"></script>
+<script language="javascript" type="text/javascript" src="public_sys-resources/imagePopup.js"></script>
+<title>Understanding 4-Byte BGP AS Numbers</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001176743547"></a><a name="EN-US_CONCEPT_0000001176743547"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding 4-Byte BGP AS Numbers</h1>
+<div><div class="section"><h4 class="sectiontitle">Purpose</h4><p>2-byte AS numbers used on networks range from 1 to 65535, and the available AS numbers verge on exhaustion as networks expand. Therefore, 4-byte AS numbers ranging from 1 to 4294967295 are used to extend the AS number range. In addition, new speakers that support 4-byte AS numbers can co-exist with old speakers that support only 2-byte AS numbers.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Definition</h4><p>4-byte AS numbers are extended from 2-byte AS numbers. BGP peers use a new capability code and new optional transitive attributes to negotiate the 4-byte AS number capability and transmit 4-byte AS numbers. This mechanism enables communication between new speakers as well as between old speakers and new speakers.</p>
+<p>To support 4-byte AS numbers, an open capability code 0x41 is defined in a standard protocol for BGP connection negotiation. 0x41 indicates that the BGP speaker supports 4-byte AS numbers.</p>
+<p>In addition, two new optional transitive attributes AS4_Path (code 0x11) and AS4_Aggregator (code 0x12) are defined to transmit 4-byte AS numbers over old sessions.</p>
+<p>If a new speaker with an AS number greater than 65535 sets up a BGP connection with an old speaker, the old speaker needs to set the peer AS number to be the same as AS_TRANS. The value of AS_TRANS is fixed at 23456 and reserved.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Related Concepts</h4><div class="p">BGP 4-byte AS numbers involve the following concepts:<ul><li><p>New speaker: a BGP speaker that supports the new 4-byte AS number extensions.</p>
+</li><li><p>Old speaker: a BGP speaker that does not support the new 4-byte AS number extensions.</p>
+</li><li><p>New session: a BGP connection established between new speakers.</p>
+</li><li><p>Old session: a BGP connection established either between a new speaker and an old speaker or between old speakers.</p>
+</li></ul>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Fundamentals</h4><div class="p">BGP speakers negotiate capabilities by exchanging Open messages. <a href="#EN-US_CONCEPT_0000001176743547__fig_dc_vrp_bgp_feature_003602">Figure 1</a> shows the format of Open messages exchanged between new speakers. The header of a BGP Open message is fixed, in which My AS Number is supposed to be the local AS number. However, My AS Number carries only 2-byte AS numbers, and does not support 4-byte AS numbers. Therefore, a new speaker adds the AS_TRANS 23456 to My AS Number and its local AS number to Optional Parameters before it sends an Open message to a peer. After the peer receives the message, it can determine whether the new speaker supports 4-byte AS numbers by checking Optional Parameters in the message.<div class="fignone" id="EN-US_CONCEPT_0000001176743547__fig_dc_vrp_bgp_feature_003602"><a name="EN-US_CONCEPT_0000001176743547__fig_dc_vrp_bgp_feature_003602"></a><a name="fig_dc_vrp_bgp_feature_003602"></a><span class="figcap"><b>Figure 1 </b>Format of Open messages sent by new speakers</span><br><span><img class="vsd" src="figure/en-us_image_0000001130783968.png"></span></div>
+</div>
+<div class="p"><a href="#EN-US_CONCEPT_0000001176743547__fig_dc_vrp_bgp_feature_003603">Figure 2</a> shows how peer relationships are established between new speakers, and between an old speaker and a new speaker. BGP speakers notify each other of whether they support 4-byte AS numbers by exchanging Open messages. After the capability negotiation, new sessions are established between new speakers, and old sessions are established between a new speaker and an old speaker.<div class="fignone" id="EN-US_CONCEPT_0000001176743547__fig_dc_vrp_bgp_feature_003603"><a name="EN-US_CONCEPT_0000001176743547__fig_dc_vrp_bgp_feature_003603"></a><a name="fig_dc_vrp_bgp_feature_003603"></a><span class="figcap"><b>Figure 2 </b>Process of establishing a BGP peer relationship</span><br><span><img class="imgResize" src="figure/en-us_image_0000001176663717.png" width="467.82750000000004" height="408.975" title="Click to enlarge"></span></div>
+</div>
+<div class="p">The AS_Path and AS_Aggregator attributes in Update messages exchanged between new speakers carry 4-byte AS numbers, whereas the two attributes in Update messages sent by an old speaker carry 2-byte AS numbers.<ul><li><p>When a new speaker sends an Update message carrying an AS number greater than 65535 to an old speaker, the new speaker uses AS4_Path and AS4_Aggregator to assist AS_Path and AS_Aggregator in transferring 4-byte AS numbers, as both AS4_Path and AS4_Aggregator are unrecognizable by the old speaker. On the network shown in <a href="#EN-US_CONCEPT_0000001176743547__fig_dc_vrp_bgp_feature_003604">Figure 3</a>, before the new speaker in AS 2.2 sends an Update message to the old speaker in AS 65002, the new speaker replaces each 4-byte AS number (1.1 and 2.2) with 23456 in AS_Path; therefore, the AS_Path carried in the Update message is (23456, 23456, 65001), and the carried AS4_Path is (2.2, 1.1, 65001). Upon receiving the Update message, the old speaker in AS 65002 transparently transmits the message to other ASs.</p>
+</li><li><p>When a new speaker receives an Update message carrying AS_Path, AS4_Path, AS_Aggregator, and AS4_Aggregator from the old speaker, the new speaker uses the reconstruction algorithm to reconstruct the actual AS_Path and AS_Aggregator. On the network shown in <a href="#EN-US_CONCEPT_0000001176743547__fig_dc_vrp_bgp_feature_003604">Figure 3</a>, after the new speaker in AS 65003 receives an Update message carrying AS_Path (65002, 23456, 23456, 65001) and AS4_Path (2.2, 1.1, 65001) from the old speaker in AS 65002, the new speaker reconstructs the actual AS_Path (65002, 2.2, 1.1, 65001).</p>
+</li></ul>
+</div>
+<div class="p"><div class="fignone" id="EN-US_CONCEPT_0000001176743547__fig_dc_vrp_bgp_feature_003604"><a name="EN-US_CONCEPT_0000001176743547__fig_dc_vrp_bgp_feature_003604"></a><a name="fig_dc_vrp_bgp_feature_003604"></a><span class="figcap"><b>Figure 3 </b>Process of transmitting a BGP Update message</span><br><span><img class="imgResize" src="figure/en-us_image_0000001176663719.png" width="523.6875" height="256.02500000000003" title="Click to enlarge"></span></div>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Formats of 4-byte AS numbers</h4><p>A 4-byte AS number can be either an integer or in dotted notation. 4-byte AS numbers are stored as unsigned integers, regardless of their formats. 4-byte AS numbers in dotted notation are in the format of <em>x</em>.<em>y</em>. A 4-byte AS number is switched between the integer and dotted notation formats as follows: 4-byte AS integer = <em>x</em> x 65536 + <em>y</em>. For example, if a 4-byte AS number in dotted notation is 2.3, it can be converted into the integer 131075 (2 x 65536 + 3).</p>
+<p>BGP supports 4-byte AS numbers in both formats. The formats of 4-byte AS numbers displayed in the configuration scripts are the same as those configured by users.</p>
+<p>By default, 4-byte AS numbers are displayed in dotted notation in the outputs of commands such as display and debugging commands, regardless of their configured formats. If the default display format of 4-byte AS numbers is changed from dotted notation to integer using a command, the 4-byte AS numbers will be displayed as integers automatically.</p>
+<div class="notice"><span class="noticetitle"><img src="public_sys-resources/notice_3.0-en-us.png"> </span><div class="noticebody"><p>If you adjust the display format of 4-byte AS numbers, the matching results of AS_Path regular expressions and extended community filters are affected. Specifically, if the display format of 4-byte AS numbers is changed when an AS_Path regular expression or extended community filter is used as an export or import policy, the AS_Path regular expression or extended community filter needs to be reconfigured. If reconfiguration is not performed, routes cannot match the export or import policy, and a network fault occurs.</p>
+</div></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Benefits</h4><p>4-byte AS numbers alleviate AS number exhaustion; therefore, they are beneficial to carriers who need to expand the network scale.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bgp_cfg_0011.html">Configuring 4-Byte BGP AS Numbers
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bgp_cfg_0013.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+
+<script language="JavaScript">
+<!--
+initImageViewer('.imgResize');
+var msg_imageMax = "view original image";
+var msg_imageClose = "close";
+//--></script></body>
+</html>

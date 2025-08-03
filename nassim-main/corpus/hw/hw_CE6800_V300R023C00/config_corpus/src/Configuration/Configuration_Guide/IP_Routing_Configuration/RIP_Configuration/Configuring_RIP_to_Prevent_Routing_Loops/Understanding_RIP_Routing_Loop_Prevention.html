@@ -1,0 +1,84 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding RIP Routing Loop Prevention">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_rip_cfg_0016.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_rip_cfg_0018.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="RIP">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="RIP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="RIP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001130623172">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding RIP Routing Loop Prevention</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001130623172"></a><a name="EN-US_CONCEPT_0000001130623172"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding RIP Routing Loop Prevention</h1>
+<div><p>As a distance-vector routing protocol, RIP periodically advertises its routing table and adds valid routes to its routing table. The accumulated metric indicates the distance to the destination network. Therefore, the router running a distance-vector routing protocol does not know the topology of the entire network. These characteristics of RIP may cause routing loops on the network.</p>
+<p>Split horizon, poison reverse, and triggered update are important routing protocol loop prevention mechanisms for distance vectors.</p>
+<div class="section"><h4 class="sectiontitle">Split Horizon</h4><p>For different network types, split horizon provides two different models: interface-based split horizon and neighbor-based split horizon. On broadcast, P2P, and P2MP networks, split horizon is implemented based on interfaces. On NBMA networks, split horizon is implemented based on neighbors.</p>
+<ul><li><strong>Split horizon on broadcast, P2MP, and P2P networks</strong></li></ul>
+<p>Split horizon prevents the routes learned by a RIP <span class="keyword">routing device</span> through an interface from being sent back to neighbors through this interface. This mechanism reduces bandwidth consumption and avoids routing loops.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130623172__fig2083612541429"><a name="EN-US_CONCEPT_0000001130623172__fig2083612541429"></a><a name="fig2083612541429"></a><span class="figcap"><b>Figure 1 </b>Network diagram of interface-based split horizon</span><br><span><img class="vsd" src="figure/en-us_image_0000001130782982.png"></span></div>
+<p>As shown in <a href="#EN-US_CONCEPT_0000001130623172__fig2083612541429">Figure 1</a>, DeviceA sends a route to 10.0.0.0/8 to DeviceB. If split horizon is not configured, DeviceB sends this route back to DeviceA. As a result, DeviceA learns two routes to 10.0.0.0/8, one being a direct route with a hop count of 0 and the other being a route with the next hop of DeviceB and a hop count of 2.</p>
+<p>However, only direct routes in the RIP routing table of DeviceA are active. If the route originating from DeviceA to 10.0.0.0/8 becomes unreachable and DeviceB is not notified, DeviceB continues to send DeviceA routing information indicating that the route to 10.0.0.0/8 is reachable. That is, DeviceA receives incorrect routing information and assumes that the route can reach the network segment 10.0.0.0/8 over DeviceB. However, as DeviceB still considers that the route can reach the network segment 10.0.0.0/8 over DeviceA, a routing loop occurs. After split horizon is configured, DeviceB will no longer send the route to 10.0.0.0/8 back to DeviceA, thereby preventing routing loops.</p>
+<ul><li><strong>Split horizon on NBMA networks</strong></li></ul>
+<p>RIP implements split horizon based on neighbors on NBMA networks, as an interface is connected to multiple neighbors. Routes on an NBMA network are sent in unicast mode, and the routes received on the same interface can be distinguished by neighbor. As such, the routes learned from a neighbor of an interface will not be sent back through the same interface.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130623172__en-us_concept_0190705510_fig_dc_vrp_rip_feature_000702"><a name="EN-US_CONCEPT_0000001130623172__en-us_concept_0190705510_fig_dc_vrp_rip_feature_000702"></a><a name="en-us_concept_0190705510_fig_dc_vrp_rip_feature_000702"></a><span class="figcap"><b>Figure 2 </b>Network diagram of neighbor-based split horizon on an NBMA network</span><br><span><img class="vsd" src="figure/en-us_image_0000001176742639.png"></span><p>After split horizon is configured on the network shown in <a href="#EN-US_CONCEPT_0000001130623172__en-us_concept_0190705510_fig_dc_vrp_rip_feature_000702">Figure 2</a>, <span class="keyword">Device</span>B sends <span class="keyword">Device</span>C the route to 10.0.0.0/8 which is learned from <span class="keyword">Device</span>A, but does not send this route back to <span class="keyword">Device</span>A.</p>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Poison Reverse</h4><p>Poison reverse means that a RIP routing device sets the hop count of a route learned from a neighbor through an interface to 16 (indicating that the route is unreachable) and then sends the route back to the neighbor through this interface. This mechanism removes the useless route from the neighbor's routing table, thereby preventing routing loops</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130623172__fig9888172004411"><a name="EN-US_CONCEPT_0000001130623172__fig9888172004411"></a><a name="fig9888172004411"></a><span class="figcap"><b>Figure 3 </b>Network diagram of poison reverse</span><br><span><img class="vsd" src="figure/en-us_image_0000001176742645.png"></span></div>
+<p>As shown in <a href="#EN-US_CONCEPT_0000001130623172__fig9888172004411">Figure 3</a>, <span class="keyword">Device</span>A sends <span class="keyword">Device</span>B a route to 10.0.0.0/8. If poison reverse is not configured, <span class="keyword">Device</span>B sends this route back to <span class="keyword">Device</span>A. As a result, <span class="keyword">Device</span>A learns two routes to 10.0.0.0/8, one being a direct route with a hop count of 0 and the other being a route with the next hop of DeviceB and a hop count of 2.</p>
+<p>If the route originating from <span class="keyword">Device</span>A to 10.0.0.0/8 becomes unreachable and <span class="keyword">Device</span>B is not notified, <span class="keyword">Device</span>B continues to send <span class="keyword">Device</span>A routing information indicating that the route to 10.0.0.0/8 is reachable. That is, <span class="keyword">Device</span>A receives incorrect routing information and assumes that the route can reach the network segment 10.0.0.0/8 over <span class="keyword">Device</span>B. However, as <span class="keyword">Device</span>B still considers that the route can reach the network segment 10.0.0.0/8 over <span class="keyword">Device</span>A, a routing loop occurs.</p>
+<p>With poison reverse configured, after <span class="keyword">Device</span>B receives a route from <span class="keyword">Device</span>A, <span class="keyword">Device</span>B sends a route unreachable message (with the cost of the route set to 16, indicating that the route is unreachable) to <span class="keyword">Device</span>A. As such, <span class="keyword">Device</span>A will no longer learn this route from <span class="keyword">Device</span>B, preventing routing loops. </p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If both split horizon and poison reverse are configured, only poison reverse takes effect.</p>
+</div></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Triggered Updates</h4><p>Triggered updates mean that when the local routing information changes, the local routing device immediately notifies its neighboring <span class="keyword">device</span>s of the change through triggered update messages. Triggered updates can speed up network convergence. When a local routing entry changes, the local routing device immediately notifies other <span class="keyword">device</span>s of the routing entry change instead of waiting for periodical updates.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130623172__en-us_concept_0190705506_fig_dc_vrp_rip_feature_000901"><a name="EN-US_CONCEPT_0000001130623172__en-us_concept_0190705506_fig_dc_vrp_rip_feature_000901"></a><a name="en-us_concept_0190705506_fig_dc_vrp_rip_feature_000901"></a><span class="figcap"><b>Figure 4 </b>Network diagram of triggered updates</span><br><span><img class="vsd" src="figure/en-us_image_0000001130623194.png"></span></div>
+<p>On the network shown in <a href="#EN-US_CONCEPT_0000001130623172__en-us_concept_0190705506_fig_dc_vrp_rip_feature_000901">Figure 4</a>, if the route to 10.4.0.0 becomes unreachable, <span class="keyword">Device</span>C learns the information first. Typically, a RIP routing device sends route updates to its neighbors every 30s. If <span class="keyword">Device</span>C receives an Update message from <span class="keyword">Device</span>B while it is waiting for the Update message, <span class="keyword">Device</span>C learns the incorrect route to 10.4.0.0 from <span class="keyword">Device</span>B. In this case, the next hops of the routes from <span class="keyword">Device</span>B or <span class="keyword">Device</span>C to 10.4.0.0 are <span class="keyword">Device</span>C and <span class="keyword">Device</span>B, respectively, causing a routing loop. If <span class="keyword">Device</span>C sends an Update message to <span class="keyword">Device</span>B immediately after it detects a network fault, <span class="keyword">Device</span>B can rapidly update its routing table, which prevents routing loops.</p>
+<p>Another scenario of triggered updates occurs when the next hop of a route is unavailable (for example, due to a link failure). Here, the local routing device sets the cost of the route to 16 and notifies other <span class="keyword">device</span>s of the unreachability. This is also known as route poisoning.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_rip_cfg_0016.html">Configuring RIP to Prevent Routing Loops
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_rip_cfg_0018.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,209 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="topic">
+<meta name="DC.Title" content="Sync">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_netconf_cfg1_0058.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_netconf_cfg1_0060.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TOPIC_0000001512842414">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Sync</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TOPIC_0000001512842414"></a><a name="EN-US_TOPIC_0000001512842414"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Sync</h1>
+<div><p>This capability enables a device to perform full or incremental data synchronization. Through data synchronization, the NMS or controller that manages network devices can have the same configuration data with NEs in real time.</p>
+<div class="section"><h4 class="sectiontitle">Full Synchronization</h4><p>The &lt;sync-full&gt; operation requests a device to implement full data synchronization. After the NMS connects to an NE for the first time, it synchronizes all data of the NE to the NMS.</p>
+<p>The YANG model defines the capability in the <strong>huawei-netconf-sync.yang</strong> file.</p>
+<p>After the server receives an &lt;rpc&gt; element containing a &lt;sync-full&gt; element, the server performs a syntax check on the &lt;rpc&gt; element. If the element fails the syntax check, the server returns an &lt;rpc-reply&gt; element containing an &lt;rpc-error&gt; element to terminate processing. Otherwise, the server responds with &lt;rpc-reply&gt;, obtains the synchronization data, encapsulates the data in XML format, writes the data into XML files by feature, compresses the data into a .zip file, and automatically transfers the file to the specified directory through FTP or SFTP. SFTP is recommended because it is more secure than FTP.</p>
+<p>Full synchronization supports the following functions:</p>
+<ul><li>Cancels a specific full data synchronization operation.</li><li>Uploads a full data synchronization file.</li><li>Queries the file upload progress.</li></ul>
+<div class="p">Example of full data synchronization: The server uses FTP to automatically transfer AAA module configurations in the obtained full synchronization data to the home directory of the user <strong>root</strong> (password: <strong>YsHsjx_202206</strong>) on the server whose IP address is 10.1.1.1. The data is saved as a file named <strong>Multi_App_sync_full.zip</strong>.<ul><li><p>RPC request</p>
+<pre class="screen">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="4"&gt;
+  &lt;sync-full xmlns="urn:huawei:yang:huawei-netconf-sync"&gt;
+    &lt;target&gt;
+      &lt;user-name&gt;root&lt;/user-name&gt;
+      &lt;password&gt;YsHsjx_202206&lt;/password&gt;
+      &lt;target-addr&gt;10.1.1.1&lt;/target-addr&gt;
+      &lt;path&gt;/home&lt;/path&gt;
+    &lt;/target&gt;
+    &lt;transfer-protocol&gt;ftp&lt;/transfer-protocol&gt;
+    &lt;transfer-method&gt;auto&lt;/transfer-method&gt;
+    &lt;filename-prefix&gt;Multi_App_sync_full&lt;/filename-prefix&gt;
+    &lt;app-err-operation&gt;stop-on-error&lt;/app-err-operation&gt;
+    &lt;filter&gt;
+      &lt;aaa xmlns="urn:huawei:yang:huawei-aaa"/&gt;
+    &lt;/filter&gt;
+  &lt;/sync-full&gt;
+&lt;/rpc&gt;
+</pre>
+</li><li><p>RPC reply</p>
+<p>The RPC reply message carries a full data synchronization identifier assigned by the NETCONF server. This message is returned using the &lt;sync-full-id&gt; parameter.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>After full synchronization is triggered, the RPC reply message sent by the device carries the nc-ext attribute.</p>
+</div></div>
+<pre class="screen">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;rpc-reply <strong>xmlns:nc-ext="urn:huawei:yang:huawei-ietf-netconf-ext"</strong>
+           xmlns:nc-sync="urn:huawei:yang:huawei-netconf-sync"
+           xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"
+           message-id="2"
+           <strong>nc-ext:flow-id="32"</strong>&gt;
+  &lt;nc-sync:sync-full-id&gt;<strong>185</strong>&lt;/nc-sync:sync-full-id&gt;
+&lt;/rpc-reply&gt;
+</pre>
+</li></ul>
+</div>
+<div class="p">The following is an example of using the cancel-synchronization operation to cancel full synchronization with sync-full-id being 185.<ul><li><p>RPC request</p>
+<pre class="screen">&lt;rpc message-id="cancel" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+  &lt;cancel-synchronization xmlns="urn:huawei:yang:huawei-netconf-sync"&gt;
+    &lt;sync-full-id&gt;185&lt;/sync-full-id&gt;
+  &lt;/cancel-synchronization&gt;
+&lt;/rpc&gt;</pre>
+</li><li><p>RPC reply</p>
+<pre class="screen">Success reply
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;rpc-reply message-id="cancel" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+  &lt;ok/&gt;
+&lt;/rpc-reply&gt;</pre>
+</li></ul>
+</div>
+<div class="p">The following is an example of uploading the full synchronization file through the upload-sync-file operation.<ul><li><p>RPC request</p>
+<pre class="screen">&lt;rpc message-id="upload" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+  &lt;upload-sync-file xmlns="urn:huawei:yang:huawei-netconf-sync"&gt; 
+    &lt;sync-full-id&gt;185&lt;/sync-full-id&gt;
+    &lt;result-save-time&gt;1&lt;/result-save-time&gt;        
+  &lt;/upload-sync-file&gt;
+&lt;/rpc&gt;</pre>
+</li><li><p>RPC reply</p>
+<pre class="screen">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;rpc-reply message-id="upload" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+  &lt;ok/&gt;
+&lt;/rpc-reply&gt;</pre>
+</li></ul>
+</div>
+<div class="p">The following is an example of using the &lt;get&gt; operation to query the file upload progress.<ul><li><p>RPC request</p>
+<pre class="screen">&lt;rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="query_status185"&gt;
+  &lt;get&gt;
+    &lt;filter type="subtree"&gt;
+      &lt;synchronization xmlns="urn:huawei:yang:huawei-netconf-sync"&gt;
+        &lt;file-transfer-statuss&gt;
+          &lt;file-transfer-status&gt;
+            &lt;sync-full-id&gt;185&lt;/sync-full-id&gt;
+            &lt;status&gt;&lt;/status&gt;
+            &lt;progress&gt;&lt;/progress&gt;
+            &lt;error-message&gt;&lt;/error-message&gt;
+          &lt;/file-transfer-status&gt;
+        &lt;/file-transfer-statuss&gt;
+      &lt;/synchronization&gt;
+    &lt;/filter&gt;
+  &lt;/get&gt;
+&lt;/rpc&gt;</pre>
+</li><li><p>RPC reply</p>
+<pre class="screen">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;rpc-reply message-id="query_status12" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+  &lt;data&gt;
+    &lt;synchronization xmlns="urn:huawei:yang:huawei-netconf-sync"&gt;
+      &lt;file-transfer-statuss&gt;
+        &lt;file-transfer-status&gt;
+          &lt;sync-full-id&gt;12&lt;/sync-full-id&gt;
+          &lt;status&gt;In-Progress&lt;/status&gt;
+          &lt;progress&gt;50&lt;/progress&gt;
+        &lt;/file-transfer-status&gt;
+      &lt;/file-transfer-statuss&gt;
+    &lt;/synchronization&gt;
+  &lt;/data&gt;
+&lt;/rpc-reply&gt;</pre>
+</li></ul>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Incremental Synchronization</h4><p>The &lt;sync-increment&gt; operation requests a device to synchronize incremental configuration data. When the configuration changes, the client detects the change through the configuration change identifier flow-id. Each time the configuration changes, the value of <strong>flow-id</strong> increases by 1. If the client needs to obtain the modified configuration, it synchronizes data incrementally.</p>
+<p>If the &lt;sync-increment&gt; operation succeeds, the NETCONF server replies with an &lt;rpc-reply&gt; element that contains the &lt;data&gt; element. The &lt;data&gt; element contains the data that was changed between two configuration committing operations. If the operation fails, the server returns an &lt;rpc-reply&gt; element containing an &lt;rpc-error&gt; element.</p>
+<p>&lt;sync-increment&gt; uses the difference attribute to identify the change operation of a configuration data instance. The YANG model defines the capability in the <strong>huawei-netconf-metadata.yang</strong> file.</p>
+<p>The following is an example of an incremental data synchronization operation that synchronizes IFM module configurations between change points 6 and 7.</p>
+<ul><li><p>RPC request</p>
+<pre class="screen">&lt;rpc message-id="101" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt; 
+  &lt;sync-increment xmlns="urn:huawei:yang:huawei-netconf-sync"&gt; 
+    &lt;target&gt; 
+      &lt;flow-id&gt;7&lt;/flow-id&gt; 
+    &lt;/target&gt; 
+    &lt;source&gt; 
+      &lt;flow-id&gt;6&lt;/flow-id&gt; 
+    &lt;/source&gt; 
+    &lt;filter&gt; 
+      &lt;ifm xmlns="urn:huawei:yang:huawei-ifm"/&gt; 
+    &lt;/filter&gt; 
+  &lt;/sync-increment&gt; 
+&lt;/rpc&gt;</pre>
+</li><li><p>RPC reply</p>
+<pre class="screen">&lt;rpc-reply xmlns:nc-md="urn:huawei:yang:huawei-netconf-metadata"&gt; 
+  &lt;data xmlns="urn:huawei:yang:huawei-netconf-sync"&gt; 
+    &lt;ifm xmlns="urn:huawei:yang:huawei-ifm"&gt; 
+       &lt;interfaceName&gt;Vlanif 1&lt;/interfaceName&gt; 
+          &lt;ifAm4s&gt; 
+            &lt;ifAm4 nc-md:difference="create"&gt; 
+              &lt;ipAddress&gt;10.1.1.1&lt;/ipAddress&gt; 
+              &lt;netMask&gt;255.255.255.0&lt;/netMask&gt; 
+              &lt;addressType/&gt; 
+            &lt;/ifAm4&gt; 
+          &lt;/ifAm4s&gt; 
+        &lt;/interface&gt; 
+      &lt;/interfaces&gt; 
+    &lt;/ifm&gt; 
+  &lt;/data&gt; 
+&lt;/rpc-reply&gt;</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_netconf_cfg1_0058.html">NETCONF Extended Capability Set
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_netconf_cfg1_0060.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

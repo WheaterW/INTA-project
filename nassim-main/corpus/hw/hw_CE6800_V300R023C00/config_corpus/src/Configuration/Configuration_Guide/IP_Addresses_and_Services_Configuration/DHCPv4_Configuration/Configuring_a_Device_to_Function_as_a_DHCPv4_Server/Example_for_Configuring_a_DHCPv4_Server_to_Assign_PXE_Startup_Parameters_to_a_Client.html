@@ -1,0 +1,168 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring a DHCPv4 Server to Assign PXE Startup Parameters to a Client">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../galaxy_dhcpv4_cfg_0012.html">
+<meta name="DC.Relation" scheme="URI" content="../galaxy_dhcpv4_cfg_0020.html">
+<meta name="DC.Relation" scheme="URI" content="../galaxy_dhcpv4_0093.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="DHCPv4">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="DHCPv4">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featurename" content="DHCPv4">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001513046146">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring a DHCPv4 Server to Assign PXE Startup Parameters to a Client</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001513046146"></a><a name="EN-US_TASK_0000001513046146"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring a DHCPv4 Server to Assign PXE Startup Parameters to a Client</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001513046146__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>The Preboot Execution Environment (PXE) allows a client to boot an operating system using a startup file downloaded from a TFTP server.</p>
+<p>On the network shown in <a href="#EN-US_TASK_0000001513046146__fig_dc_esap_cfg_001307">Figure 1</a>, a PXE client and a DHCPv4 server reside on the same network segment. The PXE client needs to obtain an IP address, TFTP server address (Option 66), and startup file name (Option 67) from the DHCPv4 server.</p>
+<div class="fignone" id="EN-US_TASK_0000001513046146__fig_dc_esap_cfg_001307"><a name="EN-US_TASK_0000001513046146__fig_dc_esap_cfg_001307"></a><a name="fig_dc_esap_cfg_001307"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring a DHCPv4 server to assign PXE startup parameters to a client</span><div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 represents <span>100GE</span> <span>1/0/1</span>.</p>
+</div></div>
+<br><span><img class="vsd" src="../images/en-us_image_0000001564126265.png"></span></div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001513046146__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enable DHCP on DeviceA.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">HUAWEI</span>]<strong> sysname DeviceA</strong>
+[*<span class="keyword">HUAWEI</span>] <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>dhcp enable</strong></pre>
+</p></li><li><span>Create VLAN 10 and add <span>100GE</span> <span>1/0/1</span> to it.</span><p><pre class="screen">[*DeviceA] <strong>vlan 10</strong>
+[*DeviceA-vlan10] <strong>quit</strong>
+[*DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>portswitch</strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>port link-type trunk</strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>port trunk allow-pass vlan 10</strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong></pre>
+</p></li><li><span>Configure an IP address for a VLANIF interface.</span><p><pre class="screen">[*DeviceA] <strong>interface vlanif 10</strong>
+[*DeviceA-Vlanif10] <strong>ip address 192.168.1.1 24</strong></pre>
+</p></li><li><span>Configure the DHCPv4 server function on VLANIF 10.</span><p><pre class="screen">[*DeviceA-Vlanif10] <strong>dhcp select interface</strong></pre>
+</p></li><li><span>Configure Option 66 and Option 67.</span><p><pre class="screen">[*DeviceA-Vlanif10] <strong>dhcp server option 66 ip-address 192.168.2.1</strong>
+[*DeviceA-Vlanif10] <strong>dhcp server option 67 </strong><strong>ascii boot\x64\wdsnbp.com</strong>
+[*DeviceA-Vlanif10] <strong>dhcp server next-server </strong><strong>192.168.2.1</strong></pre>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, the TFTP server and PXE client are on different network segments. Therefore, you need to run the <strong>dhcp server next-server</strong> command to specify the IP address of the TFTP server from which the PXE client downloads the startup file.</p>
+<p>If the TFTP server and PXE client are on the same network segment, run the <strong>dhcp server excluded-ip-address</strong> command to exclude the TFTP server address from the address pool.</p>
+</div></div>
+</p></li><li><span>Verify the configuration.</span><p><p># Run the <a href="cmdqueryname=display+this"><b><span class="cmdname">display this</span></b></a> command on VLANIF 10 of DeviceA to check the DHCPv4 server configuration.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA-Vlanif10] <strong>display this</strong>  
+#                                                                               
+interface Vlanif10                                                              
+ ipv6 enable                                                                    
+ ip address 192.168.1.1 255.255.255.0                                           
+ ipv6 address auto link-local                                                   
+ dhcp select interface                                                          
+ dhcp server next-server 192.168.2.1                                            
+ dhcp server option 66 ip-address 192.168.2.1                                   
+ dhcp server option 67 ascii boot\x64\wdsnbp.com                                                                          
+#                                                                               
+return   </pre>
+<p># Run the <a href="cmdqueryname=display+ip+pool+interface+vlanif10"><b><span class="cmdname">display ip pool interface vlanif10</span></b></a> command on VLANIF 10 of DeviceA to check the option configuration and the allocation of addresses in the interface address pool.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA-Vlanif10] <strong>display ip pool interface vlanif10</strong>
+  Pool-name        : Vlanif10                                                   
+  Pool-No          : 0                                                          
+  Lease            : 1 Days 0 Hours 0 Minutes
+  Next-server      : 192.168.2.1                                       
+  Domain-name      : -                                                          
+  Option-code      : 66                                                         
+    Option-subcode : --                                                         
+     Option-type   : ip-address                                                
+    Option-value   : 192.168.2.1                                                
+  Option-code      : 67                                                        
+    Option-subcode : --                                                         
+     Option-type   : ascii                                                     
+    Option-value   : boot\x64\wdsnbp.com                                        
+  DNS-server0      : -                                                          
+  NBNS-server0     : -                                                          
+  Netbios-type     : -                                                          
+  Position         : Interface                                                  
+  Status           : Unlocked                                                   
+  Gateway-0        : 192.168.1.1                                                
+  Network          : 192.168.1.0                                                
+  Mask             : 255.255.255.0                                              
+  VPN instance     : --                                                         
+  Logging          : Disable                                                    
+  Conflicted address recycle interval: -                                        
+  Address Statistic: Total       :253       Used        :1                      
+                     Idle        :251       Expired     :0                      
+                     Conflict    :0         Disabled    :1
+                        
+
+ -------------------------------------------------------------------------------                                                                      
+  Network section                                                               
+         Start           End       Total    Used Idle(Expired) Conflict Disabled
+ -------------------------------------------------------------------------------                                                                          
+     192.168.1.1   192.168.1.254     253       1        251(0)       0     1    
+ -------------------------------------------------------------------------------                                  </pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001513046146__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Configuration Scripts</h4><p># DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+vlan batch 10
+#
+dhcp enable
+#
+interface Vlanif10                                                            
+ ip address 192.168.1.1 255.255.255.0
+ dhcp select interface
+<strong> </strong>dhcp server next-server 192.168.2.1
+ dhcp server option 66 ip-address 192.168.2.1
+ dhcp server option 67 ascii boot\x64\wdsnbp.com                                                            
+#                                                                               
+interface <span>100GE</span><span>1/0/1</span>                                                         
+ port link-type trunk                                                          
+ port trunk allow-pass vlan 10
+#
+return</pre>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../galaxy_dhcpv4_cfg_0012.html">Configuring a Device to Function as a DHCPv4 Server
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../galaxy_dhcpv4_cfg_0020.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../galaxy_dhcpv4_0093.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

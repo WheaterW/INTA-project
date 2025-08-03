@@ -1,0 +1,132 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding Proxy ARP">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_arp_cfg_0011.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_arp_cfg_0013.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="ARP">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="ARP">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featurename" content="ARP">
+<meta name="featurename" content="IP Address Conflict Detection">
+<meta name="featurename" content="Dynamic ARP">
+<meta name="featurename" content="Static ARP">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001130783840">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding Proxy ARP</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001130783840"></a><a name="EN-US_CONCEPT_0000001130783840"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding Proxy ARP</h1>
+<div><p>ARP is applicable only to devices on the same physical network. When a device on a physical network needs to send IP datagrams to another physical network, the gateway is used to query the routing table to implement communication between the two networks. However, routing table query consumes system resources and affects other services. To resolve this problem, deploy proxy ARP on an intermediate device. Proxy ARP enables devices that reside on different physical network segments but on the same IP network to resolve IP addresses to MAC addresses. This feature helps reduce system resource consumption caused by routing table queries and improves the efficiency of system processing.</p>
+<div class="section"><h4 class="sectiontitle">Routed Proxy ARP</h4><p>A large company network is usually divided into multiple subnets to facilitate management. The routing information of a host in a subnet can be modified so that IP datagrams sent from this host to another subnet are first sent to the gateway that connects different subnets and then to another subnet. However, this solution makes it difficult to manage and maintain devices. If the gateways connected to hosts have different addresses, you can deploy routed proxy ARP so that the gateways send their interface MAC addresses to the hosts.</p>
+<p><a href="#EN-US_CONCEPT_0000001130783840__fig_dc_vrp_arp_feature_002901">Figure 1</a> illustrates how routed proxy ARP is implemented between HostA and HostB.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130783840__fig_dc_vrp_arp_feature_002901"><a name="EN-US_CONCEPT_0000001130783840__fig_dc_vrp_arp_feature_002901"></a><a name="fig_dc_vrp_arp_feature_002901"></a><span class="figcap"><b>Figure 1 </b>Routed proxy ARP implementation</span><br><span><img class="vsd" src="figure/en-us_image_0000001176743521.png"></span></div>
+<ol><li>HostA sends an ARP request message for the MAC address of HostB.</li><li>After receiving the ARP request message, DeviceA checks the destination IP address of the message and finds that the requested MAC address is not its own MAC address. DeviceA then checks whether there are routes to HostB. If a route to HostB is available, DeviceA checks whether routed proxy ARP is enabled on interface 1. If routed proxy ARP is enabled on interface 1, DeviceA sends interface 1's MAC address to HostA. If routed proxy ARP is not enabled on interface 1, DeviceA discards the ARP request message. If no route to HostB is available, DeviceA discards the ARP request message.</li><li>After learning interface 1's MAC address, HostA sends IP datagrams to DeviceA using this MAC address.</li><li>DeviceA receives the IP datagrams and forwards them to HostB.</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Proxy ARP Anyway</h4><p>In scenarios where servers are partitioned into hosts, the flexible deployment and migration of hosts on multiple servers or devices can be achieved by configuring Layer 2 interconnection between multiple devices. However, this approach may lead to larger Layer 2 domains on the network and the risk of broadcast storms. To resolve this problem, enable proxy ARP anyway on a host gateway. In this way, the gateway sends its interface MAC address to a source host and communication between hosts is implemented through route forwarding.</p>
+<p><a href="#EN-US_CONCEPT_0000001130783840__fig12417825103810">Figure 2</a> illustrates how proxy ARP anyway is implemented between Host1 and Host2.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130783840__fig12417825103810"><a name="EN-US_CONCEPT_0000001130783840__fig12417825103810"></a><a name="fig12417825103810"></a><span class="figcap"><b>Figure 2 </b>Proxy ARP anyway implementation</span><br><span><img class="vsd" src="figure/en-us_image_0000001130624070.png"></span></div>
+<ol><li>Host1 sends an ARP request message for the MAC address of Host2.</li><li>After receiving the ARP request message, DeviceA checks the destination IP address of the message and finds that the requested MAC address is not its own MAC address. DeviceA then checks whether proxy ARP anyway is enabled on interface 1. If proxy ARP anyway is enabled on interface 1, DeviceA sends interface 1's MAC address to Host1. If proxy ARP anyway is not enabled on interface 1, DeviceA discards the ARP request message.</li><li>After learning the MAC address of interface 1, Host1 sends IP datagrams to DeviceA using this MAC address.</li><li>DeviceA receives the IP datagrams and forwards them to Host2.</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Intra-VLAN Proxy ARP</h4><p><a href="#EN-US_CONCEPT_0000001130783840__fig11487611406">Figure 3</a> illustrates how intra-VLAN proxy ARP is implemented between HostA and HostC.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130783840__fig11487611406"><a name="EN-US_CONCEPT_0000001130783840__fig11487611406"></a><a name="fig11487611406"></a><span class="figcap"><b>Figure 3 </b>Intra-VLAN proxy ARP implementation</span><br><span><img class="vsd" src="figure/en-us_image_0000001176743517.png"></span></div>
+<p>HostA, HostB, and HostC belong to the same VLAN, but HostA and HostC cannot communicate at Layer 2 because interface isolation is enabled on Device. To allow HostA and HostC to communicate, configure interface 1 on Device and enable intra-VLAN proxy ARP.</p>
+<ol><li>HostA sends an ARP request message for the MAC address of HostC.</li><li>After receiving the ARP request message, Device checks the destination IP address of the message and finds that the requested MAC address is not the MAC address of interface 1. Device then searches its ARP table for the ARP entry indicating the mapping between the IP and MAC addresses of HostC. If Device finds this ARP entry in its ARP table, it checks whether intra-VLAN proxy ARP is enabled on interface 1.<ul><li>If intra-VLAN proxy ARP is enabled on interface 1, Device sends the MAC address of interface 1 to HostA.</li><li>If intra-VLAN proxy ARP is not enabled on interface 1, Device discards the ARP request message.</li></ul>
+<p>If Device does not find this ARP entry in its ARP table, it discards the ARP request message and checks whether intra-VLAN proxy ARP is enabled.</p>
+<ul><li>If intra-VLAN proxy ARP is enabled, Device broadcasts the ARP request message with the IP address of HostC as the destination IP address within VLAN 4. After receiving an ARP reply message from HostC, Device generates an ARP entry indicating the mapping between the IP and MAC addresses of HostC.</li><li>If intra-VLAN proxy ARP is not enabled, Device does not perform any operations.</li></ul>
+</li><li>After learning the MAC address of interface 1, HostA sends IP datagrams to Device using this MAC address.</li><li>Device receives the IP datagrams and forwards them to HostC.</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Inter-VLAN Proxy ARP</h4><p><a href="#EN-US_CONCEPT_0000001130783840__fig474184810148">Figure 4</a> illustrates how inter-VLAN proxy ARP is implemented between HostA and HostB.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130783840__fig474184810148"><a name="EN-US_CONCEPT_0000001130783840__fig474184810148"></a><a name="fig474184810148"></a><span class="figcap"><b>Figure 4 </b>Inter-VLAN proxy ARP implementation</span><br><span><img class="vsd" src="figure/en-us_image_0000002127121869.png"></span></div>
+<p>HostA belongs to VLAN 3, whereas HostB belongs to VLAN 2. Therefore, HostA cannot communicate with HostB. To allow HostA and HostB to communicate, configure interface 1 on Device and enable inter-VLAN proxy ARP.</p>
+<ol><li>HostA sends an ARP request message for the MAC address of HostB.</li><li>After receiving the ARP request message, Device checks the destination IP address of the message and finds that the requested MAC address is not the MAC address of interface 1. Device then searches its ARP table for the ARP entry indicating the mapping between the IP and MAC addresses of HostB. If Device finds this ARP entry in its ARP table, it checks whether inter-VLAN proxy ARP is enabled on interface 1. If inter-VLAN proxy ARP is enabled on interface 1, Device sends the MAC address of interface 1 to HostA. If inter-VLAN proxy ARP is not enabled, Device discards the ARP request message. If Device does not find this ARP entry in its ARP table, it discards the ARP request message and checks whether inter-VLAN proxy ARP is enabled. If inter-VLAN proxy ARP is enabled, Device broadcasts the ARP request message with the IP address of HostB as the destination IP address within VLAN 2. After receiving an ARP reply message from HostB, Device generates an ARP entry indicating the mapping between the IP and MAC addresses of HostB. If inter-VLAN proxy ARP is not enabled, Device does not perform any operations.</li><li>After learning the MAC address of interface 1, HostA sends IP datagrams to Device using this MAC address.</li><li>Device receives the IP datagrams and forwards them to HostB.</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Local Proxy ARP</h4><p><a href="#EN-US_CONCEPT_0000001130783840__fig_dc_vrp_arp_feature_002904">Figure 5</a> illustrates how local proxy ARP is implemented between HostA and HostB.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130783840__fig_dc_vrp_arp_feature_002904"><a name="EN-US_CONCEPT_0000001130783840__fig_dc_vrp_arp_feature_002904"></a><a name="fig_dc_vrp_arp_feature_002904"></a><span class="figcap"><b>Figure 5 </b>Local proxy ARP implementation</span><br><span><img class="vsd" src="figure/en-us_image_0000001176743523.png"></span></div>
+<p>HostA and HostB belong to the same BD, but cannot communicate at Layer 2 because interface isolation is enabled on Device. To allow HostA and HostB to communicate, configure a VBDIF interface on Device and enable local proxy ARP.</p>
+<ol><li><p>HostA sends an ARP request message to Device for the MAC address of HostB.</p>
+</li><li>After receiving the ARP request message, Device checks the destination IP address of the message and finds that the requested MAC address is not the MAC address of VBDIF 2. Device then searches its ARP table for the ARP entry indicating the mapping between the IP and MAC addresses of HostB. If Device finds this ARP entry in its ARP table, it checks whether local proxy ARP is enabled on VBDIF 2. If local proxy ARP is enabled, Device sends the MAC address of VBDIF 2 to HostA. If local proxy ARP is not enabled, Device discards the ARP request message. If Device does not find this ARP entry in its ARP table, it discards the ARP request message and checks whether local proxy ARP is enabled. If local proxy ARP is enabled, Device broadcasts the ARP request message with the IP address of HostB as the destination IP address within the BD. After receiving an ARP reply message from HostB, Device generates an ARP entry indicating the mapping between the IP and MAC addresses of HostB. If local proxy ARP is not enabled, Device does not perform any operations.</li><li>After learning the MAC address of VBDIF 2, HostA sends IP datagrams to Device using this MAC address.</li><li>Device receives the IP datagrams and forwards them to HostB.</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Application Scenarios</h4>
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Application scenarios of proxy ARP</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="16.5%" id="mcps1.3.7.2.2.3.1.1" liSelected="liSelected"><p>Proxy ARP Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="83.5%" id="mcps1.3.7.2.2.3.1.2" liSelected="liSelected"><p>Application Scenario</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="16.5%" headers="mcps1.3.7.2.2.3.1.1 "><p>Routed proxy ARP</p>
+</td>
+<td class="cellrowborder" valign="top" width="83.5%" headers="mcps1.3.7.2.2.3.1.2 "><p>Two hosts that need to communicate belong to the same network segment but different physical networks. The gateways to which hosts are connected have different IP addresses.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="16.5%" headers="mcps1.3.7.2.2.3.1.1 "><p>Proxy ARP anyway</p>
+</td>
+<td class="cellrowborder" valign="top" width="83.5%" headers="mcps1.3.7.2.2.3.1.2 "><p>Two hosts that need to communicate belong to the same network segment but different physical networks. The gateways to which hosts are connected have the same IP address.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="16.5%" headers="mcps1.3.7.2.2.3.1.1 "><p>Intra-VLAN proxy ARP</p>
+</td>
+<td class="cellrowborder" valign="top" width="83.5%" headers="mcps1.3.7.2.2.3.1.2 "><p>Two hosts that need to communicate belong to the same network segment and the same VLAN in which user isolation is configured.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="16.5%" headers="mcps1.3.7.2.2.3.1.1 "><p>Inter-VLAN proxy ARP</p>
+</td>
+<td class="cellrowborder" valign="top" width="83.5%" headers="mcps1.3.7.2.2.3.1.2 "><p>Two hosts that need to communicate belong to the same network segment but different VLANs.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="16.5%" headers="mcps1.3.7.2.2.3.1.1 "><p>Local proxy ARP</p>
+</td>
+<td class="cellrowborder" valign="top" width="83.5%" headers="mcps1.3.7.2.2.3.1.2 "><p>Two hosts that need to communicate belong to the same network segment and the same BD in which user isolation is configured.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Benefits</h4><ul><li><p>Proxy ARP enables the source host on a network to mistakenly consider that the destination host and itself are on the same network segment. In this way, the network details can be hidden, thereby achieving transparent subnet division.</p>
+</li><li><p>All operations related to proxy ARP are performed on a gateway. No configuration is required for hosts connected to the gateway. In addition, proxy ARP affects only the ARP tables on hosts and does not affect the ARP table or routing table on a gateway.</p>
+</li><li><p>Proxy ARP can be used when no default gateway is configured for a host or when a host cannot route messages.</p>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_arp_cfg_0011.html">Configuring Proxy ARP
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_arp_cfg_0013.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

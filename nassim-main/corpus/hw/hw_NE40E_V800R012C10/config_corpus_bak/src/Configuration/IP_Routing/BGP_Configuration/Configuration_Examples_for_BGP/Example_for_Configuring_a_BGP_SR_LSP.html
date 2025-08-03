@@ -1,0 +1,660 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring a BGP SR LSP">
+<meta name="abstract" content="Deploying a complete BGP SR LSP on devices in the same AS helps implement end-to-end service interworking.">
+<meta name="description" content="Deploying a complete BGP SR LSP on devices in the same AS helps implement end-to-end service interworking.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_3070.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_multiinstance_0002.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_5026.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00606909">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Route">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing Basis">
+<meta name="OWNER" content="l00425560">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00615954">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001120440568">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring a BGP SR LSP</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001120440568"></a><a name="EN-US_TASK_0000001120440568"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring a BGP SR LSP</h1>
+<div class="taskbody"><p>Deploying a complete BGP SR LSP on devices in the same AS helps implement end-to-end service interworking.</p>
+<div class="context"><a name="EN-US_TASK_0000001120440568__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0000001120440568__fig_dc_vrp_seamless_mpls_cfg_003102">Figure 1</a>, OSPF runs between DeviceA and DeviceB, between DeviceB and DeviceC, and between DeviceD and DeviceE. IS-IS runs between DeviceC and DeviceD. Basic MPLS capabilities and MPLS LDP are configured on DeviceA through DeviceE so that LDP LSPs are established between loopback interfaces of devices in each IGP area. Therefore, traffic between loopback interfaces of devices in each IGP area is encapsulated using MPLS. However, traffic cannot be transmitted across IGP areas because devices cannot ping each other across IGP areas. For example, DeviceA cannot ping DeviceE. To solve this problem, you need to configure an inner MPLS tunnel (BGP SR LSP) from 1.1.1.1 to 5.5.5.5 so that the traffic from 1.1.1.1 to 5.5.5.5 is forwarded through MPLS.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interfaces 1 and 2 represent GE <span>0/1/0</span> and GE <span>0/2/0</span>, respectively.</p>
+</div></div>
+<div class="fignone" id="EN-US_TASK_0000001120440568__fig_dc_vrp_seamless_mpls_cfg_003102"><a name="EN-US_TASK_0000001120440568__fig_dc_vrp_seamless_mpls_cfg_003102"></a><a name="fig_dc_vrp_seamless_mpls_cfg_003102"></a><span class="figcap"><b>Figure 1 </b>Configuring a BGP SR LSP</span><br><span><img class="vsd" src="figure/en-us_image_0000001167360279.png"></span></div>
+<p></p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001120440568__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>To improve security, you are advised to deploy BGP security measures. For details, see "Configuring BGP Security." Keychain authentication is used as an example. For details, see "Example for Configuring BGP Keychain."</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001120440568__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure IP addresses for interfaces.</p>
+</li><li><p>Configure IGP areas.</p>
+</li><li><p>Configure basic MPLS functions and MPLS LDP.</p>
+</li><li><p>Configure a BGP SR LSP.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001120440568__1.4.4"></a><a name="1.4.4"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li>MPLS LSR IDs of DeviceA through DeviceE</li><li>SRGBs of DeviceA through DeviceE</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001120440568__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure interface IP addresses.</span><p><p>Take DeviceA as an example.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface</strong> <strong>gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-GigabitEthernet<span>0/1/0</span>] <strong>ip address 10.1.1.1 24</strong>
+[<span class="keyword">*</span>DeviceA-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface</strong> <strong>loopBack 1</strong>
+[<span class="keyword">*</span>DeviceA-LoopBack1] <strong>ip address 1.1.1.1 32</strong>
+[<span class="keyword">*</span>DeviceA-LoopBack1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-LoopBack1] <strong>quit</strong></pre>
+<p>The interfaces that directly connect the devices can ping each other, but the devices cannot ping each other's loopback interface.</p>
+</p></li><li><span>Deploy DeviceA through DeviceC in the same IGP area, and configure OSPF on them to implement interworking in the IGP area.</span><p><p>Take DeviceA as an example.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>ospf 1 router-id 1.1.1.1</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>network 1.1.1.1 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>network 10.1.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-ospf-1] <strong>quit</strong></pre>
+<p>After the preceding configuration is complete, an OSPF neighbor relationship is established between DeviceA and DeviceB and between DeviceB and DeviceC. If the <strong>display ospf peer</strong> command is run, you can find that the neighbor status is Full. DeviceA and DeviceC can learn each other's Loopback 1 IP address and ping each other successfully.</p>
+<p>Deploy DeviceD and DeviceE in another IGP area and configure OSPF on them. Their configurations are similar to the configuration of DeviceA and are not mentioned here.</p>
+</p></li><li><span>Deploy DeviceC and DeviceD in the same IGP area, and configure IS-IS on them to implement interworking in the IGP area.</span><p><p>Take DeviceC as an example.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>isis 1</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-isis-1] <strong>network-entity 10.0000.0000.0000.0010.00</strong>
+[<span class="keyword">*</span>DeviceC-isis-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>interface</strong> <strong>gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword">*</span>DeviceC-GigabitEthernet<span>0/1/0</span>] <strong>isis enable 1</strong>
+[<span class="keyword">*</span>DeviceC-GigabitEthernet<span>0/1/0</span>0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>interface</strong> <strong>loopBack 1</strong>
+[<span class="keyword">*</span>DeviceC--LoopBack1] <strong>isis enable 1</strong>
+[<span class="keyword">*</span>DeviceC--LoopBack1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC--LoopBack1] <strong>quit</strong></pre>
+<p>After the preceding configuration is complete, DeviceC and DeviceD can learn each other's Loopback 1 IP address and ping each other successfully. However, Loopback 1 interfaces on DeviceA and DeviceD cannot ping each other. This means that OSPF and IS-IS run independently on DeviceC.</p>
+</p></li><li><span>Configure basic MPLS functions and MPLS LDP to set up LDP LSPs.</span><p><div class="p"># Configure basic MPLS functions on DeviceA and enable LDP on the interface connected to DeviceB.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>mpls lsr-id 1.1.1.1</strong>
+[<span class="keyword">*</span>DeviceA] <strong>mpls</strong>
+[<span class="keyword">*</span>DeviceA-mpls] <strong>label advertise non-null</strong>
+[<span class="keyword">*</span>DeviceA-mpls] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>mpls</strong> <strong>ldp</strong>
+[<span class="keyword">*</span>DeviceA-mpls-ldp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface</strong> <strong>gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword">*</span>DeviceA-GigabitEthernet<span>0/1/0</span>] <strong>mpls</strong>
+[<span class="keyword">*</span>DeviceA-GigabitEthernet<span>0/1/0</span>] <strong>mpls</strong> <strong>ldp</strong>
+[<span class="keyword">*</span>DeviceA-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+</div>
+<p>Configure MPLS on DeviceB through DeviceE. Their configurations are similar to that on DeviceA and are not mentioned here. After the configuration is complete, MPLS forwarding can be implemented between devices in each IGP area.</p>
+<p>Check the MPLS label forwarding information base on DeviceA. The command output shows that label 48122 is pushed to the data packet with destination IP address 3.3.3.3/32 and In-Label NULL and that the packet is forwarded through GigabiteEthernet<span>0/1/0</span>. Here, DeviceA functions as the ingress.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display mpls lsp include 3.3.3.3 32 verbose</strong>
+-------------------------------------------------------------------------------
+                 LSP Information: LDP LSP
+-------------------------------------------------------------------------------
+  No                  :  1
+  VrfIndex            :
+  Fec                 :  <strong>3.3.3.3/32</strong>
+  Nexthop             :  10.1.1.2
+  In-Label            :  <strong>NULL</strong>
+  Out-Label           :  <strong>48122</strong>
+  In-Interface        :  ----------
+  Out-Interface       :  <strong>GigabiteEthernet<span>0/1/0</span></strong>
+  LspIndex            :  5000003
+  Type                :  Primary
+  OutSegmentIndex     :  5000002
+  LsrType             :  <strong>Ingress</strong>
+  Outgoing TunnelType :  ------
+  Outgoing TunnelID   :  0x0
+  Label Operation     :  <strong>PUSH</strong>
+  Mpls-Mtu            :  1500
+  LspAge              :  257 sec
+  Ingress-ELC         :  Disable
+
+  No                  :  2
+  VrfIndex            :
+  Fec                 :  3.3.3.3/32
+  Nexthop             :  10.1.1.2
+  In-Label            :  48124
+  Out-Label           :  48122
+  In-Interface        :  ----------
+  Out-Interface       :  GigabiteEthernet<span>0/2/0</span>
+  LspIndex            :  5000003
+  Type                :  Primary
+  OutSegmentIndex     :  5000002
+  LsrType             :  Transit
+  Outgoing TunnelType :  ------
+  Outgoing TunnelID   :  0x0
+  Label Operation     :  SWAP
+  Mpls-Mtu            :  1500
+  LspAge              :  257 sec
+  Ingress-ELC         :  ------</pre>
+<p>Check the MPLS label forwarding information base on DeviceB. After DeviceB receives the packet with In-Label 48122 from DeviceA, DeviceB searches its label forwarding information base, swaps label 48122 with label 48120, and forwards the packet through <strong>GigabiteEthernet<span>0/1/0</span></strong>. Here, DeviceB functions as a transit node.</p>
+<pre class="screen">&lt;DeviceB&gt; <strong>display mpls lsp include 3.3.3.3 32 verbose</strong>
+-------------------------------------------------------------------------------
+                 LSP Information: LDP LSP
+-------------------------------------------------------------------------------
+  No                  :  1
+  VrfIndex            :
+  Fec                 :  3.3.3.3/32
+  Nexthop             :  10.1.2.1
+  In-Label            :  NULL
+  Out-Label           :  48120
+  In-Interface        :  ----------
+  Out-Interface       :  GigabiteEthernet3/0/1
+  LspIndex            :  5000003
+  Type                :  Primary
+  OutSegmentIndex     :  5000002
+  LsrType             :  Ingress
+  Outgoing TunnelType :  ------
+  Outgoing TunnelID   :  0x0
+  Label Operation     :  PUSH
+  Mpls-Mtu            :  1500
+  LspAge              :  693 sec
+  Ingress-ELC         :  Disable
+
+  No                  :  2
+  VrfIndex            :
+  Fec                 :  3.3.3.3/32
+  Nexthop             :  10.1.2.1
+  In-Label            :  <strong>48122</strong>
+  Out-Label           :  <strong>48120</strong>
+  In-Interface        :  ----------
+  Out-Interface       :  <strong>GigabiteEthernet<span>0/1/0</span></strong>
+  LspIndex            :  5000003
+  Type                :  Primary
+  OutSegmentIndex     :  5000002
+  LsrType             :  <strong>Transit</strong>
+  Outgoing TunnelType :  ------
+  Outgoing TunnelID   :  0x0
+  Label Operation     :  <strong>SWAP</strong>
+  Mpls-Mtu            :  1500
+  LspAge              :  693 sec
+  Ingress-ELC         :  ------</pre>
+<p>Check the MPLS label forwarding information base on DeviceC. After DeviceC receives the packet carrying In-Label 48120 from DeviceB, DeviceC searches its label forwarding information base, and pops out the label. Then the packet reaches its destination. Here, DeviceC functions as the egress.</p>
+<pre class="screen">&lt;DeviceC&gt; <strong>display mpls lsp include 3.3.3.3 32 verbose</strong>
+-------------------------------------------------------------------------------
+                 LSP Information: LDP LSP
+-------------------------------------------------------------------------------
+  No                  :  1
+  VrfIndex            :
+  Fec                 :  3.3.3.3/32
+  Nexthop             :  127.0.0.1
+  In-Label            :  <strong>48120</strong>
+  Out-Label           :  <strong>NULL</strong>
+  In-Interface        :  ----------
+  Out-Interface       :  ----------
+  LspIndex            :  5000001
+  Type                :  Primary
+  OutSegmentIndex     :  4294967295
+  LsrType             :  <strong>Egress</strong>
+  Outgoing TunnelType :  ------
+  Outgoing TunnelID   :  0x0
+  Label Operation     :  <strong>POP</strong>
+  Mpls-Mtu            :  ------
+  LspAge              :  1212 sec
+  Ingress-ELC         :  ------</pre>
+<p>After the preceding configuration is complete, an LDP LSP is established in the IGP area, and data packets can be forwarded using MPLS labels only in the IGP area. When a packet reaches the IGP area border, its label is popped out, and the label-based forwarding process is complete, indicating that the packet cannot be further forwarded. Therefore, an inner MPLS tunnel (inner BGP SR LSP) needs to be established from 1.1.1.1 to 5.5.5.5 so that each MPLS packet carries two MPLS labels. When a packet reaches the IGP area border, the outer label is popped out, and there is still an inner MPLS label in the packet, according to which devices can forward the packet across IGP areas, ensuring whole-process MPLS forwarding and achieving end-to-end service interworking.</p>
+</p></li><li><span>Configure a BGP SR LSP.</span><p><p>a. Configure SRGBs.</p>
+<p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>segment-routing global-block 16000 17000</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>segment-routing global-block 18000 19000</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p>Configure the SRGB ranges [20000-21000] and [22000-23000] for DeviceD and DeviceE, respectively. The configurations on DeviceD and DeviceE are similar to the configuration on DeviceC and are not mentioned here.</p>
+<p>b. Configure BGP peer relationships.</p>
+<p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 3.3.3.3 as-number 100</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 3.3.3.3 </strong><strong>connect-interface LoopBack1</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 1.1.1.1 as-number 100</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 1.1.1.1 </strong><strong>connect-interface LoopBack1</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 4.4.4.4 as-number 100</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 4.4.4.4 </strong><strong>connect-interface LoopBack1</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p>The configurations on DeviceD and DeviceE are similar to the configuration on DeviceC and are not mentioned here.</p>
+<p>c. Configure DeviceC and DeviceD as route reflectors (RRs) so that DeviceA and DeviceE can learn BGP routes from each other.</p>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 1.1.1.1 reflect-client</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 1.1.1.1 next-hop-local</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 4.4.4.4 reflect-client</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 4.4.4.4 next-hop-local</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 3.3.3.3 reflect-client</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 3.3.3.3 next-hop-local</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 5.5.5.5 reflect-client</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 5.5.5.5 next-hop-local</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+<p>d. Configure BGP SR LSP ingresses.</p>
+<p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>route-policy policy1 permit node 1</strong>
+[<span class="keyword">*</span>DeviceA-route-policy] <strong>apply mpls-label</strong>
+[<span class="keyword">*</span>DeviceA-route-policy] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>network 1.1.1.1 255.255.255.255</strong> <strong>label-index 10</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 3.3.3.3 route-policy policy1 export</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 3.3.3.3 label-route-capability</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv4] <strong>peer 3.3.3.3</strong> <strong>prefix-sid</strong>
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv4] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceE] <strong>route-policy policy1 permit node 1</strong>
+[<span class="keyword">*</span>DeviceE-route-policy] <strong>apply mpls-label</strong>
+[<span class="keyword">*</span>DeviceE-route-policy] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceE] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceE-bgp] <strong>network 5.5.5.5 255.255.255.255</strong> <strong>label-index 50</strong>
+[<span class="keyword">*</span>DeviceE-bgp] <strong>peer 4.4.4.4 route-policy policy1 export</strong>
+[<span class="keyword">*</span>DeviceE-bgp] <strong>peer </strong><strong>4.4.4.4</strong><strong> label-route-capability</strong>
+[<span class="keyword">*</span>DeviceE-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword">*</span>DeviceE-bgp-af-ipv4] <strong>peer 4.4.4.4</strong> <strong>prefix-sid</strong>
+[<span class="keyword">*</span>DeviceE-bgp-af-ipv4] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceE-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceE] <strong>commit</strong></pre>
+<p>e. Configure transit nodes for the BGP SR LSP.</p>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>route-policy policy1 permit node 1</strong>
+[<span class="keyword">*</span>DeviceC-route-policy] <strong>if-match mpls-label</strong>
+[<span class="keyword">*</span>DeviceC-route-policy] <strong>apply mpls-label</strong>
+[<span class="keyword">*</span>DeviceC-route-policy] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 1.1.1.1 label-route-capability</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 4.4.4.4 label-route-capability</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 1.1.1.1 route-policy policy1 export</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 4.4.4.4 route-policy policy1 export</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword">*</span>DeviceC-bgp-af-ipv4] <strong>peer 1.1.1.1 </strong><strong>prefix-sid</strong>
+[<span class="keyword">*</span>DeviceC-bgp-af-ipv4] <strong>peer 4.4.4.4</strong> <strong>prefix-sid</strong>
+[<span class="keyword">*</span>DeviceC-bgp-af-ipv4] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>route-policy policy1 permit node 1</strong>
+[<span class="keyword">*</span>DeviceD-route-policy] <strong>if-match mpls-label</strong>
+[<span class="keyword">*</span>DeviceD-route-policy] <strong>apply mpls-label</strong>
+[<span class="keyword">*</span>DeviceD-route-policy] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 3.3.3.3 label-route-capability</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 5.5.5.5 label-route-capability</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 3.3.3.3 route-policy policy1 export</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 5.5.5.5 route-policy policy1 export</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword">*</span>DeviceD-bgp-af-ipv4] <strong>peer 3.3.3.3 </strong><strong>prefix-sid</strong>
+[<span class="keyword">*</span>DeviceD-bgp-af-ipv4] <strong>peer 5.5.5.5</strong> <strong>prefix-sid</strong>
+[<span class="keyword">*</span>DeviceD-bgp-af-ipv4] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+<p>After the configuration is complete, run the <strong>display mpls lsp</strong> command on DeviceE to view information about BGP LSPs. The command output shows that the In Label of the route with the destination IP address 5.5.5.5/32 is 22050. In this case, DeviceE instructs DeviceD to use 22050 as the BGP SR LSP label for the route with the destination IP address 5.5.5.5/32. DeviceE then creates the entry in its BGP LSP table.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceE] <strong>display mpls lsp</strong>
+Flag after Out IF: (I) - RLFA Iterated LSP, (I*) - Normal and RLFA Iterated LSP
+Flag after LDP FRR: (L) - Logic FRR LSP
+-------------------------------------------------------------------------------
+                 LSP Information: LDP LSP
+-------------------------------------------------------------------------------
+FEC                In/Out Label    In/Out IF                      Vrf Name
+4.4.4.4/32         NULL/48120      -/Eth3/0/3
+4.4.4.4/32         48121/48120     -/Eth3/0/3
+5.5.5.5/32         48120/NULL      -/-
+-------------------------------------------------------------------------------
+                 LSP Information: BGP LSP
+-------------------------------------------------------------------------------
+FEC                In/Out Label    In/Out IF                      Vrf Name
+1.1.1.1/32         NULL/20010      -/-
+5.5.5.5/32         <strong>22050</strong>/NULL      -/-</pre>
+<p>Run the <strong>display mpls lsp</strong> command on DeviceC to view information about BGP LSPs. The command output shows that the In Label of the route with the destination IP address 5.5.5.5/32 is 18050. This label is notified to DeviceC by DeviceD, and DeviceC is instructed to use 18050 as the BGP SR LSP label for the route with the destination IP address 5.5.5.5/32. DeviceC then creates the entry in its BGP LSP table. In addition, the Out Label is 20050, which is notified by DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>display mpls lsp</strong>
+Flag after Out IF: (I) - RLFA Iterated LSP, (I*) - Normal and RLFA Iterated LSP
+Flag after LDP FRR: (L) - Logic FRR LSP
+-------------------------------------------------------------------------------
+                 LSP Information: LDP LSP
+-------------------------------------------------------------------------------
+FEC                In/Out Label    In/Out IF                      Vrf Name
+1.1.1.1/32         NULL/48121      -/Eth3/0/1
+1.1.1.1/32         48121/48121     -/Eth3/0/1
+2.2.2.2/32         NULL/48120      -/Eth3/0/1
+2.2.2.2/32         48122/48120     -/Eth3/0/1
+3.3.3.3/32         48120/NULL      -/-
+4.4.4.4/32         NULL/48120      -/Eth3/0/2
+4.4.4.4/32         48123/48120     -/Eth3/0/2
+-------------------------------------------------------------------------------
+                 LSP Information: BGP LSP
+-------------------------------------------------------------------------------
+FEC                In/Out Label    In/Out IF                      Vrf Name
+1.1.1.1/32         18010/16010     -/-
+5.5.5.5/32<strong>        18050/20050</strong>   -/-
+5.5.5.5/32         NULL/20050      -/-</pre>
+<p>Now, two MPLS labels are available, one for the LDP LSP, and the other for the BGP LSP. Then, MPLS forwarding from DeviceA to DeviceE is implemented.</p>
+</p></li><li><span>Verify the configuration.</span><p><p>After the preceding configuration is complete, DeviceA and DeviceE can learn the routes to each other's interfaces and ping each other's Loopback1 interface.</p>
+<p>Take the command output on DeviceA as an example.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>ping -a 1.1.1.1</strong> <strong>5.5.5.5</strong>
+  PING 5.5.5.5: 56  data bytes, press CTRL_C to break
+    Reply from 5.5.5.5: bytes=56 Sequence=1 ttl=252 time=30 ms
+    Reply from 5.5.5.5: bytes=56 Sequence=2 ttl=252 time=23 ms
+    Reply from 5.5.5.5: bytes=56 Sequence=3 ttl=252 time=26 ms
+    Reply from 5.5.5.5: bytes=56 Sequence=4 ttl=252 time=28 ms
+    Reply from 5.5.5.5: bytes=56 Sequence=5 ttl=252 time=22 ms
+
+  --- 5.5.5.5 ping statistics ---
+    5 packet(s) transmitted
+    5 packet(s) received
+    0.00% packet loss
+    round-trip min/avg/max = 22/25/30 ms</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001120440568__1.4.6"></a><a name="1.4.6"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>DeviceA configuration file</p>
+<pre class="screen">#
+sysname DeviceA
+#
+mpls lsr-id 1.1.1.1
+#
+mpls
+ label advertise non-null
+#
+mpls ldp
+ #
+ ipv4-family
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.1.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 1.1.1.1 255.255.255.255
+#
+bgp 100
+ segment-routing global-block 16000 17000
+ peer 3.3.3.3 as-number 100
+ peer 3.3.3.3 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  network 1.1.1.1 255.255.255.255 label-index 10
+  peer 3.3.3.3 enable
+  peer 3.3.3.3 route-policy policy1 export
+  peer 3.3.3.3 label-route-capability
+  peer 3.3.3.3 prefix-sid
+#
+ospf 1 router-id 1.1.1.1
+ area 0.0.0.0
+  network 1.1.1.1 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+#
+route-policy policy1 permit node 1
+ apply mpls-label
+#
+return</pre>
+</li><li><p>DeviceB configuration file</p>
+<pre class="screen">#
+sysname DeviceB
+#
+mpls lsr-id 2.2.2.2
+#
+mpls
+ label advertise non-null
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.2.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.1.1.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 2.2.2.2 255.255.255.255
+#
+ospf 1 router-id 2.2.2.2
+ area 0.0.0.0
+  network 2.2.2.2 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+  network 10.1.2.0 0.0.0.255
+#
+return</pre>
+</li><li><p>DeviceC configuration file</p>
+<pre class="screen">#
+sysname DeviceC
+#
+mpls lsr-id 3.3.3.3
+#
+mpls
+ label advertise non-null
+#
+mpls ldp
+#
+isis 1
+ network-entity 10.0000.0000.0000.0010.00
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.3.1 255.255.255.0
+ isis enable 1
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.1.2.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 3.3.3.3 255.255.255.255
+ isis enable 1
+#
+bgp 100
+ segment-routing global-block 18000 19000
+ peer 1.1.1.1 as-number 100
+ peer 1.1.1.1 connect-interface LoopBack1
+ peer 4.4.4.4 as-number 100
+ peer 4.4.4.4 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 1.1.1.1 enable
+  peer 1.1.1.1 route-policy policy1 export
+  peer 1.1.1.1 reflect-client
+  peer 1.1.1.1 next-hop-local
+  peer 1.1.1.1 label-route-capability
+  peer 1.1.1.1 prefix-sid
+  peer 4.4.4.4 enable
+  peer 4.4.4.4 route-policy policy1 export
+  peer 4.4.4.4 reflect-client
+  peer 4.4.4.4 next-hop-local
+  peer 4.4.4.4 label-route-capability
+  peer 4.4.4.4 prefix-sid
+#
+ospf 1 router-id 3.3.3.3
+ area 0.0.0.0
+  network 3.3.3.3 0.0.0.0
+  network 10.1.2.0 0.0.0.255
+#
+route-policy policy1 permit node 1
+ if-match mpls-label
+ apply mpls-label
+#
+return</pre>
+</li><li><p>DeviceD configuration file</p>
+<pre class="screen">#
+sysname DeviceD
+#
+mpls lsr-id 4.4.4.4
+#
+mpls
+ label advertise non-null
+#
+mpls ldp
+#
+isis 1
+ network-entity 10.0000.0000.0000.0020.00
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.4.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.1.3.2 255.255.255.0
+ isis enable 1
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 4.4.4.4 255.255.255.255
+ isis enable 1
+#
+bgp 100
+ segment-routing global-block 20000 21000
+ peer 3.3.3.3 as-number 100
+ peer 3.3.3.3 connect-interface LoopBack1
+ peer 5.5.5.5 as-number 100
+ peer 5.5.5.5 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 3.3.3.3 enable
+  peer 3.3.3.3 route-policy policy1 export
+  peer 3.3.3.3 reflect-client
+  peer 3.3.3.3 next-hop-local
+  peer 3.3.3.3 label-route-capability
+  peer 3.3.3.3 prefix-sid
+  peer 5.5.5.5 enable
+  peer 5.5.5.5 route-policy policy1 export
+  peer 5.5.5.5 reflect-client
+  peer 5.5.5.5 next-hop-local
+  peer 5.5.5.5 label-route-capability
+  peer 5.5.5.5 prefix-sid
+#
+ospf 2 router-id 4.4.4.4
+ area 0.0.0.0
+  network 4.4.4.4 0.0.0.0
+  network 10.1.4.0 0.0.0.255
+#
+route-policy policy1 permit node 1
+ if-match mpls-label
+ apply mpls-label
+#
+return</pre>
+</li><li><p>DeviceE configuration file</p>
+<pre class="screen">#
+sysname DeviceE
+#
+mpls lsr-id 5.5.5.5
+#
+mpls
+ label advertise non-null
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.1.4.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 5.5.5.5 255.255.255.255
+#
+bgp 100
+ segment-routing global-block 22000 23000
+ peer 4.4.4.4 as-number 100
+ peer 4.4.4.4 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  network 5.5.5.5 255.255.255.255 label-index 50
+  peer 4.4.4.4 enable
+  peer 4.4.4.4 route-policy policy1 export
+  peer 4.4.4.4 label-route-capability
+  peer 4.4.4.4 prefix-sid
+#
+ospf 2 router-id 5.5.5.5
+ area 0.0.0.0
+  network 5.5.5.5 0.0.0.0
+  network 10.1.4.0 0.0.0.255
+#
+route-policy policy1 permit node 1
+ apply mpls-label
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_3070.html">Configuration Examples for BGP
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_multiinstance_0002.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_5026.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

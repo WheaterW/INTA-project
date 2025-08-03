@@ -1,0 +1,518 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring OSPF-BGP Synchronization">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_ospf_cfg_0085.html">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_ospf_cfg_0088.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001176662993">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring OSPF-BGP Synchronization</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001176662993"></a><a name="EN-US_TASK_0000001176662993"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring OSPF-BGP Synchronization</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001176662993__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In <a href="#EN-US_TASK_0000001176662993__fig_dc_vrp_ospf_cfg_010301">Figure 1</a>, all devices run BGP, and an EBGP connection is set up between DeviceD and DeviceE. IBGP connections are set up between devices in AS 10, and OSPF is used as the IGP.</p>
+<p>OSPF-BGP synchronization is required on DeviceB so that a restart of DeviceB does not interrupt the traffic from DeviceA to AS 20.</p>
+<div class="fignone" id="EN-US_TASK_0000001176662993__fig_dc_vrp_ospf_cfg_010301"><a name="EN-US_TASK_0000001176662993__fig_dc_vrp_ospf_cfg_010301"></a><a name="fig_dc_vrp_ospf_cfg_010301"></a><span class="figcap"><b>Figure 1 </b>Network diagram of OSPF-BGP synchronization</span><div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1, interface 2, and interface 3 represent <span>100GE</span> <span>1/0/1</span>, <span>100GE</span> <span>1/0/2</span>, and <span>100GE</span> <span>1/0/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001130783310.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176662993__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>To improve security, OSPF area authentication or interface authentication is recommended. For details, see "Improving OSPF Network Security." OSPF area authentication is used as an example. For details, see "Example for Configuring Basic OSPF Functions."</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176662993__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Enable OSPF on DeviceA, DeviceB, DeviceC, and DeviceD (except the interface 10.2.1.1/30), and specify the same area for the network segments where the OSPF interfaces reside.</p>
+</li><li><p>Set up IBGP connections between DeviceA, DeviceB, DeviceC, and DeviceD (except the interface 10.2.1.1/30).</p>
+</li><li><p>Set the OSPF cost on DeviceC.</p>
+</li><li><p>Configure an EBGP connection between DeviceD and DeviceE.</p>
+</li><li><p>Configure BGP to import direct routes and routes from the OSPF process on DeviceD.</p>
+</li><li><p>Configure BGP on DeviceE.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001176662993__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface.</span><p><p>Assign an IP address to each interface as shown in <a href="#EN-US_TASK_0000001176662993__fig_dc_vrp_ospf_cfg_010301">Figure 1</a>. For configuration details, see configuration scripts.</p>
+</p></li><li><span>Configure basic OSPF functions.</span><p><p>For detailed configurations, see the configuration scripts.</p>
+</p></li><li><span>Configure IBGP full-mesh connections.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface loopback 0</strong>
+[<span class="keyword">*</span>DeviceA-LoopBack0] <strong>ip address 10.10.1.1 32</strong>
+[<span class="keyword">*</span>DeviceA-LoopBack0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>bgp 10</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>router-id 10.10.1.1</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.10.2.2 as-number 10</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.10.2.2 connect-interface LoopBack 0</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.10.3.3 as-number 10</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.10.3.3 connect-interface LoopBack 0</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.10.4.4 as-number 10</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.10.4.4 connect-interface LoopBack 0</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceA] <strong>commit</strong></span></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">&lt;DeviceB&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface loopback 0</strong>
+[<span class="keyword">*</span>DeviceB-LoopBack0] <strong>ip address 10.10.2.2 32</strong>
+[<span class="keyword">*</span>DeviceB-LoopBack0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>bgp 10</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>router-id 10.10.2.2</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.10.1.1 as-number 10</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.10.1.1 connect-interface LoopBack 0</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.10.3.3 as-number 10</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.10.3.3 connect-interface LoopBack 0</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.10.4.4 as-number 10</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.10.4.4 connect-interface LoopBack 0</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceB] <strong>commit</strong></span></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">&lt;DeviceC&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>interface loopback 0</strong>
+[<span class="keyword">*</span>DeviceC-LoopBack0]<strong> ip address 10.10.3.3 32</strong>
+[<span class="keyword">*</span>DeviceC-LoopBack0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>bgp 10</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>router-id 10.10.3.3</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 10.10.1.1 as-number 10</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 10.10.1.1 connect-interface LoopBack 0</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 10.10.2.2 as-number 10</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 10.10.2.2 connect-interface LoopBack 0</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 10.10.4.4 as-number 10</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 10.10.4.4 connect-interface LoopBack 0</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceC] <strong>commit</strong></span></pre>
+<p># Configure DeviceD.</p>
+<pre class="screen">&lt;DeviceD&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>interface loopback 0</strong>
+[<span class="keyword">*</span>DeviceD-LoopBack0]<strong> ip address 10.10.4.4 32</strong>
+[<span class="keyword">*</span>DeviceD-LoopBack0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>bgp 10</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>router-id 10.10.4.4</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 10.10.1.1 as-number 10</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 10.10.1.1 connect-interface LoopBack 0</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 10.10.2.2 as-number 10</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 10.10.2.2 connect-interface LoopBack 0</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 10.10.3.3 as-number 10</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 10.10.3.3 connect-interface LoopBack 0</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceD] <strong>commit</strong></span></pre>
+</p></li><li><span>Configure an EBGP connection.</span><p><p># Configure DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>bgp 10</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD-bgp] <strong>peer 10.2.1.2 as-number 20</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>import-route direct</strong>
+[<span class="keyword">*</span>DeviceD-bgp]<strong> import-route ospf 1</strong>
+[<span class="keyword">*</span>DeviceD-bgp]<strong> quit</strong>
+<span>[<span class="keyword">*</span>DeviceD] <strong>commit</strong></span></pre>
+<p># Configure DeviceE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceE] <strong>bgp 20</strong>
+[<span class="keyword">*</span>DeviceE-bgp] <strong>peer 10.2.1.1 as-number 10</strong>
+[<span class="keyword">*</span>DeviceE-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword">*</span>DeviceE-bgp-af-ipv4] <strong>network 10.3.1.0 30</strong>
+[<span class="keyword">*</span>DeviceE-bgp-af-ipv4] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceE-bgp] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceE] <strong>commit</strong></span></pre>
+</p></li><li><span>Set the OSPF cost on DeviceC.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>ospf cost 2</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>interface </strong><strong><span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>] <strong>ospf cost 2</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceC] <strong>commit</strong></span></pre>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>After the OSPF cost is set to 2 on DeviceC, DeviceA selects only DeviceB as the intermediate device to the network segment 10.2.1.0, and DeviceC becomes a backup of DeviceB.</p>
+</div></div>
+<p># Check information about the routing table on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display ip routing-table</strong></pre>
+<pre class="screen">Route Flags: R - relied, D - download to fib
+------------------------------------------------------------------------------
+Routing Table: _public_
+         Destinations : 20       Routes : 20
+
+    Destination/Mask       Proto    Pre  Cost    Flags NextHop         Interface
+
+        10.10.1.1/32         Direct   0    0       D     127.0.0.1       InLoopBack0
+        10.10.1.255/32       Direct   0    0       D     127.0.0.1       InLoopBack0
+        10.10.2.2/32         OSPF     10   3       D     10.1.1.2        <span>100GE</span><span>1/0/1</span>
+        10.4.4.0/24         BGP      255  0       RD    10.10.4.4         <span>100GE</span><span>1/0/1</span>
+        10.10.4.4/32         OSPF     10   3       D     10.1.1.2        <span>100GE</span><span>1/0/1</span>
+        10.5.5.0/24         BGP      255  0       RD    10.2.1.2        <span>100GE</span><span>1/0/1</span>
+       10.1.1.0/30         Direct   0    0       D     10.1.1.1        <span>100GE</span><span>1/0/1</span>
+       10.1.1.3/32         Direct   0    0       D     10.1.1.1        <span>100GE</span><span>1/0/1</span>
+       10.1.1.1/32         Direct   0    0       D     127.0.0.1       InLoopBack0
+       10.1.1.255/32       Direct   0    0       D     127.0.0.1       InLoopBack0
+       10.1.1.255/32       Direct   0    0       D     10.1.1.2        <span>100GE</span><span>1/0/1</span>
+       10.1.1.2/32         Direct   0    0       D     10.1.1.2        <span>100GE</span><span>1/0/1</span>
+       10.1.1.255/32       Direct   0    0       D     10.1.1.2        <span>100GE</span><span>1/0/1</span>
+       10.1.2.0/30         Direct   0    0       D     10.1.2.1        <span>100GE</span><span>1/0/2</span>
+       10.1.2.3/32         Direct   0    0       D     10.1.2.1        <span>100GE</span><span>1/0/2</span>
+       10.1.2.1/32         Direct   0    0       D     127.0.0.1       InLoopBack0
+       10.1.2.255/32       Direct   0    0       D     127.0.0.1       InLoopBack0
+       10.1.2.2/32         Direct   0    0       D     10.1.2.2        <span>100GE</span><span>1/0/2</span>
+       10.1.2.255/32       Direct   0    0       D     10.1.2.2        <span>100GE</span><span>1/0/2</span>
+      127.0.0.0/8          Direct   0    0       D     127.0.0.1       InLoopBack0
+      127.0.0.1/32         Direct   0    0       D     127.0.0.1       InLoopBack0
+      127.0.0.255/32       Direct   0    0       D     127.0.0.1       InLoopBack0
+    <strong>10.3.1.0/30       OSPF    10   2       D     10.1.1.2        <span>100GE</span><span>1/0/1</span></strong>
+       10.1.3.1/32         BGP      255  0       RD    10.10.4.4         <span>100GE</span><span>1/0/1</span>
+       10.1.4.0/30         OSPF     10   3       D     10.1.1.2        <span>100GE</span><span>1/0/1</span>
+                           OSPF     10   3       D     10.1.2.2        <span>100GE</span><span>1/0/2</span>
+       10.1.4.1/32         BGP      255  0       RD    10.10.4.4         <span>100GE</span><span>1/0/1</span>
+       10.2.1.0/30         BGP      255  0       RD    10.10.4.4         <span>100GE</span><span>1/0/1</span>
+       10.2.1.2/32         BGP      255  0       RD    10.10.4.4         <span>100GE</span><span>1/0/1</span>
+       10.3.1.0/30         BGP      255  0       RD    10.10.4.4         <span>100GE</span><span>1/0/1</span>
+       255.255.255.255/32  Direct   0    0       D     127.0.0.1       InLoopBack0</pre>
+<p>The command output shows that BGP has learned the route to 10.3.1.0, with the outbound interface being <span>100GE</span><span>1/0/1</span>.</p>
+<p># Check information about the routing table on DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display ip routing-table</strong></pre>
+<pre class="screen">Route Flags: R - relied, D - download to fib
+------------------------------------------------------------------------------
+Routing Table: _public_
+         Destinations : 19       Routes : 19
+
+    Destination/Mask       Proto    Pre  Cost      Flags NextHop         Interface
+
+        10.10.2.2/32         Direct   0    0           D   127.0.0.1        InLoopBack0
+        10.10.2.255/32       Direct   0    0           D   127.0.0.1        InLoopBack0
+        10.10.1.1/32         OSPF     10   2           D   10.1.1.1         <span>100GE</span><span>1/0/1</span>
+        10.4.4.0/24         BGP      255  0           RD  10.1.3.2         <span>100GE</span><span>1/0/2</span>
+        10.10.4.4/32         OSPF     10   2           D   10.1.3.2         <span>100GE</span><span>1/0/2</span>
+        10.5.5.0/24         BGP      255  0           RD  10.2.1.2         <span>100GE</span><span>1/0/2</span>
+       10.1.1.0/30         Direct   0    0           D   10.1.1.2         <span>100GE</span><span>1/0/1</span>
+       10.1.1.3/32         Direct   0    0           D   10.1.1.2         <span>100GE</span><span>1/0/1</span>
+       10.1.1.1/32         Direct   0    0           D   10.1.1.1         <span>100GE</span><span>1/0/1</span>
+       10.1.1.255/32       Direct   0    0           D   10.1.1.1         <span>100GE</span><span>1/0/1</span>
+       10.1.1.2/32         Direct   0    0           D   127.0.0.1        InLoopBack0
+       10.1.1.255/32       Direct   0    0           D   127.0.0.1        InLoopBack0
+       10.1.2.0/30         OSPF     10   2           D   10.1.1.1         <span>100GE</span><span>1/0/1</span>
+       10.1.3.0/30         Direct   0    0           D   10.1.3.1         <span>100GE</span><span>1/0/2</span>
+       10.1.3.3/32         Direct   0    0           D   10.1.3.1         <span>100GE</span><span>1/0/2</span>
+       10.1.3.1/32         Direct   0    0           D   127.0.0.1        InLoopBack0
+       10.1.3.255/32       Direct   0    0           D   127.0.0.1        InLoopBack0
+       10.1.3.2/32         Direct   0    0           D   10.1.3.2         <span>100GE</span><span>1/0/2</span>
+       10.1.3.255/32       Direct   0    0           D   10.1.3.2         <span>100GE</span><span>1/0/2</span>
+      127.0.0.0/8          Direct   0    0           D   127.0.0.1        InLoopBack0
+      127.0.0.1/32         Direct   0    0           D   127.0.0.1        InLoopBack0
+      127.0.0.255/32       Direct   0    0           D   127.0.0.1        InLoopBack0
+       10.1.4.0/30         OSPF     10   2           D   10.1.3.2         <span>100GE</span><span>1/0/2</span>
+       10.1.4.1/32         BGP      255  0           RD  10.1.3.2         <span>100GE</span><span>1/0/2</span>
+       10.2.1.0/30         BGP      255  0           RD  10.1.3.2         <span>100GE</span><span>1/0/2</span>
+       10.2.1.2/32         BGP      255  0           RD  10.1.3.2         <span>100GE</span><span>1/0/2</span>
+     <strong>10.3.1.0/30      BGP    255  0           RD  10.1.3.2         <span>100GE</span><span>1/0/2</span></strong>
+       255.255.255.255/32  Direct   0    0           D     127.0.0.1       InLoopBack0</pre>
+<p>The command output shows that DeviceB has learned the route to 10.3.1.0 through BGP, with the outbound interface being <span>100GE</span><span>1/0/2</span>. OSPF has learned the routes to 10.1.2.0 and 10.1.4.0, and the costs are both 2.</p>
+</p></li><li><span>Enable OSPF-BGP synchronization on DeviceB.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>stub-router on-startup</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <a href="cmdqueryname=safe-sync+enable"><b><span class="cmdname">safe-sync enable</span></b></a>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceB] <strong>commit</strong></span></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001176662993__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Restart DeviceB.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Here, the device is restarted based on the assumption that the device is faulty. In normal cases, do not run the <strong>reboot</strong> command because it may lead to a temporary network outage. In addition, check that the configuration script of the device has been saved before you restart the device.</p>
+</div></div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>reboot</strong>
+System will reboot! Continue?[Y/N] <strong>y</strong></pre>
+<p># Check information about the routing table on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display ip routing-table</strong></pre>
+<pre class="screen">Route Flags: R - relied, D - download to fib
+------------------------------------------------------------------------------
+Routing Table: _public_
+         Destinations : 20       Routes : 20
+
+Destination/Mask    Proto  Pre  Cost      Flags NextHop         Interface
+
+        10.10.1.1/32  Direct 0    0           D   127.0.0.1        InLoopBack0
+        10.10.2.2/32  OSPF   10   4           D   10.1.2.2         <span>100GE</span><span>1/0/2</span>
+        10.4.4.0/24  BGP    255  0           RD  10.10.4.4          <span>100GE</span><span>1/0/2</span>
+        10.10.4.4/32  OSPF   10   4           D   10.1.2.2         <span>100GE</span><span>1/0/2</span>
+        10.5.5.0/24  BGP    255  0           RD  10.2.1.2         <span>100GE</span><span>1/0/2</span>
+       10.1.1.0/30  Direct 0    0           D   10.1.1.1         <span>100GE</span><span>1/0/1</span>
+       10.1.1.1/32  Direct 0    0           D   127.0.0.1        InLoopBack0
+       10.1.1.2/32  Direct 0    0           D   10.1.1.2         <span>100GE</span><span>1/0/1</span>
+       10.1.2.0/30  Direct 0    0           D   10.1.2.1         <span>100GE</span><span>1/0/2</span>
+       10.1.2.1/32  Direct 0    0           D   127.0.0.1        InLoopBack0
+       10.1.2.2/32  Direct 0    0           D   10.1.2.2         <span>100GE</span><span>1/0/2</span>
+      127.0.0.0/8   Direct 0    0           D   127.0.0.1        InLoopBack0
+      127.0.0.1/32  Direct 0    0           D   127.0.0.1        InLoopBack0
+       10.1.3.0/30  OSPF   10   2           D   10.1.1.2         <span>100GE</span><span>1/0/1</span>
+       10.1.3.1/32  BGP    255  0           RD  10.10.4.4          <span>100GE</span><span>1/0/2</span>
+       10.1.4.0/30  OSPF   10   3           D   10.1.2.2         <span>100GE</span><span>1/0/2</span>
+       10.1.4.1/32  BGP    255  0           RD  10.10.4.4          <span>100GE</span><span>1/0/2</span>
+       10.2.1.0/30  BGP    255  0           RD  10.10.4.4          <span>100GE</span><span>1/0/2</span>
+       10.2.1.2/32  BGP    255  0           RD  10.10.4.4          <span>100GE</span><span>1/0/2</span>
+      <strong>10.3.1.0/30   BGP    255  0           RD  10.10.4.4          <span>100GE</span><span>1/0/2</span></strong></pre>
+<p>The command output shows that BGP has learned the route to 10.3.1.0 and the outbound interface is changed to <span>100GE</span><span>1/0/2</span>.</p>
+<p># Check information about the routing table on DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display ip routing-table</strong></pre>
+<pre class="screen">Route Flags: R - relied, D - download to fib
+------------------------------------------------------------------------------
+Routing Table: _public_
+         Destinations : 15       Routes : 15
+
+Destination/Mask    Proto  Pre  Cost      Flags NextHop        Interface
+
+        <strong>10.10.1.1/32  OSPF   10   65536       D  10.1.1.1        <span>100GE</span><span>1/0/1</span></strong>
+        10.10.2.2/32  Direct 0    0           D  127.0.0.1       InLoopBack0
+        <strong>10.10.4.4/32  OSPF   10   65536       D  10.1.3.2        <span>100GE</span><span>1/0/2</span></strong>
+       10.1.1.0/30  Direct 0    0           D  10.1.1.2        <span>100GE</span><span>1/0/1</span>
+       10.1.1.1/32  Direct 0    0           D  10.1.1.1        <span>100GE</span><span>1/0/1</span>
+       10.1.1.2/32  Direct 0    0           D  127.0.0.1       InLoopBack0
+       <strong>10.1.2.0/30  OSPF   10   65536       D  10.1.1.1        <span>100GE</span><span>1/0/1</span></strong>
+       10.1.3.0/30  Direct 0    0           D  10.1.3.1        <span>100GE</span><span>1/0/2</span>
+       10.1.3.1/32  Direct 0    0           D  127.0.0.1       InLoopBack0
+       10.1.3.2/32  Direct 0    0           D  10.1.3.2        <span>100GE</span><span>1/0/2</span>
+      127.0.0.0/8   Direct 0    0           D   127.0.0.1      InLoopBack0
+      127.0.0.1/32  Direct 0    0           D   127.0.0.1      InLoopBack0
+       <strong>10.1.4.0/30  OSPF   10   65536       D  10.1.3.2        <span>100GE</span><span>1/0/2</span></strong>
+      127.0.0.0/8   Direct 0    0           D  127.0.0.1       InLoopBack0
+      127.0.0.1/32  Direct 0    0           D  127.0.0.1       InLoopBack0</pre>
+<p>The command output shows that only the OSPF routes exist in the routing table and their costs are greater than 65535. This is because IGP routes converge faster than BGP routes.</p>
+<p># Check information about the routing table on DeviceB again.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display ip routing-table</strong></pre>
+<pre class="screen">Route Flags: R - relied, D - download to fib
+------------------------------------------------------------------------------
+Routing Table: _public_
+         Destinations : 19       Routes : 19
+
+Destination/Mask    Proto  Pre  Cost       Flags NextHop       Interface
+
+        10.10.2.2/32  Direct 0    0           D    127.0.0.1        InLoopBack0
+        10.10.1.1/32  OSPF   10   2           D    10.1.1.1         <span>100GE</span><span>1/0/1</span>
+        10.4.4.0/24  BGP    255  0           RD   10.1.3.2         <span>100GE</span><span>1/0/2</span>
+        10.10.4.4/32  OSPF   10   2           D    10.1.3.2         <span>100GE</span><span>1/0/2</span>
+        10.5.5.0/24  BGP    255  0           RD   10.2.1.2         <span>100GE</span><span>1/0/2</span>
+       10.1.1.0/30  Direct 0    0           D    10.1.1.2         <span>100GE</span><span>1/0/1</span>
+       10.1.1.1/32  Direct 0    0           D    10.1.1.1         <span>100GE</span><span>1/0/1</span>
+       10.1.1.2/32  Direct 0    0           D    127.0.0.1        InLoopBack0
+       10.1.2.0/30  OSPF   10   2           D    10.1.1.1         <span>100GE</span><span>1/0/1</span>
+       10.1.3.0/30  Direct 0    0           D    10.1.3.1         <span>100GE</span><span>1/0/2</span>
+       10.1.3.1/32  Direct 0    0           D    127.0.0.1        InLoopBack0
+       10.1.3.2/32  Direct 0    0           D    10.1.3.2         <span>100GE</span><span>1/0/2</span>
+      127.0.0.0/8   Direct 0    0           D    127.0.0.1        InLoopBack0
+      127.0.0.1/32  Direct 0    0           D    127.0.0.1        InLoopBack0
+       10.1.4.0/30  OSPF   10   2           D    10.1.3.2         <span>100GE</span><span>1/0/2</span>
+       10.1.4.1/32  BGP    255  0           RD   10.1.3.2         <span>100GE</span><span>1/0/2</span>
+       10.2.1.0/30  BGP    255  0           RD   10.1.3.2         <span>100GE</span><span>1/0/2</span>
+       10.2.1.2/32  BGP    255  0           RD   10.1.3.2         <span>100GE</span><span>1/0/2</span>
+       10.3.1.0/30  BGP    255  0           RD   10.1.3.2         <span>100GE</span><span>1/0/2</span></pre>
+<p>The command output shows that the routing information is restored (to that prior to device restart) after BGP routes converge on DeviceB.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001176662993__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+router id 10.10.1.1
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.252
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.2.1 255.255.255.252
+#
+interface LoopBack0
+ ip address 10.10.1.1 255.255.255.255
+#
+bgp 10
+ router-id 10.10.1.1
+ peer 10.10.2.2 as-number 10
+ peer 10.10.2.2 connect-interface LoopBack 0
+ peer 10.10.3.3 as-number 10
+ peer 10.10.3.3 connect-interface LoopBack 0
+ peer 10.10.4.4 as-number 10
+ peer 10.10.4.4 connect-interface LoopBack 0
+#
+ospf 1
+ area 0.0.0.0
+  network 10.10.1.1 0.0.0.0
+  network 10.1.1.0 0.0.0.3
+  network 10.1.2.0 0.0.0.3
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+router id 10.10.2.2
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.2 255.255.255.252
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.3.1 255.255.255.252
+#
+interface LoopBack0
+ ip address 10.10.2.2 255.255.255.255
+#
+bgp 10
+ router-id 10.10.2.2
+ peer 10.10.1.1 as-number 10
+ peer 10.10.1.1 connect-interface LoopBack 0
+ peer 10.10.3.3 as-number 10
+ peer 10.10.3.3 connect-interface LoopBack 0
+ peer 10.10.4.4 as-number 10
+ peer 10.10.4.4 connect-interface LoopBack 0
+#
+ospf 1
+ stub-router on-startup
+ area 0.0.0.0
+  network 10.1.1.0 0.0.0.3
+  network 10.1.3.0 0.0.0.3
+  network 10.10.2.2 0.0.0.0
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+router id 10.10.3.3
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.4.1 255.255.255.252
+ ospf cost 2
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.2.2 255.255.255.252
+ ospf cost 2
+#
+interface LoopBack0
+ ip address 10.10.3.3 255.255.255.255
+#
+bgp 10
+ router-id 10.10.3.3
+ peer 10.10.1.1 as-number 10
+ peer 10.10.1.1 connect-interface LoopBack 0
+ peer 10.10.2.2 as-number 10
+ peer 10.10.2.2 connect-interface LoopBack 0
+ peer 10.10.4.4 as-number 10
+ peer 10.10.4.4 connect-interface LoopBack 0
+#
+ospf 1
+ area 0.0.0.0
+  network 10.1.2.0 0.0.0.3
+  network 10.1.4.0 0.0.0.3
+  network 10.10.3.3 0.0.0.0
+#
+return</pre>
+</li><li><p>DeviceD</p>
+<pre class="screen">#
+sysname DeviceD
+#
+router id 10.10.4.4
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.4.2 255.255.255.252
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.3.2 255.255.255.252
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.2.1.1 255.255.255.252
+#
+interface LoopBack0
+ ip address 10.10.4.4 255.255.255.255
+#
+bgp 10
+ router-id 10.10.4.4
+ peer 10.2.1.2 as-number 20
+ peer 10.10.1.1 as-number 10
+ peer 10.10.1.1 connect-interface LoopBack 0
+ peer 10.10.2.2 as-number 10
+ peer 10.10.2.2 connect-interface LoopBack 0
+ peer 10.10.3.3 as-number 10
+ peer 10.10.3.3 connect-interface LoopBack 0
+ #
+ ipv4-family unicast
+  import-route direct
+  import-route ospf 1
+  peer 10.2.1.2 enable
+#
+ospf 1
+ area 0.0.0.0
+  network 10.10.4.4 0.0.0.0
+  network 10.1.3.0 0.0.0.3
+  network 10.1.4.0 0.0.0.3
+#
+return</pre>
+</li><li><p>DeviceE</p>
+<pre class="screen">#
+sysname DeviceE
+#
+router id 10.5.5.5
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.2.1.2 255.255.255.252
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.3.1.1 255.255.255.252
+#
+interface LoopBack0
+ ip address 10.5.5.5 255.255.255.255
+#
+bgp 20
+ router-id 10.5.5.5
+ peer 10.2.1.1 as-number 10
+ #
+ ipv4-family unicast
+  network 10.3.1.0 255.255.255.252
+  peer 10.2.1.1 enable
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../vrp/vrp_ospf_cfg_0085.html">Configuring OSPF-BGP Synchronization
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../vrp/vrp_ospf_cfg_0088.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+Overview of IPv6 Basic
+======================
+
+Overview of IPv6 Basic
+
+#### Definition
+
+Internet Protocol version 6 (IPv6), also called IP Next Generation (IPng), is a second-generation network layer protocol and an upgraded version of Internet Protocol version 4 (IPv4). It is designed by the Internet Engineering Task Force (IETF).
+
+
+#### Purpose
+
+IPv6 was developed in response to the rapidly increasing usage of the Internet. IPv4, despite being easy to implement, simple to use, and providing good interoperability, is no longer feasible as a dominant network layer protocol. This is mainly due to IPv4 address exhaustion. The following table describes notable improvements of IPv6 over IPv4.
+
+**Table 1** Comparison between IPv6 and IPv4
+| Item | Disadvantage of IPv4 | Advantage of IPv6 |
+| --- | --- | --- |
+| Address space | IPv4 addresses are 32 bits long, theoretically providing 4.3 billion IPv4 addresses. However, the number of IPv4 addresses that are actually available cannot reach such a value due to various address allocation reasons. IPv4 address resources are not allocated evenly. IPv4 addresses in the USA account for almost half of all addresses, leaving insufficient addresses for Europe, and even fewer for the Asia-Pacific region. Furthermore, the development of mobile IPv4 and broadband technologies requires more IP addresses. Currently, IPv4 addresses have been exhausted.  While several solutions to IPv4 address exhaustion are currently in place, such as classless inter-domain routing (CIDR) and network address translation (NAT), they all have significant disadvantages. These disadvantages prompted the development of IPv6. | IPv6 addresses are 128 bits long, allowing for an address space of 2128 possible addresses. This number of addresses makes IPv6 address exhaustion very unlikely. |
+| Packet format | An IPv4 packet header has an optional field (Options), which includes Security, Timestamp, and Record Route options. The variable length of the Options field results in an IPv4 packet header length range of 20 bytes to 60 bytes. IPv4 packets often need to be forwarded by intermediate devices. Using the Options field occupies a large amount of resources, and therefore this field is rarely used in practice. | Unlike the IPv4 packet header, the IPv6 packet header does not carry IHL, Identification, Flags, Fragment Offset, Header Checksum, Options, or Padding fields, but it carries the Flow Label field. This facilitates IPv6 packet processing and improves processing efficiency. The Extension Header information field is added to the IPv6 packet header to support various options without changing the existing packet format, improving flexibility. |
+| Autoconfiguration and readdressing | IPv4 addresses often need to be reallocated during network expansion or re-planning. Currently, IPv4 depends on the Dynamic Host Configuration Protocol (DHCP) to provide address autoconfiguration and readdressing to simplify address maintenance. | IPv6 provides address autoconfiguration to allow hosts to automatically discover networks and obtain IPv6 addresses, improving network manageability. |
+| Route summarization | Many non-contiguous IPv4 addresses are allocated. Routes cannot be summarized effectively due to incorrect IPv4 address allocation and planning. The increasingly large routing table consumes a lot of memory resources and affects forwarding efficiency. Manufacturers must continually upgrade devices to improve route addressing and forwarding performance. | The enormous number of addresses available enables hierarchical network design in IPv6, facilitating route summarization and improving forwarding efficiency. |
+| End-to-end security | The original IPv4 framework does not support end-to-end security because security was not fully considered during the initial design. | IPv6 supports IP security (IPsec) authentication and encryption at the network layer, providing end-to-end security. |
+| Quality of service (QoS) | IPv4 has no native mechanism to support QoS, particularly for real-time forwarding of voice, data, and video services such as network conferencing, telephones, and TVs. | The Flow Label field in IPv6 guarantees QoS. |
+| Mobility | Due to the development of the Internet, mobile IPv4 experiences significant issues such as triangular routing and source address filtering. | Mobile IPv6 improves mobile communication efficiency and is transparent to the application layer because IPv6 has the native capability to support mobility. Unlike mobile IPv4, mobile IPv6 uses the neighbor discovery function to discover a foreign network and obtain a care-of address without the need to use any foreign agent. The mobile and peer nodes can communicate using the Routing and Destination Options headers. This function solves the issues of triangular routing and source address filtering found in mobile IPv4. |

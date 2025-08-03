@@ -1,0 +1,520 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring EVPN E-Tree over MPLS">
+<meta name="abstract" content="This section provides an example for configuring EVPN E-Tree. This function isolates traffic between different interfaces in the same broadcast domain.">
+<meta name="description" content="This section provides an example for configuring EVPN E-Tree. This function isolates traffic between different interfaces in the same broadcast domain.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_0010.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_0272.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_0186.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00606909">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="EVPN">
+<meta name="featuretype" content="VPN">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="EVPN">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="EVPN">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="EVPN">
+<meta name="featuretype" content="VPN">
+<meta name="OWNER" content="l00425560">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00878323">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172370609">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring EVPN E-Tree over MPLS</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172370609"></a><a name="EN-US_TASK_0172370609"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring EVPN E-Tree over MPLS</h1>
+<div class="taskbody"><p>This section provides an example for configuring EVPN E-Tree. This function isolates traffic between different interfaces in the same broadcast domain.</p>
+<div class="context"><a name="EN-US_TASK_0172370609__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p></p>
+<p>A user wants to deploy EVPN on the network shown in <a href="#EN-US_TASK_0172370609__fig962918243284">Figure 1</a> to transmit services. Specifically, an EVPN instance (BD EVPN instance in this example) needs to be configured on PE1, PE2, and PE3, and a BGP EVPN peer relationship needs to be established between these devices. To improve network security, PE2 and PE3 can only interact with PE1, and PE2 and PE3 cannot send traffic to each other. To implement this function, the user can deploy EVPN E-Tree over the network.</p>
+<div class="fignone" id="EN-US_TASK_0172370609__fig962918243284"><a name="EN-US_TASK_0172370609__fig962918243284"></a><a name="fig962918243284"></a><span class="figcap"><b>Figure 1 </b>Configuring EVPN E-Tree</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 through 3 in this example represent GigabitEthernet<span>0/1/0</span>, GigabitEthernet<span>0/2/0</span>, and GigabitEthernet<span>0/3/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001229435519.png"></span><br></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172370609__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Precautions</h4><p>During the configuration process, note the following:</p>
+<ul><li><p>For the same EVPN instance, the export VPN target list of one site shares VPN targets with the import VPN target lists of the other sites. Conversely, the import VPN target list of one site shares VPN targets with the export VPN target lists of the other sites.</p>
+</li><li><p>Using the local loopback interface address of each PE as the source address of the PE is recommended.</p>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172370609__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure interface IP addresses, including loopback interface addresses, on PEs.</p>
+</li><li><p>Configure a routing protocol on each PE to ensure Layer 3 communication. OSPF is used in this example.</p>
+</li><li><p>Configure MPLS LDP on each PE.</p>
+</li><li><p>Create a BD EVPN instance and a BD on each PE, and bind the BD to the EVPN instance.</p>
+</li><li><p>Configure each PE interface that connects to a CE.</p>
+</li><li><p>Configure a source address on each PE.</p>
+</li><li><p>Configure a BGP EVPN peer relationship between every two PEs.</p>
+</li><li><p>Configure the access-side interfaces of PE2 and PE3 as leaf interfaces.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172370609__1.4.4"></a><a name="1.4.4"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>EVPN instance name: evrf1</p>
+</li><li><p>EVPN instance <strong>evrf1</strong>'s RD (10:1) and RT (11:1) on each PE</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172370609__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure interface IP addresses, including loopback interface addresses, on PEs.</span><p><p>For detailed configurations, see <a href="#EN-US_TASK_0172370609__file1">Configuration Files</a>.</p>
+</p></li><li><span>Configure a routing protocol on each PE to ensure Layer 3 communication. OSPF is used in this example.</span><p><p>For detailed configurations, see <a href="#EN-US_TASK_0172370609__file1">Configuration Files</a>.</p>
+</p></li><li><span>Configure MPLS LDP on each PE.</span><p><p>For detailed configurations, see <a href="#EN-US_TASK_0172370609__file1">Configuration Files</a>.</p>
+</p></li><li><span>Create a BD EVPN instance and a BD on each PE, and bind the BD to the EVPN instance.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>evpn vpn-instance evrf1 bd-mode</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-evpn-instance-evrf1] <strong>route-distinguisher 10:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-evpn-instance-evrf1] <strong>vpn-target 11:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-evpn-instance-evrf1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>bridge-domain 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bd10] <strong>evpn binding vpn-instance evrf1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bd10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p>The configurations of PE2 and PE3 are similar to that of PE1. For detailed configurations, see <a href="#EN-US_TASK_0172370609__file1">Configuration Files</a>.</p>
+</p></li><li><span>Configure each PE interface that connects to a CE.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>interface gigabitethernet <span>0/1/0</span>.1 mode l2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>.1] <strong>encapsulation dot1q vid 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>.1] <strong>bridge-domain 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p>The configurations of PE2 and PE3 are similar to that of PE1. For detailed configurations, see <a href="#EN-US_TASK_0172370609__file1">Configuration Files</a>.</p>
+</p></li><li><span>Configure a source address on each PE.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>evpn source-address 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>evpn source-address 2.2.2.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>evpn source-address 3.3.3.3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>commit</strong></pre>
+</p></li><li><span>Establish a BGP EVPN peer relationship between PEs.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>peer 2.2.2.2 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>peer 2.2.2.2 connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>peer 3.3.3.3 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>peer 3.3.3.3 connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>l2vpn-family evpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-evpn] <strong>peer 2.2.2.2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-evpn] <strong>peer 3.3.3.3 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-evpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p>The configurations of PE2 and PE3 are similar to that of PE1. For detailed configurations, see <a href="#EN-US_TASK_0172370609__file1">Configuration Files</a>.</p>
+</p></li><li><span>Configure the access side interfaces of PE2 and PE3 as leaf interfaces.</span><p><p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>evpn vpn-instance evrf1 bd-mode</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-evpn-instance-evrf1] <strong>etree enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-evpn-instance-evrf1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface gigabitethernet<span>0/1/0</span>.1 mode l2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>.1] <strong>evpn e-tree-leaf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>evpn vpn-instance evrf1 bd-mode</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-evpn-instance-evrf1] <strong>etree enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-evpn-instance-evrf1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>interface gigabitethernet<span>0/3/0</span>.1 mode l2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-GigabitEthernet<span>0/3/0</span>.1] <strong>evpn e-tree-leaf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-GigabitEthernet<span>0/3/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>commit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p>Run the <strong>display bgp evpn all routing-table</strong> command on PE1 to view the leaf attribute in Ethernet auto-discovery and MAC routes.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display bgp evpn all routing-table</strong></pre>
+<pre class="screen"> Local AS number : 100
+
+ BGP Local router ID is 10.2.1.2
+ Status codes: * - valid, &gt; - best, d - damped, x - best external, a - add path,
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+
+
+ EVPN address family:
+ Number of A-D Routes: 2
+ Route Distinguisher: 2.2.2.2:0
+       Network(ESI/EthTagId)                                  NextHop
+ *&gt;i   0000.0000.0000.0000.0000:4294967295                    2.2.2.2
+ Route Distinguisher: 3.3.3.3:0
+       Network(ESI/EthTagId)                                  NextHop
+ *&gt;i   0000.0000.0000.0000.0000:4294967295                    3.3.3.3
+    
+
+ EVPN-Instance evrf1:
+ Number of A-D Routes: 2
+       Network(ESI/EthTagId)                                  NextHop
+ *&gt;i   0000.0000.0000.0000.0000:4294967295                    2.2.2.2
+ * i                                                          3.3.3.3
+
+ EVPN address family:
+ Number of Mac Routes: 6
+ Route Distinguisher: 10:1
+       Network(EthTagId/MacAddrLen/MacAddr/IpAddrLen/IpAddr)  NextHop
+ *&gt;    0:48:00e0-fc00-0001:0:0.0.0.0                          0.0.0.0
+ *&gt;i   0:48:00e0-fc00-0005:0:0.0.0.0                          2.2.2.2
+ *&gt;i   0:48:00e0-fc00-0004:0:0.0.0.0                          3.3.3.3
+ *&gt;i   0:48:00e0-fc00-0002:0:0.0.0.0                          2.2.2.2
+ *&gt;i   0:48:00e0-fc00-0003:0:0.0.0.0                          3.3.3.3
+ *&gt;    0:48:00e0-fc00-0006:0:0.0.0.0                          0.0.0.0
+    
+
+ EVPN-Instance evrf1:
+ Number of Mac Routes: 6
+       Network(EthTagId/MacAddrLen/MacAddr/IpAddrLen/IpAddr)  NextHop
+ *&gt;    0:48:00e0-fc00-0001:0:0.0.0.0                          0.0.0.0
+ *&gt;i   0:48:00e0-fc00-0005:0:0.0.0.0                          2.2.2.2
+ *&gt;i   0:48:00e0-fc00-0004:0:0.0.0.0                          3.3.3.3
+ *&gt;i   0:48:00e0-fc00-0002:0:0.0.0.0                          2.2.2.2
+ *&gt;i   0:48:00e0-fc00-0003:0:0.0.0.0                          3.3.3.3
+ *&gt;    0:48:00e0-fc00-0006:0:0.0.0.0                          0.0.0.0
+
+ EVPN address family:
+ Number of Inclusive Multicast Routes: 3
+ Route Distinguisher: 10:1
+       Network(EthTagId/IpAddrLen/OriginalIp)                 NextHop
+ *&gt;    0:32:1.1.1.1                                           127.0.0.1
+ *&gt;i   0:32:2.2.2.2                                           2.2.2.2
+ *&gt;i   0:32:3.3.3.3                                           3.3.3.3
+    
+
+ EVPN-Instance evrf1:
+ Number of Inclusive Multicast Routes: 3
+       Network(EthTagId/IpAddrLen/OriginalIp)                 NextHop
+ *&gt;    0:32:1.1.1.1                                           127.0.0.1
+ *&gt;i   0:32:2.2.2.2                                           2.2.2.2
+ *&gt;i   0:32:3.3.3.3                                           3.3.3.3</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display bgp evpn all routing-table ad-route 0000.0000.0000.0000.0000:4294967295</strong></pre>
+<pre class="screen"> BGP local router ID : 10.2.1.2
+ Local AS number : 100
+ Total routes of Route Distinguisher(2.2.2.2:0): 1
+ BGP routing table entry information of 0000.0000.0000.0000.0000:4294967295:
+ From: 2.2.2.2 (2.2.2.2) 
+ Route Duration: 0d01h27m52s
+ Relay IP Nexthop: 10.2.1.1
+ Relay Tunnel Out-Interface: GigabitEthernet<span>0/2/0</span>
+ Original nexthop: 2.2.2.2
+ Qos information : 0x0            
+ Ext-Community: RT &lt;11 : 1&gt;, SoO &lt;2.2.2.2 : 0&gt;, <strong>E-Tree &lt;0 : 0 : 32915&gt;</strong>
+ AS-path Nil, origin incomplete, localpref 100, pref-val 0, valid, internal, best, select, pre 255, IGP cost 1
+ Route Type: 1 (Ethernet Auto-Discovery (A-D) route)
+ ESI: 0000.0000.0000.0000.0000, Ethernet Tag ID: 4294967295
+ Not advertised to any peer yet
+ 
+ Total routes of Route Distinguisher(3.3.3.3:0): 1
+ BGP routing table entry information of 0000.0000.0000.0000.0000:4294967295:
+ From: 3.3.3.3 (3.3.3.3) 
+ Route Duration: 0d01h25m59s
+ Relay IP Nexthop: 10.1.1.2
+ Relay Tunnel Out-Interface: GigabitEthernet<span>0/3/0</span>
+ Original nexthop: 3.3.3.3
+ Qos information : 0x0            
+ Ext-Community: RT &lt;11 : 1&gt;, SoO &lt;3.3.3.3 : 0&gt;, <strong>E-Tree &lt;0 : 0 : 32915&gt;</strong>
+ AS-path Nil, origin incomplete, localpref 100, pref-val 0, valid, internal, best, select, pre 255, IGP cost 1
+ Route Type: 1 (Ethernet Auto-Discovery (A-D) route)
+ ESI: 0000.0000.0000.0000.0000, Ethernet Tag ID: 4294967295
+ Not advertised to any peer yet
+ 
+    
+
+ EVPN-Instance evrf1:
+ Number of A-D Routes: 2
+ BGP routing table entry information of 0000.0000.0000.0000.0000:4294967295:
+ Route Distinguisher: 2.2.2.2:0
+ Remote-Cross route
+ From: 2.2.2.2 (2.2.2.2) 
+ Route Duration: 0d01h27m52s
+ Relay Tunnel Out-Interface: GigabitEthernet<span>0/2/0</span>
+ Original nexthop: 2.2.2.2
+ Qos information : 0x0            
+ Ext-Community: RT &lt;11 : 1&gt;, SoO &lt;2.2.2.2 : 0&gt;, <strong>E-Tree &lt;0 : 0 : 32915&gt;</strong>
+ AS-path Nil, origin incomplete, localpref 100, pref-val 0, valid, internal, best, select, pre 255, IGP cost 1
+ Route Type: 1 (Ethernet Auto-Discovery (A-D) route)
+ ESI: 0000.0000.0000.0000.0000, Ethernet Tag ID: 4294967295
+ Not advertised to any peer yet
+ 
+ BGP routing table entry information of 0000.0000.0000.0000.0000:4294967295:
+ Route Distinguisher: 3.3.3.3:0
+ Remote-Cross route
+ From: 3.3.3.3 (3.3.3.3) 
+ Route Duration: 0d01h25m59s
+ Relay Tunnel Out-Interface: GigabitEthernet<span>0/3/0</span>
+ Original nexthop: 3.3.3.3
+ Qos information : 0x0            
+ Ext-Community: RT &lt;11 : 1&gt;, SoO &lt;3.3.3.3 : 0&gt;, <strong>E-Tree &lt;0 : 0 : 32915&gt;</strong>
+ AS-path Nil, origin incomplete, localpref 100, pref-val 0, valid, internal, pre 255, IGP cost 1, not preferred for router ID
+ Route Type: 1 (Ethernet Auto-Discovery (A-D) route)
+ ESI: 0000.0000.0000.0000.0000, Ethernet Tag ID: 4294967295
+ Not advertised to any peer yet</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display bgp evpn all routing-table mac-route 0:48:00e0-fc00-0005:0:0.0.0.0</strong></pre>
+<pre class="screen"> BGP local router ID : 10.2.1.2
+ Local AS number : 100
+ Total routes of Route Distinguisher(10:1): 1
+ BGP routing table entry information of 0:48:00e0-fc00-0005:0:0.0.0.0:
+ Label information (Received/Applied): 32912/NULL
+ From: 2.2.2.2 (2.2.2.2) 
+ Route Duration: 0d01h15m31s
+ Relay IP Nexthop: 10.2.1.1
+ Relay Tunnel Out-Interface: GigabitEthernet<span>0/2/0</span>
+ Original nexthop: 2.2.2.2
+ Qos information : 0x0            
+ Ext-Community: RT &lt;11 : 1&gt;, SoO &lt;2.2.2.2 : 0&gt;, <strong>E-Tree &lt;1 : 0 : 0&gt;</strong>
+ AS-path Nil, origin incomplete, localpref 100, pref-val 0, valid, internal, best, select, pre 255, IGP cost 1
+ Route Type: 2 (MAC Advertisement Route)
+ Ethernet Tag ID: 0, MAC Address/Len: 00e0-fc00-0005/48, IP Address/Len: 0.0.0.0/0, ESI:0000.0000.0000.0000.0000
+ Not advertised to any peer yet
+ 
+    
+
+ EVPN-Instance evrf1:
+ Number of Mac Routes: 1
+ BGP routing table entry information of 0:48:00e0-fc00-0005:0:0.0.0.0:
+ Route Distinguisher: 10:1
+ Remote-Cross route
+ Label information (Received/Applied): 32912/NULL
+ From: 2.2.2.2 (2.2.2.2) 
+ Route Duration: 0d01h15m31s
+ Relay Tunnel Out-Interface: GigabitEthernet<span>0/2/0</span>
+ Original nexthop: 2.2.2.2
+ Qos information : 0x0            
+ Ext-Community: RT &lt;11 : 1&gt;, SoO &lt;2.2.2.2 : 0&gt;, <strong>E-Tree &lt;1 : 0 : 0&gt;</strong>
+ AS-path Nil, origin incomplete, localpref 100, pref-val 0, valid, internal, best, select, pre 255, IGP cost 1
+ Route Type: 2 (MAC Advertisement Route)
+ Ethernet Tag ID: 0, MAC Address/Len: 00e0-fc00-0005/48, IP Address/Len: 0.0.0.0/0, ESI:0000.0000.0000.0000.0000
+ Not advertised to any peer yet</pre>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0172370609__file1"><a name="EN-US_TASK_0172370609__file1"></a><a name="file1"></a><a name="EN-US_TASK_0172370609__1.4.6"></a><a name="1.4.6"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>PE1 configuration file</p>
+<pre class="screen">#
+sysname PE1
+#
+evpn vpn-instance evrf1 bd-mode
+ route-distinguisher 10:1
+ vpn-target 11:1 export-extcommunity
+ vpn-target 11:1 import-extcommunity
+#
+mpls lsr-id 1.1.1.1
+#
+mpls
+#
+bridge-domain 10
+ evpn binding vpn-instance evrf1
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>.1 mode l2
+ encapsulation dot1q vid 10
+ bridge-domain 10
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.2.1.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown
+ ip address 10.1.1.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 1.1.1.1 255.255.255.255
+#
+bgp 100
+ peer 2.2.2.2 as-number 100
+ peer 2.2.2.2 connect-interface LoopBack1
+ peer 3.3.3.3 as-number 100
+ peer 3.3.3.3 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 2.2.2.2 enable
+  peer 3.3.3.3 enable
+ #
+ l2vpn-family evpn
+  undo policy vpn-target
+  peer 2.2.2.2 enable
+  peer 3.3.3.3 enable
+#
+ospf 1
+ area 0.0.0.0
+  network 1.1.1.1 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+  network 10.2.1.0 0.0.0.255
+#
+evpn source-address 1.1.1.1
+#
+return</pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#
+sysname PE2
+#
+evpn vpn-instance evrf1 bd-mode
+ route-distinguisher 10:1
+ etree enable
+ vpn-target 11:1 export-extcommunity
+ vpn-target 11:1 import-extcommunity
+#
+mpls lsr-id 2.2.2.2
+#
+mpls
+#               
+bridge-domain 10
+ evpn binding vpn-instance evrf1
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>.1 mode l2
+ encapsulation dot1q vid 10
+ bridge-domain 10
+ evpn e-tree-leaf
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.2.1.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown
+ ip address 10.3.1.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 2.2.2.2 255.255.255.255
+#
+bgp 100
+ peer 1.1.1.1 as-number 100
+ peer 1.1.1.1 connect-interface LoopBack1
+ peer 3.3.3.3 as-number 100
+ peer 3.3.3.3 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 1.1.1.1 enable
+  peer 3.3.3.3 enable
+ #
+ l2vpn-family evpn
+  undo policy vpn-target
+  peer 1.1.1.1 enable
+  peer 3.3.3.3 enable
+#
+ospf 1
+ area 0.0.0.0
+  network 2.2.2.2 0.0.0.0
+  network 10.2.1.0 0.0.0.255
+  network 10.3.1.0 0.0.0.255
+#
+evpn source-address 2.2.2.2
+#
+return</pre>
+</li><li><p>PE3 configuration file</p>
+<pre class="screen">#
+sysname PE3
+#
+evpn vpn-instance evrf1 bd-mode
+ route-distinguisher 10:1
+ etree enable
+ vpn-target 11:1 export-extcommunity
+ vpn-target 11:1 import-extcommunity
+#
+mpls lsr-id 3.3.3.3
+#
+mpls
+#               
+bridge-domain 10
+ evpn binding vpn-instance evrf1
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown  
+ ip address 10.1.1.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.3.1.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/3/0</span>.1 mode l2
+ encapsulation dot1q vid 10
+ bridge-domain 10
+ evpn e-tree-leaf
+#
+interface LoopBack1
+ ip address 3.3.3.3 255.255.255.255
+#
+bgp 100
+ peer 1.1.1.1 as-number 100
+ peer 1.1.1.1 connect-interface LoopBack1
+ peer 2.2.2.2 as-number 100
+ peer 2.2.2.2 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 1.1.1.1 enable
+  peer 2.2.2.2 enable
+ #              
+ l2vpn-family evpn
+  undo policy vpn-target
+  peer 1.1.1.1 enable
+  peer 2.2.2.2 enable
+#
+ospf 1
+ area 0.0.0.0
+  network 3.3.3.3 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+  network 10.3.1.0 0.0.0.255
+#
+evpn source-address 3.3.3.3
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_0010.html">EVPN Configuration Examples
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_0272.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_0186.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

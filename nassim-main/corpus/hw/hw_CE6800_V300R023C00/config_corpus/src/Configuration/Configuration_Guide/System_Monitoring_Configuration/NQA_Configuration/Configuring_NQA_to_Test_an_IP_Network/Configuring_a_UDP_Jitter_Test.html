@@ -1,0 +1,171 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring a UDP Jitter Test">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_nqa_cfg_0009.html">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_nqa_cfg_0014.html">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_nqa_cfg_0016.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="NQA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="NQA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featurename" content="NQA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featurename" content="NQA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130622288">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Configuring a UDP Jitter Test</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130622288"></a><a name="EN-US_TASK_0000001130622288"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring a UDP Jitter Test</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130622288__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>A UDP jitter test calculates the delay, jitter, and packet loss rate using timestamps carried in UDP packets. Jitter is calculated by subtracting the interval for sending two consecutive packets from the interval for receiving these two packets. You can set the number of packets to be sent in a single UDP jitter test to simulate a type of traffic. For example, configure the source to send 3000 UDP packets at an interval of 20 ms to simulate G.711 traffic in a minute.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The maximum number of packets sent in a UDP jitter test is equal to the configured <em>probe-count</em> value (number of probes in a test) multiplied by the <em>jitter-packetnum</em> value (number of packets sent in a probe).</p>
+</div></div>
+<p><a href="#EN-US_TASK_0000001130622288__fig_dc_vrp_network-monitor_feature_000501">Figure 1</a> shows a network on which a UDP jitter test is performed. The UDP jitter test process is as follows:</p>
+<ol><li><p>DeviceA (source) sends a data packet to DeviceB (destination). Timestamp t1 is added when the packet is sent.</p>
+</li><li><p>DeviceB receives the packet and adds timestamp t1' to the packet.</p>
+</li><li><p>DeviceB adds timestamp t2' to the packet and sends it to DeviceA.</p>
+</li><li><p>DeviceA receives the packet and adds timestamp t2 to the packet. Timestamps t3, t3', t4, and t4' are added in a similar way.</p>
+</li><li>DeviceA calculates the following values based on the timestamps in received packets:<ul><li><p>Maximum, minimum, and average jitters of the packets exchanged between the source and destination.</p>
+</li><li><p>Maximum one-way delay of the packets that are sent from the source to the destination or from the destination to the source.</p>
+</li></ul>
+</li></ol>
+<div class="fignone" id="EN-US_TASK_0000001130622288__fig_dc_vrp_network-monitor_feature_000501"><a name="EN-US_TASK_0000001130622288__fig_dc_vrp_network-monitor_feature_000501"></a><a name="fig_dc_vrp_network-monitor_feature_000501"></a><span class="figcap"><b>Figure 1 </b>UDP jitter test networking</span><br><span><img class="vsd" src="figure/en-us_image_0000001130782090.png"></span></div>
+<div class="p">A UDP jitter test can measure jitters in two directions:<ul><li><p>Source-to-destination jitter = (t3' â t1') â (t3 â t1)</p>
+<p>A larger absolute jitter value indicates poorer link quality, no matter whether the jitter value is positive or negative.</p>
+</li><li><p>Destination-to-source jitter = (t4 â t2) â (t4' â t2')</p>
+<p>A larger absolute jitter value indicates poorer link quality, no matter whether the jitter value is positive or negative.</p>
+</li></ul>
+</div>
+<p>In addition, the following delay and packet loss rate information can be obtained:</p>
+<ul><li>Maximum OWD: The maximum OWD is obtained by comparing the transmission delay of each message.</li><li>RTT = (t2 â t1) â (t2' â t1')</li><li>Packet loss: If the RTT of packets is longer than the configured packet transmission timeout interval, the network is congested and the packets will be counted as lost packets.<ul><li>Number of packets lost during one-way transmission:<ul><li><p>Number of packets lost during their transmission from the source to the destination = Number of packets sent by DeviceA â Number of packets received by DeviceB</p>
+</li><li><p>Number of packets lost during their transmission from the destination to the source = Number of packets sent by DeviceB â Number of packets received by DeviceA</p>
+</li><li><p>If DeviceA does not receive any response packet, it considers packet loss occurs and records the number of discarded packets in <strong>Packet Loss Unknown</strong>, which can be queried using the <a href="cmdqueryname=display+nqa+results"><b><span class="cmdname">display nqa results</span></b></a> command.</p>
+</li></ul>
+</li><li>Packet loss rate = Number of lost packets/Number of sent packets x 100% (Number of lost packets = Number of sent packets â Number of received packets)</li></ul>
+</li></ul>
+</div></div>
+<div class="steps-unordered"><a name="EN-US_TASK_0000001130622288__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ul><li><span>Configure the NQA server for the UDP jitter test.</span><ol><li class="substepexpand"><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Specify the listening IP address and listening port for UDP services on the NQA server.</span><p><pre class="screen"><a href="cmdqueryname=nqa+server+udpecho"><b><span class="cmdname">nqa server udpecho</span></b></a> [ <strong><span>vpn-instance</span></strong> <i><span class="varname">vpn-instance-name</span></i> ] { <i><span class="varname">ip-address</span></i> | <strong><span>ipv6</span></strong> <i><span class="varname">ipv6-address</span></i> } <i><span class="varname">port-number</span></i></pre>
+</p></li><li class="substepexpand"><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001130622288__en-us_task_0234857734_screen14848162118611"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001130622288__en-us_task_0234857734_cmdname1784862115612">commit</span></b></a></pre>
+</p></li></ol>
+</li><li><span>Configure the NQA client for the UDP jitter test.</span><ol><li class="substepexpand"><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li class="substepexpand"><span>(Optional) Configure the packet version for a UDP jitter test instance.</span><p><pre class="screen"><a href="cmdqueryname=nqa+jitter+tag-version"><b><span class="cmdname">nqa jitter tag-version</span></b></a> <i><span class="varname">version-number</span></i></pre>
+<p>By default, the packet version in a jitter test instance is 1.</p>
+<p>Packet version 2 is recommended because packet statistics collected in this version is more accurate than those in version 1.</p>
+</p></li><li class="substepexpand"><span>Create an NQA test instance and set the test instance type to UDP jitter.</span><p><ol type="a"><li>Create an NQA test instance and enter the view of the test instance.<pre class="screen"><a href="cmdqueryname=nqa+test-instance"><b><span class="cmdname">nqa test-instance</span></b></a> <i><span class="varname">admin-name test-name</span></i></pre>
+</li><li>Set the test instance type to UDP jitter.<pre class="screen"><a href="cmdqueryname=test-type"><b><span class="cmdname">test-type</span></b></a> <strong><span>jitter</span></strong></pre>
+</li><li>(Optional) Configure a description for the test instance.<pre class="screen"><a href="cmdqueryname=description"><b><span class="cmdname">description</span></b></a> <i><span class="varname">description</span></i></pre>
+</li></ol>
+</p></li><li class="substepexpand"><span>Configure the destination IP address and destination port number for the test instance.</span><p><ol type="a"><li>Set the destination IP address for test packets, that is, the IP address of the NQA server. <pre class="screen"><a href="cmdqueryname=destination-address"><b><span class="cmdname">destination-address</span></b></a> { <strong><span>ipv4</span></strong> <i><span class="varname">destAddress</span></i> | <strong><span>ipv6</span></strong> <i><span class="varname">destAddress6</span></i> }</pre>
+</li><li><p>Set the destination port number for test packets.</p>
+<pre class="screen"><a href="cmdqueryname=destination-port"><b><span class="cmdname">destination-port</span></b></a> <i><span class="varname">port-number</span></i></pre>
+</li></ol>
+</p></li><li class="substepexpand"><span>(Optional) Configure the codec and advantage factor for a simulated voice test.</span><p><ol type="a"><li><p>Set the codec for the simulated voice test.</p>
+<pre class="screen"><a href="cmdqueryname=jitter-codec"><b><span class="cmdname">jitter-codec</span></b></a> { <strong><span>g711a</span></strong> | <strong><span>g711u</span></strong> | <strong><span>g729a</span></strong> }</pre>
+<p>If no codec is specified, a UDP jitter test instance is used to measure the jitter of common services by default, not voice services.</p>
+</li><li><p>Set the advantage factor for the simulated voice test.</p>
+<pre class="screen"><a href="cmdqueryname=adv-factor"><b><span class="cmdname">adv-factor</span></b></a> <i><span class="varname">factor-value</span></i></pre>
+<p>By default, the advantage factor configured for a simulated voice test is 0.</p>
+</li></ol>
+</p></li><li class="substepexpand"><span>(Optional) Set optional parameters for the test instance to simulate packet transmission.</span><p><ol type="a"><li><p>Set the packet payload size for the NQA test instance.</p>
+<pre class="screen"><a href="cmdqueryname=datasize"><b><span class="cmdname">datasize</span></b></a> <i><span class="varname">datasizeValue</span></i></pre>
+<p>By default, if <strong>g711a</strong> or <strong>g711u</strong> is configured using the <strong>jitter-codec</strong> command, the default value of <i><span class="varname">datasizeValue</span></i> is <strong>172</strong>; if <strong>g729a</strong> is configured using the <strong>jitter-codec</strong> command, the default value of <i><span class="varname">datasizeValue</span></i> is <strong>32</strong>.</p>
+</li><li><p>Set the number of packets sent in a probe.</p>
+<pre class="screen"><a href="cmdqueryname=jitter-packetnum"><b><span class="cmdname">jitter-packetnum</span></b></a> <i><span class="varname">packetNum</span></i></pre>
+<p>By default, 20 packets are sent in a probe.</p>
+</li><li><p>Set the number of probes in a test.</p>
+<pre class="screen"><a href="cmdqueryname=probe-count"><b><span class="cmdname">probe-count</span></b></a> <i><span class="varname">number</span></i></pre>
+</li><li><p>Set the interval at which test packets are sent.</p>
+<pre class="screen"><a href="cmdqueryname=interval"><b><span class="cmdname">interval</span></b></a> { <strong><span>milliseconds</span></strong> <i><span class="varname">interval</span></i> | <strong><span>seconds</span></strong> <i><span class="varname">interval</span></i> }</pre>
+</li><li><p>Configure the NQA client to send packets without searching the routing table.</p>
+<pre class="screen"><a href="cmdqueryname=sendpacket+passroute"><b><span class="cmdname">sendpacket passroute</span></b></a></pre>
+</li><li>Configure the source IP address for test packets.<pre class="screen"><a href="cmdqueryname=source-address"><b><span class="cmdname">source-address</span></b></a> { <strong><span>ipv4</span></strong> <i><span class="varname">srcAddress</span></i> | <strong><span>ipv6</span></strong> <i><span class="varname">srcAddress6</span></i> }</pre>
+</li><li>Set the source port number for the NQA test instance.<pre class="screen"><a href="cmdqueryname=source-port"><b><span class="cmdname">source-port</span></b></a> <i><span class="varname">portValue</span></i></pre>
+</li><li>Set the source interface for test packets.<pre class="screen"><a href="cmdqueryname=source-interface"><b><span class="cmdname">source-interface</span></b></a> { <i><span class="varname">ifName</span></i> | <i><span class="varname">ifType</span></i> <i><span class="varname">ifNum</span></i> }</pre>
+</li><li><p>Set the ToS value of test packets.</p>
+<pre class="screen"><a href="cmdqueryname=tos"><b><span class="cmdname">tos</span></b></a> <i><span class="varname">tos-value</span></i></pre>
+</li><li><p>Set the TTL value of test packets.</p>
+<pre class="screen"><a href="cmdqueryname=ttl"><b><span class="cmdname">ttl</span></b></a> <i><span class="varname">ttlValue</span></i></pre>
+</li></ol>
+</p></li><li class="substepexpand"><span>(Optional) Configure test failure conditions.</span><p><ul><li><p>Set the response timeout interval.</p>
+<pre class="screen"><a href="cmdqueryname=timeout"><b><span class="cmdname">timeout</span></b></a> <i><span class="varname">time</span></i></pre>
+<p>If no response packets are received within the timeout interval, the probe fails.</p>
+</li><li><p>Set the failure percentage for the NQA test instance.</p>
+<pre class="screen"><a href="cmdqueryname=fail-percent"><b><span class="cmdname">fail-percent</span></b></a> <i><span class="varname">percent</span></i></pre>
+<p>If the percentage of failed probes to total probes is greater than or equal to the configured failure percentage, the test is considered as a failure.</p>
+</li></ul>
+</p></li><li class="substepexpand"><span>(Optional) Set the maximum number of historical test records and the maximum number of test results that can be saved for the NQA test instance.</span><p><pre class="screen"><a href="cmdqueryname=records"><b><span class="cmdname">records</span></b></a> { <strong><span>history</span></strong> <i><span class="varname">history-number</span></i> | <strong><span>result</span></strong> <i><span class="varname">result-number</span></i> }</pre>
+</p></li><li class="substepexpand"><span>(Optional) Configure the device to send traps.</span><p><ol type="a"><li>Configure the NQA client to send a trap to the NMS when the number of consecutive test failures reaches a specified value.<pre class="screen"><a href="cmdqueryname=test-failtimes"><b><span class="cmdname">test-failtimes</span></b></a> <i><span class="varname">failTimes</span></i></pre>
+</li><li>Set the thresholds for the RTD and OWD.<pre class="screen"><a href="cmdqueryname=threshold"><b><span class="cmdname">threshold</span></b></a> { <strong><span>owd-ds</span></strong> <i><span class="varname">thresholdOwdDS</span></i> | <strong><span>owd-sd</span></strong> <i><span class="varname">thresholdOwdSD</span></i> | <strong><span>rtd</span></strong> <i><span class="varname">thresholdRtd</span></i> }</pre>
+</li><li>Configure the condition for sending a trap.<pre class="screen"><a href="cmdqueryname=send-trap"><b><span class="cmdname">send-trap</span></b></a> { <strong><span>all</span></strong> | { <strong><span>owd-ds</span></strong> | <strong><span>owd-sd</span></strong> | <strong><span>rtd</span></strong> | <strong><span>testfailure</span></strong> | <strong><span>testresult-change</span></strong> } <sup>*</sup> }</pre>
+</li></ol>
+</p></li><li class="substepexpand"><span>(Optional) Configure the VPN instance name for the NQA test instance.</span><p><pre class="screen"><a href="cmdqueryname=vpn-instance"><b><span class="cmdname">vpn-instance</span></b></a> <i><span class="varname">vpn-instance-name</span></i></pre>
+</p></li><li class="substepexpand"><span>Schedule the NQA test instance.</span><p><ol type="a"><li><p>(Optional) Set the interval for performing NQA tests.</p>
+<pre class="screen"><a href="cmdqueryname=frequency"><b><span class="cmdname">frequency</span></b></a> <i><span class="varname">frequencyValue</span></i></pre>
+</li><li><p>Start the NQA test instance.</p>
+<p>You can start an NQA test instance immediately, at a specified time, after a delay, or periodically.</p>
+<ul><li><p>Start the test instance immediately.</p>
+<pre class="screen"><a href="cmdqueryname=start"><b><span class="cmdname">start</span></b></a> <strong><span>now</span></strong> [ <strong><span>end</span></strong> { <strong><span>at</span></strong> [ <i><span class="varname">yyyy/mm/dd</span></i> ] <i><span class="varname">hh:mm:ss</span></i> | <strong><span>delay</span></strong> { <strong><span>seconds</span></strong> <i><span class="varname">second</span></i> | <i><span class="varname">hh:mm:ss</span></i> } | <strong><span>lifetime</span></strong> { <strong><span>seconds</span></strong> <i><span class="varname">second</span></i> | <i><span class="varname">hh:mm:ss</span></i> } } ]</pre>
+</li><li><p>Start the test instance at a specified time.</p>
+<pre class="screen"><a href="cmdqueryname=start"><b><span class="cmdname">start</span></b></a> <strong><span>at</span></strong> [ <i><span class="varname">yyyy/mm/dd</span></i> ] <i><span class="varname">hh:mm:ss</span></i> [ <strong><span>end</span></strong> { <strong><span>at</span></strong> [ <i><span class="varname">yyyy/mm/dd</span></i> ] <i><span class="varname">hh:mm:ss</span></i> | <strong><span>delay</span></strong> { <strong><span>seconds</span></strong> <i><span class="varname">second</span></i> | <i><span class="varname">hh:mm:ss</span></i> } | <strong><span>lifetime</span></strong> { <strong><span>seconds</span></strong> <i><span class="varname">second</span></i> | <i><span class="varname">hh:mm:ss</span></i> } } ]</pre>
+</li><li><p>Start the test instance after a specified delay.</p>
+<pre class="screen"><a href="cmdqueryname=start"><b><span class="cmdname">start</span></b></a> <strong><span>delay</span></strong> { <strong><span>seconds</span></strong> <i><span class="varname">second</span></i> | <i><span class="varname">hh:mm:ss</span></i> } [ <strong><span>end</span></strong> { <strong><span>at</span></strong> [ <i><span class="varname">yyyy/mm/dd</span></i> ] <i><span class="varname">hh:mm:ss</span></i> | <strong><span>delay</span></strong> { <strong><span>seconds</span></strong> <i><span class="varname">second</span></i> | <i><span class="varname">hh:mm:ss</span></i> } | <strong><span>lifetime</span></strong> { <strong><span>seconds</span></strong> <i><span class="varname">second</span></i> | <i><span class="varname">hh:mm:ss</span></i> } } ]</pre>
+</li><li><p>Start the test instance at a specified time every day.</p>
+<pre class="screen"><a href="cmdqueryname=start"><b><span class="cmdname">start</span></b></a> <strong><span>daily</span></strong> <i><span class="varname">hh:mm:ss</span></i> <strong><span>to</span></strong> <i><span class="varname">hh:mm:ss</span></i> [ <strong><span>begin</span></strong> <i><span class="varname">yyyy/mm/dd</span></i> ] [ <strong><span>end</span></strong> <i><span class="varname">yyyy/mm/dd</span></i> ]</pre>
+</li></ul>
+</li></ol>
+</p></li><li class="substepexpand"><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001130622288__en-us_task_0234857734_screen14848162118611_1"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001130622288__en-us_task_0234857734_cmdname1784862115612_1">commit</span></b></a></pre>
+</p></li></ol>
+</li></ul></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../vrp/vrp_nqa_cfg_0009.html">Configuring NQA to Test an IP Network
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../vrp/vrp_nqa_cfg_0014.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../vrp/vrp_nqa_cfg_0016.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

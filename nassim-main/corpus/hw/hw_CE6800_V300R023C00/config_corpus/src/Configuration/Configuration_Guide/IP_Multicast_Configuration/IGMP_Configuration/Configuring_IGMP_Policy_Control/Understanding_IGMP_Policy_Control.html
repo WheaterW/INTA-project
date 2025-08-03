@@ -1,0 +1,98 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding IGMP Policy Control">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_igmp_cfg_0017.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_igmp_cfg_0019.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IGMP">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IGMP">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="IGMP">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001130784216">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding IGMP Policy Control</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001130784216"></a><a name="EN-US_CONCEPT_0000001130784216"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding IGMP Policy Control</h1>
+<div><p>IGMP policy control restricts or extends IGMP actions, without affecting IGMP implementation. IGMP policy control includes source address-based IGMP message filtering, range of multicast groups that hosts can join on an IGMP interface, maximum number of IGMP entries, IGMP entries that never time out<span>, IGMP host tracking</span>, and Router-Alert option for IGMP.</p>
+<div class="section"><h4 class="sectiontitle">Source Address-based IGMP Message Filtering</h4><div class="p">On a multicast network, a device may be attacked by forged IGMP messages, causing it to forward traffic to multicast groups without members. If this is the case, bandwidth resources are wasted. Source address-based IGMP message filtering resolves this problem. The filtering function works as follows for IGMP Report or Leave messages and IGMP Query messages:<ul><li>Source address-based IGMP Report or Leave message filtering:<ul><li><p>The device permits an IGMP Report or Leave message if the message's source address is 0.0.0.0 or an address on the same network segment as the interface that receives the message.</p>
+</li><li><p>If an ACL rule is specified, the device filters out invalid IGMP Report or Leave messages based on the ACL rule.</p>
+</li></ul>
+</li><li>Source address-based IGMP Query message filtering: filters IGMP Query messages based on specified ACL rules.</li></ul>
+</div>
+<p>On the network shown in <a href="#EN-US_CONCEPT_0000001130784216__fig8449353111210">Figure 1</a>, DeviceA is the querier on the network segment, and DeviceA's interface (address 10.0.0.1/24) connects to the host network. HostA sends IGMP Report or Leave messages with the source address 10.1.0.1, HostB sends IGMP Report or Leave messages with the source address 10.0.0.8, and HostC sends IGMP Report or Leave messages with the source address 0.0.0.0. If an ACL rule is not configured, DeviceA permits messages from HostB and HostC, but drops messages from HostA. If an ACL rule is specified, the device forwards or discards IGMP Report or Leave messages based on the ACL rule. For example, if an ACL rule only permits IGMP Report or Leave messages with the source address 10.0.0.8, DeviceA permits such messages from HostB, but drops those from HostC.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130784216__fig8449353111210"><a name="EN-US_CONCEPT_0000001130784216__fig8449353111210"></a><a name="fig8449353111210"></a><span class="figcap"><b>Figure 1 </b>Network diagram of source address-based IGMP Report or Leave message filtering</span><br><span><img class="vsd" src="figure/en-us_image_0000001176663999.png" width="NaN" height="NaN"></span></div>
+<p>On the network shown in <a href="#EN-US_CONCEPT_0000001130784216__fig6450165318127">Figure 2</a>, DeviceA is the querier on the network segment and receives IGMP Report or Leave messages from hosts. If DeviceB constructs bogus IGMP Query messages that contain a smaller IP address (for example, 10.0.0.1/24), DeviceA will become a non-querier and fail to respond to IGMP Leave messages from hosts. In this case, DeviceA continues to forward multicast traffic to hosts who have left, which wastes network resources. To resolve this problem, you can configure an ACL rule on DeviceA to drop IGMP Query messages with the source IP address 10.0.0.1/24.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130784216__fig6450165318127"><a name="EN-US_CONCEPT_0000001130784216__fig6450165318127"></a><a name="fig6450165318127"></a><span class="figcap"><b>Figure 2 </b>Network diagram of source address-based filtering for IGMP Query messages</span><br><span><img class="vsd" src="figure/en-us_image_0000001176743907.png" width="NaN" height="NaN"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Range of Multicast Groups that Hosts Can Join on an IGMP Interface</h4><p>For security or management requirements, a device may not want to receive Report messages or forward multicast data for certain multicast groups. To resolve this problem, you can configure the range of multicast groups that hosts can join on an IGMP interface.</p>
+<p>On the network shown in <a href="#EN-US_CONCEPT_0000001130784216__fig_dc_vrp_multicast_feature_201102">Figure 3</a>, HostA and HostB join multicast group G1 (225.1.1.1), and HostC joins multicast group G2 (226.1.1.1). To enable DeviceA to receive and forward data only from G1, configure the range of multicast groups that hosts can join on DeviceA.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130784216__fig_dc_vrp_multicast_feature_201102"><a name="EN-US_CONCEPT_0000001130784216__fig_dc_vrp_multicast_feature_201102"></a><a name="fig_dc_vrp_multicast_feature_201102"></a><span class="figcap"><b>Figure 3 </b>Range of multicast groups that hosts can join on an IGMP interface</span><br><span><img class="vsd" src="figure/en-us_image_0000001176664001.png" width="NaN" height="NaN"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Maximum Number of IGMP Entries</h4><p>If a large number of users watch multiple programs simultaneously, a large amount of bandwidth resources are consumed. As a result, device performance will be degraded, deteriorating the service quality. To prevent this problem, you can configure the maximum number of IGMP entries on the device. When receiving an IGMP Report message from a user, the device first checks whether the number of IGMP entries exceeds the configured maximum number. If no, the device sets up a group membership and forwards data flows of the requested multicast group to the user. This improves the clarity and stability of programs for users who have joined multicast groups. On the network shown in <a href="#EN-US_CONCEPT_0000001130784216__fig_dc_vrp_multicast_feature_201103">Figure 4</a>, assume that the maximum number of IGMP entries configured on DeviceA's interface is 1. If HostA joins the multicast group first, IGMP entries can be created. However, IGMP entries cannot be created for HostB.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130784216__fig_dc_vrp_multicast_feature_201103"><a name="EN-US_CONCEPT_0000001130784216__fig_dc_vrp_multicast_feature_201103"></a><a name="fig_dc_vrp_multicast_feature_201103"></a><span class="figcap"><b>Figure 4 </b>Maximum number of IGMP entries</span><br><span><img class="vsd" src="figure/en-us_image_0000001176743905.png" width="NaN" height="NaN"></span></div>
+<p></p>
+<div class="p">The implementation mechanism for the maximum number of IGMP entries is as follows:<ul><li><p>IGMP-limit is configured on an interface. After receiving an IGMP Report message from the interface, the device limits the number of IGMP entries on the interface.</p>
+</li><li><p>You can configure an ACL rule to exclude certain multicast group ranges or source-specific group ranges from IGMP entry limiting, so that the corresponding IGMP entries are not counted as those on the interface.</p>
+</li></ul>
+</div>
+<div class="p">The maximum number of IGMP entries complies with the following rules:<ul><li><p>Each (*, G) entry is counted as one entry on an interface, and each (S, G) is counted as one entry on an interface.</p>
+</li><li><p>SSM-mapping (*, G) entries are not counted as entries on an interface, and each (S, G) entry mapped using the SSM-mapping mechanism is counted as one entry on an interface.</p>
+</li></ul>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">IGMP On-Demand</h4><p>In the standard IGMP working mechanism, a querier periodically sends Query messages and receives Report and Leave messages from members to obtain information about multicast group members. If group memberships on a network are stable, you can configure IGMP on-demand on the querier to reduce the number of exchanged IGMP messages and network traffic. After the function is configured, the querier maintains group memberships based on the requirements of hosts without proactively sending Query messages to collect member states. This reduces the number of IGMP messages exchanged between the querier and hosts.</p>
+<p>After IGMP on-demand is configured on an interface:</p>
+<ul><li>The interface does not send IGMP Query messages.</li><li>Group entries are created after the interface receives Report messages, and they will never age out.</li><li>After the interface receives an IGMP Leave message, it immediately deletes the corresponding group entry.</li></ul>
+<p>IGMP on-demand is applicable only to IGMPv2 and IGMPv3.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">IGMP Host Tracking</h4><p>When a host leaves a multicast group in Layer 3 multicast scenarios, an IGMP querier sends a Group-Specific Query message. If the querier does not receive any response from the host within the specified time, it considers that the host has left the multicast group. While the IGMP querier waits for a response from the host, the multicast device continues to forward multicast traffic to the host. This delays the switching of multicast programs and wastes bandwidth.</p>
+<p>To solve this problem, configure the host tracking function. After this function takes effect, the multicast device records the join status of the host. When receiving a Leave message from the host, the multicast device considers that the host has left and does not send a Group-Specific Query message.</p>
+<p>Before configuring the host tracking function, you must enable the IGMP function and configure IGMPv3. Host tracking applies only to IGMPv3-enabled interfaces that have IGMPv3 access users only.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Router-Alert Option for IGMP</h4><p>Typically, a network device sends a message to the corresponding protocol module for processing only when the destination address of the message is a local interface address. Because the destination IP address of an IGMP message is usually a multicast address but not the address of an interface on a multicast device, the message may fail to be sent to the routing protocol layer for processing. The Router-Alert option can address such a problem.</p>
+<p>Router-Alert is a special mechanism for identifying protocol messages. If a message contains the Router-Alert option, it needs to be sent to the routing protocol layer for processing. In practice, the destination addresses of some protocol messages are multicast addresses or other special addresses. If the messages do not carry the Router-Alert option, they may not be sent to the routing protocol layer.</p>
+<p>If a multicast device is not configured to check the Router-Alert option, it sends received IGMP messages to the routing protocol layer for processing, regardless of whether these messages contain the Router-Alert option. If a multicast device is configured to check the Router-Alert option, it sends only the IGMP messages with the Router-Alert option to the routing protocol layer for processing.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_igmp_cfg_0017.html">Configuring IGMP Policy Control
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_igmp_cfg_0019.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

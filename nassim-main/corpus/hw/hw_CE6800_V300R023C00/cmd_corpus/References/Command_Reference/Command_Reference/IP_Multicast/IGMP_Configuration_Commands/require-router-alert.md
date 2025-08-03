@@ -1,0 +1,61 @@
+require-router-alert
+====================
+
+require-router-alert
+
+Function
+--------
+
+
+
+The **require-router-alert** command enables the router to discard IGMP messages that do not contain the Router-Alert option in IP headers. The router checks whether a received IGMP message contains the Router-Alert option in the IP header. If the value of the Router-Alert option is 0, the router discards the IGMP message.
+
+The **undo require-router-alert** command restores the default configuration.
+
+
+
+By default, the router does not check whether received IGMP messages contain the Router-Alert option in IP headers, that is, the router accepts and processes all received IGMP messages.
+
+
+Format
+------
+
+**require-router-alert**
+
+**undo require-router-alert**
+
+
+Parameters
+----------
+
+None
+
+Views
+-----
+
+IGMP view,VPN instance IGMP view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+The function of this command is the same as the function of the **igmp require-router-alert** command in the interface view. The configuration in the IGMP view is effective for all interfaces, whereas the configuration in the interface view is effective only for the specified interface. The configuration in the interface view takes precedence over the configuration in the IGMP view. The configuration in the IGMP view is used only when the configuration in the interface view is not available.
+
+
+Example
+-------
+
+# In the IGMP view, enable the router to discard the IGMP messages that do not contain the Router-Alert option in IP headers.
+```
+<HUAWEI> system-view
+[~HUAWEI] multicast routing-enable
+[*HUAWEI] igmp
+[*HUAWEI-igmp] require-router-alert
+
+```

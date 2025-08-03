@@ -1,0 +1,729 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring L3VPN over OSPF SR-MPLS BE">
+<meta name="abstract" content="L3VPN services are configured to allow users within the same VPN to securely access each other.">
+<meta name="description" content="L3VPN services are configured to allow users within the same VPN to securely access each other.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr-be_cfg_0007.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr_all_cfg_0139.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr_all_cfg_0209.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="segment_routing_vrp,w00604599,l00455378,l00587852,w00606909,w00800033">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="Segment Routing MPLS">
+<meta name="featuretype" content="Segment Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Segment Routing MPLS">
+<meta name="featuretype" content="Segment Routing">
+<meta name="featurename" content="Segment Routing MPLS">
+<meta name="featuretype" content="Segment Routing">
+<meta name="featurename" content="Segment Routing MPLS">
+<meta name="featuretype" content="Segment Routing">
+<meta name="OWNER" content="l00468467">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00468467">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172368863">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring L3VPN over OSPF SR-MPLS BE</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172368863"></a><a name="EN-US_TASK_0172368863"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring L3VPN over OSPF SR-MPLS BE</h1>
+<div class="taskbody"><p>L3VPN services are configured to allow users within the same VPN to securely access each other.</p>
+<div class="context"><a name="EN-US_TASK_0172368863__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><div class="p">In <a href="#EN-US_TASK_0172368863__fig_dc_vrp_sr-be_cfg_000501">Figure 1</a>:<ul><li><p>CE1 and CE2 belong to vpna.</p>
+</li><li><p>The VPN-target attribute of vpna is 111:1.</p>
+</li></ul>
+</div>
+<p>L3VPN services recurse to an OSPF SR-MPLS BE tunnel to allow users within the same VPN to securely access each other. Since multiple links exist between PEs on a public network, traffic needs to be balanced on the public network.</p>
+<div class="fignone" id="EN-US_TASK_0172368863__fig_dc_vrp_sr-be_cfg_000501"><a name="EN-US_TASK_0172368863__fig_dc_vrp_sr-be_cfg_000501"></a><a name="fig_dc_vrp_sr-be_cfg_000501"></a><span class="figcap"><b>Figure 1 </b>L3VPN recursive to an OSPF SR-MPLS BE tunnel</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 through 3 in this example represent GE <span>0/1/0</span>, GE <span>0/2/0</span>, and GE <span>0/3/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_sr-be_cfg_000501.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368863__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>During the configuration process, note the following:</p>
+<p>After a VPN instance is bound to a PE interface connected to a CE, Layer 3 configurations on this interface, such as IP address and routing protocol configurations, are automatically deleted. Add these configurations again if necessary.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368863__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure OSPF on the backbone network to ensure that PEs can interwork with each other.</p>
+</li><li><p>Enable MPLS on the backbone network, configure SR, and establish SR LSPs. Enable TI-LFA FRR.</p>
+</li><li><p>Configure IPv4 address family VPN instances on the PEs and bind each interface that connects a PE to a CE to a VPN instance.</p>
+</li><li><p>Establish an MP-IBGP peer relationship between the PEs for them to exchange routing information.</p>
+</li><li><p>Establish EBGP peer relationships between the PEs and CEs for them to exchange routing information.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368863__1.4.4"></a><a name="1.4.4"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>MPLS LSR IDs of the PEs and P</p>
+</li><li><p>vpna's VPN-target and RD</p>
+</li><li><p>SRGB ranges on the PEs and P</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172368863__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure IP addresses for interfaces.</span><p><p># Configure PE1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname PE1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>ip address 1.1.1.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>ip address 172.18.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet<span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/3/0</span>] <strong>ip address 172.16.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/3/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure P1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname P1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-LoopBack1] <strong>ip address 2.2.2.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/0</span>] <strong>ip address 172.16.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1]<strong> interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/2/0</span>] <strong>ip address 172.17.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname PE2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>ip address 3.3.3.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>]<strong> ip address 172.19.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> interface gigabitethernet<span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/3/0</span>]<strong> ip address 172.17.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/3/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> commit</strong></pre>
+<p># Configure P2.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname P2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-LoopBack1] <strong>ip address 4.4.4.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/1/0</span>] <strong>ip address 172.18.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2]<strong> interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/2/0</span>] <strong>ip address 172.19.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>commit</strong></pre>
+</p></li><li><span>Configure an IGP on the backbone network for the PEs and Ps to communicate. OSPF is used as an example.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1] <strong>opaque-capability enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1] <strong>area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>ospf enable 1 area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>ospf enable 1 area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet<span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/3/0</span>] <strong>ospf enable 1 area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/3/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure P1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-ospf-1] <strong>opaque-capability enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-ospf-1] <strong>area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-ospf-1-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-ospf-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-LoopBack1] <strong>ospf enable 1 area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/0</span>] <strong>ospf enable 1 area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1]<strong> interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/2/0</span>] <strong>ospf enable 1 area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1] <strong>opaque-capability enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1] <strong>area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>ospf enable 1 area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> interface gigabitethernet<span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/3/0</span>]<strong> ospf enable 1 area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/3/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>]<strong> ospf enable 1 area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> commit</strong></pre>
+<p># Configure P2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-ospf-1] <strong>opaque-capability enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-ospf-1] <strong>area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-ospf-1-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-ospf-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-LoopBack1] <strong>ospf enable 1 area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/1/0</span>] <strong>ospf enable 1 area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2]<strong> interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/2/0</span>] <strong>ospf enable 1 area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>commit</strong></pre>
+</p></li><li><span>Configure basic MPLS functions on the backbone network.</span><p><p>Because MPLS is automatically enabled on the interface where OSPF has been enabled, you can ignore MPLS configuration on such an interface.</p>
+</p><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>mpls lsr-id 1.1.1.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-mpls] <strong>quit</strong></pre>
+<p># Configure P1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>mpls lsr-id 2.2.2.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-mpls] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1-mpls] <strong>quit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>mpls lsr-id 3.3.3.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-mpls]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-mpls]<strong> quit</strong></pre>
+<p># Configure P2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2] <strong>mpls lsr-id 4.4.4.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-mpls] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2-mpls] <strong>quit</strong></pre>
+</p></li><li><span>Configure SR on the backbone network and enable TI-LFA FRR.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1] <strong>segment-routing mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1] <strong>segment-routing global-block 16000 23999</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The value range of SRGB changes dynamically, depending on the actual situation of the equipment. Here is an example only.</p>
+</div></div>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1] <strong>frr</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1-frr] <strong>loop-free-alternate</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1-frr] <strong>ti-lfa enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1-frr] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>ospf prefix-sid index 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure P1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-segment-routing] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-ospf-1] <strong>segment-routing mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-ospf-1] <strong>segment-routing global-block 16000 23999</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The value range of SRGB changes dynamically, depending on the actual situation of the equipment. Here is an example only.</p>
+</div></div>
+<pre class="screen">[<span class="keyword">*</span>P1-ospf-1] <strong>frr</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-ospf-1-frr] <strong>loop-free-alternate</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-ospf-1-frr] <strong>ti-lfa enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-ospf-1-frr] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-ospf-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-LoopBack1] <strong>ospf prefix-sid index 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1] <strong>segment-routing mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1] <strong>segment-routing global-block 16000 23999</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The value range of SRGB changes dynamically, depending on the actual situation of the equipment. Here is an example only.</p>
+</div></div>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1] <strong>frr</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1-frr] <strong>loop-free-alternate</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1-frr] <strong>ti-lfa enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1-frr] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>ospf prefix-sid index 30</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure P2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2] <strong>segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-segment-routing] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-ospf-1] <strong>segment-routing mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-ospf-1] <strong>segment-routing global-block 16000 23999</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The value range of SRGB changes dynamically, depending on the actual situation of the equipment. Here is an example only.</p>
+</div></div>
+<pre class="screen">[<span class="keyword">*</span>P2-ospf-1] <strong>frr</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-ospf-1-frr] <strong>loop-free-alternate</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-ospf-1-frr] <strong>ti-lfa enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-ospf-1-frr] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-ospf-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-LoopBack1] <strong>ospf prefix-sid index 40</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>commit</strong></pre>
+<p># After the configuration is complete, run the <strong>display tunnel-info all</strong> command on each PE. The command output shows that the SR LSPs have been established. The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display tunnel-info all</strong></pre>
+<pre class="screen">Tunnel ID            Type                Destination                             Status
+----------------------------------------------------------------------------------------
+0x000000002900000003 srbe-lsp            4.4.4.9                                 UP  
+0x000000002900000004 srbe-lsp            2.2.2.9                                 UP  
+0x000000002900000005 srbe-lsp            3.3.3.9                                 UP </pre>
+<p># Using Ping to detect SR LSP connectivity on PE1, for example:</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>ping lsp segment-routing ip 3.3.3.9 32 version draft2</strong></pre>
+<pre class="screen">  LSP PING FEC: SEGMENT ROUTING IPV4 PREFIX 3.3.3.9/32 : 100  data bytes, press CTRL_C to break
+    Reply from 3.3.3.9: bytes=100 Sequence=1 time=256 ms
+    Reply from 3.3.3.9: bytes=100 Sequence=2 time=3 ms
+    Reply from 3.3.3.9: bytes=100 Sequence=3 time=4 ms
+    Reply from 3.3.3.9: bytes=100 Sequence=4 time=4 ms
+    Reply from 3.3.3.9: bytes=100 Sequence=5 time=4 ms
+
+  --- FEC: SEGMENT ROUTING IPV4 PREFIX 3.3.3.9/32 ping statistics ---
+    5 packet(s) transmitted
+    5 packet(s) received
+    0.00% packet loss
+    round-trip min/avg/max = 3/54/256 ms</pre>
+</p></li><li><span>Establish an MP-IBGP peer relationship between the PEs.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bgp] <strong>peer 3.3.3.9 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>peer 3.3.3.9 connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>ipv4-family vpnv4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-vpnv4] <strong>peer 3.3.3.9 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-vpnv4] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bgp-af-vpnv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bgp] <strong>quit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-bgp] <strong>peer 1.1.1.9 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>peer 1.1.1.9 connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>ipv4-family vpnv4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-vpnv4] <strong>peer 1.1.1.9 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-vpnv4] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-bgp-af-vpnv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-bgp] <strong>quit</strong></pre>
+<p>After the configuration is complete, run the <strong>display bgp peer</strong> or <strong>display bgp vpnv4 all peer</strong> command on each PE to check whether a BGP peer relationship has been established between the PEs. If the <strong>Established</strong> state is displayed in the command output, the BGP peer relationship has been established successfully. The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display bgp peer</strong>
+
+ BGP local router ID : 1.1.1.9
+ Local AS number : 100
+ Total number of peers : 1          Peers in established state : 1
+
+  Peer            V    AS  MsgRcvd  MsgSent     OutQ  Up/Down    State        PrefRcv
+  3.3.3.9         4   100        5        5     0     00:00:12   <strong>Established</strong>   0</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display bgp vpnv4 all peer</strong>
+
+ BGP local router ID : 1.1.1.9
+ Local AS number : 100
+ Total number of peers : 1                 Peers in established state : 1
+
+  Peer            V    AS  MsgRcvd  MsgSent    OutQ  Up/Down    State        PrefRcv
+  3.3.3.9         4   100   12      18         0     00:09:38   <strong>Established</strong>   1</pre>
+</p></li><li><span>Configure VPN instances in the IPv4 address family on each PE and connect each PE to a CE.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>ip vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna-af-ipv4] <strong>route-distinguisher 100:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna-af-ipv4] <strong>vpn-target 111:1 both</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>ip binding vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>ip address 10.1.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>ip vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna-af-ipv4] <strong>route-distinguisher 200:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna-af-ipv4] <strong>vpn-target 111:1 both</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong>ip binding vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong>ip address 10.2.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Assign an IP address to each interface on CEs as shown in <a href="#EN-US_TASK_0172368863__fig_dc_vrp_sr-be_cfg_000501">Figure 1</a>. The detailed configuration procedure is not provided here. For details, see "Configuration Files".</p>
+<p>After the configuration is complete, run the <strong>display ip vpn-instance verbose</strong> command on the PEs to check VPN instance configurations. Check that each PE can successfully ping its connected CE.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If a PE has multiple interfaces bound to the same VPN instance, specify a source IP address using the <strong>-a</strong> <em>source-ip-address</em> parameter in the <strong>ping -vpn-instance</strong> <em>vpn-instance-name</em> <strong>-a</strong> <em>source-ip-address dest-ip-address</em> command to ping the CE that is connected to the remote PE. If the source IP address is not specified, the ping operation may fail.</p>
+</div></div>
+</p></li><li><span>Configure a tunnel policy on each PE to preferentially select an SR LSP.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>tunnel-policy p1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-tunnel-policy-p1] <strong>tunnel select-seq sr-lsp load-balance-number 2</strong><strong> unmix</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-tunnel-policy-p1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>ip vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna-af-ipv4] <strong>tnl-policy p1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>tunnel-policy p1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-tunnel-policy-p1] <strong>tunnel select-seq sr-lsp load-balance-number 2</strong> <strong>unmix</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-tunnel-policy-p1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>ip vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna-af-ipv4] <strong>tnl-policy p1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+</p></li><li><span>Establish EBGP peer relationships between the PEs and CEs.</span><p><p># Configure CE1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname CE1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-LoopBack1] <strong>ip address 10.11.1.1 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>] <strong>ip address 10.1.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>bgp 65410</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp] <strong>peer 10.1.1.2 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp] <strong>network 10.11.1.1 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>commit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The configuration of CE2 is similar to the configuration of CE1, and are not provided here. For details, see "Configuration Files".</p>
+</div></div>
+<p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bgp] <strong>ipv4-family vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-vpna] <strong>peer 10.1.1.1 as-number 65410</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-vpna] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bgp-vpna] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bgp] <strong>quit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The procedure for configuring PE2 is similar to the procedure for configuring PE1, and the detailed configuration is not provided here. For details, see "Configuration Files".</p>
+</div></div>
+<p>After the configuration, run the <strong>display bgp vpnv4 vpn-instance peer</strong> command on the PEs, and you can view that BGP peer relationships between PEs and CEs have been established and are in the <strong>Established</strong> state.</p>
+<p>In the following example, the peer relationship between PE1 and CE1 is used.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display bgp vpnv4 vpn-instance vpna peer</strong>
+
+ BGP local router ID : 1.1.1.9
+ Local AS number : 100
+
+ VPN-Instance vpna, Router ID 1.1.1.9:
+ Total number of peers : 1            Peers in established state : 1
+
+  Peer            V    AS  MsgRcvd  MsgSent    OutQ  Up/Down    State        PrefRcv
+  10.1.1.1        4   65410  19     18         0     00:12:39   <strong>Established</strong>  1</pre>
+</p></li><li><span>Verify the configuration.</span><p><p># Run the <strong>display ip routing-table vpn-instance</strong> command on each PE to view the routes to CEs' loopback interfaces.</p>
+<p>In the following, the command output on PE1 is used.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display ip routing-table vpn-instance vpna</strong></pre>
+<pre class="screen"><span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table: vpna
+         Destinations : 7        Routes : 7
+Destination/Mask    Proto  Pre  Cost     Flags NextHop         Interface
+     10.1.1.0/24    Direct 0    0        D     10.1.1.2        GigabitEthernet<span>0/2/0</span>
+     10.1.1.2/32    Direct 0    0        D     127.0.0.1       GigabitEthernet<span>0/2/0</span>
+   10.1.1.255/32    Direct 0    0        D     127.0.0.1       GigabitEthernet<span>0/2/0</span>
+   <strong>10.11.1.1/32</strong>     EBGP   255  0        RD    10.1.1.1        GigabitEthernet<span>0/2/0</span>
+   <strong>10.22.2.2/32</strong>     IBGP   255  0        RD    3.3.3.9         GigabitEthernet<span>0/1/0</span>
+                    IBGP   255  0        RD    3.3.3.9         GigabitEthernet<span>0/3/0</span>
+255.255.255.255/32  Direct 0    0        D     127.0.0.1       InLoopBack0</pre>
+<p>CEs within the same VPN can ping each other. For example, CE1 successfully pings CE2 at 10.22.2.2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>ping -a 10.11.1.1 10.22.2.2</strong></pre>
+<pre class="screen">  PING 10.22.2.2: 56  data bytes, press CTRL_C to break
+    Reply from 10.22.2.2: bytes=56 Sequence=1 ttl=252 time=428 ms
+    Reply from 10.22.2.2: bytes=56 Sequence=2 ttl=252 time=4 ms
+    Reply from 10.22.2.2: bytes=56 Sequence=3 ttl=252 time=5 ms
+    Reply from 10.22.2.2: bytes=56 Sequence=4 ttl=252 time=3 ms
+    Reply from 10.22.2.2: bytes=56 Sequence=5 ttl=252 time=4 ms
+
+  --- 10.22.2.2 ping statistics ---
+    5 packet(s) transmitted
+    5 packet(s) received
+    0.00% packet loss
+    round-trip min/avg/max = 3/88/428 ms</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172368863__1.4.6"></a><a name="1.4.6"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>PE1 configuration file</p>
+<pre class="screen">#
+sysname PE1
+#
+ip vpn-instance vpna
+ ipv4-family
+  route-distinguisher 100:1
+  tnl-policy p1
+  vpn-target 111:1 export-extcommunity
+  vpn-target 111:1 import-extcommunity
+#
+mpls lsr-id 1.1.1.9
+#               
+mpls            
+#               
+segment-routing 
+#               
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown  
+ ip address 172.18.1.1 255.255.255.0
+ ospf enable 1 area 0.0.0.0  
+#               
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown  
+ ip binding vpn-instance vpna
+ ip address 10.1.1.2 255.255.255.0
+#               
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown  
+ ip address 172.16.1.1 255.255.255.0
+ ospf enable 1 area 0.0.0.0  
+#               
+interface LoopBack1
+ ip address 1.1.1.9 255.255.255.255
+ ospf enable 1 area 0.0.0.0  
+ ospf prefix-sid index 10
+#               
+bgp 100         
+ peer 3.3.3.9 as-number 100
+ peer 3.3.3.9 connect-interface LoopBack1
+ #              
+ ipv4-family unicast
+  undo synchronization
+  peer 3.3.3.9 enable
+ #              
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 3.3.3.9 enable
+ #              
+ ipv4-family vpn-instance vpna
+  peer 10.1.1.1 as-number 65410
+#               
+ospf 1          
+ opaque-capability enable
+ segment-routing mpls
+ segment-routing global-block 16000 23999
+ frr
+  loop-free-alternate
+  ti-lfa enable
+ area 0.0.0.0
+#
+tunnel-policy p1
+ tunnel select-seq sr-lsp load-balance-number 2<strong> </strong>unmix
+#
+return</pre>
+</li><li><p>P1 configuration file</p>
+<pre class="screen">#
+sysname P1
+#
+mpls lsr-id 2.2.2.9
+#               
+mpls            
+#               
+segment-routing 
+#               
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown  
+ ip address 172.16.1.2 255.255.255.0
+ ospf enable 1 area 0.0.0.0
+#               
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown  
+ ip address 172.17.1.1 255.255.255.0
+ ospf enable 1 area 0.0.0.0 
+#               
+interface LoopBack1
+ ip address 2.2.2.9 255.255.255.255
+ ospf enable 1 area 0.0.0.0  
+ ospf prefix-sid index 20
+#               
+ospf 1          
+ opaque-capability enable
+ segment-routing mpls
+ segment-routing global-block 16000 23999
+ frr
+  loop-free-alternate
+  ti-lfa enable
+ area 0.0.0.0
+#
+return</pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#
+sysname PE2
+#
+ip vpn-instance vpna
+ ipv4-family
+  route-distinguisher 200:1
+  tnl-policy p1
+  vpn-target 111:1 export-extcommunity
+  vpn-target 111:1 import-extcommunity
+#
+mpls lsr-id 3.3.3.9
+#               
+mpls            
+#               
+segment-routing
+#               
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown  
+ ip address 172.19.1.2 255.255.255.0
+ ospf enable 1 area 0.0.0.0  
+#               
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown  
+ ip binding vpn-instance vpna
+ ip address 10.2.1.2 255.255.255.0
+#               
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown  
+ ip address 172.17.1.2 255.255.255.0
+ ospf enable 1 area 0.0.0.0  
+#               
+interface LoopBack1
+ ip address 3.3.3.9 255.255.255.255
+ ospf enable 1 area 0.0.0.0  
+ ospf prefix-sid index 30
+#               
+bgp 100         
+ peer 1.1.1.9 as-number 100
+ peer 1.1.1.9 connect-interface LoopBack1
+ #              
+ ipv4-family unicast
+  undo synchronization
+  peer 1.1.1.9 enable
+ #              
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 1.1.1.9 enable
+ #              
+ ipv4-family vpn-instance vpna
+  peer 10.2.1.1 as-number 65420
+#               
+ospf 1          
+ opaque-capability enable
+ segment-routing mpls
+ segment-routing global-block 16000 23999
+ frr
+  loop-free-alternate
+  ti-lfa enable
+ area 0.0.0.0
+#
+tunnel-policy p1
+ tunnel select-seq sr-lsp load-balance-number 2<strong> </strong>unmix
+#
+return</pre>
+</li><li><p>P2 configuration file</p>
+<pre class="screen">#
+sysname P2
+#
+mpls lsr-id 4.4.4.9
+#               
+mpls            
+#               
+segment-routing 
+#               
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown  
+ ip address 172.18.1.2 255.255.255.0
+ ospf enable 1 area 0.0.0.0  
+#               
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown  
+ ip address 172.19.1.1 255.255.255.0
+ ospf enable 1 area 0.0.0.0 
+#               
+interface LoopBack1
+ ip address 4.4.4.9 255.255.255.255
+ ospf enable 1 area 0.0.0.0  
+ ospf prefix-sid index 40
+#               
+ospf 1          
+ opaque-capability enable
+ segment-routing mpls
+ segment-routing global-block 16000 23999
+ frr
+  loop-free-alternate
+  ti-lfa enable
+ area 0.0.0.0
+#
+return</pre>
+</li><li><p>CE1 configuration file</p>
+<pre class="screen">#
+ sysname CE1
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.1.1 255.255.255.0
+#
+interface LoopBack1
+ ip address 10.11.1.1 255.255.255.255
+#
+bgp 65410
+ peer 10.1.1.2 as-number 100
+ network 10.11.1.1 255.255.255.255
+ #
+ ipv4-family unicast
+  peer 10.1.1.2 enable
+#
+return</pre>
+</li><li><p>CE2 configuration file</p>
+<pre class="screen">#
+ sysname CE2
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.2.1.1 255.255.255.0
+#
+interface LoopBack1
+ ip address 10.22.2.2 255.255.255.255
+#
+bgp 65420
+ peer 10.2.1.2 as-number 100
+ network 10.22.2.2 255.255.255.255
+ #
+ ipv4-family unicast
+  peer 10.2.1.2 enable
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr-be_cfg_0007.html">Configuring Examples for SR-MPLS BE
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr_all_cfg_0139.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr_all_cfg_0209.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

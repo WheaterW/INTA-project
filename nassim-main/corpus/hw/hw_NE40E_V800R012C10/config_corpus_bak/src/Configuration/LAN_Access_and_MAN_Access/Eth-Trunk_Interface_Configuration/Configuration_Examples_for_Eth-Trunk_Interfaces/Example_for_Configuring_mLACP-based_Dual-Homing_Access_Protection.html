@@ -1,0 +1,383 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring mLACP-based Dual-Homing Access Protection">
+<meta name="abstract" content="This section provides an example for configuring mLACP-based dual-homing access protection. After mLACP is configured on PEs that a CE is dual-homed to, device-level protection rather than board-level protection is provided.">
+<meta name="description" content="This section provides an example for configuring mLACP-based dual-homing access protection. After mLACP is configured on PEs that a CE is dual-homed to, device-level protection rather than board-level protection is provided.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ethtrunk_cfg_0060.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ethtrunk_cfg_0066.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="wwx1238417">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="Eth-Trunk">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Eth-Trunk">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="featurename" content="Eth-Trunk">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="featurename" content="Eth-Trunk">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="OWNER" content="c00648116,w00437000">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="wwx1238417">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001258930801">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring mLACP-based Dual-Homing Access Protection</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001258930801"></a><a name="EN-US_TASK_0000001258930801"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring mLACP-based Dual-Homing Access Protection</h1>
+<div class="taskbody"><p>This section provides an example for configuring mLACP-based dual-homing access protection. After mLACP is configured on PEs that a CE is dual-homed to, device-level protection rather than board-level protection is provided.</p>
+<div class="context"><a name="EN-US_TASK_0000001258930801__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>Configure mLACP on dual-homed PEs to implement device redundancy and improve network reliability.</p>
+<p>On the network shown in Figure 1, a CE is dual-homed to two PEs through Eth-Trunk interfaces in static LACP mode. To improve reliability, deploy mLACP on PE1 and PE2 with PE1 as the master device and PE2 as the backup device. If the link between PE1 and the CE fails, the traffic from the CE to PE1 must be automatically switched to PE2. If the link between the CE and PE1 recovers, traffic must be switched back to PE1.</p>
+<div class="fignone"><span class="figcap"><b>Figure 1 </b>Configuring CE dual-homing access protection based on mLACP</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 and interface 2 represent GE<span>0/1/1</span> and GE<span>0/2/1</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001214370930.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001258930801__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Create an LDP session between PE1 and PE2.</p>
+<ol type="a"><li><p>Configure a routing protocol on PE1 and PE2 to ensure Layer 3 network connectivity.</p>
+<p>OSPF is used in this example.</p>
+</li><li><p>Configure basic MPLS functions and MPLS LDP, and set up LDP LSPs on PE1 and PE2.</p>
+</li></ol>
+</li><li><p>Create Eth-Trunk interfaces working in static LACP mode on the CE and PEs and add member interfaces to the Eth-Trunk interfaces to improve link reliability.</p>
+</li><li><p>Create an ICCP redundancy group and ICCP session on PE1 and PE2.</p>
+<ol type="a"><li><p>Configure an ICCP redundancy group on PE1 and PE2.</p>
+</li><li><p>Bind the ICCP redundancy group to the peer IP address of the LDP session, which is used by PE1 and PE2 to communicate with each other.</p>
+</li></ol>
+</li><li>Configure mLACP on PE1 and PE2 to improve device-level reliability.<ol type="a"><li>Configure a system ID, system priority, and node ID for the ICCP redundancy group on PE1 and PE2 to enable mLACP.</li><li>Bind the Eth-Trunk interface on PE1 and PE2 to the ICCP redundancy group, and the interface is then automatically added to mLACP.</li><li>Set a higher priority for the Eth-Trunk interface on PE1 (A smaller value indicates a higher priority) so that this interface functions as the master.</li></ol>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001258930801__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>MPLS LSR ID of each PE</p>
+</li><li>System priority of each Eth-Trunk interface</li><li>mLACP system priority, system ID, and node ID</li><li>mLACP port priority</li></ul>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>On PE1 and PE2, the mLACP system priorities must be the same, so are the system IDs; however, the node IDs must be different. To ensure normal mLACP switching, it is recommended that PE1 and PE2 be the LACP Actors. This means that their mLACP system priority value must be smaller than that on the CE.</p>
+<p>mLACP does not support protection against node faults. The convergence time upon a PE1 fault depends on the Keepalive time of the LDP session.</p>
+<p>PE1 and PE2 must have the same Eth-Trunk ID for dual-homing protection.</p>
+</div></div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001258930801__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enable MPLS and set up an LDP session between PE1 and PE2.</span><p><p>Enable MPLS on PE1 and PE2, and set up an LDP session and LSPs between the PEs. For details on how to configure MPLS, see <a href="dc_vrp_ldp-p2p_cfg_0000.html">MPLS LDP Configuration</a>.</p>
+<p>After completing the configuration, run the <a href="cmdqueryname=display+mpls+ldp+session"><b><span class="cmdname">display mpls ldp session</span></b></a> command to check that an LDP session in the <strong>Operational</strong> state has been established between PE1 and PE2.</p>
+<p>The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> display mpls ldp session</strong> <strong>all</strong></pre>
+<pre class="screen"> LDP Session(s) in Public Network
+ Codes: LAM(Label Advertisement Mode),  SsnAge Unit(DDDD:HH:MM)
+<span> An asterisk (*) before a session means the session is being deleted.</span>
+--------------------------------------------------------------------------
+ PeerID             Status      LAM  SsnRole  SsnAge       KASent/Rcv
+--------------------------------------------------------------------------
+ 10.2.2.2:0          Operational DU   Passive  0000:00:00   3/3
+--------------------------------------------------------------------------
+TOTAL: 1 Session(s) Found.</pre>
+</p></li><li><span>Create an ICCP redundancy group on PE1 and PE2 and bind the group to the LDP session to establish an ICCP connection.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong>iccp redundancy group 1</strong>
+[<span class="keyword">*</span>PE1-iccp-redundancy-group-1]<strong>peer-ip 10.2.2.2</strong>
+[<span class="keyword">*</span>PE1-iccp-redundancy-group-1]<strong>commit</strong></pre>
+</p><p><p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong>iccp redundancy group 1</strong>
+[<span class="keyword">*</span>PE2-iccp-redundancy-group-1]<strong>peer-ip 10.1.1.1</strong>
+[<span class="keyword">*</span>PE2-iccp-redundancy-group-1]<strong>commit</strong></pre>
+</p><p><p>After completing the configuration, run the <a href="cmdqueryname=display+iccp+group"><b><span class="cmdname">display iccp group</span></b></a> command on PE1 and PE2 to check that an ICCP session in the <strong>OPERATIONAL</strong> state has been established between the two PEs.</p>
+<p>The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong>display iccp group 1</strong></pre>
+<pre class="screen">                         The ICCP Redundancy Group Information
+ICCP Redundancy Group:    1
+Peer IP:                  10.2.2.2
+Local Sender Name:        PE1
+Peer Sender Name:         PE2
+State Machine Status:     OPERATIONAL
+ICCP Capability:          Enable
+LDP Session State:        UP </pre>
+</p></li><li><span>Add interfaces on the CE, PE1, and PE2 to the corresponding Eth-Trunk interfaces.</span><p><div class="p"># Configure the CE.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE]<strong>interface Eth-Trunk 1</strong><strong>0</strong>
+[<span class="keyword">*</span>CE-Eth-Trunk10]<strong>mode lacp-static</strong>
+[<span class="keyword">*</span>CE-Eth-Trunk10]<strong>trunkport <span>gigabitethernet</span> <span>0/1/1</span></strong>
+[<span class="keyword">*</span>CE-Eth-Trunk10]<strong>trunkport gigabitethernet <span>0/2/1</span></strong>
+[<span class="keyword">*</span>CE-Eth-Trunk10]<strong>commit</strong></pre>
+</div>
+</p><p><div class="p"># Configure PE1.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong>interface Eth-Trunk 1</strong><strong>0</strong>
+[<span class="keyword">*</span>PE1-Eth-Trunk10]<strong>mode lacp-static</strong>
+[<span class="keyword">*</span>PE1-Eth-Trunk10]<strong>trunkport gigabitethernet <span>0/2/1</span></strong>
+[<span class="keyword">*</span>PE1-Eth-Trunk10]<strong>commit</strong></pre>
+</div>
+</p><p><div class="p"># Configure PE2.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong>interface Eth-Trunk 1</strong><strong>0</strong>
+[<span class="keyword">*</span>PE2-Eth-Trunk10]<strong>mode lacp-static</strong>
+[<span class="keyword">*</span>PE2-Eth-Trunk10]<strong>trunkport gigabitethernet </strong><strong><span>0/1/1</span></strong>
+[<span class="keyword">*</span>PE2-Eth-Trunk10]<strong>commit</strong></pre>
+</div>
+</p></li><li><span>Enable mLACP in the ICCP redundancy group on PE1 and PE2.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong>iccp redundancy group 1</strong>
+[<span class="keyword">*</span>PE1-iccp-redundancy-group-1]<strong>mlacp system-id 00e0-fc12-3458</strong>
+[<span class="keyword">*</span>PE1-iccp-redundancy-group-1]<strong>mlacp system-priority 100</strong>
+[<span class="keyword">*</span>PE1-iccp-redundancy-group-1]<strong>mlacp node-id 1</strong>
+[<span class="keyword">*</span>PE1-iccp-redundancy-group-1]<strong>commit</strong></pre>
+</p><p><p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong>iccp redundancy group 1</strong>
+[<span class="keyword">*</span>PE2-iccp-redundancy-group-1]<strong>mlacp system-id 00e0-fc12-3458</strong>
+[<span class="keyword">*</span>PE2-iccp-redundancy-group-1]<strong>mlacp system-priority 100</strong>
+[<span class="keyword">*</span>PE2-iccp-redundancy-group-1]<strong>mlacp node-id 5</strong>
+[<span class="keyword">*</span>PE2-iccp-redundancy-group-1]<strong>commit</strong></pre>
+</p><p><p>After completing the configuration, run the <a href="cmdqueryname=display+mlacp+iccp-status+group"><b><span class="cmdname">display mlacp iccp-status group</span></b></a> command to check that the mLACP session was successfully set up, the mLACP state machine is <strong>OPERATIONAL</strong>, and the mLACP local and peer information is correct.</p>
+<p>The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong>display mlacp iccp-status group 1</strong></pre>
+<pre class="screen">                      The mLACP ICCP group information
+ICCP Redundancy Group: 1
+ICCP Status: Up                         mLACP Machine Status: OPERATIONAL
+Local:
+--------------------------------------------------------------------------------
+mLACP System ID: 00e0-fc12-3458         Work System ID: 00e0-fc12-3458
+mLACP System Priority: 100              Work System Priority: 100
+mLACP Node ID: 1
+mLACP Support Version: 1
+--------------------------------------------------------------------------------
+Peer:
+--------------------------------------------------------------------------------
+mLACP System ID : 00e0-fc12-3458
+mLACP System Priority : 100
+mLACP Node ID : 5
+mLACP Support Version: 1
+--------------------------------------------------------------------------------
+Member:
+--------------------------------------------------------------------------------
+AggName Role State PeerAggName State</pre>
+</p></li><li><span>Bind the Eth-Trunk interface to the ICCP redundancy group on PE1 and PE2, and configure a higher mLACP port priority on PE1.</span><p><div class="p"># Configure PE1.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong>interface Eth-Trunk 1</strong><strong>0</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-Eth-Trunk1]<strong>mlacp iccp-group 1</strong>
+[<span class="keyword">*</span>PE1-Eth-Trunk1]<strong>mlacp port-priority 100</strong>
+[<span class="keyword">*</span>PE1-Eth-Trunk1]<strong>commit</strong></pre>
+</div>
+</p><p><div class="p"># Configure PE2.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong>interface Eth-Trunk 1</strong><strong>0</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-Eth-Trunk1]<strong>mlacp iccp-group 1</strong>
+[<span class="keyword">*</span>PE2-Eth-Trunk1]<strong>commit</strong></pre>
+</div>
+</p></li><li><span>Verify the configuration. </span><p><p># Run the <a href="cmdqueryname=display+eth-trunk"><b><span class="cmdname">display eth-trunk</span></b></a> command on the CE to check the Eth-Trunk interface configuration.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE]<strong>display eth-trunk 10</strong></pre>
+<pre class="screen">Eth-Trunk10's state information is:
+(h): high priority
+(r): reference port
+Local:
+LAG ID: 1                   WorkingMode: STATIC
+Preempt Delay: Disabled     Hash arithmetic: According to flow
+System Priority: 32768      System ID: 00e0-fc12-3469
+Least Active-linknumber: 1  Max Active-linknumber: 64
+Operate status: up          Number Of Up Port In Trunk: 1
+<span>Timeout Period: Slow</span>
+PortKeyMode: Auto
+--------------------------------------------------------------------------------
+ActorPortName                 Status   PortType PortPri PortNo PortKey PortState Weight
+GigabitEthernet<span>0/1/1</span>(r)       <strong>Selected</strong>  1G      32768   1      289     10111100  1
+GigabitEthernet<span>0/2/1</span>          <strong>Unselect</strong>  1G      32768   2      289     10110000  1
+
+Partner:
+--------------------------------------------------------------------------------
+ActorPortName              SysPri    SystemID       PortPri PortNo  PortKey   PortState
+GigabitEthernet<span>0/1/1</span> (r)      1      00e0-fc12-3458  32768  36865     1       10111100
+GigabitEthernet<span>0/2/1</span>          1      00e0-fc12-3458  32768  53249     1       10100000</pre>
+<p>The command output shows that the CE's Eth-Trunk member interfaces GigabitEthernet<span>0/1/1</span> and GigabitEthernet<span>0/2/1</span> are in the <strong>Selected</strong> and <strong>Unselect</strong> states, respectively.</p>
+</p><p><p># Run the <a href="cmdqueryname=display+mlacp+eth-trunk"><b><span class="cmdname">display mlacp eth-trunk</span></b></a> command on PE1 to check information about the Eth-Trunk interface added to mLACP.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong>display mlacp eth-trunk 10</strong></pre>
+<pre class="screen">                   The mLACP Trunk Information
+--------------------------------------------------------------------------------
+Eth-Trunk1's state information is:
+Trunk ID: 10                           mLACP Role: Master    
+ICCP Group: 1                       
+mLACP System ID: 00e0-fc12-3458        mLACP System Priority: 100       
+mLACP Port Priority: 100             ROID: 0000.0001.0000.0000 
+--------------------------------------------------------------------------------
+
+
+                       The Local Port Information
+(P): Peer Request   (C): Local Configured   (L): Local Request
+-------------------------------------------------------------------------------
+PortName                   Status     PortPri   PortNo PortKey State     IsRef 
+-------------------------------------------------------------------------------
+GE<span>0/2/1</span>                   Select     100(C)    36865  0xa     10111100  1     
+-------------------------------------------------------------------------------
+
+Partner:
+--------------------------------------------------------------------------------
+PortName                   SysPri SystemID       PortPri PortNo PortKey State    
+--------------------------------------------------------------------------------
+GE<span>0/2/1</span>                   32768  00e0-fc12-3469 32768   1      0xa21   10111100 
+--------------------------------------------------------------------------------
+
+                       The Peer Port Information
+--------------------------------------------------------------------------------
+PortName                   Status     PortPri   PortNo PortKey State            
+--------------------------------------------------------------------------------
+GE<span>0/1/1</span>                   Unselect   32768     53249  0xa     10100000         
+--------------------------------------------------------------------------------
+
+Partner:
+--------------------------------------------------------------------------------
+PortName                   SysPri SystemID       PortPri PortNo PortKey State    
+--------------------------------------------------------------------------------
+GE<span>0/1/1</span>                   32768  00e0-fc12-3469 32768   2      0xa21   10110000 
+--------------------------------------------------------------------------------   
+</pre>
+</p><p><p># Run the <a href="cmdqueryname=display+mlacp+eth-trunk"><b><span class="cmdname">display mlacp eth-trunk</span></b></a> command on PE2 to check information about the Eth-Trunk interface added to mLACP.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong>display mlacp eth-trunk 10</strong></pre>
+<pre class="screen">                   The mLACP Trunk Information
+--------------------------------------------------------------------------------
+Eth-Trunk1's state information is:
+Trunk ID: 10                           mLACP Role: Backup    
+ICCP Group: 1                       
+mLACP System ID: 00e0-fc12-3458        mLACP System Priority: 100       
+mLACP Port Priority: 32768             ROID: 0000.0001.0000.0000 
+--------------------------------------------------------------------------------
+
+
+                       The Local Port Information
+(P): Peer Request   (C): Local Configured   (L): Local Request
+--------------------------------------------------------------------------------
+PortName                   Status     PortPri   PortNo PortKey State      IsRef       
+--------------------------------------------------------------------------------
+GE<span>0/1/1</span>                   Unselect   32768(C)  53249  0xa     10100000   1      
+--------------------------------------------------------------------------------
+
+Partner:
+--------------------------------------------------------------------------------
+PortName                   SysPri SystemID       PortPri PortNo PortKey State    
+--------------------------------------------------------------------------------
+GE<span>0/1/1</span>                   32768  00e0-fc12-3469 32768   2      0xa21   10110000 
+--------------------------------------------------------------------------------   
+
+                       The Peer Port Information
+-------------------------------------------------------------------------------
+PortName                   Status     PortPri   PortNo PortKey State     
+-------------------------------------------------------------------------------
+GE<span>0/2/1</span>                   Select     100       36865  0xa     10111100       
+-------------------------------------------------------------------------------
+
+Partner:
+--------------------------------------------------------------------------------
+PortName                   SysPri SystemID       PortPri PortNo PortKey State    
+--------------------------------------------------------------------------------
+GE<span>0/2/1</span>                   32768  00e0-fc12-3469 32768   1      0xa21   10111100 
+--------------------------------------------------------------------------------</pre>
+<p>The command output on PE1 and PE2 shows that the Eth-Trunk interface on PE1 plays the master role and that on PE2 plays the backup role.</p>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001258930801__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>CE configuration file</p>
+<pre class="screen">#
+sysname CE
+#
+interface Eth-Trunk10
+ mode lacp-static
+ #
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ eth-trunk 10
+#
+interface GigabitEthernet<span>0/2/1</span>
+ undo shutdown
+ eth-trunk 10
+#
+return</pre>
+</li><li><p>PE1 configuration file</p>
+<pre class="screen">#
+sysname PE1
+#
+mpls lsr-id 10.1.1.1
+#
+mpls
+#
+mpls ldp
+#
+mpls ldp remote-peer 10.2.2.2
+#
+mpls ldp remote-peer PE2
+ remote-ip 10.2.2.2
+#
+iccp redundancy group 1
+ peer-ip 10.2.2.2
+ mlacp system-id 00e0-fc12-3458
+ mlacp system-priority 100
+ mlacp node-id 1
+#
+interface Eth-Trunk10
+ mode lacp-static
+ mlacp iccp-group 1
+ mlacp port-priority 100
+#
+interface GigabitEthernet<span>0/2/1</span>
+ undo shutdown
+ eth-trunk 10
+#
+return</pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#
+sysname PE2
+#
+mpls lsr-id 10.2.2.2
+#
+mpls
+#
+mpls ldp
+#
+mpls ldp remote-peer 10.1.1.1
+#
+mpls ldp remote-peer PE1
+ remote-ip 10.1.1.1
+#
+iccp redundancy group 1
+ peer-ip 10.1.1.1
+ mlacp system-id 00e0-fc12-3458
+ mlacp system-priority 100
+ mlacp node-id 5
+#
+interface Eth-Trunk10
+ mode lacp-static
+ mlacp iccp-group 1
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ eth-trunk 10
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ethtrunk_cfg_0060.html">Configuration Examples for Eth-Trunk Interfaces
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ethtrunk_cfg_0066.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

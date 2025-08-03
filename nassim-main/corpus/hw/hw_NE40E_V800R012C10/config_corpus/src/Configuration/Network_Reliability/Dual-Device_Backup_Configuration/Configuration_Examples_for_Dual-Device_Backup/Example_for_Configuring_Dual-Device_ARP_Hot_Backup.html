@@ -1,0 +1,329 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Dual-Device ARP Hot Backup">
+<meta name="abstract" content="This section provides an example for configuring dual-device ARP hot backup in a VRRP group. With dual-device ARP hot backup deployed, after a master/backup switchover is performed, the new master device forwards downlink traffic without needing to relearn ARP entries, ensuring downlink traffic continuity.">
+<meta name="description" content="This section provides an example for configuring dual-device ARP hot backup in a VRRP group. With dual-device ARP hot backup deployed, after a master/backup switchover is performed, the new master device forwards downlink traffic without needing to relearn ARP entries, ensuring downlink traffic continuity.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_rbs_cfg_0010.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_rbs_cfg_0019.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00604599">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="Dual-Device Backup">
+<meta name="featuretype" content="Network Reliability">
+<meta name="Solution" content="html_ismerge">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Dual-Device Backup">
+<meta name="featuretype" content="Network Reliability">
+<meta name="featurename" content="Dual-Device Backup">
+<meta name="featuretype" content="Network Reliability">
+<meta name="featurename" content="Dual-Device Backup">
+<meta name="featuretype" content="Network Reliability">
+<meta name="OWNER" content="w00604599">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="w00604599">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172362259">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Dual-Device ARP Hot Backup</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172362259"></a><a name="EN-US_TASK_0172362259"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1"><span>Example for Configuring Dual-Device ARP Hot Backup</span></h1>
+<div class="taskbody"><p>This section provides an example for configuring dual-device ARP hot backup in a VRRP group. With dual-device ARP hot backup deployed, after a master/backup switchover is performed, the new master device forwards downlink traffic without needing to relearn ARP entries, ensuring downlink traffic continuity.</p>
+<div class="context"><a name="EN-US_TASK_0172362259__1.4.1"></a><a name="1.4.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>On the network shown in <a href="#EN-US_TASK_0172362259__fig125654388184">Figure 1</a>, users access <span class="keyword">Device</span> A and <span class="keyword">Device</span> B through a LAN switch (LSW). Configure a Virtual Router Redundancy Protocol (VRRP) group on <span class="keyword">Device</span> A and <span class="keyword">Device</span> B. <span class="keyword">Device</span> A is a master device, and <span class="keyword">Device</span> B is a backup device. In normal circumstances, <span class="keyword">Device</span> A learns ARP entries from the users and periodically updates them, and forwards both uplink and downlink traffic.</p>
+<p>If <span class="keyword">Device</span> A or the link between <span class="keyword">Device</span> A and the switch fails, a master/backup VRRP switchover is triggered to switch <span class="keyword">Device</span> B to the Master state. <span class="keyword">Device</span> B needs to advertise a network segment route to network-side devices so that the devices will transmit downlink traffic to <span class="keyword">Device</span> B. If <span class="keyword">Device</span> B has not learned ARP entries from user-side devices, the downlink traffic is interrupted. <span class="keyword">Device</span> B forwards the downlink traffic only after it learns ARP entries from user-side devices.</p>
+<div class="fignone" id="EN-US_TASK_0172362259__fig125654388184"><a name="EN-US_TASK_0172362259__fig125654388184"></a><a name="fig125654388184"></a><span class="figcap"><b>Figure 1 </b>Dual-device ARP hot backup networking</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 and 2 in this example represent <span class="keyword">Device</span> A's GE <span>0/1/0</span> and <span class="keyword">Device</span> B's GE <span>0/1/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_rbs_cfg_001101.png"></span><br></div>
+<p>To ensure downlink traffic continuity, deploy dual-device ARP hot backup on <span class="keyword">Device</span> A and <span class="keyword">Device</span> B to enable <span class="keyword">Device</span> A to back up ARP entries and host routing information to <span class="keyword">Device</span> B in real time. After a master/backup VRRP switchover is performed, <span class="keyword">Device</span> B forwards downlink traffic without needing to relearn ARP entries.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172362259__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>VRRP group ID: 1; virtual IP address: 10.1.1.100</p>
+</li><li><p><span class="keyword">Device</span> A's priority: 120; <span class="keyword">Device</span> B's priority: 100 (default value)</p>
+</li><li><p><span class="keyword">Device</span> A's and <span class="keyword">Device</span> B's preemption delays: 600 seconds</p>
+</li><li><p>Remote backup service (RBS) name: service1; remote backup profile (RBP) name: profile1; backup ID: 10</p>
+</li><li><p><span class="keyword">Device</span> A's IP address: 1.1.1.1/32; <span class="keyword">Device</span> B's IP address: 2.2.2.2/32; TCP port number: 2046</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172362259__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign IP addresses to <span class="keyword">Device</span> A's and <span class="keyword">Device</span> B's interfaces and configure OSPF on <span class="keyword">Device</span> A and <span class="keyword">Device</span> B. For detailed configurations, see Configuration Files.</span></li><li><span>Configure basic VRRP group functions.</span><p><div class="p"># Create VRRP group 1 on <span class="keyword">Device</span> A, and set <span class="keyword">Device</span> A's priority and preemption delay to 120 and 600 seconds, respectively.<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname <span class="keyword">Device</span>A</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>vrrp vrid 1 virtual-ip 10.1.1.100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>admin-vrrp vrid 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>vrrp vrid 1 priority 120</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>vrrp vrid 1 preempt-mode timer delay 600</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>vrrp recover-delay 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+</div>
+<div class="p"># Create VRRP group 1 on <span class="keyword">Device</span> B, set <span class="keyword">Device</span> B's preemption delay to 600 seconds, and retain the default priority for <span class="keyword">Device</span> B.<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname <span class="keyword">Device</span>B</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/0</span>] <strong>vrrp vrid 1 virtual-ip 10.1.1.100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/0</span>] <strong>admin-vrrp vrid 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/0</span>] <strong>vrrp vrid 1 preempt-mode timer delay 600</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/0</span>] <strong>vrrp recover-delay 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+</div>
+</p></li><li><span>Establish a dual-device backup platform.</span><p><div class="p"># Establish a dual-device backup platform on <span class="keyword">Device</span> A.<ol type="a"><li>Configure an SSL policy.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>pki domain</strong> <strong>domain1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>DeviceA-pki-domain-domain1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-pki-domain-domain1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>pki import-certificate ca domain domain1 filename test.crt</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The following uses CA certificate as an example. During the actual configuration, you need to replace <strong>ca</strong> and <strong>test.crt</strong> with the existing certificate type and name on the device. The user can directly upload the certificate to the device for installation, or apply for and download the certificate for installation. For details, see "Obtaining a Certificate" in <em>PKI Configuration</em>.</p>
+</div></div>
+<pre class="screen">[<span class="keyword">*</span>DeviceA] <strong>ssl policy policy1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>DeviceA-ssl-policy-policy1] <strong>pki-domain domain1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>DeviceA-ssl-policy-policy1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-ssl-policy-policy1] <strong>quit</strong></pre>
+</li><li>Configure an RBS.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>remote-backup-service service1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-rm-backup-srv-service1] <strong>bind ssl-policy policy1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-rm-backup-srv-service1] <strong>batch-backup service-type arp now</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-rm-backup-srv-service1] <strong>peer 2.2.2.2 source 1.1.1.1 port 2046</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-rm-backup-srv-service1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-rm-backup-srv-service1] <strong>quit</strong></pre>
+</li><li>Configure an RBP.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>remote-backup-profile profile1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-rm-backup-prf-profile1] <strong>peer-backup hot</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-rm-backup-prf-profile1] <strong>vrrp-id 1 interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-rm-backup-prf-profile1] <strong>vrrp vrid 1 authentication-mode md5 YsH_2022</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-rm-backup-prf-profile1] <strong>backup-id 10 remote-backup-service service1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-rm-backup-prf-profile1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-rm-backup-prf-profile1] <strong>quit</strong></pre>
+</li></ol>
+</div>
+<div class="p"># Establish a dual-device backup platform on <span class="keyword">Device</span> B.<ol type="a"><li>Configure an SSL policy.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>pki domain</strong> <strong>domain1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>DeviceB-pki-domain-domain1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-pki-domain-domain1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>pki import-certificate ca domain domain1 filename test.crt</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The following uses CA certificate as an example. During the actual configuration, you need to replace <strong>ca</strong> and <strong>test.crt</strong> with the existing certificate type and name on the device. The user can directly upload the certificate to the device for installation, or apply for and download the certificate for installation. For details, see "Obtaining a Certificate" in <em>PKI Configuration</em>.</p>
+</div></div>
+<pre class="screen">[<span class="keyword">*</span>DeviceB] <strong>ssl policy policy1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>DeviceB-ssl-policy-policy1] <strong>pki-domain domain1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>DeviceB-ssl-policy-policy1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-ssl-policy-policy1] <strong>quit</strong></pre>
+</li><li>Configure an RBS.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>remote-backup-service service1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-rm-backup-srv-service1] <strong>bind ssl-policy policy1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-rm-backup-srv-service1] <strong>peer 1.1.1.1 source 2.2.2.2 port 2046</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-rm-backup-srv-service1] <strong>batch-backup service-type arp now</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-rm-backup-srv-service1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-rm-backup-srv-service1] <strong>quit</strong></pre>
+</li><li>Configure an RBP.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>remote-backup-profile profile1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-rm-backup-prf-profile1] <strong>peer-backup hot</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-rm-backup-prf-profile1] <strong>vrrp-id 1 interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-rm-backup-prf-profile1] <strong>vrrp vrid 1 authentication-mode md5 YsH_2022</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-rm-backup-prf-profile1] <strong>backup-id 10 remote-backup-service service1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-rm-backup-prf-profile1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-rm-backup-prf-profile1] <strong>quit</strong></pre>
+</li></ol>
+</div>
+</p></li><li><span>Enable remote backup for ARP services.</span><p><div class="p"># Enable remote backup for ARP services in the RBP view of <span class="keyword">Device</span> A and bind the RBP to GE <span>0/1/0</span>.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>remote-backup-profile profile1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-rm-backup-prf-profile1] <strong>service-type arp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-rm-backup-prf-profile1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-rm-backup-prf-profile1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>remote-backup-profile profile1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+</div>
+<div class="p"># Enable remote backup for ARP services in the RBP view of <span class="keyword">Device</span> B and bind the RBP to GE <span>0/1/0</span>.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>remote-backup-profile profile1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-rm-backup-prf-profile1] <strong>service-type arp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-rm-backup-prf-profile1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-rm-backup-prf-profile1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/0</span>] <strong>remote-backup-profile profile1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+</div>
+</p></li><li><span>Verify the configuration.</span><p><div class="p">After completing the configurations, run the <a href="cmdqueryname=display+remote-backup-profile"><b><span class="cmdname">display remote-backup-profile</span></b></a> command on <span class="keyword">Device</span> A. The command output shows that the RBP <strong>profile1</strong> has been created and bound to GE <span>0/1/0</span>.<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>display remote-backup-profile profile1</strong></pre>
+<pre class="screen">-----------------------------------------------
+ Profile-Index        : 0x1001
+ Profile-Name         : profile1
+ Service              : arp
+ Remote-backup-service: service1
+ Backup-ID            : 10
+ track protocol       : VRRP
+ VRRP-ID              : 1
+ VRRP-Interface       : GigabitEthernet<span>0/1/0</span>
+ Access-Control       : --
+ State                : Master
+ Peer State           : --
+ Interface            :
+                        GigabitEthernet<span>0/1/0</span>
+ Backup mode          : hot
+ Slot-Number          : 1
+ Card-Number          : 0
+ Port-Number          : 0</pre>
+</div>
+<div class="p">Run the <a href="cmdqueryname=display+remote-backup-profile"><b><span class="cmdname">display remote-backup-profile</span></b></a> command on <span class="keyword">Device</span> B. The command output shows that the RBP <strong>profile1</strong> has been created and bound to GE <span>0/1/0</span>.<pre class="screen">&lt;<span class="keyword">Device</span>B&gt; <strong>display remote-backup-profile profile1</strong></pre>
+<pre class="screen">-----------------------------------------------
+ Profile-Index        : 0x1001
+ Profile-Name         : profile1
+ Service              : arp
+ Remote-backup-service: service1
+ Backup-ID            : 10
+ track protocol       : VRRP
+ VRRP-ID              : 1
+ VRRP-Interface       : GigabitEthernet<span>0/1/0</span>
+ Access-Control       : --
+ State                : Slave
+ Peer State           : --
+ Interface            :
+                        GigabitEthernet<span>0/1/0</span>
+ Backup mode          : hot
+ Slot-Number          : 1
+ Card-Number          : 0
+ Port-Number          : 0</pre>
+</div>
+<div class="p">Run the <a href="cmdqueryname=display+remote-backup-service"><b><span class="cmdname">display remote-backup-service</span></b></a> command on <span class="keyword">Device</span> A. The command output shows that the RBS <strong>service1</strong> has been created.<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>display remote-backup-service service1</strong></pre>
+<pre class="screen">----------------------------------------------------------
+ Service-Index    : 2
+ Service-Name     : service1
+ TCP-State        : Connected
+ Peer-ip          : 1.1.1.1
+ Source-ip        : 2.2.2.2
+ TCP-Port         : 2046
+ Track-BFD        : --
+<span> SSL-Policy-Name  : policy1
+ SSL-State        : --</span>
+----------------------------------------------------------</pre>
+</div>
+<div class="p">Run the <a href="cmdqueryname=display+remote-backup-service"><b><span class="cmdname">display remote-backup-service</span></b></a> command on <span class="keyword">Device</span> B. The command output shows that the RBS <strong>service1</strong> has been created.<pre class="screen">&lt;<span class="keyword">Device</span>B&gt; <strong>display remote-backup-service service1</strong></pre>
+<pre class="screen">----------------------------------------------------------
+ Service-Index    : 2
+ Service-Name     : service1
+ TCP-State        : Connected
+ Peer-ip          : 2.2.2.2
+ Source-ip        : 1.1.1.1
+ TCP-Port         : 2046
+ Track-BFD        : --
+<span> SSL-Policy-Name  : policy1
+ SSL-State        : --</span>
+----------------------------------------------------------</pre>
+</div>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172362259__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>Configuration file of <span class="keyword">Device</span> A</p>
+<pre class="screen">#
+sysname <span class="keyword">Device</span>A
+# 
+pki domain domain1 
+#
+pki import-certificate ca domain domain1 filename test.crt
+ ssl policy policy1
+ pki-domain domain1
+#
+remote-backup-service service1
+<span> bind ssl-policy policy1</span>
+ peer 2.2.2.2 source 1.1.1.1 port 2046
+#
+remote-backup-profile profile1
+ service-type arp  
+ backup-id 10 remote-backup-service service1
+ peer-backup hot 
+ vrrp-id 1 interface GigabitEthernet<span>0/1/0</span> 
+ vrrp vrid 1 authentication-mode md5 YsH_2022 
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.1.1 255.255.255.0 
+ vrrp vrid 1 virtual-ip 10.1.1.100 
+ admin-vrrp vrid 1 
+ vrrp vrid 1 priority 120
+ vrrp vrid 1 preempt-mode timer delay 600
+ vrrp recover-delay 20
+ remote-backup-profile profile1
+#
+interface LoopBack1
+ ip address 1.1.1.1 255.255.255.255
+#
+ospf 1
+ area 0.0.0.0 
+  network 1.1.1.1 0.0.0.0 
+  network 10.1.1.0 0.0.0.255
+#
+return</pre>
+</li><li><p><span class="keyword">Device</span> B configuration file</p>
+<pre class="screen">#
+sysname <span class="keyword">Device</span>B
+#  
+pki domain domain1 
+#
+pki import-certificate ca domain domain1 filename test.crt
+ ssl policy policy1
+ pki-domain domain1
+#
+remote-backup-service service1
+<span> bind ssl-policy policy1</span>
+ peer 1.1.1.1 source 2.2.2.2 port 2046
+#
+remote-backup-profile profile1
+ service-type arp
+ backup-id 10 remote-backup-service service1
+ peer-backup hot
+ vrrp-id 1 interface GigabitEthernet<span>0/1/0</span>
+ vrrp vrid 1 authentication-mode md5 YsH_2022
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.1.2 255.255.255.0
+ vrrp vrid 1 virtual-ip 10.1.1.100
+ admin-vrrp vrid 1
+ vrrp vrid 1 preempt-mode timer delay 600
+ vrrp recover-delay 20
+ remote-backup-profile profile1
+#
+interface LoopBack1
+ ip address 2.2.2.2 255.255.255.255
+#
+ospf 1
+ area 0.0.0.0 
+  network 2.2.2.2 0.0.0.0 
+  network 10.1.1.0 0.0.0.255
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_rbs_cfg_0010.html">Configuration Examples for Dual-Device Backup
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_rbs_cfg_0019.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,83 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding Multicast Load Splitting">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_mcast_cfg_0014.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_mcast_cfg_0016.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IPv4 Multicast Route Management">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IPv4 Multicast Route Management">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="IPv4 Multicast Route Management">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001176742435">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding Multicast Load Splitting</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001176742435"></a><a name="EN-US_CONCEPT_0000001176742435"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding Multicast Load Splitting</h1>
+<div><div class="section"><h4 class="sectiontitle">Definition</h4><p>Load splitting is different from load balancing. Load splitting provides a way to distribute data flows destined for the same destination to multiple equal-cost paths. The data traffic loads forwarded on each path may vary according to the load splitting mode. Load balancing is a special form of load splitting and distributes even data traffic loads on multiple equal-cost paths. In this context, multicast load splitting refers to distributing multicast traffic to multiple equal-cost optimal paths based on the configured multicast load splitting mode, instead of following the RPF check rules to select only the route with the largest next-hop address.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Fundamentals</h4><p>By default, if multiple equal-cost optimal paths exist during multicast packet forwarding, equal-cost optimal routes are treated as follows during an RPF check:</p>
+<ul><li>If the equal-cost routes are from the same routing table, for example, all from the unicast routing table or multicast static routing table, the route with the largest next-hop address is selected as the RPF route.</li><li>If the equal-cost routes are from different routing tables, the route preferences are compared first, and then the mask matching lengths are compared. If they are the same, the device selects a route as the RPF route after a function-based calculation.</li></ul>
+<p>In either of the preceding situations, the device selects only one route as the RPF route to forward multicast packets. After multicast load splitting is configured, if multiple equal-cost routes exist on the network, multicast data flows can be split according to different policies to optimize network traffic transmission.</p>
+<div class="p">In <a href="#EN-US_CONCEPT_0000001176742435__fig_dc_fd_mrm_000701">Figure 1</a>, the multicast source (Source) sends multicast flows to multicast group G. An IGP (for example, OSPF) runs between DeviceA and DeviceD. Two equal-cost paths are available: DeviceA -&gt; DeviceB -&gt; DeviceD and DeviceA -&gt; DeviceC -&gt; DeviceD. By default, multicast traffic is forwarded through interface0 according to the RPF check rules because it has a larger IP address than interface1. After multicast load splitting is configured, forwarding paths are not selected according to the next-hop addresses. Rather, multicast flows are forwarded through both DeviceA -&gt; DeviceB -&gt; DeviceD and DeviceA -&gt; DeviceC -&gt;DeviceD.<div class="fignone" id="EN-US_CONCEPT_0000001176742435__fig_dc_fd_mrm_000701"><a name="EN-US_CONCEPT_0000001176742435__fig_dc_fd_mrm_000701"></a><a name="fig_dc_fd_mrm_000701"></a><span class="figcap"><b>Figure 1 </b>Multicast forwarding without and with multicast load splitting</span><br><span><img class="vsd" src="figure/en-us_image_0000001176662559.png" width="NaN" height="NaN"></span></div>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Multicast Load Splitting Modes</h4><p>Multicast load splitting provides varied load splitting modes for the data flows from any-source multicast (*, G) or source-specific multicast (S, G) to meet the requirements of different applications.</p>
+<p><strong>Multicast group G-based load splitting</strong> </p>
+<p>The multicast group-based load splitting policy is mainly used when a large number of different multicast groups exist on a network. In <a href="#EN-US_CONCEPT_0000001176742435__fig_02">Figure 2</a>, for the data flows sent from the source to different multicast groups (G1 to G10), two equal-cost routes from the source exist on Device7, Device6 and Device5. Using a series of algorithms, the multicast devices select a proper route from the equal-cost routes for each multicast group (G) as the packet forwarding route. After load splitting is implemented, flows transmitted on different paths are sent to different groups (G).</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001176742435__fig_02"><a name="EN-US_CONCEPT_0000001176742435__fig_02"></a><a name="fig_02"></a><span class="figcap"><b>Figure 2 </b>Multicast group G-based load splitting</span><br><span><img class="vsd" src="figure/en-us_image_0000001130623004.png" width="NaN" height="NaN"></span></div>
+<p><strong>Multicast source S-based load splitting</strong></p>
+<p>The multicast source-based load splitting policy is mainly used when a large number of different multicast sources exist on a network. In <a href="#EN-US_CONCEPT_0000001176742435__fig_03">Figure 3</a>, for the data flows sent from different sources (S1 to S10) to the same multicast group (G), two equal-cost routes from the sources exist on Device7, Device6 and Device5. Using a series of algorithms, the multicast devices select a proper route from the equal-cost routes for each multicast source (S) as the packet forwarding route. After load balancing is implemented, flows transmitted on different paths belong to different sources (S).</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001176742435__fig_03"><a name="EN-US_CONCEPT_0000001176742435__fig_03"></a><a name="fig_03"></a><span class="figcap"><b>Figure 3 </b>Multicast source S-based load splitting</span><br><span><img class="vsd" src="figure/en-us_image_0000001176742449.png" width="NaN" height="NaN"></span></div>
+<p><strong>Load splitting based on multicast source-group (S, G)</strong></p>
+<p>This load splitting policy applies to scenarios where a large number of different multicast groups and multicast sources exist on a network. In <a href="#EN-US_CONCEPT_0000001176742435__fig_04">Figure 4</a>, for the data flows sent from different sources (S1 to S10) to different multicast groups (G1 to G10), two equal-cost routes from the sources exist on Device7, Device6 and Device5. Using a series of algorithms, the multicast devices select a proper route from the equal-cost routes for each multicast source-group (S, G) as the packet forwarding route. After load splitting is implemented, flows transmitted on different paths belong to different multicast source-groups (S, G). </p>
+<div class="fignone" id="EN-US_CONCEPT_0000001176742435__fig_04"><a name="EN-US_CONCEPT_0000001176742435__fig_04"></a><a name="fig_04"></a><span class="figcap"><b>Figure 4 </b>Load splitting based on multicast source-group (S, G)</span><br><span><img class="vsd" src="figure/en-us_image_0000001130782794.png" width="NaN" height="NaN"></span></div>
+<p><strong>Stable-preferred load splitting</strong></p>
+<p>This policy can be applied to the preceding three load splitting scenarios. In <a href="#EN-US_CONCEPT_0000001176742435__fig_05">Figure 5</a>, if route flapping occurs on the multicast network, frequent load adjustment on a multicast device will aggravate route flapping. After stable-preferred load splitting is configured on the device, the device â instead of immediately adjusting the load â adjusts the load only after route flapping ends. When the network topology becomes stable, routing entries on the device from the same multicast source are evenly distributed on equal-cost paths. Stable-preferred load splitting is implemented based on entries instead of traffic. As a result, when there are entries that do not forward multicast traffic, the number of entries on each outbound interface may be balanced, but the multicast traffic sent by each outbound interface may not be balanced.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001176742435__fig_05"><a name="EN-US_CONCEPT_0000001176742435__fig_05"></a><a name="fig_05"></a><span class="figcap"><b>Figure 5 </b>Stable-preferred load splitting</span><br><span><img class="vsd" src="figure/en-us_image_0000001130782786.png" width="NaN" height="NaN"></span></div>
+<p><strong>Link bandwidth-based load splitting</strong></p>
+<p>This policy applies to networks where links have different load bandwidths. In <a href="#EN-US_CONCEPT_0000001176742435__fig15585182515482">Figure 6</a>, the load capabilities of paths on the network are different. If routing entries are evenly distributed to equal-cost paths, the load bandwidth of each path cannot be fully used. After link bandwidth-based load splitting is configured, routing entries can be unevenly distributed to paths based on link bandwidth. When a new entry is generated, the multicast devices calculate a value (Interface bandwidth/Number of current interface entries) for each equal-cost route and select the route with the largest calculation result as the forwarding route of the entry. If entries are deleted, load imbalance occurs. In this case, loads are not automatically adjusted with link bandwidth-based load splitting configured.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001176742435__fig15585182515482"><a name="EN-US_CONCEPT_0000001176742435__fig15585182515482"></a><a name="fig15585182515482"></a><span class="figcap"><b>Figure 6 </b>Link bandwidth-based load splitting</span><br><span><img class="vsd" src="figure/en-us_image_0000001130623012.png" width="NaN" height="NaN"></span></div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_mcast_cfg_0014.html">Configuring Multicast Load Splitting
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_mcast_cfg_0016.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+ospf mtu-enable multi-area
+==========================
+
+ospf mtu-enable multi-area
+
+Function
+--------
+
+
+
+The **ospf mtu-enable multi-area** command enables a multi-area adjacency interface to add its actual MTU in DD packets to be sent and check whether the MTU in a received DD packet is greater than the local MTU.
+
+The **undo ospf mtu-enable multi-area** command restores the default configuration.
+
+
+
+By default, a multi-area adjacency interface adds the MTU 0 (not the actual MTU) in DD packets to be sent and does not check the MTUs in received DD packets.
+
+
+Format
+------
+
+**ospf mtu-enable multi-area** { *area-id* | *area-id-ipv4* }
+
+**undo ospf mtu-enable multi-area** { *area-id* | *area-id-ipv4* }
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| *area-id* | Specifies the ID of an OSPF area. The value is an integer. | The value is a decimal integer ranging from 0 to 4294967295. |
+| *area-id-ipv4* | Specifies the ID of an OSPF area, in the format of an IP address. | The value is in the format X.X.X.X, where each X represents a value from 0 to 255 |
+
+
+
+Views
+-----
+
+100GE interface view,10GE interface view,200GE interface view,25GE sub-interface view,25GE interface view,400GE interface view,50GE sub-interface view,50GE interface view,Eth-Trunk interface view,Tunnel interface view,VBDIF interface view,VLANIF interface view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+To improve compatibility with a non-Huawei device, an OSPF-enabled Huawei device adds the MTU 0 in DD packets to be sent and does not check the MTUs in received DD packets, allowing an OSPF neighbor relationship to be set up even if the two ends have different MTU settings.However, under the default configuration, the non-Huawei device may discard an OSPF packet received from the Huawei device if the packet's actual MTU is greater than the MTU of the non-Huawei device. If the discarded packet is an LSU, an OSPF neighbor relationship can still be set up, but the route carried in the LSU fails to be learned, causing service interruptions.To resolve this issue, run the **ospf mtu-enable multi-area** command to configure a multi-area adjacency interface to add the actual MTU in DD packets to be sent and check whether the MTU in a received DD packet is greater than the local MTU. If the interface MTU settings of the local and remote ends are different, an OSPF neighbor relationship cannot enter the Full state. In this manner, MTU inconsistency can then be identified in time.
+
+**Prerequisites**
+
+The **ospf enable multi-area** command has been run.
+
+**Precautions**
+
+OSPF does not support this configuration on null interfaces.If the **ospf mtu-enable multi-area** command is run, OSPF neighbor relationships are reestablished.
+
+
+Example
+-------
+
+# Enable multi-area adjacency interface to add its MTU to the DD packets to be sent.
+```
+<HUAWEI> system-view
+[~HUAWEI] ospf 1
+[*HUAWEI-ospf-1] area 0
+[*HUAWEI-ospf-1-area-0.0.0.0] quit
+[*HUAWEI-ospf-1] area 1
+[*HUAWEI-ospf-1-area-0.0.0.1] quit
+[*HUAWEI-ospf-1] quit
+[*HUAWEI] interface 100GE1/0/1
+[*HUAWEI-100GE1/0/1] undo portswitch
+[*HUAWEI-100GE1/0/1] ospf enable 1 area 0
+[*HUAWEI-100GE1/0/1] ospf enable multi-area 1
+[*HUAWEI-100GE1/0/1] ospf mtu-enable multi-area 1
+
+```

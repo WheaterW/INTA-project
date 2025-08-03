@@ -1,0 +1,76 @@
+advertise delay on-startup delay-time (BGP-IPv6 unicast address family view)
+============================================================================
+
+advertise delay on-startup delay-time (BGP-IPv6 unicast address family view)
+
+Function
+--------
+
+
+
+The **advertise delay on-startup delay-time** command configures a delay for BGP4+ route advertisement after a device restart.
+
+The **undo advertise delay on-startup** command restores the default configuration.
+
+
+
+By default, BGP does not delay advertising routes after a device restart.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**advertise delay on-startup delay-time** *time-value*
+
+**undo advertise delay on-startup** [ **delay-time** *time-value* ]
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| **delay-time** *time-value* | Specifies a delay. | The value is an integer ranging from 1 to 864000, in seconds. |
+
+
+
+Views
+-----
+
+BGP-IPv6 unicast address family view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+After a device is restarted, routes on the device need to be advertised after a delay to prevent traffic loss during forwarding entry delivery. To configure a BGP route advertisement delay after the device restarts, run the **advertise delay on-startup delay-time** command before restarting the device. The command specifies how long the device must wait after a restart before it starts to advertise BGP4+ routes. If the specified delay has not expired after forwarding entries are delivered, you can run the refresh bgp all export, refresh bgp ipv6 all export, or reset bgp advertise delay on-startup command to enable the device to advertise BGP4+ routes immediately.
+
+**Precautions**
+
+The **advertise delay on-startup delay-time** command takes effect only after the **reboot** command is executed and the configuration is saved.If both this command and the **advertise lowest-priority on-startup** command are run, the latest configuration overrides the previous one.This command and the **advertise lowest-priority all-address-family peer-up delay** command are mutually exclusive.
+
+
+Example
+-------
+
+# Configure a delay for BGP4+ route advertisement after a device restart.
+```
+<HUAWEI> system-view
+[~HUAWEI] bgp 100
+[*HUAWEI-bgp] ipv6-family unicast
+[*HUAWEI-bgp-af-ipv6] advertise delay on-startup delay-time 100
+
+```

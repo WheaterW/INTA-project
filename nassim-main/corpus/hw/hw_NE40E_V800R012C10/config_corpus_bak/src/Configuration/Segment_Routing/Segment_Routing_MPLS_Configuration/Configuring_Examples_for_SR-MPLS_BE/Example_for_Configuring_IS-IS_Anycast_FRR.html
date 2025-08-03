@@ -1,0 +1,367 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring IS-IS Anycast FRR">
+<meta name="abstract" content="IS-IS anycast FRR can be configured to enhance the reliability of an SR network.">
+<meta name="description" content="IS-IS anycast FRR can be configured to enhance the reliability of an SR network.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr-be_cfg_0007.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr_all_cfg_0017.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr_all_cfg_0050.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="segment_routing_vrp,w00604599,l00455378,l00587852,w00606909,w00800033">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="Segment Routing MPLS">
+<meta name="featuretype" content="Segment Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Segment Routing MPLS">
+<meta name="featuretype" content="Segment Routing">
+<meta name="featurename" content="Segment Routing MPLS">
+<meta name="featuretype" content="Segment Routing">
+<meta name="featurename" content="Segment Routing MPLS">
+<meta name="featuretype" content="Segment Routing">
+<meta name="OWNER" content="l00468467">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00468467">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172368870">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring IS-IS Anycast FRR</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172368870"></a><a name="EN-US_TASK_0172368870"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring IS-IS Anycast FRR</h1>
+<div class="taskbody"><p>IS-IS anycast FRR can be configured to enhance the reliability of an SR network.</p>
+<div class="context"><a name="EN-US_TASK_0172368870__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>As shown in <a href="#EN-US_TASK_0172368870__fig_dc_vrp_sr_all_cfg_001901">Figure 1</a>, CE1 can be reached through either PE2 and PE3. To enable PE2 and PE3 to protect each other, configure IS-IS anycast FRR. This improves network reliability.</p>
+<div class="fignone" id="EN-US_TASK_0172368870__fig_dc_vrp_sr_all_cfg_001901"><a name="EN-US_TASK_0172368870__fig_dc_vrp_sr_all_cfg_001901"></a><a name="fig_dc_vrp_sr_all_cfg_001901"></a><span class="figcap"><b>Figure 1 </b>IS-IS anycast FRR protection networking</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 and 2 in this example represent GE <span>0/1/0</span> and GE <span>0/2/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_sr_all_cfg_001901.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368870__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Enable IS-IS on the backbone network to ensure that PEs interwork with each other.</p>
+</li><li><p>Enable MPLS on the backbone network, configure SR, and establish SR LSPs.</p>
+</li><li><p>Enable TI-LFA FRR on PE1 and configure the delayed switchback function.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368870__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>MPLS LSR IDs of the PEs and P</p>
+</li><li><p>SRGB ranges on the PEs</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172368870__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface.</span><p><p># Configure PE1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname PE1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>ip address 1.1.1.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>ip address 172.18.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>ip address 172.16.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname PE2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>ip address 2.2.2.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>ip address 172.16.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname PE3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>interface loopback 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-LoopBack0] <strong>ip address 4.4.4.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-LoopBack0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-LoopBack1] <strong>ip address 2.2.2.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-GigabitEthernet<span>0/1/0</span>] <strong>ip address 172.18.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>commit</strong></pre>
+</p></li><li><span>Configure an IGP on the backbone network to enable the PEs to communicate. IS-IS is used as an example.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>is-level level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>network-entity 10.0000.0000.0001.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-isis-1] <strong>is-level level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-isis-1] <strong>network-entity 10.0000.0000.0002.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-isis-1] <strong>is-level level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-isis-1] <strong>network-entity 10.0000.0000.0004.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-LoopBack1] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-GigabitEthernet<span>0/1/0</span>] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>commit</strong></pre>
+</p></li><li><span>Configure basic MPLS functions on the backbone network.</span><p><p>Because MPLS is automatically enabled on the interface where IS-IS has been enabled, you can ignore MPLS configuration on such an interface.</p>
+</p><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>mpls lsr-id 1.1.1.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-mpls] <strong>quit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>mpls lsr-id 2.2.2.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-mpls] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-mpls] <strong>quit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>mpls lsr-id 4.4.4.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-mpls] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-mpls] <strong>quit</strong></pre>
+</p></li><li><span>Configure SR, enable TI-LFA FRR, and configure microloop avoidance in traffic switchback scenarios on the backbone network.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing] <strong>tunnel-prefer segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>cost-style wide</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>segment-routing mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>segment-routing global-block 160000 161000</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The SRGB range various according to a live network. Set the range as needed. The SRGB setting here is an example.</p>
+</div></div>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>frr</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1-frr] <strong>loop-free-alternate level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1-frr] <strong>ti-lfa level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1-frr] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>avoid-microloop segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>avoid-microloop segment-routing rib-update-delay 6000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>isis prefix-sid index 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing] <strong>tunnel-prefer segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-isis-1] <strong>cost-style wide</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-isis-1] <strong>segment-routing mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-isis-1] <strong>segment-routing global-block 160000 161000</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The SRGB range varies according to the device. The configuration in this example is for reference only.</p>
+</div></div>
+<pre class="screen">[<span class="keyword">*</span>PE2-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>isis prefix-sid index 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-segment-routing] <strong>tunnel-prefer segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-segment-routing] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-isis-1] <strong>cost-style wide</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-isis-1] <strong>segment-routing mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-isis-1] <strong>segment-routing global-block 160000 161000</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The SRGB range varies according to the device. The configuration in this example is for reference only.</p>
+</div></div>
+<pre class="screen">[<span class="keyword">*</span>PE3-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-LoopBack1] <strong>isis prefix-sid index 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>commit</strong></pre>
+</p></li><li><span>Checking the Configurations</span><p><div class="p">Run the <strong>display segment-routing prefix mpls forwarding verbose</strong> command on PE1 to check the SR label forwarding table. The command output shows FRR backup entry information.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display segment-routing prefix mpls forwarding ip-prefix 2.2.2.9 32 verbose</strong>
+
+                   Segment Routing Prefix MPLS Forwarding Information
+             --------------------------------------------------------------
+             Role : I-Ingress, T-Transit, E-Egress, I&amp;T-Ingress And Transit
+
+Prefix             Label      OutLabel   Interface         NextHop          Role  MPLSMtu   Mtu     State          
+-----------------------------------------------------------------------------------------------------------------
+2.2.2.9/32         160020     3          GE<span>0/1/0</span>           172.16.1.2       I&amp;T   ---       1500    Active         
+Protocol : ISIS          SubProtocol : Level-1       Process ID : 1         
+Cost     : 10            Weight      : 0             UpdateTime : 2018-12-11 06:46:33.920       
+BFD State: --            Favor       : Y
+Label Stack (Top -&gt; Bottom): { 3 }
+
+Prefix             Label      OutLabel   Interface         NextHop          Role  MPLSMtu   Mtu     State          
+-----------------------------------------------------------------------------------------------------------------
+2.2.2.9/32         160020     3          GE<span>0/2/0</span>           172.18.1.2       I&amp;T   ---       1500    Active          
+Protocol : ISIS          SubProtocol : Level-1       Process ID : 1         
+Cost     : 10            Weight      : 0             UpdateTime : 2018-12-11 06:47:21.478       
+BFD State: --            Favor       : Y
+Label Stack (Top -&gt; Bottom): { 3 }
+
+Total information(s): 2</pre>
+</div>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172368870__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>PE1 configuration file</p>
+<pre class="screen">#
+sysname PE1
+#
+mpls lsr-id 1.1.1.9
+#               
+mpls            
+#               
+segment-routing 
+ tunnel-prefer segment-routing
+#               
+isis 1          
+ is-level level-1
+ cost-style wide
+ network-entity 10.0000.0000.0001.00
+ segment-routing mpls
+ segment-routing global-block 160000 161000
+ avoid-microloop segment-routing
+ avoid-microloop segment-routing rib-update-delay 6000
+ frr
+  loop-free-alternate level-1
+  ti-lfa level-1
+#               
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown  
+ ip address 172.18.1.1 255.255.255.0
+ isis enable 1  
+#               
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown  
+ ip address 172.16.1.1 255.255.255.0
+ isis enable 1  
+#               
+interface LoopBack1
+ ip address 1.1.1.9 255.255.255.255
+ isis enable 1  
+ isis prefix-sid index 10
+#
+return</pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#
+sysname PE2
+#
+mpls lsr-id 2.2.2.9
+#               
+mpls            
+#               
+segment-routing 
+ tunnel-prefer segment-routing
+#               
+isis 1          
+ is-level level-1
+ cost-style wide
+ network-entity 10.0000.0000.0002.00
+ segment-routing mpls
+ segment-routing global-block 160000 161000
+#               
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown  
+ ip address 172.16.1.2 255.255.255.0
+ isis enable 1  
+#               
+interface LoopBack1
+ ip address 2.2.2.9 255.255.255.255
+ isis enable 1  
+ isis prefix-sid index 20
+#
+return</pre>
+</li><li><p>PE3 configuration file</p>
+<pre class="screen">#
+sysname PE3
+#
+mpls lsr-id 4.4.4.9
+#               
+mpls            
+#               
+segment-routing 
+ tunnel-prefer segment-routing
+#               
+isis 1          
+ is-level level-1
+ cost-style wide
+ network-entity 10.0000.0000.0004.00
+ segment-routing mpls
+ segment-routing global-block 160000 161000
+#               
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown  
+ ip address 172.18.1.2 255.255.255.0
+ isis enable 1  
+#               
+interface LoopBack0
+ ip address 4.4.4.9 255.255.255.255
+#               
+interface LoopBack1
+ ip address 2.2.2.9 255.255.255.255
+ isis enable 1  
+ isis prefix-sid index 20
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr-be_cfg_0007.html">Configuring Examples for SR-MPLS BE
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr_all_cfg_0017.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr_all_cfg_0050.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

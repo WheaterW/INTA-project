@@ -1,0 +1,87 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring Route Recursion to Remotely Leaked VPN Routes">
+<meta name="abstract" content="After route recursion to remotely leaked VPN routes is enabled, a route can inherit the label and tunnel ID of a route leaked from the remote end. Then, the device can forward data through the tunnel to which the route recurses.">
+<meta name="description" content="After route recursion to remotely leaked VPN routes is enabled, a route can inherit the label and tunnel ID of a route leaked from the remote end. Then, the device can forward data through the tunnel to which the route recurses.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mpls-l3vpn-v4_cfg_0000.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mpls-l3vpn-v4_cfg_2052.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mpls-l3vpn-v4_cfg_0153.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,l3vpnvrp,w00556928,l00468467,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="BGP/MPLS IP VPN">
+<meta name="featuretype" content="VPN">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP/MPLS IP VPN">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="BGP/MPLS IP VPN">
+<meta name="featuretype" content="VPN">
+<meta name="OWNER" content="h00847023">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00415692">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172369388">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Configuring Route Recursion to Remotely Leaked VPN Routes</title>
+</head>
+<body><a name="EN-US_TASK_0172369388"></a><a name="EN-US_TASK_0172369388"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring Route Recursion to Remotely Leaked VPN Routes</h1>
+<div class="taskbody"><p>After route recursion to remotely leaked VPN routes is enabled, a route can inherit the label and tunnel ID of a route leaked from the remote end. Then, the device can forward data through the tunnel to which the route recurses.</p>
+<div class="context"><a name="EN-US_TASK_0172369388__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Usage Scenario</h4><p>A static route needs recursion if its next hop is indirect. To enable static routes to recurse to remotely leaked VPN routes, run the <a href="cmdqueryname=ip+route+recursive-lookup+bgp-vpnv4-route+enable"><b><span class="cmdname">ip route recursive-lookup bgp-vpnv4-route enable</span></b></a> command. After recursing to remotely leaked VPN routes, static routes may inherit the labels and tunnel IDs of these leaked routes. In this case, the device can forward data through tunnels to which the static routes recurse.</p>
+<p>In some upgrade scenarios, however, you need to prevent static routes from recursing to remotely leaked VPN routes to ensure that the path along which traffic is forwarded remains unchanged after the upgrade. On the network shown in <a href="#EN-US_TASK_0172369388__fig_dc_vrp_cli_ip_route_recursive-lookup_bgp-vpnv4-route">Figure 1</a>, BGP VPNv4 peer relationships are established between AGGs and between AGGs and the RSG. L3VE interfaces are configured on AGGs and bound to VPN instances, so that the CSG can access the L3VPN. To guide traffic forwarding, BGP is configured to import direct routes on both AGGs, and static routes to the eNodeB are also configured on both AGGs. The static routes use 1.1.1.1/32 as their destination address and share the same next hop, which is the address of the interface used by the CSG to connect to AGGs.</p>
+<p>Before the upgrade, the static routers configured on AGGs cannot recurse to remotely leaked VPN routes. Therefore, the downstream traffic path is Link A. After the upgrade, however, the static routes configured on AGGs can recurse to remotely leaked VPN routes by default. The static route configured on AGG2 will recurse to route 11.11.11.0/24 on AGG1 and inherits its label and tunnel ID. After the recursion, the static route on AGG2 will also be advertised to the RSG based on the BGP VPNv4 peer relationship. As a result, the RSG receives two routes with the same prefix from AGG1 and AGG2. If the RSG selects the route from AGG2 as the optimal route, the traffic forwarding path will switch to Link B, which is different from Link A before the upgrade. To prevent the preceding problem, run the <a href="cmdqueryname=ip+route+recursive-lookup+bgp-vpnv4-route+disable"><b><span class="cmdname">ip route recursive-lookup bgp-vpnv4-route disable</span></b></a> command on AGGs to prevent the static routes from recursing to remotely leaked VPN routes.</p>
+<div class="fignone" id="EN-US_TASK_0172369388__fig_dc_vrp_cli_ip_route_recursive-lookup_bgp-vpnv4-route"><a name="EN-US_TASK_0172369388__fig_dc_vrp_cli_ip_route_recursive-lookup_bgp-vpnv4-route"></a><a name="fig_dc_vrp_cli_ip_route_recursive-lookup_bgp-vpnv4-route"></a><span class="figcap"><b>Figure 1 </b>L2VPN accessing L3VPN networking</span><br><span><img class="vsd" src="figure/en-us_image_0185535031.png" width="NaN" height="NaN"></span></div>
+<p>On the network shown in <a href="#EN-US_TASK_0172369388__fig_ip_route_recursive-lookup_inherit-label-route_enable">Figure 2</a>, PE1 and PE2 are IBGP peers, and CE1 and PE1 are IGP neighbors. PE2 has learned the IP address of CE1's loopback interface, and an EBGP peer relationship is established between CE1 and PE2 using loopback interface addresses. By default, the BGP routes that PE2 learns from CE1 through the EBGP peer connection cannot recurse to remotely leaked VPN routes. As a result, traffic fails to be forwarded. To address this problem, run the <a href="cmdqueryname=ip+route+recursive-lookup+inherit-label-route+enable"><b><span class="cmdname">ip route recursive-lookup inherit-label-route enable</span></b></a> command to allow the BGP routes to recurse to remotely leaked VPN routes. After the BGP routes inherit the labels and tunnel IDs of the remotely leaked VPN routes, traffic can be correctly forwarded.</p>
+<div class="fignone" id="EN-US_TASK_0172369388__fig_ip_route_recursive-lookup_inherit-label-route_enable"><a name="EN-US_TASK_0172369388__fig_ip_route_recursive-lookup_inherit-label-route_enable"></a><a name="fig_ip_route_recursive-lookup_inherit-label-route_enable"></a><span class="figcap"><b>Figure 2 </b>Basic BGP/MPLS IP VPN networking</span><br><span><img class="vsd" src="figure/en-us_image_0231806285.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172369388__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Pre-configuration Tasks</h4><p>Before configuring route recursion to remotely leaked VPN routes, <a href="dc_vrp_mpls-l3vpn-v4_cfg_0154.html">configure basic BGP/MPLS IP VPN</a>.</p>
+</div></div>
+<div class="steps-unordered"><a name="EN-US_TASK_0172369388__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ul><li><span>Configure recursion of static routes to remotely leaked VPN routes.</span><ol><li class="substepexpand"><span>Run <span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span></span><p><p>The system view is displayed.</p>
+</p></li><li class="substepexpand"><span>Run <span><a href="cmdqueryname=ip+route+recursive-lookup+bgp-vpnv4-route"><b><span class="cmdname">ip route recursive-lookup bgp-vpnv4-route</span></b></a> { <strong><span>enable</span></strong> | <strong><span>disable</span></strong> }</span></span><p><p>To prevent traffic forwarding path inconsistency in some upgrade scenarios, recursion of static routes to remotely leaked VPN routes needs to be disabled using the <a href="cmdqueryname=ip+route+recursive-lookup+bgp-vpnv4-route"><b><span class="cmdname">ip route recursive-lookup bgp-vpnv4-route</span></b></a> <strong><span>disable</span></strong> command.</p>
+</p></li><li class="substepexpand"><span>Run <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span></span><p><p>The configuration is committed.</p>
+</p></li></ol>
+</li><li><span>Configure recursion of all routes to remotely leaked VPN routes.</span><ol><li class="substepexpand"><span>Run <a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span><p><p>The system view is displayed.</p>
+</p></li><li class="substepexpand"><span>Run <a href="cmdqueryname=ip+route+recursive-lookup+inherit-label-route+enable"><b><span class="cmdname">ip route recursive-lookup inherit-label-route enable</span></b></a></span><p><p>Route recursion to remotely leaked VPN routes is enabled.</p>
+</p></li></ol>
+<p><p>This command mainly applies to BGP/MPLS IP VPN scenarios.</p>
+</p></li></ul></div>
+<div class="postreq"><a name="EN-US_TASK_0172369388__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>After the configuration is complete, run the <a href="cmdqueryname=display+current-configuration"><b><span class="cmdname">display current-configuration</span></b></a> command in the system view to check whether route recursion to remotely leaked VPN routes is enabled.</p>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mpls-l3vpn-v4_cfg_0000.html">BGP/MPLS IP VPN Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mpls-l3vpn-v4_cfg_2052.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mpls-l3vpn-v4_cfg_0153.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,418 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring EVC-based VPLS Accessing L3VPN">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evc_cfg_0018.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evc_cfg_0028.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evc_cfg_0041.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="h00847023,y00852169">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="EVC">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="EVC">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="featurename" content="EVC">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="featurename" content="EVC">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="OWNER" content="p00915595">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="w00437000">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172363414">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring EVC-based VPLS Accessing L3VPN</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172363414"></a><a name="EN-US_TASK_0172363414"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring EVC-based VPLS Accessing L3VPN</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0172363414__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In <a href="#EN-US_TASK_0172363414__fig_dc_vrp_evc_cfg_004001">Figure 1</a>, <span>on the access network, the CSG provides a BD for user site access and connects to the ASG over a VPLS PW; on the bearer network, the ASG uses the VBDIF interface to terminate the VPLS PW and establishes an L3VPN with the RSG.</span></p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1, sub-interface 1.1, and interface 2 stand for GE <span>0/1/0</span>, GE <span>0/1/0</span>.1, and GE <span>0/2/0</span>, respectively.</p>
+</div></div>
+<div class="fignone" id="EN-US_TASK_0172363414__fig_dc_vrp_evc_cfg_004001"><a name="EN-US_TASK_0172363414__fig_dc_vrp_evc_cfg_004001"></a><a name="fig_dc_vrp_evc_cfg_004001"></a><span class="figcap"><b>Figure 1 </b>EVC-based L2VPN accessing L3VPN</span><br><span><img class="vsd" src="images/fig_dc_vrp_evc_cfg_004001.png" width="NaN" height="NaN"></span><br></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172363414__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><ol><li><p>Configure IP addresses and IGPs on the CSG, ASG, and RSG.</p>
+</li><li><p>Configure LDP LSPs on the CSG, ASG, and RSG.</p>
+</li><li><div class="p">Configure EVC VPLS on the CSG and ASG.<ol type="a"><li><p>Create an EVC Layer 2 sub-interface and a BD and add the sub-interface to the BD.</p>
+</li><li><p>Create a BD VSI, specify the signaling protocol as LDP, and bind the VSI to the corresponding BD.</p>
+</li></ol>
+</div>
+</li><li><div class="p">Configure an L3VPN on the ASG and RSG.<ol type="a"><li><p>Configure VPN instances using the IPv4 address family.</p>
+</li><li><p>Establish an MP-IBGP peer relationship.</p>
+</li><li><p>Create a VBDIF interface on the ASG and bind the VBDIF interface to the L3VPN.</p>
+</li></ol>
+</div>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172363414__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>BD IDs on the CSG and ASG</p>
+</li><li><p>VSI IDs on the CSG and ASG (must be the same)</p>
+</li><li><p>VSI names and interfaces bound to VSIs on the CSG and ASG</p>
+</li><li><p>MPLS LSR IDs on the CSG, ASG, and RSG</p>
+</li><li><p>VPN instance names and VPN targets on the ASG and RSG</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172363414__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each node interface, including the loopback interface.</span><p><p>For configuration details, see <a href="#EN-US_TASK_0172363414__dc_vrp_evc_cfg_0040_example">Configuration Files</a>.</p>
+</p></li><li><span>Configure an IGP on each node. In this example, OSPF is used.</span><p><p>For configuration details, see <a href="#EN-US_TASK_0172363414__dc_vrp_evc_cfg_0040_example">Configuration Files</a>.</p>
+</p></li><li><span>Configure an MPLS LDP tunnel on each node.</span><p><p>For configuration details, see <a href="#EN-US_TASK_0172363414__dc_vrp_evc_cfg_0040_example">Configuration Files</a>.</p>
+</p></li><li><span>Configure EVC VPLS on the CSG and ASG.</span><ol type="a"><li class="substepexpand"><span>Create an EVC Layer 2 sub-interface and a BD, and add the EVC Layer 2 sub-interface to the BD only on the CSG.</span><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The status of a BD is determined by the status of all EVC Layer 2 sub-interfaces in the BD and the VSI. A BD goes Down only when all its EVC Layer 2 sub-interfaces and the VSI are both Down.</p>
+</div></div>
+<p># Configure the CSG.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CSG] <strong>bridge-domain 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG-bd1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG] <strong>interface GigabitEthernet <span>0/1/0</span>.1 mode l2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG-GigabitEthernet<span>0/1/0</span>.1] <strong>encapsulation dot1q vid 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG-GigabitEthernet<span>0/1/0</span>.1] <strong>rewrite pop single</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG-GigabitEthernet<span>0/1/0</span>.1] <strong>bridge-domain 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG] <strong>commit</strong></pre>
+<p># Configure the ASG.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASG] <strong>bridge-domain 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-bd1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG] <strong>commit</strong></pre>
+</p></li><li class="substepexpand"><span>Enable MPLS L2VPN.</span><p><p># Configure the CSG.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CSG] <strong>mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG-l2vpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG] <strong>commit</strong></pre>
+<p># Configure the ASG.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASG] <strong>mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-l2vpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG] <strong>commit</strong></pre>
+</p></li><li class="substepexpand"><span>Create a BD VSI, specify the signaling protocol as LDP, and bind the VSI to the corresponding BD.</span><p><p># Configure the CSG.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CSG] <strong>vsi evc-vsi bd-mode</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG-vsi-evc-vsi] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG-vsi-evc-vsi-ldp] <strong>vsi-id 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG-vsi-evc-vsi-ldp] <strong>peer 2.2.2.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG-vsi-evc-vsi-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG-vsi-evc-vsi] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG] <strong>bridge-domain 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG-bd1] <strong>l2 binding vsi evc-vsi pw-tag 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG-bd1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CSG] <strong>commit</strong></pre>
+<p># Configure the ASG.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASG] <strong>vsi evc-vsi bd-mode</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-vsi-evc-vsi] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-vsi-evc-vsi-ldp] <strong>vsi-id 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-vsi-evc-vsi-ldp] <strong>peer 1.1.1.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-vsi-evc-vsi-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-vsi-evc-vsi] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG] <strong>bridge-domain 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-bd1] <strong>l2 binding vsi evc-vsi pw-tag 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-bd1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG] <strong>commit</strong></pre>
+</p></li></ol>
+</li><li><span>Configure an L3VPN on the ASG and RSG.</span><ol type="a"><li class="substepexpand"><span>Configure VPN instances using the IPv4 address family.</span><p><p># Configure the ASG.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASG] <strong>ip vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-vpn-instance-vpna] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-vpn-instance-vpna-af-ipv4] <strong>route-distinguisher 100:100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-vpn-instance-vpna-af-ipv4] <strong>vpn-target 100:100 export-extcommunity</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-vpn-instance-vpna-af-ipv4] <strong>vpn-target 100:100 import-extcommunity</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-vpn-instance-vpna-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-vpn-instance-vpna] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG] <strong>commit</strong></pre>
+<p># Configure the RSG.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>RSG] <strong>ip vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-vpn-instance-vpna] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-vpn-instance-vpna-af-ipv4] <strong>route-distinguisher 100:100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-vpn-instance-vpna-af-ipv4] <strong>vpn-target 100:100 export-extcommunity</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-vpn-instance-vpna-af-ipv4] <strong>vpn-target 100:100 import-extcommunity</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-vpn-instance-vpna-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-vpn-instance-vpna] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG] <strong>commit</strong></pre>
+</p></li><li class="substepexpand"><span>Establish an MP-IBGP peer relationship.</span><p><p># Configure the ASG.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASG] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-bgp] <strong>peer 3.3.3.9 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-bgp] <strong>peer 3.3.3.9 connect-interface LoopBack 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-bgp] <strong>ipv4-family vpnv4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-bgp-af-vpnv4] <strong>peer 3.3.3.9 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-bgp-af-vpnv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG] <strong>commit</strong></pre>
+<p># Configure the RSG.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>RSG] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-bgp] <strong>peer 2.2.2.9 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-bgp] <strong>peer 2.2.2.9 connect-interface LoopBack 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-bgp] <strong>ipv4-family vpnv4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-bgp-af-vpnv4] <strong>peer 2.2.2.9 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-bgp-af-vpnv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG] <strong>commit</strong></pre>
+</p></li><li class="substepexpand"><span>Create a VBDIF interface on the ASG and bind the VBDIF interface to the L3VPN. On the RSG, bind GE <span>0/2/0</span> to the L3VPN.</span><p><p># Configure the ASG.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASG] <strong>interface Vbdif 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-Vbdif1] <strong>ip binding vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-Vbdif1] <strong>ip address 10.1.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-Vbdif1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG] <strong>commit</strong></pre>
+<p># Configure the RSG.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>RSG] <strong>interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-GigabitEthernet<span>0/2/0</span>] <strong>ip binding vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-GigabitEthernet<span>0/2/0</span>] <strong>ip address 10.4.4.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG] <strong>commit</strong></pre>
+</p></li><li class="substepexpand"><span>Import indirect VPN routes.</span><p><p># Configure the ASG.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASG] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-bgp] <strong>ipv4-family vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-bgp-vpna] <strong>import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-bgp-vpna] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASG] <strong>commit</strong></pre>
+<p># Configure the RSG.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>RSG] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-bgp] <strong>ipv4-family vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-bgp-vpna] <strong>import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-bgp-vpna] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RSG] <strong>commit</strong></pre>
+</p></li></ol>
+</li><li><span>Verify the configuration. </span><p><p>After completing the configuration, run the <a href="cmdqueryname=display+bridge-domain"><b><span class="cmdname">display bridge-domain</span></b></a> command. The command output shows the BD to which an EVC Layer 2 sub-interface belongs and the BD status. The following example uses the command output on the CSG.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CSG] <strong>display bridge-domain 1</strong></pre>
+<pre class="screen">--------------------------------------------------------------------------------
+MAC_LRN: MAC learning;         STAT: Statistics;         SPLIT: Split-horizon;
+BC: Broadcast;                 MC: Unknown multicast;    UC: Unknown unicast;
+*down: Administratively down;  FWD: Forward;             DSD: Discard;
+U: Up;         D: Down;
+--------------------------------------------------------------------------------
+
+BDID         Ports                                                          
+--------------------------------------------------------------------------------
+1            GE<span>0/1/0</span>.1(U)                                                      
+
+BDID  State MAC-LRN STAT    BC  MC  UC  SPLIT   Description
+--------------------------------------------------------------------------------
+1     up    enable  disable FWD FWD FWD disable    </pre>
+<p>Run the <strong>display vsi name evc-vsi</strong> command. The command output shows that the VSI named <strong>evc-vsi</strong> is <strong>up</strong>. The following example uses the command output on the CSG.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CSG] <strong>display vsi name evc-vsi</strong></pre>
+<pre class="screen">--------------------------------------------------------------------------
+Vsi                             Mem    PW    Mac       Encap     Mtu   Vsi
+Name                            Disc   Type  Learn     Type      Value State
+--------------------------------------------------------------------------
+evc-vsi                         --     ldp   qualify   vlan      1500  <strong>up</strong>  </pre>
+<p>Run the <a href="cmdqueryname=display+ip+routing-table+vpn-instance"><b><span class="cmdname">display ip routing-table vpn-instance</span></b></a> command. The command output shows IPv4 VPN instance routing table information. The following example uses the command output on the ASG.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASG] <strong>display ip routing-table vpn-instance vpna</strong></pre>
+<pre class="screen">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route
+------------------------------------------------------------------------------
+Routing Table : vpna
+         Destinations : 5        Routes : 5         
+
+Destination/Mask    Proto   Pre  Cost        Flags NextHop         Interface
+
+       10.1.1.0/24  Direct  0    0             D   10.1.1.2        Vbdif1
+       10.1.1.2/32  Direct  0    0             D   127.0.0.1       Vbdif1
+     10.1.1.255/32  Direct  0    0             D   127.0.0.1       Vbdif1
+       10.4.4.0/24  IBGP    255  0             RD  3.3.3.9         GigabitEthernet<span>0/2/0</span>
+255.255.255.255/32  Direct  0    0             D   127.0.0.1       InLoopBack0
+</pre>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0172363414__dc_vrp_evc_cfg_0040_example"><a name="EN-US_TASK_0172363414__dc_vrp_evc_cfg_0040_example"></a><a name="dc_vrp_evc_cfg_0040_example"></a><a name="EN-US_TASK_0172363414__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>CSG configuration file</p>
+<pre class="screen">#
+sysname CSG
+#
+mpls lsr-id 1.1.1.9
+#
+mpls
+#
+mpls l2vpn
+#
+vsi evc-vsi bd-mode
+ pwsignal ldp
+  vsi-id 10
+  peer 2.2.2.9  
+#               
+bridge-domain 1 
+ l2 binding vsi evc-vsi pw-tag 1
+#               
+mpls ldp        
+#               
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown  
+#               
+interface GigabitEthernet<span>0/1/0</span>.1 mode l2
+ encapsulation dot1q vid 1
+ rewrite pop single
+ bridge-domain 1
+#               
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown  
+ ip address 10.2.2.1 255.255.255.0
+ mpls           
+ mpls ldp       
+#               
+interface LoopBack1
+ ip address 1.1.1.9 255.255.255.255
+#               
+ospf 1          
+ area 0.0.0.0   
+  network 1.1.1.9 0.0.0.0
+  network 10.2.2.0 0.0.0.255
+#               
+return</pre>
+</li><li><p>ASG configuration file</p>
+<pre class="screen">#
+sysname ASG
+#
+ip vpn-instance vpna
+ ipv4-family
+  route-distinguisher 100:100
+  apply-label per-instance
+  vpn-target 100:100 export-extcommunity
+  vpn-target 100:100 import-extcommunity
+#
+mpls lsr-id 2.2.2.9
+#
+mpls
+#               
+mpls l2vpn      
+#               
+vsi evc-vsi bd-mode
+ pwsignal ldp   
+  vsi-id 10     
+  peer 1.1.1.9  
+#               
+bridge-domain 1 
+ l2 binding vsi evc-vsi pw-tag 1
+#               
+mpls ldp        
+#               
+interface Vbdif 1
+ ip binding vpn-instance vpna
+ ip address 10.1.1.2 255.255.255.0
+#               
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown  
+ ip address 10.2.2.2 255.255.255.0
+ mpls           
+ mpls ldp       
+#               
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown  
+ ip address 10.3.3.1 255.255.255.0
+ mpls           
+ mpls ldp       
+#               
+interface LoopBack1
+ ip address 2.2.2.9 255.255.255.255
+#               
+bgp 100         
+ peer 3.3.3.9 as-number 100
+ peer 3.3.3.9 connect-interface LoopBack1
+ #              
+ ipv4-family unicast
+  undo synchronization
+  peer 3.3.3.9 enable
+ #              
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 3.3.3.9 enable
+ #              
+ ipv4-family vpn-instance vpna
+  import-route direct
+#               
+ospf 1          
+ area 0.0.0.0   
+  network 2.2.2.9 0.0.0.0
+  network 10.2.2.0 0.0.0.255
+  network 10.3.3.0 0.0.0.255
+#               
+return</pre>
+</li><li><p>RSG configuration file</p>
+<pre class="screen">#
+sysname RSG
+#
+ip vpn-instance vpna
+ ipv4-family
+  route-distinguisher 100:100
+  apply-label per-instance
+  vpn-target 100:100 export-extcommunity
+  vpn-target 100:100 import-extcommunity
+#
+mpls lsr-id 3.3.3.9
+#
+mpls
+#               
+mpls ldp        
+#               
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown  
+ ip address 10.3.3.2 255.255.255.0
+ mpls           
+ mpls ldp       
+#               
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown  
+ ip binding vpn-instance vpna
+ ip address 10.4.4.1 255.255.255.0
+#               
+interface LoopBack1
+ ip address 3.3.3.9 255.255.255.0
+#               
+bgp 100         
+ peer 2.2.2.9 as-number 100
+ peer 2.2.2.9 connect-interface LoopBack1
+ #              
+ ipv4-family unicast
+  undo synchronization
+  peer 2.2.2.9 enable
+ #              
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 2.2.2.9 enable
+ #              
+ ipv4-family vpn-instance vpna
+  import-route direct
+#               
+ospf 1          
+ area 0.0.0.0   
+  network 3.3.3.9 0.0.0.0
+  network 10.3.3.0 0.0.0.255
+#               
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evc_cfg_0018.html">Configuration Examples for EVC
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evc_cfg_0028.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evc_cfg_0041.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,540 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring BGP GTSM">
+<meta name="abstract" content="This section provides an example for configuring BGP GTSM in order to protect Routers on a BGP network against CPU utilization attacks.">
+<meta name="description" content="This section provides an example for configuring BGP GTSM in order to protect Routers on a BGP network against CPU utilization attacks.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_gtsm_cfg_0009.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_gtsm_cfg_0010.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_gtsm_cfg_0012.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z00603461,w00800033,w00556928,w00606909,gtsm,l00455378,z00805567">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="GTSM">
+<meta name="featuretype" content="Security">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="GTSM">
+<meta name="featuretype" content="Security">
+<meta name="featurename" content="GTSM">
+<meta name="featuretype" content="Security">
+<meta name="featurename" content="GTSM">
+<meta name="featuretype" content="Security">
+<meta name="OWNER" content="y00852169">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="y00852169">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172372055">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring BGP GTSM</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172372055"></a><a name="EN-US_TASK_0172372055"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring BGP GTSM</h1>
+<div class="taskbody"><p>This section provides an example for configuring BGP GTSM in order to protect <span class="keyword">Router</span>s on a BGP network against CPU utilization attacks.</p>
+<div class="context"><a name="EN-US_TASK_0172372055__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>Attacks that use bogus messages can consume and overload limited device resources (such as CPU resources). Attackers may simulate BGP messages and continuously send them to a <span class="keyword">Router</span>. After receiving these messages, the forwarding plane of the <span class="keyword">Router</span> sends them directly to the control plane for BGP processing, without validating them, if they are destined for the <span class="keyword">Router</span>. Consequently, the <span class="keyword">Router</span> becomes extremely busy, and CPU usage is high because the control plane needs to process these unverified messages.</p>
+<p>GTSM protects devices against CPU utilization attacks by checking whether the TTL value in the IP header is within a predefined range.</p>
+<p>On the network shown in <a href="#EN-US_TASK_0172372055__fig_dc_vrp_gtsm_cfg_001101">Figure 1</a>, <span class="keyword">Device</span>A belongs to AS10, whereas <span class="keyword">Device</span>B, <span class="keyword">Device</span>C, and <span class="keyword">Device</span>D belong to AS20. BGP runs on the network, and BGP GTSM needs to be configured to protect <span class="keyword">Device</span>B against CPU utilization attacks.</p>
+<div class="fignone" id="EN-US_TASK_0172372055__fig_dc_vrp_gtsm_cfg_001101"><a name="EN-US_TASK_0172372055__fig_dc_vrp_gtsm_cfg_001101"></a><a name="fig_dc_vrp_gtsm_cfg_001101"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring BGP GTSM</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 and interface2 represent GE<span>0/1/0</span> and GE<span>0/2/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000002020397281.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172372055__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>During the configuration, note the following:</p>
+<ul><li><p>GTSM must be enabled on both ends of a BGP connection.</p>
+</li><li><p>The same <em>valid-ttl-hops</em> value must be configured on both ends of the BGP connection.</p>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172372055__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure OSPF on <span class="keyword">Router</span>s <span class="keyword">Device</span>B, <span class="keyword">Device</span>C, and <span class="keyword">Device</span>D in AS20 to implement interworking.</p>
+</li><li><p>Establish an EBGP connection between <span class="keyword">Device</span>A and <span class="keyword">Device</span>B and IBGP full-mesh connections among <span class="keyword">Device</span>B, <span class="keyword">Device</span>C, and <span class="keyword">Device</span>D through loopback interfaces.</p>
+</li><li><p>Configure GTSM on <span class="keyword">Device</span>A, <span class="keyword">Device</span>B, <span class="keyword">Device</span>C, and <span class="keyword">Device</span>D.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172372055__1.4.4"></a><a name="1.4.4"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Router IDs and AS numbers of <span class="keyword">Device</span>A, <span class="keyword">Device</span>B, <span class="keyword">Device</span>C, and <span class="keyword">Device</span>D</p>
+</li><li><p>Numbers of valid TTL hops between <span class="keyword">Device</span>A and <span class="keyword">Device</span>B, between <span class="keyword">Device</span>B and <span class="keyword">Device</span>C, between <span class="keyword">Device</span>C and <span class="keyword">Device</span>D, and between <span class="keyword">Device</span>B and <span class="keyword">Device</span>D</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172372055__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure IP addresses for interfaces. For detailed configurations, see Configuration Files.</span></li><li><span>Configure OSPF. For detailed configurations, see Configuration Files.</span></li><li><span>Configure IBGP full-mesh connections.</span><p><p># Configure <span class="keyword">Device</span>B.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B]<strong> bgp 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>router-id 10.2.2.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp]<strong> peer 10.3.3.9 as-number 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp]<strong> peer 10.3.3.9 connect-interface LoopBack0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>peer 10.3.3.9 next-hop-local</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp]<strong> peer 10.4.4.9 as-number 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp]<strong> peer 10.4.4.9 connect-interface LoopBack0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp]<strong> peer 10.4.4.9 next-hop-local</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp]<strong> commit</strong></pre>
+<p># Configure <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C]<strong> bgp 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp] <strong>router-id 10.3.3.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp] <strong>peer 10.2.2.9 as-number 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp] <strong>peer 10.2.2.9 connect-interface LoopBack0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp]<strong> peer 10.4.4.9 as-number 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp]<strong> peer 10.4.4.9 connect-interface LoopBack0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp]<strong> commit</strong></pre>
+<p># Configure <span class="keyword">Device</span>D.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D]<strong> bgp 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-bgp] <strong>router-id 10.4.4.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-bgp]<strong> peer 10.2.2.9 as-number 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-bgp]<strong> peer 10.2.2.9 connect-interface LoopBack0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-bgp]<strong> peer 10.3.3.9 as-number 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-bgp]<strong> peer 10.3.3.9 connect-interface LoopBack0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-bgp]<strong> commit</strong></pre>
+</p></li><li><span>Configure EBGP connections.</span><p><p># Configure <span class="keyword">Device</span>A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> bgp 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>router-id 10.1.1.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp]<strong> peer 10.1.1.2 as-number 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp]<strong> commit</strong></pre>
+<p># Configure <span class="keyword">Device</span>B.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp]<strong> peer 10.1.1.1 as-number 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp]<strong> commit</strong></pre>
+<p># Check the connection status of peers.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>B&gt; <strong>display bgp peer</strong></pre>
+<pre class="screen"> BGP local router ID : 10.2.2.9
+ Local AS number : 20
+ Total number of peers : 3                 Peers in established state : 3
+
+  Peer            V    AS  MsgRcvd  MsgSent  OutQ  Up/Down       State PrefRcv
+
+  10.3.3.9        4    20        8        7     0 00:05:06 <strong>Established</strong>       0
+  10.4.4.9        4    20        8       10     0 00:05:33 <strong>Established</strong>       0
+  10.1.1.1        4    10        7        7     0 00:04:09 <strong>Established </strong>      0</pre>
+<p>The command output shows that BGP connections have been established between <span class="keyword">Device</span>B and other <span class="keyword">Router</span>s.</p>
+</p></li><li><span>Configure GTSM on <span class="keyword">Device</span>A and <span class="keyword">Device</span>B. Because the two <span class="keyword">Router</span>s are directly connected, the valid TTL range for the messages between them is [255, 255]. In this case, the value of <strong>valid-ttl-hops</strong> is 1.</span><p><p># Configure GTSM on <span class="keyword">Device</span>A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> bgp 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>peer 10.1.1.2 valid-ttl-hops 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>commit</strong></pre>
+<p># Configure GTSM for the EBGP connection on <span class="keyword">Device</span>B.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B]<strong> bgp 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>peer 10.1.1.1 valid-ttl-hops 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>commit</strong></pre>
+<p># Check the GTSM configuration.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>B&gt; <strong>display bgp peer 10.1.1.1 verbose</strong></pre>
+<pre class="screen">BGP Peer is 10.1.1.1,  remote AS 10
+         Type: EBGP link
+         BGP version 4, Remote router ID 10.1.1.9
+
+  Group ID : 2
+         BGP current state: <strong>Established</strong>, Up for 00h49m35s
+         BGP current event: RecvKeepalive
+         BGP last state: OpenConfirm
+         BGP Peer Up count: 1
+         Received total routes: 0
+         Received active routes total: 0
+         Advertised total routes: 0
+         Port:  Local - 179      Remote - 52876
+         Configured: Active Hold Time: 180 sec   Keepalive Time:60 sec
+         Received  : Active Hold Time: 180 sec
+         Negotiated: Active Hold Time: 180 sec   Keepalive Time:60 sec
+         Peer optional capabilities:
+         Peer supports bgp multi-protocol extension
+         Peer supports bgp route refresh capability
+         Peer supports bgp 4-byte-as capability
+         Address family IPv4 Unicast: advertised and received
+ Received: Total 59 messages
+                  Update messages                0
+                  Open messages                  2
+                  KeepAlive messages             57
+                  Notification messages          0
+                  Refresh messages               0
+ Sent: Total 79 messages
+                  Update messages                5
+                  Open messages                  2
+                  KeepAlive messages             71
+                  Notification messages          1
+                  Refresh messages               0
+ Last keepalive received: 2009-02-20 13:54:58
+ Minimum route advertisement interval is 30 seconds
+ Optional capabilities:
+ Route refresh capability has been enabled
+ 4-byte-as capability has been enabled
+ <strong>GTSM has been enabled</strong>, <strong>valid-ttl-hops: 1</strong>
+ Peer Preferred Value: 0
+ Routing policy configured:
+ No routing policy is configured</pre>
+<p>The command output shows that GTSM has been enabled, the number of valid hops is 1, and the BGP connection state is <strong>Established</strong>.</p>
+</p></li><li><span>Configure GTSM on <span class="keyword">Device</span>B and <span class="keyword">Device</span>C. Because the two <span class="keyword">Router</span>s are directly connected, the valid TTL range for the messages between them is [255, 255]. In this case, the value of <strong>valid-ttl-hops</strong> is 1.</span><p><p># Configure GTSM on <span class="keyword">Device</span>B.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>bgp 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>peer 10.3.3.9 valid-ttl-hops 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>commit</strong></pre>
+<p># Configure GTSM for the IBGP connection on <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp] <strong>peer 10.2.2.9 valid-ttl-hops 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp] <strong>commit</strong></pre>
+<p># Check the GTSM configuration.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>B&gt; <strong>display bgp peer 10.3.3.9 verbose</strong></pre>
+<pre class="screen">BGP Peer is 10.3.3.9,  remote AS 20
+         Type: IBGP link
+         BGP version 4, Remote router ID 10.3.3.9
+
+  Group ID : 0
+         BGP current state: <strong>Established</strong>, Up for 00h54m36s
+         BGP current event: KATimerExpired
+         BGP last state: OpenConfirm
+         BGP Peer Up count: 1
+         Received total routes: 0
+         Received active routes total: 0
+         Advertised total routes: 0
+         Port:  Local - 54998    Remote - 179
+         Configured: Active Hold Time: 180 sec   Keepalive Time:60 sec
+         Received  : Active Hold Time: 180 sec
+         Negotiated: Active Hold Time: 180 sec   Keepalive Time:60 sec
+         Peer optional capabilities:
+         Peer supports bgp multi-protocol extension
+         Peer supports bgp route refresh capability
+         Peer supports bgp 4-byte-as capability
+         Address family IPv4 Unicast: advertised and received
+ Received: Total 63 messages
+                  Update messages                0
+                  Open messages                  1
+                  KeepAlive messages             62
+                  Notification messages          0
+                  Refresh messages               0
+ Sent: Total 69 messages
+                  Update messages                10
+                  Open messages                  1
+                  KeepAlive messages             58
+                  Notification messages          0
+                  Refresh messages               0
+ Last keepalive received: 2009-02-20 13:57:43
+ Minimum route advertisement interval is 15 seconds
+ Optional capabilities:
+ Route refresh capability has been enabled
+ 4-byte-as capability has been enabled
+ Nexthop self has been configured
+ Connect-interface has been configured
+ <strong>GTSM has been enabled</strong>, <strong>valid-ttl-hops: 1</strong>
+ Peer Preferred Value: 0
+ Routing policy configured:
+ No routing policy is configured</pre>
+<p>The command output shows that GTSM has been enabled, the number of valid hops is 1, and the BGP connection state is <strong>Established</strong>.</p>
+</p></li><li><span>Configure GTSM on <span class="keyword">Device</span>C and <span class="keyword">Device</span>D. Because the two <span class="keyword">Router</span>s are directly connected, the valid TTL range for the messages between them is [255, 255]. In this case, the value of <strong>valid-ttl-hops</strong> is 1.</span><p><p># Configure GTSM for the IBGP connection on <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C]<strong> bgp 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp] <strong>peer 10.4.4.9 valid-ttl-hops 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp] <strong>commit</strong></pre>
+<p># Configure GTSM for the IBGP connection on <span class="keyword">Device</span>D.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D]<strong> bgp 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-bgp] <strong>peer 10.3.3.9 valid-ttl-hops 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-bgp] <strong>commit</strong></pre>
+<p># Check the GTSM configuration.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>C&gt; <strong>display bgp peer 10.4.4.9 verbose</strong></pre>
+<pre class="screen">BGP Peer is 10.4.4.9,  remote AS 20
+         Type: IBGP link
+         BGP version 4, Remote router ID 10.4.4.9
+
+  Group ID : 1
+         BGP current state: <strong>Established</strong>, Up for 00h56m06s
+         BGP current event: KATimerExpired
+         BGP last state: OpenConfirm
+         BGP Peer Up count: 1
+         Received total routes: 0
+         Received active routes total: 0
+         Advertised total routes: 0
+         Port:  Local - 179      Remote - 53758
+         Configured: Active Hold Time: 180 sec   Keepalive Time:60 sec
+         Received  : Active Hold Time: 180 sec
+         Negotiated: Active Hold Time: 180 sec   Keepalive Time:60 sec
+         Peer optional capabilities:
+         Peer supports bgp multi-protocol extension
+         Peer supports bgp route refresh capability
+         Peer supports bgp 4-byte-as capability
+         Address family IPv4 Unicast: advertised and received
+ Received: Total 63 messages
+                  Update messages                0
+                  Open messages                  1
+                  KeepAlive messages             62
+                  Notification messages          0
+                  Refresh messages               0
+ Sent: Total 63 messages
+                  Update messages                0
+                  Open messages                  2
+                  KeepAlive messages             61
+                  Notification messages          0
+                  Refresh messages               0
+ Last keepalive received: 2009-02-20 14:00:06
+ Minimum route advertisement interval is 15 seconds
+ Optional capabilities:
+ Route refresh capability has been enabled
+ 4-byte-as capability has been enabled
+ Connect-interface has been configured
+ <strong>GTSM has been enabled</strong>, <strong>valid-ttl-hops: 1</strong>
+ Peer Preferred Value: 0
+ Routing policy configured:
+ No routing policy is configured</pre>
+<p>The command output shows that GTSM has been enabled, the number of valid hops is 1, and the BGP connection state is <strong>Established</strong>.</p>
+</p></li><li><span>Configure GTSM on <span class="keyword">Device</span>B and <span class="keyword">Device</span>D. Because the two <span class="keyword">Router</span>s are connected through <span class="keyword">Device</span>C, the valid TTL range for the messages between the two <span class="keyword">Router</span>s is [254, 255]. In this case, the value of <strong>valid-ttl-hops</strong> is 2.</span><p><p># Configure GTSM for the IBGP connection on <span class="keyword">Device</span>B.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-bgp] <strong>peer 10.4.4.9 valid-ttl-hops 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>commit</strong></pre>
+<p># Configure GTSM on <span class="keyword">Device</span>D.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D-bgp] <strong>peer 10.2.2.9 valid-ttl-hops 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-bgp] <strong>commit</strong></pre>
+<p># Check the GTSM configuration.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>B&gt; <strong>display bgp peer 10.4.4.9 verbose</strong></pre>
+<pre class="screen">BGP Peer is 10.4.4.9,  remote AS 20
+         Type: IBGP link
+         BGP version 4, Remote router ID 10.4.4.9
+
+  Group ID : 0
+         BGP current state: <strong>Established</strong>, Up for 00h57m48s
+         BGP current event: RecvKeepalive
+         BGP last state: OpenConfirm
+         BGP Peer Up count: 1
+         Received total routes: 0
+         Received active routes total: 0
+         Advertised total routes: 0
+         Port:  Local - 53714    Remote - 179
+         Configured: Active Hold Time: 180 sec   Keepalive Time:60 sec
+         Received  : Active Hold Time: 180 sec
+         Negotiated: Active Hold Time: 180 sec   Keepalive Time:60 sec
+         Peer optional capabilities:
+         Peer supports bgp multi-protocol extension
+         Peer supports bgp route refresh capability
+         Peer supports bgp 4-byte-as capability
+         Address family IPv4 Unicast: advertised and received
+ Received: Total 72 messages
+                  Update messages                0
+                  Open messages                  1
+                  KeepAlive messages             71
+                  Notification messages          0
+                  Refresh messages               0
+ Sent: Total 82 messages
+                  Update messages                10
+                  Open messages                  1
+                  KeepAlive messages             71
+                  Notification messages          0
+                  Refresh messages               0
+ Last keepalive received: 2009-02-20 14:01:27
+ Minimum route advertisement interval is 15 seconds
+ Optional capabilities:
+ Route refresh capability has been enabled
+ 4-byte-as capability has been enabled
+ Nexthop self has been configured
+ Connect-interface has been configured
+ <strong>GTSM has been enabled</strong>, <strong>valid-ttl-hops: 2</strong>
+ Peer Preferred Value: 0
+ Routing policy configured:
+ No routing policy is configured</pre>
+<p>The command output shows that GTSM has been enabled, the number of valid hops is 2, and the BGP connection state is <strong>Established</strong>.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li><p>In this example, if the value of <strong>valid-ttl-hops</strong> of either <span class="keyword">Device</span>B or <span class="keyword">Device</span>D is less than 2, the IBGP connection cannot be established.</p>
+</li><li><p>GTSM must be enabled on both ends of a BGP connection.</p>
+</li></ul>
+</div></div>
+</p></li><li><span>Verify the configuration.</span><p><p># Run the <strong>display gtsm statistics all</strong> command on <span class="keyword">Device</span>B to check GTSM statistics. If the default action is set to pass for the messages that do not match the specified GTSM policy and no invalid messages exist, the number of dropped messages is 0.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>B&gt; <strong>display gtsm statistics all</strong></pre>
+<pre class="screen">GTSM Statistics Table
+----------------------------------------------------------------
+SlotId  Protocol  Total Counters  Drop Counters  Pass Counters
+----------------------------------------------------------------
+ 0      BGP       17              0              17
+ 0      BGPv6     0               0              0
+ 0      OSPF      0               0              0
+ 0      LDP       0               0              0
+<span> 0      OSPFv3    0               0              0 </span>
+<span> 0      RIP       0               0              0 </span>
+ 1      BGP       0               0              0
+ 1      BGPv6     0               0              0
+ 1      OSPF      0               0              0
+ 1      LDP       0               0              0
+<span> 1      OSPFv3    0               0              0 </span>
+<span> 1      RIP       0               0              0 </span>
+ 2      BGP       0               0              0
+ 2      BGPv6     0               0              0
+ 2      OSPF      0               0              0
+ 2      LDP       0               0              0
+<span> 2      OSPFv3    0               0              0 </span>
+<span> 2      RIP       0               0              0 </span>
+ 3      BGP       0               0              0
+ 3      BGPv6     0               0              0
+ 3      OSPF      0               0              0
+ 3      LDP       0               0              0
+<span> 3      OSPFv3    0               0              0 </span>
+<span> 3      RIP       0               0              0 </span>
+ 4      BGP       32              0              32
+ 4      BGPv6     0               0              0
+ 4      OSPF      0               0              0
+ 4      LDP       0               0              0
+<span> 4      OSPFv3    0               0              0 </span>
+<span> 4      RIP       0               0              0 </span>
+ 5      BGP       0               0              0
+ 5      BGPv6     0               0              0
+ 5      OSPF      0               0              0
+ 5      LDP       0               0              0
+<span> 5      OSPFv3    0               0              0 </span>
+<span> 5      RIP       0               0              0 </span>
+ 7      BGP       0               0              0
+ 7      BGPv6     0               0              0
+ 7      OSPF      0               0              0
+ 7      LDP       0               0              0
+<span> 7      OSPFv3    0               0              0 </span>
+<span> 7      RIP       0               0              0 </span>
+----------------------------------------------------------------</pre>
+<p>In this case, if the PC simulates the BGP messages of <span class="keyword">Device</span>A to attack <span class="keyword">Device</span>B, the messages are dropped when they reach <span class="keyword">Device</span>B. This is because the TTL value is not 255. As a result, the number of dropped messages increases in the GTSM statistics about <span class="keyword">Device</span>B.</p>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172372055__1.4.6"></a><a name="1.4.6"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p><span class="keyword">Device</span>A configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname <span class="keyword">Device</span>A</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> ip address 10.1.1.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 10</pre>
+<pre class="screen"> router-id 10.1.1.9</pre>
+<pre class="screen"> peer 10.1.1.2 as-number 20</pre>
+<pre class="screen"> peer 10.1.1.2 valid-ttl-hops 1</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  undo synchronization</pre>
+<pre class="screen">  peer 10.1.1.2 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p><span class="keyword">Device</span>B configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname <span class="keyword">Device</span>B</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> ip address 10.1.1.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> ip address 10.2.1.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack0</pre>
+<pre class="screen"> ip address 10.2.2.9 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 20</pre>
+<pre class="screen"> router-id 10.2.2.9</pre>
+<pre class="screen"> peer 10.3.3.9 as-number 20</pre>
+<pre class="screen"> peer 10.3.3.9 valid-ttl-hops 1</pre>
+<pre class="screen"> peer 10.3.3.9 connect-interface LoopBack0</pre>
+<pre class="screen"> peer 10.4.4.9 as-number 20</pre>
+<pre class="screen"> peer 10.4.4.9 valid-ttl-hops 2</pre>
+<pre class="screen"> peer 10.4.4.9 connect-interface LoopBack0</pre>
+<pre class="screen"> peer 10.1.1.1 as-number 10</pre>
+<pre class="screen"> peer 10.1.1.1 valid-ttl-hops 1</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  undo synchronization</pre>
+<pre class="screen"> import-route ospf 1</pre>
+<pre class="screen">  peer 10.3.3.9 enable</pre>
+<pre class="screen">  peer 10.3.3.9 next-hop-local</pre>
+<pre class="screen">  peer 10.4.4.9 enable</pre>
+<pre class="screen">  peer 10.4.4.9 next-hop-local</pre>
+<pre class="screen">  peer 10.1.1.1 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 10.2.1.0 0.0.0.255</pre>
+<pre class="screen">  network 10.2.2.9 0.0.0.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p><span class="keyword">Device</span>C configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname <span class="keyword">Device</span>C</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> ip address 10.2.1.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> ip address 10.2.2.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack0</pre>
+<pre class="screen"> ip address 10.3.3.9 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 20</pre>
+<pre class="screen"> router-id 10.3.3.9</pre>
+<pre class="screen"> peer 10.2.2.9 as-number 20</pre>
+<pre class="screen"> peer 10.2.2.9 valid-ttl-hops 1</pre>
+<pre class="screen"> peer 10.2.2.9 connect-interface LoopBack0</pre>
+<pre class="screen"> peer 10.4.4.9 as-number 20</pre>
+<pre class="screen"> peer 10.4.4.9 valid-ttl-hops 1</pre>
+<pre class="screen"> peer 10.4.4.9 connect-interface LoopBack0</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  undo synchronization</pre>
+<pre class="screen">  peer 10.2.2.9 enable</pre>
+<pre class="screen">  peer 10.4.4.9 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 10.2.1.0 0.0.0.255</pre>
+<pre class="screen">  network 10.2.2.0 0.0.0.255</pre>
+<pre class="screen">  network 10.3.3.9 0.0.0.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p><span class="keyword">Device</span>D configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname <span class="keyword">Device</span>D</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> ip address 10.2.2.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack0</pre>
+<pre class="screen"> ip address 10.4.4.9 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 20</pre>
+<pre class="screen"> router-id 10.4.4.9</pre>
+<pre class="screen"> peer 10.2.2.9 as-number 20</pre>
+<pre class="screen"> peer 10.2.2.9 valid-ttl-hops 2</pre>
+<pre class="screen"> peer 10.2.2.9 connect-interface LoopBack0</pre>
+<pre class="screen"> peer 10.3.3.9 as-number 20</pre>
+<pre class="screen"> peer 10.3.3.9 valid-ttl-hops 1</pre>
+<pre class="screen"> peer 10.3.3.9 connect-interface LoopBack0</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  undo synchronization</pre>
+<pre class="screen">  peer 10.2.2.9 enable</pre>
+<pre class="screen">  peer 10.3.3.9 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 10.2.2.0 0.0.0.255</pre>
+<pre class="screen">  network 10.4.4.9 0.0.0.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_gtsm_cfg_0009.html">Configuration Examples for GTSMs
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_gtsm_cfg_0010.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_gtsm_cfg_0012.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

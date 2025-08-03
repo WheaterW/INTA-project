@@ -1,0 +1,247 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Static NAT Source Tracing">
+<meta name="abstract" content="This section provides an example for configuring static NAT source tracing to implement many-to-one translation between private and public addresses and allow PCs only on a specified network segment to access the Internet.">
+<meta name="description" content="This section provides an example for configuring static NAT source tracing to implement many-to-one translation between private and public addresses and allow PCs only on a specified network segment to access the Internet.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_nat_cfg_0056.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_nat_cfg_0094_m2k.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/../../toctopics/en-us_task_0000001590438665.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="c00549182">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="NAT">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="NAT">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="featurename" content="NAT">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="featurename" content="NAT">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="OWNER" content="c00549182">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="c00549182">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172374609">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Static NAT Source Tracing</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172374609"></a><a name="EN-US_TASK_0172374609"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Static NAT Source Tracing</h1>
+<div class="taskbody"><p>This section provides an example for configuring static NAT source tracing to implement many-to-one translation between private and public addresses and allow PCs only on a specified network segment to access the Internet.</p>
+<div class="context"><a name="EN-US_TASK_0172374609__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0172374609__fig_dc_ne_cfg_nat_009701">Figure 1</a>, the CPE performs NAT on the packets sent by PCs on the intranet and sends the packets to the BRAS. The BRAS connects to the RADIUS server and to the IPv4 network through the CR. The NAT device connects to the CR in off-path mode. The NAT device is connected to the CR through GE <span>0/2/0</span>. The enterprise has 100 public IP addresses ranging from 11.11.11.1/24 to 11.11.11.100/24.</p>
+<p>It is required that only PCs on the network segment ranging from 10.0.0.1/24 to 10.0.0.255/24 access the Internet.</p>
+<div class="fignone" id="EN-US_TASK_0172374609__fig_dc_ne_cfg_nat_009701"><a name="EN-US_TASK_0172374609__fig_dc_ne_cfg_nat_009701"></a><a name="fig_dc_ne_cfg_nat_009701"></a><span class="figcap"><b>Figure 1 </b>Static NAT source tracing</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interface 1 in this example represents GE <span>0/2/0</span>.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_ne_nat_cfg_0015.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172374609__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Configure NAT resources.</li><li>Configure a service-instance-group.</li><li>Configure a NAT instance named <strong>nat1</strong> and bind it to the NAT service board.</li><li>Configure the NAT static source tracing algorithm mapping.</li><li>Bind the NAT static source tracing algorithm to the NAT instance.</li><li>Configure a NAT traffic diversion policy.</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172374609__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><ul><li>Index of the service-location group: 1; name of the service-instance-group: group 1; index of the NAT instance named <strong>nat1</strong>: 1</li><li>IDs of the private and public address pools for the static source tracing algorithm</li><li>Name and IP address of each interface to which a NAT traffic diversion policy is applied</li><li>Private network address segment for NAT static source tracing: 10.0.0.1 to 10.0.0.255; public network address segment for NAT static source tracing 11.11.11.1 to 11.11.11.100</li><li>Port number range for the public address pool: 256 to 1023; port segment size: 256</li><li>ACL number: 3001; traffic classifier name: c1; traffic behavior name: b1; traffic policy name: p1</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172374609__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Set the maximum number of sessions that can be created on the service board in slot <span>1</span> to 6M.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> vsm on-board-mode disable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>license</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-license] <strong>active nat session-table size 6 slot <span>1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-license] <strong>active nat bandwidth-enhance 40 slot <span>1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-license] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-license] <strong>quit</strong></pre>
+</p></li><li><span>Configure a service-instance-group.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>service-location 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-service-location-1] <strong>location slot <span>1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-service-location-1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-service-location-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>service-instance-group group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-service-instance-group-group1] <strong>service-location 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-service-instance-group-group1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-service-instance-group-group1] <strong>quit</strong></pre>
+</p></li><li><span>Configure a NAT instance named <strong>nat1</strong> and bind it to the NAT service board.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>nat instance nat1 id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-nat-instance-nat1] <strong>service-instance-group group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-nat-instance-nat1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-nat-instance-nat1] <strong>quit</strong></pre>
+</p></li><li><span>Configure a group of NAT static source tracing algorithm parameters, with the private address pool containing IP addresses from 10.0.0.1 to 10.0.0.255, the public address pool containing IP addresses from 11.11.11.1 to 11.11.11.100, the port range from 256 to 1023, and port segment size as 256.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>nat static-mapping</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-nat-static-mapping] <strong>inside-pool 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-nat-static-mapping-inside-pool-1] <strong>section 1 10.0.0.1 10.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-nat-static-mapping-inside-pool-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-nat-static-mapping] <strong>global-pool 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-nat-static-mapping-global-pool-1] <strong>section 1 11.11.11.1 11.11.11.100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-nat-static-mapping-global-pool-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-nat-static-mapping] <strong>static-mapping 10 inside-pool 1 global-pool 1 port-range 256 1023 port-size 256</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-nat-static-mapping] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-nat-static-mapping] <strong>quit</strong></pre>
+</p></li><li><span>Enable the NAT static source tracing algorithm in the NAT instance named <strong>nat1</strong> and specify the algorithm ID as 10.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>nat instance nat1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-nat-instance-nat1] <strong>nat bind static-mapping 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-nat-instance-nat1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-nat-instance-nat1] <strong>quit</strong></pre>
+</p></li><li><span>Configure a traffic classification rule and NAT behavior.</span><ol type="a"><li class="substepexpand"><span>Configures an ACL rule to allow only PCs on internal network segment 10.0.0.0/24 to access the Internet.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>acl 3001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-acl4-advance-3001] <strong>rule 1 permit ip source 10.0.0.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-acl4-advance-3001] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-acl4-advance-3001] <strong>quit</strong></pre>
+</p></li><li class="substepexpand"><span>Configure a traffic classifier and define an ACL-based matching rule.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>traffic classifier c1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-classifier-c1] <strong>if-match acl 3001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-classifier-c1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-classifier-c1] <strong>quit</strong></pre>
+</p></li><li class="substepexpand"><span>Configure a traffic behavior, which binds traffic to the NAT instance named <strong>nat1</strong>.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>traffic behavior b1</strong> </pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-behavior-b1] <strong>nat bind instance nat1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-behavior-b1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-behavior-b1] <strong>quit</strong></pre>
+</p></li><li class="substepexpand"><span>Defines a NAT traffic policy to associate the ACL rule with the traffic behavior.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>traffic policy p1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-trafficpolicy-p1] <strong>classifier c1 behavior b1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-trafficpolicy-p1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-trafficpolicy-p1] <strong>quit</strong></pre>
+</p></li><li class="substepexpand"><span>Apply the NAT traffic diversion policy in the interface view.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>interface gigabitEthernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/2/0</span>] <strong>traffic-policy p1 inbound</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/2/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+</p></li></ol>
+</li><li><span>Verify the configuration.</span><p><p># Check NAT user information on the device.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>display nat user-information slot <span>1</span> verbose</strong></pre>
+<pre class="screen">This operation will take a few minutes. Press 'Ctrl+C' to break ...                                                                 
+Slot: <span>1</span>            
+Total number:  1.          
+  ---------------------------------------------------------------------------     
+  User Type                             :  NAT444               
+  CPE IP                                :  10.0.0.1      
+  User ID                               :  -       
+  VPN Instance                          :  -       
+  Address Group                         :  -       
+  NoPAT Address Group                   :  -      
+  NAT Instance                          :  nat1     
+  Public IP                             :  11.11.11.1   
+  NoPAT Public IP                       :  -         
+  Start Port                            :  256    
+  Port Range                            :  256      
+  Port Total                            :  256  
+  Radius Specific PCP Port              :  NO     
+  Extend Port Alloc Times               :  0      
+  Extend Port Alloc Number              :  0       
+  First/Second/Third Extend Port Start  :  0/0/0    
+  Total/TCP/UDP/ICMP Session Limit      :  8192/10240/10240/512  
+  Total/TCP/UDP/ICMP Session Current    :  1/0/1/0           
+  Total/TCP/UDP/ICMP Rev Session Limit  :  8192/10240/10240/512  
+  Total/TCP/UDP/ICMP Rev Session Current:  0/0/0/0     
+  Total/TCP/UDP/ICMP Port Limit         :  0/0/0/0    
+  Total/TCP/UDP/ICMP Port Current       :  1/0/1/0     
+  Nat ALG Enable                        :  NULL   
+  Port Reuse                            :  False     
+  Token/TB/TP                           :  0/0/0      
+  Port Forwarding Flag                  :  Non Port Forwarding   
+  Port Forwarding Ports                 :  0 0 0 0 0  
+  Create Time                           :  2022-12-15 11:15:28     
+  Aging Time(s)                         :  -      
+  Left Time(s)                          :  -    
+  Port Limit Discard Count              :  0     
+  Session Limit Discard Count           :  0   
+  Fib Miss Discard Count                :  0    
+  --&gt;Transmit Packets                   :  150156628   
+  --&gt;Transmit Bytes                     :  19699109016  
+  --&gt;Drop Packets                       :  0     
+  &lt;--Transmit Packets                   :  0     
+  &lt;--Transmit Bytes                     :  0    
+  &lt;--Drop Packets                       :  0     
+  Fast-forwarding Statistics ID         :  -   
+  --&gt;Hit Fast-fwd session Packets       :  -       
+  --&gt;NP transmit to multi-core Packets  :  -  
+  &lt;--Hit Fast-fwd session Packets       :  -  
+  &lt;--NP transmit to multi-core Packets  :  -                              
+
+  ---------------------------------------------------------------------------  </pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172374609__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><p>NAT device configuration file</p>
+<pre class="screen">#
+sysname <span class="keyword">HUAWEI</span>
+#
+vsm on-board-mode disable
+#
+license
+ active nat session-table size 6 slot <span>1</span> engine 0
+ active nat bandwidth-enhance 40 slot <span>1</span>
+#
+nat static-mapping
+ inside-pool 1
+  section 1 10.0.0.1 10.0.0.255
+ global-pool 1
+  section 1 11.11.11.1 11.11.11.100
+ static-mapping 10 inside-pool 1 global-pool 1 port-range 256 1023 port-size 256
+#
+service-location 1
+ location slot <span>1</span>
+#
+service-instance-group group1
+ service-location 1
+#
+nat instance nat1 id 1
+ service-instance-group group1 
+ nat bind static-mapping 10
+#
+acl number 3001
+ rule 1 permit ip source 10.0.0.0 0.0.0.255
+#
+traffic classifier c1 operator or
+ if-match acl 3001 precedence 1 
+#
+traffic behavior b1
+ nat bind instance nat1
+#
+traffic policy p1
+ share-mode
+ classifier c1 behavior b1 precedence 1
+#
+interface GigabitEthernet <span>0/2/0</span>
+ undo shutdown
+ ip address 10.1.1.1 255.255.255.0
+ traffic-policy p1 inbound
+#
+return</pre>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_nat_cfg_0056.html">Configuration Examples for NAT
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_nat_cfg_0094_m2k.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/../../toctopics/en-us_task_0000001590438665.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,454 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring DSVPN in Non-Shortcut Mode (BGP)">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_cfg_dsvpn_0015.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_cfg_dsvpn_0015_02.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_cfg_dsvpn_0016_02.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="dsvpn,w00800033,w00556928,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="DSVPN">
+<meta name="featuretype" content="VPN">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="DSVPN">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="DSVPN">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="DSVPN">
+<meta name="featuretype" content="VPN">
+<meta name="OWNER" content="l00415692">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="ccms">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172369158">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring DSVPN in Non-Shortcut Mode (BGP)</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172369158"></a><a name="EN-US_TASK_0172369158"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring DSVPN in Non-Shortcut Mode (BGP)</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0172369158__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In a small- and medium-sized enterprise, the HQ hub connects to branch spokes over the public network, and Spoke 1 and Spoke 2 also connect over the public network. Spokes use dynamic IP addresses to connect to the public network. The HQ hub and branch spokes are located in different areas and belong to different ASs, and the subnet environments of the HQ and branches change frequently. The enterprise wants to use a VPN for communication between branch spokes. To meet this requirement, configure dynamic routing (OSPF) for intra-AS routing and EBGP for inter-AS routing based on the enterprise network planning and deploy DSVPN in non-shortcut mode to realize direct communication between Spoke 1 and Spoke 2. <a href="#EN-US_TASK_0172369158__fig_dc_cfg_dsvpn_001503">Figure 1</a> shows the related networking.</p>
+<div class="fignone" id="EN-US_TASK_0172369158__fig_dc_cfg_dsvpn_001503"><a name="EN-US_TASK_0172369158__fig_dc_cfg_dsvpn_001503"></a><a name="fig_dc_cfg_dsvpn_001503"></a><span class="figcap"><b>Figure 1 </b>Networking diagram for configuring DSVPN in non-shortcut mode</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 and 2 in this example represent GE <span>0/1/0</span> and GE <span>0/2/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_cfg_dsvpn_001503.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172369158__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><div class="p">The configuration roadmap is as follows:<ol><li><p>Because branches access the public network through dynamic IP addresses, branches are unaware of each other's public IP address. Therefore, configure DSVPN to interconnect branches.</p>
+</li><li><p>Because a small number of branches exist, configure DSVPN in non-shortcut mode.</p>
+</li><li><p>Because the subnet environments of the HQ and branches frequently change, deploy BGP based on enterprise network planning for communication between the HQ and branches to simplify maintenance.</p>
+</li></ol>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172369158__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure interface IP addresses.</span><p><p>Configure interface IP addresses on each device.</p>
+<div class="p"># Configure interface IP addresses on Hub.<pre class="screen" id="EN-US_TASK_0172369158__en-us_task_0172369154_screen566065718214049">&lt;<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1050964078214049">HUAWEI</span>&gt; <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1659137344214049">system-view</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword813749583214049"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1513377385214049">HUAWEI</span>] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1822760354214049">sysname Hub</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword2015342727214053">*</span><span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1040322612488">HUAWEI</span>] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1220311641214053">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword650191841811"><font style="font-size:8pt" Face="Courier New" >~</font></span>Hub] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b569099514214049">interface GigabitEthernet <span>0/1/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1367961735214049">*</span>Hub-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1903503995214049">ip address 10.1.1.10 255.255.255.0</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword948131032214049">*</span>Hub-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1759170442214049">binding tunnel gre</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1338717710214049">*</span>Hub-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1119879788214049">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword67528708214049">*</span>Hub] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1903713620214049">interface tunnel 0</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword444900739214049">*</span>Hub-Tunnel<span>0</span>] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1373664831214049">ip address 172.16.1.1 255.255.255.0</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword463299984214049">*</span>Hub-Tunnel<span>0</span>] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1221450476214049">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword994836188214049">*</span>Hub] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1576895315214049">interface loopback 0</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1199183671214049">*</span>Hub-LoopBack0] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1418933430214049">ip address 192.168.0.1 255.255.255.255</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1177795193214049">*</span>Hub-LoopBack0] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1230236679214049">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword455143413214049">*</span>Hub] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1790897458214049">commit</strong></pre>
+</div>
+<p>Assign an IP address to each interface of Spoke 1 and Spoke 2 according to <a href="#EN-US_TASK_0172369158__fig_dc_cfg_dsvpn_001503">Figure 1</a>. The configurations of the spokes are similar to the configuration of the hub.</p>
+</p></li><li><span>Configure public network routes between devices to implement connectivity.</span><p><p id="EN-US_TASK_0172369158__en-us_task_0172369154_p1849682948214049">Configure OSPF on each device to ensure that the public network routes are available.</p>
+<p id="EN-US_TASK_0172369158__en-us_task_0172369154_p1602132711214049"># Configure OSPF on Hub.</p>
+<pre class="screen" id="EN-US_TASK_0172369158__en-us_task_0172369154_screen250728568214049">[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword556248625214049"><font style="font-size:8pt" Face="Courier New" >~</font></span>Hub] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1696893314214049">ospf 2 router-id 10.1.1.10 </strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword548827429214049">*</span>Hub-ospf-2] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b178156559214049">area 0.0.0.1</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword352946339214049">*</span>Hub-ospf-2-area-0.0.0.1] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1643443751214049">network 10.1.1.0 0.0.0.255</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword2112627755214049">*</span>Hub-ospf-2-area-0.0.0.1] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b134352841214049">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1528198906214049">*</span>Hub-ospf-2] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b2014439353214049">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword785805657214049">*</span>Hub] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b69079307214049">commit</strong></pre>
+<p id="EN-US_TASK_0172369158__en-us_task_0172369154_p48843687214049"># Configure OSPF on Spoke 1.</p>
+<pre class="screen" id="EN-US_TASK_0172369158__en-us_task_0172369154_screen1186993933214049">[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1044058585214049"><font style="font-size:8pt" Face="Courier New" >~</font></span>Spoke1] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b2067562733214049">ospf 2 router-id 10.1.2.10 </strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword57785474214049">*</span>Spoke1-ospf-2] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b937944495214049">area 0.0.0.1</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword742025891214049">*</span>Spoke1-ospf-2-area-0.0.0.1] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b960144591214049">network 10.1.2.0 0.0.0.255</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword78111282214049">*</span>Spoke1-ospf-2-area-0.0.0.1] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b565447723214049">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1979685503214049">*</span>Spoke1-ospf-2] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b609265803214049">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword812244118214049">*</span>Spoke1] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1533339664214049">commit</strong></pre>
+<p id="EN-US_TASK_0172369158__en-us_task_0172369154_p1827817802214049"># Configure OSPF on Spoke 2.</p>
+<pre class="screen" id="EN-US_TASK_0172369158__en-us_task_0172369154_screen1726112528214049">[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword41508944214049"><font style="font-size:8pt" Face="Courier New" >~</font></span>Spoke2] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1464408938214049">ospf 2 router-id 10.1.3.10 </strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword907905485214049">*</span>Spoke2-ospf-2] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b730034052214049">area 0.0.0.1</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword160643891214049">*</span>Spoke2-ospf-2-area-0.0.0.1] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b216577785214049">network 10.1.3.0 0.0.0.255</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword32666736214049">*</span>Spoke2-ospf-2-area-0.0.0.1] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b427986494214049">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1490337878214049">*</span>Spoke2-ospf-2] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b124768666214049">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword156282022214049">*</span>Spoke2] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1074647301214049">commit</strong></pre>
+</p></li><li><span>Configure routes in ASs.</span><p><p>Configure OSPF on the hub and spokes in different ASs to implement reachability in ASs.</p>
+<p># Configure Hub.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Hub] <strong>ospf 1 router-id 172.16.1.1</strong>
+[<span class="keyword">*</span>Hub-ospf-1] <strong>area 0.0.0.0</strong>
+[<span class="keyword">*</span>Hub-ospf-1-area-0.0.0.0] <strong>network 192.168.0.0 0.0.0.255</strong>
+[<span class="keyword">*</span>Hub-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>Hub-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>Hub] <strong>commit</strong></pre>
+<p># Configure Spoke 1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Spoke1] <strong>ospf 1 router-id 172.16.1.2</strong>
+[<span class="keyword">*</span>Spoke1-ospf-1] <strong>area 0.0.0.0</strong>
+[<span class="keyword">*</span>Spoke1-ospf-1-area-0.0.0.0] <strong>network 192.168.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>Spoke1-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>Spoke1-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>Spoke1] <strong>commit</strong></pre>
+<p># Configure Spoke 2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Spoke2] <strong>ospf 1 router-id 172.16.1.3</strong>
+[<span class="keyword">*</span>Spoke2-ospf-1] <strong>area 0.0.0.0</strong>
+[<span class="keyword">*</span>Spoke2-ospf-1-area-0.0.0.0] <strong>network 192.168.2.0 0.0.0.255</strong>
+[<span class="keyword">*</span>Spoke2-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>Spoke2-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>Spoke2] <strong>commit</strong></pre>
+</p></li><li><span>Configure basic EBGP functions.</span><p><p># Configure Hub.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Hub] <strong>bgp 100</strong>
+[<span class="keyword">*</span>Hub-bgp] <strong>router-id 172.16.1.1</strong>
+[<span class="keyword">*</span>Hub-bgp] <strong>import-route ospf 1</strong>
+[<span class="keyword">*</span>Hub-bgp] <strong>peer 172.16.1.2 as-number 200</strong>
+[<span class="keyword">*</span>Hub-bgp] <strong>peer 172.16.1.3 as-number 300</strong>
+[<span class="keyword">*</span>Hub-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>Hub] <strong>commit</strong></pre>
+<p># Configure Spoke 1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Spoke1] <strong>bgp 200</strong>
+[<span class="keyword">*</span>Spoke1-bgp] <strong>router-id 172.16.1.2</strong>
+[<span class="keyword">*</span>Spoke1-bgp] <strong>import-route ospf 1</strong>
+[<span class="keyword">*</span>Spoke1-bgp] <strong>peer 172.16.1.1 as-number 100</strong>
+[<span class="keyword">*</span>Spoke1-bgp] <strong>peer 172.16.1.3 as-number 300</strong>
+[<span class="keyword">*</span>Spoke1-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>Spoke1] <strong>commit</strong></pre>
+<p># Configure Spoke 2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Spoke2] <strong>bgp 300</strong>
+[<span class="keyword">*</span>Spoke2-bgp] <strong>router-id 172.16.1.3</strong>
+[<span class="keyword">*</span>Spoke2-bgp] <strong>import-route ospf 1</strong>
+[<span class="keyword">*</span>Spoke2-bgp] <strong>peer 172.16.1.1 as-number 100</strong>
+[<span class="keyword">*</span>Spoke2-bgp] <strong>peer 172.16.1.2 as-number 200</strong>
+[<span class="keyword">*</span>Spoke2-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>Spoke2] <strong>commit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The configuration of one branch subnet is used as an example. Perform the same configuration on the other branch subnets.</p>
+<p>If a branch subnet is changed, you only need to configure the corresponding dynamic routing attribute on the local device.</p>
+</div></div>
+</p></li><li><span>Enable NHRP globally.</span><p><p id="EN-US_TASK_0172369158__en-us_task_0172369154_p1167536300214049"># Configure Hub.</p>
+<pre class="screen" id="EN-US_TASK_0172369158__en-us_task_0172369154_screen1028335826214049">[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword43842734214049"><font style="font-size:8pt" Face="Courier New" >~</font></span>Hub] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b550849294214049">nhrp enable</strong></pre>
+<p id="EN-US_TASK_0172369158__en-us_task_0172369154_p587930736214049">The configurations of the spokes are similar to the configuration of the hub. For detailed configurations, see Configuration Files.</p>
+</p></li><li><span>Configure tunnel interfaces.</span><p><p id="EN-US_TASK_0172369158__en-us_task_0172369154_p1816071283214049">Configure a tunnel interface on the hub and spokes; configure a static NHRP peer entry mapped to Hub on Spoke 1 and Spoke 2.</p>
+<div class="p" id="EN-US_TASK_0172369158__en-us_task_0172369154_p1452004114214049"># Configure a tunnel interface on Hub.<pre class="screen" id="EN-US_TASK_0172369158__en-us_task_0172369154_screen1138891763214049">[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword943799946214049"><font style="font-size:8pt" Face="Courier New" >~</font></span>Hub] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b744059575214049">interface tunnel 0</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1933109997214049">*</span>Hub-Tunnel0] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b521457842214049">tunnel-protocol gre p2mp</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1536603426214049">*</span>Hub-Tunnel0] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1952602569214049">nhrp enable</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword575728766214049">*</span>Hub-Tunnel0] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b966441798214049">nhrp entry multicast dynamic</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword344751052214049">*</span>Hub-Tunnel0] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1804121818214049">source gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1221873305214049">*</span>Hub-Tunnel0] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1999050328214049">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword370498595214049">*</span>Hub] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1495616600214049">commit</strong></pre>
+</div>
+<div class="p" id="EN-US_TASK_0172369158__en-us_task_0172369154_p1982643086214049"># On Spoke 1, configure a tunnel interface and a static NHRP peer entry (mapped to Hub).<pre class="screen" id="EN-US_TASK_0172369158__en-us_task_0172369154_screen450501972214049">[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword2042288324214049"><font style="font-size:8pt" Face="Courier New" >~</font></span>Spoke1] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1910345740214049">interface tunnel 0</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword808762044214049">*</span>Spoke1-Tunnel0] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b863086766214049">tunnel-protocol gre p2mp</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1944974327214049">*</span>Spoke1-Tunnel0] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b2080532283214049">nhrp enable</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword71689557214049">*</span>Spoke1-Tunnel0] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1633684098214049">source gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword502924001214049">*</span>Spoke1-Tunnel0] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1493900279214049">nhrp entry 172.16.1.1 10.1.1.10 register</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1376633720214049">*</span>Spoke1-Tunnel0] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1314472242214049">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword2003253679214049">*</span>Spoke1] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b54375045214049">commit</strong></pre>
+</div>
+<div class="p" id="EN-US_TASK_0172369158__en-us_task_0172369154_p851680054214049"># On Spoke 2, configure a tunnel interface and a static NHRP peer entry (mapped to Hub).<pre class="screen" id="EN-US_TASK_0172369158__en-us_task_0172369154_screen1092666276214049">[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword265580189214049"><font style="font-size:8pt" Face="Courier New" >~</font></span>Spoke2] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1365164051214049">interface tunnel 0</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1299081089214049">*</span>Spoke2-Tunnel0] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b141037470214049">tunnel-protocol gre p2mp</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword2063564996214049">*</span>Spoke2-Tunnel0] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b565865579214049">nhrp enable</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword299303446214049">*</span>Spoke2-Tunnel0] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b580824743214049">source gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword157544490214049">*</span>Spoke2-Tunnel0] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b1607913719214049">nhrp entry 172.16.1.1 10.1.1.10 register</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1517861026214049">*</span>Spoke2-Tunnel0] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b147654420214049">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1283380805214049">*</span>Spoke2] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b934361861214049">commit</strong></pre>
+</div>
+</p></li><li><span>Verify the DSVPN configuration.</span><p><p>After completing the configuration, verify the NHRP peer entry on spokes.</p>
+<p># Run the <strong>display nhrp peer all</strong> command on Spoke 1. The command output shows that dynamic NHRP peer entry information is as follows.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Spoke1] <strong>display nhrp peer all</strong>
+-------------------------------------------------------------------------------
+Protocol-addr   Mask  NBMA-addr       NextHop-addr    Type         Flag
+-------------------------------------------------------------------------------
+172.16.1.1      32    10.1.1.10      172.16.1.1       hub          up
+-------------------------------------------------------------------------------
+Tunnel interface: Tunnel0 (VPN instance: _public_) 
+Created time    : 00:10:58
+Expire time     : --
+
+Number of nhrp peers: 1
+</pre>
+<p># Run the <strong>display nhrp peer all</strong> command on Spoke 2. The command output is as follows.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Spoke2] <strong>display nhrp peer all</strong>
+-------------------------------------------------------------------------------
+Protocol-addr   Mask  NBMA-addr       NextHop-addr    Type         Flag
+-------------------------------------------------------------------------------
+172.16.1.1      32    10.1.1.10      172.16.1.1       hub          up
+-------------------------------------------------------------------------------
+Tunnel interface: Tunnel0 (VPN instance: _public_)
+Created time    : 00:07:55
+Expire time     : --
+
+Number of nhrp peers: 1
+</pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>After completing the preceding configurations, run the <strong>display nhrp peer all</strong> command on Spoke 1 and Spoke 2. You can view the static NHRP peer entries mapped to Hub and the dynamic NHRP peer entries of the peer. This is because the BGP interaction triggers the interaction of NHRP modules between spokes to establish dynamic tunnels.</p>
+</div></div>
+<p>On Hub, verify registration information about Spoke 1 and Spoke 2.</p>
+<p># Run the <strong>display nhrp peer all</strong> command on Hub. The command output is as follows.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Hub] <strong>display nhrp peer all</strong>
+-------------------------------------------------------------------------------
+Protocol-addr   Mask  NBMA-addr       NextHop-addr    Type         Flag
+-------------------------------------------------------------------------------
+172.16.1.2      32    10.1.2.10      172.16.1.2      registered   up|unique
+-------------------------------------------------------------------------------
+Tunnel interface: Tunnel0 (VPN instance: _public_)
+Created time    : 00:02:02
+Expire time     : 01:57:58
+-------------------------------------------------------------------------------
+Protocol-addr   Mask  NBMA-addr       NextHop-addr    Type         Flag
+-------------------------------------------------------------------------------
+172.16.1.3      32    10.1.3.10      172.16.1.3      registered   up|unique
+-------------------------------------------------------------------------------
+Tunnel interface: Tunnel0 (VPN instance: _public_)
+Created time    : 00:01:53
+Expire time     : 01:59:35
+
+Number of nhrp peers: 2
+</pre>
+</p></li><li><span>Run the <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b995907429">ping</strong> command and check the configuration result.</span><p><p id="EN-US_TASK_0172369158__en-us_task_0172369154_p260464509214049">On Spoke 1, ping the subnet address 192.168.2.1 of Spoke 2. Then, verify the dynamic NHRP peer entries of Spoke 1 and Spoke 2.</p>
+<p id="EN-US_TASK_0172369158__en-us_task_0172369154_p866844266214049"># Run the <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b586312213429">ping -a 192.168.1.1 192.168.2.1</strong> command on Spoke 1. The command output is as follows.</p>
+<pre class="screen" id="EN-US_TASK_0172369158__en-us_task_0172369154_screen1854136452214049">[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1743108019214049"><font style="font-size:8pt" Face="Courier New" >~</font></span>Spoke1] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b674044000214049">ping -a 192.168.1.1 192.168.2.1</strong>
+  PING 192.168.2.1: 56  data bytes, press CTRL_C to break
+    Reply from 192.168.2.1: bytes=56 Sequence=1 ttl=254 time=3 ms
+    Reply from 192.168.2.1: bytes=56 Sequence=2 ttl=255 time=2 ms
+    Reply from 192.168.2.1: bytes=56 Sequence=3 ttl=255 time=2 ms
+    Reply from 192.168.2.1: bytes=56 Sequence=4 ttl=255 time=2 ms
+    Reply from 192.168.2.1: bytes=56 Sequence=5 ttl=255 time=2 ms
+
+  --- 192.168.2.1 ping statistics ---
+    5 packet(s) transmitted
+    5 packet(s) received
+    0.00% packet loss
+    round-trip min/avg/max = 2/2/3 ms
+
+</pre>
+<div class="p" id="EN-US_TASK_0172369158__en-us_task_0172369154_p465551217214049"># Run the <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b26795211434">display nhrp peer all</strong> command on Spoke 1. The command output is as follows.<pre class="screen" id="EN-US_TASK_0172369158__en-us_task_0172369154_screen1435318419214049">[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword249980661214049"><font style="font-size:8pt" Face="Courier New" >~</font></span>Spoke1] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b486419348214049">display nhrp peer all</strong>
+-------------------------------------------------------------------------------
+Protocol-addr   Mask  NBMA-addr       NextHop-addr    Type            Flag
+-------------------------------------------------------------------------------
+172.16.1.1      32    10.1.1.10      172.16.1.1      hub              up
+-------------------------------------------------------------------------------
+Tunnel interface: Tunnel0 (VPN instance: _public_)
+Created time    : 00:46:35
+Expire time     : --
+-------------------------------------------------------------------------------
+Protocol-addr   Mask  NBMA-addr       NextHop-addr    Type            Flag
+-------------------------------------------------------------------------------
+172.16.1.3      32    10.1.3.10      172.16.1.3      remote          up
+-------------------------------------------------------------------------------
+Tunnel interface: Tunnel0 (VPN instance: _public_)
+Created time    : 00:00:28
+Expire time     : 01:59:32
+-------------------------------------------------------------------------------
+Protocol-addr   Mask  NBMA-addr       NextHop-addr    Type            Flag
+-------------------------------------------------------------------------------
+172.16.1.2      32    10.1.2.10      172.16.1.2      local           up
+-------------------------------------------------------------------------------
+Tunnel interface: Tunnel0 (VPN instance: _public_)
+Created time    : 00:00:28
+Expire time     : 01:59:32
+
+Number of nhrp peers: 3
+</pre>
+</div>
+<div class="p" id="EN-US_TASK_0172369158__en-us_task_0172369154_p1420285345214049"># Run the <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b3238133013432">display nhrp peer all</strong> command on Spoke 2. The command output is as follows.<pre class="screen" id="EN-US_TASK_0172369158__en-us_task_0172369154_screen1062813459214049">[<span class="keyword" id="EN-US_TASK_0172369158__en-us_task_0172369154_keyword1300618534214049"><font style="font-size:8pt" Face="Courier New" >~</font></span>Spoke2] <strong id="EN-US_TASK_0172369158__en-us_task_0172369154_b387336171214049">display nhrp peer all</strong>
+-------------------------------------------------------------------------------
+Protocol-addr   Mask  NBMA-addr       NextHop-addr    Type            Flag
+-------------------------------------------------------------------------------
+172.16.1.1      32    10.1.1.10      172.16.1.1      hub              up
+-------------------------------------------------------------------------------
+Tunnel interface: Tunnel0 (VPN instance: _public_)
+Created time    : 00:43:32
+Expire time     : --
+-------------------------------------------------------------------------------
+Protocol-addr   Mask  NBMA-addr       NextHop-addr    Type            Flag
+-------------------------------------------------------------------------------
+172.16.1.2      32    10.1.2.10      172.16.1.2      remote          up
+-------------------------------------------------------------------------------
+Tunnel interface: Tunnel0 (VPN instance: _public_)
+Created time    : 00:00:47
+Expire time     : 01:59:13
+-------------------------------------------------------------------------------
+Protocol-addr   Mask  NBMA-addr       NextHop-addr    Type            Flag
+-------------------------------------------------------------------------------
+172.16.1.3      32    10.1.3.10      172.16.1.3      local           up
+-------------------------------------------------------------------------------
+Tunnel interface: Tunnel0 (VPN instance: _public_)
+Created time    : 00:00:47
+Expire time     : 01:59:13
+
+Number of nhrp peers: 3
+</pre>
+</div>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172369158__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>Hub configuration file</p>
+<pre class="screen">#
+sysname Hub
+# 
+nhrp enable
+#
+interface GigabitEthernet<span>0/1/0</span>
+ ip address 10.1.1.10 255.255.255.0
+ binding tunnel gre
+#
+interface LoopBack0
+ ip address 192.168.0.1 255.255.255.255
+# 
+interface Tunnel0
+ ip address 172.16.1.1 255.255.255.0
+ tunnel-protocol gre p2mp
+ source GigabitEthernet<span>0/1/0</span>
+ nhrp enable
+ nhrp entry multicast dynamic
+# 
+bgp 100
+ router-id 172.16.1.1
+ peer 172.16.1.2 as-number 200
+ peer 172.16.1.3 as-number 300
+ # 
+ ipv4-family unicast
+  undo synchronization
+  import-route ospf 1
+  peer 172.16.1.2 enable
+  peer 172.16.1.3 enable
+# 
+ospf 1 router-id 172.16.1.1
+ area 0.0.0.0
+  network 192.168.0.0 0.0.0.255
+# 
+ospf 2 router-id 10.1.1.10
+ area 0.0.0.1
+  network 10.1.1.0 0.0.0.255
+# 
+return
+</pre>
+</li><li><p>Spoke 1 configuration file</p>
+<pre class="screen">#
+sysname Spoke1
+# 
+nhrp enable
+#
+interface GigabitEthernet<span>0/1/0</span>
+ ip address 10.1.2.10 255.255.255.0
+ binding tunnel gre
+#
+interface GigabitEthernet<span>0/2/0</span>
+ ip address 192.168.1.1 255.255.255.0
+# 
+interface Tunnel0
+ ip address 172.16.1.2 255.255.255.0
+ tunnel-protocol gre p2mp
+ source GigabitEthernet<span>0/1/0</span>
+ nhrp enable
+ nhrp entry 172.16.1.1 10.1.1.10 register
+# 
+bgp 200
+ router-id 172.16.1.2
+ peer 172.16.1.1 as-number 100
+ peer 172.16.1.3 as-number 300
+ # 
+ ipv4-family unicast
+  undo synchronization
+  import-route ospf 1
+  peer 172.16.1.1 enable
+  peer 172.16.1.3 enable
+# 
+ospf 1 router-id 172.16.1.2
+ area 0.0.0.0
+  network 192.168.1.0 0.0.0.255
+# 
+ospf 2 router-id 10.1.2.10
+ area 0.0.0.1
+  network 10.1.2.0 0.0.0.255
+# 
+return
+</pre>
+</li><li><p>Spoke 2 configuration file</p>
+<pre class="screen">#
+sysname Spoke2
+# 
+nhrp enable
+#
+interface GigabitEthernet<span>0/1/0</span>
+ ip address 10.1.3.10 255.255.255.0
+ binding tunnel gre
+#
+interface GigabitEthernet<span>0/2/0</span>
+ ip address 192.168.2.1 255.255.255.0
+# 
+interface Tunnel0
+ ip address 172.16.1.3 255.255.255.0
+ tunnel-protocol gre p2mp
+ source GigabitEthernet<span>0/1/0</span>
+ nhrp enable
+ nhrp entry 172.16.1.1 10.1.1.10 register
+# 
+bgp 300
+ router-id 172.16.1.3
+ peer 172.16.1.1 as-number 100
+ peer 172.16.1.2 as-number 200
+ # 
+ ipv4-family unicast
+  undo synchronization
+  import-route ospf 1
+  peer 172.16.1.1 enable
+  peer 172.16.1.2 enable
+# 
+ospf 1 router-id 172.16.1.3
+ area 0.0.0.0
+  network 192.168.2.0 0.0.0.255
+# 
+ospf 2 router-id 10.1.3.10
+ area 0.0.0.1
+  network 10.1.3.0 0.0.0.255
+# 
+return
+</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_cfg_dsvpn_0015.html">Configuration Examples for DSVPN
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_cfg_dsvpn_0015_02.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_cfg_dsvpn_0016_02.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

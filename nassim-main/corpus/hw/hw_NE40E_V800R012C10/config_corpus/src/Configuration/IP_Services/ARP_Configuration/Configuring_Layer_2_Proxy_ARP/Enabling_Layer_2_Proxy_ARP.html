@@ -1,0 +1,88 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Enabling Layer 2 Proxy ARP">
+<meta name="abstract" content="After Layer 2 proxy ARP is enabled, the ARP proxy responds to ARP request messages based on locally generated DHCP snooping or ARP snooping entries.">
+<meta name="description" content="After Layer 2 proxy ARP is enabled, the ARP proxy responds to ARP request messages based on locally generated DHCP snooping or ARP snooping entries.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_arp_cfg_2085.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_arp_cfg_2087.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="y00852169,x00504385">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="ARP">
+<meta name="featuretype" content="IP Services">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="ARP">
+<meta name="featuretype" content="IP Services">
+<meta name="featurename" content="ARP">
+<meta name="featuretype" content="IP Services">
+<meta name="featurename" content="ARP">
+<meta name="featuretype" content="IP Services">
+<meta name="OWNER" content="y00852169">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="x00504385">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0240873513">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Enabling Layer 2 Proxy ARP</title>
+</head>
+<body><a name="EN-US_TASK_0240873513"></a><a name="EN-US_TASK_0240873513"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Enabling Layer 2 Proxy ARP</h1>
+<div class="taskbody"><p>After Layer 2 proxy ARP is enabled, the ARP proxy responds to ARP request messages based on locally generated <span>DHCP snooping or </span>ARP snooping entries.</p>
+<div class="context"><a name="EN-US_TASK_0240873513__1.4.1"></a><a name="1.4.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>On the network shown in <a href="#EN-US_TASK_0240873513__fig_dc_vrp_arp_feature_000101">Figure 1</a>, if proxy ARP is not enabled on the CEs, an ARP message sent by Host3 to request the MAC address of Host1 is broadcast in the BD through CE1. In this case, both Host1 and Host2 receive the ARP request message. Host1 finds that the destination of the message is itself, and so accepts the message. Host2, however, finds that the destination of the message is not itself, and so directly discards the message. This message forwarding mode brings the following problems:</p>
+<p>(1) The IP address in the ARP message can be obtained by any user, posing security risks. For example, malicious users can use the IP address to initiate attacks (such as ping attacks) targeting authorized users.</p>
+<p>(2) The ARP request message is broadcast to all users, including those that are not the destination, consuming excessive network resources. This causes network congestion and deteriorates network performance.</p>
+<p>To solve the preceding problems, configure BD-based Layer 2 proxy ARP on the CEs. Layer 2 proxy ARP can relieve the pressure on processing ARP messages by isolating ARP BDs. With this function enabled, a device preferentially uses learned ARP snooping entries to respond to received ARP request messages. After receiving an ARP request message, the device with Layer 2 proxy ARP enabled checks whether the user information in the request message matches an ARP snooping binding entry. If a matching entry exists, the device sends an ARP reply message. If no matching entry exists, the device broadcasts the ARP request message.</p>
+<div class="fignone" id="EN-US_TASK_0240873513__fig_dc_vrp_arp_feature_000101"><a name="EN-US_TASK_0240873513__fig_dc_vrp_arp_feature_000101"></a><a name="fig_dc_vrp_arp_feature_000101"></a><span class="figcap"><b>Figure 1 </b>BD-based Layer 2 proxy ARP</span><br><span><img class="vsd" src="images/fig_dc_vrp_arp_feature_003703.png" width="NaN" height="NaN"></span></div>
+<div class="p">On the network shown in <a href="#EN-US_TASK_0240873513__fig1428825633711">Figure 2</a>, Layer 2 proxy ARP is not supported on the PE.<div class="fignone" id="EN-US_TASK_0240873513__fig1428825633711"><a name="EN-US_TASK_0240873513__fig1428825633711"></a><a name="fig1428825633711"></a><span class="figcap"><b>Figure 2 </b>BD-based Layer 2 proxy ARP not supported</span><br><span><img class="vsd" src="figure/en-us_image_0000002084822782.png"></span></div>
+</div>
+<p>The users connected to the CE can communicate with each other in a Layer 2 BD, and the PE is connected to the BD. If Layer 2 proxy ARP is enabled in the BD:</p>
+<p>1. When Host1 needs to communicate with Host2, it sends an ARP request message to Host2. The message enters the CE through Interface1. The CE then broadcasts the message to Host2 through Interface2 and to the PE's Interface4 through Interface3.</p>
+<ul><li>The CE learns the MAC address of Host1 through Interface1.</li><li>When the PE receives the ARP request message from Host1, Interface4 learns the ARP information sent by Host1 and adds a proxy ARP entry.</li></ul>
+<p>2. When Host2 needs to communicate with Host1, it sends an ARP request message to Host1. The message enters the CE through Interface2. The CE then broadcasts the message to Host1 through Interface1 and to the PE's Interface4 through Interface3.</p>
+<ul><li>When Interface4 of the PE receives the ARP request message from Host2, the PE sends an ARP reply message to Host2 (Interface4 -&gt; Interface3 -&gt; Interface2) using the real MAC address of Host1 because the PE has a proxy ARP entry for Host1.</li><li>After receiving the ARP reply message from the PE through Interface3, the CE learns the MAC address of Host1 through Interface3. As a result, the outbound interface of Host1's MAC address on the CE changes, affecting unicast traffic forwarding.</li></ul>
+<p>Therefore, when users connected to the CE communicate with each other in a Layer 2 BD, Layer 2 proxy ARP cannot be enabled in the BD connected to the PE.</p>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0240873513__1.4.2"></a><a name="1.4.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Run <a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span><p><p>The system view is displayed.</p>
+</p></li><li><span>Run <a href="cmdqueryname=bridge-domain"><b><span class="cmdname">bridge-domain</span></b></a> <i><span class="varname">bd-id</span></i></span><p><p>The BD view is displayed.</p>
+</p></li><li><span>Run <a href="cmdqueryname=arp+l2-proxy+enable"><b><span class="cmdname">arp l2-proxy enable</span></b></a></span><p><p>Layer 2 proxy ARP is enabled.</p>
+</p><p></p><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In a BD+L2VE+L3VE scenario, configuring this function prevents ARP entries from being learned.</p>
+</div></div>
+</p></li><li><span>Run <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span><p><p>The configuration is committed.</p>
+</p></li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_arp_cfg_2085.html">Configuring Layer 2 Proxy ARP
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_arp_cfg_2087.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

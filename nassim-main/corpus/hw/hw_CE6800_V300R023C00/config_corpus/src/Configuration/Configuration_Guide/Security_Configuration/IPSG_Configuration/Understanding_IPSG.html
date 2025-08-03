@@ -1,0 +1,136 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding IPSG">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_IPSG_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_IPSG_cfg_0002.html">
+<meta name="DC.Relation" scheme="URI" content="spec/IPSG_limitation_CE_v6r23c00.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IPSG">
+<meta name="featuretype" content="Security">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IPSG">
+<meta name="featuretype" content="Security">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001513049278">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding IPSG</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001513049278"></a><a name="EN-US_CONCEPT_0000001513049278"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding IPSG</h1>
+<div><div class="section"><h4 class="sectiontitle">IPSG Fundamentals</h4><p>IPSG checks IP packets on Layer 2 interfaces against a binding table that contains the bindings of source IP addresses, source MAC addresses, VLANs, and inbound interfaces. Only packets matching binding entries are forwarded, and other packets are discarded.</p>
+<p><a href="#EN-US_CONCEPT_0000001513049278__table15634419201">Table 1</a> describes two types of binding tables: static and dynamic binding tables.</p>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001513049278__table15634419201"></a><a name="table15634419201"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001513049278__table15634419201" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Binding tables</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="33.33333333333333%" id="mcps1.3.1.4.2.4.1.1" liSelected="liSelected"><p>Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="33.33333333333333%" id="mcps1.3.1.4.2.4.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="33.33333333333333%" id="mcps1.3.1.4.2.4.1.3" liSelected="liSelected"><p>Application Scenario</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.1.4.2.4.1.1 "><p>Static binding table</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.1.4.2.4.1.2 "><p>A static binding table is manually configured using the <strong>user-bind static</strong> command.</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.1.4.2.4.1.3 "><p>A network with a few IPv4 hosts that use static IP addresses.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.1.4.2.4.1.1 "><p>DHCP snooping binding table</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.1.4.2.4.1.2 "><p>After DHCP snooping is configured, hosts request IP addresses from the DHCP server. The device dynamically generates DHCP snooping binding entries according to the DHCP reply packets returned by the DHCP server.</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.1.4.2.4.1.3 "><p>A network with many IPv4 hosts that obtain IP addresses from the DHCP server.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>After the binding table is generated, IPSG delivers ACL rules to the specified interface or VLAN according to the binding table, and then checks all IP packets against the ACL rules. The device forwards only the packets that match binding entries. When the binding table is modified, IPSG delivers the ACL rules again. By default, if IPSG is enabled but no binding table is generated, the device forwards IP protocol packets (except for IGMP protocol packets) and rejects all IP data packets.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>IPSG checks only the IP packets. It does not check non-IP packets such as ARP packets.</p>
+</div></div>
+<p><a href="#EN-US_CONCEPT_0000001513049278__fig166683434714">Figure 1</a> illustrates the IPSG working mechanism. When an unauthorized host forges an authorized host's IP address to send packets to the Device, the Device discards these packets because they do not match binding entries.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001513049278__fig166683434714"><a name="EN-US_CONCEPT_0000001513049278__fig166683434714"></a><a name="fig166683434714"></a><span class="figcap"><b>Figure 1 </b>IPSG working mechanism</span><br><span><img class="vsd" src="figure/en-us_image_0000001513169274.png"></span></div>
+<p>Typically, IPSG is configured on the interfaces or VLANs of the user-side access device.</p>
+<ul><li>After IPSG is enabled on a user-side interface, it checks all IP packets received by the interface against binding entries.</li></ul>
+<ul><li>After IPSG is enabled in a user-side VLAN, it checks the IP packets received by all interfaces in the VLAN against binding entries.</li><li>If the user-side access device does not support IPSG, you can configure IPSG on the interfaces or in VLANs of the upper-layer device.</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">IPSG Interface Roles</h4><p>IPSG can be configured only on Layer 2 physical interfaces or in VLANs. It also checks the packets only on the untrusted interfaces with IPSG enabled and considers all interfaces to be untrusted by default (you can specify trusted interfaces). The trusted and untrusted interfaces in IPSG are the same as those used in DHCP snooping. In addition, these interfaces are also valid for IPSG based on a static binding table.</p>
+<p><a href="#EN-US_CONCEPT_0000001513049278__fig31701652165715">Figure 2</a> shows the IPSG interface roles.</p>
+<ul><li>Interface1 and Interface2 are untrusted interfaces with IPSG enabled. The Device performs an IPSG check on the packets received by these interfaces.</li><li>Interface3 is an untrusted interface with IPSG disabled. The device does not perform an IPSG check on the packets received by this interface. Consequently, Interface3 is prone to attacks.</li><li>Interface4 is a trusted interface specified by users. The device does not perform an IPSG check on the packets received by this interface; however, it is not prone to attacks. On a network with DHCP snooping configured, the interfaces directly or indirectly connected to a valid DHCP server are generally configured as trusted interfaces.</li></ul>
+<div class="fignone" id="EN-US_CONCEPT_0000001513049278__fig31701652165715"><a name="EN-US_CONCEPT_0000001513049278__fig31701652165715"></a><a name="fig31701652165715"></a><span class="figcap"><b>Figure 2 </b>IPSG interface roles</span><br><span><img src="figure/en-us_image_0000001694854929.png"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">IPSG Filtering</h4><p>A binding entry contains the following items: MAC address, IP address, VLAN ID, and inbound interface. IPSG checks received packets against all items in a static binding table. For a dynamic binding table, this is also the default implementation, but you can additionally specify the items against which IPSG performs checks. <a href="#EN-US_CONCEPT_0000001513049278__table488634913455">Table 2</a> describes some common check items.</p>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001513049278__table488634913455"></a><a name="table488634913455"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001513049278__table488634913455" frame="border" border="1" rules="all"><caption><b>Table 2 </b>IPSG filtering</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="26.08%" id="mcps1.3.3.3.2.3.1.1" liSelected="liSelected"><p>Item</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="73.92%" id="mcps1.3.3.3.2.3.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="26.08%" headers="mcps1.3.3.3.2.3.1.1 "><p>Source IP address </p>
+</td>
+<td class="cellrowborder" valign="top" width="73.92%" headers="mcps1.3.3.3.2.3.1.2 "><p>The device forwards only the packets whose source IP addresses match binding entries.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="26.08%" headers="mcps1.3.3.3.2.3.1.1 "><p>Source MAC address</p>
+</td>
+<td class="cellrowborder" valign="top" width="73.92%" headers="mcps1.3.3.3.2.3.1.2 "><p>The device forwards only the packets whose source MAC addresses match binding entries.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="26.08%" headers="mcps1.3.3.3.2.3.1.1 "><p>Source IP address + source MAC address</p>
+</td>
+<td class="cellrowborder" valign="top" width="73.92%" headers="mcps1.3.3.3.2.3.1.2 "><p>The device forwards only the packets whose source IP and MAC addresses match binding entries.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="26.08%" headers="mcps1.3.3.3.2.3.1.1 "><p>Source IP address + source MAC address + interface</p>
+</td>
+<td class="cellrowborder" valign="top" width="73.92%" headers="mcps1.3.3.3.2.3.1.2 "><p>The device forwards only the packets whose source IP addresses, source MAC addresses, and interfaces match binding entries.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="26.08%" headers="mcps1.3.3.3.2.3.1.1 "><p>Source IP address + source MAC address + interface + VLAN</p>
+</td>
+<td class="cellrowborder" valign="top" width="73.92%" headers="mcps1.3.3.3.2.3.1.2 "><p>The device forwards only the packets whose source IP addresses, source MAC addresses, interfaces, and VLANs match binding entries.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_IPSG_cfg_0001.html">IPSG Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_IPSG_cfg_0002.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="spec/IPSG_limitation_CE_v6r23c00.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

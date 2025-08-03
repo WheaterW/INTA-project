@@ -1,0 +1,335 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring AS_Path Filters to Control Route Advertisement">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0037.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0044.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130624112">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring AS_Path Filters to Control Route Advertisement</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130624112"></a><a name="EN-US_TASK_0000001130624112"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring AS_Path Filters to Control Route Advertisement</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130624112__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>Enterprises A, B, and C belong to different ASs, and enterprise B's network communicates with the networks of the other two enterprises through EBGP connections. Due to competition between enterprises A and C, they require that the routes that they advertise to enterprise B should not be learned by each other in order to improve their own network security. To meet this requirement, configure AS_Path filters on enterprise B's network.</p>
+<p>On the network shown in <a href="#EN-US_TASK_0000001130624112__fig_dc_vrp_bgp_cfg_408801">Figure 1</a>, EBGP connections are established between DeviceA and DeviceB, and between DeviceB and DeviceC. To disable the device in AS 10 from communicating with the device in AS 30, configure AS_Path filters on DeviceB to stop DeviceB from advertising the routes of AS 30 to the device in AS 10 as well as the routes of AS 10 to the device in AS 30. This ensures that AS 10 and AS 30 are isolated from each other.</p>
+<div class="fignone" id="EN-US_TASK_0000001130624112__fig_dc_vrp_bgp_cfg_408801"><a name="EN-US_TASK_0000001130624112__fig_dc_vrp_bgp_cfg_408801"></a><a name="fig_dc_vrp_bgp_cfg_408801"></a><span class="figcap"><b>Figure 1 </b>Network diagram of BGP route filtering</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 and interface 2 represent <span>100GE</span><span>1/0/1</span> and <span>100GE</span><span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001130783978.png"></span></div>
+<p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Router ID and AS number of each device: DeviceA, DeviceB, and DeviceC</p>
+</li><li><p>Numbers of AS_Path filters</p>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130624112__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>During the configuration, note the following:</p>
+<ul><li><p>The relationship between multiple filtering rules in the same filter is OR.</p>
+</li><li>To improve security, you are advised to deploy BGP security measures. For details, see "Configuring BGP Authentication." Keychain authentication is used as an example. For details, see Example for Configuring Keychain Authentication for BGP.</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130624112__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Establish EBGP connections between each pair of DeviceA, DeviceB, and DeviceC, and then configure the devices to import direct routes.</p>
+</li><li><p>Configure and apply AS_Path filters on DeviceB.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130624112__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface involved. For detailed configurations, see <a href="#EN-US_TASK_0000001130624112__postreq148923599515">Configuration Scripts</a>.</span></li><li><span>Configure EBGP.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>bgp 10</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>router-id 1.1.1.1</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.1.2.2 as-number 20</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>import-route direct</strong>
+[<span class="keyword">*</span>DeviceA-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>bgp 20</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>router-id 2.2.2.2</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.1.2.1 as-number 10</strong>
+[<span class="keyword">*</span>DeviceB-bgp]<strong> peer 10.1.3.2 as-number 30</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>import-route direct</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC]<strong> bgp 30</strong>
+[<span class="keyword">*</span>DeviceC-bgp]<strong> router-id 3.3.3.3 </strong>
+[<span class="keyword">*</span>DeviceC-bgp]<strong> peer 10.1.3.1 as-number 20</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>import-route direct</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Check information about the routes that DeviceB has advertised to a specified peer in the BGP routing table. This example uses the routes advertised by DeviceB to DeviceC. The command output shows that DeviceB has advertised the routes destined for the direct network segment between DeviceA and DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display bgp routing-table peer 10.1.3.2 advertised-routes</strong>
+
+ BGP Local router ID is 2.2.2.2
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete<span>  RPKI validation codes: V - valid, I - invalid, N - not-found</span>
+
+Total Number of Routes: 9
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *&gt;   10.1.2.0          0.0.0.0         0                     0      ?
+ *&gt;   10.1.2.1/32       0.0.0.0         0                     0      ?
+ *&gt;   10.1.2.2/32       10.1.2.1        0                     0      10?
+ *&gt;   10.1.3.0          0.0.0.0         0                     0      ?
+ *&gt;   10.1.3.1/32       10.1.3.2        0                     0      30?
+ *&gt;   10.1.3.2/32       0.0.0.0         0                     0      ?
+ *&gt;   <strong>10.1.4.0</strong>          <strong>10.1.2.1</strong>        0                     0      10?
+ *&gt;   10.1.4.1/32       10.1.3.2        0                     0      30?
+ *&gt;   <strong>10.1.4.2/32</strong>       <strong>10.1.2.1</strong>        0                     0      10?</pre>
+<p>Check the routing table of DeviceC. The command output shows that DeviceC has learned both routes advertised by DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>display bgp routing-table</strong>
+ BGP Local router ID is 3.3.3.3
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete<span>
+ RPKI validation codes: V - valid, I - invalid, N - not-found</span>
+
+Total Number of Routes: 18
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+       
+ *&gt;   10.1.2.0          10.1.4.1       0                     0      10?
+ *                      10.1.3.1       0                     0      20?
+ *&gt;   10.1.2.1/32       10.1.3.1       0                     0      20?
+ *                      10.1.4.1                             0      10 20?
+ *&gt;   10.1.2.2/32       10.1.4.1       0                     0      10?
+ *                      10.1.3.1                             0      20 10?
+ *&gt;   10.1.3.0          0.0.0.0        0                     0      ?
+ *                      10.1.3.1       0                     0      20?
+ *                      10.1.4.1                             0      10 20?
+ *&gt;   10.1.3.1/32       0.0.0.0        0                     0      ?
+ *&gt;   10.1.3.2/32       10.1.3.1       0                     0      20?
+ *                      10.1.4.1                             0      10 20?
+ *&gt;   10.1.4.0          0.0.0.0        0                     0      ?
+ *                      10.1.4.1       0                     0      10?
+ *                      <strong>10.1.3.1</strong>                             <strong>0</strong>      <strong>20 10?</strong>
+ *&gt;   10.1.4.1/32       0.0.0.0        0                     0      ?
+ *&gt;   10.1.4.2/32       10.1.4.1       0                     0      10?
+ *                      <strong>10.1.3.1</strong>                             <strong>0</strong>      <strong>20 10?</strong></pre>
+</p></li><li><span>Configure AS_Path filters on DeviceB and apply them to the routes that DeviceB will advertise to specified peers.</span><p><p># Create AS_Path filter 1 to deny the routes carrying AS 30. The regular expression "_30_" indicates any AS_Path list that contains AS 30, and ".*" matches any character.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ip as-path-filter 1 deny _30_</strong>
+[<span class="keyword">*</span>DeviceB] <strong>ip as-path-filter 1 permit .*</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Create AS_Path filter 2 to deny the routes carrying AS 10. The regular expression "_10_" indicates any AS_Path list that contains AS 10, and ".*" matches any character.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ip as-path-filter 2 deny _10_</strong>
+[<span class="keyword">*</span>DeviceB] <strong>ip as-path-filter 2 permit .*</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Apply each AS_Path filter to the routes that DeviceB will advertise to a specified peer.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>bgp 20</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.1.2.1 as-path-filter 1 export</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.1.3.2 as-path-filter 2 export</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001130624112__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check information about the routes that DeviceB has advertised to a specified peer in the BGP routing table. The command output shows that DeviceB does not advertise the routes to the network segment between DeviceA and DeviceC. This example uses the routes advertised by DeviceB to DeviceC.</p>
+<pre class="screen">&lt;DeviceB&gt; <strong>display bgp routing-table peer 10.1.3.2 advertised-routes</strong>
+BGP Local router ID is 2.2.2.2
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete<span>
+ RPKI validation codes: V - valid, I - invalid, N - not-found</span>
+
+Total Number of Routes: 6
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *&gt;   10.1.2.0          0.0.0.0         0                     0      ?
+ *&gt;   10.1.2.1/32       0.0.0.0         0                     0      ?
+ *&gt;   10.1.3.0          0.0.0.0         0                     0      ?
+ *&gt;   10.1.3.1/32       10.1.3.2        0                     0      30?
+ *&gt;   10.1.3.2/32       0.0.0.0         0                     0      ?
+ *&gt;   10.1.4.1/32       10.1.3.2        0                     0      30?</pre>
+<p># Check the BGP routing table of DeviceC. The command output shows that DeviceC does not have these routes either.</p>
+<pre class="screen">&lt;DeviceC&gt; <strong>display bgp routing-table</strong>
+ BGP Local router ID is 3.3.3.3
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete<span>
+ RPKI validation codes: V - valid, I - invalid, N - not-found</span>
+
+Total Number of Routes: 15
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *&gt;   10.1.2.0          10.1.4.1        0                     0      10?
+ *                      10.1.3.1        0                     0      20?
+ *&gt;   10.1.2.1/32       10.1.3.1        0                     0      20?
+ *                      10.1.4.1                              0      10 20?
+ *&gt;   10.1.2.2/32       10.1.4.1        0                     0      10?
+ *&gt;   10.1.3.0          0.0.0.0         0                     0      ?
+ *                      10.1.3.1        0                     0      20?
+ *                      10.1.4.1                              0      10 20?
+ *&gt;   10.1.3.1/32       0.0.0.0         0                     0      ?
+ *&gt;   10.1.3.2/32       10.1.3.1        0                     0      20?
+ *                      10.1.4.1                              0      10 20?
+ *&gt;   10.1.4.0          0.0.0.0         0                     0      ?
+ *                      10.1.4.1        0                     0      10?
+ *&gt;   10.1.4.1/32       0.0.0.0         0                     0      ?
+ *&gt;   10.1.4.2/32       10.1.4.1        0                     0      10?</pre>
+<p># Check information about the routes that DeviceB has advertised to a specified peer in the BGP routing table. The command output shows that DeviceB does not advertise the routes to the network segment between DeviceA and DeviceC. This example uses the routes advertised by DeviceB to DeviceA.</p>
+<pre class="screen">&lt;DeviceB&gt; <strong>display bgp routing-table peer 10.1.2.1 advertised-routes</strong>
+ BGP Local router ID is 2.2.2.2
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete<span>
+ RPKI validation codes: V - valid, I - invalid, N - not-found</span>
+
+Total Number of Routes: 4
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *&gt;   10.1.2.0          0.0.0.0         0                     0      ?
+ *&gt;   10.1.2.1/32       0.0.0.0         0                     0      ?
+ *&gt;   10.1.2.2/32       10.1.2.1        0                     0      10?
+ *&gt;   10.1.3.0          0.0.0.0         0                     0      ?
+ *&gt;   10.1.3.2/32       0.0.0.0         0                     0      ?
+ *&gt;   10.1.4.0          10.1.2.1        0                     0      10?
+ *&gt;   10.1.4.2/32       10.1.2.1        0                     0      10?</pre>
+<p># Check the BGP routing table of DeviceA. The command output shows that DeviceA does not have these routes either.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display bgp routing-table</strong>
+BGP Local router ID is 1.1.1.1
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete<span>
+ RPKI validation codes: V - valid, I - invalid, N - not-found</span>
+
+ Total Number of Routes: 14
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *&gt;   10.1.2.0          0.0.0.0         0                     0      ?
+ *                      10.1.2.2        0                     0      20?
+ *&gt;   10.1.2.1/32       10.1.2.2        0                     0      20?
+ *                      10.1.4.2                              0      30 20?
+ *&gt;   10.1.2.2/32       0.0.0.0         0                     0      ?
+ *&gt;   10.1.3.0          10.1.2.2        0                     0      20?
+ *                      10.1.4.2        0                     0      30?
+ *&gt;   10.1.3.1/32       10.1.4.2        0                     0      30?
+ *&gt;   10.1.3.2/32       10.1.2.2        0                     0      20?
+ *                      10.1.4.2                              0      30 20?
+ *&gt;   10.1.4.0          0.0.0.0         0                     0      ?
+ *                      10.1.4.2        0                     0      30?
+ *&gt;   10.1.4.1/32       10.1.4.2        0                     0      30?
+ *&gt;   10.1.4.2/32       0.0.0.0         0                     0      ?</pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001130624112__postreq148923599515"></a><a name="postreq148923599515"></a><a name="EN-US_TASK_0000001130624112__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.4.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.2.1 255.255.255.0
+#
+bgp 10
+ router-id 1.1.1.1
+ peer 10.1.2.2 as-number 20
+ #
+ ipv4-family unicast
+  import-route direct
+  peer 10.1.2.2 enable
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.3.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.2.2 255.255.255.0
+#
+bgp 20
+ router-id 2.2.2.2
+ peer 10.1.2.1 as-number 10
+ peer 10.1.3.2 as-number 30
+ #
+ ipv4-family unicast
+  import-route direct
+  peer 10.1.2.1 enable
+  peer 10.1.2.1 as-path-filter 1 export
+  peer 10.1.3.2 enable
+  peer 10.1.3.2 as-path-filter 2 export
+#
+ ip as-path-filter 1<span> index 10</span> deny _30_
+ ip as-path-filter 1<span> index 20</span> permit .*
+ ip as-path-filter 2<span> index 10</span> deny _10_
+ ip as-path-filter 2<span> index 20</span> permit .*
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.4.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.3.2 255.255.255.0
+#
+bgp 30
+ router-id 3.3.3.3
+ peer 10.1.3.1 as-number 20
+ #
+ ipv4-family unicast
+  import-route direct
+  peer 10.1.3.1 enable
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bgp_cfg_0037.html">Configuring BGP to Advertise Routes
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bgp_cfg_0044.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

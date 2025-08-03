@@ -1,0 +1,76 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding Path Detection">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="Path_and_Connectivity_Detection_004.html">
+<meta name="DC.Relation" scheme="URI" content="Path_and_Connectivity_Detection_006.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Path and Connectivity Detection">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Path and Connectivity Detection">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featurename" content="Path and Connectivity Detection">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001563874701">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding Path Detection</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001563874701"></a><a name="EN-US_CONCEPT_0000001563874701"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding Path Detection</h1>
+<div><div class="section"><h4 class="sectiontitle">Path Detection Function</h4><p><strong>Differentiated services code point (DSCP)-based IPv4 path detection</strong></p>
+<p>The device identifies path detection packets based on the detection flag (DSCP value) and detection data (OAM PDU). During DSCP-based IPv4 path detection, <span class="keyword">iMaster NCE-Fabric</span> delivers IPv4 UDP, TCP, or ICMP packets as the detection packets. <a href="#EN-US_CONCEPT_0000001563874701__fig13021532195013">Figure 1</a> shows the packet format.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The IPv4 path detection function can detect only the traffic path between any two devices when no tunnel is configured or when a VXLAN tunnel is configured.The <span>CE6820H, CE6820H-K, or CE6820S</span> cannot function as a VTEP when a VXLAN tunnel is configured.</p>
+<p>Before using DSCP-based IPv4 path detection, plan an unoccupied DSCP value that will be used to identify detection packets.</p>
+</div></div>
+<div class="fignone" id="EN-US_CONCEPT_0000001563874701__fig13021532195013"><a name="EN-US_CONCEPT_0000001563874701__fig13021532195013"></a><a name="fig13021532195013"></a><span class="figcap"><b>Figure 1 </b>DSCP-based IPv4 path detection packet</span><br><span><img class="vsd" src="figure/en-us_image_0000001564114813.png"></span></div>
+<p><strong>DSCP-based IPv6 path detection</strong></p>
+<p>During DSCP-based IPv6 path detection, <span class="keyword">iMaster NCE-Fabric</span> delivers IPv6 UDP, TCP, or ICMP packets as the detection packets. <a href="#EN-US_CONCEPT_0000001563874701__fig15280112311317">Figure 2</a> shows the packet format. The device identifies path detection packets based on the detection flag (DSCP value) and detection data (OAM PDU). </p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>DSCP-based IPv6 path detection can be used on IPv6 over IPv4 and IPv6 over IPv6 VXLAN networks. The <span>CE6820H, CE6820H-K, or CE6820S</span> cannot function as a VTEP on IPv6 over IPv6 VXLAN networks.</p>
+<p>Before using DSCP-based IPv6 path detection, plan an unoccupied DSCP value that will be used to identify detection packets.</p>
+<p>The CE6885-LL in low latency mode does not support IPv6 functions.</p>
+</div></div>
+<div class="fignone" id="EN-US_CONCEPT_0000001563874701__fig15280112311317"><a name="EN-US_CONCEPT_0000001563874701__fig15280112311317"></a><a name="fig15280112311317"></a><span class="figcap"><b>Figure 2 </b>DSCP-based IPv6 path detection packet</span><br><span><img class="vsd" src="figure/en-us_image_0000001563994997.png"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Path Detection Process</h4><div class="p">As shown in <a href="#EN-US_CONCEPT_0000001563874701__fig_dc_cfg_path_detection_01">Figure 3</a>, DeviceA and DeviceB are Layer 3 devices on an IP network, DeviceC to DeviceF are VXLAN Layer 3 gateways, DeviceG to DeviceJ are transparent transmission devices on the VXLAN network, and DeviceK to DeviceR are VXLAN Layer 2 gateways; and two physical network zones exist. O&amp;M personnel need to detect the path from VM1 to VM3. Assume that the path is DeviceL -&gt; DeviceG -&gt; DeviceC -&gt; DeviceA -&gt; DeviceE -&gt; DeviceI -&gt; DeviceP -&gt; VM3. The path detection process is as follows:<ol><li><span class="keyword">iMaster NCE-Fabric</span> creates a path detection packet based on the configuration where the source IP address is the IP address of VM1 and the destination IP address is the IP address of VM3.</li><li><span class="keyword">iMaster NCE-Fabric</span> sends a packet-out message carrying the path detection packet to DeviceL.</li><li>When DeviceL receives the packet-out message, it identifies the detection flag in the packet, calculates the outbound interface based on its MAC address table, and sends a packet-in message carrying the outbound interface, inbound interface, and path detection packet to <span class="keyword">iMaster NCE-Fabric</span>. DeviceL then encapsulates the path detection packet into a VXLAN packet and sends it to DeviceG.</li><li>When DeviceG receives the VXLAN packet, it calculates the outbound interface based on its MAC address table, and sends a packet-in message carrying the outbound interface, inbound interface, and VXLAN packet to <span class="keyword">iMaster NCE-Fabric</span>. DeviceG then transparently transmits the VXLAN packet to DeviceC.</li><li>When DeviceC receives the VXLAN packet, it calculates the outbound interface based on its routing table, and sends a packet-in message carrying the outbound interface, inbound interface, and VXLAN packet to <span class="keyword">iMaster NCE-Fabric</span>. DeviceC then decapsulates the VXLAN packet to obtain the path detection packet and forwards it to DeviceA.</li><li>When DeviceA receives the path detection packet, it calculates the outbound interface based on its routing table, and sends a packet-in message carrying the outbound interface, inbound interface, and path detection packet to <span class="keyword">iMaster NCE-Fabric</span>. DeviceA then forwards the path detection packet to DeviceE.</li><li>When DeviceE receives the path detection packet, it calculates the outbound interface based on its routing table, and sends a packet-in message carrying the outbound interface, inbound interface, and path detection packet to <span class="keyword">iMaster NCE-Fabric</span>. DeviceE then encapsulates the path detection packet into a VXLAN packet and sends it to DeviceI.</li><li>When DeviceI receives the VXLAN packet, it calculates the outbound interface based on its MAC address table, and sends a packet-in message carrying the outbound interface, inbound interface, and VXLAN packet to <span class="keyword">iMaster NCE-Fabric</span>. DeviceI then transparently transmits the VXLAN packet to DeviceP.</li><li>When DeviceP receives the VXLAN packet, it calculates the outbound interface based on its MAC address table, and sends a packet-in message carrying the outbound interface, inbound interface, and VXLAN packet to <span class="keyword">iMaster NCE-Fabric</span>. DeviceP then decapsulates the VXLAN packet to obtain the path detection packet and forwards it to VM3.</li><li><span class="keyword">iMaster NCE-Fabric</span> calculates the entire path from VM1 to VM3 based on the information reported by DeviceL, DeviceG, DeviceC, DeviceA, DeviceE, DeviceI, and DeviceP.</li></ol>
+</div>
+<div class="fignone" id="EN-US_CONCEPT_0000001563874701__fig_dc_cfg_path_detection_01"><a name="EN-US_CONCEPT_0000001563874701__fig_dc_cfg_path_detection_01"></a><a name="fig_dc_cfg_path_detection_01"></a><span class="figcap"><b>Figure 3 </b>Path detection diagram</span><br><span><img class="vsd" src="figure/en-us_image_0000001513154722.png"></span></div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="Path_and_Connectivity_Detection_004.html">Configuring Path Detection
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="Path_and_Connectivity_Detection_006.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

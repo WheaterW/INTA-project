@@ -1,0 +1,196 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring RMON">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_rmon_cfg_0005.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_rmon_cfg_0008.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="RMON">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="RMON">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="RMON">
+<meta name="featuretype" content="System Management">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001512843790">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring RMON</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001512843790"></a><a name="EN-US_TASK_0000001512843790"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring RMON</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001512843790__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0000001512843790__fig_dc_vrp_rmon_cfg_001001">Figure 1</a>, the subnet connected to <span>100GE</span><span>1/0/2</span> of DeviceA needs to be monitored. This includes:</p>
+<ul><li><p>Collecting real-time and historical statistics about specific traffic and various packets.</p>
+</li><li><p>Monitoring broadcast and multicast traffic on the subnet and enabling the alarm function for the total number of broadcast and multicast packets. When the total number of such packets exceeds the configured threshold, the system proactively reports alarm information to the NMS.</p>
+</li></ul>
+<div class="fignone" id="EN-US_TASK_0000001512843790__fig_dc_vrp_rmon_cfg_001001"><a name="EN-US_TASK_0000001512843790__fig_dc_vrp_rmon_cfg_001001"></a><a name="fig_dc_vrp_rmon_cfg_001001"></a><span class="figcap"><b>Figure 1 </b>Networking diagram for configuring RMON</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 and interface2 represent <span>100GE</span><span>1/0/1</span> and <span>100GE</span><span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001512684222.png"></span></div>
+<p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Index of the RMON statistics function: 1</p>
+</li><li><p>Owner for the RMON statistics function: userA</p>
+</li><li><p>Sampling interval: 30 seconds</p>
+</li><li><p>Index of the RMON alarm function: 1</p>
+</li><li><p>OID of a monitored object: 1.3.6.1.2.1.16.1.1.1.5.1</p>
+</li><li><p>Upper threshold (1000) and lower threshold (100) for triggering an event</p>
+</li><li><p>Owner for the RMON alarm function: userA</p>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001512843790__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Ensure that there are reachable routes between the device and NMS.</p>
+</li><li><p>Configure SNMP and usernames and ensure that the device can send trap messages to the NMS.</p>
+</li><li><p>Configure the RMON statistics function and collect traffic statistics on interfaces.</p>
+</li><li><p>Configure the RMON alarm function so that a trap message is sent to the NMS when the sampling value exceeds the set threshold.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001512843790__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure reachable routes between the device and NMS. For details, see Configuration Scripts.</span></li><li><span>Configure the device to send trap messages to the NMS.</span><p><p># Enable SNMP to send trap messages to the NMS.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span>DeviceA] <strong>snmp-agent</strong>
+[<span class="keyword">*</span>DeviceA] <strong>snmp-agent trap enable</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure the device to send trap messages to the specified NMS.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>snmp-agent target-host trap address udp-domain 10.1.1.1 params securityname nms2-admin v3 privacy</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>Configure the RMON statistics function.</span><p><p># Enable the RMON statistics function.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/2</span>]<strong> rmon-statistics enable</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>commit</strong></pre>
+<p># Configure the Ethernet statistics function.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>rmon statistics 1 owner userA</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>commit</strong></pre>
+<p># Configure the historical traffic sampling function to sample the traffic on the subnet at an interval of 30 seconds and save the 10 most recent historical entries.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/2</span>]<strong> rmon history 1 buckets 10 interval 30 owner userA</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>Configure the RMON alarm function.</span><p><p># Configure the device to send trap messages to the NMS when RMON event 1 occurs.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>rmon event 1 description alarmofinterface trap nms2-admin</strong><strong> owner userA</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Set a sampling interval and thresholds for triggering event 1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>rmon alarm 1 1.3.6.1.2.1.16.1.1.1.5.1 5 absolute rising-threshold 1000 1 falling-threshold 100 1 owner userA</strong>
+[<span class="keyword">*</span>DeviceA] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001512843790__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check data traffic information on the subnet.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display rmon statistics </strong><strong><span>100ge</span></strong> <strong><span>1/0/2</span></strong>
+Statistics entry 1 owned by userA is valid.
+  Interface :<span>100GE</span><span>1/0/2</span>&lt;ifEntry.402653698&gt;
+  Received  :
+  Octets              :4294966296, Packets:316091
+  Broadcast packets   :311839    , Multicast packets:666
+  Undersize packets   :0         , Oversize packets :0
+  Fragments packets   :0         , Jabbers packets  :0
+  CRC alignment errors:0         , Collisions       :0
+  Dropped packets (insufficient resources):0
+  Packets received according to length (octets):
+  64     :0         ,  65-127  :0         ,  128-255  :0
+  256-511:0         ,  512-1023:0         ,  1024-1518:0</pre>
+<p># Check historical sampling records.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display rmon history <span>100ge</span></strong> <strong><span>1/0/2</span></strong>
+History control entry 1 owned by userA is valid
+  Sampled interface     : <span>100GE</span><span>1/0/2</span>&lt;ifEntry.402653698&gt;
+  Sampling interval     : 30(sec) with 10 buckets max
+  Last Sampling time    : 0days 05h:17m:26s.30th
+  Latest sampled values :
+  Octets               :1000      , Packets           :100
+  Broadcast packets    :100       , Multicast packets :100
+  Undersize packets    :0         , Oversize packets  :0
+  Fragments packets    :0         , Jabbers packets   :0
+  CRC alignment errors :0         , Collisions        :0
+  Dropped packet       :0         , Utilization       :0
+  History record:
+
+  Record No.1 (Sample time: 0days 05h:13m:56s.56th)
+  Octets               :1000      , Packets           :100
+  Broadcast packets    :100       , Multicast packets :100
+  Undersize packets    :0         , Oversize packets  :0
+  Fragments packets    :0         , Jabbers packets   :0
+  CRC alignment errors :0         , Collisions        :0
+  Dropped packets       :0         , Utilization       :0</pre>
+<p># Check RMON event information.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display rmon event</strong>
+Event table 1 owned by userA is valid.
+  Description: alarmofinterface.
+  Will cause snmp-trap when triggered, last triggered at 1days 04h:00m:00s.04th</pre>
+<p># Check RMON alarm configurations.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display rmon alarm 1</strong>
+Alarm table 1 owned by userA is valid.
+ Samples absolute value : 1.3.6.1.2.1.16.1.1.1.5.1
+ Sampling interval    : 5(sec)
+ Rising threshold     : 1000(linked with event 1)
+ Falling threshold    : 100(linked with event 1)
+ When startup enables : risingOrFallingAlarm
+ Latest value         : 1500</pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001512843790__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><pre class="screen">#
+sysname DeviceA
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.2.2.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.3.3.1 255.255.255.0
+ rmon-statistics enable
+ rmon statistics 1 owner userA
+ rmon history 1 buckets 10 interval 30 owner userA
+#
+ ip route-static 10.1.1.0 255.255.255.0 10.2.2.2
+#
+snmp-agent
+#
+snmp-agent target-host trap address udp-domain 10.1.1.1 params securityname nms2-admin v3 privacy
+#
+rmon event 1 description alarmofinterface trap nms2-admin owner userA
+rmon alarm 1 1.3.6.1.2.1.16.1.1.1.5.1 5 absolute rising-threshold 1000 1 falling-threshold 100 1 owner userA
+#
+return</pre>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_rmon_cfg_0005.html">Configuring RMON
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_rmon_cfg_0008.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

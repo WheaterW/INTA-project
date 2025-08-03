@@ -1,0 +1,155 @@
+Configuring a Policy for Accepting BGP4+ Routes
+===============================================
+
+Configuring a Policy for Accepting BGP4+ Routes
+
+#### Prerequisites
+
+Before configuring a policy for accepting BGP4+ routes, you have completed the following task:
+
+* [Configure basic BGP4+ functions](vrp_bgp6_cfg_0006.html).
+
+#### Context
+
+BGP4+ can apply a routing policy to routes received from all peers or peer groups, or only those received from a specified peer or peer group. If multiple filtering policies are configured, BGP4+ accepts only those routes that match all the configured policies.
+
+
+#### Procedure
+
+* Configure BGP4+ to filter routes received from all peers or peer groups.
+  1. Enter the system view.
+     
+     
+     ```
+     [system-view](cmdqueryname=system-view)
+     ```
+  2. Enter the BGP view.
+     
+     
+     ```
+     [bgp](cmdqueryname=bgp) as-number
+     ```
+  3. Enter the IPv6 unicast address family view.
+     
+     
+     ```
+     [ipv6-family](cmdqueryname=ipv6-family+unicast) unicast
+     ```
+  4. Configure the device to filter all received BGP4+ routes.
+     
+     
+     ```
+     [filter-policy](cmdqueryname=filter-policy+acl6-name+ipv6-prefix) { acl6-number | acl6-name acl6-name | ipv6-prefix ipv6-prefix-name } [import](cmdqueryname=import)
+     ```
+     
+     Only the matched routes are accepted by BGP4+ and added to the BGP4+ routing table.
+  5. Commit the configuration.
+     
+     
+     ```
+     [commit](cmdqueryname=commit)
+     ```
+* Apply a routing policy to the routes received from a specified peer or peer group.
+  1. Enter the system view.
+     
+     
+     ```
+     [system-view](cmdqueryname=system-view)
+     ```
+  2. Configure the device to filter the routes received from a specified peer or peer group based on any of the following filters:
+     
+     
+     + Based on a basic ACL
+       1. Enter the ACL view.
+          ```
+          [acl ipv6](cmdqueryname=acl+ipv6+name+basic+number) { name basic-acl6-name basic | [ number ] basic-acl6-number }
+          ```
+       2. Configure an ACL rule.
+          
+          ```
+          [rule](cmdqueryname=rule+name+deny+permit+fragment+source+any+time-range) [ rule-id ] [ name rule-name ] { deny | permit } [ fragment | source { source-ipv6-address { prefix-length | source-wildcard } | source-ipv6-address/prefix-length | any } | time-range time-name | vpn-instance vpn-instance-name ] *
+          ```
+          
+          When the [**rule**](cmdqueryname=rule) command is used to configure a filtering rule for a named ACL, only the configurations specified by **source** and **time-range** take effect.
+          
+          When a filter-policy of a routing protocol is used to filter routes:
+          - If the action specified in an ACL rule is **permit**, a route matching the rule will be accepted or advertised by the device.
+          - If the action specified in an ACL rule is **deny**, a route matching the rule will not be accepted or advertised by the device.
+          - If a route has not matched any ACL rules, the route will not be accepted or advertised by the device.
+          - If an ACL does not contain any rules, none of the routes matched against the filter-policy that uses this ACL will be accepted or advertised by the device.
+          - Routes can be filtered using a blacklist or whitelist:
+            
+            Filtering using a blacklist: Configure a rule with a smaller ID and specify the action **deny** in this rule to filter out the unwanted routes. Then, configure another rule with a larger ID in the same ACL and specify the action **permit** in this rule to advertise or accept the other routes.
+            
+            Filtering using a whitelist: Configure a rule with a smaller ID and specify the action **permit** in this rule to permit the routes to be advertised or accepted. Then, configure another rule with a larger ID in the same ACL and specify the action **deny** in this rule to filter out the unwanted routes.
+            
+            If **match-order** is set to **config** for the ACL, the ACL rules are matched based on their configuration order by default. If the ACL rules are numbered with IDs, the rules are matched in ascending order of their IDs.
+       3. Return to the system view.
+          ```
+          [quit](cmdqueryname=quit)
+          ```
+       4. Enter the BGP view.
+          ```
+          [bgp](cmdqueryname=bgp) as-number
+          ```
+       5. Enter the IPv6 unicast address family view.
+          ```
+          [ipv6-family](cmdqueryname=ipv6-family+unicast) unicast
+          ```
+       6. Configure BGP4+ to filter the routes received from a specified peer or peer group.
+          ```
+          [peer](cmdqueryname=peer) { ipv6-address | group-name | ipv4-address } [filter-policy](cmdqueryname=filter-policy+import) acl-number import
+          ```
+          ```
+          [peer](cmdqueryname=peer) { ipv6-address | group-name | ipv4-address } [filter-policy](cmdqueryname=filter-policy+acl6-name+import) acl6-name acl6-name import
+          ```
+     + Based on an AS\_Path filter:
+       
+       1. Enter the BGP view.
+          ```
+          [bgp](cmdqueryname=bgp) as-number
+          ```
+       2. Enter the IPv6 unicast address family view.
+          ```
+          [ipv6-family](cmdqueryname=ipv6-family+unicast) unicast
+          ```
+       3. Configure BGP4+ to filter the routes received from a specified peer or peer group.
+          ```
+          [peer](cmdqueryname=peer) { ipv6-address | group-name | ipv4-address } [as-path-filter](cmdqueryname=as-path-filter+import) { number | name } import
+          ```
+     + Based on a route-policy:
+       
+       1. Enter the BGP view.
+          ```
+          [bgp](cmdqueryname=bgp) as-number
+          ```
+       2. Enter the IPv6 unicast address family view.
+          ```
+          [ipv6-family](cmdqueryname=ipv6-family+unicast) unicast
+          ```
+       3. Configure BGP4+ to filter the routes received from a specified peer or peer group.
+          ```
+          [peer](cmdqueryname=peer) { ipv6-address | group-name | ipv4-address } [route-policy](cmdqueryname=route-policy+import) route-policy-name import
+          ```
+     + Based on a route-policy:
+       
+       1. Enter the BGP view.
+          ```
+          [bgp](cmdqueryname=bgp) as-number
+          ```
+       2. Enter the IPv6 unicast address family view.
+          ```
+          [ipv6-family](cmdqueryname=ipv6-family+unicast) unicast
+          ```
+       3. Configure the device to filter the routes to be received from a specified peer or peer group.
+          ```
+          [peer](cmdqueryname=peer) { ipv6-address | group-name | ipv4-address } [route-policy](cmdqueryname=route-policy+import) route-policy-name import
+          ```
+     
+     The import routing policy applied to a peer in a peer group can be different from that applied to the peer group. Specifically, a unique policy can be used to filter the routes to be received from each peer in the peer group.
+  3. Commit the configuration.
+     
+     
+     ```
+     [commit](cmdqueryname=commit)
+     ```

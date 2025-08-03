@@ -1,0 +1,433 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Associating a BFD Session with an Interface">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bfd_cfg_0059.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bfd_cfg_0081.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BFD">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BFD">
+<meta name="featuretype" content="High Availability">
+<meta name="featurename" content="BFD">
+<meta name="featuretype" content="High Availability">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001413039217">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Associating a BFD Session with an Interface</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001413039217"></a><a name="EN-US_TASK_0000001413039217"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Associating a BFD Session with an Interface</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001413039217__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In <a href="#EN-US_TASK_0000001413039217__fig559257205013">Figure 1</a>, CE1 is dual-homed to PE1 and PE2, and CE2 is dual-homed to PE3 and PE4. Normally, traffic is forwarded along the primary path CE1 -&gt; PE1 -&gt; PE3 -&gt; CE2. It is required that faults on the link between PEs be quickly detected so that the CEs can detect the faults and switch traffic to the backup path CE1 -&gt; PE2 -&gt; PE4 -&gt; CE2.</p>
+<div class="fignone" id="EN-US_TASK_0000001413039217__fig559257205013"><a name="EN-US_TASK_0000001413039217__fig559257205013"></a><a name="fig559257205013"></a><span class="figcap"><b>Figure 1 </b>Networking diagram for associating a BFD session with an interface</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1, interface2, and interface3 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, and <span>100GE</span><span>1/0/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001362999254.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001413039217__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure devices to advertise routes through OSPF and set the OSPF cost of VLANIF 40 on CE1 and VLANIF 60 on CE2 to 10 so that traffic is transmitted along the primary path CE1 -&gt; PE1 -&gt; PE3 -&gt; CE2.</p>
+</li><li><p>Create a BFD session on PE1 to detect the directly connected link between PE1 and PE3.</p>
+</li><li><p>Create a BFD session on PE3 to detect the directly connected link between PE3 and PE1.</p>
+</li><li><p>Associate the BFD session on PE1 with <span>100GE</span><span>1/0/1</span>, and associate the BFD session on PE3 with <span>100GE</span><span>1/0/2</span>.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001413039217__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Procedure</h4><ol><li>Enable network connectivity between devices.<div class="p"># Configure an IP address for each interface. PE1 is used as an example. The configurations of PE2, PE3, PE4, CE1, and CE2 are similar to the configuration of PE1. For details, see the configuration files.<pre class="screen">&lt;<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname PE1</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>vlan batch 10 20</strong>
+[<span class="keyword">*</span>PE1] <strong>interface <span>100ge</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>PE1-<span>100GE</span><span>1/0/1</span>] <strong>portswitch</strong>
+[<span class="keyword">*</span>PE1-<span>100GE</span><span>1/0/1</span>] <strong>port link-type hybrid</strong>
+[<span class="keyword">*</span>PE1-<span>100GE</span><span>1/0/1</span>] <strong>port hybrid pvid vlan 10</strong>
+[<span class="keyword">*</span>PE1-<span>100GE</span><span>1/0/1</span>] <strong>port hybrid untagged vlan 10</strong>
+[<span class="keyword">*</span>PE1-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>interface <span>100ge</span><span>1/0/2</span></strong>
+[<span class="keyword">*</span>PE1-<span>100GE</span><span>1/0/2</span>] <strong>portswitch</strong>
+[<span class="keyword">*</span>PE1-<span>100GE</span><span>1/0/2</span>] <strong>port link-type hybrid</strong>
+[<span class="keyword">*</span>PE1-<span>100GE</span><span>1/0/2</span>] <strong>port hybrid pvid vlan 20</strong>
+[<span class="keyword">*</span>PE1-<span>100GE</span><span>1/0/2</span>] <strong>port hybrid untagged vlan 20</strong>
+[<span class="keyword">*</span>PE1-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>interface vlanif 10</strong>
+[<span class="keyword">*</span>PE1-Vlanif10] <strong>ip address 10.10.1.2 24</strong>
+[<span class="keyword">*</span>PE1-Vlanif10] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>interface vlanif 20</strong>
+[<span class="keyword">*</span>PE1-Vlanif20] <strong>ip address 10.20.1.1 24</strong>
+[<span class="keyword">*</span>PE1-Vlanif20] <strong>quit</strong>
+[<span class="keyword">*</span>PE1-Vlanif20] <strong>commit</strong></pre>
+</div>
+</li><li>Configure a routing protocol.<p>OSPF is used in this example.</p>
+<p>Run OSPF on CEs and PEs. To ensure that traffic is transmitted along the path CE1 -&gt; PE1 -&gt; PE3 -&gt; CE2, increase the OSPF cost of VLANIF 40 on CE1 and VLANIF 60 on CE2. For example, change the cost to 10.</p>
+<p># Configure PE1. The configurations of PE2, PE3, and PE4 are similar to the configuration of PE1. For details, see the configuration files.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>ospf 1</strong>
+[<span class="keyword">*</span>PE1-ospf-1] <strong>area 0.0.0.0</strong>
+[<span class="keyword">*</span>PE1-ospf-1-area-0.0.0.0] <strong>network 10.10.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>PE1-ospf-1-area-0.0.0.0] <strong>network 10.20.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>PE1-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>PE1-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>PE1-ospf-1] <strong>commit</strong></pre>
+<div class="p"># Configure CE1.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>ospf 1</strong>
+[<span class="keyword">*</span>CE1-ospf-1] <strong>area 0.0.0.0</strong>
+[<span class="keyword">*</span>CE1-ospf-1-area-0.0.0.0] <strong>network 10.10.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>CE1-ospf-1-area-0.0.0.0] <strong>network 10.40.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>CE1-ospf-1-area-0.0.0.0] <strong>network 192.168.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>CE1-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>CE1-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>CE1] <strong>interface vlanif 40</strong>
+[<span class="keyword">*</span>CE1-Vlanif40] <strong>ospf cost 10</strong>
+[<span class="keyword">*</span>CE1-Vlanif40] <strong>quit</strong>
+[<span class="keyword">*</span>PE1-Vlanif40] <strong>commit</strong></pre>
+</div>
+<p># Configure CE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2] <strong>ospf 1</strong>
+[<span class="keyword">*</span>CE2-ospf-1] <strong>area 0.0.0.0</strong>
+[<span class="keyword">*</span>CE2-ospf-1-area-0.0.0.0] <strong>network 10.30.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>CE2-ospf-1-area-0.0.0.0] <strong>network 10.60.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>CE2-ospf-1-area-0.0.0.0] <strong>network 192.168.2.0 0.0.0.255</strong>
+[<span class="keyword">*</span>CE2-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>CE2-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>CE2] <strong>interface vlanif 60</strong>
+[<span class="keyword">*</span>CE2-Vlanif60] <strong>ospf cost 10</strong>
+[<span class="keyword">*</span>CE2-Vlanif60] <strong>quit</strong>
+[<span class="keyword">*</span>PE1-Vlanif60] <strong>commit</strong></pre>
+</li><li>Create a BFD session.<div class="p"># Configure PE1.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>bfd</strong>
+[<span class="keyword">*</span>PE1-bfd] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>bfd pe1tope3 bind peer-ip 10.20.1.2 interface vlanif 20</strong>
+[<span class="keyword">*</span>PE1-bfd-session-pe1tope3] <strong>discriminator local 1</strong>
+[<span class="keyword">*</span>PE1-bfd-session-pe1tope3] <strong>discriminator remote 2</strong>
+[<span class="keyword">*</span>PE1-bfd-session-pe1tope3] <strong>commit</strong>
+[<span class="keyword">*</span>PE1-bfd-session-pe1tope3] <strong>quit</strong>
+[<span class="keyword">*</span>PE1-bfd-session-pe1tope3] <strong>commit</strong></pre>
+</div>
+<div class="p"># Configure PE3.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>bfd</strong>
+[<span class="keyword">*</span>PE3-bfd] <strong>quit</strong>
+[<span class="keyword">*</span>PE3] <strong>bfd pe3tope1 bind peer-ip 10.20.1.1 interface vlanif 20</strong>
+[<span class="keyword">*</span>PE3-bfd-session-pe3tope1] <strong>discriminator local 2</strong>
+[<span class="keyword">*</span>PE3-bfd-session-pe3tope1] <strong>discriminator remote 1</strong>
+[<span class="keyword">*</span>PE3-bfd-session-pe3tope1] <strong>commit</strong>
+[<span class="keyword">*</span>PE3-bfd-session-pe3tope1] <strong>quit</strong>
+[<span class="keyword">*</span>PE1-bfd-session-pe1tope3] <strong>commit</strong></pre>
+</div>
+</li><li>Associate the BFD session with an interface.<p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>oam-mgr</strong>
+[<span class="keyword">*</span>PE1-oam-mgr] <strong>oam-bind ingress bfd-session 1 trigger if-down egress interface <span>100ge</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>PE1-oam-mgr] <strong>quit</strong>
+[<span class="keyword">*</span>PE1-oam-mgr] <strong>commit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>oam-mgr</strong>
+[<span class="keyword">*</span>PE3-oam-mgr] <strong>oam-bind ingress bfd-session 2 trigger if-down egress interface <span>100ge</span><span>1/0/2</span></strong>
+[<span class="keyword">*</span>PE3-oam-mgr] <strong>quit</strong>
+[<span class="keyword">*</span>PE1-oam-mgr] <strong>commit</strong></pre>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001413039217__1.3.4"></a><a name="1.3.4"></a>
+<div class="p"><h4 class="sectiontitle">Verifying the Configuration</h4><p># Run the <strong>shutdown</strong> command on <span>100GE</span><span>1/0/1</span> of PE3 to simulate a link fault. After the OAM management module of CE1 receives the fault notification message encapsulated into a BFD packet, CE1 is aware of the link fault between PE1 and PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>interface <span>100ge</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>PE3-<span>100GE</span><span>1/0/1</span>] <strong>shutdown</strong>
+[<span class="keyword">*</span>PE3-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>PE1-<span>100GE</span><span>1/0/1</span>] <strong>commit</strong></pre>
+<p># Run the <strong>display bfd session all verbose</strong> command on PE1. You can see that the BFD session becomes down and the value of <strong>Bind Application</strong> is <strong>ETHOAM</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display bfd session all verbose</strong> 
+--------------------------------------------------------------------------------
+Session MIndex : <samp class="codeph">258</samp>       (One Hop) State : <strong>Down</strong>        Name : pe1tope3        
+--------------------------------------------------------------------------------
+  Local Discriminator    : 1                Remote Discriminator   : 2          
+  Session Detect Mode    : Asynchronous Mode Without Echo Function              
+  BFD Bind Type          : Interface(Vlanif20)                                 
+  Bind Session Type      : Static                                               
+  Bind Peer IP Address   : 10.20.1.2                                             
+  NextHop Ip Address     : 10.20.1.2                                             
+  Bind Interface         : Vlanif20                                             
+  FSM Board Id           : 0                TOS-EXP                : 7          
+  Min Tx Interval (ms)   : <samp class="codeph">1000</samp>             Min Rx Interval (ms)   : <samp class="codeph">1000</samp>       
+  Actual Tx Interval (ms): <samp class="codeph">11000</samp>            Actual Rx Interval (ms): <samp class="codeph">11000</samp>      
+  Local Detect Multi     : 3                Detect Interval (ms)   : -          
+  Echo Passive           : Disable          Acl Number             : -          
+  Destination Port       : 3784             TTL                    : 255        
+  Proc Interface Status  : Disable          Process PST            : Disable    
+  WTR Interval (ms)      : -                                                    
+  Active Multi           : -<span>                DSCP                   : - </span>                                                    
+  Last Local Diagnostic  : No Diagnostic                       
+  Bind Application       : <strong>ETHOAM</strong>                                        
+  Session TX TmrID       : <samp class="codeph">16483</samp>            Session Detect TmrID   : -          
+  Session Init TmrID     : -                Session WTR TmrID      : -          
+  Session Echo Tx TmrID  : -                                                    
+  PDT Index              : FSM-0 | RCV-0 | IF-0 | TOKEN-0                       
+  Session Description    : -                                                    
+--------------------------------------------------------------------------------
+                                                                                
+     Total UP/DOWN Session Number : 0/1</pre>
+<p># Run the <strong>display ip routing table</strong> command on CE1 to check the route from CE1 to CE2. The next hop of <strong>192.168.2.0/24</strong> is 10.40.1.2. That is, the traffic is forwarded through the backup path.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>display ip routing-table</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance</span>
+------------------------------------------------------------------------------
+Routing Tables: Public
+         Destinations : 9        Routes : 9
+
+Destination/Mask    Proto   Pre  Cost      Flags NextHop         Interface
+
+      10.40.1.0/24  Direct  0    0           D   10.40.1.1       Vlanif40
+      10.40.1.1/32  Direct  0    0           D   127.0.0.1       Vlanif40
+      10.50.1.0/24  OSPF    10   11          D   10.40.1.2       Vlanif40
+      10.60.1.0/24  OSPF    10   12          D   10.40.1.2       Vlanif40
+      127.0.0.0/8   Direct  0    0           D   127.0.0.1       InLoopBack0
+      127.0.0.1/32  Direct  0    0           D   127.0.0.1       InLoopBack0
+    192.168.1.0/24  Direct  0    0           D   192.168.1.1     Vlanif100
+    192.168.1.1/32  Direct  0    0           D   127.0.0.1       Vlanif100
+    <strong>192.168.2.0/24</strong>  OSPF    10   13          D   10.40.1.2       Vlanif40</pre>
+</div></div>
+<div class="example"><a name="EN-US_TASK_0000001413039217__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>CE1</p>
+<pre class="screen">#
+sysname CE1
+#
+vlan batch 10 40 100
+#
+interface Vlanif10
+ ip address 10.10.1.1 255.255.255.0
+#
+interface Vlanif40
+ ip address 10.40.1.1 255.255.255.0
+ ospf cost 10
+#
+interface Vlanif100
+ ip address 192.168.1.1 255.255.255.0
+#
+interface <span>100ge</span><span>1/0/1</span>
+<span> port link-type hybrid</span>
+ port hybrid pvid vlan 10
+ port hybrid untagged vlan 10
+#
+interface <span>100ge</span><span>1/0/2</span>
+<span> port link-type hybrid</span>
+ port hybrid pvid vlan 40
+ port hybrid untagged vlan 40
+#
+interface <span>100ge</span><span>1/0/3</span>
+<span> port link-type hybrid</span>
+ port hybrid pvid vlan 100
+ port hybrid untagged vlan 100
+#
+ospf 1
+ area 0.0.0.0
+  network 10.10.1.0 0.0.0.255
+  network 10.40.1.0 0.0.0.255
+  network 192.168.1.0 0.0.0.255
+#
+return</pre>
+</li><li><p>CE2</p>
+<pre class="screen">#
+sysname CE2
+#
+vlan batch 30 60 110
+#
+interface Vlanif30
+ ip address 10.30.1.2 255.255.255.0
+#
+interface Vlanif60
+ ip address 10.60.1.1 255.255.255.0
+ ospf cost 10
+#
+interface Vlanif110
+ ip address 192.168.2.1 255.255.255.0
+#
+interface <span>100ge</span><span>1/0/1</span>
+<span> port link-type hybrid</span>
+ port hybrid pvid vlan 30
+ port hybrid untagged vlan 30
+#
+interface <span>100ge</span><span>1/0/2</span>
+<span> port link-type hybrid</span>
+ port hybrid pvid vlan 60
+ port hybrid untagged vlan 60
+#
+interface <span>100ge</span><span>1/0/3</span> 
+<span> port link-type hybrid</span>
+ port hybrid pvid vlan 110
+ port hybrid untagged vlan 110
+#
+ospf 1
+ area 0.0.0.0
+  network 10.30.1.0 0.0.0.255
+  network 10.60.1.0 0.0.0.255
+  network 192.168.2.0 0.0.0.255
+#
+return</pre>
+</li><li><p>PE1</p>
+<pre class="screen">#
+sysname PE1
+#
+vlan batch 10 20
+#
+bfd
+#
+interface Vlanif10
+ ip address 10.10.1.2 255.255.255.0
+#
+interface Vlanif20
+ ip address 10.20.1.1 255.255.255.0
+#
+interface <span>100ge</span><span>1/0/1</span>
+<span> port link-type hybrid</span>
+ port hybrid pvid vlan 10
+ port hybrid untagged vlan 10
+#
+interface <span>100ge</span><span>1/0/2</span>
+<span> port link-type hybrid</span>
+ port hybrid pvid vlan 20
+ port hybrid untagged vlan 20
+#
+bfd pe1tope3 bind peer-ip 10.20.1.2 interface Vlanif20
+ discriminator local 1
+ discriminator remote 2
+#
+ospf 1
+ area 0.0.0.0
+  network 10.10.1.0 0.0.0.255
+  network 10.20.1.0 0.0.0.255
+#
+oam-mgr
+ oam-bind ingress bfd-session 1 trigger if-down egress interface <span>100ge</span><span>1/0/1</span> 
+#
+return</pre>
+</li><li><p>PE2</p>
+<pre class="screen">#
+sysname PE2
+#
+vlan batch 40 50
+#
+interface Vlanif40
+ ip address 10.40.1.2 255.255.255.0
+#
+interface Vlanif50
+ ip address 10.50.1.1 255.255.255.0
+#
+interface <span>100ge</span><span>1/0/1</span>
+<span> port link-type hybrid</span>
+ port hybrid pvid vlan 40
+ port hybrid untagged vlan 40
+#
+interface <span>100ge</span><span>1/0/2</span>
+<span> port link-type hybrid</span>
+ port hybrid pvid vlan 50
+ port hybrid untagged vlan 50
+#
+ospf 1
+ area 0.0.0.0
+  network 10.40.1.0 0.0.0.255
+  network 10.50.1.0 0.0.0.255
+#
+return</pre>
+</li><li><p>PE3</p>
+<pre class="screen">#
+sysname PE3
+#
+vlan batch 20 30
+#
+bfd
+#
+interface Vlanif20
+ ip address 10.20.1.2 255.255.255.0
+#
+interface Vlanif30
+ ip address 10.30.1.1 255.255.255.0
+#
+interface <span>100ge</span><span>1/0/1</span>
+<span> port link-type hybrid</span>
+ port hybrid pvid vlan 20
+ port hybrid untagged vlan 20
+#
+interface <span>100ge</span><span>1/0/2</span>
+<span> port link-type hybrid</span>
+ port hybrid pvid vlan 30
+ port hybrid untagged vlan 30
+#
+bfd pe3tope1 bind peer-ip 10.20.1.1 interface Vlanif20
+ discriminator local 2
+ discriminator remote 1
+#
+ospf 1
+ area 0.0.0.0
+  network 10.20.1.0 0.0.0.255
+  network 10.30.1.0 0.0.0.255
+#
+oam-mgr
+ oam-bind ingress bfd-session 2 trigger if-down egress interface <span>100ge</span><span>1/0/2</span>
+#
+return</pre>
+</li><li><p>PE4</p>
+<pre class="screen">#
+sysname PE4
+#
+vlan batch 50 60
+#
+interface Vlanif50
+ ip address 10.50.1.2 255.255.255.0
+#
+interface Vlanif60
+ ip address 10.60.1.2 255.255.255.0
+#
+interface <span>100ge</span><span>1/0/1</span>
+<span> port link-type hybrid</span>
+ port hybrid pvid vlan 50
+ port hybrid untagged vlan 50
+#
+interface <span>100ge</span><span>1/0/2</span>
+<span> port link-type hybrid</span>
+ port hybrid pvid vlan 60
+ port hybrid untagged vlan 60
+#
+ospf 1
+ area 0.0.0.0
+  network 10.50.1.0 0.0.0.255
+  network 10.60.1.0 0.0.0.255
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bfd_cfg_0059.html">Associating a BFD Session with an Interface
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bfd_cfg_0081.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

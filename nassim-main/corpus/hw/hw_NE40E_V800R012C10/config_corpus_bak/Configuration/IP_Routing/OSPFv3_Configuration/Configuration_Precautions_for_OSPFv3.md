@@ -1,0 +1,15 @@
+Configuration Precautions for OSPFv3
+====================================
+
+Configuration_Precautions_for_OSPFv3
+
+#### Feature Requirements
+
+**Table 1** Feature requirements
+| Feature Requirements | Series | Models |
+| --- | --- | --- |
+| OSPFv3 checks whether a neighbor in the full state exists in the backbone area before advertising a default route to the stub area. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| The network types of the interfaces on both ends of an OSPFv3 neighbor relationship must be the same so that the interfaces can learn routes after the neighbor relationship is established. Otherwise, the neighbor relationship cannot be established and routes cannot be calculated.  You are advised to use the same network type at both ends. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| If the OSPFv3 neighbor timeout period is too short, the neighbor relationship may go Down due to timeout, affecting services.  You are advised to use the default hello timer and dead timer, or change the dead timer to a value greater than or equal to 40s. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| After the device is restarted, if the BFD session status of the local device or neighbor is AdminDown, the OSPFv3 status is not affected. When the BFD session is renegotiated, if BFD reports the detection status Down but the previous detection status is Up, OSPFv3 sets the neighbor status to Down. In other cases, the OSPFv3 status is not affected. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| 1. A maximum of 100,000 route processing loops are supported. If the number of imported route advertisement extension LSAs exceeds the upper limit, the LSAs are not advertised.  2. Routes cannot be imported to NSSAs.  3. Aggregated routes cannot advertise redistribute information.  4. After a loop is removed, the loop cannot be automatically removed. You need to manually clear the alarm using a command.  5. If the redistribute IDs of different devices conflict, a loop alarm may be falsely reported.  6. Loop detection is not supported in the scenario where more than two re-advertisement nodes are configured.  7. Loops may fail to be detected in load balancing scenarios where inner-loop routes and non-loop routes are advertised by multiple nodes.  8. If the original route source is withdrawn and a loop is triggered, self-healing is not supported.  9. Route import between public and private networks is not supported.  10. After detecting a route loop, the re-advertisement point increases the cost of the route to prevent the loop. As a result, the traffic direction may be different from the expected path.  11. When the maximum cost is advertised on a loop, the apply cost command does not take effect.  12. After this function is enabled, LSAs need to be added to advertise extended TLVs for each prefix, which greatly increases memory usage. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |

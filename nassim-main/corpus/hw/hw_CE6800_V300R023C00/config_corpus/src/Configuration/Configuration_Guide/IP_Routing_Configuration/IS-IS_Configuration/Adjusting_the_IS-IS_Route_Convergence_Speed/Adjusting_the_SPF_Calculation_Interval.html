@@ -1,0 +1,82 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Adjusting the SPF Calculation Interval">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0036.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0039.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0041.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IS-IS">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IS-IS">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130784104">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Adjusting the SPF Calculation Interval</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130784104"></a><a name="EN-US_TASK_0000001130784104"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Adjusting the SPF Calculation Interval</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130784104__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>If a network topology frequently changes, IS-IS performs SPF calculation frequently too, consuming excessive CPU resources, and adversely affecting other services.</p>
+<p>To solve this problem, configure an intelligent timer to control the SPF calculation interval. With an intelligent timer, the interval for the SPF calculation at the beginning is short, ensuring fast IS-IS route convergence. When the IS-IS network stabilizes, the interval for SPF calculation doubles automatically, reducing unnecessary resource consumption.</p>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130784104__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li><span>Enter the IS-IS view.</span><p><pre class="screen"><a href="cmdqueryname=isis"><b><span class="cmdname">isis</span></b></a> [ <i><span class="varname">process-id</span></i> ]</pre>
+</p></li><li><span>Configure an intelligent timer for SPF calculation.</span><p><pre class="screen"><a href="cmdqueryname=timer+spf"><b><span class="cmdname">timer spf</span></b></a> <i><span class="varname">max-interval</span></i> [ <i><span class="varname">init-interval</span></i> [ <i><span class="varname">incr-interval</span></i> ] ]</pre>
+</p><p><div class="p">The intelligent timer works as follows:<ul><li>The interval for the first SPF calculation is <i><span class="varname">init-interval</span></i>; the interval for the second SPF calculation is <i><span class="varname">incr-interval</span></i>. From the third time on, the delay in SPF calculation doubles each time until the delay reaches <i><span class="varname">max-interval</span></i>. <span>If the network still flaps within the <i><span class="varname">max-interval</span></i>, the calculation delay remains <i><span class="varname">max-interval</span></i> until the time when the network does not flap throughout <i><span class="varname">max-interval</span></i> or when the IS-IS process is restarted. The delay then decreases to <i><span class="varname">init-interval</span></i>.</span></li><li>If <i><span class="varname">incr-interval</span></i> is not specified, <i><span class="varname">init-interval</span></i> is used as the interval for the first SPF calculation, and <i><span class="varname">max-interval</span></i> is used as the interval for subsequent SPF calculations.</li><li>If only <i><span class="varname">max-interval</span></i> is specified, the intelligent timer becomes a one-shot timer.</li></ul>
+</div>
+</p></li><li><span>Configure a period for the device to delay route calculation when the device receives an LSP during route flapping.</span><p><pre class="screen"><a href="cmdqueryname=suppress-flapping+route-calculate"><b><span class="cmdname">suppress-flapping route-calculate</span></b></a> <strong><span>timer</span></strong> <i><span class="varname">delay-interval</span></i></pre>
+</p><p><p>By default, if a device receives an LSP during route flapping, it delays route calculation for 10s.</p>
+</p></li><li><span>Configure a period for the device to delay route calculation when the device receives a purge LSP.</span><p><pre class="screen"><a href="cmdqueryname=timer+purge-zero-lsp+route-calculate-delay"><b><span class="cmdname">timer purge-zero-lsp route-calculate-delay</span></b></a> <i><span class="varname">delay-interval</span></i></pre>
+<p>By default, if a device receives a purge LSP, it delays route calculation for 10s.</p>
+</p></li><li><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001130784104__en-us_task_0234857734_screen163801330213"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001130784104__en-us_task_0234857734_en-us_concept_0141113565_cmdname1667501373175340">commit</span></b></a></pre>
+</p></li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_isis_ipv4_cfg_0036.html">Adjusting the IS-IS Route Convergence Speed
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_isis_ipv4_cfg_0039.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_isis_ipv4_cfg_0041.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

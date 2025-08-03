@@ -1,0 +1,93 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Tracert Fundamentals">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_ping_tracert_cfg_0003.html">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_ping_tracert_cfg_0004.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Ping and Tracert">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Ping and Tracert">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featurename" content="Ping and Tracert">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featurename" content="Ping and Tracert">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001176664539">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Tracert Fundamentals</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001176664539"></a><a name="EN-US_CONCEPT_0000001176664539"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Tracert Fundamentals</h1>
+<div><p>The tracert function utilizes the ICMP error-reporting mechanism. You can send UDP packets with different TTL values from the source to the destination so that the packets will reach different hops on the network path. Each hop then sends ICMP error-reporting messages to the source.</p>
+<div class="section"><h4 class="sectiontitle">Tracert Process</h4><p>The packet exchange during a tracert operation is as follows:</p>
+<ol><li>A user performs a tracert operation on the source (DeviceA) to send UDP packets (three packets by default) with the TTL value of 1 to the destination (DeviceE). The first packet uses port 33434 as the destination port by default, and the subsequent packets increase the port number by 1 in sequence. These specified ports are not the actual destination port.</li><li>The first hop (DeviceB) receives the UDP packets. As the TTL value in the received packets is reduced to 0, the first hop sends three ICMP Time Exceeded messages to the source.</li><li>After receiving the ICMP Time Exceeded messages sent by the first hop, the source determines that the first hop is reachable, and obtains the RTT (time difference between sending and receiving packets) in communication between the source and the first hop.</li><li>The source continues to send three UDP packets with a TTL value of 2 to the destination. Similarly, after receiving the packets with the TTL value reduced to 0, the second hop sends ICMP Time Exceeded messages to the source.</li><li>The source continues to send UDP packets by increasing the TTL value by 1 each time a packet is sent in order to test the reachability of each hop.</li><li>Finally, the destination receives the UDP packets from the source. As the destination port specified in the packets is incorrect, the destination sends three ICMP Port Unreachable messages to the source, indicating that the destination port is unreachable.</li><li>The source receives the ICMP Port Unreachable messages, indicating that the tracert process is completed. The command output on the source displays the reachability and RTT of each hop on the path from the source to the destination.</li></ol>
+<div class="fignone"><span class="figcap"><b>Figure 1 </b>Packet exchange during a tracert operation</span><br><span><img class="vsd" src="figure/en-us_image_0000001130784794.png"></span></div>
+<p>If no response packet is received within a specified period after a UDP packet is sent, a timeout prompt is displayed on the source. If a timeout prompt is displayed after the source sends a UDP packet with the configured maximum TTL value, the destination cannot be reached and the test fails.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Application Scenarios of Tracert</h4><p>The tracert function can be used to detect paths on different networks. The following table describes its application scenarios.</p>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Application scenarios of tracert</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="11.331133113311331%" id="mcps1.3.3.3.2.4.1.1" liSelected="liSelected"><p>Network Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="23.01230123012301%" id="mcps1.3.3.3.2.4.1.2" liSelected="liSelected"><p>Detection Item</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="65.65656565656566%" id="mcps1.3.3.3.2.4.1.3" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="11.331133113311331%" headers="mcps1.3.3.3.2.4.1.1 "><p>IP network</p>
+</td>
+<td class="cellrowborder" valign="top" width="23.01230123012301%" headers="mcps1.3.3.3.2.4.1.2 "><p>Path information of an IPv4 or IPv6 network</p>
+</td>
+<td class="cellrowborder" valign="top" width="65.65656565656566%" headers="mcps1.3.3.3.2.4.1.3 "><p>Detect the path between two devices on an IPv4 or IPv6 network.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="11.331133113311331%" headers="mcps1.3.3.3.2.4.1.1 "><p>VXLAN network</p>
+</td>
+<td class="cellrowborder" valign="top" width="23.01230123012301%" headers="mcps1.3.3.3.2.4.1.2 "><p>Path information of a VXLAN network</p>
+</td>
+<td class="cellrowborder" valign="top" width="65.65656565656566%" headers="mcps1.3.3.3.2.4.1.3 "><p>Detect the path between VTEPs of a VXLAN tunnel on a VXLAN network.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../vrp/vrp_ping_tracert_cfg_0003.html">Understanding Ping and Tracert
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../vrp/vrp_ping_tracert_cfg_0004.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

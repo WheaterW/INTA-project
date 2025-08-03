@@ -1,0 +1,74 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding Rapid VRRP Switchback">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_vrrp_cfg_0137.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_vrrp_cfg_0151.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001130624258">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding Rapid VRRP Switchback</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001130624258"></a><a name="EN-US_CONCEPT_0000001130624258"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding Rapid VRRP Switchback</h1>
+<div><div class="section"><h4 class="sectiontitle">Definition</h4><p>VRRP switchback is a process during which the original master device switches from the Backup state to the Master state after a fault is rectified.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Application Scenarios</h4><p>In scenarios where the master device in an mVRRP group monitors a VRRP-disabled interface or feature, for example, a Bidirectional Forwarding Detection (BFD) session, in reduced mode, if the interface or feature fails, the master device reduces its VRRP priority to trigger a master/backup VRRP switchover. On the network to the left in <a href="#EN-US_CONCEPT_0000001130624258__fig_dc_vrp_vrrp_feature_012101">Figure 1</a>, VRRP-enabled DeviceC and DeviceD are connected to DeviceA and DeviceB over primary and secondary links. User-to-network traffic is transmitted to DeviceC (master) over the primary link, and DeviceC forwards the traffic to the Internet. Normally, user traffic is transmitted along the path DeviceE -&gt; DeviceA -&gt; DeviceC. On the network to the right in <a href="#EN-US_CONCEPT_0000001130624258__fig_dc_vrp_vrrp_feature_012101">Figure 1</a>, if the primary link or interface 1 on DeviceC fails, a primary/secondary link switchover and a master/backup VRRP switchover are performed. User-to-network traffic is then transmitted along the path DeviceE -&gt; DeviceA -&gt; DeviceB -&gt; DeviceD to the Internet. After the fault is rectified, a primary/secondary link switchback and a master/backup VRRP switchback are performed. However, if the link switchback is completed faster than the VRRP switchback, user traffic is interrupted.</p>
+<p>To prevent user traffic interruptions, you can enable rapid VRRP switchback to allow the original master device to switch from the Backup state to the Master state immediately after the fault is rectified without waiting for a VRRP negotiation period.</p>
+<p>Rapid VRRP switchback can be configured if the following conditions are met:</p>
+<ul><li>The master device in an mVRRP group tracks a VRRP-disabled interface or feature and reduces its VRRP priority if the interface or feature fails.</li></ul>
+<ul><li>Devices in the VRRP group are connected to user-side devices over primary and standby links.</li><li>A primary/secondary link switchback is completed faster than a master/backup VRRP switchback.</li></ul>
+<div class="fignone" id="EN-US_CONCEPT_0000001130624258__fig_dc_vrp_vrrp_feature_012101"><a name="EN-US_CONCEPT_0000001130624258__fig_dc_vrp_vrrp_feature_012101"></a><a name="fig_dc_vrp_vrrp_feature_012101"></a><span class="figcap"><b>Figure 1 </b>Network diagram of rapid VRRP switchback</span><br><span><img class="vsd" src="figure/en-us_image_0000001176743737.png"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Fundamentals</h4><div class="p">Rapid VRRP switchback allows the original master device to switch from the Backup state to the Master state immediately after the fault is rectified without sending VRRP Advertisement packets to negotiate the VRRP status. The following example uses an mVRRP group tracking a VRRP-disabled interface to illustrate rapid VRRP switchback implementation.<ul><li>Common VRRP groups are configured on DeviceC and DeviceD that run VRRP, and an mVRRP group is configured on the directly connected interfaces of DeviceC and DeviceD. The common VRRP groups are bound to the mVRRP group as service VRRP groups, and the mVRRP group determines the master/backup state of the service VRRP groups.</li><li>DeviceC has a VRRP priority of 120 and functions as the master in the mVRRP group.</li><li>DeviceD has a VRRP priority of 100 and functions as the backup in the mVRRP group.</li><li>DeviceC in the mVRRP group monitors interface 1 and reduces its priority by 40 if interface 1 goes down.</li></ul>
+</div>
+<div class="p">The implementation is as follows:<ol><li>Normally, DeviceC periodically sends VRRP Advertisement packets to notify DeviceD that it is working properly. DeviceC monitors the status of interface 1. </li><li>If either the primary link or interface 1 fails, interface 1 goes down. The service VRRP status on DeviceC then changes to Initialize, and DeviceC reduces its mVRRP priority to 80 (120 â 40 = 80), making the mVRRP priority of DeviceD higher than that of DeviceC. With immediate preemption enabled, DeviceD immediately preempts the master role, and sends a VRRP Advertisement packet carrying a higher priority than that of DeviceC. After receiving the packet, DeviceC in the mVRRP group stops sending VRRP Advertisement packets and enters the Backup state. At this point, the service VRRP status and mVRRP group status on DeviceD are the same. User-to-network traffic is transmitted along the path DeviceE -&gt; DeviceA -&gt; DeviceB -&gt; DeviceD.</li><li>After the fault is rectified, interface 1 goes up, and DeviceC restores its mVRRP priority to 120 (80 + 40 = 120). DeviceC immediately preempts the master role and sends VRRP Advertisement packets. User-to-network traffic switches back to the path DeviceE -&gt; DeviceA -&gt; DeviceC.<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If rapid VRRP switchback is not configured, after DeviceC restores its mVRRP priority to 120, it does not preempt the master role until it receives a VRRP Advertisement packet carrying a priority lower than its own from DeviceD.</p>
+</div></div>
+</li><li>After receiving a VRRP Advertisement packet carrying a higher priority, DeviceD enters the Backup state. Both DeviceC and DeviceD are restored to their original statuses.</li></ol>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_vrrp_cfg_0137.html">Configuring Rapid VRRP Switchback
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_vrrp_cfg_0151.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

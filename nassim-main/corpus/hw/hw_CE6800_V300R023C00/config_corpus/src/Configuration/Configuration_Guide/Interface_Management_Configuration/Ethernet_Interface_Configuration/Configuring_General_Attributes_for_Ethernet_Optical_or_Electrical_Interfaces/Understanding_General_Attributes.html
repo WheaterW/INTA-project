@@ -1,0 +1,108 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding General Attributes">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ethernet-int_0023.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ethernet-int_0013.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Ethernet Interface">
+<meta name="featuretype" content="Interface Management">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Ethernet Interface">
+<meta name="featuretype" content="Interface Management">
+<meta name="featurename" content="Ethernet Interface">
+<meta name="featuretype" content="Interface Management">
+<meta name="featuretype" content="Interface Management">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="Ethernet_Interface_other1">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<link rel="stylesheet" type="text/css" href="public_sys-resources/imagePopup.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/customQuery.js"></script>
+<script language="javascript" type="text/javascript" src="public_sys-resources/imagePopup.js"></script>
+<title>Understanding General Attributes</title>
+</head>
+<body><a name="Ethernet_Interface_other1"></a><a name="Ethernet_Interface_other1"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding General Attributes</h1>
+<div><div class="section"><h4 class="sectiontitle">Interface Rate</h4><p>In auto-negotiation mode, interfaces at both ends of a link negotiate an interface rate. If the automatically negotiated interface rate does not meet requirements or the peer device does not support auto-negotiation, you need to manually set an interface rate in non-auto-negotiation mode. The interface rates set on both ends of a link must be the same.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Interface IFG</h4><p>The inter-frame gap (IFG) is used to differentiate two Ethernet frames, as shown in <a href="#Ethernet_Interface_other1__fig_dc_cfg_int_003401">Figure 1</a>. It can affect the packet forwarding capability on an interface.</p>
+<p>The packet forwarding capability, also called interface throughput, refers to the data forwarding capability on an interface, which is expressed in packets per second (pps). The packet forwarding capability is calculated based on the number of 64-byte data packets (smallest packets) sent in a certain period. During calculation, the lengths of the preamble and IFG must be taken into account.</p>
+<p>It is recommended that the default IFG of 12 bytes is used. If you set the IFG to a smaller value, after receiving one data frame, a device may not be well prepared to receive the next one. This could result in frame loss. If the length of a data frame to be sent is too large, it is recommended that you change the IFG to 16 bytes.</p>
+<div class="fignone" id="Ethernet_Interface_other1__fig_dc_cfg_int_003401"><a name="Ethernet_Interface_other1__fig_dc_cfg_int_003401"></a><a name="fig_dc_cfg_int_003401"></a><span class="figcap"><b>Figure 1 </b>IFG</span><br><span><img class="imgResize" src="figure/en-us_image_0000001513041014.png" width="522.69" height="91.508655" title="Click to enlarge"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Traffic Statistics Collection</h4><p>You can check the running status and traffic statistics of an interface by running the <strong>display interface</strong> command. The <strong>Last 300 seconds input rate</strong> and <strong>Last 300 seconds output rate</strong> fields in the command output indicate the inbound and outbound traffic rates on the interface in the last 300 seconds.</p>
+<ul><li>To obtain the total number of bytes (including the number of packet bytes and the fixed lengths of the IFG and preamble) passing through an interface per second, configure collection of traffic statistics that include the IFG and preamble. The interface's traffic rate is then calculated as follows: Interface's traffic rate = (Original packet length + IFG length + Preamble length) x Number of packets passing through the interface per second</li><li>To obtain only the number of packet bytes (excluding the fixed lengths of the IFG and preamble) passing through an interface per second, configure collection of traffic statistics that exclude the IFG and preamble. The interface's traffic rate is then calculated as follows: Interface's traffic rate = Original packet length x Number of packets passing through the interface per second</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Jumbo Frame Length Allowed on an Interface</h4><p>Ethernet frames longer than 1518 bytes and VLAN frames longer than 1522 bytes are called jumbo frames.</p>
+<p>When exchanging a large amount of data (for example, when transmitting files), Ethernet interfaces may receive jumbo frames whose length exceeds that of common packets. However, if the length of the received Jumbo frame exceeds the default data frame length, it is directly discarded by the device. To address this issue, you can adjust the jumbo frame length allowed on an interface.</p>
+<p>After adjustment, the common Ethernet frame length no longer restricts the allowed packet length limit. In this way, flexible packet forwarding can be achieved. Jumbo frames also improve bandwidth utilization. When transmitting data packets, common Ethernet frames introduce a lot of overheads such as IFGs and headers. In contrast, jumbo frames reduce this number and therefore improve bandwidth utilization.</p>
+<p>The jumbo frame lengths allowed on interfaces cannot be set to the maximum value, as extra packet encapsulation must be considered. After an interface receives protocol packets such as VLAN packets, it encapsulates packet headers containing certain bytes to the packets. The length of the outgoing packets then exceeds that of the incoming packets, which may cause packet loss. To prevent this, the packet header length must be considered when you configure the maximum frame length on an interface.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Alarm Threshold for Outbound/Inbound Bandwidth Usage</h4><p>You can configure a threshold for outbound/inbound bandwidth usage. When this threshold is exceeded, an alarm is generated. This helps you to expand bandwidth in advance and prevent service interruptions. For best effect, the threshold must be set to an appropriate value. If it is too high, for example, 95%, you may not have enough time to expand the bandwidth after the alarm is generated, which may cause service interruptions.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Alarms for Sudden Traffic Rate Changes on Interfaces</h4><p>To notify users that the incoming or outgoing traffic rate on an interface suddenly increases or decreases, the device supports hwInputRateChangeOverThresholdNotice or hwOutputRateChangeOverThresholdNotice alarm. </p>
+</div>
+<div class="section"><h4 class="sectiontitle">Control-Flap</h4><p>The flapping of routing protocols and other protocols caused by frequent changes of the interface status affects the stability of the whole network. To resolve this problem, you can configure the control-flap function.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Only Layer 3 interfaces support the control-flap function.</p>
+</div></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Fast Detection of Interfaces' Physical Status Changes</h4><p>An Ethernet interface can be physically up or down. When a local device is connected to a transmission device or deployed on a network requiring high reliability, enable this device to rapidly detect interfaces' physical status changes, so that services can run properly.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Fault Detection on an Interface</h4><p>Fault detection enables a device to set its local interface to down when detecting that the peer interface is down or the involved link signal is weak, or restores its local interface to up when detecting that the peer interface is up or the involved link signal is strong.</p>
+<p>If the interface status changes multiple times due to fault detection, the device reports the hwLocalFaultAlarm alarm.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Delay to Report an Interface Up Event</h4><p>An Ethernet interface can be physically up or down. When the physical status of an interface changes, the device where the interface resides notifies upper-layer protocol modules, such as the routing and forwarding modules, of the change to guide packet receiving and forwarding. In addition, the device automatically generates traps and logs to remind users to perform the corresponding operations on physical links. If the interface's physical status changes to up, but the upper-layer protocol modules are not ready for forwarding after the device restarts or a subcard resets, the upper-layer protocol modules cannot properly process the packets sent from the interface. As a result, the negotiation mechanism used in the upper-layer protocols cannot take effect. To address this issue, you can set a delay to report a downstream interface up event only after the upper-layer protocol modules are ready for forwarding.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Delay to Report Interfaces' Physical Status Changes</h4><p>An Ethernet interface can be physically up or down. When the physical status of an interface changes, the device where the interface resides notifies upper-layer protocol modules, such as the routing and forwarding modules, of the change to guide packet receiving and forwarding. In addition, the device automatically generates traps and logs to remind users to perform the corresponding operations on physical links.</p>
+<p>After you configure a delay in reporting changes in interfaces' physical status, the device will not detect physical status changes during that delay. After the delay, if the physical status has not resumed its original status, the physical status changes are reported to the device.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Link Flapping Causing Interfaces to Enter the Error-Down State</h4><p>A device sets the status of an interface to error-down when it detects a fault on the interface. An interface in error-down state cannot send or receive packets, and the interface indicator is off. Link flapping is one possible cause of an interface entering the error-down state. To address this issue, link flapping protection shuts down the interfaces whose physical status frequently alternates between up and down, thereby preventing network topologies from frequently changing and affecting user communication. For example, if the physical status of the active link's interface frequently alternates between up and down, services are frequently switched between the active and standby links. This increases the load on the device and may cause service data loss. To prevent this issue, configure link flapping protection on the active link's interface. If this function is configured and the device detects that the physical status of the active link's interface frequently changes, the device shuts down this interface to trigger an active/standby link switchover. The standby link then takes over to steadily transmit services. The link flapping protection function involves the following parameters:</p>
+<ul><li><p>Number of link flaps: One interface up/down transition is recorded as one link flap.</p>
+</li><li><p>Link flapping detection interval: a period during which a device counts the number of link flaps.</p>
+</li></ul>
+<p>If the number of link flaps on an interface reaches a preset threshold within a link flapping interval, a device disables the interface and records its status as <strong>ERROR DOWN(link-flap)</strong>.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Threshold for the Number of Received CRC Error Packets that Cause an Interface to Enter the Error-Down State</h4><p>A device sets the status of an interface to error-down when it detects a fault on the interface. An interface in error-down state cannot send or receive packets, and the interface indicator is off. Receiving excessive CRC error packets is one of the possible causes of an interface entering the Error-Down state. If this function is not enabled, an interface that encounters a fault may be still up, preventing traffic from being switched to a configured backup link. To avoid impact on services, you can configure the interface to enter the error-down state when it receives excessive CRC error packets. When the number of received error packets on the interface exceeds the upper alarm threshold, the device disables the interface and records its status as error-down. Services are then switched to the backup link immediately.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_ethernet-int_0023.html">Configuring General Attributes for Ethernet Optical or Electrical Interfaces
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_ethernet-int_0013.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+
+<script language="JavaScript">
+<!--
+initImageViewer('.imgResize');
+var msg_imageMax = "view original image";
+var msg_imageClose = "close";
+//--></script></body>
+</html>

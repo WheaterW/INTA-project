@@ -1,0 +1,71 @@
+ospf mtu-enable
+===============
+
+ospf mtu-enable
+
+Function
+--------
+
+
+
+The **ospf mtu-enable** command enables an interface to add its actual MTU in DD packets to be sent and check whether the MTU in a received DD packet is greater than the local MTU.
+
+The **undo ospf mtu-enable** command restores the default configuration.
+
+
+
+By default, an interface adds the MTU 0 (not the actual MTU) in DD packets to be sent and does not check the MTUs in received DD packets.
+
+
+Format
+------
+
+**ospf mtu-enable**
+
+**undo ospf mtu-enable**
+
+
+Parameters
+----------
+
+None
+
+Views
+-----
+
+100GE interface view,10GE interface view,200GE interface view,25GE sub-interface view,25GE interface view,400GE interface view,50GE sub-interface view,50GE interface view,Eth-Trunk interface view,Tunnel interface view,VBDIF interface view,VLANIF interface view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+To improve compatibility with a non-Huawei device, an OSPF-enabled Huawei device adds the MTU 0 in DD packets to be sent and does not check the MTUs in received DD packets, allowing an OSPF neighbor relationship to be set up even if the two ends have different MTU settings.However, under the default configuration, the non-Huawei device may discard an OSPF packet received from the Huawei device if the packet's actual MTU is greater than the MTU of the non-Huawei device. If the discarded packet is an LSU, an OSPF neighbor relationship can still be set up, but the route carried in the LSU fails to be learned, causing service interruptions.To resolve this issue, run the **ospf mtu-enable** command to configure an interface to add the actual MTU in DD packets to be sent and check whether the MTU in a received DD packet is greater than the local MTU. If the interface MTU settings of the local and remote ends are different, an OSPF neighbor relationship cannot enter the Full state. In this manner, MTU inconsistency can then be identified in time.
+
+**Precautions**
+
+
+
+OSPF does not support this configuration on null interfaces.After the **ospf mtu-enable** command is run, OSPF neighbor relationships are reestablished.
+
+
+
+
+Example
+-------
+
+# Configure the interface to fill in the MTU value when sending DD packets.
+```
+<HUAWEI> system-view
+[~HUAWEI] interface 100GE 1/0/1
+[~HUAWEI-100GE1/0/1] undo portswitch
+[*HUAWEI-100GE1/0/1] ospf mtu-enable
+
+```

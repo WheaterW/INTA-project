@@ -1,0 +1,77 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding Association Between VRRP and an NQA Test Instance">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_vrrp_cfg_0019.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_vrrp_cfg_0020.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001130784046">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding Association Between VRRP and an NQA Test Instance</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001130784046"></a><a name="EN-US_CONCEPT_0000001130784046"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding Association Between VRRP and an NQA Test Instance</h1>
+<div><div class="section"><h4 class="sectiontitle">Application Scenarios</h4><div class="p">To improve network reliability, configure VRRP on a device to track the following:<ul><li><p>Interface status</p>
+</li><li><p>BFD session status</p>
+</li></ul>
+If the tracked object fails, a rapid master/backup VRRP switchover can be performed to ensure service continuity.</div>
+<p>In <a href="#EN-US_CONCEPT_0000001130784046__fig_dc_vrp_vrrp_feature_013101">Figure 1</a>, however, if interface 2 on DeviceC goes down and its IP address (10.3.1.1) becomes unreachable, VRRP is unable to detect the fault. As a result, user traffic is lost.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130784046__fig_dc_vrp_vrrp_feature_013101"><a name="EN-US_CONCEPT_0000001130784046__fig_dc_vrp_vrrp_feature_013101"></a><a name="fig_dc_vrp_vrrp_feature_013101"></a><span class="figcap"><b>Figure 1 </b>Network diagram of VRRP</span><br><span><img class="vsd" src="figure/en-us_image_0000001130624280.png" width="NaN" height="NaN"></span></div>
+<p>To resolve the preceding problem, you can associate VRRP with a network quality analysis (NQA) test instance to implement rapid master/backup VRRP switchovers. With test instances configured, NQA sends probe packets to check the reachability of destination IP addresses. For the preceding example, you can configure an NQA test instance on DeviceA to check whether the IP address (10.3.1.1) of interface 2 on DeviceC is reachable.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Configure association between VRRP and an NQA test instance only on the local device (DeviceA).</p>
+</div></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Fundamentals</h4><p>You can configure association between VRRP and an NQA test instance to monitor a gateway's cross-device uplink. If the uplink fails and hosts on the LAN cannot access the external network through the gateway, NQA instructs VRRP to reduce the gateway's priority by a specified value. This allows the backup device with a higher priority to preempt the master role, thereby ensuring uninterrupted communication between hosts on the LAN and the external network. NQA then instructs VRRP to restore the gateway's priority after the uplink recovers.</p>
+<div class="p"><a href="#EN-US_CONCEPT_0000001130784046__fig108815382486">Figure 2</a> illustrates VRRP association with an NQA test instance.<div class="fignone" id="EN-US_CONCEPT_0000001130784046__fig108815382486"><a name="EN-US_CONCEPT_0000001130784046__fig108815382486"></a><a name="fig108815382486"></a><span class="figcap"><b>Figure 2 </b>Network diagram of VRRP association with an NQA test instance</span><br><span><img class="vsd" src="figure/en-us_image_0000001130784076.png" width="NaN" height="NaN"></span></div>
+</div>
+<div class="p"><ul><li>DeviceA and DeviceB run VRRP.</li><li>An NQA test instance is created on DeviceA to detect the reachability of the destination IP address 10.3.1.1.</li><li>If the status of the NQA test instance is Failed, DeviceA reduces its priority to trigger a master/backup VRRP switchover. A VRRP group can track a maximum of eight NQA test instances.</li></ul>
+</div>
+<div class="p">The implementation is as follows:<ol><li><p>Normally, DeviceA periodically sends VRRP Advertisement packets to notify DeviceB that it is working properly and monitors the status of the NQA test instance.</p>
+</li><li>If the uplink fails, the state of the NQA test instance changes to failed. NQA then notifies VRRP of the link detection failure, and DeviceA reduces its priority by a specified value. DeviceB, now with a priority higher than DeviceA, preempts the master role and takes over service forwarding.</li><li>When the uplink recovers, the state of the NQA test instance changes to success. NQA then notifies VRRP of the link detection success, and DeviceA restores its original priority. If DeviceA is configured to work in preemption mode, it preempts the master role and takes over service forwarding again after VRRP negotiation is complete.</li></ol>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_vrrp_cfg_0019.html">Configuring Association Between VRRP and an NQA Test Instance
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_vrrp_cfg_0020.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+Monitoring the Running Status of IPv6 PIM
+=========================================
+
+Monitoring the Running Status of IPv6 PIM
+
+#### Context
+
+During routine maintenance, you can run the following commands as required in any view to check the IPv6 PIM running status.
+
+**Table 1** Monitoring the running status of IPv6 PIM
+| Operation | Command |
+| --- | --- |
+| Check information about unicast routes used by IPv6 PIM. | [**display pim ipv6**](cmdqueryname=display+pim+ipv6) [ **vpn-instance** *vpn-instance-name* | **all-instance** ] **claimed-route** [ *ipv6-source-address* ] |
+| Check information about BFD sessions. | [**display pim ipv6**](cmdqueryname=display+pim+ipv6) [ **vpn-instance** *vpn-instance-name* | **all-instance** ] [**bfd** **session** [ **interface** *interface-type* *interface-number* | **neighbor** *ipv6-neighbor-address* ]] |
+| Check information about the BSR in an IPv6 PIM-SM domain. | [**display pim ipv6**](cmdqueryname=display+pim+ipv6) [ **vpn-instance** *vpn-instance-name* | **all-instance** ] **bsr-info** |
+| Check the number of sent and received IPv6 PIM control messages. | [**display pim ipv6**](cmdqueryname=display+pim+ipv6) [ **vpn-instance** *vpn-instance-name* | **all-instance** ] **control-message counters** [ **message-type** { **crp | probe** | **register** | **register-stop** } ]  [**display pim ipv6**](cmdqueryname=display+pim+ipv6) [ **vpn-instance** *vpn-instance-name* | **all-instance** ] **control-message counters** **interface** { *interface-name* | *interface-type interface-number* } [ **message-type** { **assert** | **bsr** | **hello** | **join-prune** } ]  [**display pim ipv6**](cmdqueryname=display+pim+ipv6) [ **vpn-instance** *vpn-instance-name* | **all-instance** ] **control-message counters**  **message-type** { **assert** | **bsr** | **hello** | **join-prune** } [ **interface** { *interface-name* | *interface-type interface-number* } ] |
+| Check IPv6 PIM information on an interface. | [**display pim ipv6**](cmdqueryname=display+pim+ipv6) [ **vpn-instance** *vpn-instance-name* | **all-instance** ]  **interface** [ *interface-type* *interface-number* | **up** | **down** ] [ **verbose** ] |
+| Check information about IPv6 PIM neighbors. | [**display pim ipv6**](cmdqueryname=display+pim+ipv6) [ **vpn-instance** *vpn-instance-name* | **all-instance** ] [ **neighbor** [ *ipv6-neighbor-address* | **interface** *interface-type* *interface-number* | **verbose** ]] \* |
+| Check the IPv6 PIM routing table. | [**display pim ipv6**](cmdqueryname=display+pim+ipv6) [ **vpn-instance** *vpn-instance-name* | **all-instance** ] **routing-table** [ *ipv6-group-address* [ **mask** { *group-mask-length* | *group-mask* } ] | *ipv6-source-address* [ **mask** { *source-mask-length* | *source-mask* } ] | **incoming-interface** { *interface-type* *interface-number* | **register** } | **outgoing-interface** { **include** | **exclude** | **match** } { *interface-type* *interface-number* | **register** | **none** } | **mode** { **sm** | **ssm** } | **flags** *flag-value* | **fsm** ] \* [ **outgoing-interface-number** [ *number* ] ]  [**display pim ipv6**](cmdqueryname=display+pim+ipv6) [ **vpn-instance** *vpn-instance-name* | **all-instance** ] **routing-table** **brief** [ *ipv6-group-address* [ **mask** { *group-mask-length* | *group-mask* } ] | *ipv6-source-address* [ **mask** { *source-mask-length* | *source-mask* } ] | **incoming-interface** { *interface-type interface-number* | **register** } ] \* |
+| Check RP information of an IPv6 multicast group. | [**display pim ipv6**](cmdqueryname=display+pim+ipv6) [ **vpn-instance** *vpn-instance-name* | **all-instance** ]  **rp-info** [ *ipv6-group-address* ] |
+| Check statistics about invalid IPv6 PIM messages received by the device. | [**display pim ipv6**](cmdqueryname=display+pim+ipv6) [ **vpn-instance** *vpn-instance-name* | **all-instance** ] **invalid-packet** [ **interface** { *interface-name* | *interface-type interface-number* } | **message-type** { **hello** | **join-prune** | **assert** | **bsr** } ] \*  [**display pim ipv6**](cmdqueryname=display+pim+ipv6) [ **vpn-instance** *vpn-instance-name* | **all-instance** ] **invalid-packet** **message-type** { **register** | **register-stop** | **crp** } |
+| Check the limit on the number of IPv6 PIM entries, as well as IPv6 PIM statistics, on a device. | **display multicast ipv6 global** { **pim sm** | **all**} **statistics** |

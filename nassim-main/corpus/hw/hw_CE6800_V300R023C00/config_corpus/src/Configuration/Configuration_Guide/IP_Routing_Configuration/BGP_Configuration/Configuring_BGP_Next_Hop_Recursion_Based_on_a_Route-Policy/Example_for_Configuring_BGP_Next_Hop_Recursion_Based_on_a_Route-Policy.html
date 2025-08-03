@@ -1,0 +1,312 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring BGP Next Hop Recursion Based on a Route-Policy">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0105.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0107.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130783906">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring BGP Next Hop Recursion Based on a Route-Policy</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130783906"></a><a name="EN-US_TASK_0000001130783906"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring BGP Next Hop Recursion Based on a Route-Policy</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130783906__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>As shown in <a href="#EN-US_TASK_0000001130783906__fig_dc_vrp_bgp_cfg_308201">Figure 1</a>, OSPF runs in AS 100, and IBGP peer relationships are established between DeviceA and DeviceB and between DeviceA and DeviceC through loopback 0 interfaces. DeviceB and DeviceC advertise the BGP route 10.20.1.0/24 to DeviceA. Because the router ID of DeviceB is smaller, DeviceA preferentially selects the route 10.20.1.0/24 learned from DeviceB as the optimal route, with the original next hop of 2.2.2.2/32.</p>
+<p>In normal cases, DeviceA recurses the BGP route destined for 10.20.1.0/24 to an IGP route destined for 2.2.2.2/32, with <span>100GE</span><span>1/0/1</span> as the outbound interface. If DeviceB is faulty, DeviceA immediately deletes the IGP route destined for 2.2.2.2/32. However, DeviceA still prefers the BGP route with the original next hop of 2.2.2.2/32, as it is not aware of the BGP route change until the BGP hold timer expires. Based on the longest matching rule, DeviceA incorrectly recurses the BGP route destined for 10.20.1.0/24 to the direct route destined for 2.2.2.0/24 with <span>100GE</span><span>1/0/3</span> as the outbound interface, resulting in a loss of traffic.</p>
+<div class="fignone" id="EN-US_TASK_0000001130783906__fig_dc_vrp_bgp_cfg_308201"><a name="EN-US_TASK_0000001130783906__fig_dc_vrp_bgp_cfg_308201"></a><a name="fig_dc_vrp_bgp_cfg_308201"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring BGP next hop recursion based on a route-policy</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1, interface 2, and interface 3 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, and <span>100GE</span><span>1/0/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001176743643.png" width="NaN" height="NaN"></span></div>
+<p>To prevent the preceding problem, configure BGP next hop recursion based on a route-policy on DeviceA to control the recursive routes. In this example, only the recursive routes with a mask length of 32 bits match the route-policy, and those that do not match the route-policy are considered unreachable. As such, when DeviceB is faulty, DeviceA can rapidly detect the route change and re-select a correct BGP route with the original next hop of 3.3.3.3/32, preventing traffic loss.</p>
+<p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Router ID of DeviceA: 1.1.1.1; router ID of DeviceB: 2.2.2.2; router ID of DeviceC: 3.3.3.3; AS number: 100</p>
+</li><li><p>Name of the route-policy configured on DeviceA to control route recursion: np-by-rp</p>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130783906__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>During the configuration, note the following:</p>
+<ul><li><p>Ensure that all desirable recursive routes match the route-policy. Otherwise, BGP routes may be considered unreachable, unable to guide traffic forwarding.</p>
+</li><li>To improve security, you are advised to deploy BGP security measures. For details, see "Configuring BGP Authentication." Keychain authentication is used as an example. For details, see Example for Configuring Keychain Authentication for BGP.</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130783906__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure OSPF on DeviceA, DeviceB, and DeviceC so that devices in AS 100 can communicate with each other.</p>
+</li><li><p>Establish IBGP peer relationships between DeviceA and DeviceB and between DeviceA and DeviceC through loopback 0 interfaces.</p>
+</li><li><p>Enable DeviceB and DeviceC to advertise a BGP route destined for 10.20.1.0/24 to DeviceA.</p>
+</li><li><p>Configure BGP next hop recursion based on a route-policy on DeviceA. This configuration enables DeviceA to rapidly become aware of the route change when DeviceB is faulty and re-select a correct BGP route, preventing traffic loss.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130783906__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface. For detailed configurations, see <a href="#EN-US_TASK_0000001130783906__postreq181281331101216">Configuration Scripts</a>.</span></li><li><span>Configure OSPF in AS 100.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>network 1.1.1.1 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>network 10.1.0.0 0.0.255.255</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0] <strong>network 2.2.2.2 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0] <strong>network 10.1.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0] <strong>network 3.3.3.3 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0] <strong>network 10.1.2.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li><li><span>Configure IBGP connections.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>router-id 1.1.1.1</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 2.2.2.2 as-number 100</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 3.3.3.3 as-number 100</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 2.2.2.2 connect-interface Loopback 0</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 3.3.3.3 connect-interface Loopback 0</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>router-id 2.2.2.2</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 1.1.1.1 as-number 100</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 1.1.1.1 connect-interface Loopback 0</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>router-id 3.3.3.3</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 1.1.1.1 as-number 100</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 1.1.1.1 connect-interface Loopback 0</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li><li><span>Enable DeviceB and DeviceC to advertise a BGP route destined for 10.20.1.0/24.</span><p><p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ip route-static 10.20.1.0 24 NULL 0</strong>
+[<span class="keyword">*</span>DeviceB] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>import-route static</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>ip route-static 10.20.1.0 24 NULL 0</strong>
+[<span class="keyword">*</span>DeviceC] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>import-route static</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li><li><span>On DeviceA, configure BGP next hop recursion based on a route-policy.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>ip ip-prefix np-by-rp-ip permit 0.0.0.0 32</strong>
+[<span class="keyword">*</span>DeviceA] <strong>route-policy np-by-rp permit node 0</strong>
+[<span class="keyword">*</span>DeviceA-route-policy] <strong>if-match ip-prefix np-by-rp-ip</strong>
+[<span class="keyword">*</span>DeviceA-route-policy] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>nexthop recursive-lookup route-policy np-by-rp</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001130783906__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># On DeviceA, check detailed information about the BGP route destined for 10.20.1.0/24 when DeviceB is running properly.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display bgp routing-table 10.20.1.0 24</strong>
+ BGP local router ID : 1.1.1.1
+ Local AS number : 100
+ Paths:   2 available, 1 best, 1 select
+ BGP routing table entry information of 10.20.1.0/24:
+ From: 2.2.2.2 (2.2.2.2)  Route Duration: 0d00h00m36s
+ <strong>Relay IP Nexthop: 10.1.1.2</strong>
+ <strong>Relay IP Out-interface: <span>100GE</span><span>1/0/1</span></strong>
+ <strong>Original nexthop: 2.2.2.2</strong>
+ Qos information : 0x0            
+ AS-path Nil, origin incomplete, MED 0, localpref 100, pref-val 0, valid, internal, <strong>best</strong>, select, pre 255
+ Not advertised to any peer yet
+
+ BGP routing table entry information of 10.20.1.0/24:
+ From: 3.3.3.3 (3.3.3.3)  Route Duration: 0d02h53m45s
+ <strong>Relay IP Nexthop: 10.1.2.2</strong>
+ <strong>Relay IP Out-interface: <span>100GE</span><span>1/0/2</span></strong>
+ <strong>Original nexthop: 3.3.3.3</strong>
+ Qos information : 0x0            
+ AS-path Nil, origin incomplete, MED 0, localpref 100, pref-val 0, valid, internal, pre 255, 
+not preferred for router ID
+ Not advertised to any peers yet</pre>
+<p># Run the <a href="cmdqueryname=shutdown"><b><span class="cmdname">shutdown</span></b></a> command on <span>100GE</span> <span>1/0/1</span> of DeviceB to simulate a fault on DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface <span>100GE</span></strong> <strong><span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>shutdown</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># On DeviceA, check detailed information about the BGP route destined for 10.20.1.0/24.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display bgp routing-table 10.20.1.0 24</strong>
+ BGP local router ID : 1.1.1.1
+ Local AS number : 100
+ Paths:   2 available, 1 best, 1 select
+ BGP routing table entry information of 10.20.1.0/24:
+ From: 3.3.3.3 (3.3.3.3)  Route Duration: 0d03h10m58s
+ <strong>Relay IP Nexthop: 10.1.2.2</strong>
+ <strong>Relay IP Out-interface: </strong><span>100GE</span><span>1/0/2</span>
+ <strong>Original nexthop: 3.3.3.3</strong>
+ Qos information : 0x0            
+ AS-path Nil, origin incomplete, MED 0, localpref 100, pref-val 0, valid, internal, <strong>best</strong>, select, pre 255
+ Not advertised to any peer yet
+
+ BGP routing table entry information of 10.20.1.0/24:
+ From: 2.2.2.2 (2.2.2.2)  Route Duration: 0d00h00m50s
+ <strong>Relay IP Nexthop: 0.0.0.0</strong>
+ <strong>Relay IP Out-interface: </strong>
+ <strong>Original nexthop: 2.2.2.2</strong>
+ Qos information : 0x0            
+ AS-path Nil, origin incomplete, MED 0, localpref 100, pref-val 0, internal, pre 255
+ Not advertised to any peers yet</pre>
+<p>After DeviceB becomes faulty, the route which is destined for 10.20.1.0/24 and has the original next hop of 2.2.2.2/32 is recursed to the direct route destined for 2.2.2.10/24. However, the direct route destined for 2.2.2.10/24 is not a specific route with a 32-bit mask and does not match the route-policy <strong>np-by-rp</strong>. As a result, the recursive route is considered unreachable. In this manner, the BGP device quickly re-selects the correct route with 3.3.3.3/32 as the original next hop.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001130783906__postreq181281331101216"></a><a name="postreq181281331101216"></a><a name="EN-US_TASK_0000001130783906__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#   
+sysname DeviceA
+#            
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.0
+#               
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.2.1 255.255.255.0
+#          
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 2.2.2.10 255.255.255.0
+#               
+interface LoopBack0
+ ip address 1.1.1.1 255.255.255.255
+#               
+bgp 100         
+ router-id 1.1.1.1
+ peer 2.2.2.2 as-number 100
+ peer 2.2.2.2 connect-interface LoopBack0
+ peer 3.3.3.3 as-number 100
+ peer 3.3.3.3 connect-interface LoopBack0
+ #              
+ ipv4-family unicast
+  nexthop recursive-lookup route-policy np-by-rp
+  peer 2.2.2.2 enable
+  peer 3.3.3.3 enable
+#               
+ospf 1          
+ area 0.0.0.0   
+  network 1.1.1.1 0.0.0.0
+  network 10.1.0.0 0.0.255.255
+# 
+ip ip-prefix np-by-rp-ip index 10 permit 0.0.0.0 32
+#
+route-policy np-by-rp permit node 10
+ if-match ip-prefix np-by-rp-ip
+#               
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#               
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.2 255.255.255.0
+#               
+interface LoopBack0
+ ip address 2.2.2.2 255.255.255.255
+#               
+bgp 100         
+ router-id 2.2.2.2
+ peer 1.1.1.1 as-number 100
+ peer 1.1.1.1 connect-interface LoopBack0
+ #              
+ ipv4-family unicast
+  import-route static
+  peer 1.1.1.1 enable
+#               
+ospf 1          
+ area 0.0.0.0   
+  network 2.2.2.2 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+#               
+ip route-static 10.20.1.0 24 NULL 0
+#               
+return          </pre>
+</li><li><p>DeviceC</p>
+<pre class="screen"># 
+sysname DeviceC
+#              
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.2.2 255.255.255.0
+#               
+interface LoopBack0
+ ip address 3.3.3.3 255.255.255.255
+#               
+bgp 100         
+ router-id 3.3.3.3
+ peer 1.1.1.1 as-number 100
+ peer 1.1.1.1 connect-interface LoopBack0
+ #              
+ ipv4-family unicast
+  import-route static
+  peer 1.1.1.1 enable
+#               
+ospf 1          
+ area 0.0.0.0   
+  network 3.3.3.3 0.0.0.0
+  network 10.1.2.0 0.0.0.255
+#               
+ip route-static 10.20.1.0 24 NULL 0
+#               
+return </pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bgp_cfg_0105.html">Configuring BGP Next Hop Recursion Based on a Route-Policy
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bgp_cfg_0107.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

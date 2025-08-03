@@ -1,0 +1,652 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Example for Configuring VE Access Through an EVPN VPLS over SRv6 BE Path">
+<meta name="abstract" content="This section provides an example for configuring an SRv6 BE path to carry EVPN E-LAN services for PPPoE users to implement BRAS user access.">
+<meta name="description" content="This section provides an example for configuring an SRv6 BE path to carry EVPN E-LAN services for PPPoE users to implement BRAS user access.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_pppox_cfg_0183.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_pppoxv6_cfg_0058.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_014461_copy.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z50024784,z00603461,w00800033,z00588052,c00549182,w00556928,l00593348,w00606909,w00447999">
+<meta name="DC.Publisher" content="20240229">
+<meta name="dcAudienceJob" content="Configuration">
+<meta name="featurename" content="PPPoE Access">
+<meta name="featuretype" content="User Access">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="PPPoE Access">
+<meta name="featuretype" content="User Access">
+<meta name="featurename" content="PPPoE Access">
+<meta name="featuretype" content="User Access">
+<meta name="featurename" content="PPPoE Access">
+<meta name="featuretype" content="User Access">
+<meta name="OWNER" content="c00549182">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="z00588052">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0212448010">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring VE Access Through an EVPN VPLS over SRv6 BE Path</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_CONCEPT_0212448010"></a><a name="EN-US_CONCEPT_0212448010"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring VE Access Through an EVPN VPLS over SRv6 BE Path</h1>
+<div><p>This section provides an example for configuring an SRv6 BE path to carry EVPN E-LAN services for PPPoE users to implement BRAS user access.</p>
+<div class="section"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_CONCEPT_0212448010__fig25401857173015">Figure 1</a>, PE1, P, and PE2 are in the same AS and run IS-IS to implement IPv6 network connectivity. A bidirectional SRv6 BE path is established between PE1 and PE2 to carry EVPN E-LAN services. The BRAS user accesses the Internet in PPPoE mode through the VE 1/0/1.1 sub-interface on PE2. VE <span>0/1/0</span> is used to terminate the VLL, and VE <span>0/1/1</span> functions as a BAS interface to provide authentication for the access user.</p>
+<div class="fignone" id="EN-US_CONCEPT_0212448010__fig25401857173015"><a name="EN-US_CONCEPT_0212448010__fig25401857173015"></a><a name="fig25401857173015"></a><span class="figcap"><b>Figure 1 </b>Configuring VE access through an EVPN VPLS over SRv6 BE path</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 and 2 in this example represent GE <span>0/1/0</span> and GE <span>0/2/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0212478889.png" width="NaN" height="NaN"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Assign an IPv6 address for each interface.</li><li>Enable IS-IS, configure a level, and specify a network entity on each device.</li><li>Configure an EVPN instance in BD mode on each PE and bind the EVPN instance to an access-side sub-interface.</li><li>Establish a BGP EVPN peer relationship between PEs.</li><li>Configure an SRv6 BE path on each PE.</li><li>Configure BRAS access on PE2 and configure VE <span>0/1/1</span>.1 as the BAS interface.</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li>EVPN instance name: evrf1</li><li>RD and RT values of the EVPN instance: 100:1 and 1:1</li><li>BD ID: 100</li><li>Names of SID node route locators on PE1: PE1_ARG, PE1; names of SID node route locators on PE2: PE2_ARG, PE2; dynamically generated opcodes</li><li>Length of the SID node route locators PE1_ARG and PE2_ARG: 10 (as specified in the args parameter)</li><li>VE-group number</li><li><p>Virtual template number</p>
+</li><li><p>RADIUS authentication and accounting schemes and their names</p>
+</li><li><p>RADIUS server group name, and IP addresses and port numbers of the RADIUS authentication and accounting servers</p>
+</li><li><p>Local address pool name</p>
+</li><li><p>Domain name</p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Procedure</h4><ol><li>Enable IPv6 forwarding on each interface and configure an IPv6 address for each interface.<p>Configure an IPv4 address for the loopback interface because the EVPN source address needs to be an IPv4 address. The following example uses the configuration of PE1. The configurations of other devices are similar to the configuration of PE1. For configuration details, see the configuration file.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname PE1</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>interface gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>ipv6 enable</strong>
+[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>ipv6 address 2001:db8:10::1 64</strong>
+[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>interface LoopBack 1</strong>
+[<span class="keyword">*</span>PE1-LoopBack1] <strong>ip address 1.1.1.1 32</strong>
+[<span class="keyword">*</span>PE1-LoopBack1] <strong>ipv6 enable</strong>
+[<span class="keyword">*</span>PE1-LoopBack1] <strong>ipv6 address 2001:db8:1::1 64</strong>
+[<span class="keyword">*</span>PE1-LoopBack1] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+</li><li>Configure IS-IS.<p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>isis 1</strong>
+[<span class="keyword">*</span>PE1-isis-1] <strong>is-level level-1</strong>
+[<span class="keyword">*</span>PE1-isis-1] <strong>cost-style wide</strong>
+[<span class="keyword">*</span>PE1-isis-1] <strong>network-entity 10.0000.0000.0001.00</strong>
+[<span class="keyword">*</span>PE1-isis-1] <strong>ipv6 enable topology ipv6</strong>
+[<span class="keyword">*</span>PE1-isis-1] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>interface gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>interface loopback1</strong>
+[<span class="keyword">*</span>PE1-LoopBack1] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>PE1-LoopBack1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-LoopBack1] <strong>quit</strong></pre>
+<p># Configure the P.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P] <strong>isis 1</strong>
+[<span class="keyword">*</span>P-isis-1] <strong>is-level level-1</strong>
+[<span class="keyword">*</span>P-isis-1] <strong>cost-style wide</strong>
+[<span class="keyword">*</span>P-isis-1] <strong>network-entity 10.0000.0000.0002.00</strong>
+[<span class="keyword">*</span>P-isis-1] <strong>ipv6 enable topology ipv6</strong>
+[<span class="keyword">*</span>P-isis-1] <strong>quit</strong>
+[<span class="keyword">*</span>P] <strong>interface gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword">*</span>P-GigabitEthernet<span>0/1/0</span>] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>P-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong>
+[<span class="keyword">*</span>P] <strong>interface gigabitethernet <span>0/2/0</span></strong>
+[<span class="keyword">*</span>P-GigabitEthernet<span>0/2/0</span>] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>P-GigabitEthernet<span>0/2/0</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong>
+[<span class="keyword">*</span>P] <strong>interface loopback1</strong>
+[<span class="keyword">*</span>P-LoopBack1] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>P-LoopBack1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P-LoopBack1] <strong>quit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>isis 1</strong>
+[<span class="keyword">*</span>PE2-isis-1] <strong>is-level level-1</strong>
+[<span class="keyword">*</span>PE2-isis-1] <strong>cost-style wide</strong>
+[<span class="keyword">*</span>PE2-isis-1] <strong>network-entity 10.0000.0000.0003.00</strong>
+[<span class="keyword">*</span>PE2-isis-1] <strong>ipv6 enable topology ipv6</strong>
+[<span class="keyword">*</span>PE2-isis-1] <strong>quit</strong>
+[<span class="keyword">*</span>PE2] <strong>interface gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong>
+[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong>
+[<span class="keyword">*</span>PE2] <strong>interface loopback1</strong>
+[<span class="keyword">*</span>PE2-LoopBack1] <strong>isis ipv6 enable 1</strong>
+[<span class="keyword">*</span>PE2-LoopBack1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-LoopBack1] <strong>quit</strong></pre>
+<p>After the configuration is complete, perform the following operations to check whether IS-IS is successfully configured:</p>
+<p># Display IS-IS neighbor information. The following example uses the command output on PE1.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>PE1] <strong>display isis peer</strong>
+                          Peer information for ISIS(1) 
+                          
+  System Id     Interface         Circuit Id        State HoldTime Type     PRI 
+-------------------------------------------------------------------------------- 
+0000.0000.0002  GE<span>0/1/0</span>           0000.0000.0002.01  Up   8s       L1       64  
+ 
+Total Peer(s): 1</pre>
+<p># Display IS-IS routing table information. The following example uses the command output on PE1.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>PE1] <strong>display isis route</strong>
+                         Route information for ISIS(1) 
+                         ----------------------------- 
+ 
+                        ISIS(1) Level-1 Forwarding Table 
+                        -------------------------------- 
+ 
+ IPV6 Dest.        ExitInterface      NextHop                    Cost     Flags     
+-------------------------------------------------------------------------------- 
+2001:db8:1::/64    GE<span>0/1/0</span>            Direct                     10       D/-/L/-   
+2001:db8:2::/64    GE<span>0/1/0</span>            FE80::3A5D:67FF:FE31:307   10       A/-/-/- 
+2001:db8:3::/64    GE<span>0/1/0</span>            FE80::3A5D:67FF:FE31:307   20       A/-/-/-   
+2001:db8:10::/64   GE<span>0/1/0</span>            Direct                     20       D/-/L/-   
+2001:db8:20::/64   GE<span>0/1/0</span>            FE80::3A5D:67FF:FE31:307   20       A/-/-/-   
+     Flags: D-Direct, A-Added to URT, L-Advertised in LSPs, S-IGP Shortcut,  
+            U-Up/Down Bit Set, LP-Local Prefix-Sid
+     Protect Type: L-Link Protect, N-Node Protect</pre>
+</li><li>Configure an EVPN instance in BD mode on each PE and bind the EVPN instance to an access-side sub-interface.<p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>evpn vpn-instance evrf1 bd-mode</strong>
+[<span class="keyword">*</span>PE1-evpn-instance-evrf1] <strong>route-distinguisher 100:1</strong>
+[<span class="keyword">*</span>PE1-evpn-instance-evrf1] <strong>vpn-target 1:1</strong>
+[<span class="keyword">*</span>PE1-evpn-instance-evrf1] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>evpn source-address 1.1.1.1</strong>
+[<span class="keyword">*</span>PE1] <strong>bridge-domain 100</strong>
+[<span class="keyword">*</span>PE1-bd100] <strong>evpn binding vpn-instance evrf1</strong>
+[<span class="keyword">*</span>PE1-bd100] <strong>quit</strong>
+[<span class="keyword">*</span>PE1]<strong> evpn vpn-instance evrf2 bd-mode</strong>
+[<span class="keyword">*</span>PE1-evpn-instance-evrf2] <strong>route-distinguisher 200:1</strong>
+[<span class="keyword">*</span>PE1-evpn-instance-evrf2] <strong>vpn-target 2:2</strong>
+[<span class="keyword">*</span>PE1-evpn-instance-evrf2] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>bridge-domain 200</strong>
+[<span class="keyword">*</span>PE1-bd200] <strong>evpn binding vpn-instance evrf2</strong>
+[<span class="keyword">*</span>PE1-bd200] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>interface </strong><strong>gigabitethernet</strong><strong><span>0/2/0</span>.1 mode l2</strong>
+[<span class="keyword">*</span>PE1-Gigabitethernet<span>0/2/0</span>.1] <strong>encapsulation dot1q vid 100</strong>
+[<span class="keyword">*</span>PE1-Gigabitethernet<span>0/2/0</span>.1] <strong>rewrite pop single</strong>
+[<span class="keyword">*</span>PE1-Gigabitethernet<span>0/2/0</span>.1] <strong>bridge-domain 100</strong>
+[<span class="keyword">*</span>PE1-Gigabitethernet<span>0/2/0</span>.1] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>interface gigabitethernet<span>0/2/0</span>.2 mode l2</strong>
+[<span class="keyword">*</span>PE1-Gigabitethernet<span>0/2/0</span>.2] <strong>encapsulation dot1q vid 200</strong>
+[<span class="keyword">*</span>PE1-Gigabitethernet<span>0/2/0</span>.2] <strong>rewrite pop single</strong>
+[<span class="keyword">*</span>PE1-Gigabitethernet<span>0/2/0</span>.2]<strong> </strong><strong>bridge-domain 200</strong>
+[<span class="keyword">*</span>PE1-Gigabitethernet<span>0/2/0</span>.2]<strong> quit</strong>
+[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>evpn vpn-instance evrf1 bd-mode</strong>
+[<span class="keyword">*</span>PE2-evpn-instance-evrf1] <strong>route-distinguisher 100:1</strong>
+[<span class="keyword">*</span>PE2-evpn-instance-evrf1] <strong>vpn-target 1:1</strong>
+[<span class="keyword">*</span>PE2-evpn-instance-evrf1] <strong>quit</strong>
+[<span class="keyword">*</span>PE2] <strong>evpn source-address 3.3.3.3</strong>
+[<span class="keyword">*</span>PE2] <strong>bridge-domain 100</strong>
+[<span class="keyword">*</span>PE2-bd100] <strong>evpn binding vpn-instance evrf1</strong>
+[<span class="keyword">*</span>PE2-bd100] <strong>quit</strong>
+[<span class="keyword">*</span>PE2]<strong> evpn vpn-instance evrf2 bd-mode</strong>
+[<span class="keyword">*</span>PE2-evpn-instance-evrf2] <strong>route-distinguisher 200:1</strong>
+[<span class="keyword">*</span>PE2-evpn-instance-evrf2] <strong>vpn-target 2:2</strong>
+[<span class="keyword">*</span>PE2-evpn-instance-evrf2] <strong>quit</strong>
+[<span class="keyword">*</span>PE2] <strong>bridge-domain 200</strong>
+[<span class="keyword">*</span>PE2-bd200] <strong>evpn binding vpn-instance evrf2</strong>
+[<span class="keyword">*</span>PE2-bd200] <strong>quit</strong>
+[<span class="keyword">*</span>PE2] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>interface virtual-ethernet<span>0/1/0</span></strong>
+[<span class="keyword">*</span>PE2-Virtual-Ethernet<span>0/1/0</span>]<strong> ve-group 1 l2-terminate</strong>
+[<span class="keyword">*</span>PE2-Virtual-Ethernet<span>0/1/0</span>]<strong> quit</strong>
+[<span class="keyword">*</span>PE2] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>interface virtual-ethernet<span>0/1/1</span></strong>
+[<span class="keyword">*</span>PE2-Virtual-Ethernet<span>0/1/1</span>] <strong>ve-group 1 l3-access</strong>
+[<span class="keyword">*</span>PE2-Virtual-Ethernet<span>0/1/1</span>]<strong> quit</strong>
+[<span class="keyword">*</span>PE2] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>interface virtual-ethernet<span>0/1/0</span>.1 mode l2</strong>
+[<span class="keyword">*</span>PE2-Virtual-Ethernet<span>0/1/0</span>.1]<strong> encapsulation dot1q vid 100</strong>
+[<span class="keyword">*</span>PE2-Virtual-Ethernet<span>0/1/0</span>.1]<strong> bridge-domain 100</strong>
+[<span class="keyword">*</span>PE2-Virtual-Ethernet<span>0/1/0</span>.1]<strong> quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>interface virtual-ethernet<span>0/1/0</span>.2 mode l2</strong>
+[<span class="keyword">*</span>PE2-Virtual-Ethernet<span>0/1/0</span>.2] <strong>encapsulation dot1q vid 200</strong>
+[<span class="keyword">*</span>PE2-Virtual-Ethernet<span>0/1/0</span>.2]<strong> </strong><strong>bridge-domain 200</strong>
+[<span class="keyword">*</span>PE2-Virtual-Ethernet<span>0/1/0</span>.2]<strong> quit</strong>
+[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+</li><li>Establish a BGP EVPN peer relationship between PEs.<p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>bgp 100</strong>
+[<span class="keyword">*</span>PE1-bgp] <strong>route-id 1.1.1.1</strong>
+[<span class="keyword">*</span>PE1-bgp] <strong>peer 2001:db8:3::3 as-number 100</strong>
+[<span class="keyword">*</span>PE1-bgp] <strong>peer 2001:db8:3::3 connect-interface loopback 1</strong>
+[<span class="keyword">*</span>PE1-bgp] <strong>l2vpn-family evpn</strong>
+[<span class="keyword">*</span>PE1-bgp-af-evpn] <strong>peer 2001:db8:3::3 enable</strong>
+[<span class="keyword">*</span>PE1-bgp-af-evpn] <strong>peer 2001:db8:3::3 advertise encap-type srv6</strong>
+[<span class="keyword">*</span>PE1-bgp-af-evpn] <strong>quit</strong>
+[<span class="keyword">*</span>PE1-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>bgp 100</strong>
+[<span class="keyword">*</span>PE2-bgp] <strong>route-id 3.3.3.3</strong>
+[<span class="keyword">*</span>PE2-bgp] <strong>peer 2001:db8:1::1 as-number 100</strong>
+[<span class="keyword">*</span>PE2-bgp] <strong>peer 2001:db8:1::1 connect-interface loopback 1</strong>
+[<span class="keyword">*</span>PE2-bgp] <strong>l2vpn-family evpn</strong>
+[<span class="keyword">*</span>PE2-bgp-af-evpn] <strong>peer 2001:db8:1::1 enable</strong>
+[<span class="keyword">*</span>PE2-bgp-af-evpn] <strong>peer 2001:db8:1::1 advertise encap-type srv6</strong>
+[<span class="keyword">*</span>PE2-bgp-af-evpn] <strong>quit</strong>
+[<span class="keyword">*</span>PE2-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p>After the configuration is complete, run the <strong>display bgp evpn peer</strong> command on the PEs and check whether a BGP EVPN peer relationship has been established between the PEs. If the <strong>Established</strong> state is displayed in the command output, the BGP EVPN peer relationship has been established successfully. The following example uses the command output on PE1.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>PE1] <strong>display bgp evpn peer</strong>   
+BGP local router ID : 1.1.1.1  
+Local AS number : 100  
+Total number of peers : 1                 Peers in established state : 1    
+Peer            V          AS  MsgRcvd  MsgSent  OutQ  Up/Down       State  PrefRcv   
+3.3.3.3         4         100        9        9     0 00:00:02 Established        5</pre>
+</li><li>Establish an SRv6 BE tunnel between PEs.<p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>segment-routing ipv6</strong>
+[<span class="keyword">*</span>PE1-segment-routing-ipv6] <strong>encapsulation source-address 2001:db8:1::1</strong>
+[<span class="keyword">*</span>PE1-segment-routing-ipv6] <strong>locator PE1 ipv6-prefix 2001:db8:11:: 64</strong>
+[<span class="keyword">*</span>PE1-segment-routing-ipv6-locator] <strong>quit</strong>
+[<span class="keyword">*</span>PE1-segment-routing-ipv6] <strong>locator PE1_ARG ipv6-prefix 2001:db8:12:: 64 args 10</strong>
+[<span class="keyword">*</span>PE1-segment-routing-ipv6-locator] <strong>quit</strong>
+[<span class="keyword">*</span>PE1-segment-routing-ipv6] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>isis 1</strong>
+[<span class="keyword">*</span>PE1-isis-1] <strong>segment-routing ipv6 locator PE1</strong>
+[<span class="keyword">*</span>PE1-isis-1]<strong> segment-routing ipv6 locator PE1_ARG auto-sid-disable</strong>
+[<span class="keyword">*</span>PE1-isis-1] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>evpn vpn-instance evrf1 bd-mode</strong>
+[<span class="keyword">*</span>PE1-evpn-instance-evrf1] <strong>segment-routing ipv6 locator PE1_ARG unicast-locator PE1</strong>
+[<span class="keyword">*</span>PE1-evpn-instance-evrf1] <strong>segment-routing ipv6 best-effort</strong>
+[<span class="keyword">*</span>PE1-evpn-instance-evrf1] <strong>quit</strong>
+[*PE1]<strong> evpn vpn-instance evrf2 bd-mode</strong>
+[<span class="keyword">*</span>PE1-evpn-instance-evrf2] <strong>segment-routing ipv6 locator PE1_ARG unicast-locator PE1</strong>
+[<span class="keyword">*</span>PE1-evpn-instance-evrf2] <strong>segment-routing ipv6 best-effort</strong>
+[<span class="keyword">*</span>PE1-evpn-instance-evrf2] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>segment-routing ipv6</strong>
+[<span class="keyword">*</span>PE2-segment-routing-ipv6] <strong>encapsulation source-address 2001:db8:3::3</strong>
+[<span class="keyword">*</span>PE2-segment-routing-ipv6] <strong>locator PE2 ipv6-prefix 2001:db8:21:: 64</strong>
+[<span class="keyword">*</span>PE2-segment-routing-ipv6-locator] <strong>quit</strong>
+[<span class="keyword">*</span>PE2-segment-routing-ipv6] <strong>locator PE2_ARG ipv6-prefix 2001:db8:22:: 64 args 10</strong>
+[<span class="keyword">*</span>PE2-segment-routing-ipv6-locator] <strong>quit</strong>
+[<span class="keyword">*</span>PE2-segment-routing-ipv6] <strong>quit</strong>
+[<span class="keyword">*</span>PE2] <strong>isis 1</strong>
+[<span class="keyword">*</span>PE2-isis-1] <strong>segment-routing ipv6 locator PE2</strong>
+[<span class="keyword">*</span>PE2-isis-1] <strong>segment-routing ipv6 locator PE2_ARG auto-sid-disable</strong>
+[<span class="keyword">*</span>PE2-isis-1] <strong>quit</strong>
+[<span class="keyword">*</span>PE2] <strong>evpn vpn-instance evrf1 bd-mode</strong>
+[<span class="keyword">*</span>PE2-evpn-instance-evrf1] <strong>segment-routing ipv6 locator PE2_ARG unicast-locator PE2</strong>
+[<span class="keyword">*</span>PE2-evpn-instance-evrf1] <strong>segment-routing ipv6 best-effort</strong>
+[<span class="keyword">*</span>PE2-evpn-instance-evrf1] <strong>quit</strong>
+[<span class="keyword">*</span>PE2] <strong>evpn vpn-instance evrf2 bd-mode</strong>
+[<span class="keyword">*</span>PE2-evpn-instance-evrf2]<strong> segment-routing ipv6 locator PE2_ARG unicast-locator PE2</strong>
+[<span class="keyword">*</span>PE2-evpn-instance-evrf2] <strong>segment-routing ipv6 best-effort</strong>
+[<span class="keyword">*</span>PE2-evpn-instance-evrf2] <strong>quit</strong>
+[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+</li><li>Configure BRAS access on PE2 and configure VE <span>0/1/1</span>.1 as the BAS interface.<p># Configure a virtual template.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong> interface virtual-template 1</strong>
+[<span class="keyword">*</span>PE2-Virtual-Template1]<strong> ppp authentication-mode chap</strong>
+[<span class="keyword">*</span>PE2-Virtual-Template1]<strong> quit</strong>
+[<span class="keyword">*</span>PE2]<strong> commit</strong></pre>
+<p># Configure an authentication scheme.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong> aaa</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-aaa]<strong> authentication-scheme auth1</strong>
+[<span class="keyword">*</span>PE2-aaa-authen-auth1]<strong> authentication-mode radius</strong>
+[<span class="keyword">*</span>PE2-aaa-authen-auth1]<strong> quit</strong>
+[<span class="keyword">*</span>PE2-aaa]<strong> commit</strong></pre>
+<p># Configure an accounting scheme.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-aaa]<strong> accounting-scheme acct1</strong>
+[<span class="keyword">*</span>PE2-aaa-accounting-acct1]<strong> accounting-mode radius</strong>
+[<span class="keyword">*</span>PE2-aaa-accounting-acct1]<strong> quit</strong>
+[<span class="keyword">*</span>PE2-aaa]<strong> quit</strong>
+[<span class="keyword">*</span>PE2]<strong> commit</strong></pre>
+<p># Configure a RADIUS server group.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong> radius-server group rd1</strong>
+[<span class="keyword">*</span>PE2-radius-rd1]<strong> radius-server authentication 192.168.7.249 1812</strong>
+[<span class="keyword">*</span>PE2-radius-rd1]<strong> radius-server accounting 192.168.7.249 1813</strong>
+[<span class="keyword">*</span>PE2-radius-rd1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-radius-rd1]<strong> radius-server type plus11</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-radius-rd1]<strong> radius-server shared-key itellin</strong>
+[<span class="keyword">*</span>PE2-radius-rd1]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-radius-rd1]<strong> </strong><strong>quit</strong></pre>
+<p># Configure a local address pool.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong> ip pool pool1 bas local</strong>
+[<span class="keyword">*</span>PE2-ip-pool-pool1]<strong> gateway 172.30.1.1 255.255.255.0</strong>
+[<span class="keyword">*</span>PE2-ip-pool-pool1]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-ip-pool-pool1]<strong> section 0 172.30.1.2 172.30.1.200</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-ip-pool-pool1]<strong> dns-server 192.168.7.252</strong>
+[<span class="keyword">*</span>PE2-ip-pool-pool1]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-ip-pool-pool1]<strong> quit</strong></pre>
+<p># Configure a domain named <strong>isp1</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>aaa</strong>
+[<span class="keyword">*</span>PE2-aaa]<strong> domain isp1</strong>
+[<span class="keyword">*</span>PE2-aaa-domain-isp1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-aaa-domain-isp1] <strong>ip-pool pool1</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-aaa-domain-isp1]<strong> authentication-scheme auth1</strong>
+[<span class="keyword">*</span>PE2-aaa-domain-isp1]<strong> accounting-scheme acct1</strong>
+[<span class="keyword">*</span>PE2-aaa-domain-isp1]<strong> radius-server group rd1</strong>
+[<span class="keyword">*</span>PE2-aaa-domain-isp1]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-aaa-domain-isp1]<strong> quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-aaa]<strong> quit</strong></pre>
+<p># Bind the virtual template to VE <span>0/1/1</span>.1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>interface virtual-ethernet<span>0/1/1</span></strong><strong>.1</strong>
+[<span class="keyword">*</span>PE2-Virtual-Ethernet<span>0/1/1</span>.1]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-Virtual-Ethernet<span>0/1/1</span>.1]<strong> pppoe-server bind virtual-template 1</strong>
+[<span class="keyword">*</span>PE2-Virtual-Ethernet<span>0/1/1</span>.1]<strong> commit</strong></pre>
+<p># Configure a BAS interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-Virtual-Ethernet<span>0/1/1</span>.1]<strong> user-vlan 1 2 qinq 100</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-Virtual-Ethernet<span>0/1/1</span>.1-vlan-1-2-QinQ-100] <strong>quit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>PE2-Virtual-Ethernet<span>0/1/1</span>.1] <strong>bas</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>PE2-Virtual-Ethernet<span>0/1/1</span>.1-bas]<strong> access-type layer2-subscriber</strong>
+[<span class="keyword">*</span>PE2-Virtual-Ethernet<span>0/1/1</span>.1-bas]<strong> authentication-method ppp</strong>
+[<span class="keyword">*</span>PE2-Virtual-Ethernet<span>0/1/1</span>.1-bas] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>PE2-Virtual-Ethernet<span>0/1/1</span>.1-bas]<strong> quit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>PE2-Virtual-Ethernet<span>0/1/1</span>.1]<strong> quit</strong></pre>
+<p># Configure an upstream interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong> interface GigabitEthernet <span>0/2/0</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-GigabitEthernet<span>0/2/0</span>]<strong> ip address 10.1.1.2 255.255.255.0</strong>
+[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-GigabitEthernet<span>0/2/0</span>]<strong> quit</strong></pre>
+</li><li>Verify the configuration.<p>Run the <strong><a href="cmdqueryname=display+segment-routing+ipv6+local-sid"><b><span class="cmdname">display segment-routing ipv6 local-sid</span></b></a></strong>  { <strong><strong><span>end-dt2u</span></strong></strong> | <strong><strong><span>end-dt2ul</span></strong></strong> | <strong><strong><span>end-dt2m</span></strong></strong> } <strong><a href="cmdqueryname=forwarding"><b><span class="cmdname">forwarding</span></b></a></strong> command on PEs to check information about the local SID table of an SRv6 VE interface. The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display segment-routing ipv6 local-sid end-dt2m forwarding</strong>
+                    My Local-SID End.DT2M Forwarding Table 
+                     -------------------------------------- 
+SID             : 2001:db8:12::400/118                         FuncType : End.DT2M 
+Bridge-domain ID: 100                                           
+LocatorName     : PE1_ARG                                      LocatorID: 5 
+Flavor          : NO-FLAVOR                                    SidCompress : NO 
+UpdateTime      : 2023-05-10 01:46:05.713
+
+Total SID(s): 1
+
+[<font style="font-size:8pt" Face="Courier New" >~</font>PE1] <strong>display segment-routing ipv6 local-sid end-dt2u forwarding</strong> 
+                     My Local-SID End.DT2U Forwarding Table 
+                    -------------------------------------- 
+ 
+SID             : 2001:db8:11::3D/128                          FuncType : End.DT2U 
+Bridge-domain ID: 100                                          
+LocatorName     : PE1                                          LocatorID: 4 
+Flavor          : NO-FLAVOR                                    SidCompress : NO 
+UpdateTime      : 2023-05-10 01:46:05.713
+
+Total SID(s): 1</pre>
+<p>Run the <strong><a href="cmdqueryname=display+bgp+evpn+all+routing-table"><b><span class="cmdname">display bgp evpn all routing-table</span></b></a></strong> command on PEs. The command output shows the EVPN route sent from the peer device. The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display bgp evpn all routing-table</strong>
+Local AS number : 100 
+ 
+ BGP Local router ID is 1.1.1.1 
+ Status codes: * - valid, &gt; - best, d - damped, x - best external, a - add path, 
+               h - history,  i - internal, s - suppressed, S - Stale 
+               Origin : i - IGP, e - EGP, ? - incomplete 
+ 
+ 
+ EVPN address family: 
+ Number of Inclusive Multicast Routes: 2 
+ Route Distinguisher: 100:1 
+       Network(EthTagId/IpAddrLen/OriginalIp)                 NextHop 
+ *&gt;    0:32:1.1.1.1                                           127.0.0.1                                     
+ *&gt;i   0:32:3.3.3.3                                           2001:db8:3::3                                 
+ 
+ 
+ EVPN-Instance evrf1: 
+ Number of Inclusive Multicast Routes: 2 
+       Network(EthTagId/IpAddrLen/OriginalIp)                 NextHop 
+ *&gt;    0:32:1.1.1.1                                           127.0.0.1                                     
+ *&gt;i   0:32:3.3.3.3                                           2001:db8:3::3</pre>
+</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration Files</h4><ul><li>PE1 configuration file<pre class="screen">#
+sysname PE1 
+#
+evpn vpn-instance evrf1 bd-mode
+ route-distinguisher 100:1
+ segment-routing ipv6 best-effort
+ segment-routing ipv6 locator PE1_ARG unicast-locator PE1
+ vpn-target 1:1 export-extcommunity
+ vpn-target 1:1 import-extcommunity
+# 
+evpn vpn-instance evrf2 bd-mode  
+ route-distinguisher 200:1  
+ segment-routing ipv6 best-effort  
+ segment-routing ipv6 locator PE1_ARG unicast-locator PE1   
+ vpn-target 2:2 export-extcommunity  
+ vpn-target 2:2 import-extcommunity 
+#
+bridge-domain 100
+ evpn binding vpn-instance evrf1
+#
+bridge-domain 200
+ evpn binding vpn-instance evrf2
+#
+segment-routing ipv6
+ encapsulation source-address 2001:db8:1::1 
+ locator PE1 ipv6-prefix 2001:db8:11:: 64 
+ locator PE1_ARG ipv6-prefix 2001:db8:12:: 64 args 10 
+#
+isis 1
+ is-level level-1
+ cost-style wide
+ network-entity 10.0000.0000.0001.00 
+ #
+ ipv6 enable topology ipv6
+ segment-routing ipv6 locator PE1
+ segment-routing ipv6 locator PE1_ARG auto-sid-disable 
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ipv6 enable
+ ipv6 address 2001:db8:10::1/64
+ isis ipv6 enable 1
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+#
+interface GigabitEthernet<span>0/2/0</span>.1 mode l2
+ encapsulation dot1q vid 100
+ rewrite pop single
+ bridge-domain 100
+#
+interface GigabitEthernet<span>0/2/0</span>.2 mode l2
+ encapsulation dot1q vid 100
+ rewrite pop single
+ bridge-domain 200
+#
+interface LoopBack1
+ ipv6 enable
+ ip address 1.1.1.1 255.255.255.255
+ ipv6 address 2001:db8:1::1/64
+ isis ipv6 enable 1
+#
+bgp 100
+ router-id 1.1.1.1
+ peer 2001:db8:3::3 as-number 100
+ peer 2001:db8:3::3 connect-interface LoopBack1
+#
+ipv4-family unicast
+ undo synchronization
+ #               
+ l2vpn-family evpn 
+  policy vpn-target 
+  peer 2001:db8:3::3 enable 
+  peer 2001:db8:3::3 advertise encap-type srv6 
+# 
+evpn source-address 1.1.1.1 
+# 
+return</pre>
+</li><li>P configuration file<pre class="screen"># 
+sysname P 
+#                
+isis 1           
+ is-level level-1 
+ cost-style wide 
+ network-entity 10.0000.0000.0002.00 
+ #               
+ ipv6 enable topology ipv6               
+# 
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown   
+ ipv6 enable     
+ ipv6 address 2001:db8:10::2/64 
+ isis ipv6 enable 1 
+# 
+interface GigabitEthernet<span>0/2/0</span> 
+ undo shutdown   
+ ipv6 enable     
+ ipv6 address 2001:db8:20::1/64 
+ isis ipv6 enable 1 
+# 
+interface LoopBack1 
+ ipv6 enable     
+ ip address 2.2.2.2 255.255.255.255 
+ ipv6 address 2001:db8:2::2/64 
+ isis ipv6 enable 1 
+# 
+return</pre>
+</li><li>PE2 configuration file<pre class="screen"># 
+sysname PE2 
+#
+evpn vpn-instance evrf1 bd-mode 
+ route-distinguisher 100:1 
+ segment-routing ipv6 best-effort 
+ segment-routing ipv6 locator PE2_ARG unicast-locator PE2  
+ vpn-target 1:1 export-extcommunity 
+ vpn-target 1:1 import-extcommunity
+#
+evpn vpn-instance evrf2 bd-mode 
+ route-distinguisher 200:1 
+ segment-routing ipv6 best-effort 
+ segment-routing ipv6 locator PE2_ARG unicast-locator PE2  
+ vpn-target 2:2 export-extcommunity 
+ vpn-target 2:2 import-extcommunity 
+# 
+radius-server group rd1
+ radius-server shared-key %^%#oNUw%i-|"WcBgt8=fSVID7F&lt;=K_N+.(ip[H\:a{D%^%#
+ radius-server authentication 192.168.7.249 1645 weight 0
+ radius-server accounting 192.168.7.249 1646 weight 0
+ radius-server type plus11
+ radius-server traffic-unit kbyte
+#    
+ip pool pool1 bas local
+ gateway 172.30.1.1 255.255.255.0
+ section 0 172.30.1.2 172.30.1.200
+ dns-server 192.168.7.252
+# 
+bridge-domain 100 
+ evpn binding vpn-instance evrf1
+# 
+bridge-domain 200 
+ evpn binding vpn-instance evrf2
+#
+aaa
+ #
+ authentication-scheme auth1
+ accounting-scheme acct1
+ #
+ domain isp1
+  authentication-scheme auth1
+  accounting-scheme acct1
+  radius-server group rd1
+  ip-pool pool1
+#                
+segment-routing ipv6 
+ encapsulation source-address 2001:db8:3::3 
+ locator PE2 ipv6-prefix 2001:db8:21:: 64 
+ locator PE2_ARG ipv6-prefix 2001:db8:22:: 64 args 10 
+#                
+isis 1           
+ is-level level-1 
+ cost-style wide 
+ network-entity 10.0000.0000.0003.00 
+ #               
+ ipv6 enable topology ipv6 
+ segment-routing ipv6 locator PE2  
+ segment-routing ipv6 locator PE2_ARG auto-sid-disable 
+#  
+interface Virtual-Template1
+ ppp authentication-mode chap
+#
+interface GigabitEthernet<span>0/1/0</span> 
+ undo shutdown   
+ ipv6 enable     
+ ipv6 address 2001:db8:20::2/64 
+ isis ipv6 enable 1 
+# 
+interface GigabitEthernet<span>0/2/0</span> 
+ undo shutdown 
+ ip address 10.1.1.2 255.255.255.0
+# 
+interface Virtual-Ethernet<span>0/1/0</span>
+ ve-group 1 l2-terminate
+#  
+interface Virtual-Ethernet<span>0/1/0</span>.1 mode l2
+ encapsulation dot1q vid 100  
+ bridge-domain 100 
+#  
+interface Virtual-Ethernet<span>0/1/0</span>.2 mode l2
+ encapsulation dot1q vid 200  
+ bridge-domain 200 
+#
+interface Virtual-Ethernet<span>0/1/1</span>
+ ve-group 1 l3-access
+#
+interface Virtual-Ethernet<span>0/1/1</span>.1
+ user-vlan 1 2 qinq 100
+ bas
+  #
+  access-type layer2-subscriber
+#
+interface LoopBack1 
+ ipv6 enable     
+ ip address 3.3.3.3 255.255.255.255 
+ ipv6 address 2001:db8:3::3/64 
+ isis ipv6 enable 1 
+#           
+bgp 100          
+ router-id 3.3.3.3 
+ peer 2001:db8:1::1 as-number 100 
+ peer 2001:db8:1::1 connect-interface LoopBack1 
+ #               
+ ipv4-family unicast 
+  undo synchronization 
+ #               
+ l2vpn-family evpn 
+  policy vpn-target 
+  peer 2001:db8:1::1 enable 
+  peer 2001:db8:1::1 advertise encap-type srv6 
+#  
+evpn source-address 3.3.3.3 
+# 
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_pppox_cfg_0183.html">PPPoE Access Configuration Examples
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_pppoxv6_cfg_0058.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_014461_copy.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

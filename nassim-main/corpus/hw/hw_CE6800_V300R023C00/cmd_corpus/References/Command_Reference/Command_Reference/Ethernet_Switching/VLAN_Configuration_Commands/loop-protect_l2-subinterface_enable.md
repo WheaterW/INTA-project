@@ -1,0 +1,78 @@
+loop-protect l2-subinterface enable
+===================================
+
+loop-protect l2-subinterface enable
+
+Function
+--------
+
+
+
+The **loop-protect l2-subinterface enable** command enables Layer 2 sub-interfaces to inherit the blocked/forwarding status of the main interface.
+
+The **undo loop-protect l2-subinterface enable** command disables Layer 2 sub-interfaces from inheriting the blocked/forwarding status of the main interface.
+
+
+
+By default, Layer 2 sub-interfaces do not inherit the blocked/forwarding status of the main interface.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**loop-protect l2-subinterface enable**
+
+**undo loop-protect l2-subinterface enable**
+
+
+Parameters
+----------
+
+None
+
+Views
+-----
+
+Layer 2 100GE interface view,Layer 2 10GE interface view,Layer 2 200GE interface view,25GE-L2 view,400GE-L2 view,Layer 2 50GE interface view,Layer 2 Eth-Trunk interface view,Layer 2 GE interface view,Interface group view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+To prevent or eliminate loops on a complex Layer 2 network, STP, RSTP, or MSTP can be configured on the device.Running the **stp enable** command enables STP/RSTP/MSTP. The devices running STP/RSTP/MSTP discover loops on the network by exchanging information with each other, so that the ring topology can be trimmed into a loop-free tree topology by blocking a certain interface. In this manner, replication and circular propagation of packets are prevented on the network. In addition, the processing performance of devices is prevented from deteriorating.If you want Layer 2 sub-interfaces to be blocked when their main interface is blocked due to loops, run the **loop-protect l2-subinterface enable** command to enable the Layer 2 sub-interfaces to inherit the blocked/forwarding status of the main interface.
+
+**Prerequisites**
+
+Basic STP/RSTP functions have been configured.
+
+**Precautions**
+
+The **loop-protect l2-subinterface enable** command can be applied only to STP and RSTP scenarios and cannot work with MSTP or VBST. If MSTP or VBST is enabled, the device displays an error message when you run the **loop-protect l2-subinterface enable** command.The **loop-protect l2-subinterface enable** command can be run only for Layer 2 interfaces. To run the command for a Layer 3 interface, run the **portswitch** command to switch the interface to a Layer 2 interface first.Currently, only Layer 2 dot1q and QinQ sub-interfaces can inherit the loop status of the main interface.A Layer 2 sub-interface cannot be configured to inherit the loop status of its main interface in the following situation:
+
+* A physical interface has been added to an Eth-Trunk interface.
+
+Example
+-------
+
+# Enable the sub-interfaces of the Layer 2 interface to inherit the blocked/forwarding status of 100GE .
+```
+<HUAWEI> system-view
+[~HUAWEI] stp mode rstp
+[*HUAWEI] interface 100GE 1/0/1
+[*HUAWEI-100GE1/0/1] portswitch
+[*HUAWEI-100GE1/0/1] loop-protect l2-subinterface enable
+
+```

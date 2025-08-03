@@ -1,0 +1,100 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Enabling VBST">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_vbst_cfg_0006.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_vbst_cfg_0008.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_vbst_cfg_0010.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="VBST">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VBST">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="featurename" content="VBST">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001512689214">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Enabling VBST</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001512689214"></a><a name="EN-US_TASK_0000001512689214"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Enabling VBST</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001512689214__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>Enabling VBST on a ring network immediately triggers spanning tree calculation on the network. Parameters such as the device priority and port priority affect spanning tree calculation, and changing them during calculation may cause network flapping. To ensure fast and stable spanning tree calculation, set parameters such as the device priority and port priority before enabling VBST.</p>
+<div class="p">The number of PVs is equal to the sum of existing VBST-enabled VLANs that all VBST-enabled interfaces are added to. For example, if VBST is enabled on 10 device interfaces, and each interface is added to 100 existing VBST-enabled VLANs, then the number of PVs occupied by all the interfaces is 1000. If the number of occupied PVs exceeds the specifications, the CPU usage may be high. This results in the device being incapable of promptly processing tasks, affects protocol calculation, and even makes the device unmanageable (by the NMS).<ul><li>The CPU usage of VBST is in direct proportion to the number of occupied PVs. If parameter settings are not adjusted in a scenario where a large number of PVs exist, the CPU usage will be too high.</li><li>You can run the <a href="cmdqueryname=display+vbst+port-vlan+statistics"><b><span class="cmdname">display vbst port-vlan statistics</span></b></a> command in any view to check the supported maximum number of PVs of VBST.</li></ul>
+</div>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li><p>On a network running VBST, configure the core device as the root bridge to ensure the stability of the Layer 2 network. Failing to do so may cause temporary service interruptions if deployment of new devices on the network triggers switchover of the root bridge.</p>
+</li><li><p>When VBST is enabled on a ring network, VBST immediately starts spanning tree calculation. Parameters such as the device priority and port priority affect spanning tree calculation, and changing these parameters during the calculation may cause network flapping. To ensure fast and stable spanning tree calculation, perform basic configurations on the switching device and its ports before enabling VBST.</p>
+</li><li>VBST constructs a spanning tree in each VLAN so that traffic in different VLANs can be forwarded along different spanning trees. However, it cannot prevent performance deterioration due to significantly increasing network scale.</li></ul>
+<ul><li>When the number of PVs on a VBST network reaches the upper limit (you can run the <a href="cmdqueryname=display+vbst+port-vlan+statistics"><b><span class="cmdname">display vbst port-vlan statistics</span></b></a> command to check the number of occupied PVs and the maximum number of PVs supported by the device):<ul><li>You are advised to adjust the device configurations to reduce the number of occupied PVs. For example, check whether the interfaces that participate in VBST calculation are added to unnecessary VLANs; if so, remove the interfaces from these VLANs. Alternatively, run the <a href="cmdqueryname=stp+disable"><b><span class="cmdname">stp disable</span></b></a> command on the interfaces that do not need to participate in VBST calculation, or run the <a href="cmdqueryname=stp+vlan+disable"><b><span class="cmdname">stp vlan disable</span></b></a> command in the system view to disable VBST in the VLANs that do not require VBST.</li><li>If the number of occupied PVs cannot be reduced, run the <a href="cmdqueryname=stp+vlan+timer+hello"><b><span class="cmdname">stp vlan timer hello</span></b></a> command to set Hello Time to a value greater than or equal to 4 seconds and adjust Forward Delay and Max Age values accordingly.</li><li>If a large number of PVs are required, you are advised to set Hello Time to a larger value and adjust Forward Delay and Max Age values accordingly. If the number of PVs is 8000, you are advised to set Hello Time to 4 seconds. If the number of PVs is 16000, you are advised to set Hello Time to 8 seconds. If the number of PVs is 24000, you are advised to set Hello Time to 10 seconds.</li></ul>
+</li></ul>
+</div></div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001512689214__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li><span>Set the spanning tree working mode to VBST.</span><p><pre class="screen"><a href="cmdqueryname=stp+mode+vbst"><b><span class="cmdname">stp mode vbst</span></b></a></pre>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The VBST mode is mutually exclusive with the STP, RSTP, and MSTP modes.</p>
+<p>If 1:<em>N</em> (<em>N</em> &gt; 1) mapping between instances and VLANs has been configured on the device, you must delete the mapping before changing the spanning tree working mode to VBST.</p>
+<p>If the <a href="cmdqueryname=stp+vpls-subinterface+enable"><b><span class="cmdname">stp vpls-subinterface enable</span></b></a> command has been configured on the device, you must run the <a href="cmdqueryname=stp+vpls-subinterface+enable"><b><span class="cmdname">undo stp vpls-subinterface enable</span></b></a> command on the corresponding interface before changing the spanning tree working mode to VBST.</p>
+</div></div>
+</p></li><li><span>Enable VBST.</span><p><pre class="screen"><a href="cmdqueryname=stp+enable"><b><span class="cmdname">stp enable</span></b></a></pre>
+</p></li><li><span>Enable VBST in VLANs.</span><p><pre class="screen"><a href="cmdqueryname=stp+vlan+disable"><b><span class="cmdname">undo stp vlan</span></b></a> <i><span class="varname">vlan-id1</span></i> [ <strong><span>to</span></strong> <i><span class="varname">vlan-id2</span></i> ] [ <i><span class="varname">vlan-id3</span></i> [ <strong><span>to</span></strong> <i><span class="varname">vlan-id4</span></i> ] ] &amp;&lt;1-9&gt; <strong><span>disable</span></strong></pre>
+<p>By default, VBST is enabled in all VLANs.</p>
+</p></li><li><span>Enter the interface view.</span><p><pre class="screen"><a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> <i><span class="varname">interface-type interface-number</span></i></pre>
+</p></li><li><span>Switch the interface working mode to Layer 2.</span><p><pre class="screen" id="EN-US_TASK_0000001512689214__en-us_task_0228023023_screen242613534459"><a href="cmdqueryname=portswitch"><b><span class="cmdname" id="EN-US_TASK_0000001512689214__en-us_task_0228023023_cmdname942715314511">portswitch</span></b></a></pre>
+<p id="EN-US_TASK_0000001512689214__en-us_task_0228023023_p1175711105814">Determine whether to perform this step based on the current interface working mode.</p>
+</p></li><li><span>Enable VBST.</span><p><pre class="screen"><a href="cmdqueryname=stp+enable"><b><span class="cmdname">stp enable</span></b></a></pre>
+<p>By default, VBST is enabled on all interfaces.</p>
+</p></li><li><span>Return to the system view.</span><p><pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</p></li><li><span>(Optional) Configure a protection mode when VBST detects different PVIDs on directly connected interfaces.</span><p><pre class="screen"><a href="cmdqueryname=stp+pvid-consistency+protection+mode+block"><b><span class="cmdname">stp pvid-consistency protection mode block</span></b></a></pre>
+<p>By default, no protection mode is configured for PVID inconsistency detected between directly connected interfaces. If the PVIDs of two directly connected interfaces are different, VBST will not block the interfaces in their default VLANs. However, if the protection mode is set to block in the preceding situation, VBST will block these interfaces in their default VLANs.</p>
+<p>If the interfaces at both ends of a link are trunk interfaces and their PVIDs are changed, you are advised to configure the protection mode for PVID inconsistency. This prevents traffic forwarding exceptions caused by improper configurations.</p>
+</p></li><li><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001512689214__en-us_task_0228023023_screen163801330213"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001512689214__en-us_task_0228023023_en-us_concept_0141113565_cmdname1667501373175340">commit</span></b></a></pre>
+</p></li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_vbst_cfg_0006.html">Configuring Basic VBST Functions
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_vbst_cfg_0008.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="galaxy_vbst_cfg_0010.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

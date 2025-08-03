@@ -1,0 +1,248 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="topic">
+<meta name="DC.Title" content="Notification Capabilities">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_netconf_cfg1_0047.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_netconf_cfg1_0055.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_netconf_cfg1_0057.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TOPIC_0000001563881981">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Notification Capabilities</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TOPIC_0000001563881981"></a><a name="EN-US_TOPIC_0000001563881981"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Notification Capabilities</h1>
+<div><div class="section"><h4 class="sectiontitle">Notification 1.0</h4><p>A device can send alarms and events to a client using the NETCONF notification capability, thereby allowing the client to promptly detect device configuration or other changes. You can perform the &lt;create-subscription&gt; operation to subscribe to device alarms and events. If the &lt;rpc-reply&gt; element returned by the device contains an &lt;ok&gt; element, the &lt;create-subscription&gt; operation is successful. In this case, the device will proactively report the generated alarms and events to the client through NETCONF.</p>
+<ol><li>Alarms and events can be subscribed to in either of the following modes: long-term subscription and subscription within a specified period.<ul><li><p>Long-term subscription: After the subscription is successful, if the &lt;startTime&gt; element is specified in the subscription message, the device sends historical alarms and events to the NMS and then sends a &lt;replayComplete&gt; message to notify the NMS that the replay is complete. If a new alarm or event is generated, the device also sends it to the NMS. If the &lt;startTime&gt; element is not specified in the subscription message, the device sends all newly generated alarms and events to the NMS. After a NETCONF session is terminated, the subscription is automatically canceled.</p>
+</li><li><p>Subscription within a specified period: After the subscription is successful, the device sends the alarms and events that are generated during the specified period and that meet the filtering conditions to the NMS. Because the &lt;startTime&gt; element is specified in the subscription message, the device sends historical alarms and events to the NMS and then sends a &lt;replayComplete&gt; message to notify the NMS that the replay is complete. When the specified &lt;stopTime&gt; has been reached, the NETCONF module sends a &lt;notificationComplete&gt; message to notify the NMS that the subscription is terminated.</p>
+</li></ul>
+<p>Historical alarms and events refer to those generated from the &lt;startTime&gt; specified in the subscription message to when the user performs the subscription operation. If &lt;stopTime&gt; is not specified, the subscription is a long-term one. If both &lt;startTime&gt; and &lt;stopTime&gt; are specified, the subscription is within a specified period. The format of the subscription message sent by the device to the NMS is as follows:</p>
+<p>RPC request (NETCONF subscription)</p>
+<pre class="screen">&lt;rpc message-id="101" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+  &lt;create-subscription xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"&gt;
+    &lt;stream&gt;NETCONF&lt;/stream&gt;
+    &lt;filter type="subtree"&gt;
+       &lt;netconf-config-change xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-notifications"/&gt;
+    &lt;/filter&gt;
+    &lt;startTime&gt;2016-10-20T14:50:00Z&lt;/startTime&gt;
+    &lt;stopTime&gt;2016-10-23T06:22:04Z&lt;/stopTime&gt;
+  &lt;/create-subscription&gt;
+&lt;/rpc&gt;</pre>
+<p>RPC reply (NETCONF subscription)</p>
+<pre class="screen">&lt;rpc-reply message-id="101" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+  &lt;ok/&gt;
+&lt;/rpc-reply&gt;</pre>
+<p>RPC request (NETCONF-WITH-RES-CONFIG subscription)</p>
+<pre class="screen">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="5"&gt;
+  &lt;create-subscription xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"&gt;
+    &lt;stream&gt;NETCONF-WITH-RES-CONFIG&lt;/stream&gt;
+    &lt;filter type="subtree"&gt;
+      &lt;netconf-config-change xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-notifications"/&gt;
+    &lt;/filter&gt;
+  &lt;/create-subscription&gt;
+&lt;/rpc&gt;</pre>
+<p>RPC reply (NETCONF-WITH-RES-CONFIG subscription)</p>
+<pre class="screen">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="5"&gt;
+  &lt;ok/&gt;
+&lt;/rpc-reply&gt;</pre>
+<p>Example of reporting a notification (NETCONF-WITH-RES-CONFIG subscription)</p>
+<pre class="screen">&lt;notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"&gt;
+  &lt;eventTime&gt;2020-12-09T20:41:14Z&lt;/eventTime&gt;
+  &lt;alt-resource-config xmlns="urn:huawei:yang:huawei-notification-common"&gt;
+    &lt;notification-id&gt;135598331&lt;/notification-id&gt;
+    &lt;notification-class&gt;event&lt;/notification-class&gt;
+    &lt;event-level&gt;informational&lt;/event-level&gt;
+  &lt;/alt-resource-config&gt;
+  &lt;netconf-config-change xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-notifications"&gt;
+    &lt;changed-by&gt;
+      &lt;server/&gt;
+    &lt;/changed-by&gt;
+    &lt;datastore&gt;running&lt;/datastore&gt;
+  &lt;/netconf-config-change&gt;
+&lt;/notification&gt;</pre>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Element descriptions</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="20%" id="mcps1.3.1.3.1.13.2.6.1.1" liSelected="liSelected"><p>Element</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="20%" id="mcps1.3.1.3.1.13.2.6.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="20%" id="mcps1.3.1.3.1.13.2.6.1.3" liSelected="liSelected"><p>Value Range</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="20%" id="mcps1.3.1.3.1.13.2.6.1.4" liSelected="liSelected"><p>Mandatory</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="20%" id="mcps1.3.1.3.1.13.2.6.1.5" liSelected="liSelected"><p>Constraints</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.1 "><p>stream</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.2 "><p>Event flow type</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.3 "><p>The value is a case-sensitive enumerated type and can be:</p>
+<ul><li>NETCONF: indicates that the NETCONF notification mechanism is used to report alarms and events.</li><li>NETCONF-WITH-RES-CONFIG: indicates that the reported alarms or events carry Huawei's proprietary extension attribute huawei-notification-common.</li></ul>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.4 "><p>No</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.5 "><p>N/A</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.1 "><p>filter</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.2 "><p>Alarm or event filter</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.3 "><p>The value is a string of characters in the format of &lt;alarm name xmlns=namespace of the alarm name/&gt; or &lt;event name xmlns=namespace of the event name/&gt;.</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.4 "><p>No</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.5 "><p>If no filter is specified, all alarms and events that can be reported through notifications are subscribed to.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.1 "><p>startTime</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.2 "><p>Start time</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.3 "><p>The value is in the time format.</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.4 "><p>No</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.5 "><p>The start time must be earlier than the time when the subscription operation is performed.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.1 "><p>stopTime</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.2 "><p>End time</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.3 "><p>The value is in the time format.</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.4 "><p>No</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.3.1.13.2.6.1.5 "><p>The end time must be later than the start time.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li></ol><ol start="2"><li>After the subscription is successful, the device encapsulates the alarm or event information into notification messages and sends them to the NMS.<pre class="screen">&lt;notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"&gt;
+  &lt;eventTime&gt;2016-11-26T13:51:00Z&lt;/eventTime&gt;
+  &lt;hwCPUUtilizationResume xmlns="urn:huawei:yang:huawei-sem"&gt;
+  &lt;TrapSeverity&gt;0&lt;/TrapSeverity&gt;
+  &lt;ProbableCause&gt;0&lt;/ProbableCause&gt;
+  &lt;EventType&gt;0&lt;/EventType&gt;
+  &lt;PhysicalIndex&gt;0&lt;/PhysicalIndex&gt;
+  &lt;PhysicalName&gt;SimulateStringData&lt;/PhysicalName&gt;
+  &lt;RelativeResource&gt;SimulateStringData&lt;/RelativeResource&gt;
+  &lt;UsageType&gt;0&lt;/UsageType&gt;
+  &lt;SubIndex&gt;0&lt;/SubIndex&gt;
+  &lt;CpuUsage&gt;0&lt;/CpuUsage&gt;
+  &lt;Unit&gt;0&lt;/Unit&gt;
+  &lt;CpuUsageThreshold&gt;0&lt;/CpuUsageThreshold&gt;
+  &lt;/hwCPUUtilizationResume&gt;
+&lt;/notification&gt;</pre>
+</li></ol><ol start="3"><li>After alarms and events are reported to the NMS, the NETCONF module sends a subscription completion message to the NMS.<ul><li><p>After historical alarms and events are reported to the NMS, the NETCONF module sends a replayComplete message to the NMS.</p>
+<pre class="screen">&lt;notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"&gt;
+  &lt;eventTime&gt;2016-11-29T11:57:15Z&lt;/eventTime&gt;
+  &lt;replayComplete xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0" /&gt;
+&lt;/notification&gt;</pre>
+</li><li><p>When &lt;stopTime&gt; specified in the subscription message has been reached, the NETCONF module sends a notificationComplete message to notify the NMS that the subscription is terminated.</p>
+<pre class="screen">&lt;notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0"&gt;
+  &lt;eventTime&gt;2016-11-29T11:57:25Z&lt;/eventTime&gt;
+  &lt;notificationComplete xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0" /&gt;
+&lt;/notification&gt;</pre>
+</li></ul>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 2 </b>Element descriptions</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="20%" id="mcps1.3.1.5.1.2.2.6.1.1" liSelected="liSelected"><p>Element</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="20%" id="mcps1.3.1.5.1.2.2.6.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="20%" id="mcps1.3.1.5.1.2.2.6.1.3" liSelected="liSelected"><p>Value Range</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="20%" id="mcps1.3.1.5.1.2.2.6.1.4" liSelected="liSelected"><p>Mandatory</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="20%" id="mcps1.3.1.5.1.2.2.6.1.5" liSelected="liSelected"><p>Constraints</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.5.1.2.2.6.1.1 "><p>replayComplete</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.5.1.2.2.6.1.2 "><p>After historical alarms and events are reported to the NMS, the NETCONF module sends a replayComplete message to the NMS.</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.5.1.2.2.6.1.3 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.5.1.2.2.6.1.4 "><p>No</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.5.1.2.2.6.1.5 "><p>N/A</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.5.1.2.2.6.1.1 "><p>notificationComplete</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.5.1.2.2.6.1.2 "><p>When &lt;stopTime&gt; specified in the subscription message has been reached, the NETCONF module sends a notificationComplete message to notify the NMS that the subscription is terminated.</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.5.1.2.2.6.1.3 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.5.1.2.2.6.1.4 "><p>No</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.3.1.5.1.2.2.6.1.5 "><p>N/A</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li></ol>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_netconf_cfg1_0047.html">NETCONF Standard Capability Set
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_netconf_cfg1_0055.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_netconf_cfg1_0057.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

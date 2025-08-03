@@ -1,0 +1,94 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring Three-Segment VXLAN to Implement Layer 2 Interworking">
+<meta name="abstract" content="Three-segment VXLAN tunnels can be configured to enable communication between VMs that belong to the same subnet but different DCs.">
+<meta name="description" content="Three-segment VXLAN tunnels can be configured to enable communication between VMs that belong to the same subnet but different DCs.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vxlan_cfg_1218.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vxlan_cfg_1219.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vxlan_cfg_1221.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="h00847023">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="OWNER" content="p00915595">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="p00915595">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172363813">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Configuring Three-Segment VXLAN to Implement Layer 2 Interworking</title>
+</head>
+<body><a name="EN-US_TASK_0172363813"></a><a name="EN-US_TASK_0172363813"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring Three-Segment VXLAN to Implement Layer 2 Interworking</h1>
+<div class="taskbody"><p>Three-segment VXLAN tunnels can be configured to enable communication between VMs that belong to the same subnet but different DCs.</p>
+<div class="context"><a name="EN-US_TASK_0172363813__1.4.1"></a><a name="1.4.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>On the network shown in <a href="#EN-US_TASK_0172363813__fig_dc_vrp_vxlan_cfg_120201">Figure 1</a>, VXLAN tunnels are configured both within DC A and DC B and between transit leaf nodes in both DCs. To enable communication between VM1 and VM2, implement Layer 2 communication between DC A and DC B. If the VXLAN tunnels within DC A and DC B use the same VXLAN Network Identifier (VNI), this VNI can also be used to establish a VXLAN tunnel between Transit Leaf1 and Transit Leaf2. In practice, however, different DCs have their own VNI spaces, and therefore the VXLAN tunnels within DC A and DC B mostly likely use different VNIs. To configure a VXLAN tunnel between Transit Leaf1 and Transit Leaf2 in such cases, perform a VNI conversion.</p>
+<p>For example, in <a href="#EN-US_TASK_0172363813__fig_dc_vrp_vxlan_cfg_120201">Figure 1</a>, the VXLAN tunnel in DC A uses the VNI 10, and that in DC B uses the VNI 20. Transit Leaf2's VNI (20) must be configured as the outbound VNI on Transit Leaf1, and Transit Leaf1's VNI (10) as the outbound VNI on Transit Leaf2. After the configuration is complete, Layer 2 packets can be forwarded properly. Take DC A sending packets to DC B as an example. After receiving VXLAN packets within DC A, Transit Leaf1 decapsulates the packets and then uses the outbound VNI 20 to re-encapsulate the packets before sending them to Transit Leaf2. Upon receipt, Transit Leaf2 forwards them as normal VXLAN packets.</p>
+<div class="fignone" id="EN-US_TASK_0172363813__fig_dc_vrp_vxlan_cfg_120201"><a name="EN-US_TASK_0172363813__fig_dc_vrp_vxlan_cfg_120201"></a><a name="fig_dc_vrp_vxlan_cfg_120201"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring three-segment VXLAN to implement Layer 2 interworking</span><br><span><img class="vsd" src="images/fig_dc_vrp_vxlan_cfg_120201.png" width="NaN" height="NaN"></span></div>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li><p>Layer 2 communication between VMs in different DCs is implemented here, therefore avoiding the need to configure a Layer 3 gateway.</p>
+</li><li><p>If DC A and DC B belong to the same AS, configure an RR on the edge device. If DC A and DC B do not belong to the same AS, establish an EBGP EVPN peer relationship between edge devices.</p>
+</li></ul>
+</div></div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172363813__1.4.2"></a><a name="1.4.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure BGP EVPN within DC A and DC B to establish VXLAN tunnels. For detailed configurations, see <a href="dc_vrp_vxlan_cfg_0017b.html">Configuring VXLAN in Centralized Gateway Mode Using BGP EVPN</a>. There is no need to configure a Layer 3 VXLAN gateway.</span></li><li><span>Configure BGP EVPN on Transit Leaf1 and Transit Leaf2 to establish a VXLAN tunnel between them. For detailed configurations, see <a href="dc_vrp_vxlan_cfg_0017b.html">Configuring VXLAN in Centralized Gateway Mode Using BGP EVPN</a>. There is no need to configure a Layer 3 VXLAN gateway.</span></li><li><span>Configure Transit Leaf1 and Transit Leaf2 to advertise routes that are re-originated by the EVPN address family to BGP EVPN peers.</span><p><ol type="a"><li><p>Run <span><a href="cmdqueryname=bgp"><b><span class="cmdname">bgp</span></b></a> <i><span class="varname">as-number</span></i></span></p>
+<p>The BGP view is displayed.</p>
+</li><li><p>Run <span><a href="cmdqueryname=l2vpn-family"><b><span class="cmdname">l2vpn-family</span></b></a> <strong><span>evpn</span></strong></span></p>
+<p>The BGP-EVPN address family view is displayed.</p>
+</li><li><p>Run <span><a href="cmdqueryname=peer"><b><span class="cmdname">peer</span></b></a> { <i><span class="varname">group-name</span></i> | <i><span class="varname">ipv4-address</span></i> } <strong><span>split-group</span></strong> <i><span class="varname">split-group-name</span></i></span></p>
+<p>A split horizon group (SHG) to which BGP EVPN peers (or peer groups) belong is configured.</p>
+<p>In Layer 2 interworking scenarios, to prevent forwarding BUM traffic from causing a loop, an SHG must be configured. Separately specify the name of the SHG between Transit Leaf1 and Transit Leaf2 on each, so that devices within DC A and DC B belong to the default SHG and Transit Leaf1 and Transit Leaf2 belong to the specified SHG. In this manner, when a transit leaf node receives BUM traffic, it does not forward traffic to a device belonging to the same SHG, therefore preventing loops.</p>
+</li><li><p>Run <span><a href="cmdqueryname=peer"><b><span class="cmdname">peer</span></b></a> { <i><span class="varname">ipv4-address</span></i> | <i><span class="varname">group-name</span></i> } <strong><span>import</span></strong> <strong><span>reoriginate</span></strong></span></p>
+<p>The function to re-originate routes received from BGP EVPN peers is enabled.</p>
+<p>Enable on transit leaf nodes the function to re-originate routes received from BGP EVPN peers within DCs and between the DCs (between transit leaf nodes).</p>
+</li><li><p>Run <span><a href="cmdqueryname=peer"><b><span class="cmdname">peer</span></b></a> { <i><span class="varname">ipv4-address</span></i> | <i><span class="varname">group-name</span></i> } <strong><span>advertise</span></strong> <strong><span>route-reoriginated</span></strong> <strong><span>evpn</span></strong> <strong><span>mac</span></strong></span></p>
+<p>The function to advertise re-originated EVPN routes to BGP EVPN peers is enabled.</p>
+<p>In Layer 2 interworking scenarios, configure the function to advertise only re-originated MAC routes to BGP EVPN peers. Enable on transit leaf nodes the function to advertise re-originated MAC routes to BGP EVPN peers within DCs and between the DCs (between transit leaf nodes).</p>
+</li><li><p>Run <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span></p>
+<p>The configuration is committed.</p>
+</li></ol>
+</p></li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vxlan_cfg_1218.html">Configuring Three-Segment VXLAN to Implement DCI
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vxlan_cfg_1219.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vxlan_cfg_1221.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

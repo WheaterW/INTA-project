@@ -1,0 +1,278 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring a Static PCP Server Address in a Distributed NAT444 Scenario">
+<meta name="abstract" content="This section provides an example for configuring static PCP server address in a distributed NAT444 scenario to implement multiple-to-multiple conversions between private addresses of home users and external public addresses, so that users can access the Internet after NAT and PCP connections can be established. The example provides the networking requirements, configuration roadmap, configuration procedure, and configuration files.">
+<meta name="description" content="This section provides an example for configuring static PCP server address in a distributed NAT444 scenario to implement multiple-to-multiple conversions between private addresses of home users and external public addresses, so that users can access the Internet after NAT and PCP connections can be established. The example provides the networking requirements, configuration roadmap, configuration procedure, and configuration files.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_pcp_cfg_0011.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_pcp_cfg_0008.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="c00549182">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="PCP">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="PCP">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="featurename" content="PCP">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="featurename" content="PCP">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="OWNER" content="c00549182">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="c00549182">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172374862">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring a Static PCP Server Address in a Distributed NAT444 Scenario</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172374862"></a><a name="EN-US_TASK_0172374862"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring a Static PCP Server Address in a Distributed NAT444 Scenario</h1>
+<div class="taskbody"><p>This section provides an example for configuring static PCP server address in a distributed NAT444 scenario to implement multiple-to-multiple conversions between private addresses of home users and external public addresses, so that users can access the Internet after NAT and PCP connections can be established. The example provides the networking requirements, configuration roadmap, configuration procedure, and configuration files.</p>
+<div class="context"><a name="EN-US_TASK_0172374862__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In <a href="#EN-US_TASK_0172374862__fig_dc_ne_cfg_pcp_0001">Figure 1</a>, a private IPv4 user accesses the Internet after a BRAS performs NAT for the user. The CGN device is required to have a static PCP server address configured and establishes a PCP connection to the user.</p>
+<div class="p">The configuration requirements are as follows:<ul><li>The private IPv4 home user' PC can access the IPv4 Internet through the MAN.</li><li>The private IPv4 addresses of residential users can be mapped to multiple public IP addresses in multiple-to-multiple translation mode.</li></ul>
+</div>
+<div class="fignone" id="EN-US_TASK_0172374862__fig_dc_ne_cfg_pcp_0001"><a name="EN-US_TASK_0172374862__fig_dc_ne_cfg_pcp_0001"></a><a name="fig_dc_ne_cfg_pcp_0001"></a><span class="figcap"><b>Figure 1 </b>PCP server with a static IP address in a distributed NAT444 scenario</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 represents GE <span>0/2/1</span>.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_ne_cfg_pcp_0001.png"></span><br></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172374862__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Configure basic NAT functions.</li><li>Configure NAT user information and RADIUS authentication on the BRAS.</li><li>Configure a NAT traffic diversion policy.</li><li>Configure a NAT traffic conversion policy.</li><li>Configure a static PCP server in a NAT444 instance.</li><li>Verify the configuration.</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172374862__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li>Name of a NAT instance</li><li>NAT address pool's number and start and end IP addresses</li><li>User group name</li><li>ACL and UCL numbers</li><li>NAT traffic diversion policy information</li><li>Static PCP server address<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The static PCP server address must differ from a physical interface address, loopback interface address, or an address in the address pool of the NAT444 instance.</p>
+</div></div>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172374862__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Set the maximum number of sessions that can be created on the service board in slot <span>1</span> to 6M.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname BRAS_NAT</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT]<strong> vsm on-board-mode disable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>license</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-license] <strong>active nat session-table size 6 slot <span>1</span> </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-license]<strong> active nat bandwidth-enhance 40 slot <span>1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-license] <strong>active pcp vsuf slot <span>1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-license] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-license]<strong> quit</strong></pre>
+<ul><li><p>Configure a NAT instance named <strong>nat1</strong> with the ID of <strong>1</strong> and bind it to a NAT board.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>service-location 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-service-location-1]<strong> location slot <span>1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-service-location-1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-service-location-1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>service-instance-group group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-service-instance-group-group1] <strong>service-location 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-service-instance-group-group1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-service-instance-group-group1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>nat instance nat1 id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-nat-instance-nat1] <strong>service-instance-group group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-nat-instance-nat1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-nat-instance-nat1] <strong>quit</strong></pre>
+</li><li><p>Configure an address pool and set the start IP address to 11.11.11.101 and the end IP address to 11.11.11.105.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>nat instance nat1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-nat-instance-nat1] <strong>nat address-group address-group1 group-id 1 11.11.11.101 11.11.11.105</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-nat-instance-nat1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-nat-instance-nat1] <strong>quit</strong></pre>
+</li></ul>
+</p></li><li><span>Configure NAT user information.</span><ol type="a"><li class="substepexpand"><span>Configure the BRAS service to enable users to go online. For details, see <em><span class="keyword">HUAWEI</span> <span class="keyword">NE40E</span></em> Configuration Guide â User Access.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>aaa</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-aaa] <strong>authentication-scheme auth1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-aaa-authen-auth1] <strong>authentication-mode radius</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-aaa-authen-auth1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-aaa-authen-auth1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-aaa] <strong>accounting-scheme acct1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-aaa-accounting-acct1] <strong>accounting-mode radius</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-aaa-accounting-acct1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-aaa-accounting-acct1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-aaa] <strong>domain isp1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-aaa-domain-isp1] <strong>authentication-scheme auth1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-aaa-domain-isp1] <strong>accounting-scheme acct1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-aaa-domain-isp1] <strong>radius-server group rd1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-aaa-domain-isp1] <strong>ip-pool pool1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-aaa-domain-isp1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-aaa-domain-isp1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-aaa] <strong>quit</strong></pre>
+</p></li><li class="substepexpand"><span>Create a user group named <strong>group1</strong>.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>user-group group1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>commit</strong></pre>
+</p></li><li class="substepexpand"><span>Specify the domain of users.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>aaa</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-aaa] <strong>domain isp1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-aaa-domain-isp1] <strong>user-group group1 bind nat instance nat1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-aaa-domain-isp1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-aaa-domain-isp1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-aaa] <strong>quit</strong></pre>
+</p></li></ol>
+</li><li><span>Configure a NAT traffic diversion policy.</span><p><ol type="a"><li><div class="p">Configure an ACL numbered 6001 and an ACL rule numbered 1.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>acl 6001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-ucl-6001] <strong>rule 1 permit ip source user-group group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-ucl-6001] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-ucl-6001] <strong>quit</strong></pre>
+</div>
+</li><li><div class="p">Configure a traffic classifier.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>traffic classifier classifier1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-classifier-classifier1] <strong>if-match acl 6001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-classifier-classifier1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-classifier-classifier1] <strong>quit</strong></pre>
+</div>
+</li><li><div class="p">Define a traffic behavior <strong>behavior1</strong> and bind it to the NAT instance <strong>nat1</strong>.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>traffic behavior behavior1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-behavior-behavior1] <strong>nat bind instance nat1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-behavior-behavior1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-behavior-behavior1] <strong>quit</strong></pre>
+</div>
+</li><li><div class="p">Configure a NAT traffic policy named <strong>policy1</strong> and associate the ACL-based traffic classification rules with the traffic behavior.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>traffic policy policy1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-trafficpolicy-policy1] <strong>classifier classifier1 behavior behavior1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-trafficpolicy-policy1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-trafficpolicy-policy1] <strong>quit</strong></pre>
+</div>
+</li><li><div class="p">Apply the NAT traffic diversion policy in the system view.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>traffic-policy policy1 inbound</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>quit</strong></pre>
+</div>
+</li></ol>
+</p></li><li><span>Configure a NAT444 traffic conversion policy.</span><p><ol type="a"><li>Configure an ACL numbered 3001 and an ACL rule numbered 1.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>acl 3001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-acl4-advance-3001] <strong>rule 10 permit ip source 10.110.10.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-acl4-advance-3001] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-acl4-advance-3001] <strong>quit</strong></pre>
+</li><li>Configure a NAT444 traffic conversion policy.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>nat instance nat1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-nat-instance-nat1] <strong>nat outbound 3001 address-group address-group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-nat-instance-nat1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-nat-instance-nat1] <strong>quit</strong></pre>
+</li></ol>
+</p></li><li><span>Configure a static PCP server in a NAT444 instance.</span><p><pre class="screen">[<span class="keyword">*</span>BRAS_NAT-nat-instance-nat1]<strong> pcp server ipv4 10.1.1.1 255.255.255.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS_NAT-nat-instance-nat1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT-nat-instance-nat1] <strong>quit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS_NAT] <strong>display nat instance nat1</strong></pre>
+<pre class="screen">nat instance nat1 id 1
+ service-instance-group 1
+ nat address-group address-group1 group-id 1 11.11.11.101 11.11.11.105
+ nat outbound 3001 address-group address-group1
+ pcp server ipv4 10.1.1.1 255.255.255.255</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172374862__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration File</h4><p>BRAS_NAT configuration file</p>
+<pre class="screen">#
+sysname BRAS_NAT
+#
+radius-server group rd1
+ radius-server authentication 192.168.7.249 1645 weight 0
+ radius-server accounting 192.168.7.249 1646 weight 0
+ radius-server shared-key %^%#x*CgITP4C<font style="font-size:8pt" Face="Courier New" >~</font>;q,*+DEW'JBWe#)"Q&amp;|7bX]b:Y&lt;{w'%^%#
+ radius-server type plus11
+ radius-server traffic-unit kbyte
+#
+interface Virtual-Template1
+ ppp authentication-mode auto
+#
+interface GigabitEthernet<span>0/2/1</span>.1
+ user-vlan 1
+ pppoe-server bind Virtual-Template 1
+ bas
+  access-type layer2-subscriber default-domain authentication isp1
+  authentication-method ppp
+#
+ip pool pool1 bas local
+ gateway 10.110.10.101 255.255.255.0
+ section 1 10.110.10.1 10.110.10.100
+ dns-server  192.168.7.252
+#
+vsm on-board-mode disable
+#
+license
+ active nat session-table size 6 slot <span>1</span>
+<strong> </strong>active nat bandwidth-enhance 40 slot <span>1</span>
+ active pcp vsuf slot <span>1</span>
+#
+service-location 1
+ location slot <span>1</span> 
+#
+service-instance-group group1
+ service-location 1
+#
+nat instance nat1 id 1
+ service-instance-group group1
+ nat address-group address-group1 group-id 1 11.11.11.101 11.11.11.105
+ nat outbound 3001 address-group address-group1
+ pcp server ipv4 10.1.1.1 255.255.255.255
+#
+user-group group1
+#
+acl 3001
+ rule 10 permit ip source 10.110.10.0 0.0.0.255
+#
+acl 6001
+ rule 1 permit ip source user-group group1
+#
+traffic classifier classifier1 operator or
+ if-match acl 6001 precedence 1
+#
+traffic behavior behavior1
+ nat bind instance nat1
+#
+traffic policy policy1
+ classifier classifier1 behavior behavior1 precedence 1
+#
+traffic-policy policy1 inbound
+#
+aaa
+ authentication-scheme auth1
+  authentication-mode RADIUS
+#
+ accounting-scheme acct1
+  accounting-mode RADIUS
+#
+ domain isp1
+  authentication-scheme auth1
+  accounting-scheme acct1
+  radius-server group rd1
+  ip-pool pool1
+  user-group group1 bind nat instance nat1
+#
+ip route-static 11.11.11.0 24 null 0
+#
+ospf 1
+ import-route static
+#
+ return</pre>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_pcp_cfg_0011.html">Configuration Examples for PCP
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_pcp_cfg_0008.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

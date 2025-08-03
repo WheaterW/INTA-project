@@ -1,0 +1,69 @@
+observe-port group
+==================
+
+observe-port group
+
+Function
+--------
+
+
+
+The **observe-port group** command configures an observing port group or displays the observing port group view.
+
+The **undo observe-port group** command deletes the observing port group.
+
+
+
+By default, no instance is configured for an observing port group.
+
+
+Format
+------
+
+**observe-port group** *group-id*
+
+**undo observe-port group** *group-id*
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| *group-id* | Specifies the ID of an observing port group. | For the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ:The value is an integer ranging from 1 to 128.  For the CE6885-LL (low latency mode):The value is an integer that ranges from 1 to 8. |
+
+
+
+Views
+-----
+
+System view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+To mirror packets to multiple observing port, configure an observing port group. The mirrored packets are then copied to all the member ports of the observing port group.
+
+**Follow-up Procedure**
+
+Run the **group-member** command to add the member ports to the observing port group.
+
+
+Example
+-------
+
+# Create observing port group 1.
+```
+<HUAWEI> system-view
+[~HUAWEI] observe-port group 1
+
+```

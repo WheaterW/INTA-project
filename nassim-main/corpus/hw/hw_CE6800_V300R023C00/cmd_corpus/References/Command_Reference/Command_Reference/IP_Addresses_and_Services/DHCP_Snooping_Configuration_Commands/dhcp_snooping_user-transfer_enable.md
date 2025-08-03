@@ -1,0 +1,71 @@
+dhcp snooping user-transfer enable
+==================================
+
+dhcp snooping user-transfer enable
+
+Function
+--------
+
+
+
+The **dhcp snooping user-transfer enable** command enables location transition for DHCP snooping users.
+
+The **undo dhcp snooping user-transfer enable** command disables location transition for DHCP snooping users.
+
+
+
+By default, location transition is enabled for DHCP snooping users.
+
+
+Format
+------
+
+**dhcp snooping user-transfer enable**
+
+**undo dhcp snooping user-transfer enable**
+
+
+Parameters
+----------
+
+None
+
+Views
+-----
+
+System view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+
+
+User floating is classified into location floating and IP address floating.Location floating: If a mobile user goes online through interface A, goes offline, and then goes online through interface B, the user sends a DHCP Discover message to apply for an IP address. However, this brings security risks in some scenarios. For example, if an attacker pretends to be an authorized user and sends a DHCP Discover message, the device updates the DHCP snooping binding and the authorized user can no longer access the network. In this case, you need to disable location transition for DHCP snooping users. After this function is disabled, the device discards DHCP Discover messages sent by a user who has an entry in the DHCP snooping binding table (the user's MAC address exists in the table) through another interface.IP address floating: After a user goes online through interface A, a binding entry is generated. When the user goes online again, the server assigns a different IP address to the user. By default, the user is allowed to go online and the DHCP snooping binding table is updated. However, this processing method has risks. You can disable the floating function so that the device discards response packets with different IP addresses without updating the binding table.
+
+
+
+**Prerequisites**
+
+DHCP snooping has been enabled on the device using the **dhcp snooping enable** command.
+
+
+Example
+-------
+
+# Disable location transition for DHCP snooping users.
+```
+<HUAWEI> system-view
+[~HUAWEI] dhcp enable
+[*HUAWEI] dhcp snooping enable
+[*HUAWEI] undo dhcp snooping user-transfer enable
+
+```

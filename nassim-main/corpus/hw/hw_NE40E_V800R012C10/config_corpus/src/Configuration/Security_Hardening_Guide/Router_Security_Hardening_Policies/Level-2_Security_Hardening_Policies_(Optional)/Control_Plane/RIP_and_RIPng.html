@@ -1,0 +1,136 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="RIP/RIPng">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_hardening_control_level2.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0037.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0040.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z00588052,z00875216">
+<meta name="DC.Publisher" content="20240229">
+<meta name="OWNER" content="z00588052,z00875216">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="h00414125">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001335293938">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>RIP/RIPng</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001335293938"></a><a name="EN-US_CONCEPT_0000001335293938"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">RIP/RIPng</h1>
+<div><div class="section"><h4 class="sectiontitle">Security Policy Overview</h4><p>Rapid development of networks poses higher network security requirements. Routing protocol packets transmitted over networks may be illegally obtained, changed, or forged, and packet attacks may cause network interruptions. Therefore, measures must be taken to ensure packet transmission security.</p>
+<ul><li><p>Protocol security mechanism</p>
+<p>RIP<span>/RIPng</span> supports the following security policies at the protocol layer:</p>
+<ul><li><p>TTL/hop limit mechanism:</p>
+<p>The scope of RIP<span>/RIPng</span> packet transmission is always one hop from the originator. RIP<span>/RIPng</span> sets the TTL/hop limit to 1 for the RIP<span>/RIPng</span> packets to be transmitted on broadcast or multicast networks.</p>
+</li><li><p>Whitelist security policy:</p>
+<p>RIP<span>/RIPng</span> provides whitelist security for neighbor ports to prevent packet loss caused by CP-CAR policies.</p>
+</li><li><p>GTSM security policy</p>
+<p>RIP uses GTSM policies to prevent packet attacks through TTL detection. TTL specifies the maximum number of devices through which a packet can pass. The TTL field exists in IP headers. The forwarding plane of a neighbor directly filters out the protocol packets whose TTL values exceed the TTL range, preventing the control plane from being attacked.</p>
+</li><li><p>Authentication policies:</p>
+<p>RIP-2 supports a packet authentication mechanism to prevent receiving bad routing data, error packets, and replay attacks from networks.</p>
+<p>RIPng does not define any authentication mechanism to prevent receiving bad routing data, error packets, or replay attacks.<span> RIPng supports IPsec authentication for RIPng packets.</span></p>
+</li><li><p>Route limit</p>
+<p>RIP<span>/RIPng</span> limits the maximum number of routes that can be added to the RIP<span>/RIPng</span> database to limit the route information based on the device capacity.</p>
+</li></ul>
+</li><li><p>Policy for defending against attacks using a large number of error packets:</p>
+<p>RIP uses the whitelist security policy to prevent attacks from massive error packets.</p>
+</li><li><p>Other policies:</p>
+<p>The system supports CP-based policies (CAR) on each interface to define the bandwidth for receiving packets from unknown sources.</p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Attack Methods</h4><ul><li><p>DoS attacks:</p>
+<p>RIP uses the whitelist security policy to prevent DoS attacks.</p>
+<p>When a DoS attack occurs, the device may obtain RIP packets from a remote path. <span>These packets will be processed by an I/O board</span> and sent to a main control board, on which they will be discarded by RIP<span>/RIPng</span>. This wastes bandwidth and CPU resources and reduces system performance.</p>
+<p>To prevent the device from processing these packets from unknown sources, RIP<span>/RIPng</span> provides the whitelist function. A whitelist label is created for each known interface so that packets can be exchanged rapidly. This is necessary to ensure quick convergence on the network. If the interfaces that send packets are not in the whitelist, these interfaces are allocated only the default bandwidth, which is limited.</p>
+</li><li><p>Injection of massive routing information:</p>
+<p>RIP applies to devices of various levels. The CPU and memory of a device determine the number of RIP<span>/RIPng</span> routes that can be processed. If the number of routes received is greater than the device capacity, CPU and memory are overused, causing the device to become unstable. To ensure that the device runs stably, you can set the maximum number of routes that can be accepted by RIP<span>/RIPng</span>.</p>
+</li><li><p>Injection of incorrect routing information:</p>
+<p>RIP<span>/RIPng</span> will accept any packet from a valid source address that matches the configured network. Direct route data is carried directly in packets. Therefore, the routing data carried in RIP packets may contain invalid or incorrect route information. The incorrect information causes the generated routing database to be incorrect and leads to network failures.</p>
+<p>If authentication is configured on the RIP interface on both sides, RIP only accepts packets if they are authenticated in order to prevent accepting routes from unauthenticated devices.</p>
+<p>If IPsec is configured on both sides, RIPng will only accept the packets that are authenticated to prevent the device from accepting routes from unauthenticated devices.</p>
+</li><li><p>Replay attacks:</p>
+<p>RIP supports sequence numbers in MD5 authenticated packets to prevent replay attacks.</p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Procedure</h4><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>It is recommended that the password be at least eight characters long and contain at least two of the following character types: uppercase letters, lowercase letters, digits, and special characters.</p>
+</div></div>
+<ul><li>Configure RIP packet authentication.<ol><li>Run <a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a><p>The system view is displayed.</p>
+</li><li>Run <b><span class="cmdname">interface</span></b> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i><p>The interface view is displayed.</p>
+</li><li>Perform the following configurations as required:<ul><li>To configure simple plaintext authentication for RIP-2 packets, run the <a href="cmdqueryname=rip+authentication-mode"><b><span class="cmdname">rip authentication-mode</span></b></a> <strong><span>simple</span></strong> { <strong><span>plain</span></strong> <i><span class="varname">plain-text</span></i> | [ <strong><span>cipher</span></strong> ] <i><span class="varname">password-key</span></i> } command.<p>In simple authentication mode, the password in plaintext mode is transmitted along with each authentication packet. Therefore, simple authentication is not recommended on networks requiring high security.</p>
+</li><li>To configure MD5 authentication for RIP-2 packets, run the <a href="cmdqueryname=rip+authentication-mode"><b><span class="cmdname">rip authentication-mode</span></b></a> <strong><span>md5</span></strong> { <strong><span>nonstandard</span></strong> { { <strong><span>plain</span></strong> <i><span class="varname">plain-text</span></i> | [ <strong><span>cipher</span></strong> ] <i><span class="varname">password-key</span></i> } <i><span class="varname">key-id</span></i> | <a href="cmdqueryname=keychain"><b><span class="cmdname">keychain</span></b></a> <i><span class="varname">keychain-name</span></i> } | <strong><span>usual</span></strong> { <strong><span>plain</span></strong> <i><span class="varname">plain-text</span></i> | [ <strong><span>cipher</span></strong> ] <i><span class="varname">password-key</span></i> } } command.<p>In MD5 authentication mode, an MD5 password is used for packet encapsulation and decapsulation. MD5 authentication is more secure than simple authentication.</p>
+<p><strong><span>nonstandard</span></strong> supports nonstandard authentication packets.</p>
+<p><strong><span>usual</span></strong> supports Internet Engineering Task Force (IETF) standard authentication packets.</p>
+</li><li>To configure Hash Message Authentication Code for Secure Hash Algorithm 256 (HMAC-SHA256) authentication, run the <b><span class="cmdname">rip authentication-mode</span></b> <strong><span>hmac-sha256</span></strong> { <strong><span>plain</span></strong> <i><span class="varname">plain-text</span></i> | [ <strong><span>cipher</span></strong> ] <i><span class="varname">password-key</span></i> } <i><span class="varname">key-id</span></i> command.<div class="notice"><span class="noticetitle"><img src="../../../../public_sys-resources/notice_3.0-en-us.png"> </span><div class="noticebody"><p>When configuring an authentication password, select the ciphertext mode because the password is saved in the configuration file as a plaintext if you select the plaintext mode, which has a high risk. To ensure device security, change the password periodically.</p>
+</div></div>
+</li></ul>
+</li><li>Run <b><span class="cmdname">commit</span></b><p>The configuration is committed.</p>
+</li></ol>
+</li></ul>
+<ul><li>Configure IPsec authentication for a RIPng process.<ol><li>Run <b><span class="cmdname">system-view</span></b><p>The system view is displayed.</p>
+</li><li>Run <b><span class="cmdname">ripng</span></b> [ <i><span class="varname">process-id</span></i> ]<p>The RIPng view is displayed.</p>
+</li><li>Run <b><span class="cmdname">ipsec sa</span></b> <i><span class="varname">sa-name</span></i><p>IPsec authentication is enabled for RIPng, and the name of the SA is specified.</p>
+</li><li>Run <b><span class="cmdname">commit</span></b><p>The configuration is committed.</p>
+</li></ol>
+</li><li>Configure IPsec authentication on a RIPng interface.<ol><li>Run <b><span class="cmdname">system-view</span></b><p>The system view is displayed.</p>
+</li><li>Run <b><span class="cmdname">interface</span></b> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i><p>The interface view is displayed.</p>
+</li><li>Run <b><span class="cmdname">ripng ipsec sa</span></b> <i><span class="varname">sa-name</span></i><div class="p">IPsec authentication is enabled on the interface, and the name of an SA is specified.<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The <a href="cmdqueryname=ripng+ipsec+sa"><b><span class="cmdname">ripng ipsec sa</span></b></a> command takes precedence over the <a href="cmdqueryname=ipsec+sa"><b><span class="cmdname">ipsec sa</span></b></a> command. If IPsec authentication is configured on both the interface and the process and different SA names are specified, only the configuration of the <a href="cmdqueryname=ripng+ipsec+sa"><b><span class="cmdname">ripng ipsec sa</span></b></a> command takes effect.</p>
+</div></div>
+</div>
+</li><li>Run <b><span class="cmdname">commit</span></b><p>The configuration is committed.</p>
+</li></ol>
+</li></ul>
+<ul><li>Whitelist security policy:<p>No special RIP<span>/RIPng</span> configuration is required.</p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration Suggestions</h4><ul><li><p>RIP authentication support:</p>
+<p>In MD5 authentication mode, which Huawei implements in compliance with relevant standards, RIP packets will take "checksum" in authentication instead of direct password keys. Nonstandard authentication is based on relevant standards and supports the same packet format described in relevant standards. (MD5 is supported only.)</p>
+<p>Configuring keychain authentication improves RIP connection security. Keychain must be configured on both links. Note: The encryption algorithms and passwords configured for keychain authentication must be the same on both peers. Otherwise, the RIP connection cannot be set up between the two ends and RIP packets cannot be transmitted. After keychain authentication is configured, the MD5 algorithm is used as the keychain authentication algorithm.</p>
+<p>To improve network security, HMAC-SHA256 authentication is recommended.</p>
+</li><li><p>RIPng authentication support using IPsec</p>
+<p>RIPng supports IPsec authentication. Before configuring IPsec authentication for RIPng, familiarize yourself with basic IPsec configurations.</p>
+</li><li><p>RIP<span>/RIPng</span> interface security:</p>
+<p>No special RIP<span>/RIPng</span> configuration is required.</p>
+</li><li><p>Whitelist security policy:</p>
+<p>RIP adds a neighboring interface to a whitelist when receiving the first response packet sent by the interface, without checking whether the interface is trusted. After authentication is configured on RIP-enabled interfaces, trusted neighboring interfaces are added to the whitelist.</p>
+</li><li><p>RIP<span>/RIPng</span> route limit:</p>
+<p>The maximum number of routes supported can be set based on device usage scope, memory, and supported CP-CAR values.</p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Verifying the Security Hardening Result</h4><ul><li>Run the <a href="cmdqueryname=display+rip"><b><span class="cmdname">display rip</span></b></a> <i><span class="varname">process-id</span></i> <strong><span>interface</span></strong> [ <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> ] [ <strong><span>verbose</span></strong> ] command to check information about RIP interfaces.</li><li>Run the <a href="cmdqueryname=display+rip"><b><span class="cmdname">display rip</span></b></a> <i><span class="varname">process-id</span></i> command to check the operating status and configuration of a RIP process.</li><li>Run the <a href="cmdqueryname=display+ripng"><b><span class="cmdname">display ripng</span></b></a> <i><span class="varname">process-id</span></i> <strong><span>interface</span></strong> [ <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> ] [ <strong><span>verbose</span></strong> ] command to check the SA used for IPsec authentication.</li><li>Run the <a href="cmdqueryname=display+ripng"><b><span class="cmdname">display ripng</span></b></a> <i><span class="varname">process-id</span></i> <strong><span>statistics</span></strong> <strong><span>interface</span></strong> { <strong><span>all</span></strong> | <i><span class="varname">interface-type interface-number</span></i> [ <strong><span>verbose</span></strong> | <strong><span>neighbor</span></strong> <i><span class="varname">neighbor-ipv6-address</span></i> ] } command to check the number of RIPng packets that fail to be authenticated.</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_hardening_control_level2.html">Control Plane
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0037.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0040.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

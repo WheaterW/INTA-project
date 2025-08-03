@@ -1,0 +1,361 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring OSPF IP FRR">
+<meta name="abstract" content="This section describes how to configure OSPF IP FRR with an example, including how to block FRR on certain interfaces to prevent the links connected to these interfaces from functioning as backup links and how to bind OSPF IP FRR to a BFD session.">
+<meta name="description" content="This section describes how to configure OSPF IP FRR with an example, including how to block FRR on certain interfaces to prevent the links connected to these interfaces from functioning as backup links and how to bind OSPF IP FRR to a BFD session.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospf_cfg_0093.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospf_cfg_2017.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospf_cfg_0102.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="ospf,w00800033,w00556928,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Route">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Routing Basis">
+<meta name="OWNER" content="z00875216">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="z00875216">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172365668">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/jquery.min.idp.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/RowOrColfreezeSupport.js"></script>
+
+<script type="text/javascript">
+setTimeout(function(){
+	jQueryHW(document).ready(function(){
+		jQueryHW("table[rowfreeze='yes']").rowfreeze();
+		jQueryHW("table[colfreeze='yes']").colfreeze();
+	});
+},500);
+</script>
+<title>Example for Configuring OSPF IP FRR</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172365668"></a><a name="EN-US_TASK_0172365668"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring OSPF IP FRR</h1>
+<div class="taskbody"><p>This section describes how to configure OSPF IP FRR with an example, including how to block FRR on certain interfaces to prevent the links connected to these interfaces from functioning as backup links and how to bind OSPF IP FRR to a BFD session.</p>
+<div class="context"><a name="EN-US_TASK_0172365668__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><div class="p">When a fault occurs on the primary link T, traffic is switched to a backup link. In such a scenario, two problems arise:<ul><li>It takes hundreds of milliseconds for the traffic to be switched to a backup link. During this period, services are interrupted.</li><li>Traffic may be switched to the link that passes through <span class="keyword">Device</span>A. <span class="keyword">Device</span>A is an ASBR and is not expected to function as a backup device.</li></ul>
+</div>
+<p>If a fault occurs on the network, OSPF IP FRR can fast switch traffic to the backup link without waiting for route convergence. This ensures uninterrupted traffic transmission. In addition, you can also prevent the link which passes through <span class="keyword">Device</span>A from functioning as the FRR backup link.</p>
+<div class="p">On the network shown in <a href="#EN-US_TASK_0172365668__fig_dc_vrp_ospf_cfg_200801">Figure 1</a>:<ul><li>All <span class="keyword">Router</span>s run OSPF.</li><li>The link cost meets the OSPF IP FRR traffic protection inequality.</li><li><p>If the primary link T fails, <span class="keyword">Device</span> S immediately switches traffic to the backup link which passes through <span class="keyword">Device</span>N.</p>
+</li><li>Based on the network planning, the link which passes through <span class="keyword">Device</span>A does not function as an FRR backup link.</li></ul>
+</div>
+<div class="fignone" id="EN-US_TASK_0172365668__fig_dc_vrp_ospf_cfg_200801"><a name="EN-US_TASK_0172365668__fig_dc_vrp_ospf_cfg_200801"></a><a name="fig_dc_vrp_ospf_cfg_200801"></a><span class="figcap"><b>Figure 1 </b>Networking for configuring OSPF IP FRR</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 through 4 in this example represent GE <span>0/1/0</span>, GE <span>0/2/0</span>, GE <span>0/3/0</span>, and GE <span>0/1/1</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_ospf_cfg_200801.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172365668__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>During the configuration, pay attention to the following points:</p>
+<ul><li>Before configuring OSPF IP FRR, block FRR on certain interfaces to prevent the links connected to these interfaces from functioning as backup links. After that, the link where the interface resides is not calculated as a backup link during FRR calculation.</li><li>During the configuration of OSPF IP FRR, the lower layer needs to fast respond to a link change so that traffic can be rapidly switched to the backup link. After the <a href="cmdqueryname=bfd+all-interfaces"><b><span class="cmdname">bfd all-interfaces</span></b></a> <strong><span>frr-binding</span></strong> command is run, the BFD session status is bound to the link status of the interface (when the BFD session goes down, the link status of the interface also goes down). In this manner, faults can be rapidly detected.</li><li>To improve security, OSPF area authentication or interface authentication is recommended. For details, see "Improving OSPF Network Security". OSPF area authentication is used as an example. For details, see Example for Configuring Basic OSPF Functions.</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172365668__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><div class="p">The configuration roadmap is as follows:<ol><li><p>Configure basic OSPF functions on each <span class="keyword">Router</span>.</p>
+</li><li><p>Configure BFD for OSPF on all the devices in Area 0.</p>
+</li><li><p>Set the costs of links to ensure that link T is selected to transmit traffic.</p>
+</li><li><p>Block FRR on a specified interface of <span class="keyword">Device</span>S.</p>
+</li><li>Enable OSPF IP FRR on <span class="keyword">Device</span>S to protect the traffic forwarded by <span class="keyword">Device</span>S.</li></ol>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172365668__1.4.4"></a><a name="1.4.4"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" rowfreeze="yes" frame="border" border="1" rules="all"><thead align="left"><tr><th align="left" class="cellrowborder" char="." valign="top" width="25%" id="mcps1.4.4.3.1.5.1.1" liSelected="liSelected"><p>Device</p>
+</th>
+<th align="left" class="cellrowborder" char="." valign="top" width="11%" id="mcps1.4.4.3.1.5.1.2" liSelected="liSelected"><p>Router ID</p>
+</th>
+<th align="left" class="cellrowborder" char="." valign="top" width="32%" id="mcps1.4.4.3.1.5.1.3" liSelected="liSelected"><p>Interface</p>
+</th>
+<th align="left" class="cellrowborder" char="." valign="top" width="32%" id="mcps1.4.4.3.1.5.1.4" liSelected="liSelected"><p>IP Address</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" rowspan="3" char="." valign="top" width="25%" headers="mcps1.4.4.3.1.5.1.1 "><p><span class="keyword">Device</span>S</p>
+</td>
+<td class="cellrowborder" rowspan="3" char="." valign="top" width="11%" headers="mcps1.4.4.3.1.5.1.2 "><p>1.1.1.1</p>
+</td>
+<td class="cellrowborder" char="." valign="top" width="32%" headers="mcps1.4.4.3.1.5.1.3 "><p>GE<span>0/1/0</span></p>
+</td>
+<td class="cellrowborder" char="." valign="top" width="32%" headers="mcps1.4.4.3.1.5.1.4 "><p>10.1.1.1/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" char="." valign="top" headers="mcps1.4.4.3.1.5.1.3 "><p>GE<span>0/2/0</span></p>
+</td>
+<td class="cellrowborder" char="." valign="top" headers="mcps1.4.4.3.1.5.1.4 "><p>10.1.2.1/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" char="." valign="top" headers="mcps1.4.4.3.1.5.1.3 "><p>GE<span>0/3/0</span></p>
+</td>
+<td class="cellrowborder" char="." valign="top" headers="mcps1.4.4.3.1.5.1.4 "><p>10.1.3.1/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="2" char="." valign="top" width="25%" headers="mcps1.4.4.3.1.5.1.1 "><p><span class="keyword">Device</span>A</p>
+</td>
+<td class="cellrowborder" rowspan="2" char="." valign="top" width="11%" headers="mcps1.4.4.3.1.5.1.2 "><p>2.2.2.2</p>
+</td>
+<td class="cellrowborder" char="." valign="top" width="32%" headers="mcps1.4.4.3.1.5.1.3 "><p>GE<span>0/1/0</span></p>
+</td>
+<td class="cellrowborder" char="." valign="top" width="32%" headers="mcps1.4.4.3.1.5.1.4 "><p>10.1.1.2/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" char="." valign="top" headers="mcps1.4.4.3.1.5.1.3 "><p>GE<span>0/2/0</span></p>
+</td>
+<td class="cellrowborder" char="." valign="top" headers="mcps1.4.4.3.1.5.1.4 "><p>10.2.1.2/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="2" char="." valign="top" width="25%" headers="mcps1.4.4.3.1.5.1.1 "><p><span class="keyword">Device</span>N</p>
+</td>
+<td class="cellrowborder" rowspan="2" char="." valign="top" width="11%" headers="mcps1.4.4.3.1.5.1.2 "><p>3.3.3.3</p>
+</td>
+<td class="cellrowborder" char="." valign="top" width="32%" headers="mcps1.4.4.3.1.5.1.3 "><p>GE<span>0/1/0</span></p>
+</td>
+<td class="cellrowborder" char="." valign="top" width="32%" headers="mcps1.4.4.3.1.5.1.4 "><p>10.1.3.2/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" char="." valign="top" headers="mcps1.4.4.3.1.5.1.3 "><p>GE<span>0/2/0</span></p>
+</td>
+<td class="cellrowborder" char="." valign="top" headers="mcps1.4.4.3.1.5.1.4 "><p>10.2.3.2/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="4" char="." valign="top" width="25%" headers="mcps1.4.4.3.1.5.1.1 "><p><span class="keyword">Device</span>E</p>
+</td>
+<td class="cellrowborder" rowspan="4" char="." valign="top" width="11%" headers="mcps1.4.4.3.1.5.1.2 "><p>4.4.4.4</p>
+</td>
+<td class="cellrowborder" char="." valign="top" width="32%" headers="mcps1.4.4.3.1.5.1.3 "><p>GE<span>0/1/0</span></p>
+</td>
+<td class="cellrowborder" char="." valign="top" width="32%" headers="mcps1.4.4.3.1.5.1.4 "><p>10.2.1.1/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" char="." valign="top" headers="mcps1.4.4.3.1.5.1.3 "><p>GE<span>0/2/0</span></p>
+</td>
+<td class="cellrowborder" char="." valign="top" headers="mcps1.4.4.3.1.5.1.4 "><p>10.1.2.2/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" char="." valign="top" headers="mcps1.4.4.3.1.5.1.3 "><p>GE<span>0/3/0</span></p>
+</td>
+<td class="cellrowborder" char="." valign="top" headers="mcps1.4.4.3.1.5.1.4 "><p>10.2.3.1/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" char="." valign="top" headers="mcps1.4.4.3.1.5.1.3 "><p>GE<span>0/1/1</span></p>
+</td>
+<td class="cellrowborder" char="." valign="top" headers="mcps1.4.4.3.1.5.1.4 "><p>172.17.1.1/24</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172365668__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface. For configuration details, see <a href="#EN-US_TASK_0172365668__section_dc_vrp_ospf_cfg_200806">Configuration Files</a> in this section.</span></li><li><span>Configure basic OSPF functions. For details, see <a href="dc_vrp_ospf_cfg_0094.html">Example for Configuring Basic OSPF Functions</a>.</span></li><li><span>Configure BFD for OSPF on all the devices in Area 0. For details, see <a href="dc_vrp_ospf_cfg_0102.html">Example for Configuring BFD for OSPF</a>.</span></li><li><span>Set the costs of links to ensure that link T is selected to transmit traffic.</span><p><p># Configure <span class="keyword">Device</span>S.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>S] <strong>interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>S-GigabitEthernet<span>0/1/0</span>] <strong>ospf cost 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>S-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>S] <strong>interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>S-GigabitEthernet<span>0/2/0</span>] <strong>ospf cost 15</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>S-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>S] <strong>interface gigabitethernet<span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>S-GigabitEthernet<span>0/3/0</span>] <strong>ospf cost 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>S-GigabitEthernet<span>0/3/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>S] <strong>commit</strong></pre>
+</p><p><p># Configure <span class="keyword">Device</span>A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>] <strong>ospf cost 15</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</p><p><p># Configure <span class="keyword">Device</span>N.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>N] <strong>interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>N-GigabitEthernet<span>0/2/0</span>] <strong>ospf cost 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>N-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>N] <strong>commit</strong></pre>
+</p></li><li><span>Block FRR on a specified interface of <span class="keyword">Device</span>S.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>S] <strong>interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>S-GigabitEthernet<span>0/1/0</span>] <strong>ospf frr block</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>S-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>S] <strong>commit</strong></pre>
+</p></li><li><span>Enable OSPF IP FRR on <span class="keyword">Device</span>S.</span><p><p># Enable OSPF IP FRR on <span class="keyword">Device</span>S.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>S] <strong>ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>S-ospf-1] <strong>frr</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>S-ospf-1-frr] <strong>loop-free-alternate</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>S-ospf-1-frr] <strong>commit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p># Run the <strong>display ospf routing router-id</strong> command on <span class="keyword">Device</span>S to view routing information.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>S-ospf-1-frr] <strong>display ospf routing router-id 4.4.4.4</strong></pre>
+<pre class="screen">          OSPF Process 1 with Router ID 1.1.1.1
+
+ Destination :    4.4.4.4             Route Type :       Intra-area
+ Area        :    0.0.0.1             AdvRouter  :       4.4.4.4
+ Type        :    ASBR                
+ URT Cost    :    59
+ NextHop     :    10.1.2.2            Interface  :       GE<span>0/2/0</span>
+<strong> Backup Nexthop : 10.1.3.2         Backup Interface : GE<span>0/3/0</span>  Backup Type : LFA LINK </strong>
+<strong> BakLabelStack : {48092,48092}       </strong></pre>
+<p>The preceding display shows that a backup route is generated on <span class="keyword">Device</span>S.</p>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0172365668__section_dc_vrp_ospf_cfg_200806"><a name="EN-US_TASK_0172365668__section_dc_vrp_ospf_cfg_200806"></a><a name="section_dc_vrp_ospf_cfg_200806"></a><a name="EN-US_TASK_0172365668__1.4.6"></a><a name="1.4.6"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p><span class="keyword">Device</span> S configuration file</p>
+<pre class="screen">#
+sysname <span class="keyword">Device</span>S
+#
+bfd
+#
+interface GigabitEthernet<span>0/1/0</span>
+ ip address 10.1.1.1 255.255.255.0
+ ospf frr block
+ ospf cost 10
+#
+interface GigabitEthernet<span>0/2/0</span>
+ ip address 10.1.2.1 255.255.255.0
+ ospf cost 15
+#
+interface GigabitEthernet<span>0/3/0</span>
+ ip address 10.1.3.1 255.255.255.0
+ ospf cost 10
+#
+interface LoopBack0
+ ip address 1.1.1.1 255.255.255.255
+#
+ospf 1 router-id 1.1.1.1
+ bfd all-interfaces enable
+ bfd all-interfaces frr-binding
+ frr
+  loop-free-alternate
+ area 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+  network 10.1.2.0 0.0.0.255
+  network 10.1.3.0 0.0.0.255
+#
+return</pre>
+</li><li><p><span class="keyword">Device</span>A configuration file</p>
+<pre class="screen">#
+sysname <span class="keyword">Device</span>A
+#  
+bfd
+#
+interface GigabitEthernet<span>0/1/0</span>
+ ip address 10.1.1.2 255.255.255.0
+ ospf cost 10
+#
+interface GigabitEthernet<span>0/2/0</span>
+ ip address 10.2.1.2 255.255.255.0
+ ospf cost 15
+#
+interface LoopBack0
+ ip address 2.2.2.2 255.255.255.255
+#
+ospf 1 router-id 2.2.2.2
+ bfd all-interfaces enable
+ bfd all-interfaces frr-binding
+ frr
+  loop-free-alternate
+ area 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+  network 10.2.2.0 0.0.0.255
+#
+return</pre>
+</li><li><p><span class="keyword">Device</span>N configuration file</p>
+<pre class="screen">#
+sysname <span class="keyword">Device</span>N
+#
+bfd
+#
+interface GigabitEthernet<span>0/1/0</span>
+ ip address 10.1.3.2 255.255.255.0
+ ospf cost 10
+#
+interface GigabitEthernet<span>0/2/0</span>
+ ip address 10.2.3.2 255.255.255.0
+ ospf cost 10
+#
+interface LoopBack0
+ ip address 3.3.3.3 255.255.255.255
+#
+ospf 1 router-id 3.3.3.3
+ bfd all-interfaces enable
+ bfd all-interfaces frr-binding
+ frr
+ area 0.0.0.0
+  network 10.1.3.0 0.0.0.255
+  network 10.2.3.0 0.0.0.255
+#
+return</pre>
+</li><li><p><span class="keyword">Device</span>E configuration file</p>
+<pre class="screen">#
+sysname <span class="keyword">Device</span>E
+#
+bfd
+#
+interface GigabitEthernet<span>0/1/0</span>
+ ip address 10.2.1.1 255.255.255.0
+#
+interface GigabitEthernet<span>0/2/0</span>
+ ip address 10.1.2.2 255.255.255.0
+#
+interface GigabitEthernet<span>0/3/0</span>
+ ip address 10.2.3.1 255.255.255.0
+#
+interface GigabitEthernet<span>0/1/1</span>
+ ip address 172.17.1.1 255.255.255.0
+ ospf cost 5
+#
+interface LoopBack0
+ ip address 4.4.4.4 255.255.255.255
+#
+ospf 1 router-id 4.4.4.4
+ bfd all-interfaces enable
+ bfd all-interfaces frr-binding
+ area 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+  network 10.1.2.0 0.0.0.255
+  network 10.1.3.0 0.0.0.255
+  network 172.17.1.0 0.0.0.255
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospf_cfg_0093.html">Configuration Examples for OSPF
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospf_cfg_2017.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospf_cfg_0102.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

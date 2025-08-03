@@ -1,0 +1,333 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Filtering Routes to Be Received and Those to Be Advertised">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_route-policy_cfg_0004.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_route-policy_cfg_0104.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Routing Policy">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Routing Policy">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="Routing Policy">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001176743437">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Filtering Routes to Be Received and Those to Be Advertised</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001176743437"></a><a name="EN-US_TASK_0000001176743437"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Filtering Routes to Be Received and Those to Be Advertised</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001176743437__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the OSPF network shown in <a href="#EN-US_TASK_0000001176743437__fig_dc_vrp_route-policy_cfg_002901">Figure 1</a>, DeviceA receives routes from the Internet and provides some of the Internet routes for DeviceB. It is required that DeviceA advertise only the routes 172.16.17.0/24, 172.16.18.0/24, and 172.16.19.0/24 to DeviceB, DeviceC accept only the route 172.16.18.0/24, and that DeviceD accept all the routes advertised by DeviceB.</p>
+<div class="fignone" id="EN-US_TASK_0000001176743437__fig_dc_vrp_route-policy_cfg_002901"><a name="EN-US_TASK_0000001176743437__fig_dc_vrp_route-policy_cfg_002901"></a><a name="fig_dc_vrp_route-policy_cfg_002901"></a><span class="figcap"><b>Figure 1 </b>Filtering the routes to be received and those to be advertised</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1, interface2, and interface3 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, and <span>100GE</span><span>1/0/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001176743449.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176743437__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Configure IPv4 addresses for interfaces on each routing device.</li><li><p>Configure basic OSPF functions on DeviceA, DeviceB, DeviceC, and DeviceD.</p>
+</li><li><p>Configure static routes on DeviceA and import these routes into the OSPF routing table.</p>
+</li><li><p>Configure an export policy for filtering routes to be advertised on DeviceA.</p>
+</li><li><p>Configure an import policy for filtering routes to be received on DeviceC.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001176743437__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure IPv4 addresses for interfaces on each routing device.</span><p><p># Configure DeviceA.</p>
+<pre class="screen"><span class="keyword">&lt;HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>undo </strong><strong>portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ip address 192.168.1.1 255.255.255.0</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p>The configurations of DeviceB, DeviceC, and DeviceD are similar to the configuration of DeviceA. For detailed configurations, see <a href="#EN-US_TASK_0000001176743437__postreq24192593172748">Configuration Scripts</a>. </p>
+</p></li><li><span>Configure OSPF routes.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> ospf</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1]<strong> area 0</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0]<strong> network 192.168.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> ospf</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1]<strong> area 0</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0]<strong> network 192.168.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0]<strong> network 192.168.2.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0]<strong> network 192.168.3.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC]<strong> ospf</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1]<strong> area 0</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0]<strong> network 192.168.2.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD]<strong> ospf</strong>
+[<span class="keyword">*</span>DeviceD-ospf-1]<strong> area 0</strong>
+[<span class="keyword">*</span>DeviceD-ospf-1-area-0.0.0.0]<strong> network 192.168.3.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceD-ospf-1-area-0.0.0.0]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+</p></li><li><span>Configure five static routes on DeviceA and import these routes into the OSPF routing table.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>ip route-static 172.16.16.0 24 NULL0</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ip route-static 172.16.17.0 24 NULL0</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ip route-static 172.16.18.0 24 NULL0</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ip route-static 172.16.19.0 24 NULL0</strong>
+[<span class="keyword">*</span>DeviceA]<strong> ip route-static 172.16.20.0 24 NULL0</strong>
+[<span class="keyword">*</span>DeviceA]<strong> ospf</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1]<strong> import-route static</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Check the IP routing table on DeviceB. The following command output shows that the five static routes have been imported into the OSPF routing table. </p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display ip routing-table</strong>
+Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route
+------------------------------------------------------------------------------
+Routing Table : Public
+         Destinations : 22       Routes : 22
+
+Destination/Mask    Proto  Pre  Cost        Flags NextHop       Interface
+
+        1.1.1.1/32  Direct 0    0             D  127.0.0.1       LoopBack1
+      127.0.0.0/8   Direct 0    0             D  127.0.0.1       InLoopBack0
+      127.0.0.1/32  Direct 0    0             D  127.0.0.1       InLoopBack0
+127.255.255.255/32  Direct 0    0             D  127.0.0.1       InLoopBack0
+255.255.255.255/32  Direct 0    0             D  127.0.0.1       InLoopBack0
+<strong>   </strong><strong>172.16.16.0/24</strong><strong>  </strong><strong>O_ASE</strong><strong>  </strong><strong>150</strong><strong>  </strong><strong>1</strong><strong>             </strong><strong>D</strong><strong>  </strong><strong>192.168.1.1</strong><strong>     <span>100GE</span><span>1/0/1</span></strong>
+<strong>   </strong><strong>172.16.17.0/24</strong><strong>  </strong><strong>O_ASE</strong><strong>  </strong><strong>150</strong><strong>  </strong><strong>1</strong><strong>             </strong><strong>D</strong><strong>  </strong><strong>192.168.1.1</strong><strong>     <span>100GE</span><span>1/0/1</span></strong>
+<strong>   </strong><strong>172.16.18.0/24</strong><strong>  </strong><strong>O_ASE</strong><strong>  </strong><strong>150</strong><strong>  </strong><strong>1</strong><strong>             </strong><strong>D</strong><strong>  </strong><strong>192.168.1.1</strong><strong>     <span>100GE</span><span>1/0/1</span></strong>
+<strong>   </strong><strong>172.16.19.0/24</strong><strong>  </strong><strong>O_ASE</strong><strong>  </strong><strong>150</strong><strong>  </strong><strong>1</strong><strong>             </strong><strong>D</strong><strong>  </strong><strong>192.168.1.1</strong><strong>     <span>100GE</span><span>1/0/1</span></strong>
+<strong>   </strong><strong>172.16.20.0/24</strong><strong>  </strong><strong>O_ASE</strong><strong>  </strong><strong>150</strong><strong>  </strong><strong>1</strong><strong>             </strong><strong>D</strong><strong>  </strong><strong>192.168.1.1</strong><strong>     <span>100GE</span></strong><strong><span>1/0/1</span></strong>
+    192.168.1.0/24  Direct 0    0             D  192.168.1.2     <span>100GE</span><span>1/0/1</span>
+    192.168.1.1/32  Direct 0    0             D  192.168.1.1     <span>100GE</span><span>1/0/1</span>
+    192.168.1.2/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+  192.168.1.255/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+    192.168.2.0/24  Direct 0    0             D  192.168.2.1     <span>100GE</span><span>1/0/3</span>
+    192.168.2.1/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/3</span>
+    192.168.2.2/32  Direct 0    0             D  192.168.2.2     <span>100GE</span><span>1/0/3</span>
+  192.168.2.255/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/3</span>
+    192.168.3.0/24  Direct 0    0             D  192.168.3.1     <span>100GE</span><span>1/0/2</span>
+    192.168.3.1/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/2</span>
+    192.168.3.2/32  Direct 0    0             D  192.168.3.2     <span>100GE</span><span>1/0/2</span>
+  192.168.3.255/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/2</span></pre>
+</p></li><li><span>Configure an export policy to filter the routes to be advertised.</span><p><p># Configure the IP prefix list named <strong>a2b</strong> on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>ip ip-prefix a2b index 10 permit 172.16.17.0 24</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ip ip-prefix a2b index 20 permit 172.16.18.0 24</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ip ip-prefix a2b index 30 permit 172.16.19.0 24</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure an export policy on DeviceA to filter routes based on the IP prefix list <strong>a2b</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> ospf</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>filter-policy ip-prefix a2b export static</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>Configure an import policy to filter the routes to be received.</span><p><p># Configure an IP prefix list named <strong>in</strong> on DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>ip ip-prefix in index 10 permit 172.16.18.0 24</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure an import policy on DeviceC to use the IP prefix list named <strong>in</strong> to filter routes.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>ospf</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1] <strong>filter-policy ip-prefix in import</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001176743437__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check the IP routing table on DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display ip routing-table</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table : Public
+         Destinations : 20       Routes : 20
+
+Destination/Mask    Proto  Pre  Cost        Flags NextHop         Interface
+
+        1.1.1.1/32  Direct 0    0             D  127.0.0.1       LoopBack1
+      127.0.0.0/8   Direct 0    0             D  127.0.0.1       InLoopBack0
+      127.0.0.1/32  Direct 0    0             D  127.0.0.1       InLoopBack0
+127.255.255.255/32  Direct 0    0             D  127.0.0.1       InLoopBack0
+255.255.255.255/32  Direct 0    0             D  127.0.0.1       InLoopBack0
+  <strong>172.16.17.0/24</strong>  <strong>O_ASE</strong>  <strong>150</strong>   <strong>1</strong>            <strong>D</strong>   <strong>192.168.1.1</strong>     <span>100GE</span><span>1/0/1</span>
+  <strong>172.16.18.0/24</strong>  <strong>O_ASE</strong>  <strong>150</strong>   <strong>1</strong>            <strong>D</strong>   <strong>192.168.1.1</strong>     <span>100GE</span><span>1/0/1</span>
+  <strong>172.16.19.0/24</strong>  <strong>O_ASE</strong>  <strong>150</strong>   <strong>1</strong>            <strong>D</strong>   <strong>192.168.1.1</strong>     <span>100GE</span><span>1/0/1</span>
+    192.168.1.0/24  Direct 0    0             D  192.168.1.2      <span>100GE</span><span>1/0/1</span>
+    192.168.1.1/32  Direct 0    0             D  192.168.1.1      <span>100GE</span><span>1/0/1</span>
+    192.168.1.2/32  Direct 0    0             D  127.0.0.1        <span>100GE</span><span>1/0/1</span>
+  192.168.1.255/32  Direct 0    0             D  127.0.0.1        <span>100GE</span><span>1/0/1</span>
+    192.168.2.0/24  Direct 0    0             D  192.168.2.1      <span>100GE</span><span>1/0/3</span>
+    192.168.2.1/32  Direct 0    0             D  127.0.0.1        <span>100GE</span><span>1/0/3</span>
+    192.168.2.2/32  Direct 0    0             D  192.168.2.2      <span>100GE</span><span>1/0/3</span>
+  192.168.2.255/32  Direct 0    0             D  127.0.0.1        <span>100GE</span><span>1/0/3</span>
+    192.168.3.0/24  Direct 0    0             D  192.168.3.1      <span>100GE</span><span>1/0/2</span>
+    192.168.3.1/32  Direct 0    0             D  127.0.0.1        <span>100GE</span><span>1/0/2</span>
+    192.168.3.2/32  Direct 0    0             D  192.168.3.2      <span>100GE</span><span>1/0/2</span>
+  192.168.3.255/32  Direct 0    0             D  127.0.0.1        <span>100GE</span><span>1/0/2</span></pre>
+<p>The command output shows that DeviceB has accepted only three routes (those matching the IP prefix list <strong>a2b</strong>). </p>
+<p># Check the IP routing table on DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>display ip routing-table</strong>
+Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route
+------------------------------------------------------------------------------
+Routing Table : Public
+         Destinations : 12       Routes : 12
+
+Destination/Mask    Proto  Pre  Cost        Flags NextHop      Interface
+
+        1.1.1.1/32  O_ASE  10   1             D  192.168.2.1    <span>100GE</span><span>1/0/1</span>
+      127.0.0.0/8   Direct 0    0             D  127.0.0.1      InLoopBack0
+      127.0.0.1/32  Direct 0    0             D  127.0.0.1      InLoopBack0
+127.255.255.255/32  Direct 0    0             D  127.0.0.1      InLoopBack0
+255.255.255.255/32  Direct 0    0             D  127.0.0.1      InLoopBack0
+  <strong>172.16.18.0/24</strong>  <strong>O_ASE</strong>  <strong>150</strong>  <strong>1</strong>             <strong>D</strong>  <strong>192.168.2.1</strong>    <strong><span>100GE</span></strong><strong><span>1/0/1</span></strong>
+    192.168.1.0/24  O_ASE  10   2             D  192.168.2.1     <span>100GE</span><span>1/0/1</span>
+    192.168.2.0/24  Direct 0    0             D  192.168.2.2     <span>100GE</span><span>1/0/1</span>
+    192.168.2.1/32  Direct 0    0             D  192.168.2.1     <span>100GE</span><span>1/0/1</span>
+    192.168.2.2/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+  192.168.2.255/32  Direct 0    0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+    192.168.3.0/24  O_ASE  10   2             D  192.168.2.1     <span>100GE</span><span>1/0/1</span></pre>
+<p>The command output shows that DeviceC has accepted only one route (the one matching the IP prefix list <strong>in</strong>).</p>
+<p># Check the OSPF routing table on DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>display ospf routing</strong>
+          OSPF Process 1 with Router ID 192.168.2.2
+                   Routing Tables
+
+ Routing for Network
+ Destination        Cost       Type       NextHop         AdvRouter       Area
+
+ 1.1.1.1/32         1          Stub       192.168.2.1     1.1.1.1         0.0.0.0
+ 192.168.1.0/24     2          Transit    192.168.2.1     192.168.1.1     0.0.0.0
+ 192.168.3.0/24     2          Stub       192.168.2.1     1.1.1.1         0.0.0.0
+
+ Routing for ASEs
+ Destination        Cost       Type       Tag        NextHop         AdvRouter
+
+ <strong>172.16.17.0/24</strong>    <strong>1</strong>          <strong>Type2</strong>      <strong>1</strong>          <strong>192.168.2.1</strong>     <strong>192.168.1.1</strong>
+
+ <strong>172.16.18.0/24</strong>    <strong>1</strong>          <strong>Type2</strong>      <strong>1</strong>          <strong>192.168.2.1</strong>     <strong>192.168.1.1</strong>
+
+ <strong>172.16.19.0/24</strong>    <strong>1</strong>          <strong>Type2</strong>      <strong>1</strong>          <strong>192.168.2.1</strong>     <strong>192.168.1.1</strong>
+
+
+ Total Nets: 6
+ Intra Area: 3  Inter Area: 0  ASE: 3  NSSA: 0</pre>
+<p>The command output shows that the OSPF routing table has accepted three routes (those matching the IP prefix list <strong>a2b</strong>). This is because the <strong>filter-policy import</strong> command is used to filter the routes that are to be added to the local core routing table from the protocol routing table.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001176743437__postreq24192593172748"></a><a name="postreq24192593172748"></a><a name="EN-US_TASK_0000001176743437__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.1.1 255.255.255.0
+#
+ospf 1
+ filter-policy ip-prefix a2b export static
+ import-route static
+ area 0.0.0.0
+  network 192.168.1.0 0.0.0.255
+#
+ip ip-prefix a2b index 10 permit 172.16.17.0 24
+ip ip-prefix a2b index 20 permit 172.16.18.0 24
+ip ip-prefix a2b index 30 permit 172.16.19.0 24
+#
+ip route-static 172.16.16.0 255.255.255.0 NULL0
+ip route-static 172.16.17.0 255.255.255.0 NULL0
+ip route-static 172.16.18.0 255.255.255.0 NULL0
+ip route-static 172.16.19.0 255.255.255.0 NULL0
+ip route-static 172.16.20.0 255.255.255.0 NULL0
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.3.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 192.168.2.1 255.255.255.0
+#
+ospf 1
+ area 0.0.0.0
+  network 192.168.1.0 0.0.0.255
+  network 192.168.2.0 0.0.0.255
+  network 192.168.3.0 0.0.0.255
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.2.2 255.255.255.0
+#
+ospf 1
+ filter-policy ip-prefix in import
+ area 0.0.0.0
+  network 192.168.2.0 0.0.0.255
+#
+ip ip-prefix in index 10 permit 172.16.18.0 24
+#
+return</pre>
+</li><li><p>DeviceD</p>
+<pre class="screen">#
+sysname DeviceD
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.3.2 255.255.255.0
+#
+ospf 1
+ area 0.0.0.0
+  network 192.168.3.0 0.0.0.255
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_route-policy_cfg_0004.html">Configuring an IPv4 Prefix List
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_route-policy_cfg_0104.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

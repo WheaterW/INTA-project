@@ -1,0 +1,275 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Associating Direct Routes with a VRRP Group">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_ip_routing_management_cfg_0011.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_ip_routing_management_cfg_0015.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Route Management">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Route Management">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="Route Management">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130782560">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Associating Direct Routes with a VRRP Group</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130782560"></a><a name="EN-US_TASK_0000001130782560"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Associating Direct Routes with a VRRP Group</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130782560__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0000001130782560__fig_dc_vrp_ip-route_cfg_003301">Figure 1</a>, DeviceA and DeviceB form a VRRP group and function as user-side gateways. User traffic is sent to DeviceA, which is the master device in the VRRP group. In addition, DeviceA, DeviceB, and DeviceC run OSPF to implement IP interworking. Network-to-user traffic passes through the path that OSPF selects. DeviceC has two OSPF equal-cost routes destined for the user network segment 10.1.1.0/24. Therefore, the two routes load-balance the network-to-user traffic. User-to-network traffic and network-to-user traffic pass through different paths. To resolve the path inconsistency, configure a VRRP interface on each of DeviceA and DeviceB to associate the VRRP status with the direct route destined for the network segment to which the virtual IP address belongs. The association allows DeviceB to increase the direct route cost. Configure OSPF to import direct routes and inherit the costs of the imported direct routes. As the cost of the OSPF route that passes through DeviceA is smaller, DeviceC selects this route to forward downstream traffic. In this manner, upstream and downstream traffic is transmitted along the same path.</p>
+<p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Virtual local area network (VLAN) ID on Switch: 10</p>
+</li><li><p>VRRP group's VRID: 1; virtual IP address: 10.1.1.111</p>
+</li><li><p>VRRP priority values of DeviceA and DeviceB: 120 and 100 (default), respectively</p>
+</li><li><p>Cost of a direct route to the network segment to which the VRRP virtual IP address belongs: 300</p>
+</li></ul>
+<div class="fignone" id="EN-US_TASK_0000001130782560__fig_dc_vrp_ip-route_cfg_003301"><a name="EN-US_TASK_0000001130782560__fig_dc_vrp_ip-route_cfg_003301"></a><a name="fig_dc_vrp_ip-route_cfg_003301"></a><span class="figcap"><b>Figure 1 </b>Association between direct routes and a VRRP group</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 and interface 2 represent <span>100GE</span><span>1/0/1</span> and <span>100GE</span><span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001176662339.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130782560__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Configure IPv4 addresses for interfaces on each device.</li><li><p>Configure a VRRP group on DeviceA and DeviceB.</p>
+</li><li><p>Configure OSPF on DeviceA, DeviceB, and DeviceC to implement IP interworking.</p>
+</li><li><p>Associate direct routes with the VRRP group on DeviceA and DeviceB.</p>
+</li><li><p>Configure OSPF on DeviceA and DeviceB to import direct routes and configure the two devices to inherit the costs of the direct routes.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130782560__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure IPv4 addresses for interfaces on each device.</span><p><p># Configure DeviceA.</p>
+<pre class="screen"><span class="keyword">&lt;HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>undo </strong><strong>portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ip address 10.1.1.1 255.255.255.0</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface </strong><strong><span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>undo </strong><strong>portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>ip address 10.1.3.1 255.255.255.0</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p>The configurations of DeviceB and DeviceC are similar to the configuration of DeviceA. For detailed configurations, see Configuration Scripts.</p>
+</p></li><li><span>Configure a VRRP group.</span><p><p># Create VLAN 10 on the Switch and add <span>100GE</span> <span>1/0/1</span> and <span>100GE</span> <span>1/0/2</span> to VLAN 10 so that the Switch can transparently transmit VRRP packets from DeviceA and <span class="keyword">DeviceB</span>.</p>
+</p><p><pre class="screen">&lt;<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Switch&gt; <strong>system-view</strong>
+[<span class="keyword">*</span>Switch] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword">*</span>Switch-<span>100GE</span><span>1/0/1</span>] <strong>portswitch</strong>
+[<span class="keyword">*</span>Switch-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>Switch] <strong>interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>Switch-<span>100GE</span><span>1/0/2</span>] <strong>portswitch</strong>
+[<span class="keyword">*</span>Switch-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>Switch] <strong>vlan 10</strong>
+[<span class="keyword">*</span>Switch-vlan10] <strong>port <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword">*</span>Switch-vlan10] <strong>port <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>Switch-vlan10] <strong>quit</strong>
+[<span class="keyword">*</span>Switch] <strong>commit</strong></pre>
+<p># Create VRRP group 1 on DeviceA and set the priority value of DeviceA in the VRRP group to 120 so that DeviceA functions as the master device.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>vrrp vrid 1 virtual-ip 10.1.1.111</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>vrrp vrid 1 priority 120</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Create VRRP group 1 on DeviceB and retain the default priority 100 for DeviceB so that DeviceB functions as the backup device.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>vrrp vrid 1 virtual-ip 10.1.1.111</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li><li><span>Configure OSPF. </span><p><p># Configure OSPF on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>network 10.1.3.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure OSPF on DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0] <strong>network 10.1.2.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure OSPF on DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0] <strong>network 10.1.2.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0] <strong>network 10.1.3.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li><li><span>Associate direct routes with the VRRP group.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>direct-route track vrrp vrid 1 degrade-cost 300</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>direct-route track vrrp vrid 1 degrade-cost 300</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li><li><span>Configure OSPF to import direct routes.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>import-route direct</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>default cost inherit-metric</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>import-route direct</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>default cost inherit-metric</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001130782560__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Run the <a href="cmdqueryname=display+ip+routing-table"><b><span class="cmdname">display ip routing-table</span></b></a> command on DeviceB to check the IP routing table.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display ip routing-table</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table : _public_
+Destinations : 12       Routes : 12
+
+Destination/Mask    Proto  Pre  Cost        Flags NextHop         Interface
+
+<strong>10.1.1.0/24       Direct 0    300         D  10.1.1.2      <span>100GE</span><span>1/0/1</span></strong>
+10.1.1.2/32         Direct  0     0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+10.1.1.111/32       O_ASE   150   0             D  10.1.2.2       <span>100GE</span><span>1/0/2</span>
+10.1.1.255/32       Direct  0     0             D  127.0.0.1       <span>100GE</span><span>1/0/1</span>
+10.1.2.0/24         Direct  0     0             D  10.1.2.1        <span>100GE</span><span>1/0/2</span>
+10.1.2.1/32         Direct  0     0             D  127.0.0.1       <span>100GE</span><span>1/0/2</span>
+10.1.2.255/32       Direct  0     0             D  127.0.0.1       <span>100GE</span><span>1/0/2</span>
+10.1.3.0/24         OSPF   10     2             D  10.1.2.2        <span>100GE</span><span>1/0/2</span>
+127.0.0.0/8         Direct  0     0             D  127.0.0.1       InLoopBack0
+127.0.0.1/32        Direct  0     0             D  127.0.0.1       InLoopBack0
+127.255.255.255/32  Direct  0     0             D  127.0.0.1       InLoopBack0
+255.255.255.255/32  Direct  0     0             D  127.0.0.1       InLoopBack0</pre>
+<p>The command output shows that the cost of the direct route to the network segment to which the VRRP virtual IP address belongs is set to 300.</p>
+<p># Run the <a href="cmdqueryname=display+ip+routing-table+10.1.1.0"><b><span class="cmdname">display ip routing-table 10.1.1.0</span></b></a> command on DeviceC to check the routes to the network segment where users reside.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>display ip routing-table 10.1.1.0</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table : _public_
+Summary Count : 1
+
+Destination/Mask    Proto  Pre  Cost    Flags NextHop         Interface
+
+10.1.1.0/24         O_ASE  150    0      D  <strong>  10.1.3.1      <span>100GE</span><span>1/0/1</span></strong></pre>
+<p>The command output shows that DeviceC selects the route with the next-hop IP address of 10.1.3.1 for the network-to-user traffic so that traffic passes through DeviceA, the master device in the VRRP group.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001130782560__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>Switch</p>
+<pre class="screen">#
+sysname Switch
+#
+vlan batch 10
+#               
+interface <span>100GE</span><span>1/0/1</span>
+ port default vlan 10
+#               
+interface <span>100GE</span><span>1/0/2</span>
+ port default vlan 10
+#</pre>
+</li><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.0
+ vrrp vrid 1 virtual-ip 10.1.1.111
+ vrrp vrid 1 priority 120
+ direct-route track vrrp vrid 1 degrade-cost 300
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.3.1 255.255.255.0
+#               
+ospf 1          
+ default cost inherit-metric
+ import-route direct
+ area 0.0.0.0   
+  network 10.1.3.0 0.0.0.255
+#</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.2 255.255.255.0
+ vrrp vrid 1 virtual-ip 10.1.1.111
+ direct-route track vrrp vrid 1 degrade-cost 300
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.2.1 255.255.255.0
+#               
+ospf 1          
+ default cost inherit-metric
+ import-route direct
+ area 0.0.0.0   
+  network 10.1.2.0 0.0.0.255
+#</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.3.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.2.2 255.255.255.0
+#               
+ospf 1          
+ area 0.0.0.0   
+  network 10.1.2.0 0.0.0.255
+  network 10.1.3.0 0.0.0.255
+#</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_ip_routing_management_cfg_0011.html">Associating Direct Routes with a VRRP Group
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_ip_routing_management_cfg_0015.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

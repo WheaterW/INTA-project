@@ -1,0 +1,336 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Routing Policies to Control BGP Route Advertisement and Acceptance">
+<meta name="abstract" content="Routing policies can be configured to flexibly filter BGP routes, allowing only desired routes to be advertised and accepted so that these routes guide network traffic forwarding properly.">
+<meta name="description" content="Routing policies can be configured to flexibly filter BGP routes, allowing only desired routes to be advertised and accepted so that these routes guide network traffic forwarding properly.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_3070.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_3082.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_4083.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,w00606909">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Route">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing Basis">
+<meta name="OWNER" content="w00604599">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00615954">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0240837311">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Routing Policies to Control BGP Route Advertisement and Acceptance</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0240837311"></a><a name="EN-US_TASK_0240837311"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Routing Policies to Control BGP Route Advertisement and Acceptance</h1>
+<div class="taskbody"><p>Routing policies can be configured to flexibly filter BGP routes, allowing only desired routes to be advertised and accepted so that these routes guide network traffic forwarding properly.</p>
+<div class="context"><a name="EN-US_TASK_0240837311__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0240837311__fig_dc_vrp_route-policy_cfg_002901">Figure 1</a>, <span class="keyword">Device</span>B, <span class="keyword">Device</span>C, and <span class="keyword">Device</span>D reside in AS 200 and run OSPF, whereas <span class="keyword">Device</span>A resides in AS 100. <span class="keyword">Device</span>A receives routes from the Internet. It is required that <span class="keyword">Device</span>A provide only the routes 172.16.17.0/24, 172.16.18.0/24, and 172.16.19.0/24 for <span class="keyword">Device</span>B, <span class="keyword">Device</span>C accept only the route 172.16.18.0/24, and <span class="keyword">Device</span>D accept all the routes provided by <span class="keyword">Device</span>B.</p>
+<div class="fignone" id="EN-US_TASK_0240837311__fig_dc_vrp_route-policy_cfg_002901"><a name="EN-US_TASK_0240837311__fig_dc_vrp_route-policy_cfg_002901"></a><a name="fig_dc_vrp_route-policy_cfg_002901"></a><span class="figcap"><b>Figure 1 </b>Network diagram of filtering routes to be advertised and accepted</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 through 3 in this example represent GE <span>0/1/0</span>, GE <span>0/2/0</span>, and GE <span>0/3/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0284656208.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0240837311__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>When configuring routing policies to control BGP route advertisement and acceptance, note the following:</p>
+<ul><li><p>When configuring an IP prefix list, specify a proper IP prefix range according to actual requirements.</p>
+</li><li><p>Note that the name of a configured IP prefix list is case-sensitive.</p>
+</li><li>To improve security, you are advised to deploy BGP security measures. For details, see "Configuring BGP Security." Keychain authentication is used as an example. For details, see "Example for Configuring BGP Keychain."</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0240837311__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Configure basic OSPF functions on <span class="keyword">Device</span>B, <span class="keyword">Device</span>C, and <span class="keyword">Device</span>D.</li><li>Establish an EBGP peer relationship between <span class="keyword">Device</span>A and <span class="keyword">Device</span>B. Establish IBGP peer relationships between <span class="keyword">Device</span>B and <span class="keyword">Device</span>C, and between <span class="keyword">Device</span>B and <span class="keyword">Device</span>D.</li><li><p>Configure static routes on <span class="keyword">Device</span>A and import them to the BGP routing table.</p>
+</li><li><p>Configure an export routing policy for BGP routes on <span class="keyword">Device</span>A and check the filtering result on <span class="keyword">Device</span>B.</p>
+</li><li><p>Configure an import routing policy for BGP routes on <span class="keyword">Device</span>C and check the filtering result on <span class="keyword">Device</span>C.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0240837311__1.4.4"></a><a name="1.4.4"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Five static routes configured and imported on <span class="keyword">Device</span>A</p>
+</li><li><p>OSPF backbone area (area 0) where <span class="keyword">Device</span>B, <span class="keyword">Device</span>C, and <span class="keyword">Device</span>D reside</p>
+</li><li><p>Names of IP prefix lists and routes to be filtered</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0240837311__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface. For configuration details, see <a href="#EN-US_TASK_0240837311__example46219185193">Configuration Files</a>.</span></li><li><span>Configure OSPF in AS 100.</span><p><p># Configure <span class="keyword">Device</span>B.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B]<strong> ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1]<strong> area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1-area-0.0.0.0]<strong> network 192.168.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1-area-0.0.0.0]<strong> network 192.168.2.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1-area-0.0.0.0]<strong> network 192.168.3.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1-area-0.0.0.0]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-ospf-1-area-0.0.0.0]<strong> quit</strong></pre>
+<p># Configure <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C]<strong> ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf-1]<strong> area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf-1-area-0.0.0.0]<strong> network 192.168.2.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf-1-area-0.0.0.0]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-ospf-1-area-0.0.0.0]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-ospf-1]<strong> quit</strong></pre>
+<p># Configure <span class="keyword">Device</span>D.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D]<strong> ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-ospf-1]<strong> area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-ospf-1-area-0.0.0.0]<strong> network 192.168.3.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-ospf-1-area-0.0.0.0]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D-ospf-1-area-0.0.0.0]<strong> quit</strong></pre>
+</p></li><li><span>Configure basic BGP functions.</span><p><p># Configure <span class="keyword">Device</span>A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>router-id 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>peer 192.168.1.2 as-number 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-bgp] <strong>quit</strong></pre>
+<p># Configure <span class="keyword">Device</span>B.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>bgp 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>router-id 2.2.2.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>peer 192.168.1.1 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>peer 192.168.2.2 as-number 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>peer 192.168.3.2 as-number 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-bgp] <strong>quit</strong></pre>
+<p># Configure <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>bgp 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp] <strong>router-id 3.3.3.3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp] <strong>peer 192.168.2.1 as-number 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-bgp] <strong>quit</strong></pre>
+<p># Configure <span class="keyword">Device</span>D.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D] <strong>bgp 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-bgp] <strong>router-id 4.4.4.4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-bgp] <strong>peer 192.168.3.1 as-number 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>D-bgp] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>D-bgp] <strong>quit</strong></pre>
+</p></li><li><span>Configure five static routes on <span class="keyword">Device</span>A and import them to the BGP routing table.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>ip route-static 172.16.16.0 24 NULL0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>ip route-static 172.16.17.0 24 NULL0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>ip route-static 172.16.18.0 24 NULL0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>ip route-static 172.16.19.0 24 NULL0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A]<strong> ip route-static 172.16.20.0 24 NULL0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A]<strong> bgp</strong> <strong>100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp]<strong> import-route static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-bgp]<strong> quit</strong></pre>
+<p># Check the BGP routing table of <span class="keyword">Device</span>B. The command output shows that <span class="keyword">Device</span>B has learned the imported static routes.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>display bgp routing-table</strong>
+
+ BGP Local router ID is 2.2.2.2
+ Status codes: * - valid, &gt; - best, d - damped, x - best external, a - add path,
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+ RPKI validation codes: V - valid, I - invalid, N - not-found
+
+
+ Total Number of Routes: 5
+        Network            NextHop                       MED        LocPrf    PrefVal Path/Ogn
+
+ *&gt;     172.16.16.0/24     192.168.1.1                    0                     0      100?
+ *&gt;     172.16.17.0/24     192.168.1.1                    0                     0      100?
+ *&gt;     172.16.18.0/24     192.168.1.1                    0                     0      100?
+ *&gt;     172.16.19.0/24     192.168.1.1                    0                     0      100?
+ *&gt;     172.16.20.0/24     192.168.1.1                    0                     0      100?</pre>
+</p></li><li><span>Configure a routing policy to filter the BGP routes to be advertised.</span><p><p># Configure an IP prefix list named <strong>a2b</strong> on <span class="keyword">Device</span>A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>ip </strong><strong>ip-prefix a2b index 10 permit 172.16.17.0 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>ip </strong><strong>ip-prefix a2b index 20 permit 172.16.18.0 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>ip </strong><strong>ip-prefix a2b index 30 permit 172.16.19.0 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+<p># Configure an export routing policy based on the IP prefix list <strong>a2b</strong> on <span class="keyword">Device</span>A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>filter-policy ip-prefix a2b export static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-bgp] <strong>quit</strong></pre>
+<p># Check the BGP routing table of <span class="keyword">Device</span>B. The command output shows that <span class="keyword">Device</span>B has received only the three routes that match the IP prefix list <strong>a2b</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>display bgp routing-table</strong>
+
+ BGP Local router ID is 2.2.2.2
+ Status codes: * - valid, &gt; - best, d - damped, x - best external, a - add path,
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+ RPKI validation codes: V - valid, I - invalid, N - not-found
+
+
+ Total Number of Routes: 3
+        Network            NextHop                       MED        LocPrf    PrefVal Path/Ogn
+
+ *&gt;     172.16.17.0/24     192.168.1.1                    0                     0      100?
+ *&gt;     172.16.18.0/24     192.168.1.1                    0                     0      100?
+ *&gt;     172.16.19.0/24     192.168.1.1                    0                     0      100?</pre>
+</p></li><li><span>Configure a routing policy to filter the BGP routes to be accepted.</span><p><p># Configure an IP prefix list named <strong>in</strong> on <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>ip </strong><strong>ip-prefix in index 10 permit 172.16.18.0 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>commit</strong></pre>
+<p># Configure an import routing policy based on the IP prefix list <strong>in</strong> on <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>bgp 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp] <strong>filter-policy ip-prefix in import</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp] <strong>commit</strong></pre>
+<p># Check the BGP routing table of <span class="keyword">Device</span>C. The command output shows that <span class="keyword">Device</span>C has accepted only the route that matches the IP prefix list <strong>in</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>display bgp routing-table</strong>
+
+ BGP Local router ID is 3.3.3.3
+ Status codes: * - valid, &gt; - best, d - damped, x - best external, a - add path,
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+ RPKI validation codes: V - valid, I - invalid, N - not-found
+
+
+ Total Number of Routes: 1
+        Network            NextHop                       MED        LocPrf    PrefVal Path/Ogn
+
+ *&gt;     172.16.18.0/24     192.168.1.1                    0                     0      100?</pre>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0240837311__example46219185193"><a name="EN-US_TASK_0240837311__example46219185193"></a><a name="example46219185193"></a><a name="EN-US_TASK_0240837311__1.4.6"></a><a name="1.4.6"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p><span class="keyword">Device</span>A configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname <span class="keyword">Device</span>A</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 192.168.1.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 100</pre>
+<pre class="screen"> router-id 1.1.1.1</pre>
+<pre class="screen"> peer 192.168.1.2 as-number 200</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  undo synchronization</pre>
+<pre class="screen">  filter-policy ip-prefix a2b export static</pre>
+<pre class="screen">  import-route static</pre>
+<pre class="screen">  peer 192.168.1.2 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ip ip-prefix a2b index 10 permit 172.16.17.0 24</pre>
+<pre class="screen">ip ip-prefix a2b index 20 permit 172.16.18.0 24</pre>
+<pre class="screen">ip ip-prefix a2b index 30 permit 172.16.19.0 24</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ip route-static 172.16.16.0 255.255.255.0 NULL0</pre>
+<pre class="screen">ip route-static 172.16.17.0 255.255.255.0 NULL0</pre>
+<pre class="screen">ip route-static 172.16.18.0 255.255.255.0 NULL0</pre>
+<pre class="screen">ip route-static 172.16.19.0 255.255.255.0 NULL0</pre>
+<pre class="screen">ip route-static 172.16.20.0 255.255.255.0 NULL0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p><span class="keyword">Device</span>B configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname <span class="keyword">Device</span>B</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 192.168.1.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 192.168.3.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/3/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 192.168.2.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 200</pre>
+<pre class="screen"> router-id 2.2.2.2</pre>
+<pre class="screen"> peer 192.168.1.1 as-number 100</pre>
+<pre class="screen"> peer 192.168.2.2 as-number 200</pre>
+<pre class="screen"> peer 192.168.3.2 as-number 200</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  undo synchronization</pre>
+<pre class="screen">  peer 192.168.1.1 enable</pre>
+<pre class="screen">  peer 192.168.2.2 enable</pre>
+<pre class="screen">  peer 192.168.3.2 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 192.168.1.0 0.0.0.255</pre>
+<pre class="screen">  network 192.168.2.0 0.0.0.255</pre>
+<pre class="screen">  network 192.168.3.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p><span class="keyword">Device</span>C configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname <span class="keyword">Device</span>C</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 192.168.2.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 200</pre>
+<pre class="screen"> router-id 3.3.3.3</pre>
+<pre class="screen"> peer 192.168.2.1 as-number 200</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  undo synchronization</pre>
+<pre class="screen">  filter-policy ip-prefix in import</pre>
+<pre class="screen">  peer 192.168.2.1 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 192.168.2.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ip ip-prefix in index 10 permit 172.16.18.0 24</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p><span class="keyword">Device</span>D configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname <span class="keyword">Device</span>D</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 192.168.3.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 200</pre>
+<pre class="screen"> router-id 4.4.4.4</pre>
+<pre class="screen"> peer 192.168.3.1 as-number 200</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  undo synchronization</pre>
+<pre class="screen">  peer 192.168.3.1 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 192.168.3.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_3070.html">Configuration Examples for BGP
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_3082.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_4083.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

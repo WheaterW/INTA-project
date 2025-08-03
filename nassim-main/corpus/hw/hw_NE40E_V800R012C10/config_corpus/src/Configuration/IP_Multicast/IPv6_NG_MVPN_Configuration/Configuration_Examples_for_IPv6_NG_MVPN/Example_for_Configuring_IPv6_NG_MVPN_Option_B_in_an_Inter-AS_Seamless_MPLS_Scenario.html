@@ -1,0 +1,915 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring IPv6 NG MVPN Option B in an Inter-AS Seamless MPLS Scenario">
+<meta name="abstract" content="When devices are deployed in different ASs, you can deploy IPv6 NG MVPN in an inter-AS seamless MPLS scenario to implement end-to-end service interworking.">
+<meta name="description" content="When devices are deployed in different ASs, you can deploy IPv6 NG MVPN in an inter-AS seamless MPLS scenario to implement end-to-end service interworking.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfg_ngmvpn_0212.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfg_ngmvpn_00275.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfg_ngmvpn_0276.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z00603461,w00606909,w00447999">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="IPv6 Multicast VPN">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IPv6 Multicast VPN">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="IPv6 Multicast VPN">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="IPv6 Multicast VPN">
+<meta name="featuretype" content="IP Multicast">
+<meta name="OWNER" content="w00447999">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="w00447999">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172367593">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring IPv6 NG MVPN Option B in an Inter-AS Seamless MPLS Scenario</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172367593"></a><a name="EN-US_TASK_0172367593"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring IPv6 NG MVPN Option B in an Inter-AS Seamless MPLS Scenario</h1>
+<div class="taskbody"><p>When devices are deployed in different ASs, you can deploy IPv6 NG MVPN in an inter-AS seamless MPLS scenario to implement end-to-end service interworking.</p>
+<div class="context"><a name="EN-US_TASK_0172367593__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>As shown in <a href="#EN-US_TASK_0172367593__fig_dc_vrp_cfg_ngmvpn_027501">Figure 1</a>, the PEs, ABR, and ASBRs are in different ASs. To allow the PEs to communicate and provide VPN services, you can configure IPv6 NG MVPN in an inter-AS seamless MPLS scenario.</p>
+<div class="fignone" id="EN-US_TASK_0172367593__fig_dc_vrp_cfg_ngmvpn_027501"><a name="EN-US_TASK_0172367593__fig_dc_vrp_cfg_ngmvpn_027501"></a><a name="fig_dc_vrp_cfg_ngmvpn_027501"></a><span class="figcap"><b>Figure 1 </b>Networking for IPv6 NG MVPN in an inter-AS seamless MPLS scenario</span><br><span><img class="vsd" src="images/fig_dc_vrp_cfg_ngmvpn_027501.png" width="NaN" height="NaN"></span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 through 4 in this example represent GE <span>0/1/1</span>, GE <span>0/1/2</span>, GE <span>0/1/3</span>, and GE <span>0/1/4</span>, respectively.</p>
+</div></div>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172367593__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure an IGP protocol on each network for connectivity.</p>
+</li><li><p>Configure MPLS and MPLS LDP and establish MPLS LSPs on each network.</p>
+</li><li><p>Establish IBGP peer relationships in each AS and enable devices to exchange labeled routes.</p>
+</li><li><p>Establish an EBGP peer relationship between ASBRs and enable these devices to exchange labeled routes across ASs.</p>
+</li><li><p>Configure the ABR as an RR to reflect routes so that PEs can obtain the route destined for each other's loopback interface.</p>
+</li><li><p>Configure a routing policy to control label distribution for a BGP LSP to be established on each device. The egress of the BGP LSP to be established needs to assign an MPLS label to the route advertised to an upstream node. If a transit node receives a labeled IPv4 route from downstream, the downstream node must re-assign an MPLS label to the transit node.</p>
+</li><li><p>Configure peers.</p>
+</li><li><p>Configure a P2MP LSP to carry multicast traffic.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172367593__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>MPLS LSR IDs of devices (1.1.1.1, 1.1.1.2, 1.1.1.3, 1.1.1.4, and 1.1.1.5)</p>
+</li><li><p>Name of a routing policy (policy1)</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172367593__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure an IGP on the MPLS backbone networks in AS100 and AS200, so that the PE and ASBR on the same MPLS backbone network can communicate. OSPF is used between PE1 and the ABR; IS-IS is used between the ABR and ASBR1, between ASBR2 and PE2, and between PEs and CEs; a static route is configured between ASBRs. For configuration details, see Configuration Files in this example.</span></li><li><span>Enable MPLS and LDP globally on each device and configure LDP LSPs.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> mpls lsr-id 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface GigabitEthernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/2</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/2</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/2</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure the ABR.</p>
+<pre class="screen">&lt;ABR&gt; <strong>system-view </strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ABR]<strong> mpls lsr-id 1.1.1.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-mpls]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR] <strong>interface GigabitEthernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-GigabitEthernet<span>0/1/2</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-GigabitEthernet<span>0/1/2</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-GigabitEthernet<span>0/1/2</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR] <strong>interface GigabitEthernet <span>0/1/3</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-GigabitEthernet<span>0/1/3</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-GigabitEthernet<span>0/1/3</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-GigabitEthernet<span>0/1/3</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR] <strong>commit</strong></pre>
+<p># Configure ASBR1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1]<strong> mpls lsr-id 1.1.1.3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-mpls]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-mpls-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>interface GigabitEthernet <span>0/1/3</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/1/3</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/1/3</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/1/3</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>interface GigabitEthernet <span>0/1/4</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/1/4</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/1/4</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/1/4</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>commit</strong></pre>
+<p># Configure ASBR2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR2]<strong> mpls lsr-id 1.1.1.4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-mpls]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-mpls-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>interface GigabitEthernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/1/1</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/1/1</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR] <strong>interface GigabitEthernet <span>0/1/3</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-GigabitEthernet<span>0/1/3</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-GigabitEthernet<span>0/1/3</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-GigabitEthernet<span>0/1/3</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong> mpls lsr-id 1.1.1.5</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-mpls]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-mpls-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface GigabitEthernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/1</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/1</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+</p></li><li><span>Configure an automatic mLDP P2MP LSP.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-mpls-ldp] <strong>mldp p2mp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls-ldp] <strong>mldp recursive-fec</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls-ldp] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-mpls-ldp] <strong>quit</strong></pre>
+<p>The procedure for configuring PE2 is similar to the procedure for configuring PE1. For configuration details, see Configuration Files in this example.</p>
+<p># Configure the ABR.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ABR] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ABR-mpls-ldp] <strong>mldp p2mp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-mpls-ldp] <strong>mldp recursive-fec</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-mpls-ldp] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ABR-mpls-ldp] <strong>quit</strong></pre>
+<p># Configure ASBR1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1-mpls-ldp] <strong>mldp p2mp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-mpls-ldp] <strong>mldp recursive-fec</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-mpls-ldp] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1-mpls-ldp] <strong>quit</strong></pre>
+<p>The procedure for configuring ASBR2 is similar to the procedure for configuring ASBR1. For configuration details, see Configuration Files in this example.</p>
+</p></li><li><span>Establish IBGP peer relationships in each AS, establish an EBGP peer relationship between ASBR1 and ASBR2, and enable devices to exchange labeled routes.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>bgp 1.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>peer 1.1.1.2 as-number 1.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>peer 1.1.1.2 connect-interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>ipv4-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-ipv4] <strong>undo synchronization</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-ipv4] <strong>peer 1.1.1.2 label-route-capability</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-ipv4] <strong>peer 1.1.1.2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-ipv4] <strong>network 1.1.1.1 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>ipv6-family mvpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-mvpnv6] <strong>policy vpn-target</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-mvpnv6] <strong>peer 1.1.1.2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-mvpnv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>ipv6-family vpnv6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-vpnv6] <strong>policy vpn-target</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-vpnv6] <strong>peer 1.1.1.2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-vpnv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure the ABR.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ABR] <strong>bgp 1.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp] <strong>peer 1.1.1.1 as-number 1.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp] <strong>peer 1.1.1.1 connect-interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp] <strong>peer 1.1.1.3 as-number 1.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp] <strong>peer 1.1.1.3 connect-interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp] <strong>ipv4-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-ipv4] <strong>undo synchronization</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-ipv4] <strong>peer 1.1.1.1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-ipv4] <strong>peer 1.1.1.1 label-route-capability</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-ipv4] <strong>peer 1.1.1.3 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-ipv4] <strong>peer 1.1.1.3 label-route-capability</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp] <strong>ipv6-family mvpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-mvpnv6] <strong>undo policy vpn-target</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-mvpnv6] <strong>peer 1.1.1.1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-mvpnv6] <strong>peer 1.1.1.3 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-mvpnv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp] <strong>ipv6-family vpnv6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-vpnv6] <strong>undo policy vpn-target</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-vpnv6] <strong>peer 1.1.1.1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-vpnv6] <strong>peer 1.1.1.3 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-vpnv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR] <strong>commit</strong></pre>
+<p># Configure ASBR1.</p>
+<pre class="screen">&lt;ASBR1&gt; <strong>system-view </strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1] <strong>bgp 1.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp] <strong>peer 1.1.1.2 as-number 1.0</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1-bgp] <strong>peer 10.0.16.2 as-number 65535.65535</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp] <strong>peer 1.1.1.2 connect-interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp] <strong>ipv4-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-ipv4] <strong>undo synchronization</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-ipv4] <strong>peer 1.1.1.2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-ipv4] <strong>network 1.1.1.3 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-ipv4] <strong>peer 1.1.1.2 label-route-capability</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp] <strong>ipv6-family mvpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-mvpnv6] <strong>undo policy vpn-target</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-mvpnv6] <strong>peer 10.0.16.2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-mvpnv6] <strong>peer 1.1.1.2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-mvpnv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp] <strong>ipv6-family vpnv6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-vpnv6] <strong>undo policy vpn-target</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-vpnv6] <strong>peer 10.0.16.2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-vpnv6] <strong>peer 1.1.1.2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp-af-vpnv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1] <strong>commit</strong></pre>
+<p># Configure ASBR2.</p>
+<pre class="screen">&lt;ASBR2&gt; <strong>system-view </strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR2] <strong>bgp 65535.65535</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp] <strong>peer 1.1.1.5 as-number 65535.65535</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp] <strong>peer 10.0.16.1 as-number 1.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp] <strong>peer 1.1.1.5 connect-interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp] <strong>ipv4-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp-af-ipv4] <strong>undo synchronization</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp-af-ipv4] <strong>peer 10.0.16.1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp-af-ipv4] <strong>peer 1.1.1.5 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp] <strong>ipv6-family mvpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp-af-mvpnv6] <strong>undo policy vpn-target</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp-af-mvpnv6] <strong>peer 10.0.16.1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp-af-mvpnv6] <strong>peer 1.1.1.5 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp-af-mvpnv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp] <strong>ipv6-family vpnv6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp-af-vpnv6] <strong>undo policy vpn-target</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp-af-vpnv6] <strong>peer 10.0.16.1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp-af-vpnv6] <strong>peer 1.1.1.5 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp-af-vpnv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>bgp 65535.65535</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>peer 1.1.1.4 as-number 65535.65535</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>peer 1.1.1.4 connect-interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>ipv4-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-ipv4] <strong>undo synchronization</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-ipv4] <strong>peer 1.1.1.4 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>ipv6-family mvpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-mvpnv6] <strong>policy vpn-target</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-mvpnv6] <strong>peer 1.1.1.4 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-mvpnv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>ipv6-family vpnv6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-vpnv6] <strong>policy vpn-target</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-vpnv6] <strong>peer 1.1.1.4 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-vpnv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+</p></li><li><span>Configure the ABR as an RR to reflect routes so that PE1 and PE2 can obtain the route destined for each other's loopback interface.</span><p><p># Configure the ABR.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ABR] <strong>bgp 1.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp] <strong>ipv4-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-ipv4] <strong>peer 1.1.1.1 reflect-client</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-ipv4] <strong>peer 1.1.1.1 next-hop-local</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-ipv4] <strong>peer 1.1.1.3 reflect-client</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-ipv4] <strong>peer 1.1.1.3 next-hop-local</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp] <strong>ipv6-family mvpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-mvpnv6] <strong>peer 1.1.1.1 reflect-client</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-mvpnv6] <strong>peer 1.1.1.3 reflect-client</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-mvpnv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp] <strong>ipv6-family vpnv6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-vpnv6] <strong>peer 1.1.1.1 reflect-client</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-vpnv6] <strong>peer 1.1.1.1 next-hop-local</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-vpnv6] <strong>peer 1.1.1.3 reflect-client</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-vpnv6] <strong>peer 1.1.1.3 next-hop-local</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-vpnv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR] <strong>commit</strong></pre>
+</p></li><li><span>Configure a route-policy on each device to establish BGP LSPs.</span><p><p># Create a route-policy on PE1 and apply the route-policy to the routes to be advertised to a specified peer.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>route-policy policy1 permit node 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-route-policy] <strong>apply mpls-label</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-route-policy] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>bgp 1.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>ipv4-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-ipv4] <strong>peer 1.1.1.2 route-policy policy1 export</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p>The configuration on PE2 is similar to that on PE1. For configuration details, see Configuration Files in this example.</p>
+<p># Create a route-policy on the ABR and apply the route-policy to the routes to be advertised to specified peers.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ABR] <strong>route-policy policy1 permit node 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-route-policy] <strong>if-match mpls-label</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-route-policy] <strong>apply mpls-label</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-route-policy]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR] <strong>bgp 1.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp] <strong>ipv4-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-ipv4] <strong>peer 1.1.1.1 route-policy policy1 export</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-ipv4] <strong>peer 1.1.1.3 route-policy policy1 export</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ABR] <strong>commit</strong></pre>
+<p>The configuration on ASBR1 is similar to that on the ABR. For configuration details, see Configuration Files in this example.</p>
+</p></li><li><span>Create VPN instances and configure unicast peers.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>ip vpn-instance ngv6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-ngv6] <strong>ipv6-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-ngv6-af-ipv6] <strong>route-distinguisher 1.2.3.4:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-ngv6-af-ipv4] <strong>vpn-target 1:1 both</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-ngv6-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-ngv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface GigabitEthernet <span>0/1/3</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/3</span>] <strong>ip binding vpn-instance ngv6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/3</span>] <strong>ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/3</span>] <strong>ipv6 address 2001:db8:6::3 64</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/3</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>bgp 1.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>ipv6-family vpn-instance ngv6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-vpn-ngv6] <strong>import-route isis 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-vpn-ngv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p>The configuration on PE2 is similar to that on PE1. For configuration details, see Configuration Files in this example.</p>
+</p></li><li><span>Configure a P2MP LSP on PEs to carry multicast traffic.</span><p><p># Configure PE1 as the sender PE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>multicast ipv6 mvpn 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>ip vpn-instance ngv6</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-vpn-instance-ngv6] <strong>ipv6-family</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-vpn-instance-ngv6-af-ipv6] <strong>multicast ipv6 routing-enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-ngv6-af-ipv6] <strong>mvpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-ngv6-af-ipv6-mvpn] <strong>sender-enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-ngv6-af-ipv6-mvpn] <strong>c-multicast signaling bgp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-ngv6-af-ipv6-mvpn] <strong>auto-discovery inter-as</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-ngv6-af-ipv6-mvpn] <strong>ipmsi-tunnel</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-ngv6-af-ipv6-mvpn-ipmsi] <strong>mldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-ngv6-af-ipv6-mvpn-ipmsi] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-ngv6-af-ipv6-mvpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-ngv6-af-ipv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-ngv6] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-vpn-instance-ngv6] <strong>quit</strong></pre>
+<p># Configure PE2 as the receiver PE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>multicast ipv6 mvpn 1.1.1.5</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>ip vpn-instance ngv6</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-vpn-instance-ngv6] <strong>ipv6-family</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-vpn-instance-ngv6-af-ipv6] <strong>multicast ipv6 routing-enable</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-vpn-instance-ngv6-af-ipv6] <strong>mvpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-ngv6-af-ipv6-mvpn] <strong>c-multicast signaling bgp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-ngv6-af-ipv6-mvpn] <strong>auto-discovery inter-as</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-ngv6-af-ipv6-mvpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-ngv6-af-ipv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-ngv6] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-vpn-instance-ngv6] <strong>quit</strong></pre>
+</p></li><li><span>Configure PIM.</span><p><p># Configure CE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>pim-ipv6</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-pim6] <strong>static-rp 2001:db8:6::3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-pim6] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-pim6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>multicast ipv6 routing-enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>interface GigabitEthernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>] <strong>pim ipv6 sm</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>interface GigabitEthernet <span>0/1/3</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-GigabitEthernet<span>0/1/3</span>] <strong>pim ipv6 sm</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/3</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-GigabitEthernet<span>0/1/3</span>] <strong>quit</strong></pre>
+<p># Configure CE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2] <strong>pim-ipv6</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2-pim6] <strong>static-rp 2001:db8:6::3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-pim6] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2-pim6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2] <strong>multicast ipv6 routing-enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2] <strong>interface GigabitEthernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>] <strong>pim ipv6 sm</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>] <strong>mld enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/1</span>] <strong>mld static-group FF3E::1 source 2001:DB8:5::2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2] <strong>interface GigabitEthernet <span>0/1/4</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-GigabitEthernet<span>0/1/4</span>] <strong>pim ipv6 sm</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/4</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-GigabitEthernet<span>0/1/4</span>] <strong>quit</strong></pre>
+<p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>pim-ipv6 vpn-instance ngv6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-pim6-ngv6] <strong>static-rp 2001:db8:6::3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-pim6-ngv6] <strong>source-lifetime 60</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-pim6-ngv6] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-pim6-ngv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>interface GigabitEthernet <span>0/1/3</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-GigabitEthernet<span>0/1/3</span>] <strong>pim ipv6 sm</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/3</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-GigabitEthernet<span>0/1/3</span>] <strong>quit</strong></pre>
+<p>The configuration on PE2 is similar to the configuration on PE1. For configuration details, see Configuration Files in this example.</p>
+</p></li><li><span>Verify the configuration.</span><p><p>After the configuration is complete, CEs can learn the routes to each other's interfaces and ping each other.</p>
+<p>The following example uses the command output on CE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>ping ipv6 2001:db8:14::1</strong></pre>
+<pre class="screen">  PING 2001:DB8:14::1: 56  data bytes, press CTRL_C to break</pre>
+<pre class="screen">    Reply from 2001:DB8:14::1: bytes=56 Sequence=1 ttl=252 time=102 ms</pre>
+<pre class="screen">    Reply from 2001:DB8:14::1: bytes=56 Sequence=2 ttl=252 time=89 ms</pre>
+<pre class="screen">    Reply from 2001:DB8:14::1: bytes=56 Sequence=3 ttl=252 time=106 ms</pre>
+<pre class="screen">    Reply from 2001:DB8:14::1: bytes=56 Sequence=4 ttl=252 time=104 ms</pre>
+<pre class="screen">    Reply from 2001:DB8:14::1: bytes=56 Sequence=5 ttl=252 time=56 ms</pre>
+<pre class="screen"></pre>
+<pre class="screen">  --- 2001:DB8:14::1 ping statistics ---</pre>
+<pre class="screen">    5 packet(s) transmitted</pre>
+<pre class="screen">    5 packet(s) received</pre>
+<pre class="screen">    0.00% packet loss</pre>
+<pre class="screen">    round-trip min/avg/max = 56/91/106 ms</pre>
+<p>Run the <a href="cmdqueryname=display+pim+ipv6+routing-table"><b><span class="cmdname">display pim ipv6 routing-table</span></b></a> command on a PE to check the PIM routing table.</p>
+<p>The following example uses the command output on PE1.</p>
+<pre class="screen">&lt;PE1&gt;<strong> display pim ipv6 vpn-instance ngv6 routing-table</strong></pre>
+<pre class="screen"> VPN-Instance: ngv6
+ Total 1 (S, G) entry
+
+ (2001:DB8:5::2, FF3E::1)
+     Protocol: pim-ssm, Flag:
+     UpTime: 00:24:09
+     Upstream interface: through-BGP, Refresh time: 00:24:09
+         Upstream neighbor: ::FFFF:1.1.1.2
+         RPF prime neighbor: ::FFFF:1.1.1.2
+     Downstream interface(s) information:
+     Total number of downstreams: 1
+        1: GigabitEthernet<span>0/1/3</span>
+             Protocol: pim-ssm, UpTime: 00:24:09, Expires: 00:02:35
+</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172367593__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>CE1 configuration file</p>
+<pre class="screen">#
+sysname CE1
+#
+multicast ipv6 routing-enable
+#
+isis 2
+ is-level level-2
+ ipv6 enable topology ipv6
+ network-entity 10.0000.0000.0004.00
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ipv6 enable
+ ipv6 address 2001:DB8:5::6 64
+ isis ipv6 enable 2
+ pim ipv6 sm
+#
+interface GigabitEthernet<span>0/1/3</span>
+ undo shutdown
+ ipv6 enable
+ ipv6 address 2001:DB8:6::6 64
+ isis ipv6 enable 2
+ pim ipv6 sm
+#
+pim-ipv6
+ static-rp 2001:DB8:6::3
+#
+return</pre>
+</li><li><p>PE1 configuration file</p>
+<pre class="screen">#
+sysname PE1 
+#
+multicast ipv6 mvpn 1.1.1.1 
+#
+ip vpn-instance ngv6 
+ ipv6-family 
+ route-distinguisher 1.2.3.4:1 
+ apply-label per-instance
+ vpn-target 1:1 export-extcommunity 
+ vpn-target 1:1 import-extcommunity 
+ multicast ipv6 routing-enable 
+ mvpn 
+  sender-enable 
+  c-multicast signaling bgp 
+  auto-discovery inter-as 
+  ipmsi-tunnel 
+   mldp 
+#
+mpls lsr-id 1.1.1.1 
+#
+mpls 
+#
+mpls ldp 
+ mldp p2mp
+ mldp recursive-fec 
+ #
+ ipv4-family 
+ 
+#
+route-policy policy1 permit node 1 
+ apply mpls-label 
+#
+isis 2 vpn-instance ngv6
+ is-level level-2
+ network-entity 10.0000.0000.0006.00
+ ipv6 enable topology ipv6
+ ipv6 import-route bgp
+#
+interface GigabitEthernet<span>0/1/2</span>
+ undo shutdown 
+ ip address 10.0.11.6 255.255.255.0 
+ mpls 
+ mpls ldp 
+#
+interface GigabitEthernet<span>0/1/3</span>
+ undo shutdown 
+ ip binding vpn-instance ngv6 
+ ipv6-enable
+ ipv6 address 2001:DB8:6::3 64
+ isis ipv6 enable 2
+ pim ipv6 sm
+#
+interface LoopBack0 
+ ip address 1.1.1.1 255.255.255.255 
+# 
+interface NULL0 
+#
+bgp 1.0 
+ peer 1.1.1.2 as-number 1.0 
+ peer 1.1.1.2 connect-interface LoopBack0 
+ #
+ ipv4-family unicast 
+  undo synchronization 
+  network 1.1.1.1 255.255.255.255 
+  peer 1.1.1.2 enable 
+  peer 1.1.1.2 route-policy policy1 export 
+  peer 1.1.1.2 label-route-capability 
+ #
+ ipv6-family mvpn 
+  policy vpn-target 
+  peer 1.1.1.2 enable 
+ #
+ ipv6-family vpnv6 
+  policy vpn-target 
+  peer 1.1.1.2 enable 
+ #
+ ipv6-family vpn-instance ngv6 
+  import-route isis 2
+#
+ospf 1 
+ area 0.0.0.0 
+ network 10.0.11.0 0.0.0.255 
+ network 1.1.1.1 0.0.0.0 
+#
+pim-ipv6 vpn-instance ngv6
+ static-rp 2001:DB8:6::3
+ source-lifetime 60
+#
+return</pre>
+</li><li><p>ABR configuration file</p>
+<pre class="screen"># 
+sysname ABR 
+# 
+mpls lsr-id 1.1.1.2 
+# 
+mpls 
+# 
+mpls ldp 
+ mldp p2mp 
+#
+ mldp recursive-fec 
+# 
+ ipv4-family 
+# 
+isis 1 
+ is-level level-2 
+ cost-style wide 
+ network-entity 10.0000.0000.000c.00 
+# 
+interface GigabitEthernet<span>0/1/2</span>
+ undo shutdown 
+ ip address 10.0.7.5 255.255.255.0 
+ isis enable 1 
+ mpls 
+ mpls ldp 
+# 
+interface GigabitEthernet<span>0/1/3</span>
+ undo shutdown 
+ ip address 10.0.11.5 255.255.255.0 
+ mpls 
+ mpls ldp 
+# 
+interface LoopBack0 
+ ip address 1.1.1.2 255.255.255.255 
+ isis enable 1 
+# 
+interface NULL0 
+#
+route-policy policy1 permit node 1 
+ if-match mpls-label
+ apply mpls-label 
+# 
+bgp 1.0 
+ peer 1.1.1.1 as-number 1.0 
+ peer 1.1.1.1 connect-interface LoopBack0 
+ peer 1.1.1.3 as-number 1.0 
+ peer 1.1.1.3 connect-interface LoopBack0 
+ # 
+ ipv4-family unicast 
+  undo synchronization 
+  peer 1.1.1.1 enable 
+  peer 1.1.1.1 route-policy policy1 export 
+  peer 1.1.1.1 reflect-client 
+  peer 1.1.1.1 next-hop-local 
+  peer 1.1.1.1 label-route-capability 
+  peer 1.1.1.3 enable 
+  peer 1.1.1.3 route-policy policy1 export 
+  peer 1.1.1.3 reflect-client 
+  peer 1.1.1.3 next-hop-local 
+  peer 1.1.1.3 label-route-capability 
+ # 
+ ipv6-family mvpn 
+  undo policy vpn-target 
+  peer 1.1.1.1 enable 
+  peer 1.1.1.1 reflect-client 
+  peer 1.1.1.3 enable 
+  peer 1.1.1.3 reflect-client 
+ # 
+ ipv6-family vpnv6 
+  undo policy vpn-target 
+  peer 1.1.1.1 enable 
+  peer 1.1.1.1 reflect-client 
+  peer 1.1.1.1 next-hop-local 
+  peer 1.1.1.3 enable 
+  peer 1.1.1.3 reflect-client 
+  peer 1.1.1.3 next-hop-local 
+# 
+ospf 1 
+ area 0.0.0.0 
+ network 10.0.11.0 0.0.0.255 
+ network 1.1.1.2 0.0.0.0 
+# 
+return </pre>
+</li><li><p>ASBR1 configuration file</p>
+<pre class="screen"># 
+sysname ASBR1 
+# 
+mpls lsr-id 1.1.1.3 
+# 
+mpls 
+# 
+mpls ldp 
+ mldp p2mp 
+#
+ mldp recursive-fec 
+# 
+ ipv4-family 
+# 
+isis 1 
+ is-level level-2 
+ cost-style wide 
+ network-entity 10.0000.0000.000a.00 
+# 
+interface GigabitEthernet<span>0/1/3</span>
+ undo shutdown 
+ ip address 10.0.7.7 255.255.255.0 
+ isis enable 1 
+ mpls 
+ mpls ldp 
+# 
+interface GigabitEthernet<span>0/1/4</span>
+ undo shutdown 
+ ip address 10.0.16.1 255.255.255.0 
+ mpls 
+ mpls ldp 
+# 
+interface LoopBack0 
+ ip address 1.1.1.3 255.255.255.255 
+ isis enable 1 
+# 
+interface NULL0 
+#
+route-policy policy1 permit node 1 
+ apply mpls-label 
+# 
+bgp 1.0 
+ peer 10.0.16.2 as-number 65535.65535 
+ peer 1.1.1.2 as-number 1.0 
+ peer 1.1.1.2 connect-interface LoopBack0 
+ #
+ ipv4-family unicast 
+  undo synchronization 
+  network 1.1.1.3 255.255.255.255 
+  peer 10.0.16.2 enable 
+  peer 1.1.1.2 enable 
+  peer 1.1.1.2 route-policy policy1 export 
+  peer 1.1.1.2 label-route-capability 
+ #
+ ipv6-family mvpn 
+  undo policy vpn-target 
+  peer 10.0.16.2 enable 
+  peer 1.1.1.2 enable 
+ #
+ ipv6-family vpnv6 
+  undo policy vpn-target 
+  peer 10.0.16.2 enable 
+  peer 1.1.1.2 enable 
+#
+ip route-static 1.1.1.4 255.255.255.255 10.0.16.2 
+# 
+return </pre>
+</li><li><p>ASBR2 configuration file</p>
+<pre class="screen"># 
+sysname ASBR2 
+# 
+mpls lsr-id 1.1.1.4 
+# 
+mpls 
+# 
+mpls ldp 
+ mldp p2mp 
+#
+ mldp recursive-fec 
+# 
+ ipv4-family 
+# 
+isis 1 
+ is-level level-2 
+ cost-style wide 
+ network-entity 10.0000.0000.000b.00 
+# 
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown 
+ ip address 10.0.10.4 255.255.255.0 
+ isis enable 1 
+ mpls 
+ mpls ldp 
+# 
+interface GigabitEthernet<span>0/1/3</span>
+ undo shutdown 
+ ip address 10.0.16.2 255.255.255.0 
+ mpls 
+ mpls ldp 
+# 
+interface LoopBack0 
+ ip address 1.1.1.4 255.255.255.255 
+ isis enable 1 
+# 
+interface NULL0 
+# 
+bgp 65535.65535 
+ peer 10.0.16.1 as-number 1.0 
+ peer 1.1.1.5 as-number 65535.65535 
+ peer 1.1.1.5 connect-interface LoopBack0 
+ 
+ ipv4-family unicast 
+ undo synchronization 
+ peer 10.0.16.1 enable 
+ peer 1.1.1.5 enable 
+ 
+ ipv6-family mvpn 
+ undo policy vpn-target 
+ peer 10.0.16.1 enable 
+ peer 1.1.1.5 enable 
+ 
+ ipv6-family vpnv6 
+ undo policy vpn-target 
+ peer 10.0.16.1 enable 
+ peer 1.1.1.5 enable 
+# 
+ip route-static 1.1.1.3 255.255.255.255 10.0.16.1 
+# 
+return </pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#
+sysname PE2 
+#
+multicast ipv6 mvpn 1.1.1.5  
+#
+ip vpn-instance ngv6  
+ ipv6-family  
+ route-distinguisher 2.3:1  
+ apply-label per-instance
+ vpn-target 1:1 export-extcommunity 
+ vpn-target 1:1 import-extcommunity 
+ multicast ipv6 routing-enable  
+ mvpn  
+  sender-enable  
+  c-multicast signaling bgp  
+  auto-discovery inter-as  
+  ipmsi-tunnel  
+   mldp  
+#
+mpls lsr-id 1.1.1.5  
+#
+mpls  
+#
+mpls ldp  
+ mldp p2mp
+ mldp recursive-fec  
+ # 
+ ipv4-family  
+#
+isis 1  
+ is-level level-2  
+ cost-style wide  
+ network-entity 10.0000.0000.000d.00 
+#
+isis 2 vpn-instance ngv6
+ is-level level-2
+ network-entity 10.0000.0000.0007.00
+ ipv6 enable topology ipv6
+ ipv6 import-route bgp
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown  
+ ip address 10.0.10.3 255.255.255.0  
+ isis enable 1  
+ mpls  
+ mpls ldp  
+#
+interface GigabitEthernet<span>0/1/4</span>
+ undo shutdown  
+ ip binding vpn-instance ngv6  
+ ipv6-enable
+ ipv6 address 2001:DB8:14::4 64
+ isis ipv6 enable 2
+ pim ipv6 sm
+#  
+interface LoopBack0  
+ ip address 1.1.1.5 255.255.255.255 
+ isis enable 1  
+#  
+interface NULL0  
+#  
+bgp 65535.65535  
+ peer 1.1.1.4 as-number 65535.65535 
+ peer 1.1.1.4 connect-interface LoopBack0 
+ # 
+ ipv4-family unicast  
+ undo synchronization  
+ peer 1.1.1.4 enable  
+ # 
+ ipv6-family mvpn  
+ policy vpn-target  
+ peer 1.1.1.4 enable  
+ # 
+ ipv6-family vpnv6  
+ policy vpn-target  
+ peer 1.1.1.4 enable  
+ # 
+ ipv6-family vpn-instance ngv6
+ import-route isis 2
+#
+pim-ipv6 vpn-instance ngv6
+ static-rp 2001:DB8:6::3
+#  
+return </pre>
+</li><li><p>CE2 configuration file</p>
+<pre class="screen">#
+sysname CE2
+#
+multicast ipv6 routing-enable
+#
+isis 2
+ is-level level-2
+ ipv6 enable topology ipv6
+ network-entity 10.0000.0000.0004.00
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ipv6 enable
+ ipv6 address 2001:DB8:3::1 64
+ isis ipv6 enable 2
+ pim ipv6 sm
+ mld enable
+ mld static-group FF3E::1 source 2001:DB8:5::2
+#
+interface GigabitEthernet<span>0/1/4</span>
+ undo shutdown
+ ipv6 enable
+ ipv6 address 2001:DB8:14::1 64
+ isis ipv6 enable 2
+ pim ipv6 sm
+#
+pim-ipv6
+ static-rp 2001:DB8:6::3
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfg_ngmvpn_0212.html">Configuration Examples for IPv6 NG MVPN
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfg_ngmvpn_00275.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfg_ngmvpn_0276.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

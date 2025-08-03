@@ -1,0 +1,115 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding SA Messages">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_msdp_cfg_0016.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_msdp_cfg_0018.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="MSDP">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="MSDP">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="MSDP">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001130623928">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding SA Messages</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001130623928"></a><a name="EN-US_CONCEPT_0000001130623928"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding SA Messages</h1>
+<div><div class="section"><h4 class="sectiontitle">SA Message</h4><p>MSDP peers share (S, G) information by exchanging SA messages. Transmitted among multiple RPs, an SA message carries multiple groups of (S, G) information, including the IP address of the source RP, number of (S, G) entries contained in the message, and active (S, G) list in the domain.</p>
+<p>A device does not send SA Request messages to its remote MSDP peer if the peer has a larger SA cache capacity than its own or if a new receiver joins a group. Instead, the device waits for the SA message sent by its remote MSDP peer in the next period, which delays the receiver from obtaining the multicast source information. For the new receiver to quickly learn the information about active multicast sources, the local RP needs to send an SA Request message to the MSDP peer to request the (S, G) list of a specified group.</p>
+<p>After receiving the SA Request message, the remote MSDP peer immediately responds with an SA Response message carrying the required (S, G) information. If an SA Request message filtering rule is configured on the remote MSDP peer, the remote MSDP peer responds only to the SA Request messages permitted by the rule.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">RPF Check Rules for SA Messages</h4><p>To prevent SA messages from being repeatedly forwarded between MSDP peers, MSDP peers perform RPF checks on the received SA messages, strictly controlling the incoming ones. The SA messages that do not comply with the RPF rules are discarded.</p>
+<p>When forwarding an SA message, an MSDP-enabled device complies with the following RPF check rules:</p>
+<ul><li>Rule 1: If the SA message is sent by the RPF peer, the message is accepted and forwarded to other MSDP peers.</li><li><p>Rule 2: If the peer that sends an SA message is the source RP, the SA message is accepted and forwarded to other peers.</p>
+</li><li><p>Rule 3: A multicast device can set up MSDP peer relationships with several other multicast devices. You can configure one or more remote peers as static RPF peers to allow the local device to accept SA messages from them.</p>
+</li><li><p>Rule 4: If a multicast device has only one remote MSDP peer, the peer automatically becomes the RPF peer, and the device accepts the SA messages sent from this peer.</p>
+</li><li><p>Rule 5: If a peer that sends an SA message is in the same mesh group as the local multicast device, the SA message is accepted. However, the SA message is not forwarded to other members in the mesh group, but is forwarded to all peers outside the mesh group. If the SA message is sent by a certain MSDP peer outside the mesh group, an RPF check is performed on the SA message. If the SA message passes the check, it is forwarded to all other members of the mesh group. You are advised to add all MSDP peers in the same or different ASs to the same mesh group on a live network that encounters SA message RPF check failures. This prevents SA messages from being discarded due to RPF check failures.</p>
+</li><li><p>Rule 6: If the route to the source RP spans multiple ASs, only the SA messages sent from a peer in the next-hop AS are accepted. If this AS has multiple remote MSDP peers, the SA message sent from the peer with the highest IP address is accepted.</p>
+</li><li><p>Rule 7: If an SA message is sent from an MSDP peer that is a route advertiser or the next hop of a source RP, the device accepts the SA message. If a network has multiple equal-cost routes to a source RP, the multicast device accepts SA messages sent from all MSDP peers on the equal-cost routes.</p>
+</li></ul>
+<p>The application of rules 6 and 7 depends on route selection. For details, see <a href="#EN-US_CONCEPT_0000001130623928__table119671359191016">Table 1</a>.</p>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001130623928__table119671359191016"></a><a name="table119671359191016"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001130623928__table119671359191016" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Application of RPF check rules 6 and 7</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="16.04%" id="mcps1.3.2.6.2.4.1.1" liSelected="liSelected"><p>Whether the Route to the Source RP Is a BGP Route</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="48.22%" id="mcps1.3.2.6.2.4.1.2" liSelected="liSelected"><p>Scenario</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="35.74%" id="mcps1.3.2.6.2.4.1.3" liSelected="liSelected"><p>Processing Rule</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" rowspan="4" valign="top" width="16.04%" headers="mcps1.3.2.6.2.4.1.1 "><p>Yes</p>
+</td>
+<td class="cellrowborder" valign="top" width="48.22%" headers="mcps1.3.2.6.2.4.1.2 "><p>MSDP peers are EBGP peers.</p>
+</td>
+<td class="cellrowborder" rowspan="2" valign="top" width="35.74%" headers="mcps1.3.2.6.2.4.1.3 "><p>Apply rule 6.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.2.6.2.4.1.1 "><p>MSDP peers are not BGP peers, and the route to the source RP spans multiple ASs.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.2.6.2.4.1.1 "><p>MSDP peers are IBGP peers.</p>
+</td>
+<td class="cellrowborder" rowspan="3" valign="top" headers="mcps1.3.2.6.2.4.1.2 "><p>Apply rule 7.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.2.6.2.4.1.1 "><p>MSDP peers are not BGP peers, and the route to the source RP does not span multiple ASs.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="2" valign="top" headers="mcps1.3.2.6.2.4.1.1 "><p>No</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.2.6.2.4.1.2 "><p>IGP routes or multicast static routes exist.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.2.6.2.4.1.1 "><p>No route is available.</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.2.6.2.4.1.2 "><p>The SA message sent by the MSDP peer is discarded.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Filtering SA Messages</h4><p>MSDP peers do not filter SA messages by default. SA messages sent from a domain can be transmitted to all MSDP peers on the network. However, (S, G) entries in some PIM-SM domains can guide packet forwarding only in the local domains. For example, some local multicast applications use global multicast group addresses or some multicast sources use private addresses 10.x.x.x. If SA messages are not filtered, these (S, G) entries are transmitted to other MSDP peers. To solve this problem, configure SA message filtering rules (usually ACL rules) and apply them to enable MSDP peers to filter the SA messages they create, forward, and receive. In this way, the transmission of messages sent by multicast sources can be controlled.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_msdp_cfg_0016.html">Adjusting the Parameters of SA Messages
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_msdp_cfg_0018.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

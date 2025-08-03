@@ -1,0 +1,218 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="OSPF/OSPFv3">
+<meta name="abstract" content="">
+<meta name="description" content="">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_hardening_control_level2.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0036.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0039.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z00588052,z00875216">
+<meta name="DC.Publisher" content="20240229">
+<meta name="OWNER" content="z00588052,z00875216">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="h00414125">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001180503149">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>OSPF/OSPFv3</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001180503149"></a><a name="EN-US_CONCEPT_0000001180503149"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">OSPF/OSPFv3</h1>
+<div><p></p>
+<div class="section"><h4 class="sectiontitle">Security Policy Overview</h4><p><strong>OSPF<span>/OSPFv3</span> packet authentication</strong></p>
+<p>OSPF<span>/OSPFv3</span> supports packet authentication. Packets are accepted only if they are authenticated. If packets fail to be authenticated, a neighbor relationship cannot be established. If area authentication is used, authentication mode and password configurations on all <span class="keyword">Router</span>s in the same area must be the same. Interface authentication is implemented by setting an authentication mode and password between neighboring <span class="keyword">Router</span>s. Interface authentication takes precedence over area authentication.</p>
+<p><strong>OSPFv3 IPsec authentication</strong></p>
+<p>Relevant standards (Authentication/Confidentiality for OSPFv3) define the use of the IP Security (IPsec) mechanism to authenticate OSPFv3 packets.</p>
+<ul><li><p>Confidentiality: ESP is used to provide confidentiality. After ESP is enabled, OSPFv3 packets that are not protected by ESP and the packets that do not pass the confidentiality check are discarded.</p>
+</li><li><p>Data authentication: When OSPFv3 authentication is enabled, a device discards the OSPFv3 packets that are not protected by AH or ESP and the packets that fail authentication checks.</p>
+</li></ul>
+<p>All OSPFv3 instances running over the same interface use the same SA.</p>
+<p>OSPFv3 starts sending packets using IPsec authentication and notifies the lower layers to check received packets with IPsec authentication. The lower layers will check all the received packets, and the packets which fail the check will be discarded silently.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Attack Methods</h4><p><strong>OSPF</strong></p>
+<p>OSPF is attacked mainly through forged packets. To identify and discard these packets, authentication can be configured.</p>
+<p>An attacker may use the following methods to initiate attacks:</p>
+<ul><li><p>Changes the aging time of a packet to the maximum aging time so that all <span class="keyword">Router</span>s discard this packet.</p>
+</li><li><p>Advertises the LSAs with valid Max Sequence Numbers or with sequence numbers close to the Max Sequence Number.</p>
+</li><li><p>Changes the sequence number when the state of the encryption sequence number resets during a neighbor <span class="keyword">Router</span> restart.</p>
+</li><li><p>Changes the neighbor list in Hello packets.</p>
+</li></ul>
+<div class="p"><strong>OSPFv3</strong><ul><li><p>DoS attacks:</p>
+<p>When a DoS attack occurs, the <span class="keyword">Router</span> may obtain OSPFv3 packets from a remote path. These packets will be processed by an I/O board and sent to a main control board, on which they will be dropped by OSPFv3. This wastes bandwidth and CPU resources and reduces system performance.</p>
+</li><li><p>Injection of incorrect routing information:</p>
+<p>OSPFv3 accepts all packets from valid sources. A device may be attacked by OSPFv3 packets with invalid or incorrect routing information. Such information may cause errors when the route database is running, resulting in network failures. OSPFv3-IPsec authentication can be used to prevent this problem. When IPsec is configured for OSPFv3 on both communicating neighbors, OSPFv3 will process packets only if the packets are authenticated, which prevents OSPFv3 from accepting incorrect routing data from unauthenticated neighbors.</p>
+</li></ul>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration and Maintenance Methods</h4><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>It is recommended that the password be at least eight characters long and contain at least two of the following character types: uppercase letters, lowercase letters, digits, and special characters.</p>
+</div></div>
+<ul><li><p>Configure OSPF area authentication.</p>
+<ol><li><p>Run <span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span></p>
+<p>The system view is displayed.</p>
+</li><li><p>Run <span><a href="cmdqueryname=ospf"><b><span class="cmdname">ospf</span></b></a> [ <i><span class="varname">process-id</span></i> ]</span></p>
+<p>The OSPF view is displayed.</p>
+</li><li><p>Run <span><a href="cmdqueryname=area"><b><span class="cmdname">area</span></b></a> <i><span class="varname">area-id</span></i></span></p>
+<p>The OSPF area view is displayed.</p>
+</li><li>Configure an authentication mode for the OSPF area as required.<ul><li><p>To configure simple authentication for the OSPF area, run the <a href="cmdqueryname=authentication-mode+simple"><b><span class="cmdname">authentication-mode simple</span></b></a> [ <span>[ <strong><span>plain</span></strong> ] <i><span class="varname">plain-text</span></i> | </span>[ <strong><span>cipher</span></strong> ] <i><span class="varname">cipher-text</span></i> ] command.</p>
+</li><li><p>To configure ciphertext authentication for the OSPF area, run the <a href="cmdqueryname=authentication-mode"><b><span class="cmdname">authentication-mode</span></b></a> { <strong><span>md5</span></strong> | <strong><span>hmac-md5</span></strong> | <strong><span>hmac-sha256</span></strong> } [ <i><span class="varname">key-id</span></i> { <span><strong><span>plain</span></strong> <i><span class="varname">plain-text</span></i> | </span>[ <strong><span>cipher</span></strong> ] <i><span class="varname">cipher-text</span></i> } ] command.</p>
+</li><li><p>To configure keychain authentication for the OSPF area, run the <a href="cmdqueryname=authentication-mode"><b><span class="cmdname">authentication-mode</span></b></a> <strong><span>keychain</span></strong> <i><span class="varname">keychain-name</span></i> command.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Before using keychain authentication, you need to run the <a href="cmdqueryname=keychain"><b><span class="cmdname">keychain</span></b></a> command to create a keychain, and then run the <a href="cmdqueryname=key-id"><b><span class="cmdname">key-id</span></b></a>, <a href="cmdqueryname=key-string"><b><span class="cmdname">key-string</span></b></a>, and <a href="cmdqueryname=algorithm"><b><span class="cmdname">algorithm</span></b></a> commands to configure a key ID, a password, and an authentication algorithm, respectively, for this keychain. Otherwise, OSPF authentication will fail.</p>
+<p>To ensure high security, you are advised to use a more secure algorithm, such as HMAC-SHA256, instead of the MD5 and HMAC-MD5 algorithms.</p>
+</div></div>
+</li></ul>
+</li><li><p>Run <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span></p>
+<p>The configuration is committed.</p>
+</li></ol>
+</li><li><p>Configure OSPF interface authentication.</p>
+<ol><li><p>Run <span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span></p>
+<p>The system view is displayed.</p>
+</li><li><p>Run <span><a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i></span></p>
+<p>The OSPF interface view is displayed.</p>
+</li><li>Run any of the following commands:<ul><li><p>To configure simple authentication for the OSPF interface, run the <a href="cmdqueryname=ospf+authentication-mode+simple"><b><span class="cmdname">ospf authentication-mode simple</span></b></a> [ <span>[ <strong><span>plain</span></strong> ] <i><span class="varname">plain-text</span></i> | </span>[ <strong><span>cipher</span></strong> ] <i><span class="varname">cipher-text</span></i> ] command.</p>
+</li><li><p>To configure ciphertext authentication for the OSPF interface, run the <a href="cmdqueryname=ospf+authentication-mode"><b><span class="cmdname">ospf authentication-mode</span></b></a> { <strong><span>md5</span></strong> | <strong><span>hmac-md5</span></strong> | <strong><span>hmac-sha256</span></strong> } [ <i><span class="varname">key-id</span></i> { <span><strong><span>plain</span></strong> <i><span class="varname">plain-text</span></i> | </span>[ <strong><span>cipher</span></strong> ] <i><span class="varname">cipher-text</span></i> } ] command.</p>
+</li><li><p>To configure keychain authentication for the OSPF interface, run the <a href="cmdqueryname=ospf+authentication-mode"><b><span class="cmdname">ospf authentication-mode</span></b></a> <strong><span>keychain</span></strong> <i><span class="varname">keychain-name</span></i> command.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Before using keychain authentication, you need to run the <a href="cmdqueryname=keychain"><b><span class="cmdname">keychain</span></b></a> command to create a keychain, and then run the <a href="cmdqueryname=key-id"><b><span class="cmdname">key-id</span></b></a>, <a href="cmdqueryname=key-string"><b><span class="cmdname">key-string</span></b></a>, and <a href="cmdqueryname=algorithm"><b><span class="cmdname">algorithm</span></b></a> commands to configure a key ID, a password, and an authentication algorithm, respectively, for this keychain. Otherwise, OSPF authentication will fail.</p>
+<p>To ensure high security, you are advised to use a more secure algorithm, such as HMAC-SHA256, instead of the MD5 and HMAC-MD5 algorithms.</p>
+</div></div>
+</li><li><p>Run <span><a href="cmdqueryname=ospf+authentication-mode+null"><b><span class="cmdname">ospf authentication-mode null</span></b></a></span></p>
+<p>The OSPF interface does not perform authentication.</p>
+</li></ul>
+</li><li><p>Run <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span></p>
+<p>The configuration is committed.</p>
+</li></ol>
+</li><li><p>Configure OSPFv3 area authentication.</p>
+<ol><li><p>Run <span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span></p>
+<p>The system view is displayed.</p>
+</li><li><p>Run <span><a href="cmdqueryname=ospfv3"><b><span class="cmdname">ospfv3</span></b></a> [ <i><span class="varname">process-id</span></i> ]</span></p>
+<p>The OSPFv3 view is displayed.</p>
+</li><li><p>Run <span><a href="cmdqueryname=area"><b><span class="cmdname">area</span></b></a> <i><span class="varname">area-id</span></i></span></p>
+<p>The OSPFv3 area view is displayed.</p>
+</li><li>Configure an authentication mode for the OSPFv3 area as required.<ul><li><p>To configure the HMAC-SHA256 or HMAC-SM3 authentication mode for the OSPFv3 area, run the <a href="cmdqueryname=authentication-mode"><b><span class="cmdname">authentication-mode</span></b></a> { <strong><span>hmac-sha256</span></strong> | <strong><span>hmac-sm3 </span></strong>} <strong><span>key-id</span></strong> <i><span class="varname">KeyId</span></i> { <strong><span>plain</span></strong> <i><span class="varname">PlainText</span></i> | [ <strong><span>cipher</span></strong> ] <i><span class="varname">CipherText</span></i> } command.</p>
+<p>If you choose <strong><span>plain</span></strong>, the password will be saved as a plaintext in the configuration file, which provokes high security risks. To improve device security, choose ciphertext authentication and change the password periodically.</p>
+</li><li><p>To configure the keychain authentication mode for the OSPFv3 area, run the <a href="cmdqueryname=authentication-mode"><b><span class="cmdname">authentication-mode</span></b></a> { <strong><span>keychain</span></strong> <i><span class="varname">Keychain-Name</span></i> } command.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Before using keychain authentication, you need to run the <a href="cmdqueryname=keychain"><b><span class="cmdname">keychain</span></b></a> command to create a keychain, and then run the <a href="cmdqueryname=key-id"><b><span class="cmdname">key-id</span></b></a>, <a href="cmdqueryname=key-string"><b><span class="cmdname">key-string</span></b></a>, and <a href="cmdqueryname=algorithm"><b><span class="cmdname">algorithm</span></b></a> commands to configure a key ID, a password, and an authentication algorithm, respectively, for this keychain. Otherwise, OSPF authentication will fail.</p>
+<p>If area authentication is used, authentication mode and password configurations on all <span class="keyword">Router</span>s in the same area must be the same.</p>
+</div></div>
+</li></ul>
+</li><li><p>Run <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span></p>
+<p>The configuration is committed.</p>
+</li></ol>
+</li><li><p>Configure OSPFv3 process authentication.</p>
+<ol><li><p>Run <span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span></p>
+<p>The system view is displayed.</p>
+</li><li><p>Run <span><a href="cmdqueryname=ospfv3"><b><span class="cmdname">ospfv3</span></b></a> [ <i><span class="varname">process-id</span></i> ]</span></p>
+<p>The OSPFv3 view is displayed.</p>
+</li><li>Configure an authentication mode for the OSPFv3 process as required.<ul><li>To configure the HMAC-SHA256 or HMAC-SM3 authentication mode for the OSPFv3 process, run the <b><span class="cmdname">authentication-mode</span></b> { <strong><span>hmac-sha256</span></strong> | <strong><span>hmac-sm3 </span></strong>} <strong><span>key-id</span></strong> <i><span class="varname">KeyId</span></i> { <strong><span>plain</span></strong> <i><span class="varname">PlainText</span></i> | [ <strong><span>cipher</span></strong> ] <i><span class="varname">CipherText</span></i> } command.<p>If you choose <strong><span>plain</span></strong>, the password will be saved as a plaintext in the configuration file, which provokes high security risks. To improve device security, choose ciphertext authentication and change the password periodically.</p>
+</li><li>To configure the keychain authentication mode for the OSPFv3 process, run the <a href="cmdqueryname=authentication-mode"><b><span class="cmdname">authentication-mode</span></b></a> { <strong><span>keychain</span></strong> <i><span class="varname">Keychain-Name</span></i> } command.</li></ul>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Before using keychain authentication, you need to run the <a href="cmdqueryname=keychain"><b><span class="cmdname">keychain</span></b></a> command to create a keychain, and then run the <a href="cmdqueryname=key-id"><b><span class="cmdname">key-id</span></b></a>, <a href="cmdqueryname=key-string"><b><span class="cmdname">key-string</span></b></a>, and <a href="cmdqueryname=algorithm"><b><span class="cmdname">algorithm</span></b></a> commands to configure a key ID, a password, and an authentication algorithm, respectively, for this keychain. Otherwise, OSPFv3 authentication will fail.</p>
+</div></div>
+</li><li>Run <b><span class="cmdname">commit</span></b><p>The configuration is committed.</p>
+</li></ol>
+</li><li><p>Configure OSPFv3 interface authentication.</p>
+<ol><li><p>Run <span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span></p>
+<p>The system view is displayed.</p>
+</li><li><p>Run <span><a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i></span></p>
+<p>The interface view is displayed.</p>
+</li><li>Configure an authentication mode for the OSPFv3 interface as required.<ul><li>To configure the HMAC-SHA256 or HMAC-SM3 authentication mode for the OSPFv3 interface, run the <b><span class="cmdname">authentication-mode</span></b> { <strong><span>hmac-sha256</span></strong> | <strong><span>hmac-sm3 </span></strong>} <strong><span>key-id</span></strong> <i><span class="varname">KeyId</span></i> { <strong><span>plain</span></strong> <i><span class="varname">PlainText</span></i> | [ <strong><span>cipher</span></strong> ] <i><span class="varname">CipherText</span></i> } command.<p>If you choose <strong><span>plain</span></strong>, the password will be saved as a plaintext in the configuration file, which provokes high security risks. To improve device security, choose ciphertext authentication and change the password periodically.</p>
+</li><li>To configure the keychain authentication mode for the OSPFv3 interface, run the <a href="cmdqueryname=ospfv3+authentication-mode"><b><span class="cmdname">ospfv3 authentication-mode</span></b></a> { <strong><span>keychain</span></strong> <i><span class="varname">Keychain-Name</span></i> } command.</li></ul>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Before using keychain authentication, you need to run the <a href="cmdqueryname=keychain"><b><span class="cmdname">keychain</span></b></a> command to create a keychain, and then run the <a href="cmdqueryname=key-id"><b><span class="cmdname">key-id</span></b></a>, <a href="cmdqueryname=key-string"><b><span class="cmdname">key-string</span></b></a>, and <a href="cmdqueryname=algorithm"><b><span class="cmdname">algorithm</span></b></a> commands to configure a key ID, a password, and an authentication algorithm, respectively, for this keychain. Otherwise, OSPFv3 authentication will fail.</p>
+<p>Interface authentication takes precedence over area authentication. For interfaces on the same subnet, the configured authentication mode and password must be identical. This requirement does not apply to the interfaces on different subnets.</p>
+</div></div>
+</li><li><p>Run <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span></p>
+<p>The configuration is committed.</p>
+</li></ol>
+</li><li><p>OSPFv3 IPsec authentication</p>
+<ol><li>Configure an IPsec proposal.<ol type="a"><li><p>Run <span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span></p>
+<p>The system view is displayed.</p>
+</li><li><p>Run <span><a href="cmdqueryname=ipsec+proposal"><b><span class="cmdname">ipsec proposal</span></b></a> <i><span class="varname">proposal-name</span></i></span></p>
+<p>An IPsec proposal is created, and the IPsec proposal view is displayed.</p>
+</li><li>(Optional) Run <a href="cmdqueryname=transform"><b><span class="cmdname">transform</span></b></a> { <strong><span>ah</span></strong> | <strong><span>esp</span></strong> | <strong><span>ah-esp</span></strong> }<p>A security protocol is configured.</p>
+</li><li>Run <a href="cmdqueryname=esp+authentication-algorithm"><b><span class="cmdname">esp authentication-algorithm</span></b></a> { <strong><span>md5</span></strong> | <strong><span>sha1</span></strong> | <strong><span>sha2-256</span></strong> | <strong><span>sha2-384</span></strong> | <strong><span>sha2-512</span></strong> }<p>An authentication algorithm is configured for ESP.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>For higher security, the MD5 authentication algorithm is not recommended for the ESP protocol.</p>
+<p>Before configuring a security algorithm for a security protocol, run the <a href="cmdqueryname=transform"><b><span class="cmdname">transform</span></b></a> command to specify the security protocol.</p>
+</div></div>
+</li><li><p>Run <a href="cmdqueryname=esp+encryption-algorithm"><b><span class="cmdname">esp encryption-algorithm</span></b></a> { <strong><span>3des</span></strong> | <strong><span>des</span></strong> <span>| <strong><span>aes</span></strong> [ <strong><span>128</span></strong> | <strong><span>192</span></strong> | <strong><span>256</span></strong> ] </span>}</p>
+<div class="p">An encryption algorithm used for ESP is configured.<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The encryption algorithms DES/3DES have a low security, which may bring security risks. If protocols allowed, using more secure encryption algorithms, such as AES, is recommended.</p>
+</div></div>
+</div>
+</li><li>Run <a href="cmdqueryname=encapsulation-mode"><b><span class="cmdname">encapsulation-mode</span></b></a> <strong><span>transport</span></strong><p>The packet encapsulation mode is configured.</p>
+</li><li><p>Run <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span></p>
+<p>The configuration is committed.</p>
+</li></ol>
+</li><li>Configure an IPsec SA.<ol type="a"><li><p>Run <span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span></p>
+<p>The system view is displayed.</p>
+</li><li><p>Run <a href="cmdqueryname=ipsec+sa"><b><span class="cmdname">ipsec sa</span></b></a> <i><span class="varname">sa-name</span></i></p>
+<p>An SA is created.</p>
+</li><li><p>Run <a href="cmdqueryname=proposal"><b><span class="cmdname">proposal</span></b></a> <i><span class="varname">proposal-name</span></i></p>
+<p>A proposal is applied to the SA.</p>
+</li><li>Run <a href="cmdqueryname=sa+spi"><b><span class="cmdname">sa spi</span></b></a> { <strong><span>inbound</span></strong> | <strong><span>outbound</span></strong> } { <strong><span>ah</span></strong> | <strong><span>esp</span></strong> } <i><span class="varname">spi-number</span></i><p>Security parameter indexes (SPIs) are configured.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The SA parameters set at both ends of the IPsec tunnel must be the same. The inbound SPI on the local end must be consistent with the outbound SPI on the peer end, and the outbound SPI on the local end must be consistent with the inbound SPI on the peer end.</p>
+</div></div>
+</li><li>Run either of the following commands:<ol class="substepthirdol"><li>To configure an authentication key in the format of hexadecimal numerals, run the <a href="cmdqueryname=sa+authentication-hex"><b><span class="cmdname">sa authentication-hex</span></b></a> { <strong><span>inbound</span></strong> | <strong><span>outbound</span></strong> } { <strong><span>ah</span></strong> | <strong><span>esp</span></strong> } [ <strong><span>cipher</span></strong> ] <i><span class="varname">hex-cipher-key</span></i> command.</li><li>To configure an authentication key in the format of a character string, run the <a href="cmdqueryname=sa+string-key"><b><span class="cmdname">sa string-key</span></b></a> { <strong><span>inbound</span></strong> | <strong><span>outbound</span></strong> } { <strong><span>ah</span></strong> | <strong><span>esp</span></strong> } [ <strong><span>cipher</span></strong> ] <i><span class="varname">string-cipher-key</span></i> command.</li></ol>
+</li><li><p>Run <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span></p>
+<p>The configuration is committed.</p>
+</li></ol>
+</li><li>Enable OSPFv3 IPsec.<ul><li>Enable IPsec in the OSPFv3 process.<ol type="a"><li><p>Run <span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span></p>
+<p>The system view is displayed.</p>
+</li><li><p>Run <span><a href="cmdqueryname=ospfv3"><b><span class="cmdname">ospfv3</span></b></a> [ <i><span class="varname">process-id</span></i> ]</span></p>
+<p>The OSPFv3 view is displayed.</p>
+</li><li>Run <a href="cmdqueryname=ipsec+sa"><b><span class="cmdname">ipsec sa</span></b></a> <i><span class="varname">sa-name</span></i><p>The SA is enabled in the OSPFv3 process.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>An OSPFv3 process can be associated with multiple OSPFv3 areas. An SA applied in the OSPFv3 process can be used in the associated areas.</p>
+</div></div>
+</li><li><p>Run <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span></p>
+<p>The configuration is committed.</p>
+</li></ol>
+</li><li>Enable IPsec in an OSPFv3 area.<ol type="a"><li><p>Run <span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span></p>
+<p>The system view is displayed.</p>
+</li><li><p>Run <span><a href="cmdqueryname=ospfv3"><b><span class="cmdname">ospfv3</span></b></a> [ <i><span class="varname">process-id</span></i> ]</span></p>
+<p>The OSPFv3 view is displayed.</p>
+</li><li><p>Run <span><a href="cmdqueryname=area"><b><span class="cmdname">area</span></b></a> <i><span class="varname">area-id</span></i></span></p>
+<p>The OSPFv3 area view is displayed.</p>
+</li><li>Run <a href="cmdqueryname=ipsec+sa"><b><span class="cmdname">ipsec sa</span></b></a> <i><span class="varname">sa-name</span></i><p>The SA is enabled in the OSPFv3 area.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The SA configured on an OSPFv3 area takes precedence over that configured in an OSPFv3 process.</p>
+</div></div>
+</li><li>Run <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span><p>The configuration is committed.</p>
+</li></ol>
+</li></ul>
+</li></ol>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Verifying the Security Hardening Result</h4><ul><li>Run the <a href="cmdqueryname=display+this"><b><span class="cmdname">display this</span></b></a> command to check packet authentication information.</li><li>Run the <a href="cmdqueryname=display+ospfv3"><b><span class="cmdname">display ospfv3</span></b></a> [ <i><span class="varname">process-id</span></i> ] command to check the SA applied to the process.</li><li>Run the <a href="cmdqueryname=display+ospfv3"><b><span class="cmdname">display ospfv3</span></b></a> [ <i><span class="varname">process-id</span></i> ] <strong><span>area</span></strong> [ <i><span class="varname">area-id</span></i> ] command to check the SA applied to the area.</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_hardening_control_level2.html">Control Plane
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0036.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0039.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

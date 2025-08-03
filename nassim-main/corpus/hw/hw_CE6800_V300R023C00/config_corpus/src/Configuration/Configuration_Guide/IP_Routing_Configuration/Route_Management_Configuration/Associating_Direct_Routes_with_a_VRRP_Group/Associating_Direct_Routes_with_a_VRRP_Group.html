@@ -1,0 +1,92 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Associating Direct Routes with a VRRP Group">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_ip_routing_management_cfg_0011.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_ip_routing_management_cfg_0012.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_ip_routing_management_cfg_0014.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Route Management">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Route Management">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="Route Management">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001176662307">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Associating Direct Routes with a VRRP Group</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001176662307"></a><a name="EN-US_TASK_0000001176662307"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Associating Direct Routes with a VRRP Group</h1>
+<div class="taskbody"><div class="prereq" style="margin-left:0"><a name="EN-US_TASK_0000001176662307__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Prerequisites</h4>
+<div class="p"><p>Before associating direct routes with a VRRP group, complete the following task:</p>
+<ul><li><p>Create a VRRP group.</p>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176662307__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>If the master device in a VRRP group fails, the VRRP group performs a master/backup switchover. After the master device recovers, the direct route of the master device immediately becomes available. The VRRP group performs a VRRP switchback, which takes some time. To ensure that user-to-network traffic and network-to-user traffic travel along the same path in this period, associate direct routes with the VRRP group on both the master and backup devices. The association allows the VRRP-enabled devices to modify the cost of each direct route destined for the virtual IP network segment based on the VRRP status.</p>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001176662307__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li><span>Enter the interface view.</span><p><pre class="screen"><a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> <span>{ <i><span class="varname">interface-name</span></i> | <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> }</span></pre>
+</p></li><li><span>Switch the interface working mode from Layer 2 to Layer 3.</span><p><pre class="screen"><a href="cmdqueryname=undo+portswitch"><b><span class="cmdname">undo portswitch</span></b></a></pre>
+<p>Determine whether to perform this step based on the current interface working mode.</p>
+</p></li><li><span>Perform either of the following operations to associate a direct route with a VRRP group.</span><p><ul><li>Associate an IPv4 direct route with a VRRP4 group.<pre class="screen"><a href="cmdqueryname=direct-route+track+vrrp"><b><span class="cmdname">direct-route track vrrp</span></b></a> <strong><span>vrid</span></strong> <i><span class="varname">virtual-router-id</span></i> <strong><span>degrade-cost</span></strong> <i><span class="varname">cost-value</span></i></pre>
+</li><li>Associate an IPv6 direct route with a VRRP6 group.<pre class="screen"><a href="cmdqueryname=ipv6+direct-route+track+vrrp6"><b><span class="cmdname">ipv6 direct-route track vrrp6</span></b></a> <strong><span>vrid</span></strong> <i><span class="varname">virtual-router-id</span></i> <strong><span>degrade-cost</span></strong> <i><span class="varname">cost-value</span></i></pre>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The CE6885-LL in low latency mode does not support this command.</p>
+</div></div>
+</li></ul>
+</p><p><p>The cost of the direct route destined for the virtual IP network segment of the VRRP group is dynamically adjusted based on the VRRP status.</p>
+<ul><li><p>If the VRRP status is Master, the cost of the direct route is set to the default value of 0 (the highest priority).</p>
+</li><li><p>If the VRRP status is Backup or Initialize, <i><span class="varname">cost-value</span></i> (greater than 0) specified in the command is used as the cost of the direct route.</p>
+</li></ul>
+</p></li><li><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001176662307__en-us_task_0234857734_screen163801330213"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001176662307__en-us_task_0234857734_en-us_concept_0141113565_cmdname1667501373175340">commit</span></b></a></pre>
+</p></li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_ip_routing_management_cfg_0011.html">Associating Direct Routes with a VRRP Group
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_ip_routing_management_cfg_0012.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_ip_routing_management_cfg_0014.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

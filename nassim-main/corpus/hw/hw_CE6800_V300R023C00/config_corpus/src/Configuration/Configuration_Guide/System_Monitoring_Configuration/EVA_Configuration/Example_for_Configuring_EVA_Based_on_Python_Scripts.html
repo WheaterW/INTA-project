@@ -1,0 +1,151 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="topic">
+<meta name="DC.Title" content="Example for Configuring EVA Based on Python Scripts">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../toctopics/en-us_topic_0000001512671434.html">
+<meta name="DC.Relation" scheme="URI" content="../toctopics/en-us_task_0000001564110649.html">
+<meta name="DC.Relation" scheme="URI" content="../toctopics/en-us_task_0000001513150578.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="EVA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="EVA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featurename" content="EVA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TOPIC_0000001533788278">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring EVA Based on Python Scripts</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TOPIC_0000001533788278"></a><a name="EN-US_TOPIC_0000001533788278"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring EVA Based on Python Scripts</h1>
+<div><div class="section"><h4 class="sectiontitle">Networking Requirements</h4><p>A customized Python script is stored on an SFTP server. O&amp;M personnel want to use EVA to monitor the CPU usage and memory usage. The Python script specifies that when the CPU usage and memory usage exceed 90%, the system automatically generates an alarm log reporting high CPU and memory usages, prompting O&amp;M personnel to maintain devices in a timely manner.</p>
+<div class="fignone"><span class="figcap"><b>Figure 1 </b>Networking diagram of monitoring CPU usage changes through EVA</span><br><span><img class="vsd" src="../images/en-us_image_0000001534107514.png"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration Roadmap</h4><ol><li>Subscribe to telemetry data based on the gRPC service.</li><li><p>Compile a Python script to customize events and troubleshooting strategies.</p>
+</li><li><p>Upload the Python script to the device.</p>
+</li><li><p>Install the Python script.</p>
+</li><li><p>Register the Python script.</p>
+</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Procedure</h4><ol><li><span>Subscribe to telemetry data based on the gRPC service.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> </strong><strong>grpc</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-grpc]<strong> </strong><strong>grpc server</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-grpc-server] <strong>source-ip 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceA-grpc-server] <a href="cmdqueryname=server-port"><b><span class="cmdname">server-port</span></b></a> <strong>57400</strong>
+[<span class="keyword">*</span>DeviceA-grpc-server] <strong>server enable</strong>
+[<span class="keyword">*</span>DeviceA-grpc-server] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA-grpc] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>Compile a Python script to customize events and troubleshooting strategies.</span><p><p># Compile the script <strong>cpuMemHigh.py</strong> to subscribe to the system CPU usage and memory usage, and calculate the average values of last 10 CPU usages and memory usages. If both the average values exceed 90%, an alarm log is generated.</p>
+<pre class="screen">import eva
+def condition(): 
+    e1 = eva.Event()
+    kpi1 = e1.addkpi("huawei-cpu-memory:cpu-memory/board-cpu-infos/board-cpu-info/system-cpu-usage")
+    e1.ret = eva.avg(kpi1, 10) &gt; 90
+ 
+    e2 = eva.Event()
+    kpi2 = e2.addkpi("huawei-cpu-memory:cpu-memory/board-memory-infos/board-memory-info/os-memory-usage")
+    e2.ret = eva.avg(kpi2, 10) &gt; 90
+    
+    s1 = eva.Strategy()
+    s1.formula = e1 &amp; e2
+    s1.validTime= 10
+    action1 = eva.log("board ${e1.slot-id}--${e1.cpu-id} cpu and memory simultaneously overload")
+    s1.addaction(action1)</pre>
+</p></li><li><span>Upload the Python script to the device.</span><p><p># Configure DeviceA functioning as an SFTP client to download the Python script file <strong>cpuMemHigh.py</strong> from the SFTP server. For details, see "Managing Files Using SFTP" in <span>Configuration Guide</span> &gt; Basic Configuration &gt; File System Management Configuration.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>sftp </strong><strong>client-transfile get host-ip 10.2.1.1 username </strong><strong>client001</strong><strong> password </strong><strong>Helloworld@6789</strong><strong> sourcefile cpuMemHigh.py</strong>
+Trying 10.2.1.1 ... 
+Press CTRL+K to abort 
+Connected to 10.2.1.1 ... 
+Remote file: /cpuMemHigh.py ---&gt;  Local file: /cpuMemHigh.py 
+Downloading the file. Please wait.. 
+Downloading file successfully ended.   
+File download is completed in 1 seconds. 
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</p></li><li><span>Install the Python script.</span><p><pre class="screen">&lt;DeviceA&gt; <strong>ops install file cpuMemHigh.py</strong></pre>
+</p></li><li><span>Register the Python script.</span><p><pre class="screen">&lt;DeviceA&gt; <strong>ops run python evamain.py install cpuMemHigh.py</strong></pre>
+</p></li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Verifying the Configuration</h4><p># Display strategy registration information of the device.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display eva register-strategy cpuMemHigh.py</strong>
+Total: 1 
+-----------------------------------------------------------------------------------------
+FileName   Name   ValidTime SurvivalTime SecDetect RegisterTime         Action Formula   
+-----------------------------------------------------------------------------------------
+cpuMemHigh.py s1            10           60 False     2020-5-14 11:12:21  log    e1&amp;&amp;e2    
+-----------------------------------------------------------------------------------------   </pre>
+<p># Display registration information about the event configured in the script.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display eva register-events cpuMemHigh.py </strong>
+Total: 2<strong>   </strong>                
+----------------------------------------------------------------------------
+FileName   EventName   Compare   Threshold  Frequency Xpath                 
+----------------------------------------------------------------------------
+cpuMemHigh.py    e1        &gt;             90          1     huawei-cpu-memory:cpu-memory/board-cpu-infos/board-cpu-info/system-cpu-usage  
+cpuMemHigh.py    e2        &gt;             90          1     huawei-cpu-memory:cpu-memory/board-memory-infos/board-memory-info/os-memory-usage 
+----------------------------------------------------------------------------</pre>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration Scripts</h4><ul><li>DeviceA<pre class="screen">#
+sysname DeviceA
+#
+grpc
+ #
+ grpc server                                                                    
+  source-ip 0.0.0.0 
+  server-port 57400
+  server enable
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.0
+#</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../toctopics/en-us_topic_0000001512671434.html">EVA Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../toctopics/en-us_task_0000001564110649.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../toctopics/en-us_task_0000001513150578.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

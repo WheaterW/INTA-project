@@ -1,0 +1,336 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring IPv4 Static Route FRR">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_ipv4-static-route_cfg_0015.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_ipv4-static-route_cfg_0017.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IPv4 Static Route">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IPv4 Static Route">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="IPv4 Static Route">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001176742411">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring IPv4 Static Route FRR</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001176742411"></a><a name="EN-US_TASK_0000001176742411"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring IPv4 Static Route FRR</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001176742411__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0000001176742411__fig1431681518820">Figure 1</a>, two IPv4 static routes are configured on DeviceD. The next hop in one static route is set to DeviceA and that in the other static route is set to DeviceB. Link B backs up link A. If link A fails, traffic is rapidly switched to link B.</p>
+<div class="fignone" id="EN-US_TASK_0000001176742411__fig1431681518820"><a name="EN-US_TASK_0000001176742411__fig1431681518820"></a><a name="fig1431681518820"></a><span class="figcap"><b>Figure 1 </b>Network diagram of IPv4 static route FRR</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1, interface 2, and interface 3 represent <span>100GE</span> <span>1/0/1</span>, <span>100GE</span> <span>1/0/2</span>, and <span>100GE</span> <span>1/0/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001176662557.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176742411__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>Note the following during the configuration:</p>
+<ul><li><p>Ensure that there are at least two IPv4 static routes to the same destination address when configuring IPv4 static route FRR.</p>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176742411__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Configure IPv4 addresses for interfaces on each device.</li><li><p>Configure IPv4 static routes on each device. Configure two IPv4 static routes with the next hops set to DeviceA and DeviceB, respectively, on DeviceD.</p>
+</li><li><p>Set a smaller preference value for link A on DeviceD so that DeviceD preferentially selects link A.</p>
+</li><li><p>Enable IPv4 static route FRR on DeviceD.</p>
+</li><li><p>Configure static BFD for IPv4 static route to speed up fault detection.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>To speed up fault detection, configure dynamic or static BFD for IPv4 static route. In this example, static BFD for IPv4 static route is used. This is because it is more common than dynamic BFD for IPv4 static route on the live network.</p>
+</div></div>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001176742411__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure IPv4 addresses for interfaces on each device.</span><p><p># Configure DeviceA.</p>
+<pre class="screen"><span class="keyword">&lt;HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>undo </strong><strong>portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ip address 192.168.10.2 255.255.255.0</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>undo </strong><strong>portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>ip address 192.168.11.2 255.255.255.0</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p>The configurations of DeviceB, DeviceC, and DeviceD are similar to the configuration of DeviceA. For detailed configurations, see <a href="#EN-US_TASK_0000001176742411__postreq24192593172748">Configuration Scripts</a>.</p>
+</p></li><li><span>Configure an IPv4 static route on each device, and configure two IPv4 static routes with next hops set to DeviceA and DeviceB on DeviceD.</span><p><p># Configure IPv4 static routes on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>ip route-static 172.16.1.0 24 </strong><strong><span>100ge</span></strong><strong> </strong><strong><span>1/0/1</span></strong><strong> 192.168.10.1</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ip route-static 172.17.1.0 24 <span>100ge</span> <span>1/0/2</span> 192.168.11.1</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure IPv4 static routes on DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ip route-static 172.16.1.0 24 </strong><strong><span>100ge</span></strong><strong> <span>1/0/1</span></strong><strong> 192.168.20.1</strong>
+[<span class="keyword">*</span>DeviceB] <strong>ip route-static 172.17.1.0 24 <span>100ge</span> <span>1/0/2</span> 192.168.21.1</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure IPv4 static routes on DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>ip route-static 172.16.1.0 24 <span>100ge</span> <span>1/0/2</span> 192.168.11.2</strong>
+[<span class="keyword">*</span>DeviceC] <strong>ip route-static 172.16.1.0 24 <span>100ge</span> <span>1/0/3</span> 192.168.21.2</strong>
+[<span class="keyword">*</span>DeviceC] <strong>ip route-static 192.168.10.0 24 <span>100ge</span> <span>1/0/2</span> 192.168.11.2</strong>
+[<span class="keyword">*</span>DeviceC] <strong>ip route-static 192.168.20.0 24 <span>100ge</span> <span>1/0/3</span> 192.168.21.2</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure IPv4 static routes on DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>ip route-static 172.17.1.0 24 <span>100ge</span> <span>1/0/2</span> 192.168.10.2 </strong>
+[<span class="keyword">*</span>DeviceD] <strong>ip route-static 172.17.1.0 24 <span>100ge</span> <span>1/0/3</span> 192.168.20.2</strong> 
+[<span class="keyword">*</span>DeviceD] <strong>ip route-static 192.168.11.0 24 <span>100ge</span> <span>1/0/2</span> 192.168.10.2</strong>
+[<span class="keyword">*</span>DeviceD] <strong>ip route-static 192.168.21.0 24 <span>100ge</span> <span>1/0/3</span> 192.168.20.2</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+<p># Check the IP routing table of DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>display ip routing-table</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table : _public_
+         Destinations : 16       Routes : 16
+
+Destination/Mask    Proto   Pre  Cost        Flags NextHop         Interface
+
+      127.0.0.0/8   Direct  0    0             D   127.0.0.1       InLoopBack0
+      127.0.0.1/32  Direct  0    0             D   127.0.0.1       InLoopBack0
+127.255.255.255/32  Direct  0    0             D   127.0.0.1       InLoopBack0
+     172.16.1.0/24  Direct  0    0             D   172.16.1.1      <span>100GE</span><span>1/0/1</span>
+     172.16.1.1/32  Direct  0    0             D   127.0.0.1       <span>100GE</span><span>1/0/1</span>
+   172.16.1.255/32  Direct  0    0             D   127.0.0.1       <span>100GE</span><span>1/0/1</span>
+   <strong>172.17.1.0/24</strong>  <strong>Static 60</strong>   0             D  <strong>192.168.10.2</strong>   <span>100GE</span><span>1/0/2</span>
+                   <strong> Static 60</strong>   0             D  <strong>192.168.20.2</strong>   <strong><span>100GE</span></strong><strong><span>1/0/3</span></strong>
+   192.168.10.0/24  Direct  0    0             D   192.168.10.1    <span>100GE</span><span>1/0/2</span>
+   192.168.10.1/32  Direct  0    0             D   127.0.0.1       <span>100GE</span><span>1/0/2</span>
+ 192.168.10.255/32  Direct  0    0             D   127.0.0.1       <span>100GE</span><span>1/0/2</span>
+   192.168.11.0/24  Static  60   0             D   192.168.10.2    <span>100GE</span><span>1/0/2</span>
+   192.168.20.0/24  Direct  0    0             D   192.168.20.1    <span>100GE</span><span>1/0/3</span>
+   192.168.20.1/32  Direct  0    0             D   127.0.0.1       <span>100GE</span><span>1/0/3</span>
+ 192.168.20.255/32  Direct  0    0             D   127.0.0.1       <span>100GE</span><span>1/0/3</span>
+   192.168.21.0/24  Static  60   0             D   192.168.20.2    <span>100GE</span><span>1/0/3</span>
+255.255.255.255/32  Direct  0    0             D   127.0.0.1       InLoopBack0 </pre>
+<p>The command output shows that two routes from DeviceD to 172.17.1.0/24 are working in load balancing mode.</p>
+</p></li><li><span>On DeviceD, set a smaller preference value for link A so that DeviceD preferentially selects link A.</span><p><p># Change the preference value of one of the routes to 172.17.1.0.24 to 40 on DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>ip route-static 172.17.1.0 24 <span>100ge</span> <span>1/0/2</span> 192.168.10.2 preference 40</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+<p># Check the routing table of DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>display ip routing-table</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table : _public_
+         Destinations : 16       Routes : 16
+
+Destination/Mask    Proto   Pre  Cost        Flags NextHop         Interface
+
+      127.0.0.0/8   Direct  0    0             D   127.0.0.1       InLoopBack0
+      127.0.0.1/32  Direct  0    0             D   127.0.0.1       InLoopBack0
+127.255.255.255/32  Direct  0    0             D   127.0.0.1       InLoopBack0
+     172.16.1.0/24  Direct  0    0             D   172.16.1.1      <span>100GE</span><span>1/0/1</span>
+     172.16.1.1/32  Direct  0    0             D   127.0.0.1       <span>100GE</span><span>1/0/1</span>
+   172.16.1.255/32  Direct  0    0             D   127.0.0.1       <span>100GE</span><span>1/0/1</span>
+   <strong>172.17.1.0/24</strong>  <strong>Static</strong> <strong>40</strong>   0             D  <strong>192.168.10.2</strong>    <span>100GE</span><span>1/0/2</span>
+   192.168.10.0/24  Direct  0    0             D   192.168.10.1    <span>100GE</span><span>1/0/2</span>
+   192.168.10.1/32  Direct  0    0             D   127.0.0.1       <span>100GE</span><span>1/0/2</span>
+ 192.168.10.255/32  Direct  0    0             D   127.0.0.1       <span>100GE</span><span>1/0/2</span>
+   192.168.11.0/24  Static  60   0             D   192.168.10.2    <span>100GE</span><span>1/0/2</span>
+   192.168.20.0/24  Direct  0    0             D   192.168.20.1    <span>100GE</span><span>1/0/3</span>
+   192.168.20.1/32  Direct  0    0             D   127.0.0.1       <span>100GE</span><span>1/0/3</span>
+ 192.168.20.255/32  Direct  0    0             D   127.0.0.1       <span>100GE</span><span>1/0/3</span>
+   192.168.21.0/24  Static  60   0             D   192.168.20.2    <span>100GE</span><span>1/0/3</span>
+255.255.255.255/32  Direct  0    0             D   127.0.0.1       InLoopBack0 </pre>
+<p>The command output shows that there is only one route from DeviceD to 172.17.1.0/24 and that the preference value of the route is 40.</p>
+</p></li><li><span>On DeviceD, enable IPv4 static route FRR, and check information about the backup outbound interface and backup next hop.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD]<strong> ip route-static frr</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+<p># Check information about the backup outbound interface and backup next hop of the route to 172.17.1.0 on DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>display ip routing-table 172.17.1.0 verbose</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table : _public_
+Summary Count : 1
+
+Destination: 172.17.1.0/24
+     Protocol: Static          Process ID: 0
+   Preference: 40                    Cost: 0
+     <strong>NextHop: 192.168.10.2</strong>    Neighbour: 0.0.0.0
+        State: Active Adv             Age: 00h00m03s
+          Tag: 0                 Priority: medium
+        Label: NULL               QoSInfo: 0x0
+   IndirectID: 0x31000032
+ RelayNextHop: 0.0.0.0         <strong>Interface: <span>100GE</span><span>1/0/2</span></strong>
+     TunnelID: 0x0                  Flags: D
+   <strong>BkNextHop: 192.168.20.2</strong>  <strong>BkInterface: <span>100GE</span><span>1/0/3</span></strong>
+      BkLabel: NULL           SecTunnelID: 0x0
+ BkPETunnelID: 0x0        BkPESecTunnelID: 0x0
+ BkIndirectID: 0x32000033</pre>
+<p>On DeviceD, the primary link to 172.17.1.0 is link A, and the backup link is link B.</p>
+</p></li><li><span>Configure static BFD for IPv4 static route to speed up fault detection.</span><p><p># On DeviceD, configure a BFD session named <strong>aa</strong> between DeviceD and DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD]<strong> bfd</strong>
+[<span class="keyword">*</span>DeviceD-bfd]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceD]<strong> bfd aa bind peer-ip 192.168.11.1 source-ip 192.168.10.1</strong>
+[<span class="keyword">*</span>DeviceD-bfd-session-aa]<strong> discriminator local 10</strong>
+[<span class="keyword">*</span>DeviceD-bfd-session-aa] <strong>discriminator remote 20</strong>
+[<span class="keyword">*</span>DeviceD-bfd-session-aa] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+</p><p><p># On DeviceC, configure a BFD session named <strong>ab</strong> between DeviceC and DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC]<strong> bfd</strong>
+[<span class="keyword">*</span>DeviceC-bfd] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC]<strong> bfd ab bind peer-ip 192.168.10.1 source-ip 192.168.11.1</strong>
+[<span class="keyword">*</span>DeviceC-bfd-session-ab]<strong> discriminator local 20</strong>
+[<span class="keyword">*</span>DeviceC-bfd-session-ab] <strong>discriminator remote 10</strong>
+[<span class="keyword">*</span>DeviceC-bfd-session-ab]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p><p><p># On DeviceD, bind the static route to the BFD session named <strong>aa</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD]<strong> ip route-static 172.17.1.0 24 <span>100ge</span> <span>1/0/2</span> 192.168.10.2 preference 40 track bfd-session aa</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+</p></li><li><span>Simulate a fault on link A to rapidly switch traffic to link B.</span><p><p># Run the <strong>shutdown</strong> command on <span>100GE</span> <span>1/0/2</span> of DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD]<strong> interface </strong><strong><span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD-<span>100GE</span><span>1/0/2</span>]<strong> shutdown</strong>
+[<span class="keyword">*</span>DeviceD-<span>100GE</span><span>1/0/2</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001176742411__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># On DeviceD, check the route to 172.17.1.0/24.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD]<strong> display ip routing-table 172.17.1.0 verbose</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table : _public_
+Summary Count : 1
+
+Destination: 172.17.1.0/24
+     Protocol: Static          Process ID: 0
+   Preference: 60                    Cost: 0
+     <strong>NextHop: 192.168.20.2</strong>    Neighbour: 0.0.0.0
+        State: Active Adv             Age: 00h00m07s
+          Tag: 0                 Priority: medium
+        Label: NULL               QoSInfo: 0x0
+   IndirectID: 0x32000033
+ RelayNextHop: 0.0.0.0         <strong>Interface: <span>100GE</span><span>1/0/3</span></strong>
+     TunnelID: 0x0                  Flags: D</pre>
+<p>After link A becomes faulty, configure DeviceD to ping 172.17.1.1. The command output shows that the packet loss time is within the BFD detection duration.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001176742411__postreq24192593172748"></a><a name="postreq24192593172748"></a><a name="EN-US_TASK_0000001176742411__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceD</p>
+<pre class="screen">#
+sysname DeviceD
+#
+bfd
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 172.16.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.10.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 192.168.20.1 255.255.255.0
+#
+bfd aa bind peer-ip 192.168.11.1 source-ip 192.168.10.1
+ discriminator local 10
+ discriminator remote 20
+#
+ip route-static frr
+ip route-static 172.17.1.0 24 <span>100GE</span><span>1/0/2</span> 192.168.10.2 preference 40 track bfd-session aa
+ip route-static 172.17.1.0 24 <span>100GE</span><span>1/0/3</span> 192.168.20.2
+ip route-static 192.168.11.0 24 <span>100GE</span><span>1/0/2</span> 192.168.10.2
+ip route-static 192.168.21.0 24 <span>100GE</span><span>1/0/3</span> 192.168.20.2 
+#
+return</pre>
+</li><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.10.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.11.2 255.255.255.0
+#
+ip route-static 172.16.1.0 24 <span>100GE</span><span>1/0/1</span> 192.168.10.1
+ip route-static 172.17.1.0 24 <span>100GE</span><span>1/0/2</span> 192.168.11.1
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.20.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.21.2 255.255.255.0
+#
+ip route-static 172.16.1.0 24 <span>100GE</span><span>1/0/1</span> 192.168.20.1
+ip route-static 172.17.1.0 24 <span>100GE</span><span>1/0/2</span> 192.168.21.1
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+bfd
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 172.17.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.11.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 192.168.21.1 255.255.255.0
+#
+bfd ab bind peer-ip 192.168.10.1 source-ip 192.168.11.1
+ discriminator local 20
+ discriminator remote 10
+#
+ip route-static 172.16.1.0 24 <span>100GE</span><span>1/0/2</span> 192.168.11.2
+ip route-static 172.16.1.0 24 <span>100GE</span><span>1/0/3</span> 192.168.21.2
+ip route-static 192.168.10.0 255.255.255.0 <span>100GE</span><span>1/0/2</span> 192.168.11.2
+ip route-static 192.168.20.0 255.255.255.0 <span>100GE</span><span>1/0/3</span> 192.168.21.2 
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_ipv4-static-route_cfg_0015.html">Configuring IPv4 Static Route FRR
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_ipv4-static-route_cfg_0017.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

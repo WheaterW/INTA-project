@@ -1,0 +1,90 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding Dynamic BFD for IPv6 IS-IS">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv6_cfg_0057_1.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv6_cfg_0059_1.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IS-ISv6">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IS-ISv6">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="IS-ISv6">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001176662161">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding Dynamic BFD for IPv6 IS-IS</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001176662161"></a><a name="EN-US_CONCEPT_0000001176662161"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding Dynamic BFD for IPv6 IS-IS</h1>
+<div><p>IS-IS detects neighbor state changes through IIH exchanges. By default, if no response is received to three consecutive IIHs within a specified period (30 seconds by default), a neighbor is considered down. For networks that require fast convergence and zero packet loss, IS-IS cannot meet link fault detection requirements. To address this problem, you can configure dynamic BFD for IS-IS.</p>
+<div class="section"><h4 class="sectiontitle">Fundamentals of Dynamic BFD for IS-IS</h4><p>In dynamic BFD for IS-IS, BFD sessions are dynamically established by IS-IS rather than being manually configured. Dynamic BFD notifies IS-IS if it detects a fault, and IS-IS then immediately sets the involved neighbor to down, updates LSPs, and performs PRC. This process ensures fast IS-IS route convergence.</p>
+<p>Dynamic BFD for IS-IS is more flexible than static BFD for IS-IS, is easy to configure, and can be used in scenarios where BFD needs to be configured on the entire network. Dynamic BFD for IS-IS sessions are dynamically established by IS-IS, preventing manual misconfigurations.</p>
+<p>In <a href="#EN-US_CONCEPT_0000001176662161__en-us_concept_0275863947_fig_dc_feature_isis_001501">Figure 1</a>, basic IS-IS functions are enabled on each routing device, and dynamic BFD for IS-IS is configured on DeviceA and DeviceB.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001176662161__en-us_concept_0275863947_fig_dc_feature_isis_001501"><a name="EN-US_CONCEPT_0000001176662161__en-us_concept_0275863947_fig_dc_feature_isis_001501"></a><a name="en-us_concept_0275863947_fig_dc_feature_isis_001501"></a><span class="figcap"><b>Figure 1 </b>Network diagram of dynamic BFD for IPv6 IS-IS</span><br><span><img class="vsd" src="figure/en-us_image_0000001229800911.png"></span></div>
+<p>When the primary link fails, dynamic BFD rapidly detects the fault and notifies IS-IS of the fault. IS-IS then deletes the neighbor relationship between DeviceA and DeviceB, recalculates routes, and switches traffic to the backup link.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>BFD uses local and remote discriminators to distinguish multiple BFD sessions between two ends.</p>
+<p>BFD does not replace the Hello mechanism of IS-IS. Instead, it works with IS-IS to rapidly detect faults.</p>
+</div></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Establishment and Deletion of a Dynamic BFD for IS-IS Session</h4><div class="p"><strong>Prerequisites for BFD session establishment</strong><ul><li>Basic IS-IS functions have been configured on each device, and IS-IS has been enabled on each involved interface.</li><li><p>BFD has been configured globally on each device.</p>
+</li><li><p>BFD has been enabled on IS-IS interfaces or for an IS-IS process, and the neighbor has gone up (a DIS has been elected on a broadcast network).</p>
+</li></ul>
+</div>
+<div class="p"><strong>Process of establishing a BFD session</strong><ul><li><p>On a P2P network, when the prerequisites for BFD session establishment are met, IS-IS instructs the BFD module to establish a BFD session and trigger BFD parameter negotiation between neighbors.</p>
+</li><li><p>On a broadcast network, when the prerequisites for BFD session establishment are met and a DIS is elected, IS-IS instructs BFD to establish a BFD session and trigger BFD parameter negotiation between the DIS and other devices. No BFD sessions are established between non-DISs.</p>
+</li></ul>
+</div>
+<p>On broadcast networks, all devices (including non-DIS devices) of the same level residing on the same network segment establish neighbor relationships with each other. However, no dynamic BFD for IS-IS sessions are established between non-DISs. Conversely, on P2P networks, static BFD for IS-IS sessions are established between neighbors.</p>
+<p>On a network where a Level-1-2 neighbor relationship is established between the devices at two ends of a link, IS-IS establishes a Level-1 BFD session and a Level-2 BFD session if the network is a broadcast network, and establishes only one BFD session if the network is a P2P network.</p>
+<div class="p"><strong>Process of deleting a BFD session</strong><ul><li><p>On a P2P network, when an IS-IS neighbor relationship is not up, the corresponding BFD session is deleted.</p>
+</li><li><p>On a broadcast network, when an IS-IS neighbor relationship is not up or a new DIS is elected, the corresponding BFD session is deleted.</p>
+</li></ul>
+</div>
+<p>If the configurations of dynamic BFD sessions are deleted or dynamic BFD for IS-IS is disabled from an interface, all BFD sessions corresponding to the neighbor relationships that are up on the interface are deleted. Furthermore, if the interface is a DIS and the DIS is up, all BFD sessions corresponding to the neighbor relationships on the interface are deleted.</p>
+<p>If BFD is disabled from an IS-IS process, BFD sessions are deleted from the process.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>BFD detects faults only on one-hop links between IS-IS neighbors. This is because IS-IS establishes only one-hop neighbor relationships.</p>
+<p>After dynamic BFD is globally disabled in an IS-IS process, the BFD sessions on all the interfaces in this IS-IS process are deleted.</p>
+</div></div>
+<p><strong>Response to the down event of a BFD session</strong></p>
+<p>When BFD detects a link failure, it generates a down event and informs IS-IS of the failure. IS-IS then suppresses the involved neighbor relationship and recalculates routes, ensuring fast network convergence.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_isis_ipv6_cfg_0057_1.html">Configuring Dynamic BFD for IPv6 IS-IS
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_isis_ipv6_cfg_0059_1.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

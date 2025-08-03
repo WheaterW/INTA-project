@@ -1,0 +1,331 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Centralized NAT64 Inter-Board Hot Backup">
+<meta name="abstract" content="This section provides an example for configuring centralized NAT64 inter-board hot backup.">
+<meta name="description" content="This section provides an example for configuring centralized NAT64 inter-board hot backup.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0042.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0033.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="c00549182">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="OWNER" content="c00549182">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="m00390128">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172362475">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Centralized NAT64 Inter-Board Hot Backup</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172362475"></a><a name="EN-US_TASK_0172362475"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Centralized NAT64 Inter-Board Hot Backup</h1>
+<div class="taskbody"><p>This section provides an example for configuring centralized NAT64 inter-board hot backup.</p>
+<div class="context"><a name="EN-US_TASK_0172362475__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><div class="p">In a centralized NAT64 networking scenario shown in <a href="#EN-US_TASK_0172362475__fig_01">Figure 1</a>, a NAT64 CGN device is deployed close to the CR on the MAN core and equipped with two CGN boards. IPv6 users access the IPv4 network through a BRAS, CR, and NAT64 CGN device in sequence. The NAT64 CGN device translates IPv6 addresses of enterprise users to external IPv4 addresses so that the enterprise users can access the IPv4 Internet. <div class="fignone" id="EN-US_TASK_0172362475__fig_01"><a name="EN-US_TASK_0172362475__fig_01"></a><a name="fig_01"></a><span class="figcap"><b>Figure 1 </b>Networking of inter-board hot backup in a centralized NAT64 scenario</span><br><span><img class="vsd" src="images/fig_dc_ne_cgn_0014.png" width="NaN" height="NaN"></span></div>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172362475__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><div class="p">The configuration roadmap is as follows:<ol><li><p>Apply for and configure NAT64 session resources and configure a NAT64 GTL license file.</p>
+</li><li><p>Bind the CPU of each service board to the NAT64 instance.</p>
+</li><li><p>Configure basic NAT64 functions.</p>
+</li><li><p>Configure a traffic classification rule, a NAT64 traffic behavior, and a NAT64 traffic distribution policy, and apply the NAT64 traffic distribution policy.</p>
+</li><li><p>Enable the NAT64 device to advertise public routes.</p>
+</li></ol>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172362475__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Apply for and configure NAT64 session resources and configure a NAT64 GTL license file.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>display license</strong></pre>
+<pre class="screen">Item name     Item type Value  Description
+ -------------------------------------------------------------
+ LME0CONN01     Resource  64    Concurrent Users(1k)
+ LME0NATDS00    Resource  16    2M NAT Session
+  
+..................................................
+ Item name     (View)Resource License Command-line
+ -------------------------------------------------------------
+ LME0NATDS00    (Sys)nat session-table size table-size slot slot-id 
+ Master board license state: Normal.
+</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname NAT64_CGN</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64]<strong> vsm on-board-mode disable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN] <strong>License</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN-license] <strong>active nat session-table size 16 slot <span>1</span> </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-license] <strong>active nat session-table size 16 slot <span>2</span> </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-license] <strong>active nat bandwidth-enhance 40 slot</strong> <strong><span>1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-license] <strong>active nat bandwidth-enhance 40 slot</strong><strong> <span>2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-license] <strong>active nat64 vsuf slot <span>1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-license] <strong>active nat64 vsuf slot <span>2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-license] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN-license] <strong>quit</strong></pre>
+</p></li><li><span>Bind the CPU of each service board to the NAT64 instance.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN] <strong>service-location 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-service-location-1] <strong>location slot <span>1</span> backup slot <span>2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-service-location-1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN-service-location-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN] <strong>service-instance-group group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-instance-group-group1] <strong>service-location 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-instance-group-group1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN-instance-group-group1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN] <strong>nat64 instance nat64-1 id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-nat64-instance-nat64-1] <strong>service-instance-group group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-nat64-instance-nat64-1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN-nat64-instance-nat64-1] <strong>quit</strong></pre>
+</p></li><li><span>Configure basic NAT64 functions.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN] <strong>nat64 instance nat64-1 id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-nat64-instance-nat64-1] <strong>port-range 4096</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-nat64-instance-nat64-1] <strong>nat64 alg ftp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-nat64-instance-nat64-1] <strong>nat64 alg http</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-nat64-instance-nat64-1] <strong>nat64 address-group nat64-group1 group-id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-nat64-instance-nat64-1-nat64-address-group-nat64-group1] <strong>section 0 11.1.1.0 mask 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-nat64-instance-nat64-1-nat64-address-group-nat64-group1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-nat64-instance-nat64-1] <strong>nat64 log host 1.1.1.1 514 source 2.2.2.2 514 name loghost</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-nat64-instance-nat64-1] <strong>nat64 log user enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-nat64-instance-nat64-1] <strong>nat64 filter mode full-cone</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-nat64-instance-nat64-1] <strong>nat64 prefix 64:FF9B:: prefix-length 96 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-nat64-instance-nat64-1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN-nat64-instance-nat64-1] <strong>quit</strong></pre>
+</p></li><li><span>Configure a traffic classification rule, a NAT64 traffic behavior, and a NAT64 traffic distribution policy, and apply the NAT64 traffic distribution policy.</span><p><ol type="a"><li><p>Configure an ACL-based traffic classification rule so that only hosts on internal network segment 64:FF9B/96 can access the network segment 192.168.0.133/30 on the IPv4 Internet.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN] <strong>acl ipv6 number 3003</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-acl6-adv-3003] <strong>rule 5 permit ipv6 source 2001:db8::1:1112 126 destination 64:FF9B::C0A8:85 96</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-acl6-adv-3003] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN-acl6-adv-3003] <strong>quit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>A NAT64 user packet's destination IP address is an IPv6 address combined by an IPv4 address and a NAT64 prefix. You are advised to use source+destination addresses for traffic diversion, with the destination address being the same as the NAT64 prefix.</p>
+</div></div>
+</li><li><p>Configure a traffic classifier.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN] <strong>traffic classifier c1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-classifier-c1] <strong>if-match ipv6 acl 3003</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-classifier-c1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN-classifier-c1] <strong>quit</strong></pre>
+</li><li><p>Configure a traffic behavior and bind the traffic behavior to the NAT64 instance.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN] <strong>traffic behavior b1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-behavior-b1] <strong>nat64 bind instance nat64-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-behavior-b1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN-behavior-b1] <strong>quit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If multiple behavior settings are configured, packets are matched against them in a top-to-bottom order.</p>
+</div></div>
+</li><li><p>Configure a traffic policy and associate the ACL-based traffic classification rule with the traffic behavior.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN] <strong>traffic policy p1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-trafficpolicy-p1] <strong>classifier c1 behavior b1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-trafficpolicy-p1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN-trafficpolicy-p1] <strong>quit</strong></pre>
+</li><li><p>Configure an IPv6 address in the user-side interface view.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN] <strong>interface GigabitEthernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN-GigabitEthernet<span>0/1/1</span>] <strong>ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-GigabitEthernet<span>0/1/1</span>] <strong>ipv6 address 2001:db8::1:110e 126</strong></pre>
+</li><li><p>Apply the NAT64 traffic diversion policy in the user-side interface view.</p>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-GigabitEthernet<span>0/1/1</span>] <strong>traffic-policy p1 inbound</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NAT64_CGN-GigabitEthernet<span>0/1/1</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NAT64_CGN-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+</li><li><p>Enable the NAT64 device to advertise public routes.</p>
+<p>The NAT64 device must advertise private prefix routes and public address pool rules. Private network VPNs are not supported.</p>
+</li></ol>
+</p></li><li><span>Verify the configuration.</span><p><p># Verify the status of the active and standby service boards.</p>
+<p># Verify that the public network routes are properly advertised.</p>
+<pre class="screen">[NAT64_CGN] <strong>display ip routing-table</strong></pre>
+<pre class="screen">Route Flags: R - relay, D - download to fib
+-------------------------------------------------------------------
+Routing Table: Public
+Destinations  : 21813            Routes : 21814
+Destination/Mask Proto Pre Cost Flags NextHop Interface
+11.1.1.0/24     Unr 64   10   D  127.0.0.1 InLoopBack0</pre>
+<p># Verify that the master/backup status in the service-location is correct.</p>
+<pre class="screen">[NAT64_CGN] <strong>display service-location 1</strong></pre>
+<pre class="screen">service-location 1
+Location slot ID: <span>1</span>
+Current location slot ID: <span>1</span>
+Backup slot ID: <span>2</span>
+Current backup slot ID: <span>2</span>
+Bound service-instance-group number: 1
+Batch-backup state: finished</pre>
+<p># Verify that the license resources are correct.</p>
+<pre class="screen">[NAT64_CGN] <strong>display nat session-table size slot <span>1</span></strong></pre>
+<pre class="screen">--------------------------------------------------------------
+TotalSize :64M
+UsedSize :32 M
+FreeSize :32 M
+SlotID CpuID CurSessTblSize CfgSessTblSize ValidFlag
+<span>1</span> 0(engine) 16 M 16 M Valid
+<span>2</span> 0(engine) 16 M 16 M Valid
+-----------------------------------------------------------------</pre>
+<p># Verify that user table information on the master and slave service boards is correct.</p>
+<pre class="screen">[NAT64_CGN] <strong>display nat user-information slot <span>1</span> verbose</strong></pre>
+<pre class="screen">This operation will take a few minutes. Press 'Ctrl+C' to break
+Slot: <span>1</span>
+Total number: 2.
+--------------------------------------------------------------
+User Type                             : NAT64
+IPv6Address                           : 2001:db8:2068::0002/128
+User ID                               : -
+VPN Instance                          : -
+Address Group                         : nat64-group1-1
+NoPAT Address Group                   : -
+NAT64 Instance                        : nat64-1
+Public IP                             : 198.51.100.0
+NoPAT Public IP                       : 0.0.0.0
+Start Port                            : 1024
+Port Range                            : 4096
+Port Total                            : 4096
+MTU                                   : 1500
+Extend Port Alloc Times               : 0
+Extend Port Alloc Number              : 0
+First/Second/Third Extend Port Start  : 0/0/0
+Total/TCP/UDP/ICMP Session Limit      : 8192/10240/10240/512
+Total/TCP/UDP/ICMP Session Current    : 3/0/2/1
+Total/TCP/UDP/ICMP Rev Session Limit  : 0/0/0/0
+Total/TCP/UDP/ICMP Rev Session Current: 0/0/0/0
+Nat ALG Enable                        : FTP/HTTP
+Token/TB/TP                           : 0/0/0
+Port Forwarding Flag                  : Non Port Forwarding
+Port Forwarding Ports                 : 0 0 0 0 0
+Aging Time(s)                         : -
+Left Time(s)                          : -
+Port Limit Discard Count              : 0
+Session Limit Discard Count           : 0
+Fib Miss Discard Count                : 0
+--&gt;Transmit Packets                   : 230853
+--&gt;Transmit Bytes                     : 50325954
+--&gt;Drop Packets                       : 0
+&lt;--Transmit Packets                   : 0
+&lt;--Transmit Bytes                     : 0
+&lt;--Drop Packets                       : 0
+--------------------------------------------------------------</pre>
+<p># Verify that user session table information on the master and slave service boards is correct.</p>
+<pre class="screen">[NAT64_CGN] <strong>display nat session table slot <span>1</span></strong></pre>
+<pre class="screen">This operation will take a few minutes. Press 'Ctrl+C' to break
+Slot: <span>1</span>
+Current total sessions:3.
+icmp: [2001:db8:2068::0002]:200(198.51.100.0:200)--&gt; *:32768
+udp: [2001:db8:2068::0002]:-( 198.51.100.0:-)--&gt;[2001:db8:2091::]:-(0.0.0.0:-), frag_ID:100
+udp: [2001:db8:2068::0002]:1024(198.51.100.0:1024)--&gt; *:*</pre>
+<p># Run the <strong>display nat statistics</strong> command to view the number of sent and received packets on the master service board.</p>
+<pre class="screen">[NAT64_CGN] <strong>display nat statistics received slot <span>1</span></strong></pre>
+<pre class="screen">This operation will take a few minutes. Press 'Ctrl+C' to break
+Slot: <span>1</span> 
+------------------------------------------------------------------------
+Packets received from interface :632014772
+Packets received from mainboard :29450
+Packets received by nat entry :255587842
+-------------------------------------------------------------------------</pre>
+<pre class="screen">[NAT64_CGN] <strong>display nat statistics transmitted slot <span>1</span></strong></pre>
+<pre class="screen">This operation will take a few minutes. Press 'Ctrl+C' to break
+Slot: <span>1</span>
+--------------------------------------------------------------
+Packets transmitted to interface :159142427
+Packets transmitted to mainboard :22219
+Seclog packets transmitted :0
+SYSLOG packets transmitted :0
+Userinfo log msg transmitted to cp :0
+Transparent packet with nat :65080312
+Transparent packet without nat :0
+---------------------------------------------------------------</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172362475__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>NAT64 CGN device configuration file</p>
+<pre class="screen">#
+sysname NAT64_CGN
+#
+vsm on-board-mode disable
+#
+license
+ active nat session-table size 16 slot  
+ active nat session-table size 16 slot  
+<strong> </strong>active nat bandwidth-enhance 40 slot <span>1</span>
+ active nat bandwidth-enhance 40 slot <span>2</span>
+ active nat64 vsuf slot <span>1</span>
+ active nat64 vsuf slot <span>2</span>
+#
+acl ipv6 number 3003
+ rule 5 permit ipv6 source 2001:db8::1:1112 126 destination 64:FF9B::C0A8:85 96
+#
+traffic classifier c1 operator or
+ if-match ipv6 acl 3003 precedence 1
+#
+traffic behavior b1
+ nat64 bind instance nat64-1
+#
+traffic policy p1
+ classifier c1 behavior b1 precedence 1
+#
+interface GigabitEthernet <span>0/1/1</span>
+ ipv6 enable
+ ipv6 address 2001:db8::1:110e 126
+ traffic-policy p1 inbound
+#
+service-ha hot-backup enable
+service-ha delay-time 10
+#
+service-location 1
+ location slot <span>1</span> backup slot <span>2</span>
+#
+service-instance-group group1
+ service-location 1
+#
+nat64 instance nat64-1 id 1
+ service-instance-group group1
+ port-range 4096
+ nat64 alg ftp
+ nat64 alg http
+ nat64 address-group nat64-group1 group-id 1
+  section 0 11.1.1.0 mask 24
+ nat64 log host 1.1.1.1 514 source 2.2.2.2 514 name loghost
+ nat64 log user enable
+ nat64 filter mode full-cone
+ nat64 filter mode full-cone
+ nat64 prefix 64:FF9B:: prefix-length 96 1
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0042.html">Inter-Board Hot Backup
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0033.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

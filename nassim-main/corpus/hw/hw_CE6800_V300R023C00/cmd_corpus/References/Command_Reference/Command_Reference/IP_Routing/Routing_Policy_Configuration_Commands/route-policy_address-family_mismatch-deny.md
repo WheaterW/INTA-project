@@ -1,0 +1,89 @@
+route-policy address-family mismatch-deny
+=========================================
+
+route-policy address-family mismatch-deny
+
+Function
+--------
+
+
+
+The **route-policy address-family mismatch-deny** command configures a device to deny routes if the address family that the routes belong to does not match that specified in an if-match clause of a route-policy.
+
+The undo route-policy address-family mismatch-deny command restores the default configuration.
+
+
+
+By default, if the address family that a route belongs to does not match that specified in an if-match clause of a route-policy, the route matches the route-policy.
+
+
+Format
+------
+
+**route-policy** *route-policy-name* **address-family** **mismatch-deny**
+
+**undo route-policy** *route-policy-name* **address-family** **mismatch-deny**
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| *route-policy-name* | Specifies the name of a route-policy. | The name is a string of 1 to 200 case-sensitive characters, with spaces not supported. When double quotation marks are used around the string, spaces are allowed in the string. |
+
+
+
+Views
+-----
+
+System view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+
+
+By default, if the **route-policy address-family mismatch-deny** command is not run and the address family of a route does not match the address family specified in the if-match clause of the route-policy, the route matches the address family by default. The permit node is used as an example. If no if-match clause is configured for a permit node, the node matches all IPv4 and IPv6 routes. If only the if-match clause for matching IPv4 routes is configured for a permit node, the node matches the IPv4 routes that match the if-match clause and all IPv6 routes. If only the if-match clause for matching IPv6 routes is configured for a permit node, the node matches the IPv6 routes that match the if-match clause and all IPv4 routes. If both IPv4 and IPv6 if-match clauses are configured for a node, the node matches all the routes that match either of the two if-match clauses. The same applies to the deny node.Using the same route-policy to filter both IPv4 and IPv6 routes by default is not recommended. Otherwise, services may be interrupted due to improper use. In some special service scenarios, only one route-policy can be used. In this case, you are advised to run the **route-policy address-family mismatch-deny** command before running the route-policy command. If the address family of a route does not match that specified in the if-match clause of the route-policy, the route fails to match the address family by default. The permit node is used as an example. If no if-match clause is configured for a permit node, the node matches all IPv4 and IPv6 routes. If only an if-match clause is configured for a permit node to match IPv4 routes, the node matches only the IPv4 routes that match the if-match clause. If only an if-match clause is configured for a permit node to match IPv6 routes, the node matches only the IPv6 routes that match the if-match clause. If a node is configured with both IPv4 and IPv6 if-match clauses, all routes cannot match the node. The same applies to the deny node.
+
+
+
+**Prerequisites**
+
+
+
+A route-policy has been configured.
+
+
+
+**Precautions**
+
+
+
+If an if-match clause of a node uses information such as the next hop address or direct route source as a matching condition, the node compares the address family to which the next hop address or direct route source belongs with that specified in the if-match clause.
+
+
+
+
+Example
+-------
+
+# Configure a device to deny routes if the address family that the routes belong to does not match that specified in an if-match clause of a route-policy.
+```
+<HUAWEI> system-view
+[~HUAWEI] ip ip-prefix aaa permit 10.1.1.1 32
+[*HUAWEI] route-policy rp1 permit node 10
+[*HUAWEI-route-policy] if-match ip-prefix aaa
+[*HUAWEI-route-policy] quit
+[*HUAWEI] route-policy rp1 address-family mismatch-deny
+
+```

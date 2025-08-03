@@ -1,0 +1,398 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring EVPN L3VPNv6 H-VPN over MPLS">
+<meta name="abstract" content="This section provides an example for configuring EVPN L3VPNv6 H-VPN over MPLS to deliver network connectivity.">
+<meta name="description" content="This section provides an example for configuring EVPN L3VPNv6 H-VPN over MPLS to deliver network connectivity.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_0010.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_0086.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_0109.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="p00915595,w00800033,w00556928,l00468467,w00606909,evpnvrp,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="EVPN">
+<meta name="featuretype" content="VPN">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="EVPN">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="EVPN">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="EVPN">
+<meta name="featuretype" content="VPN">
+<meta name="OWNER" content="p00915595">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00878323">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172370687">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring EVPN L3VPNv6 H-VPN over MPLS</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172370687"></a><a name="EN-US_TASK_0172370687"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring EVPN L3VPNv6 H-VPN over MPLS</h1>
+<div class="taskbody"><p>This section provides an example for configuring EVPN L3VPNv6 H-VPN over MPLS to deliver network connectivity.</p>
+<div class="context"><a name="EN-US_TASK_0172370687__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>An IP bearer network generally uses L2VPN and L3VPN (HVPN) to carry Layer 2 and Layer 3 services, respectively. The protocols are complex. EVPN, in contrast, can carry both Layer 2 and Layer 3 services. To simplify service bearer protocols, many IP bearer networks will evolve to EVPN. Among them, L3VPNv6 HVPN that carries IPv6 Layer 3 services needs to evolve to EVPN L3VPNv6 HVPN. On the network shown in <a href="#EN-US_TASK_0172370687__fig7904139358">Figure 1</a>, an access layer network is deployed between the UPE and SPE, and an aggregation layer network is deployed between the SPE and NPE. Independent IGP protocols need to be deployed on the access layer network and aggregation layer network for connectivity. EVPN L3VPNv6 H-VPN needs to be deployed to implement E2E connectivity. On the EVPN L3VPNv6 H-VPN network, the UPE functions as an RR client to receive specific routes reflected by the SPE functioning as an RR. This mechanism facilitates route management and traffic control.</p>
+<div class="fignone" id="EN-US_TASK_0172370687__fig7904139358"><a name="EN-US_TASK_0172370687__fig7904139358"></a><a name="fig7904139358"></a><span class="figcap"><b>Figure 1 </b>EVPN L3VPNv6 H-VPN over MPLS networking</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 and 2 in this example represent GE<span>0/1/0</span> and GE<span>0/2/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001225120653.png"></span><br></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172370687__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Deploy an IGP between the UPE and SPE and between the SPE and NPE. In this example, deploy OSPF between the UPE and SPE and IS-IS between the SPE and NPE.</p>
+</li><li><p>Configure MPLS LDP on the UPE, SPE, and NPE.</p>
+</li><li><p>Create a VPN instance on the UPE and NPE.</p>
+</li><li><p>Bind access-side interfaces to VPN instances on the UPE and NPE.</p>
+</li><li><p>Deploy BGP EVPN between the UPE and SPE and between the SPE and NPE.</p>
+</li><li><p>On the SPE, specify the UPE as an RR client, and configure the SPE to use its own address as the next hop of BGP EVPN routes to be advertised to the peer.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172370687__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>MPLS LSR IDs of the UPE, SPE, and NPE: 1.1.1.1, 2.2.2.2, and 3.3.3.3</p>
+</li><li><p>VPN instance name (vpn1) and RD (100:1)</p>
+</li><li><p>VPN targets 2:2 for route import and export by the VPN instance</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172370687__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure IP addresses, including loopback interface addresses, on the UPE, SPE, and NPE.</span><p><p>For details about how to configure interface IP addresses and masks, see <a href="#EN-US_TASK_0172370687__dc_vrp_evpn_cfg_008601">Configuration Files</a> in this section.</p>
+</p></li><li><span>Deploy an IGP between the UPE and SPE and between the SPE and NPE. In this example, deploy OSPF between the UPE and SPE and IS-IS between the SPE and NPE.</span><p><p>For details, see <a href="#EN-US_TASK_0172370687__dc_vrp_evpn_cfg_008601">Configuration Files</a> in this section.</p>
+</p></li><li><span>Configure MPLS LDP on the UPE, SPE, and NPE.</span><p><p>For details, see <a href="#EN-US_TASK_0172370687__dc_vrp_evpn_cfg_008601">Configuration Files</a> in this section.</p>
+</p></li><li><span>Create a VPN instance on the UPE and NPE.</span><p><p># Configure the UPE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE] <strong>ip vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-vpn-instance-vpn1] <strong>ipv6-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-vpn-instance-vpn1-af-ipv6] <strong>route-distinguisher 100:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-vpn-instance-vpn1-af-ipv6] <strong>vpn-target 2:2 both evpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-vpn-instance-vpn1-af-ipv6] <strong>evpn mpls routing-enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-vpn-instance-vpn1-af-ipv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-vpn-instance-vpn1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE] <strong>commit</strong></pre>
+<p># Configure the NPE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE] <strong>ip vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-vpn-instance-vpn1] <strong>ipv6-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-vpn-instance-vpn1-af-ipv6] <strong>route-distinguisher 100:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-vpn-instance-vpn1-af-ipv6] <strong>vpn-target 2:2 both evpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-vpn-instance-vpn1-af-ipv6] <strong>evpn mpls routing-enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-vpn-instance-vpn1-af-ipv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-vpn-instance-vpn1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE] <strong>commit</strong></pre>
+</p></li><li><span>Bind access-side interfaces to VPN instances on the UPE and NPE.</span><p><p># Configure the UPE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE] <strong>interface GigabitEthernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-GigabitEthernet<span>0/2/0</span>] <strong>ip binding vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-GigabitEthernet<span>0/2/0</span>] <strong>ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-GigabitEthernet<span>0/2/0</span>] <strong>ipv6 address 2001:DB8:20::1 64</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE] <strong>commit</strong></pre>
+<p># Configure the NPE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE] <strong>interface GigabitEthernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-GigabitEthernet<span>0/2/0</span>] <strong>ip binding vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-GigabitEthernet<span>0/2/0</span>] <strong>ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-GigabitEthernet<span>0/2/0</span>] <strong>ipv6 address 2001:DB8:30::1 64</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE] <strong>commit</strong></pre>
+</p></li><li><span>Deploy BGP EVPN between the UPE and SPE and between the SPE and NPE.</span><p><p># Configure the UPE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-bgp] <strong>peer 2.2.2.2 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-bgp] <strong>peer 2.2.2.2 connect-interface LoopBack1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-bgp] <strong>l2vpn-family evpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-bgp-af-evpn] <strong>peer 2.2.2.2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-bgp-af-evpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-bgp] <strong>ipv6-family vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-bgp-6-vpn1] <strong>advertise l2vpn evpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-bgp-6-vpn1] <strong>import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-bgp-6-vpn1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE] <strong>commit</strong></pre>
+<p># Configure the SPE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>SPE] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE-bgp] <strong>peer 1.1.1.1 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE-bgp] <strong>peer 1.1.1.1 connect-interface LoopBack1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE-bgp] <strong>peer 3.3.3.3 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE-bgp] <strong>peer 3.3.3.3 connect-interface LoopBack1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE-bgp] <strong>l2vpn-family evpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE-bgp-af-evpn] <strong>peer 1.1.1.1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE-bgp-af-evpn] <strong>peer 3.3.3.3 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE-bgp-af-evpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE] <strong>commit</strong></pre>
+<p># Configure the NPE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-bgp] <strong>peer 2.2.2.2 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-bgp] <strong>peer 2.2.2.2 connect-interface LoopBack1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-bgp] <strong>l2vpn-family evpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-bgp-af-evpn] <strong>peer 2.2.2.2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-bgp-af-evpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-bgp] <strong>ipv6-family vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-bgp-6-vpn1] <strong>advertise l2vpn evpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-bgp-6-vpn1] <strong>import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-bgp-6-vpn1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE] <strong>commit</strong></pre>
+</p></li><li><span>On the SPE, specify the UPE as an RR client, and configure the SPE to use its own IP address as the next hop of BGP EVPN routes to be advertised to the peer.</span><p><p># Configure the SPE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>SPE] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE-bgp] <strong>l2vpn-family evpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE-bgp-af-evpn] <strong>peer 1.1.1.1 reflect-client</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE-bgp-af-evpn] <strong>peer 1.1.1.1 next-hop-local</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE-bgp-af-evpn] <strong>peer 3.3.3.3 reflect-client</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE-bgp-af-evpn] <strong>peer 3.3.3.3 next-hop-local</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE-bgp-af-evpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SPE] <strong>commit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p>Run the <strong>display bgp evpn all routing-table</strong> command on the NPE and UPE. The command output shows EVPN routes received from the remote end. The following example uses the command output on the NPE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE] <strong>display bgp evpn all routing-table</strong></pre>
+<pre class="screen"> Local AS number : 100
+
+ BGP Local router ID is 10.2.1.2
+ Status codes: * - valid, &gt; - best, d - damped, x - best external, a - add path,
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+
+ 
+ EVPN address family:
+ Number of Ip Prefix Routes: 2
+ Route Distinguisher: 100:1
+       Network(EthTagId/IpPrefix/IpPrefixLen)                 NextHop
+ *&gt;i   0:[2001:DB8:20::]:64                                   2.2.2.2
+ *&gt;    0:[2001:DB8:30::]:64                                   0.0.0.0
+    
+</pre>
+<p>Run the <strong>display ipv6 routing-table vpn-instance vpn1</strong> command on the NPE and UPE. The command output shows VPN routes received from the remote end. The following example uses the command output on the NPE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE] <strong>display ipv6 routing-table vpn-instance vpn1</strong></pre>
+<pre class="screen">Routing Table : vpn1
+         Destinations : 4        Routes : 4         
+
+Destination  : 2001:DB8:20::                           PrefixLength : 64
+NextHop      : ::FFFF:2.2.2.2                          Preference   : 255
+Cost         : 0                                       Protocol     : IBGP
+RelayNextHop : ::FFFF:10.2.1.1                         TunnelID     : 0x0000000001004c4b42
+Interface    : GigabitEthernet<span>0/1/0</span>                    Flags        : RD
+
+Destination  : 2001:DB8:30::                           PrefixLength : 64
+NextHop      : 2001:DB8:30::1                          Preference   : 0
+Cost         : 0                                       Protocol     : Direct
+RelayNextHop : ::                                      TunnelID     : 0x0
+Interface    : GigabitEthernet<span>0/2/0</span>                    Flags        : D
+
+Destination  : 2001:DB8:30::1                          PrefixLength : 128
+NextHop      : ::1                                     Preference   : 0
+Cost         : 0                                       Protocol     : Direct
+RelayNextHop : ::                                      TunnelID     : 0x0
+Interface    : GigabitEthernet<span>0/2/0</span>                    Flags        : D
+
+Destination  : FE80::                                  PrefixLength : 10
+NextHop      : ::                                      Preference   : 0
+Cost         : 0                                       Protocol     : Direct
+RelayNextHop : ::                                      TunnelID     : 0x0
+Interface    : NULL0                                   Flags        : DB</pre>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0172370687__dc_vrp_evpn_cfg_008601"><a name="EN-US_TASK_0172370687__dc_vrp_evpn_cfg_008601"></a><a name="dc_vrp_evpn_cfg_008601"></a><a name="EN-US_TASK_0172370687__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>UPE configuration file</p>
+<pre class="screen">#
+sysname UPE
+#
+ip vpn-instance vpn1
+ ipv6-family
+  route-distinguisher 100:1
+<span>  apply-label per-instance</span>
+  vpn-target 2:2 export-extcommunity evpn
+  vpn-target 2:2 import-extcommunity evpn
+  evpn mpls routing-enable
+#
+mpls lsr-id 1.1.1.1
+#
+mpls            
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.1.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip binding vpn-instance vpn1
+ ipv6 enable
+ ipv6 address 2001:DB8:20::1/64
+#
+interface LoopBack1
+ ip address 1.1.1.1 255.255.255.255
+#
+bgp 100
+ peer 2.2.2.2 as-number 100
+ peer 2.2.2.2 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 2.2.2.2 enable
+ #
+ ipv6-family vpn-instance vpn1
+  import-route direct
+  advertise l2vpn evpn
+ #
+ l2vpn-family evpn
+  undo policy vpn-target
+  peer 2.2.2.2 enable
+#
+ospf 1
+ area 0.0.0.0   
+  network 1.1.1.1 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+#
+return</pre>
+</li><li><p>SPE configuration file</p>
+<pre class="screen">#
+sysname SPE
+#
+mpls lsr-id 2.2.2.2
+#
+mpls
+#
+mpls ldp
+#
+isis 1
+ network-entity 10.0000.0000.0002.00
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.1.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.2.1.1 255.255.255.0
+ isis enable 1
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 2.2.2.2 255.255.255.255
+ isis enable 1
+#
+bgp 100
+ peer 1.1.1.1 as-number 100
+ peer 1.1.1.1 connect-interface LoopBack1
+ peer 3.3.3.3 as-number 100
+ peer 3.3.3.3 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 1.1.1.1 enable
+  peer 3.3.3.3 enable
+ #
+ l2vpn-family evpn
+  undo policy vpn-target
+  peer 1.1.1.1 enable
+  peer 1.1.1.1 reflect-client
+  peer 1.1.1.1 next-hop-local
+  peer 3.3.3.3 enable
+  peer 3.3.3.3 reflect-client
+  peer 3.3.3.3 next-hop-local
+#               
+ospf 1
+ area 0.0.0.0
+  network 2.2.2.2 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+#
+return</pre>
+</li><li><p>NPE configuration file</p>
+<pre class="screen">#
+sysname NPE
+#
+ip vpn-instance vpn1
+ ipv6-family
+  route-distinguisher 100:1
+<span>  apply-label per-instance</span>
+  vpn-target 2:2 export-extcommunity evpn
+  vpn-target 2:2 import-extcommunity evpn
+  evpn mpls routing-enable
+#
+mpls lsr-id 3.3.3.3
+#
+mpls            
+#
+mpls ldp
+#
+isis 1
+ network-entity 10.0000.0000.0003.00
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip binding vpn-instance vpn1
+ ipv6 enable
+ ipv6 address 2001:DB8:30::1/64
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.2.1.2 255.255.255.0
+ isis enable 1
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 3.3.3.3 255.255.255.255
+ isis enable 1
+#
+bgp 100
+ peer 2.2.2.2 as-number 100
+ peer 2.2.2.2 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 2.2.2.2 enable
+ #
+ ipv6-family vpn-instance vpn1
+  import-route direct
+  advertise l2vpn evpn
+ #
+ l2vpn-family evpn
+  undo policy vpn-target
+  peer 2.2.2.2 enable
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_0010.html">EVPN Configuration Examples
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_0086.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_0109.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

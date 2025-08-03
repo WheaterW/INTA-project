@@ -1,0 +1,220 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring BGP Route Summarization">
+<meta name="abstract" content="">
+<meta name="description" content="">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0061.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0063.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130783884">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring BGP Route Summarization</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130783884"></a><a name="EN-US_TASK_0000001130783884"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring BGP Route Summarization</h1>
+<div class="taskbody"><p></p>
+<div class="context"><a name="EN-US_TASK_0000001130783884__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>BGP routes can be locally imported or learned from peers. The locally imported routes take precedence over those learned from peers during BGP route selection. In real-world networking, there is a low probability that both locally imported routes and those learned from BGP peers are destined for the same destination address. In most cases, a local device imports routes in different ways. Locally imported routes include routes imported using the <a href="cmdqueryname=network"><b><span class="cmdname">network</span></b></a> or <a href="cmdqueryname=import-route"><b><span class="cmdname">import-route</span></b></a> command, as well as manually and automatically generated summary routes. BGP selects such routes in descending order of priority:</p>
+<ol><li><p>Prefers a summary route to a non-summary route.</p>
+</li><li><p>Prefers a summary route manually generated using the <a href="cmdqueryname=aggregate"><b><span class="cmdname">aggregate</span></b></a> command to a summary route automatically generated using the <a href="cmdqueryname=summary+automatic"><b><span class="cmdname">summary automatic</span></b></a> command.</p>
+</li><li><p>Prefers a route imported using the <a href="cmdqueryname=network"><b><span class="cmdname">network</span></b></a> command to a route imported using the <a href="cmdqueryname=import-route"><b><span class="cmdname">import-route</span></b></a> command.</p>
+</li></ol>
+<div class="p">Take the network shown in <a href="#EN-US_TASK_0000001130783884__fig_dc_vrp_bgp_path_selection_000701">Figure 1</a> as an example. An EBGP peer relationship is established between DeviceA and DeviceB, and an IBGP peer relationship is established between each pair of DeviceB, DeviceC, and DeviceD.<div class="fignone" id="EN-US_TASK_0000001130783884__fig_dc_vrp_bgp_path_selection_000701"><a name="EN-US_TASK_0000001130783884__fig_dc_vrp_bgp_path_selection_000701"></a><a name="fig_dc_vrp_bgp_path_selection_000701"></a><span class="figcap"><b>Figure 1 </b>Network diagram of BGP route summarization</span><br><span><img class="vsd" src="figure/en-us_image_0000001176663723.png" width="NaN" height="NaN"></span></div>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130783884__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>During the configuration, note the following:</p>
+<ul><li>To improve security, you are advised to deploy BGP security measures. For details, see "Configuring BGP Authentication." Keychain authentication is used as an example. For details, see Example for Configuring Keychain Authentication for BGP.</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130783884__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure DeviceC.</span><p><pre class="screen">#
+bgp 65001
+ #
+ ipv4-family unicast
+  network 10.1.2.0 255.255.255.252                       //Configure the device to advertise routes to 10.1.2.0/30.
+  network 10.1.4.0 255.255.255.252                       //Configure the device to advertise routes to 10.1.4.0/30.
+  import-route direct                                    //Configure the device to import direct routes.
+#</pre>
+</p></li><li><span>Configure DeviceD.</span><p><pre class="screen">#
+bgp 65001
+ #
+ ipv4-family unicast
+  network 10.1.3.0 255.255.255.252                       //Configure the device to advertise routes to 10.1.3.0/30.
+  network 10.1.4.0 255.255.255.252                       //Configure the device to advertise routes to 10.1.4.0/30.
+  import-route direct                                    //Configure the device to import direct routes.
+#</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001130783884__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>Run the <a href="cmdqueryname=display+bgp+routing-table"><b><span class="cmdname">display bgp routing-table</span></b></a> [ <i><span class="varname">ip-address</span></i>] command to verify the configurations.</p>
+<p># Check the routing table of DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>display bgp routing-table</strong>
+ BGP Local router ID is 10.1.3.2
+ Status codes: * - valid, &gt; - best, d - damped, x - best external, a - add path,
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+ RPKI validation codes: V - valid, I - invalid, N - not-found
+
+ Total Number of Routes: 10
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *&gt;i  10.1.2.0/30        10.1.4.2        0          100        0      i
+ *&gt;   10.1.3.0/30        0.0.0.0         0                     0      i
+ *                       0.0.0.0         0                     0      ?
+ *&gt;   10.1.3.2/32        0.0.0.0         0                     0      ?
+ *&gt;   10.1.4.0/30        0.0.0.0         0                     0      i
+ *                       0.0.0.0         0                     0      ?
+   i                     10.1.4.2        0          100        0      ?
+ *&gt;   10.1.4.1/32        0.0.0.0         0                     0      ?
+ *&gt;   127.0.0.0          0.0.0.0         0                     0      ?
+ *&gt;   127.0.0.1/32       0.0.0.0         0                     0      ?</pre>
+<p>The preceding command output shows that three routes pointing to the 10.1.4.0/30 segment are available in the routing table. The route with the next hop address 10.1.4.2 is learned from DeviceC, and therefore BGP ignores the route first during route selection.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>display bgp routing-table 10.1.4.0 30</strong>
+ BGP local router ID : 10.1.3.2
+ Local AS number : 65001
+ Paths:   3 available, 1 best, 1 select
+ BGP routing table entry information of 10.1.4.0/30:
+ <strong>Network route.</strong>
+ <strong>From: 0.0.0.0 (0.0.0.0)</strong>
+ Route Duration: 00h03m51s
+ Direct Out-interface: <span>100GE</span><span>1/0/1</span>
+ Original nexthop: 10.1.4.1
+ Qos information : 0x0
+ AS-path Nil, origin igp, MED 0, pref-val 0, valid, local, <strong>best</strong>, select, pre 0
+ Advertised to such 2 peers:
+    10.1.3.1
+    10.1.4.2
+ BGP routing table entry information of 10.1.4.0/30:
+ <strong>Imported route.</strong>
+ <strong>From: 0.0.0.0 (0.0.0.0)</strong>
+ Route Duration: 00h04m10s
+ Direct Out-interface:<span>100GE</span><span>1/0/1</span>
+ Original nexthop: 10.1.4.1
+ Qos information : 0x0
+ AS-path Nil, origin incomplete, MED 0, pref-val 0, valid, local, pre 0, <strong>not preferred for route type</strong>
+ Not advertised to any peer yet
+
+ BGP routing table entry information of 10.1.4.0/30:
+ <strong>From: 10.1.4.2 (10.1.2.2)</strong>
+ Route Duration: 00h02m24s
+ Relay IP Nexthop: 0.0.0.0
+ Relay IP Out-Interface: <span>100GE</span><span>1/0/1</span>
+ Original nexthop: 10.1.4.2
+ Qos information : 0x0
+ AS-path Nil, origin incomplete, MED 0, localpref 100, pref-val 0, internal, pre 255
+ Not advertised to any peer yet</pre>
+<p>The preceding command output shows that the route imported using the <a href="cmdqueryname=network"><b><span class="cmdname">network</span></b></a> command is selected as the optimal route.</p>
+<p>Configure DeviceB.</p>
+<pre class="screen">bgp 65001
+ #
+ ipv4-family unicast
+  summary automatic
+  aggregate 10.0.0.0 255.0.0.0
+  import-route direct
+#</pre>
+<p>Run the <a href="cmdqueryname=display+bgp+routing-table"><b><span class="cmdname">display bgp routing-table</span></b></a> [ <i><span class="varname">ip-address</span></i>] command to verify the configurations.</p>
+<p># Check the routing table of DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display bgp routing-table</strong>
+ BGP Local router ID is 10.1.1.2
+ Status codes: * - valid, &gt; - best, d - damped, x - best external, a - add path,
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+ RPKI validation codes: V - valid, I - invalid, N - not-found
+
+ Total Number of Routes: 14
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *&gt;   10.0.0.0           127.0.0.1                             0      ?
+ *                       127.0.0.1                             0      ?
+ s&gt;   10.1.1.0/30        0.0.0.0         0                     0      ?
+ *&gt;   10.1.1.2/32        0.0.0.0         0                     0      ?
+ s&gt;   10.1.2.0/30        0.0.0.0         0                     0      ?
+   i                     10.1.2.2        0          100        0      i
+ *&gt;   10.1.2.1/32        0.0.0.0         0                     0      ?
+ s&gt;   10.1.3.0/30        0.0.0.0         0                     0      ?
+   i                     10.1.3.2        0          100        0      i
+ *&gt;   10.1.3.1/32        0.0.0.0         0                     0      ?
+ *&gt;i  10.1.4.0/30        10.1.3.2        0          100        0      i
+ * i                     10.1.2.2        0          100        0      ?
+ *&gt;   127.0.0.0          0.0.0.0         0                     0      ?
+ *&gt;   127.0.0.1/32       0.0.0.0         0                     0      ?</pre>
+<p>The preceding command output shows that two summary routes 10.0.0.0 are available in the routing table.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display bgp routing-table 10.0.0.0</strong>
+ BGP local router ID : 10.1.1.2
+ Local AS number : 65001
+ Paths:   2 available, 1 best, 1 select
+ BGP routing table entry information of 10.0.0.0/8:
+ <strong>Aggregated route.</strong>
+ Route Duration: 00h17m04s
+ Direct Out-interface: NULL0
+ Original nexthop: 127.0.0.1
+ Qos information : 0x0
+ AS-path Nil, origin incomplete, pref-val 0, valid, local, <strong>best</strong>, select, active, pre 255
+ Aggregator: AS 65001, Aggregator ID 10.1.1.2
+ Advertised to such 3 peers:
+    10.1.1.1
+    10.1.3.2
+    10.1.2.2
+ BGP routing table entry information of 10.0.0.0/8:
+ <strong>Summary automatic route</strong>
+ Route Duration: 00h17m04s
+ Direct Out-interface: NULL0
+ Original nexthop: 127.0.0.1
+ Qos information : 0x0
+ AS-path Nil, origin incomplete, pref-val 0, valid, local, pre 255, <strong>not preferred for route type</strong>
+ Aggregator: AS 65001, Aggregator ID 10.1.1.2
+ Not advertised to any peer yet</pre>
+<p>The preceding command output shows that the summary route manually generated using the <a href="cmdqueryname=aggregate"><b><span class="cmdname">aggregate</span></b></a> command is selected as the optimal route.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bgp_cfg_0061.html">Configuring BGP Route Summarization
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bgp_cfg_0063.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

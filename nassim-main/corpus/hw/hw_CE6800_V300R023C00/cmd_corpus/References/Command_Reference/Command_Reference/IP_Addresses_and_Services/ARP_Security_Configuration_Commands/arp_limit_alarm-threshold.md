@@ -1,0 +1,82 @@
+arp limit alarm-threshold
+=========================
+
+arp limit alarm-threshold
+
+Function
+--------
+
+
+
+The **arp limit alarm-threshold** command sets an alarm threshold for the maximum number of dynamic ARP entries that an interface can learn.
+
+The **undo arp limit alarm-threshold** command deletes an alarm threshold.
+
+
+
+If the arp limit command is not run in the interface view, the maximum number of dynamic ARP entries that an interface can learn is not limited by default. If the arp limit command is run in the interface view, the alarm threshold is set to 80% by default.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**arp limit alarm-threshold** *threshold-value*
+
+**undo arp limit alarm-threshold** *threshold-value*
+
+**undo arp limit alarm-threshold**
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| *threshold-value* | Specifies an alarm threshold for the maximum number of dynamic ARP entries that an interface can learn. If the ratio of the number of dynamic ARP entries that an interface has learned to the maximum number of dynamic ARP entries that an interface can learn (configured using the arp limit command) reaches the specified threshold, an alarm is generated. | The value is an integer ranging from 60 to 100, in percentage. |
+
+
+
+Views
+-----
+
+VBDIF interface view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+If a device receives a large number of ARP packets from unauthorized users, the device learns a large number of ARP entries in a short period of time, causing a buffer overflow and interrupting services of authorized users. To resolve the problem, run the **arp limit** command to limit the maximum number of dynamic ARP entries that an interface can learn. This helps prevent a buffer overflow and ensures that the device runs properly. To set an alarm threshold, run the **arp limit alarm-threshold** command, so that an alarm is generated to prompt you to delete unwanted dynamic ARP entries when the number of ARP entries learned on an interface reaches the specified threshold.
+
+**Precautions**
+
+For the **arp limit alarm-threshold** command to take effect, the **arp limit** command also needs to be run.
+
+* If the **arp limit** command is not run, the **arp limit alarm-threshold** command does not take effect.
+* If the **arp limit** command is run but the **arp limit alarm-threshold** command is not run, the default setting (80%) of the **arp limit alarm-threshold** command is used.
+
+Example
+-------
+
+# Set the alarm threshold for the maximum number of dynamic ARP entries that a VBDIF interface can learn to 90%.
+```
+<HUAWEI> system-view
+[~HUAWEI] bridge-domain 60
+[*HUAWEI-bd60] quit
+[*HUAWEI] interface vbdif 60
+[*HUAWEI-Vbdif60] arp limit 300
+[*HUAWEI-Vbdif60] arp limit alarm-threshold 90
+
+```

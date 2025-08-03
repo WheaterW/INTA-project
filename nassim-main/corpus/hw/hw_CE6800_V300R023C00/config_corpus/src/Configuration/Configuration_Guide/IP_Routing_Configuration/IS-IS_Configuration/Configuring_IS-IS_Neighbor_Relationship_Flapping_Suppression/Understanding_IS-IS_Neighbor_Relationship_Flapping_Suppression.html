@@ -1,0 +1,93 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding IS-IS Neighbor Relationship Flapping Suppression">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0043.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0045.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IS-IS">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IS-IS">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001130624308">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding IS-IS Neighbor Relationship Flapping Suppression</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001130624308"></a><a name="EN-US_CONCEPT_0000001130624308"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding IS-IS Neighbor Relationship Flapping Suppression</h1>
+<div><p>IS-IS neighbor relationship flapping suppression works by delaying IS-IS neighbor relationship reestablishment or setting the link cost to the maximum value (16777214 for the cost style wide and 63 for the cost style narrow).</p>
+<div class="section"><h4 class="sectiontitle">Context</h4><p>If an IS-IS interface alternates between up and down, IS-IS neighbor relationship flapping occurs on the interface. During the flapping, IS-IS frequently sends IIHs to reestablish the neighbor relationship, synchronizes LSDBs, and recalculates routes. In this process, a large number of packets are exchanged, impacting neighbor relationship stability, IS-IS services, and IS-IS-dependent services. IS-IS neighbor relationship flapping suppression can address this problem by either delaying IS-IS neighbor relationship reestablishment, or setting the link cost to the maximum value to prevent service traffic from passing through flapping links.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Related Concepts</h4><p>Flapping_event: reported when the state of a neighbor relationship on an interface last changes from Up to Initial or Down. The flapping_event triggers flapping detection. Flapping_count: number of times flapping has occurred.</p>
+<p>Detecting-interval: interval at which flapping is detected. It is used to determine whether a valid flapping_event should be triggered.</p>
+<p>Threshold: flapping suppression threshold. When the flapping_count reaches or exceeds the threshold, flapping suppression starts.</p>
+<p>Resume-interval: interval used to determine whether flapping suppression exits. If the interval between two valid flapping_events is greater than or equal to the resume-interval, flapping suppression exits.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Fundamentals of IS-IS Neighbor Relationship Flapping Suppression</h4><p><strong>Flapping detection</strong></p>
+<p>IS-IS interfaces start a flapping counter. If the interval between two consecutive flapping_events is shorter than the detecting-interval, a valid flapping_event is recorded, and the flapping_count increases by 1. When the flapping_count reaches or exceeds the threshold, the system determines that flapping occurs, implements flapping suppression, and sets the flapping_count to 0. If the interval between two valid flapping_events is greater than or equal to the resume-interval before the flapping_count reaches the threshold again, the system sets the flapping_count to 0. Interfaces start the suppression timer when the state of a neighbor relationship last changes to Init or Down. The detecting-interval, threshold, and resume-interval are configurable.</p>
+<p><strong>Flapping suppression</strong></p>
+<p>Flapping suppression works in either Hold-down or Hold-max-cost mode.</p>
+<ul><li>Hold-down mode: If frequent flooding and network topology changes occur during neighbor relationship establishment, interfaces prevent neighbor relationship reestablishment during Hold-down suppression to minimize LSDB synchronization attempts and packet exchanges.</li><li>Hold-max-cost mode: If the traffic forwarding path frequently changes, interfaces use the maximum cost of the flapping link during the suppression period to prevent traffic from passing through the flapping link.</li></ul>
+<p>If both modes are enabled, flapping suppression first works in Hold-down mode and then in Hold-max-cost mode.</p>
+<p>The default mode is Hold-max-cost mode. The mode and suppression period can be changed manually.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>When an interface enters the flapping suppression state, all neighbor relationships on the interface enter the state accordingly.</p>
+</div></div>
+<p><strong>Exiting flapping suppression</strong></p>
+<p>Interfaces exit flapping suppression in the following scenarios:</p>
+<ul><li>The suppression timer expires.</li><li>The corresponding IS-IS process is reset.</li><li>A command is run to exit flapping suppression.</li><li>Three IIHs in which the padding TLV carries a sub-TLV with the value being 251 are sent consecutively to instruct a neighbor to forcibly exit flapping suppression.</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Typical Scenarios</h4><p><strong>Basic scenario</strong></p>
+<p>In <a href="#EN-US_CONCEPT_0000001130624308__isis_suppress_flapping_0001">Figure 1</a>, the traffic forwarding path is DeviceA -&gt; DeviceB -&gt; DeviceC -&gt; DeviceE -&gt; DeviceF. After the link between DeviceB and DeviceC fails, the forwarding path switches to DeviceA -&gt; DeviceB -&gt; DeviceD -&gt; DeviceE -&gt; DeviceF. If the neighbor relationship between DeviceB and DeviceC frequently flaps when the path switchover commences, the forwarding path will also experience frequent switching, causing traffic loss and affecting network stability. If the neighbor relationship flapping meets suppression conditions, flapping suppression takes effect.</p>
+<ul><li>If flapping suppression works in Hold-down mode, the neighbor relationship between DeviceB and DeviceC is prevented from being reestablished during the suppression period, in which traffic is forwarded along the path DeviceA -&gt; DeviceB -&gt; DeviceD -&gt; DeviceE -&gt; DeviceF.</li><li>If flapping suppression works in Hold-max-cost mode, the maximum cost is used as the cost of the link between DeviceB and DeviceC during the suppression period, and traffic is forwarded along the path DeviceA -&gt; DeviceB -&gt; DeviceD -&gt; DeviceE -&gt; DeviceF.</li></ul>
+<div class="fignone" id="EN-US_CONCEPT_0000001130624308__isis_suppress_flapping_0001"><a name="EN-US_CONCEPT_0000001130624308__isis_suppress_flapping_0001"></a><a name="isis_suppress_flapping_0001"></a><span class="figcap"><b>Figure 1 </b>Flapping suppression in a basic scenario</span><br><span><img class="vsd" src="figure/en-us_image_0000001130784158.png"></span></div>
+<p><strong>Broadcast scenario</strong></p>
+<p>In <a href="#EN-US_CONCEPT_0000001130624308__isis_suppress_flapping_0003">Figure 2</a>, four devices are neighbors on the same broadcast network. If DeviceC flaps due to a link failure, and DeviceA and DeviceB were deployed at different times (for example, DeviceA was deployed earlier) or their flapping suppression parameters are different, DeviceA first detects the flapping and suppresses the neighbor relationship with DeviceC. Consequently, the IIHs sent by DeviceA do not carry DeviceC's router ID. However, DeviceB has not yet detected the flapping and still considers DeviceC valid. As a result, the DIS candidates identified by Device A are Device B and Device D, whereas the DIS candidates identified by Device B are Device A, Device C, and Device D. Different candidates result in different election results, which may lead to route calculation errors. To prevent this problem in scenarios where a broadcast interface has multiple neighbors, all the neighbor relationships on the interface are suppressed when the state of a neighbor relationship last changes to Initial or Down. Specifically, if DeviceC flaps, neighbor relationships with DeviceA, DeviceB, and DeviceD are all suppressed. After the network stabilizes and the suppression timer expires, DeviceA, DeviceB, and DeviceD are restored to normal status.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130624308__isis_suppress_flapping_0003"><a name="EN-US_CONCEPT_0000001130624308__isis_suppress_flapping_0003"></a><a name="isis_suppress_flapping_0003"></a><span class="figcap"><b>Figure 2 </b>Flapping suppression on a broadcast network</span><br><span><img class="vsd" src="figure/en-us_image_0000001176663907.png"></span></div>
+<p><strong>Scenario of multi-level networking</strong></p>
+<p>In <a href="#EN-US_CONCEPT_0000001130624308__isis_suppress_flapping_0004">Figure 3</a>, DeviceA, DeviceB, DeviceC, DeviceE, and DeviceF are Level-1 neighbors in area 1. DeviceB, DeviceD, and DeviceE are Level-2 neighbors in area 0. Traffic from DeviceA to DeviceF is preferentially forwarded along an intra-area route, and the forwarding path is DeviceA -&gt; DeviceB -&gt; DeviceC -&gt; DeviceE -&gt; DeviceF. When the neighbor relationship between DeviceB and DeviceC flaps and the flapping meets suppression conditions, flapping suppression takes effect in the default mode (Hold-max-cost mode). Consequently, the maximum cost is used as the cost of the link between DeviceB and DeviceC. However, the forwarding path remains unchanged because intra-area routes take precedence over inter-area routes during route selection according to IS-IS route selection rules. To prevent traffic loss in multi-area scenarios, configure the Hold-down mode to prevent the neighbor relationship between DeviceB and DeviceC from being reestablished during the suppression period. During this period, traffic is forwarded along the path DeviceA -&gt; DeviceB -&gt; DeviceD -&gt; DeviceE -&gt; DeviceF.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>By default, the Hold-max-cost mode takes effect. The mode can be changed to Hold-down manually.</p>
+</div></div>
+<div class="fignone" id="EN-US_CONCEPT_0000001130624308__isis_suppress_flapping_0004"><a name="EN-US_CONCEPT_0000001130624308__isis_suppress_flapping_0004"></a><a name="isis_suppress_flapping_0004"></a><span class="figcap"><b>Figure 3 </b>Flapping suppression in a multi-level scenario</span><br><span><img class="vsd" src="figure/en-us_image_0000001130784156.png"></span></div>
+<p><strong>Scenario with both link-bundle and IS-IS neighbor relationship flapping suppression configured</strong></p>
+<p>When the traffic rate is too high for one link to tolerate, multiple links must be used. In such cases, if one link fails, traffic is switched to another link and excess traffic is discarded due to the new link's limited forwarding capacity. If the number of faulty links reaches the upper threshold, the maximum cost is used as the cost of all links in the link bundle to switch all service traffic to the backup nodes. If both link-bundle and neighbor relationship flapping suppression are configured and the number of flapping links reaches the upper threshold, the maximum cost must be configured as the cost of all other links in the link bundle to prevent service loss caused by user traffic congestion. In <a href="#EN-US_CONCEPT_0000001130624308__isis_suppress_flapping_0006">Figure 4</a>, two parallel links exist between DeviceA and DeviceC. If link 1 is faulty and link 2 is incapable of bearing all service traffic, traffic loss occurs. If both link-bundle and neighbor relationship flapping suppression are configured and link 1 flaps, the maximum cost must also be configured for link 2 to avoid service traffic congestion. Only the Hold-max-cost mode therefore can be configured for neighbor relationship flapping suppression to switch the traffic forwarding path to DeviceA -&gt; DeviceB -&gt; DeviceC.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130624308__isis_suppress_flapping_0006"><a name="EN-US_CONCEPT_0000001130624308__isis_suppress_flapping_0006"></a><a name="isis_suppress_flapping_0006"></a><span class="figcap"><b>Figure 4 </b>Scenario with both link-bundle and IS-IS neighbor relationship flapping suppression configured</span><br><span><img class="vsd" src="figure/en-us_image_0000001176663905.png"></span></div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_isis_ipv4_cfg_0043.html">Configuring IS-IS Neighbor Relationship Flapping Suppression
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_isis_ipv4_cfg_0045.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

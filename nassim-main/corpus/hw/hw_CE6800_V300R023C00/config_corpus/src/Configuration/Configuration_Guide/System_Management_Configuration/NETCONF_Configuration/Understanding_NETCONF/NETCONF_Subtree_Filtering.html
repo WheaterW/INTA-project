@@ -1,0 +1,230 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="topic">
+<meta name="DC.Title" content="NETCONF Subtree Filtering">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_netconf_cfg1_0003.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_netconf_cfg1_0006.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TOPIC_0000001563762333">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>NETCONF Subtree Filtering</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TOPIC_0000001563762333"></a><a name="EN-US_TOPIC_0000001563762333"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">NETCONF Subtree Filtering</h1>
+<div><div class="section"><h4 class="sectiontitle">Overview</h4><p>Subtree filtering is a mechanism that allows an application to query particular data for a &lt;get&gt; or &lt;get-config&gt; operation.</p>
+<p>Subtree filtering provides a small set of filters for inclusion, simple content exact-match, and selection. The NETCONF agent does not need to use any semantics specific to any particular data model during processing, allowing for simple and centralized implementation policies.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Subtree Filter Components</h4><p>Each node specified in subtree filtering represents a filter. The filter only selects nodes associated with the basic data model of a specified database on the NETCONF server. A node matching any filtering rule and element hierarchy is selected. <a href="#EN-US_TOPIC_0000001563762333__tab_3">Table 1</a> describes subtree filter components.</p>
+
+<div class="tableBorder"><a name="EN-US_TOPIC_0000001563762333__tab_3"></a><a name="tab_3"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_TOPIC_0000001563762333__tab_3" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Subtree filter components</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="25.81%" id="mcps1.3.2.3.2.3.1.1" liSelected="liSelected"><p>Component</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="74.19%" id="mcps1.3.2.3.2.3.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="25.81%" headers="mcps1.3.2.3.2.3.1.1 "><p>Namespace selection</p>
+</td>
+<td class="cellrowborder" valign="top" width="74.19%" headers="mcps1.3.2.3.2.3.1.2 "><p>If namespaces are used, the filter output will include only elements from the specified namespace.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="25.81%" headers="mcps1.3.2.3.2.3.1.1 "><p>Containment node</p>
+</td>
+<td class="cellrowborder" valign="top" width="74.19%" headers="mcps1.3.2.3.2.3.1.2 "><p>A containment node is a node that contains child elements within a subtree filter.</p>
+<p>For each containment node specified in a subtree filter, all data model instances that are exact matches for the specified namespaces and element hierarchy are included in the filter output.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="25.81%" headers="mcps1.3.2.3.2.3.1.1 "><p>Content match node</p>
+</td>
+<td class="cellrowborder" valign="top" width="74.19%" headers="mcps1.3.2.3.2.3.1.2 "><p>A content match node is a leaf node that contains simple content within a subtree filter.</p>
+<p>This node is used to select some or all of its relevant nodes for filter output and represents an exact-match filter of the leaf node element content.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="25.81%" headers="mcps1.3.2.3.2.3.1.1 "><p>Selection node</p>
+</td>
+<td class="cellrowborder" valign="top" width="74.19%" headers="mcps1.3.2.3.2.3.1.2 "><p>A selection node is an empty leaf node within a subtree filter.</p>
+<p>This node represents an explicit selection filter of the underlying data model. Presence of any selection nodes within a set of sibling nodes will cause the filter to select the specified subtrees and suppress automatic selection of the entire set of sibling nodes in the underlying data model.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul><li><p>Namespace selection</p>
+<p>If the XML namespace associated with a specific node in the &lt;filter&gt; element is the same as that in the underlying data model, the namespace is matched.</p>
+<pre class="screen">&lt;filter type="subtree"&gt;
+ &lt;nacm xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-acm"/&gt;
+&lt;/filter&gt;</pre>
+<p>In this example, the &lt;nacm&gt; element is a selection node. If the node namespace complies with <strong>urn:ietf:params:xml:ns:yang:ietf-netconf-acm</strong>, the node and its child nodes will be included in the filter for output.</p>
+</li><li><p>Containment node</p>
+<p>The child element of a containment node can be a node of any type, including another containment node. For each containment node specified in the subtree filter, all data model instances that completely match the specified namespace and element hierarchy, and any attribute-matching expression are included in the output.</p>
+<pre class="screen">&lt;filter type="subtree"&gt;
+ &lt;nacm xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-acm"&gt;
+  &lt;rule-list/&gt;
+ &lt;/nacm&gt;
+&lt;/filter&gt;</pre>
+<p>In this example, the &lt;rule-list&gt; element is a containment node.</p>
+</li><li><p>Content match node</p>
+<p>A leaf node that contains simple content is called a content match node. It is used to select some or all of its sibling nodes for filter output and represents exact match of the leaf node element content.</p>
+<pre class="screen">&lt;filter type="subtree"&gt;
+ &lt;nacm xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-acm"&gt;
+  &lt;rule-list&gt;
+   &lt;name&gt;fred&lt;/name&gt;
+  &lt;/rule-list&gt;
+ &lt;/nacm&gt;
+&lt;/filter&gt;</pre>
+<p>In this example, the &lt;rule-list&gt; node is a containment node, and the &lt;name&gt; node is a content match node. Because the sibling nodes of the &lt;name&gt; node are not specified, only &lt;rule-list&gt; nodes that comply with namespace <strong>urn:ietf:params:xml:ns:yang:ietf-netconf-acm</strong>, with their element hierarchies matching the <strong>name</strong> element and their values being <strong>fred</strong>, can be included in the filter output. All sibling nodes of the &lt;name&gt; node are included in the filter output.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The support-filter statement in the YANG model indicates whether filtering based on node content is supported when a node is being operated.</p>
+<ul><li>For key nodes, filtering based on node content is supported by default.</li><li>For non-key nodes, filtering based on node content is not supported by default. If the value of the support-filter statement is set to <strong>true</strong> for a non-key node, filtering based on node content is supported.</li></ul>
+</div></div>
+</li><li><p>Selection node</p>
+<p>Selection nodes represent a basic data model for an explicit selection of filters. If any selection node appears in a group of same-level sibling nodes, the filter selects a specified subtree and suppresses the automatic selection of the entire sibling node set in the basic data model. In a filtering expression, an empty tag (such as &lt;rule-list/&gt;) or an expression with explicit start and end tags (such as &lt;rule-list&gt; &lt;/rule-list&gt;) can be used to specify an empty leaf node. In this case, all blank characters will be ignored.</p>
+<pre class="screen">&lt;filter type="subtree"&gt;
+ &lt;nacm xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-acm"&gt;
+  &lt;rule-list/&gt;
+ &lt;/nacm&gt;
+&lt;/filter&gt;</pre>
+<p>In this example, the &lt;nacm&gt; node is a containment node, and the &lt;rule-list&gt; node is a selection node. The &lt;rule-list&gt; node can be included for filter output only when the &lt;rule-list&gt; node complies with namespace <strong>urn:ietf:params:xml:ns:yang:ietf-netconf-acm</strong> and is contained in the &lt;nacm&gt; element in the root directory of the configuration database.</p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Subtree Filter Processing</h4><div class="p">First, the subtree filter output is set as empty. Each subtree filter can contain one or more data model segments, each of which represents one of the selected output parts of the selected data model. Each subtree data segment is composed of data models supported by the NETCONF server. If the entire subtree data segment completely matches part of the data models supported by the NETCONF server, all nodes and child nodes of the subtree data segment are selected and output to the query result.<ul><li><p>If no filter is used, all data in the current data model is returned in the query result.</p>
+<p>RPC request</p>
+<pre class="screen">&lt;rpc message-id="101"
+xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+ &lt;get/&gt;
+&lt;/rpc&gt;</pre>
+<p>RPC reply</p>
+<pre class="screen">&lt;rpc-reply message-id="101"
+xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+ &lt;data&gt;
+  &lt;!-- ... entire set of data returned ... --&gt;
+ &lt;/data&gt;
+&lt;/rpc-reply&gt;</pre>
+</li><li><p>If an empty filter is used, the query result contains no data output, in that no content match or selection node is specified.</p>
+<p>RPC request</p>
+<pre class="screen">&lt;rpc message-id="101"
+xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+ &lt;get&gt;
+  &lt;filter type="subtree"&gt;
+  &lt;/filter&gt;
+ &lt;/get&gt;
+&lt;/rpc&gt;</pre>
+<p>RPC reply</p>
+<pre class="screen">&lt;rpc-reply message-id="101"
+xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+ &lt;data&gt;
+ &lt;/data&gt;
+&lt;/rpc-reply&gt;</pre>
+</li><li><p>Multi-subtree filtering</p>
+<p>The following example uses the <strong>root</strong>, <strong>fred</strong>, and <strong>barney</strong> subtree filters.</p>
+<p>The <strong>root</strong> subtree filter contains one containment nodes (&lt;rule-list&gt;), one content match node (&lt;name&gt;), and one selection node (&lt;rule&gt;). As for subtrees that meet selection criteria, only &lt;rule&gt; is selected.</p>
+<p>The <strong>fred</strong> subtree filter contains two containment nodes (&lt;rule-list&gt; and &lt;rule&gt;), one content match node (&lt;name&gt;), and one selection node (&lt;module-name&gt;). As for subtrees that meet the selection criteria, only the &lt;module-name&gt; element in &lt;rule&gt; is selected.</p>
+<p>The <strong>barney</strong> subtree filter contains two containment nodes (&lt;rule-list&gt; and &lt;rule&gt;), two content match nodes (&lt;name&gt; and &lt;group&gt;), and one selection node (&lt;action&gt;). User <strong>barney</strong> does not belong to the <strong>netconf</strong> group and does not comply with the subtree filtering rule. Therefore, the entire subtree of <strong>barney</strong> (including its parent node &lt;rule-list&gt;) is not selected.</p>
+<p>RPC request</p>
+<pre class="screen">&lt;rpc message-id="101"
+xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+  &lt;get-config&gt;
+    &lt;source&gt;
+      &lt;running /&gt;
+    &lt;/source&gt;
+    &lt;filter type="subtree"&gt;
+      &lt;nacm xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-acm"&gt;
+        &lt;rule-list&gt;
+          &lt;name&gt;root&lt;/name&gt;
+          &lt;rule /&gt;
+        &lt;/rule-list&gt;
+        &lt;rule-list&gt;
+          &lt;name&gt;fred&lt;/name&gt;
+          &lt;rule&gt;
+            &lt;module-name /&gt;
+          &lt;/rule&gt;
+        &lt;/rule-list&gt;
+        &lt;rule-list&gt;
+          &lt;name&gt;barney&lt;/name&gt;
+          &lt;group&gt;netconf&lt;/group&gt;
+          &lt;rule&gt;
+            &lt;action /&gt;
+          &lt;/rule&gt;
+        &lt;/rule-list&gt;
+      &lt;/nacm&gt;
+    &lt;/filter&gt;
+  &lt;/get-config&gt;
+&lt;/rpc&gt;</pre>
+<p>RPC reply</p>
+<pre class="screen">&lt;rpc-reply message-id="101"
+xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
+  &lt;data&gt;
+    &lt;nacm xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-acm"&gt;
+      &lt;rule-list&gt;
+        &lt;name&gt;root&lt;/name&gt;
+        &lt;rule&gt;
+          &lt;name&gt;aaa&lt;/name&gt;
+          &lt;module-name&gt;huawei-aaa&lt;/module-name&gt;
+          &lt;access-operations&gt;*&lt;/access-operations&gt;
+          &lt;action&gt;permit&lt;/action&gt;
+        &lt;/rule&gt;
+      &lt;/rule-list&gt;
+      &lt;rule-list&gt;
+        &lt;name&gt;fred&lt;/name&gt;
+        &lt;rule&gt;
+          &lt;name&gt;ifm&lt;/name&gt;
+          &lt;module-name&gt;huawei-ifm&lt;/module-name&gt;
+        &lt;/rule&gt;
+      &lt;/rule-list&gt;
+    &lt;/nacm&gt;
+  &lt;/data&gt;
+&lt;/rpc-reply&gt;</pre>
+</li></ul>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_netconf_cfg1_0003.html">Understanding NETCONF
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_netconf_cfg1_0006.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

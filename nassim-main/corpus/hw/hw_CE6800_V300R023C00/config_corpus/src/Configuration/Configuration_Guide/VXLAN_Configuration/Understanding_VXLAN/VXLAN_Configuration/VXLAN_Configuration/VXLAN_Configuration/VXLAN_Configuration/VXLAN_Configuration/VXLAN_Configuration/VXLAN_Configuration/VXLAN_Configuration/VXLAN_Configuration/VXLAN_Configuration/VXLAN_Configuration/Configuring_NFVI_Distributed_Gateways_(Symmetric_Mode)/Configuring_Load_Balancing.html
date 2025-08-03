@@ -1,0 +1,99 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring Load Balancing">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../vrp/dc_vrp_vxlan_cfg_1232.html">
+<meta name="DC.Relation" scheme="URI" content="../vrp/dc_vrp_vxlan_cfg_1234.html">
+<meta name="DC.Relation" scheme="URI" content="../vrp/dc_vrp_vxlan_cfg_1237.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001196047233">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Configuring Load Balancing</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001196047233"></a><a name="EN-US_TASK_0000001196047233"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring Load Balancing</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001196047233__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>In NFVI scenarios where distributed gateways are deployed, traffic forwarded between UEs and the Internet through VNFs is called north-south traffic, and traffic forwarded between VNFs is called east-west traffic. To balance both types of traffic, you need to configure load balancing on DC gateways and L2GWs/L3GWs.</p>
+<p>You can use either of the following configuration methods as required:</p>
+</div></div>
+<div class="steps-unordered"><a name="EN-US_TASK_0000001196047233__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ul><li><span>Run the <a href="cmdqueryname=ip+route-static"><b><span class="cmdname">ip route-static</span></b></a> <strong><span>vpn-instance</span></strong> or <a href="cmdqueryname=ipv6+route-static"><b><span class="cmdname">ipv6 route-static</span></b></a> <strong><span>vpn-instance</span></strong> command on each L2GW/L3GW to configure static routes destined for VNF1 and VNF2. When running the command, specify the <strong>inter-protocol-ecmp</strong> keyword to allow hybrid load balancing between static routes and dynamic protocol routes. In addition, set the preference of static routes to 255, so that these routes have the same preference as BGP EVPN routes.</span></li><li><span>To configure a VPN IGP route to a VNF on an L2GW/L3GW, perform the following steps:</span><ol><li class="substepexpand"><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Enter the BGP view.</span><p><pre class="screen"><a href="cmdqueryname=bgp"><b><span class="cmdname">bgp</span></b></a> <i><span class="varname">as-number</span></i></pre>
+</p></li><li class="substepexpand"><span>Enter the BGP VPN instance IPv4/IPv6 address family view.</span><p><pre class="screen"><a href="cmdqueryname=ipv4-family"><b><span class="cmdname">ipv4-family</span></b></a> <strong><span>vpn-instance</span></strong> <i><span class="varname">vpn-instance-name</span></i> or <a href="cmdqueryname=ipv6-family"><b><span class="cmdname">ipv6-family</span></b></a> <strong><span>vpn-instance</span></strong> <i><span class="varname">vpn-instance-name</span></i></pre>
+</p></li><li class="substepexpand"><span>Configure the maximum number of equal-cost BGP routes for load balancing with routes of other protocols.</span><p><pre class="screen"><a href="cmdqueryname=maximum+load-balancing+mixed"><b><span class="cmdname">maximum load-balancing mixed</span></b></a> <i><span class="varname">number</span></i></pre>
+</p><p><p>By default, the maximum number of equal-cost BGP routes for load balancing with routes of other protocols is 0, indicating that load balancing is not performed.</p>
+<p>This step serves the following purposes:</p>
+<ul><li>Enables load balancing between different types of BGP routes (for example, between IBGP and EBGP routes or between leaked and non-leaked routes) and sets the maximum number of BGP equal-cost routes for load balancing.</li><li>Enables BGP routes to work in load-balancing mode with routes of other protocols. The route management module determines whether to select BGP routes for hybrid load balancing.</li></ul>
+</p></li><li class="substepexpand"><span>Return to the BGP view.</span><p><pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Enter the BGP-EVPN address family view.</span><p><pre class="screen"><a href="cmdqueryname=l2vpn-family+evpn"><b><span class="cmdname">l2vpn-family evpn</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Enable BGP Add-Path and set the number of preferred routes that the RR can select.</span><p><pre class="screen"><a href="cmdqueryname=bestroute+add-path"><b><span class="cmdname">bestroute add-path</span></b></a> <strong><span>path-number</span></strong> <i><span class="varname">path-number</span></i></pre>
+<p>By default, BGP Add-Path is not enabled.</p>
+</p></li><li class="substepexpand"><span>Enable the function to receive Add-Path routes from or send Add-Path routes to a DC gateway or both.</span><p><pre class="screen"><a href="cmdqueryname=peer"><b><span class="cmdname">peer</span></b></a> { <i><span class="varname">ipv4-address</span></i> | <i><span class="varname">group-name</span></i> | <i><span class="varname">ipv6-address</span></i> } <strong><span>capability-advertise</span></strong> <strong><span>add-path</span></strong> { <strong><span>send</span></strong> | <strong><span>receive</span></strong> | <strong><span>both</span></strong> }</pre>
+</p></li><li class="substepexpand"><span>Configure the number of preferred routes to be advertised to the DC gateway.</span><p><pre class="screen"><a href="cmdqueryname=peer"><b><span class="cmdname">peer</span></b></a> { <i><span class="varname">ipv4-address</span></i> | <i><span class="varname">group-name</span></i> | <i><span class="varname">ipv6-address</span></i> } <strong><span>advertise add-path path-number</span></strong> <i><span class="varname">path-number</span></i></pre>
+</p></li><li class="substepexpand"><span>Return to the BGP view.</span><p><pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Return to the system view.</span><p><pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001196047233__en-us_task_0234857734_screen14848162118611"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001196047233__en-us_task_0234857734_cmdname1784862115612">commit</span></b></a></pre>
+</p></li></ol>
+</li></ul></div>
+<div class="postreq"><a name="EN-US_TASK_0000001196047233__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Follow-up Procedure</h4>
+<div class="p"><ul><li>By default, after finding that the next-hop outbound interfaces of received Layer 3 traffic are VXLAN and non-VXLAN interfaces working in hybrid load-balancing mode, the device load-balances this traffic among these interfaces. If local traffic does not need to enter VXLAN tunnels, perform the following configurations so that traffic is forwarded only to a local non-VXLAN outbound interface.<pre class="screen"><a href="cmdqueryname=load-balance+ecmp"><b><span class="cmdname">load-balance ecmp</span></b></a>
+<a href="cmdqueryname=vxlan-overlay"><b><span class="cmdname">vxlan-overlay</span></b></a> { <strong><span>network</span></strong> | <strong><span>all</span></strong> } <strong><span>local-preference</span></strong> <strong><span>enable</span></strong></pre>
+<p>If <strong><span>network</span></strong> is specified, traffic entering the local device from the VXLAN network side and matching a route is forwarded only to a local non-VXLAN outbound interface.</p>
+<p>If <strong><span>all</span></strong> is specified, all traffic that matches a route is forwarded only to a local non-VXLAN outbound interface.</p>
+</li></ul>
+</div></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../vrp/dc_vrp_vxlan_cfg_1232.html">Configuring NFVI Distributed Gateways (Symmetric Mode)
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../vrp/dc_vrp_vxlan_cfg_1234.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../vrp/dc_vrp_vxlan_cfg_1237.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

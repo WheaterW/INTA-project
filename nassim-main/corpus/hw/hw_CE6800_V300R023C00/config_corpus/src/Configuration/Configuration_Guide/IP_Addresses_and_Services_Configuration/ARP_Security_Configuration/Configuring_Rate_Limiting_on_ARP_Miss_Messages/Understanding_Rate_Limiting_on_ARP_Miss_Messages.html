@@ -1,0 +1,94 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding Rate Limiting on ARP Miss Messages">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_arp_security_cfg_0033.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_arp_security_cfg_0035.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="ARP Security">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="ARP Security">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featurename" content="ARP Security">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001176741539">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding Rate Limiting on ARP Miss Messages</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001176741539"></a><a name="EN-US_CONCEPT_0000001176741539"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding Rate Limiting on ARP Miss Messages</h1>
+<div><div class="section"><h4 class="sectiontitle">Fundamentals</h4><p>If a device is flooded with IP packets that contain unresolvable destination IP addresses, the device generates a large number of ARP Miss messages. This is because the device has no ARP entry that matches the next hop of the route. IP packets, which trigger ARP Miss messages, are sent to the CPU for processing. As a result, the device generates and delivers many temporary ARP entries based on ARP Miss messages, and sends a large number of ARP request messages to the destination network. This increases CPU usage of the device and consumes considerable bandwidth resources of the destination network.</p>
+<p>The following describes in detail the procedure of initiating an ARP Miss attack with reference to <a href="#EN-US_CONCEPT_0000001176741539__fig_dc_fd_ARP_SEC_000501">Figure 1</a>.</p>
+<ol><li>The attacker sends IP packets with the unresolvable destination IP address 10.2.1.5/24 to the gateway (Device).</li><li>Device fails to learn the MAC address matching 10.2.1.5, and sends an ARP Miss message.</li><li>Device generates and delivers a temporary ARP entry based on the ARP Miss message, and sends an ARP request message to the destination network.</li><li>Device deletes the temporary ARP entry after the aging time of the entry expires. If no ARP entry matches the IP packets forwarded by Device and the attacker keeps sending IP packets with the unresolvable destination IP address, Device repeats steps 2 and 3. This increases CPU usage of Device and consumes considerable bandwidth resources of the destination network.</li></ol>
+<div class="fignone" id="EN-US_CONCEPT_0000001176741539__fig_dc_fd_ARP_SEC_000501"><a name="EN-US_CONCEPT_0000001176741539__fig_dc_fd_ARP_SEC_000501"></a><a name="fig_dc_fd_ARP_SEC_000501"></a><span class="figcap"><b>Figure 1 </b>ARP Miss attack</span><br><span><img class="vsd" src="figure/en-us_image_0000001886034389.png"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Application Scenarios</h4><p>To avoid the preceding issues, the device can be configured to limit the rate of ARP Miss messages in various scenarios, as described in <a href="#EN-US_CONCEPT_0000001176741539__table551051810303">Table 1</a>.</p>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001176741539__table551051810303"></a><a name="table551051810303"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001176741539__table551051810303" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Scenarios for rate limiting on ARP Miss messages</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="50%" id="mcps1.3.2.3.2.3.1.1" liSelected="liSelected"><p>Scenario</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="50%" id="mcps1.3.2.3.2.3.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.3.2.3.1.1 "><p>Limiting the rate of ARP Miss messages based on source IP addresses</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.3.2.3.1.2 "><p>If the rate of ARP Miss messages triggered by IP packets from a source IP address exceeds the limit, the device considers that this address has initiated an attack. If a source IP address is specified, the rate of ARP Miss messages triggered by IP packets from this source IP address is limited. If no source IP address is specified, the rate of ARP Miss messages triggered by IP packets from any source IP address is limited.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.3.2.3.1.1 "><p>Limiting the rate of ARP Miss messages globally or in a VLAN</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.3.2.3.1.2 "><p>Limiting the rate of ARP Miss messages globally: If a device is flooded with IP packets that contain unresolvable destination IP addresses, the number of ARP Miss messages to be processed on the device is limited.</p>
+<p>Limiting the rate of ARP Miss messages in a VLAN: If all interfaces in a VLAN are flooded with IP packets that contain unresolvable destination IP addresses, the number of ARP Miss messages to be processed in the VLAN is limited. The configuration in a VLAN does not affect IP packet forwarding on interfaces in other VLANs.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.3.2.3.1.1 "><p>Reducing the frequency of triggering ARP Miss messages by increasing the aging time of temporary ARP entries</p>
+</td>
+<td class="cellrowborder" valign="top" width="50%" headers="mcps1.3.2.3.2.3.1.2 "><p>When IP packets trigger ARP Miss messages, a device generates temporary ARP entries and sends ARP request messages to the destination network.</p>
+<p>If a device does not receive an ARP reply message during the aging time of temporary ARP entries, it discards the IP packets matching the temporary ARP entries and does not generate ARP Miss messages. After receiving an ARP reply message, the device generates a correct ARP entry to replace the temporary one.</p>
+<p>After temporary ARP entries age out, a device clears them. If no ARP entry matches the IP packets forwarded by the device, ARP Miss messages and temporary ARP entries are repeatedly generated.</p>
+<p>If a device undergoes an ARP Miss attack, you can increase the aging time of temporary ARP entries to reduce the frequency of triggering ARP Miss messages, mitigating the impact of the attack on the device.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_arp_security_cfg_0033.html">Configuring Rate Limiting on ARP Miss Messages
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_arp_security_cfg_0035.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,199 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring IPSG to Prevent Hosts with DHCP-assigned IP Addresses from Changing Their Own IP Addresses">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../galaxy_IPSG_cfg_0010.html">
+<meta name="DC.Relation" scheme="URI" content="../galaxy_IPSG_cfg_0012.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IPSG">
+<meta name="featuretype" content="Security">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IPSG">
+<meta name="featuretype" content="Security">
+<meta name="featurename" content="IPSG">
+<meta name="featuretype" content="Security">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001522209554">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring IPSG to Prevent Hosts with DHCP-assigned IP Addresses from Changing Their Own IP Addresses</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001522209554"></a><a name="EN-US_TASK_0000001522209554"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring IPSG to Prevent Hosts with DHCP-assigned IP Addresses from Changing Their Own IP Addresses</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001522209554__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In <a href="#EN-US_TASK_0000001522209554__fig12346621111">Figure 1</a>, PC1, PC2, and PC3 connect to the network through DeviceA, DeviceB functions as a DHCP server to dynamically assign IP addresses to PC1 and PC2, PC3 uses a static IP address, and Gateway is the enterprise egress gateway. The administrator hopes that the PC1 and PC2 cannot access the network using static IP addresses configured without permission.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1, interface2, interface3, and interface4 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, <span>100GE</span><span>1/0/3</span>, and <span>100GE</span><span>1/0/4</span>, respectively.</p>
+</div></div>
+<div class="fignone" id="EN-US_TASK_0000001522209554__fig12346621111"><a name="EN-US_TASK_0000001522209554__fig12346621111"></a><a name="fig12346621111"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring IPSG to prevent hosts with DHCP-assigned IP addresses from changing their own IP addresses</span><br><span><img src="../images/en-us_image_0000001573744797.png"></span></div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001522209554__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure the DHCP server function on DeviceB.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">HUAWEI</span>] <strong>sysname DeviceB</strong>
+[*<span class="keyword">DeviceB</span>] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceB] <strong>vlan batch 10</strong>
+[*DeviceB] <strong>interface <span>100GE</span></strong> <strong><span>1/0/1</span></strong>
+[*DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>port link-type trunk</strong>
+[*DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>port trunk allow-pass vlan 10</strong>
+[*DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[*DeviceB] <strong>dhcp enable</strong>
+[*DeviceB] <strong>ip pool 10</strong>
+[*DeviceB-ip-pool-10] <strong>network 10.1.1.0 mask 24</strong>
+[*DeviceB-ip-pool-10] <strong>gateway-list 10.1.1.1</strong>
+[*DeviceB-ip-pool-10] <strong>quit</strong>
+[*DeviceB] <strong>interface vlanif 10</strong>
+[*DeviceB-Vlanif10] <strong>dhcp enable</strong>
+[*DeviceB] <strong>interface vlanif 10</strong>
+[*DeviceB-Vlanif10] <strong>ip address 10.1.1.1 255.255.255.0</strong>
+[*DeviceB-Vlanif10]<strong> dhcp select global</strong>
+[*DeviceB-Vlanif10] <strong>quit</strong>
+[*<span class="keyword">DeviceB</span>] <strong>commit</strong></pre>
+</p></li><li><span>Configure DHCP snooping on DeviceA.</span><p><p># Create a VLAN and add interfaces to the VLAN.</p>
+</p><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[*<span class="keyword">DeviceA</span>] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>vlan batch 10</strong>
+[*DeviceA] <strong>interface <span>100GE</span></strong> <strong><span>1/0/1</span></strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>port link-type access</strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>port default vlan 10</strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[*DeviceA] <strong>interface <span>100GE</span></strong> <strong><span>1/0/2</span></strong>
+[*DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>port link-type access</strong>
+[*DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>port default vlan 10</strong>
+[*DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[*DeviceA] <strong>interface <span>100GE</span></strong> <strong><span>1/0/3</span></strong>
+[*DeviceA-<span>100GE</span><span>1/0/3</span>] <strong>port link-type access</strong>
+[*DeviceA-<span>100GE</span><span>1/0/3</span>] <strong>port default vlan 10</strong>
+[*DeviceA-<span>100GE</span><span>1/0/3</span>] <strong>quit</strong>
+[*DeviceA] <strong>interface <span>100GE</span></strong> <strong><span>1/0/4</span></strong>
+[*DeviceA-<span>100GE</span><span>1/0/4</span>] <strong>port link-type trunk</strong>
+[*DeviceA-<span>100GE</span><span>1/0/4</span>] <strong>port trunk allow-pass vlan 10</strong>
+[*DeviceA-<span>100GE</span><span>1/0/4</span>] <strong>quit</strong>
+[*<span class="keyword">DeviceA</span>] <strong>commit</strong></pre>
+<p># Enable DHCP snooping and configure <span>100GE</span><span>1/0/4</span> for connecting to the DHCP server as a trusted interface.</p>
+</p><p><pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>dhcp enable</strong>
+[*DeviceA] <strong>dhcp snooping enable</strong>
+[*DeviceA] <strong>vlan 10</strong>
+[*DeviceA-vlan10] <strong>dhcp snooping enable</strong>
+[*DeviceA-vlan10] <strong>dhcp snooping</strong> <strong>trusted</strong> <strong>interface</strong><strong> <span>100GE</span></strong> <strong><span>1/0/4</span></strong>
+[*<span class="keyword">DeviceA</span>] <strong>commit</strong></pre>
+</p></li><li><span>Create a static binding entry for PC3.</span><p><pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>user-bind static ip-address </strong><strong>10.0.0.3</strong> <strong>mac-address 00e0-fc12-3489</strong> <strong>interface <span>100GE</span> <span>1/0/3</span></strong> <strong>vlan 10</strong>
+[*<span class="keyword">DeviceA</span>] <strong>commit</strong></pre>
+</p></li><li><span>Enable IPSG in VLAN 10.</span><p><pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>vlan 10</strong>
+[*DeviceA-vlan10] <strong>ipv4 source check user-bind enable</strong>
+[*DeviceA-vlan10] <strong>quit</strong>
+[*<span class="keyword">DeviceA</span>] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001522209554__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Display dynamic binding entries corresponding to PC1 and PC2.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>display dhcp snooping user-bind all</strong>
+DHCP Dynamic Bind-table: 
+Flags:O - outer vlan ,I - inner vlan ,P - Vlan-mapping 
+IP Address       MAC Address     VSI/VLAN(O/I/P) Interface      Lease            
+-------------------------------------------------------------------------------- 
+10.1.1.254       00e0-fc12-3456  10  /--  /--    GE<span>100GE</span><span>1/0/1</span>       2014.08.17-07:31 
+10.1.1.253       00e0-fc12-3478  10  /--  /--    GE<span>100GE</span><span>1/0/2</span>        2014.08.17-07:34 
+-------------------------------------------------------------------------------- 
+Print count:      2     Total count:      2                 </pre>
+<p># Display the static binding entry corresponding to PC3.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>display user-bind static all</strong>                 
+DHCP static Bind-table:                                   
+Flags:O - outer vlan ,I - inner vlan 
+IP Address           MAC Address   VLAN(O/I)         Interface 
+-------------------------------------------------------------------------------- 
+10.0.0.3            00e0-fc12-3489   10/--           <span>100GE</span><span>1/0/3</span>
+-------------------------------------------------------------------------------- 
+Print count:      1     Total count:      1</pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001522209554__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Configuration Scripts</h4><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+vlan batch 10
+#
+dhcp enable
+#
+dhcp snooping enable
+user-bind static ip-address 10.0.0.3 mac-address 00e0-fc12-3489 interface <span>100GE</span> <span>1/0/3</span> vlan 10 
+#
+vlan 10
+ dhcp snooping enable 
+ dhcp snooping trusted interface <span>100GE</span> <span>1/0/4</span>
+ ipv4 source check user-bind enable 
+#
+interface <span>100GE</span> <span>1/0/1</span>
+ port default vlan 10 
+#
+interface <span>100GE</span> <span>1/0/2</span>
+ port default vlan 10 
+#
+interface <span>100GE</span> <span>1/0/3</span>
+ port default vlan 10
+#
+interface <span>100GE</span> <span>1/0/4</span>
+ port link-type trunk
+ port trunk allow-pass vlan 10
+#
+return</pre>
+<p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+vlan batch 10
+#
+dhcp enable
+#
+ip pool 10
+ gateway-list 10.1.1.1
+ network 10.1.1.0 mask 255.255.255.0
+#
+interface Vlanif10
+ ip address 10.1.1.1 255.255.255.0
+ dhcp select global
+# 
+interface <span>100GE</span> <span>1/0/1</span>
+ port link-type trunk 
+ port trunk allow-pass vlan 10
+#
+return</pre>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../galaxy_IPSG_cfg_0010.html">Configuring IPSG Based on a Dynamic Binding Table
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../galaxy_IPSG_cfg_0012.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

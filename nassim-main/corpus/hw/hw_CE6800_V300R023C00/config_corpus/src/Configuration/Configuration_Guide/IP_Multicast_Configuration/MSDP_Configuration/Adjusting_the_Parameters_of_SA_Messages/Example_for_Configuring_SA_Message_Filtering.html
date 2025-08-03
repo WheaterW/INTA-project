@@ -1,0 +1,426 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring SA Message Filtering">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_msdp_cfg_0016.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_msdp_cfg_0038.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="MSDP">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="MSDP">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="MSDP">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130623922">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring SA Message Filtering</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130623922"></a><a name="EN-US_TASK_0000001130623922"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring SA Message Filtering</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130623922__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>As shown in <a href="#EN-US_TASK_0000001130623922__fig9472039125916">Figure 1</a>, service data is transmitted in multicast mode on a network that is divided into three PIM-SM domains. Multicast source Source1 sends multicast data to multicast groups 225.1.1.0/30 and 226.1.1.0/30, and multicast source Source2 sends multicast data to the multicast group 227.1.1.0/30. HostA and HostB receive only multicast data sent to multicast groups 225.1.1.0/30 and 226.1.1.0/30, and HostC receives only multicast data sent to multicast groups 226.1.1.0/30 and 227.1.1.0/30.</p>
+<div class="fignone" id="EN-US_TASK_0000001130623922__fig9472039125916"><a name="EN-US_TASK_0000001130623922__fig9472039125916"></a><a name="fig9472039125916"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring SA message filtering</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1, interface2, interface3, and interface4 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, <span>100GE</span><span>1/0/3</span>, and <span>100GE</span><span>1/0/4</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001130783730.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130623922__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>Configure MSDP to implement multicast source information sharing across domains. Then, configure SA message filtering to ensure that receivers can only receive the corresponding multicast data.</p>
+<ol><li><p>Enable the multicast function and configure interface IP addresses on devices, and configure OSPF in each PIM-SM domain for intra-domain interconnection.</p>
+</li><li><p>Enable PIM-SM on each interface, configure BSR boundaries to form PIM-SM domains, and enable IGMP on interfaces connected to hosts. </p>
+</li><li><p>Configure Loopback0 interfaces on DeviceA, DeviceC, and DeviceD as the C-BSR and C-RP of their respective PIM-SM domains.</p>
+</li><li><p>Set up MSDP peer relationships between RPs in PIM-SM domains. Establish peer relationships between DeviceA and DeviceC, and between DeviceC and DeviceD.</p>
+</li><li><p>Configure the rules for filtering SA messages. Specifically, configure DeviceC not to forward SA messages related to Source1 (225.1.1.0/30) to DeviceD, and configure DeviceD not to create SA messages related to Source2.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130623922__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enable the multicast function. Based on <a href="#EN-US_TASK_0000001130623922__fig9472039125916">Figure 1</a>, assign an IP address to each interface, and configure OSPF as a unicast routing protocol for interworking in each PIM-SM domain.</span><p><p># Enable the multicast function on DeviceA and configure interface IP addresses and masks. The configurations of other devices are similar to the configuration of DeviceA. For detailed configurations, see Configuration Scripts.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>multicast routing-enable</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ip address 10.1.1.1 24</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>ip address 10.1.2.1 24</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/3</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/3</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/3</span>] <strong>ip address 192.168.1.1 24</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/3</span>] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword"></span>DeviceA] <strong>interface loopback 0</strong>
+[<span class="keyword">*</span><span class="keyword"></span>DeviceA-LoopBack0] <strong>ip address 1.1.1.1 255.255.255.255</strong>
+[<span class="keyword">*</span><span class="keyword"></span>DeviceA-LoopBack0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>area 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>network 1.1.1.1 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>network 10.1.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>network 10.1.2.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>network 10.2.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>Configure PIM-SM.</span><p><p># Enable PIM-SM on each interface. The following uses the configuration of DeviceA as an example. The configurations of other devices are similar to the configuration of DeviceA. For detailed configurations, see Configuration Scripts.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>interface <span>100ge</span> <span>1/0/1</span></strong> 
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/1</span>] <strong>pim sm</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword"></span><span class="keyword"></span><span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/2</span>] <strong>pim sm</strong>
+[<span class="keyword">*</span><span class="keyword"></span><span class="keyword"></span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>interface <span>100ge</span> <span>1/0/3</span></strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/3</span>] <strong>pim sm</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/3</span>] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>interface loopback 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-LoopBack0] <strong>pim sm</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-LoopBack0] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</p></li><li><span>Enable IGMP on the host-side interface. The following uses DeviceA as an example. The configurations of DeviceC and DeviceD are similar to the configuration of DeviceA. For detailed configurations, see Configuration Scripts.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>interface <span>100ge</span> <span>1/0/1</span></strong> 
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/1</span>] <strong>igmp enable</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/1</span>] <strong>commit</strong></pre>
+</p></li><li><span>Configure BSR boundaries and divide the PIM-SM domains.</span><p><p># Configure BSR boundaries on DeviceC. The configurations of DeviceA, DeviceB, and DeviceD are similar to the configuration of DeviceC. For detailed configurations, see Configuration Scripts.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>pim bsr-boundary</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>interface <span>100ge</span> <span>1/0/4</span></strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/4</span>] <strong>pim bsr-boundary</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/4</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>interface </strong><strong><span>100ge</span></strong> <strong><span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>] <strong>pim bsr-boundary</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li><li><span>Configure C-BSRs and C-RPs.</span><p><p># Configure Loopback0 on DeviceA as a C-BSR and C-RP. The configurations of DeviceC and DeviceD are similar to the configuration of DeviceA. For detailed configurations, see Configuration Scripts.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-pim] <strong>pim</strong>
+[<span class="keyword">*</span>DeviceA-pim] <strong>c-bsr loopback0</strong>
+[<span class="keyword">*</span>DeviceA-pim] <strong>c-rp loopback0</strong>
+[<span class="keyword">*</span>DeviceA-pim] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>Configure MSDP peers.</span><p><p># Configure an MSDP peer on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>msdp</strong>
+[<span class="keyword">*</span>DeviceA-msdp] <strong>peer 192.168.1.2 connect-interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceA-msdp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure an MSDP peer on DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>msdp</strong>
+[<span class="keyword">*</span>DeviceC-msdp] <strong>peer 192.168.1.1 connect-interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceC-msdp] <strong>peer 10.1.5.2 connect-interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceC-msdp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure an MSDP peer on DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>msdp</strong>
+[<span class="keyword">*</span>DeviceD-msdp] <strong>peer 10.1.5.1 connect-interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceD-msdp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+</p></li><li><span>Configure the rules for filtering SA messages.</span><p><p># Configure DeviceC not to forward SA messages related to Source1 (225.1.1.0/30) to DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>acl number 3001</strong>
+[<span class="keyword">*</span>DeviceC-acl4-advance-3001] <strong>rule deny ip source 10.1.3.100 0 destination 225.1.1.0 0.0.0.3</strong>
+[<span class="keyword">*</span>DeviceC-acl4-advance-3001] <strong>rule permit ip source any destination any</strong>
+[<span class="keyword">*</span>DeviceC-acl4-advance-3001] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>msdp</strong>
+[<span class="keyword">*</span>DeviceC-msdp] <strong>peer 10.1.5.2 sa-policy export 3001</strong>
+[<span class="keyword">*</span>DeviceC-msdp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure DeviceD not to create SA messages related to Source2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>acl number 2001</strong>
+[<span class="keyword">*</span>DeviceD-acl4-basic-2001] <strong>rule deny source 10.1.6.100 0</strong>
+[<span class="keyword">*</span>DeviceD-acl4-basic-2001] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>msdp</strong>
+[<span class="keyword">*</span>DeviceD-msdp] <strong>import-source acl 2001</strong>
+[<span class="keyword">*</span>DeviceD-msdp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001130623922__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Run the <strong>display msdp sa-cache</strong> command to view information about (S, G) entries in the SA cache. The following example uses the command output on DeviceC and DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>display msdp sa-cache</strong>
+MSDP Source-Active Cache Information of <span>VPN instance</span>: public net
+ MSDP Total Source-Active Cache - 8 entries
+ MSDP matched 8 entries
+
+(10.1.3.100, 225.1.1.0)
+ Origin RP: 10.1.1.1
+ Pro: BGP, AS: ? 
+ Uptime: 00:03:32, Expires: 00:05:28 
+
+(10.1.3.100, 225.1.1.1)
+ Origin RP: 10.1.1.1
+ Pro: BGP, AS: ?
+ Uptime: 00:03:32, Expires: 00:05:28
+
+(10.1.3.100, 225.1.1.2)
+ Origin RP: 10.1.1.1 
+ Pro: BGP, AS: ?
+ Uptime: 00:03:32, Expires: 00:05:28 
+
+(10.1.3.100, 225.1.1.3)
+ Origin RP: 10.1.1.1 
+ Pro: BGP, AS: ?
+ Uptime: 00:03:32, Expires: 00:05:28
+
+(10.1.3.100, 226.1.1.0)
+ Origin RP: 10.1.1.1
+ Pro: BGP, AS: ? 
+ Uptime: 00:03:32, Expires: 00:05:28
+
+(10.1.3.100, 226.1.1.1)
+ Origin RP: 10.1.1.1
+ Pro: BGP, AS: ?
+ Uptime: 00:03:32, Expires: 00:05:28
+
+(10.1.3.100, 226.1.1.2)
+ Origin RP: 10.1.1.1
+ Pro: BGP, AS: ? 
+ Uptime: 00:03:32, Expires: 00:05:28
+
+(10.1.3.100, 226.1.1.3)
+ Origin RP: 10.1.1.1 
+ Pro: BGP, AS: ?
+ Uptime: 00:03:32, Expires: 00:05:28
+
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>display msdp sa-cache</strong>
+MSDP Source-Active Cache Information of <span>VPN instance</span>: public net
+ MSDP Total Source-Active Cache - 4 entries
+ MSDP matched 4 entries
+
+(10.1.3.100, 226.1.1.0)
+ Origin RP: 10.1.1.1
+ Pro: BGP, AS: ?
+ Uptime: 00:24:53, Expires: 00:05:06
+
+(10.1.3.100, 226.1.1.1)
+ Origin RP: 10.1.1.1
+ Pro: BGP, AS: ? 
+ Uptime: 00:24:53, Expires: 00:05:06
+
+(10.1.3.100, 226.1.1.2)
+ Origin RP: 10.1.1.1
+ Pro: BGP, AS: ?
+ Uptime: 00:24:53, Expires: 00:05:06
+
+(10.1.3.100, 226.1.1.3)
+ Origin RP: 10.1.1.1
+ Pro: BGP, AS: ? 
+ Uptime: 00:24:53, Expires: 00:05:06</pre>
+<p>The command output shows that the SA cache on DeviceC contains only multicast data of groups 225.1.1.0/30 and 226.1.1.0/30. The SA cache of DeviceD contains only multicast data of the group 226.1.1.0/30.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001130623922__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+multicast routing-enable
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.0
+ pim sm
+ igmp enable
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 192.168.1.1 255.255.255.0
+ pim sm
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.2.1 255.255.255.0
+ pim sm
+#
+interface LoopBack0
+ ip address 1.1.1.1 255.255.255.255
+ pim sm
+#
+ospf 1
+ area 0.0.0.0
+  network 1.1.1.1 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+  network 10.1.2.0 0.0.0.255
+  network 10.2.1.0 0.0.0.255
+#
+pim
+ c-bsr LoopBack0
+ c-rp LoopBack0
+#
+msdp
+ peer 192.168.1.2 connect-interface <span>100GE</span><span>1/0/3</span>
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+multicast routing-enable
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.2.2 255.255.255.0
+ pim bsr-boundary 
+ pim sm
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 192.168.2.1 255.255.255.0
+ pim bsr-boundary 
+ pim sm
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.3.1 255.255.255.0
+ pim sm
+#
+ospf 1
+ area 0.0.0.0
+  network 10.1.2.0 0.0.0.255
+  network 10.2.2.0 0.0.0.255
+  network 10.1.3.0 0.0.0.255
+#
+return</pre>
+</li><li><p><span class="keyword"></span>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+multicast routing-enable
+#
+acl number 3001
+ rule 5 deny ip source 10.1.3.100 0 destination 225.1.1.0 0.0.0.3 
+ rule 10 permit ip 
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 192.168.1.2 255.255.255.0
+ pim bsr-boundary 
+ pim sm
+#
+interface  <span>100GE</span><span>1/0/4</span>
+ undo portswitch
+ ip address 192.168.2.2 255.255.255.0
+ pim bsr-boundary 
+ pim sm
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.5.1 255.255.255.0
+ pim bsr-boundary 
+ pim sm
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.4.1 255.255.255.0
+ pim sm
+ igmp enable
+#
+interface LoopBack0
+ ip address 2.2.2.2 255.255.255.255
+ pim sm
+#
+ospf 1
+ area 0.0.0.0
+  network 2.2.2.2 0.0.0.0
+  network 10.1.4.0 0.0.0.255
+  network 10.1.5.0 0.0.0.255
+  network 10.2.1.0 0.0.0.255
+  network 10.2.2.0 0.0.0.255
+#
+pim
+ c-bsr LoopBack0
+ c-rp LoopBack0
+#
+msdp
+ peer 192.168.1.1 connect-interface <span>100GE</span><span>1/0/3</span>
+ peer 10.1.5.2 connect-interface <span>100GE</span><span>1/0/2</span>
+ peer 10.1.5.2 sa-policy export 3001
+#
+return</pre>
+</li><li><p><span class="keyword"></span>DeviceD</p>
+<pre class="screen">#
+sysname DeviceD
+#
+multicast routing-enable
+#
+acl number 2001
+ rule 5 deny source 10.1.6.100 0 
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.5.2 255.255.255.0
+ pim bsr-boundary 
+ pim sm
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.1.6.1 255.255.255.0
+ pim sm
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.7.1 255.255.255.0
+ pim sm
+ igmp enable
+#
+interface LoopBack0
+ ip address 3.3.3.3 255.255.255.255
+ pim sm
+#
+ospf 1
+ area 0.0.0.0
+  network 3.3.3.3 0.0.0.0
+  network 10.1.5.0 0.0.0.255
+  network 10.1.6.0 0.0.0.255
+  network 10.1.7.0 0.0.0.255
+#
+pim
+ c-bsr LoopBack0
+ c-rp LoopBack0
+#
+msdp
+ import-source acl 2001
+ peer 10.1.5.1 connect-interface <span>100GE</span><span>1/0/2</span>
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_msdp_cfg_0016.html">Adjusting the Parameters of SA Messages
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_msdp_cfg_0038.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

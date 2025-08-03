@@ -1,0 +1,136 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="topic">
+<meta name="DC.Title" content="Configuration Validation">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_netconf_cfg1_0083.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_netconf_cfg1_0088.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TOPIC_0000001563881909">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Configuration Validation</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TOPIC_0000001563881909"></a><a name="EN-US_TOPIC_0000001563881909"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuration Validation</h1>
+<div><div class="section"><h4 class="sectiontitle">Basic Operations</h4><ol><li><span>Construct the data to be configured, for example, the interface MTU. The corresponding XPath is /ifm/interfaces/interface.</span><p><pre class="screen">CREATE_INTERFACE = '''&lt;config&gt;
+            &lt;ifm xmlns="urn:huawei:yang:huawei-ifm"&gt;
+                &lt;interfaces&gt;
+                  &lt;interface&gt;
+                    &lt;name&gt;&lt;/name&gt;  
+                    &lt;mtu&gt;1300&lt;/mtu&gt;
+                  &lt;/interface&gt;
+                &lt;/interfaces&gt;
+              &lt;/ifm&gt;
+&lt;/config&gt;'''</pre>
+</p></li><li><span>Deliver an &lt;edit-config&gt; message in which the value of &lt;test-option&gt; is set.</span><p><pre class="screen">rpc_obj = m.edit_config(target='<strong>candidate</strong>', config=CREATE_INTERFACE, test_option='set')
+_check_response(rpc_obj, 'CREATE_INTERFACE')</pre>
+</p></li><li><span>Deliver a validate message.</span><p><pre class="screen">m.validate(source="candidate")</pre>
+<div class="p">In the preceding example, "m" indicates the following:<pre class="screen">with huawei_connect(host, port=port, user=user, password=password) as m:</pre>
+</div>
+</p></li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Example</h4><div class="p">This example shows how to configure a simple Python script to connect to the device and implement configuration.<pre class="screen"><strong># test_validate.py</strong>
+import sys
+import logging 
+from ncclient import manager
+from ncclient import operations
+
+log = logging.getLogger(__name__)
+CREATE_INTERFACE = '''&lt;config&gt;
+                 &lt;ifm xmlns="urn:huawei:yang:huawei-ifm"&gt;
+                   &lt;interfaces&gt;
+                     &lt;interface&gt;
+                       &lt;name&gt;<span><span><span>100GE</span><span>1/0/1</span></span></span>&lt;/name&gt;
+                       &lt;mtu&gt;1300&lt;/mtu&gt;
+                      &lt;/interface&gt;
+                    &lt;/interfaces&gt;
+                  &lt;/ifm&gt;
+                &lt;/config&gt;'''
+
+#Fill the device information and establish a NETCONF session
+def <strong>huawei_connect</strong>(host, port, user, password):
+    return manager.connect(host=host,
+                           port=port,
+                           username=user,
+                           password=password,
+                           hostkey_verify = False,
+                           device_params={'name': "huaweiyang"},
+                           allow_agent = False,
+                           look_for_keys = False)
+
+def <strong>_check_response</strong>(rpc_obj, snippet_name):
+    print("RPCReply for %s is %s" % (snippet_name, rpc_obj.xml))
+    xml_str = rpc_obj.xml
+    if "&lt;ok/&gt;" in xml_str:
+        print("%s successful" % snippet_name)
+    else:
+        print("Cannot successfully execute: %s" % snippet_name)      
+
+def <strong>test_validate</strong>(host, port, user, password):
+    #1.Create a NETCONF session
+    with huawei_connect(host, port=port, user=user, password=password) as m:
+
+        #2.Send RPC and check RPC reply
+        rpc_obj = m.edit_config(target='candidate', config=CREATE_INTERFACE, test_option='set')
+        _check_response(rpc_obj, 'CREATE_INTERFACE')
+  
+        #validate check
+        m.validate(source="candidate")
+        m.commit()
+
+<strong>if __name__ == '__main__':</strong>
+    <strong>test_validate</strong>(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])</pre>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_netconf_cfg1_0083.html">Examples for Basic NETCONF Operations
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_netconf_cfg1_0088.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

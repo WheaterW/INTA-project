@@ -1,0 +1,83 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="DHCPv4 Server Allocating Network Parameters to Newly Connected DHCPv4 Clients">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_dhcpv4_cfg_0003.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_dhcpv4_cfg_0005.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_dhcpv4_cfg_0007.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="DHCPv4">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="DHCPv4">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featurename" content="DHCPv4">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001512846590">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>DHCPv4 Server Allocating Network Parameters to Newly Connected DHCPv4 Clients</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001512846590"></a><a name="EN-US_CONCEPT_0000001512846590"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">DHCPv4 Server Allocating Network Parameters to Newly Connected DHCPv4 Clients</h1>
+<div><p>As shown in <a href="#EN-US_CONCEPT_0000001512846590__fig2660191813218">Figure 1</a>, when no DHCPv4 relay agent is deployed, the newly connected DHCPv4 client and server exchange DHCPv4 messages through four steps.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001512846590__fig2660191813218"><a name="EN-US_CONCEPT_0000001512846590__fig2660191813218"></a><a name="fig2660191813218"></a><span class="figcap"><b>Figure 1 </b>Message exchange between the newly connected DHCPv4 client and server</span><br><span><img class="vsd" src="figure/en-us_image_0000001564126257.png"></span></div>
+<div class="section"><h4 class="sectiontitle">Step 1: Discovery Stage</h4><p>The newly connected DHCPv4 client does not know the IPv4 address of the DHCPv4 server. To learn the IPv4 address of the DHCPv4 server, the DHCPv4 client broadcasts a DHCPDISCOVER message with the destination IPv4 address of 255.255.255.255 to all devices on the same network segment, including the DHCPv4 server and relay agent (if possible). The DHCPDISCOVER message carries information, such as the client's MAC address (<a href="galaxy_dhcpv4_cfg_0005.html#EN-US_CONCEPT_0000001564006389__c1">chaddr field</a>), requested parameter list option (<a href="galaxy_dhcpv4_cfg_0005.html#EN-US_CONCEPT_0000001564006389__op55">Option 55</a>), and broadcast flag (<a href="galaxy_dhcpv4_cfg_0005.html#EN-US_CONCEPT_0000001564006389__f1">flags field</a>).</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Step 2: Offer Stage</h4><p>All the DHCPv4 servers on the same network segment as the DHCPv4 client receive the DHCPDISCOVER message. Each DHCPv4 server selects an address pool on the same network segment as the IPv4 address of the interface receiving the DHCPDISCOVER message, and from the address pool allocates an idle IPv4 address. The DHCPv4 server then sends a DHCPOFFER message carrying the allocated IPv4 address to the DHCPv4 client. </p>
+<p>In most cases, the leases of IPv4 addresses are specified in an address pool. If the DHCPDISCOVER message carries an expected lease, the DHCPv4 server compares the expected lease with the specified lease and allocates the IPv4 address with a smaller lease to the DHCPv4 client.</p>
+<div class="p">The DHCPv4 server allocates an IPv4 address from the address pool to a client in the following sequence:<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The IPv4 address allocation sequence cannot be modified.</p>
+</div></div>
+<ol><li>IPv4 address statically bound to the MAC address of the client on the DHCPv4 server.</li><li>IPv4 address specified in <a href="galaxy_dhcpv4_cfg_0005.html#EN-US_CONCEPT_0000001564006389__op50">Option 50</a> (requested IPv4 address) in the DHCPDISCOVER message.</li><li>IPv4 address in the Expired state in the address pool, that is, the IPv4 address that has been assigned to the client and whose lease has expired.</li><li>Random IPv4 address in the Idle state in the address pool.</li><li><p>If no IPv4 address is available for allocation, the DHCPv4 server automatically reclaims the expired and conflicting IPv4 addresses in sequence. If an available IPv4 address is found after the reclaim, the DHCPv4 server allocates the IPv4 address. If no IPv4 address is available, the DHCPv4 client resends a DHCPDISCOVER message to apply for an IPv4 address after waiting for a response times out.</p>
+</li></ol>
+DHCPv4 servers can exclude some IPv4 addresses that cannot be allocated through DHCPv4 from address pools. For example, if 192.168.1.100/24 has been manually configured for a DNS server, the DHCPv4 server excludes this IPv4 address from the address pool on network segment 192.168.1.0/24 so that it is not allocated through DHCPv4. This helps prevent IPv4 address conflicts.</div>
+<p>To prevent the allocated IPv4 address from conflicting with the IPv4 addresses of other clients on the network, before sending a DHCPOFFER message, the DHCPv4 server sends an ICMP Echo request message with the source address being the IPv4 address of the DHCPv4 server and the destination address being the pre-allocated IPv4 address to detect conflicts for the allocated IPv4 address. If the DHCPv4 server receives no ICMP Echo reply message within the detection period, no client is using this IPv4 address, and the DHCPv4 server can allocate it. If the DHCPv4 server receives an ICMP Echo reply message within the detection period, this IPv4 address is being used by another client, and the DHCPv4 server lists this IPv4 address as a conflicting one. The DHCPv4 server then waits for the next DHCPDISCOVER message to start the IPv4 address selection process again.</p>
+<p>The IPv4 address allocated in this stage may not be the final IPv4 address used by the client. This is because the IPv4 address can be allocated to another client if the DHCPv4 server receives no response 16 seconds after the DHCPOFFER message is sent. The IPv4 address for the client can be determined only after the request and acknowledgment stages.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Step 3: Request Stage</h4><p>If multiple DHCPv4 servers reply with a DHCPOFFER message to the DHCPv4 client, the client accepts only the first received DHCPOFFER message. The client then broadcasts a DHCPREQUEST message carrying the selected DHCPv4 server identifier (<a href="galaxy_dhcpv4_cfg_0005.html#EN-US_CONCEPT_0000001564006389__op54">Option 54</a>) and IPv4 address (<a href="galaxy_dhcpv4_cfg_0005.html#EN-US_CONCEPT_0000001564006389__op50">Option 50</a>, with the IPv4 address specified in the yiaddr field of the accepted DHCPOFFER message).</p>
+<p>The DHCPv4 client broadcasts a DHCPREQUEST message to notify all the DHCPv4 servers that it has selected the IPv4 address offered by a DHCPv4 server. Then the other servers can allocate IPv4 addresses to other clients.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If a device functions as a DHCPv4 client and multiple DHCPv4 servers exist on the network, the DHCPv4 client polls the DHCPv4 servers according to the sequence of receiving DHCPOFFER messages. If a DHCPv4 server fails to assign an IPv4 address, the client selects the next DHCPv4 server.</p>
+</div></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Step 4: Acknowledgement Stage</h4><p>After receiving the DHCPREQUEST message, the DHCPv4 server sends a DHCPACK message to the client, carrying the IPv4 address specified in <a href="galaxy_dhcpv4_cfg_0005.html#EN-US_CONCEPT_0000001564006389__op50">Option 50</a> of the DHCPREQUEST message.</p>
+<p>After receiving the DHCPACK message, the DHCPv4 client broadcasts gratuitous ARP packets to check whether any other terminal is using the IPv4 address allocated by the DHCPv4 server. If no response is received within the specified time, the DHCPv4 client can use the IPv4 address. If the DHCPv4 client receives a response within the specified time, this IPv4 address is being used by another terminal. The client then sends a DHCPDECLINE message to the DHCPv4 server and applies for a new IPv4 address. The DHCPv4 server lists this IPv4 address as a conflicting one. The DHCPv4 server allocates conflicting IPv4 addresses only when there is no idle IPv4 address in the address pool, minimizing IPv4 address conflicts.</p>
+<p>Occasionally, the DHCPv4 server may fail to allocate the IPv4 address specified in <a href="galaxy_dhcpv4_cfg_0005.html#EN-US_CONCEPT_0000001564006389__op50">Option 50</a> because, for example, an error occurs during negotiation or it takes a long time to receive the DHCPREQUEST message. In this case, the DHCPv4 server replies with a DHCPNAK message to notify the DHCPv4 client that the requested IPv4 address cannot be allocated. In this case, the DHCPv4 client has to send another DHCPDISCOVER message for a new application.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_dhcpv4_cfg_0003.html">Understanding DHCPv4
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_dhcpv4_cfg_0005.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="galaxy_dhcpv4_cfg_0007.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="(Optional) Configuring OSPFv3 to Discard Specified LSAs">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_ospfv3_cfg_0126.html">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_ospfv3_cfg_0128.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="OSPFv3">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="OSPFv3">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001176662837">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>(Optional) Configuring OSPFv3 to Discard Specified LSAs</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001176662837"></a><a name="EN-US_TASK_0000001176662837"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">(Optional) Configuring OSPFv3 to Discard Specified LSAs</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001176662837__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>OSPFv3 can be configured to discard specified LSAs in the following scenarios:</p>
+<ol><li>When devices on the entire network restart repeatedly due to abnormal LSAs and you have located the LSA that causes protocol restarts, you can configure this function as a last resort to prevent the device from restarting continuously. However, if this function is incorrectly configured, routing loops may occur.</li><li>If an LSA is identified as an attack packet as it is not supposed to appear in the local area and has caused serious problems, such as device restarts, you can configure this function to filter out the LSA under the condition that the attack source cannot be located temporarily and that the LSA does not affect topology path computation.</li><li>If an LSA is identified as an attack packet as it is not supposed to appear in the local area and it affects topology path computation and has caused serious problems, such as network-wide device restarts, you can configure this function on each device to discard the LSA to prevent it from participating in network-wide calculation.<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>To filter out the LSA that affects topology path computation, you must ensure that it is removed from all the LSDBs on the entire network. Otherwise, routing loops may occur.</p>
+</div></div>
+</li><li>If an LSA is identified as an unreachable residual LSA and the device that advertised the LSA becomes permanently unreachable, you can configure this function to filter out the LSA upon reception under the condition that the LSA does not affect topology path computation.</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001176662837__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li><span>Enter the OSPFv3 view.</span><p><pre class="screen"><a href="cmdqueryname=ospfv3"><b><span class="cmdname">ospfv3</span></b></a> [ <i><span class="varname">process-id</span></i> ]</pre>
+</p></li><li><span>Configure the device to discard LSAs of a specified type.</span><p><pre class="screen"><a href="cmdqueryname=ignore-receive-lsa+advertise-router"><b><span class="cmdname">ignore-receive-lsa advertise-router</span></b></a> <i><span class="varname">adv-rtr-id</span></i> [ <strong><span>lsa-type</span></strong> <i><span class="varname">type-value</span></i> [ <strong><span>area</span></strong> { <i><span class="varname">area-id</span></i> | <i><span class="varname">area-idipv4</span></i> } ] | <strong><span>link-state-id</span></strong> <i><span class="varname">ls-id</span></i> ] <sup>*</sup></pre>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If this command is incorrectly configured, services cannot be restored even if the <a href="cmdqueryname=undo+ignore-receive-lsa+advertise-router"><b><span class="cmdname">undo ignore-receive-lsa advertise-router</span></b></a> <i><span class="varname">adv-rtr-id</span></i> [ <strong><span>lsa-type</span></strong> <i><span class="varname">type-value</span></i> [ <strong><span>area</span></strong> { <i><span class="varname">area-id</span></i> | <i><span class="varname">area-idipv4</span></i> } ] | <strong><span>link-state-id</span></strong> <i><span class="varname">ls-id</span></i> ] * command is run. In this case, you may need to reset the process or neighbor to restore services.</p>
+<p>You are not advised to run this command to filter out the LSAs that exist on the network as running this command may filter out normal service LSAs.</p>
+<p>As an attack LSA can have any key, it is difficult to defend against the LSA using this command. Therefore, you are advised to directly isolate the attack source.</p>
+<p>This command cannot be used to defend against attacks as it goes against protocol processing rules and affects services. Therefore, exercise caution when running this command.</p>
+<p>If the fault is caused by a bug, you are advised to run this command temporarily. After the patch is installed, run the <a href="cmdqueryname=undo+ignore-receive-lsa+advertise-router"><b><span class="cmdname">undo ignore-receive-lsa advertise-router</span></b></a> <i><span class="varname">adv-rtr-id</span></i> [ <strong><span>lsa-type</span></strong> <i><span class="varname">type-value</span></i> [ <strong><span>area</span></strong> { <i><span class="varname">area-id</span></i> | <i><span class="varname">area-idipv4</span></i> } ] | <strong><span>link-state-id</span></strong> <i><span class="varname">ls-id</span></i> ] * command immediately and check whether services are affected. If services are affected, re-establish all neighbor relationships to restore services.</p>
+</div></div>
+</p></li><li><span>Commit the configuration.</span><p><pre class="screen"><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></pre>
+</p></li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../vrp/vrp_ospfv3_cfg_0126.html">Configuring OSPFv3 to Filter LSAs
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../vrp/vrp_ospfv3_cfg_0128.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

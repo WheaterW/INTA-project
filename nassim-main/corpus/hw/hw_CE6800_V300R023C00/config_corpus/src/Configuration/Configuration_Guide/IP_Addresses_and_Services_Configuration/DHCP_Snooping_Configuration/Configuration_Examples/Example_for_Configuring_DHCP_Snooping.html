@@ -1,0 +1,214 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring DHCP Snooping">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="toctopics/en-us_concept_0000002056501870.html">
+<meta name="DC.Relation" scheme="URI" content="dc_cfg_dhcp-snooping_0001.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="DHCP Snooping">
+<meta name="featurename" content="VLAN">
+<meta name="featurename" content="VLAN Mapping">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="DHCP Snooping">
+<meta name="featurename" content="VLAN">
+<meta name="featurename" content="VLAN Mapping">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_XTASK_0000001563760673">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring DHCP Snooping</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_XTASK_0000001563760673"></a><a name="EN-US_XTASK_0000001563760673"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring DHCP Snooping</h1>
+<div><div class="section"><h4 class="sectiontitle">Networking Requirements</h4>
+<div class="p"><p>On the network shown in <a href="#EN-US_XTASK_0000001563760673__fig435655411611">Figure 1</a>, users access DeviceC through DeviceA and DeviceB. DeviceC is the user gateway that functions as the DHCP relay agent to forward DHCP messages to the DHCP server, so that DHCP clients can obtain IP addresses and related configurations from the DHCP server.</p>
+<p>The network may encounter the following DHCP attacks:</p>
+<ul><li>Bogus DHCP server attack: An attacker deploys a DHCP server on the network to allocate IP addresses and other network parameters to clients. If the DHCP server allocates incorrect IP addresses and other network parameters to clients, the network will be greatly affected.</li><li>DHCP flood attack: If an attacker sends a large number of DHCP messages to a device in a short period, device performance is impacted, and the device may stop working.</li><li>Bogus DHCP message attack: If an attacker pretends to be an authorized user and continuously sends DHCPREQUEST messages to the DHCP server to renew the IP address lease, the expired IP addresses cannot be reclaimed. As a result, authorized users can no longer obtain IP addresses. If an attacker pretends to be an authorized user and sends a DHCPRELEASE message to the DHCP server, the authorized user will be disconnected unexpectedly.</li><li>DHCP server DoS attack: If a large number of attackers apply for IP addresses or an attacker continuously changes the CHADDR field to apply for IP addresses from the DHCP server, IP addresses on the DHCP server are quickly exhausted and authorized users can no longer obtain IP addresses.</li></ul>
+<p>To defend against DHCP attacks and provide a high-quality service for DHCP users, configure the DHCP snooping function.</p>
+<div class="fignone" id="EN-US_XTASK_0000001563760673__fig435655411611"><a name="EN-US_XTASK_0000001563760673__fig435655411611"></a><a name="fig435655411611"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring DHCP snooping attack defense</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interfaces 1, 2, and 3 represent <span>100GE</span> <span>1/0/1</span>, <span>100GE</span> <span>1/0/2</span>, and <span>100GE</span> <span>1/0/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001512681270.png"></span></div>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration Roadmap</h4>
+<div class="p"><p>The configuration roadmap is as follows:</p>
+<ol><li>Configure DHCP relay so that DeviceC forwards DHCP messages from different network segments to the DHCP server.</li><li>Configure the basic DHCP snooping functions to prevent bogus DHCP server attacks. Enable association between ARP and DHCP snooping to ensure that the binding table is updated in real time when DHCP users are disconnected unexpectedly. Configure the device to discard DHCP messages in which the GIADDR field value is not 0 to prevent attacks initiated by unauthorized users.</li><li>Set the maximum rate of DHCP messages sent to the DHCP message processing unit to prevent DHCP flood attacks. Enable the packet discarding alarm function so that an alarm is generated when the number of discarded DHCP messages reaches the alarm threshold.</li><li>Enable the device to check DHCP messages against the binding table to prevent bogus DHCP message attacks. Configure the device to generate an alarm when the number of DHCP messages discarded because they do not match the binding table reaches the threshold.</li><li>Configure the maximum number of access users and enable the device to check whether the CHADDR field value is the same as the source MAC address in the header of a DHCPREQUEST message to prevent DHCP server DoS attacks.</li></ol>
+</div>
+
+<div class="p"><p>In this example, only the configuration on <span class="keyword">DeviceC</span> is provided. The example does not include detailed configurations for the DHCP server.</p>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Procedure</h4>
+<div class="p"><ol><li>Configure DHCP relay.<p># Configure DHCP relay.</p>
+<pre class="screen">&lt;HUAWEI&gt; <strong>system-view</strong> 
+[<font style="font-size:8pt" Face="Courier New" >~</font>HUAWEI] <strong>sysname DeviceC</strong>
+[*<span class="keyword">DeviceC</span>] <strong>commit</strong> 
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font>DeviceC</span>] <strong>vlan batch 10 20</strong> 
+[*DeviceC] <strong>interface <span>100GE</span> <span>1/0/1</span></strong> 
+[*DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>portswitch</strong> 
+[*DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>port link-type access</strong> 
+[*DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>port default vlan 10</strong> 
+[*DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong> 
+[*DeviceC] <strong>interface <span>100GE</span> <span>1/0/2</span></strong> 
+[*DeviceC-<span>100GE</span><strong><span>1/0/2</span></strong>] <strong>portswitch</strong> 
+[*DeviceC-<span>100GE</span><span>1/0/2</span>] <strong>port link-type access</strong> 
+[*DeviceC-<span>100GE</span><span>1/0/2</span>] <strong>port default vlan 10</strong> 
+[*DeviceC-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong> 
+[*DeviceC] <strong>interface <span>100GE</span> <span>1/0/3</span></strong> 
+[*DeviceC-<span>100GE</span><strong><span>1/0/3</span></strong>] <strong>portswitch</strong> 
+[*DeviceC-<span>100GE</span><span>1/0/3</span>] <strong>port link-type access</strong> 
+[*DeviceC-<span>100GE</span><span>1/0/3</span>] <strong>port default vlan 20</strong> 
+[*DeviceC-<span>100GE</span><span>1/0/3</span>] <strong>quit</strong> 
+[*DeviceC] <strong>dhcp enable</strong> 
+[*DeviceC] <strong>interface vlanif 10</strong> 
+[*DeviceC-Vlanif10] <strong>ip address 10.0.0.1 255.255.255.0</strong> 
+[*DeviceC-Vlanif10] <strong>dhcp select relay</strong>  
+[*DeviceC-Vlanif10] <strong>quit</strong> 
+[*DeviceC] <strong>interface vlanif 2</strong><strong>0</strong> 
+[*DeviceC-Vlanif20] <strong>ip address 10.1.1.1 255.255.255.0</strong>
+[*DeviceC-Vlanif20] <strong>dhcp select relay</strong>
+[*DeviceC-Vlanif20] <strong>quit</strong> 
+[*DeviceC] <strong>ip route-static 0.0.0.0 0.0.0.0 10.1.1.1</strong>
+[*<span class="keyword">DeviceC</span>] <strong>commit</strong></pre>
+<p>Set the IP address of the DHCP server to 10.2.1.2/24, configure the address pool with the network segment 10.0.1.0/24, and set the gateway address of the address pool to 10.0.0.1.</p>
+</li><li>Enable basic DHCP snooping functions.<p># Enable DHCP snooping globally.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceC] <strong>dhcp snooping enable</strong>
+[*<span class="keyword">DeviceC</span>] <strong>commit</strong></pre>
+<p># Enable DHCP snooping on the user-side interface. The following uses <span>100GE</span> <span>1/0/1</span> as an example. The configuration of <span>100GE</span> <span>1/0/2</span> is the same as that of <span>100GE</span> <span>1/0/1</span>.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceC] <strong>interface <span>100GE</span> <span>1/0/1</span></strong>
+[*DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>dhcp snooping enable</strong> </pre>
+<p># Enable association between ARP and DHCP snooping.</p>
+<pre class="screen">[*DeviceC-<span>100GE</span><span>1/0/1</span>] <a href="cmdqueryname=dhcp+snooping+user-bind+arp-detect+enable"><b><span class="cmdname">dhcp snooping user-bind arp-detect enable</span></b></a> </pre>
+<p># Enable the device to check whether the GIADDR field value in a DHCPREQUEST message is not 0.</p>
+<pre class="screen">[*DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>dhcp snooping check dhcp-giaddr enable</strong> </pre>
+</li><li>Enable the device to check DHCP messages against the binding table.<p># Configure the user-side interface.</p>
+<pre class="screen">[*DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>dhcp snooping check dhcp-request enable</strong> </pre>
+</li><li>Configure the maximum number of access users allowed on the interface and enable the device to check the CHADDR field.<p># Configure the user-side interface.</p>
+<pre class="screen">[*DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>dhcp snooping user-bind max-number 20</strong> 
+[*DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>dhcp snooping check dhcp-chaddr enable</strong> 
+[*DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[*<span class="keyword">DeviceC</span>] <strong>commit</strong></pre>
+</li><li>Verify the configuration.<div class="p"># Check the DHCP snooping configuration.<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceC] <strong>display dhcp snooping configuration</strong> 
+# 
+dhcp snooping enable 
+# 
+interface <span>100GE</span><span>1/0/1</span>  
+ dhcp snooping enable  
+ dhcp snooping check dhcp-giaddr enable  
+ dhcp snooping check dhcp-request enable  
+ dhcp snooping check dhcp-chaddr enable
+ dhcp snooping user-bind max-number 20
+# 
+interface <span>100GE</span><span>1/0/2</span>  
+ dhcp snooping enable  
+ dhcp snooping check dhcp-giaddr enable  
+ dhcp snooping check dhcp-request enable  
+ dhcp snooping check dhcp-chaddr enable
+ dhcp snooping user-bind max-number 20
+#</pre>
+</div>
+<p># Check DHCP snooping running information on an interface. The command output shows that the values of <strong>Check dhcp-giaddr</strong>, <strong>Check dhcp-chaddr</strong>, and <strong>Check dhcp-request</strong> fields are all <strong>Enable</strong>. The following uses the command output on <span>100GE</span> <span>1/0/1</span> as an example:</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceC] <strong>display dhcp snooping interface <span>100GE</span> <span>1/0/1</span></strong> 
+DHCP snooping running information for interface <span>100GE</span><span>1/0/1</span> :  
+DHCP snooping                            : Enable  
+Trusted interface                        : No  
+Dhcp user max number                     : 20  
+Current dhcp and nd user number          : 0  
+Check dhcp-giaddr                        : Enable  
+Check dhcp-chaddr                        : Enable  
+Check dhcp-request                       : Enable  </pre>
+</li></ol>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration Scripts</h4>
+<div class="p"><div class="p">DeviceC<pre class="screen"># 
+sysname DeviceC 
+# 
+vlan batch 10 20 
+# 
+dhcp enable 
+# 
+dhcp snooping enable
+#
+interface Vlanif 10  
+ ip address 10.0.0.1 255.255.255.0   
+ dhcp select relay  
+# 
+interface Vlanif 20 
+ ip address 10.1.1.1 255.255.255.0 
+# 
+interface <span>100GE</span> <span>1/0/1</span>   
+ portswitch 
+ port default vlan 10  
+ dhcp snooping enable  
+ dhcp snooping check dhcp-giaddr enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ dhcp snooping user-bind max-number 20 
+# 
+interface <span>100GE</span> <span>1/0/2</span>    
+ portswitch 
+ port default vlan 10  
+ dhcp snooping enable  
+ dhcp snooping check dhcp-giaddr enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ dhcp snooping user-bind max-number 20
+
+# 
+interface <span>100GE</span> <span>1/0/3</span>   
+ portswitch 
+ port default vlan 20
+# 
+ip route-static 0.0.0.0 0.0.0.0 10.1.1.1 
+# 
+return</pre>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="toctopics/en-us_concept_0000002056501870.html">Configuration Examples
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="dc_cfg_dhcp-snooping_0001.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

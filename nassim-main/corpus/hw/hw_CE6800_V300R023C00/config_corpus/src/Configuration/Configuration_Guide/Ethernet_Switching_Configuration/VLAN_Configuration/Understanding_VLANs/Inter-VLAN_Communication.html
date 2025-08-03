@@ -1,0 +1,84 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Inter-VLAN Communication">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_vlan_cfg_0003.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_vlan_cfg_0008.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="VLAN">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VLAN">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="featurename" content="QinQ">
+<meta name="featurename" content="VLAN">
+<meta name="featurename" content="VLAN Mapping">
+<meta name="featurename" content="VLAN Pool">
+<meta name="featurename" content="Voice VLAN">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001176742329">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Inter-VLAN Communication</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001176742329"></a><a name="EN-US_CONCEPT_0000001176742329"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Inter-VLAN Communication</h1>
+<div><div class="section" id="EN-US_CONCEPT_0000001176742329__section126740485349"><a name="EN-US_CONCEPT_0000001176742329__section126740485349"></a><a name="section126740485349"></a><h4 class="sectiontitle">Inter-VLAN Communication Through a Single Device (Using VLANIF Interfaces)</h4><p>In <a href="#EN-US_CONCEPT_0000001176742329__fig_dc_cfg_vlan_101201">Figure 1</a>, Host1 and Host2 connect to DeviceA, are located on different network segments, and belong to VLAN 2 and VLAN 3, respectively. After VLANIF 2 and VLANIF 3 are created on DeviceA and allocated with IP addresses, the default gateway addresses of Host1 and Host2 are set to the IP addresses of VLANIF 2 and VLANIF 3, respectively.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001176742329__fig_dc_cfg_vlan_101201"><a name="EN-US_CONCEPT_0000001176742329__fig_dc_cfg_vlan_101201"></a><a name="fig_dc_cfg_vlan_101201"></a><span class="figcap"><b>Figure 1 </b>Using VLANIF interfaces to implement inter-VLAN communication through a single device</span><br><span><img class="vsd" src="figure/en-us_image_0000001176662447.png" width="NaN" height="NaN"></span></div>
+<p></p>
+<p>When Host1 sends a packet to Host2, the packet is transmitted as follows (assuming that no forwarding entry is created on DeviceA):</p>
+<ol><li>Host1 determines that the destination IP address is on a different network segment from its own IP address, and therefore sends an ARP Request packet to request the gateway MAC address. The ARP Request packet carries the destination IP address 10.1.1.1 (gateway's IP address) and all-F destination MAC address.</li><li>When the ARP Request packet reaches interface 1 on DeviceA, DeviceA tags the packet with VLAN ID 2 (PVID of interface 1). DeviceA then records the mapping between the source MAC address, VLAN ID, and interface (00e0-fc00-1111, 2, interface 1) in its MAC address table.</li><li>DeviceA determines that the packet is an ARP Request packet and the destination IP address is that of its own VLANIF 2. DeviceA then encapsulates VLANIF 2's MAC address 00e0-fc00-3333 into the ARP Reply packet and sends the packet through interface 1. In addition, DeviceA records the mapping between the IP address and MAC address of Host1 in its ARP table.</li><li>After receiving the ARP Reply packet from DeviceA, Host1 records the mapping between the IP address and MAC address of VLANIF 2 on DeviceA in its ARP table and sends a packet to DeviceA. The packet carries the destination MAC address 00e0-fc00-3333 and destination IP address 10.2.2.2 (Host2's IP address).</li><li>After the packet reaches interface 1 on DeviceA, DeviceA tags the packet with VLAN ID 2.</li><li>DeviceA updates its MAC address table based on the source MAC address, VLAN ID, and inbound interface of the packet, and compares the destination MAC address of the packet with the MAC address of VLANIF 2. If they are the same, DeviceA determines that the packet should be forwarded at Layer 3 and searches for a Layer 3 forwarding entry based on the destination IP address. If no entry is found, DeviceA sends the packet to the CPU, which then searches for a routing entry to forward the packet.</li><li>The CPU searches the routing table based on the destination IP address of the packet and determines that the destination IP address matches a directly connected network segment (the network segment where VLANIF 3 is located). The CPU continues to search the ARP table but finds no matching ARP entry. As a result, DeviceA broadcasts an ARP Request packet with the destination address of 10.2.2.2 to all interfaces in VLAN 3 through interface 2.</li><li>After receiving the ARP Request packet, Host2 determines that the destination IP address in the packet is its own IP address and sends an ARP Reply packet with its own MAC address. At the same time, Host2 records the mapping between the MAC address and IP address of VLANIF 3 to its ARP table.</li><li>After interface 2 on DeviceA receives the ARP Reply packet, DeviceA tags the packet with VLAN ID 3 and records the mapping between the MAC address and IP address of Host2 in its ARP table. Before forwarding the packet from Host1 to Host2, DeviceA removes the tag with VLAN ID 3 from the packet. At the same time, DeviceA records the mapping between the Host2's IP address, MAC address, VLAN ID, and outbound interface in its Layer 3 forwarding table.</li></ol>
+<p>At this point, Host1 accesses Host2 successfully. The same process is used for Host2 to access Host1.</p>
+</div>
+<div class="section" id="EN-US_CONCEPT_0000001176742329__section73131523183516"><a name="EN-US_CONCEPT_0000001176742329__section73131523183516"></a><a name="section73131523183516"></a><h4 class="sectiontitle">Inter-VLAN Communication Through Multiple Devices Using VLANIF Interfaces</h4><p>When hosts in different VLANs connect to multiple devices, you need to configure static routes or a dynamic routing protocol in addition to configuring VLANIF interfaces and their IP addresses, as the IP addresses of VLANIF interfaces can only be used to generate direct routes.</p>
+<p>In <a href="#EN-US_CONCEPT_0000001176742329__fig_dc_cfg_vlan_101202">Figure 2</a>, Host1 and Host2 are located on different network segments, connect to DeviceA and DeviceB respectively, and belong to VLAN 2 and VLAN 3, respectively. DeviceA and DeviceB connect to hosts using access interfaces and connect to each other using trunk interfaces. On DeviceA, VLANIF 2 and VLANIF 4 are created and allocated with IP addresses 10.1.1.1 and 10.1.4.1, respectively. On DeviceB, VLANIF 3 and VLANIF 4 are created and allocated with IP addresses 10.1.2.1 and 10.1.4.2, respectively. Static routes are configured on DeviceA and DeviceB. On DeviceA, the destination network segment in the static route is 10.1.2.0/24 and the next-hop address is 10.1.4.2. On DeviceB, the destination network segment in the static route is 10.1.1.0/24 and the next-hop address is 10.1.4.1.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001176742329__fig_dc_cfg_vlan_101202"><a name="EN-US_CONCEPT_0000001176742329__fig_dc_cfg_vlan_101202"></a><a name="fig_dc_cfg_vlan_101202"></a><span class="figcap"><b>Figure 2 </b>Using VLANIF interfaces to implement inter-VLAN communication through multiple devices</span><br><span><img class="vsd" src="figure/en-us_image_0000001176742357.png" width="NaN" height="NaN"></span></div>
+<p></p>
+<p>When Host1 sends a packet to Host2, the packet is transmitted as follows (assuming that no forwarding entry is created on DeviceA and DeviceB):</p>
+<ol><li>The first six steps are the same as steps 1 to 6 in <a href="#EN-US_CONCEPT_0000001176742329__section126740485349">Inter-VLAN Communication Through a Single Device (Using VLANIF Interfaces)</a>. After those steps are complete, DeviceA sends the packet to its CPU which then searches the routing table to forward the packet.</li><li>The CPU of DeviceA searches its routing table based on the destination IP address 10.1.2.2, and finds a static route with the destination network segment of 10.1.2.0/24 and a next-hop address of 10.1.4.2. The CPU continues to search its ARP table but finds no matching ARP entry. Therefore, DeviceA broadcasts an ARP Request packet with the destination address 10.1.4.2 to all interfaces in VLAN 4. Interface 2 on DeviceA sends the ARP Request packet to interface 2 on DeviceB without removing the tag from the packet.</li><li>After the ARP Request packet reaches DeviceB, DeviceB determines that the destination IP address of the ARP Request packet is the IP address of its own VLANIF 4. DeviceB then sends an ARP Reply packet with the MAC address of VLANIF 4 to DeviceA.</li><li>Interface 2 on DeviceB sends the ARP Reply packet to DeviceA. After DeviceA receives the ARP Reply packet, it records the mapping between the MAC address and IP address of VLANIF 4 to its ARP table.</li><li>Before forwarding the packet of Host1 to DeviceB, DeviceA changes the destination MAC address of the packet to the MAC address of VLANIF 4 on DeviceB, and the source MAC address to the MAC address of its own VLANIF 4. In addition, DeviceA records the forwarding entry (10.1.2.0/24, destination MAC address, VLAN, and outbound interface) in its Layer 3 forwarding table. Similarly, the packet is directly sent to interface 2 on DeviceB.</li><li>After DeviceB receives the packet of Host1 forwarded by DeviceA, steps 6 to 9 in <a href="#EN-US_CONCEPT_0000001176742329__section126740485349">Inter-VLAN Communication Through a Single Device (Using VLANIF Interfaces)</a> are performed. In addition, DeviceB records the forwarding entry (Host2's IP address, MAC address, VLAN, and outbound interface) in its Layer 3 forwarding table.</li></ol>
+<p>At this point, Host1 accesses Host2 successfully. The same process is used for Host2 to access Host1.</p>
+</div>
+<div class="section" id="EN-US_CONCEPT_0000001176742329__section26271943217"><a name="EN-US_CONCEPT_0000001176742329__section26271943217"></a><a name="section26271943217"></a><h4 class="sectiontitle">Inter-VLAN Communication Through a Single Device Using Layer 3 Sub-interfaces</h4><p>In <a href="#EN-US_CONCEPT_0000001176742329__fig41361407138">Figure 3</a>, hosts on the network belong to different VLANs and are located in different network segments. Host1 and Host2 belong to VLAN 2, and Host3 and Host4 belong to VLAN 3. DeviceA is connected to DeviceB through Ethernet interface 1. On DeviceA, two Layer 3 sub-interfaces (interface 1.1 and interface 1.2) are created on interface 1 and configured with 802.1Q tag termination for VLAN 2 and VLAN 3, respectively. These sub-interfaces are also allocated with IP addresses to ensure that they are reachable at Layer 3. The IP address of the default gateway for hosts in a specific VLAN is set to the IP address of the sub-interface in this VLAN.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001176742329__fig41361407138"><a name="EN-US_CONCEPT_0000001176742329__fig41361407138"></a><a name="fig41361407138"></a><span class="figcap"><b>Figure 3 </b>Using Layer 3 sub-interfaces to implement inter-VLAN communication through a single device</span><br><span><img class="vsd" src="figure/en-us_image_0000001130782694.png" width="NaN" height="NaN"></span></div>
+<p></p>
+<div class="p">When Host1 sends a packet to Host3, the packet is transmitted as follows (assuming that no forwarding entry is created on DeviceA):<ol><li>Host1 determines that Host3's IP address is on a different network segment from its own IP address, and sends an ARP Request packet to request the gateway MAC address. The ARP Request packet carries the destination IP address 10.1.1.1 (gateway's IP address) and all-F destination MAC address.</li><li>When the ARP Request packet reaches interface 1 on DeviceA, DeviceA records the mapping between the source MAC address, VLAN ID, and interface (00e0-fc00-1111, 2, interface 1) in its MAC address table.</li><li>DeviceA determines that the packet is an ARP Request packet and the destination IP address is the IP address of its own interface 1.1. DeviceA then responds with an ARP Reply packet that is encapsulated with the MAC address 00e0-fc00-3333 of interface 1.1 corresponding to VLAN 2. In addition, DeviceA records the mapping between the IP address and MAC address of Host1 in its ARP table.</li><li>After receiving the ARP Reply packet from DeviceA, Host1 records the mapping between the IP address and MAC address of interface 1.1 on DeviceA in its ARP table and sends a packet to DeviceA. The packet carries the destination MAC address 00e0-fc00-3333 and destination IP address 10.2.2.2 (Host3's IP address).</li><li>After the packet reaches interface 1 on DeviceA, DeviceA updates the MAC address table based on the source MAC address, VLAN ID, and inbound interface of the packet and compares the destination MAC address of the packet with the MAC address of interface 1.1. DeviceA then forwards the packet at Layer 3 after determining that the two MAC addresses are the same. As the IP address of Host3 matches a direct route, the packet is forwarded through interface 1.2 associated with VLAN 3.</li><li>DeviceA functions as the gateway of hosts in VLAN 3, and sends an ARP Request packet to all interfaces in VLAN 3 where the destination Host3 is located. The destination IP address of the ARP request packets is 10.2.2.2.</li><li>After receiving the ARP Request packet, Host3 determines that the destination IP address in the packet is its own IP address and sends an ARP Reply packet with its own MAC address. In addition, Host3 records the mapping between the MAC address and IP address of interface 1.2 (associated with VLAN 3) in its ARP table.</li><li>After DeviceA receives the ARP Reply packet from Host3, DeviceA records the mapping between the MAC address and IP address of Host3 in its ARP table and then forward the packet from Host1 to Host3. At the same time, DeviceA records the mapping between the Host3's IP address, MAC address, VLAN ID, and outbound interface in its Layer 3 forwarding table.</li></ol>
+</div>
+<p>At this point, Host1 accesses Host3 successfully. The same process is used for Host3 to access Host1.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_vlan_cfg_0003.html">Understanding VLANs
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_vlan_cfg_0008.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

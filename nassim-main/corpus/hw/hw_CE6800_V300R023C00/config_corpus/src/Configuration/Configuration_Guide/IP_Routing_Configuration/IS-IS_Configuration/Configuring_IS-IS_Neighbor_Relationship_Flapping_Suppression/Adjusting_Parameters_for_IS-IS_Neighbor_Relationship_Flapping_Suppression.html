@@ -1,0 +1,94 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Adjusting Parameters for IS-IS Neighbor Relationship Flapping Suppression">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0043.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0044.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0145.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IS-IS">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IS-IS">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130624310">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Adjusting Parameters for IS-IS Neighbor Relationship Flapping Suppression </title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130624310"></a><a name="EN-US_TASK_0000001130624310"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Adjusting Parameters for IS-IS Neighbor Relationship Flapping Suppression </h1>
+<div class="taskbody"><div class="prereq" style="margin-left:0"><a name="EN-US_TASK_0000001130624310__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Prerequisites</h4>
+<div class="p"><p>Before adjusting parameters for IS-IS neighbor relationship flapping suppression, you have completed the following task:</p>
+<ul><li><a href="vrp_isis_ipv4_cfg_0011.html">Configure basic IS-IS functions</a>.</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130624310__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>If an IS-IS interface alternates between up and down, IS-IS neighbor relationship flapping occurs on the interface. During the flapping, IS-IS frequently sends IIHs to reestablish the neighbor relationship, synchronizes LSDBs, and recalculates routes. In this process, a large number of packets are exchanged, impacting neighbor relationship stability, IS-IS services, and IS-IS-dependent services. IS-IS neighbor relationship flapping suppression can address this problem by either delaying IS-IS neighbor relationship reestablishment, or setting the link cost to the maximum value to prevent service traffic from passing through flapping links.</p>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130624310__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li><span>Enter the interface view.</span><p><pre class="screen"><a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i></pre>
+</p></li><li><span>Switch the interface working mode to Layer 3.</span><p><pre class="screen"><a href="cmdqueryname=undo+portswitch"><b><span class="cmdname">undo portswitch</span></b></a></pre>
+<p> Determine whether to perform this step based on the current interface working mode.</p>
+</p></li><li><span>Set the flapping suppression mode to Hold-down.</span><p><pre class="screen"><a href="cmdqueryname=isis+suppress-flapping+peer+hold-down"><b><span class="cmdname">isis suppress-flapping peer hold-down</span></b></a> <i><span class="varname">interval</span></i></pre>
+</p><p><p>IS-IS neighbor relationship flapping suppression works in either Hold-down or Hold-max-cost mode.</p>
+<ul><li>Hold-down mode: If frequent flooding and network topology changes occur during neighbor relationship establishment, interfaces prevent neighbor relationship reestablishment during Hold-down suppression to minimize LSDB synchronization attempts and packet exchanges.</li><li>Hold-max-cost mode: If the traffic forwarding path frequently changes, interfaces use the maximum cost of the flapping link during the suppression period to prevent traffic from passing through the flapping link.</li></ul>
+<p>If both modes are enabled, flapping suppression first works in Hold-down mode and then in Hold-max-cost mode.</p>
+<p>By default, the Hold-max-cost mode takes effect.</p>
+<p>To disable the Hold-max-cost mode, run the <a href="cmdqueryname=isis+suppress-flapping+peer+hold-max-cost"><b><span class="cmdname">isis suppress-flapping peer hold-max-cost</span></b></a> <strong><span>disable</span></strong> command.</p>
+</p></li><li><span>Configure detection parameters for IS-IS neighbor relationship flapping suppression.</span><p><pre class="screen"><a href="cmdqueryname=isis+suppress-flapping+peer"><b><span class="cmdname">isis suppress-flapping peer</span></b></a> { <strong><span>detecting-interval</span></strong> <i><span class="varname">detecting-interval</span></i> | <strong><span>threshold</span></strong> <i><span class="varname">threshold</span></i> | <strong><span>resume-interval</span></strong> <i><span class="varname">resume-interval</span></i> }</pre>
+</p><p><p>Each IS-IS interface maintains a flapping counter. If the interval between two successive neighbor state changes from Up to Initial or Down is less than or equal to the <i><span class="varname">detecting-interval</span></i>, a valid flapping_event is recorded, and the flapping_count increases by 1. When the flapping_count reaches or exceeds the <i><span class="varname">threshold</span></i>, flapping suppression takes effect. If the interval between two successive neighbor state changes from Up to Initial or Down is greater than or equal to the <i><span class="varname">resume-interval</span></i>, neighbor relationship flapping suppression exits, and the flapping_count is set to 0.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The value of <i><span class="varname">resume-interval</span></i> must be greater than that of <i><span class="varname">detecting-interval</span></i>.</p>
+</div></div>
+<p>You can configure detection parameters as required. <span>However, using the default detection parameters is recommended. By default, the detection interval for IS-IS neighbor relationship flapping suppression is 60s, the suppression threshold is 10, and the interval for exiting suppression is 120s.</span></p>
+</p></li><li><span>Return to the system view.</span><p><pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</p></li><li><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001130624310__en-us_task_0234857734_screen163801330213"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001130624310__en-us_task_0234857734_en-us_concept_0141113565_cmdname1667501373175340">commit</span></b></a></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001130624310__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><ul><li>Run the <a href="cmdqueryname=display+isis"><b><span class="cmdname">display isis</span></b></a> [ <i><span class="varname">process-id</span></i> ] <strong><span>interface</span></strong> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> <strong><span>verbose</span></strong> command to check the status of IS-IS neighbor relationship flapping suppression.</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_isis_ipv4_cfg_0043.html">Configuring IS-IS Neighbor Relationship Flapping Suppression
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_isis_ipv4_cfg_0044.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_isis_ipv4_cfg_0145.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

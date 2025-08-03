@@ -1,0 +1,116 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring OSPFv3 IP FRR">
+<meta name="abstract" content="If a link fails, OSPFv3 IP FRR rapidly switches traffic to a backup link, which prevents traffic interruption and improves OSPFv3 network reliability.">
+<meta name="description" content="If a link fails, OSPFv3 IP FRR rapidly switches traffic to a backup link, which prevents traffic interruption and improves OSPFv3 network reliability.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospfv3_cfg_2000.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospfv3_cfg_2092.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospfv3_cfg_2036.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospfv3_cfg_2032.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospfv3_cfg_2033.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospfv3_cfg_2034.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospfv3_cfg_2035.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,56675587z00801081,w00556928,w00606909,l00455378,">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="OSPFv3">
+<meta name="featuretype" content="IP Route">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="OSPFv3">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="OSPFv3">
+<meta name="featuretype" content="IP Routing Basis">
+<meta name="OWNER" content="z00875216">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="w00604599">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172365755">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Configuring OSPFv3 IP FRR</title>
+</head>
+<body><a name="EN-US_TASK_0172365755"></a><a name="EN-US_TASK_0172365755"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring OSPFv3 IP FRR</h1>
+<div class="taskbody"><p>If a link fails, OSPFv3 IP FRR rapidly switches traffic to a backup link, which prevents traffic interruption and improves OSPFv3 network reliability.</p>
+<div class="context"><a name="EN-US_TASK_0172365755__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Usage Scenario</h4><p>As networks develop, services such as Voice over IP (VoIP) and on-line video services require high-quality real-time transmission. However, OSPFv3 takes more than 50 ms to rectify a fault, which cannot meet the requirement for real-time transmission of these services.</p>
+<p>Nevertheless, if an OSPFv3 fault occurs, traffic can be switched to a new link only after the fault detection that lasts several milliseconds, fault notification to the routing control plane that lasts several milliseconds, new topology information generation and flooding that last tens of milliseconds, Shortest Path First (SPF) calculation that lasts tens of milliseconds, and new route notification and adding that last hundreds of milliseconds.</p>
+<p>OSPFv3 IP FRR calculates a backup link in advance. If the primary link fails, OSPFv3 IP FRR rapidly switches traffic to the backup link without interrupting traffic. This protects traffic and greatly improves OSPFv3 network reliability.</p>
+<p>OSPFv3 IP FRR is applicable to services that are sensitive to the packet delay and packet loss.</p>
+<div class="p">OSPFv3 LFA FRR uses the SPF algorithm to calculate the shortest path from each neighbor (root node) that provides a backup link to the destination node and store the node-based backup next hop, which applies to single-node routing scenarios. As networks are increasingly diversified, two ABRs or ASBRs are deployed to improve network reliability. In this case, OSPFv3 FRR in a scenario where multiple nodes advertise the same route is needed. In <a href="#EN-US_TASK_0172365755__fig_dc_vrp_ospfv3_cfg_203102">Figure 1</a>, Device B and Device C function as ABRs to forward area 0 and area 1 routes. Device E advertises an intra-area route. Upon receipt of the route, Device B and Device C translate it into a Type 3 LSA and flood the LSA to area 0. After OSPFv3 FRR is enabled on Device A, Device A considers Device B and Device C as its neighbors. Without a fixed neighbor as the root node, Device A fails to calculate FRR backup next hop. To address this problem, a virtual node is simulated between Device B and Device C and used as the root node of Device A, and Device A uses the LFA algorithm to calculate the backup next hop. This solution converts multi-node routing into single-node routing.<div class="fignone" id="EN-US_TASK_0172365755__fig_dc_vrp_ospfv3_cfg_203102"><a name="EN-US_TASK_0172365755__fig_dc_vrp_ospfv3_cfg_203102"></a><a name="fig_dc_vrp_ospfv3_cfg_203102"></a><span class="figcap"><b>Figure 1 </b>OSPFv3 FRR in the scenario where multiple nodes advertise the same route</span><br><span><img class="vsd" src="images/fig_dc_vrp_ospfv3_cfg_203102.png" width="NaN" height="NaN"></span></div>
+</div>
+<p>After OSPFv3 IP FRR is configured, the lower layer needs to fast respond to a link change so that traffic can be fast switched to the backup link. After FRR and BFD are bound, link failures can be detected rapidly so that traffic is rapidly switched to the backup link if the primary link fails.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172365755__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Pre-configuration Tasks</h4><p>Before configuring OSPFv3 IP FRR, complete the following tasks:</p>
+<ul><li><p>Configure a link layer protocol.</p>
+</li><li><p>Configure IP addresses for interfaces to ensure that neighboring nodes are reachable at the network layer.</p>
+</li><li><p><a href="dc_vrp_ospfv3_cfg_2003.html">Configure basic OSPFv3 functions</a>.</p>
+</li></ul>
+</div></div>
+</div>
+
+<ul class="ullinks">
+<dl>
+<dt>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospfv3_cfg_2032.html">Enabling OSPFv3 IP FRR</a>
+</dt>
+<dd>
+With OSPF IP FRR and loop-free backup links, a device can switch traffic to a backup link immediately if the primary link fails.</dd>
+</dl>
+<dl>
+<dt>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospfv3_cfg_2033.html">(Optional) Binding IP FRR and BFD</a>
+</dt>
+<dd>
+Binding IP FRR and BFD enables the lower layer to fast respond to a link change so that traffic can be rapidly switched to the backup link if the primary link fails.</dd>
+</dl>
+<dl>
+<dt>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospfv3_cfg_2034.html">(Optional) Blocking FRR on an OSPFv3 Interface</a>
+</dt>
+<dd>
+If FRR is not required on certain OSPFv3 interfaces, FRR needs to be blocked on these interfaces.</dd>
+</dl>
+<dl>
+<dt>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospfv3_cfg_2035.html">Verifying the Configuration of OSPFv3 IP FRR</a>
+</dt>
+<dd>
+After configuring OSPFv3 IP FRR, you can view information about the primary and backup links.</dd>
+</dl>
+</ul>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospfv3_cfg_2000.html">OSPFv3 Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospfv3_cfg_2092.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospfv3_cfg_2036.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

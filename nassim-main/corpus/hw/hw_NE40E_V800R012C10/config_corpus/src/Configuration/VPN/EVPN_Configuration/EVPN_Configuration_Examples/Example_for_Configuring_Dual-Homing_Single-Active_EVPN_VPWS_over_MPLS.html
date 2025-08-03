@@ -1,0 +1,670 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Dual-Homing Single-Active EVPN VPWS over MPLS">
+<meta name="abstract" content="This section provides an example for configuring EVPN VPWS services on a dual-homing single-active network.">
+<meta name="description" content="This section provides an example for configuring EVPN VPWS services on a dual-homing single-active network.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_0010.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_0153-eth-trunk.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_vpws-df-result.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="p00915595,w00800033,w00606909">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="EVPN">
+<meta name="featuretype" content="VPN">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="EVPN">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="EVPN">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="EVPN">
+<meta name="featuretype" content="VPN">
+<meta name="OWNER" content="p00915595">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00878323">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0272003280">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Dual-Homing Single-Active EVPN VPWS over MPLS</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0272003280"></a><a name="EN-US_TASK_0272003280"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Dual-Homing Single-Active EVPN VPWS over MPLS</h1>
+<div class="taskbody"><p>This section provides an example for configuring EVPN VPWS services on a dual-homing single-active network.</p>
+<div class="context"><a name="EN-US_TASK_0272003280__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0272003280__fig_dc_vrp_evpn_cfg_015301">Figure 1</a>, PE1, PE2, the RR, and PE3 belong to the same AS. They need to communicate with each other using OSPF, and MPLS tunnels need to be deployed to carry EVPN VPWS services. CE1 is dual-homed to PE1 and PE2 in single-active mode. PE1 is the active PE, and PE2 is the standby PE. CE2 is single-homed to PE3.</p>
+<div class="fignone" id="EN-US_TASK_0272003280__fig_dc_vrp_evpn_cfg_015301"><a name="EN-US_TASK_0272003280__fig_dc_vrp_evpn_cfg_015301"></a><a name="fig_dc_vrp_evpn_cfg_015301"></a><span class="figcap"><b>Figure 1 </b>Configuring dual-homing single-active EVPN VPWS over MPLS</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 through 3 in this example represent GE <span>0/1/0</span>, GE <span>0/2/0</span>, and GE <span>0/3/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0272003281.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0272003280__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure an IGP on the backbone network to enable PEs and the RR to communicate.</p>
+</li><li><p>Configure basic MPLS functions and enable MPLS LDP to establish MPLS LSPs on the backbone network.</p>
+</li><li><p>Configure EVPN VPWS and an EVPL instance and bind an access-side sub-interface to the EVPL instance on each PE.</p>
+</li><li>Configure the E-Trunk on PEs for EVPN single-active networking. The E-Trunk uses the default encryption mode <strong>enhanced-hmac-sha256</strong> for authentication.</li><li><p>Establish BGP EVPN peer relationships between PEs and the RR. On the RR, configure the PEs as RR clients.</p>
+</li><li><p>Configure local-remote FRR on PEs.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0272003280__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>EVPN instance name: evrf1</p>
+</li><li><p>EVPN instance RDs: 100:1, 100:2, and 100:3; RTs: 1:1</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0272003280__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure interface addresses on the RR and PEs according to <a href="#EN-US_TASK_0272003280__fig_dc_vrp_evpn_cfg_015301">Figure 1</a>. For detailed configurations, see Configuration Files.</span></li><li><span>Configure an IGP on the backbone network to enable PEs and the RR to communicate. OSPF is used as an IGP in this example.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1] <strong>area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1-area-0.0.0.0] <strong>network 10.1.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1-area-0.0.0.0] <strong>network 1.1.1.1 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1-area-0.0.0.0] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-ospf-1-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-ospf-1] <strong>quit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1] <strong>area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1-area-0.0.0.0] <strong>network 10.2.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1-area-0.0.0.0] <strong>network 2.2.2.2 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1-area-0.0.0.0] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-ospf-1-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-ospf-1] <strong>quit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-ospf-1] <strong>area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-ospf-1-area-0.0.0.0] <strong>network 10.3.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-ospf-1-area-0.0.0.0] <strong>network 4.4.4.4 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-ospf-1-area-0.0.0.0] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-ospf-1-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-ospf-1] <strong>quit</strong></pre>
+<p># Configure the RR.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>RR] <strong>ospf 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-ospf-1]<strong> area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-ospf-1-area-0.0.0.0] <strong>network 10.1.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-ospf-1-area-0.0.0.0] <strong>network 10.2.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-ospf-1-area-0.0.0.0] <strong>network 10.3.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-ospf-1-area-0.0.0.0] <strong>network 3.3.3.3 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-ospf-1-area-0.0.0.0] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>RR-ospf-1-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>RR-ospf-1] <strong>quit</strong></pre>
+</p></li><li><span>Configure basic MPLS functions and enable MPLS LDP to establish LDP LSPs on the MPLS backbone network.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>mpls lsr-id 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>mpls lsr-id 2.2.2.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-mpls]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-mpls-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<p># Configure the RR.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>RR] <strong>mpls lsr-id 3.3.3.3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-GigabitEthernet<span>0/1/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-GigabitEthernet<span>0/1/0</span>]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR] <strong>interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-GigabitEthernet<span>0/2/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-GigabitEthernet<span>0/2/0</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR] <strong>interface gigabitethernet <span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-GigabitEthernet<span>0/3/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-GigabitEthernet<span>0/3/0</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-GigabitEthernet<span>0/3/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>RR-GigabitEthernet<span>0/3/0</span>] <strong>quit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>mpls lsr-id 4.4.4.4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-mpls]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-mpls-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-GigabitEthernet<span>0/1/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-GigabitEthernet<span>0/1/0</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+</p></li><li><span>Configure EVPN VPWS and an EVPL instance and bind an access-side sub-interface to the EVPL instance on each PE.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>evpn vpn-instance evrf1 vpws</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpws-evpn-instance-evrf1] <strong>route-distinguisher 100:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpws-evpn-instance-evrf1] <strong>vpn-target 1:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpws-evpn-instance-evrf1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>evpl instance 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-evpl1] <strong>evpn binding vpn-instance evrf1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-evpl1] <strong>local-service-id 100 remote-service-id 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-evpl1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface Eth-Trunk1</strong>
+[<span class="keyword">*</span>PE1-Eth-Trunk1] <strong>mode lacp-static</strong>
+[<span class="keyword">*</span>PE1-Eth-Trunk1] <strong>esi 0001.0002.0003.0004.0005</strong>
+[<span class="keyword">*</span>PE1-Eth-Trunk1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet <span>0/1/0</span>] <strong>eth-trunk 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet <span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface Eth-Trunk1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Eth-Trunk1.1] <strong>vlan-type dot1q 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Eth-Trunk1.1] <strong>evpl instance 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Eth-Trunk1.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>evpn vpn-instance evrf1 vpws</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpws-evpn-instance-evrf1] <strong>route-distinguisher 100:2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpws-evpn-instance-evrf1] <strong>vpn-target 1:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpws-evpn-instance-evrf1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>evpl instance 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-evpl1] <strong>evpn binding vpn-instance evrf1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-evpl1] <strong>local-service-id 100 remote-service-id 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-evpl1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface Eth-Trunk1</strong>
+[<span class="keyword">*</span>PE2-Eth-Trunk1] <strong>mode lacp-static</strong>
+[<span class="keyword">*</span>PE2-Eth-Trunk1] <strong>esi 0001.0002.0003.0004.0005</strong>
+[<span class="keyword">*</span>PE2-Eth-Trunk1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet <span>0/1/0</span>] <strong>eth-trunk 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet <span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface Eth-Trunk1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Eth-Trunk1.1] <strong>vlan-type dot1q 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Eth-Trunk1.1] <strong>evpl instance 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Eth-Trunk1.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>evpn vpn-instance evrf1 vpws</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-vpws-evpn-instance-evrf1] <strong>route-distinguisher 100:3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-vpws-evpn-instance-evrf1] <strong>vpn-target 1:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-vpws-evpn-instance-evrf1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>evpl instance 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-evpl1] <strong>evpn binding vpn-instance evrf1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-evpl1] <strong>local-service-id 200 remote-service-id 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-evpl1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-GigabitEthernet <span>0/2/0</span>] <strong>evpl instance 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-GigabitEthernet <span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>commit</strong></pre>
+</p></li><li><span>Configure a source address on each PE.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>evpn source-address 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>evpn source-address 2.2.2.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>evpn source-address 4.4.4.4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>commit</strong></pre>
+</p></li><li><span>Configure the E-Trunk on PEs for EVPN single-active networking.</span><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>For security purposes, you are not advised to use weak security algorithms in this feature. If you need to use such an algorithm, run the <a href="cmdqueryname=undo+crypto+weak-algorithm+disable"><b><span class="cmdname">undo crypto weak-algorithm disable</span></b></a> command to enable the weak security algorithm function.</p>
+</div></div>
+</p><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>evpn redundancy-mode single-active</strong>
+[<span class="keyword">*</span>PE1] <strong>lacp e-trunk system-id 00e0-fc00-0001</strong>
+[<span class="keyword">*</span>PE1] <strong>e-trunk 1</strong>
+[<span class="keyword">*</span>PE1-e-trunk-1] <strong>priority 10</strong>
+[<span class="keyword">*</span>PE1-e-trunk-1] <strong>peer-address 2.2.2.2 source-address 1.1.1.1</strong>
+[<span class="keyword">*</span>PE1-e-trunk-1] <strong>security-key cipher YsHsjx_202206</strong>
+[<span class="keyword">*</span>PE1-e-trunk-1] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>interface Eth-Trunk1</strong>
+[<span class="keyword">*</span>PE1-Eth-Trunk1] <strong>e-trunk 1</strong>
+[<span class="keyword">*</span>PE1-Eth-Trunk1] <strong>quit</strong>
+[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>evpn redundancy-mode single-active</strong>
+[<span class="keyword">*</span>PE2] <strong>lacp e-trunk system-id 00e0-fc00-0001</strong>
+[<span class="keyword">*</span>PE2] <strong>e-trunk 1</strong>
+[<span class="keyword">*</span>PE2-e-trunk-1] <strong>priority 20</strong>
+[<span class="keyword">*</span>PE2-e-trunk-1] <strong>peer-address 1.1.1.1 source-address 2.2.2.2</strong>
+[<span class="keyword">*</span>PE2-e-trunk-1] <strong>security-key cipher YsHsjx_202206</strong>
+[<span class="keyword">*</span>PE2-e-trunk-1] <strong>quit</strong>
+[<span class="keyword">*</span>PE2] <strong>interface Eth-Trunk1</strong>
+[<span class="keyword">*</span>PE2-Eth-Trunk1] <strong>e-trunk 1</strong>
+[<span class="keyword">*</span>PE2-Eth-Trunk1] <strong>quit</strong>
+[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+</p></li><li><span>Establish BGP EVPN peer relationships between PEs and the RR. On the RR, configure the PEs as RR clients.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>peer 3.3.3.3 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>peer 3.3.3.3 connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>l2vpn-family evpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-evpn] <strong>peer 3.3.3.3 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-evpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>peer 3.3.3.3 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>peer 3.3.3.3 connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>l2vpn-family evpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-evpn] <strong>peer 3.3.3.3 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-evpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-bgp] <strong>peer 3.3.3.3 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-bgp] <strong>peer 3.3.3.3 connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-bgp] <strong>l2vpn-family evpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-bgp-af-evpn] <strong>peer 3.3.3.3 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-bgp-af-evpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>commit</strong></pre>
+<p># Configure the RR.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>RR] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-bgp] <strong>peer 1.1.1.1 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-bgp] <strong>peer 1.1.1.1 connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-bgp] <strong>peer 2.2.2.2 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-bgp] <strong>peer 2.2.2.2 connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-bgp] <strong>peer 4.4.4.4 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-bgp] <strong>peer 4.4.4.4 connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-bgp] <strong>l2vpn-family evpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-bgp-af-evpn] <strong>undo policy vpn-target</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-bgp-af-evpn] <strong>peer 1.1.1.1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-bgp-af-evpn] <strong>peer 1.1.1.1 reflect-client</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-bgp-af-evpn] <strong>peer 2.2.2.2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-bgp-af-evpn] <strong>peer 2.2.2.2 reflect-client</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-bgp-af-evpn] <strong>peer 4.4.4.4 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-bgp-af-evpn] <strong>peer 4.4.4.4 reflect-client</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-bgp-af-evpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RR] <strong>commit</strong></pre>
+<p>After completing the configurations, run the <strong>display bgp evpn peer</strong> command on the RR. The command output shows that BGP peer relationships are in the <strong>Established</strong> state, indicating that the BGP peer relationships have been successfully established between the PEs and RR.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>RR] <strong>display bgp evpn peer</strong></pre>
+<pre class="screen"> 
+ BGP local router ID : 3.3.3.3
+ Local AS number : 100
+ Total number of peers : 3                 Peers in established state : 3
+
+  Peer            V          AS  MsgRcvd  MsgSent  OutQ  Up/Down       State  PrefRcv
+  1.1.1.1         4         100        9       15     0 00:03:41 Established        1
+  2.2.2.2         4         100        9       15     0 00:03:42 Established        1
+  4.4.4.4         4         100        8       15     0 00:03:42 Established        1</pre>
+</p></li><li><span>Configure FRR on PEs.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>evpn vpn-instance evrf1 vpws</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpws-evpn-instance-evrf1] <strong>local-remote frr enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpws-evpn-instance-evrf1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>evpn vpn-instance evrf1 vpws</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpws-evpn-instance-evrf1] <strong>local-remote frr enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpws-evpn-instance-evrf1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>evpn vpn-instance evrf1 vpws</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-vpws-evpn-instance-evrf1] <strong>remote frr enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-vpws-evpn-instance-evrf1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>commit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p>Run the <strong>display bgp evpn vpn-instance evrf1 routing-table ad-route 0001.0002.0003.0004.0005:100</strong> command on PE3. The command output shows detailed information about the EVPN A-D routes sent by PE1 and PE2. The route sent by PE1 is selected, and the route sent by PE2 is a backup route. In addition, you can view the label information about the bypass tunnel after FRR is configured.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>display bgp evpn vpn-instance evrf1 routing-table ad-route 0001.0002.0003.0004.0005:100</strong></pre>
+<pre class="screen"> BGP local router ID : 4.4.4.4
+ Local AS number : 100
+ 
+ EVPN-Instance evrf1:
+ Number of A-D Routes: 2
+ BGP routing table entry information of 0001.0002.0003.0004.0005:100:
+ Route Distinguisher: 100:1
+ Remote-Cross route
+ Label information (Received/Applied): 48123/NULL
+ From: 3.3.3.3 (3.3.3.3) 
+ Route Duration: 0d00h21m10s
+ Relay Tunnel Out-Interface: GigabitEthernet<span>0/1/0</span>
+ Original nexthop: 1.1.1.1
+ Qos information : 0x0
+ Ext-Community: RT &lt;1 : 1&gt;, SoO &lt;1.1.1.1 : 0&gt;, EVPN L2 Attributes &lt;MTU:1500 C:0 P:1 B:0&gt;, <strong>Bypass Label&lt;0 : 0 : 48124&gt;</strong>
+ AS-path Nil, origin incomplete, localpref 100, pref-val 0, valid, internal, <strong>best, select</strong>, pre 255, IGP cost 2
+ Originator: 1.1.1.1
+ Cluster list: 3.3.3.3
+ Route Type: 1 (Ethernet Auto-Discovery (A-D) route)
+ ESI: 0001.0002.0003.0004.0005, Ethernet Tag ID: 100
+ Not advertised to any peer yet
+ 
+ BGP routing table entry information of 0001.0002.0003.0004.0005:100:
+ Route Distinguisher: 100:2
+ Remote-Cross route
+ Label information (Received/Applied): 48123/NULL
+ From: 3.3.3.3 (3.3.3.3) 
+ Route Duration: 0d00h20m53s
+ Relay Tunnel Out-Interface: GigabitEthernet<span>0/1/0</span>
+ Original nexthop: 2.2.2.2
+ Qos information : 0x0
+ Ext-Community: RT &lt;1 : 1&gt;, SoO &lt;2.2.2.2 : 0&gt;, EVPN L2 Attributes &lt;MTU:1500 C:0 P:0 B:1&gt;, <strong>Bypass Label&lt;0 : 0 : 48124&gt;</strong>
+ AS-path Nil, origin incomplete, localpref 100, pref-val 0, valid, internal, <strong>backup</strong>, pre 255, IGP cost 2, not preferred for L2 ext-community
+ Originator: 2.2.2.2
+ Cluster list: 3.3.3.3
+ Route Type: 1 (Ethernet Auto-Discovery (A-D) route)
+ ESI: 0001.0002.0003.0004.0005, Ethernet Tag ID: 100
+ Not advertised to any peer yet</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0272003280__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>PE1 configuration file</p>
+<pre class="screen">#
+sysname PE1
+#
+lacp e-trunk system-id 00e0-fc00-0001
+#
+evpn redundancy-mode single-active
+#
+e-trunk 1
+ priority 10
+ peer-address 2.2.2.2 source-address 1.1.1.1
+ security-key cipher %^%#!8C!"bAoc<font style="font-size:8pt" Face="Courier New" >~</font>O}UW2)%$HP4%.G9179.;&amp;Yr[GmV.PN%^%# 
+ authentication-mode enhanced-hmac-sha256
+#
+evpn vpn-instance evrf1 vpws
+ route-distinguisher 100:1
+ local-remote frr enable
+ vpn-target 1:1 export-extcommunity
+ vpn-target 1:1 import-extcommunity
+#
+evpl instance 1
+ evpn binding vpn-instance evrf1
+ local-service-id 100 remote-service-id 200
+#
+mpls lsr-id 1.1.1.1
+#               
+mpls
+#
+mpls ldp
+#
+interface Eth-Trunk1
+ mode lacp-static
+ e-trunk 1
+ esi 0001.0002.0003.0004.0005
+#
+interface Eth-Trunk1.1
+ vlan-type dot1q 1
+ evpl instance 1
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ eth-trunk 1        
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.1.1.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 1.1.1.1 255.255.255.255
+#
+bgp 100
+ peer 3.3.3.3 as-number 100
+ peer 3.3.3.3 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 3.3.3.3 enable
+ #
+ l2vpn-family evpn
+  policy vpn-target
+  peer 3.3.3.3 enable
+#
+ospf 1
+ area 0.0.0.0
+  network 1.1.1.1 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+#
+evpn source-address 1.1.1.1
+#
+return</pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#
+sysname PE2
+#
+lacp e-trunk system-id 00e0-fc00-0001
+#
+evpn redundancy-mode single-active
+#
+e-trunk 1
+ priority 20
+ peer-address 1.1.1.1 source-address 2.2.2.2
+ security-key cipher %^%#GAG\Y-F%GY[GnwCkov7A&lt;e(m/cl}m86`jd6z[79<font style="font-size:8pt" Face="Courier New" >~</font>%^%#
+ authentication-mode enhanced-hmac-sha256
+#
+evpn vpn-instance evrf1 vpws
+ route-distinguisher 100:2
+ local-remote frr enable
+ vpn-target 1:1 export-extcommunity
+ vpn-target 1:1 import-extcommunity
+#
+evpl instance 1
+ evpn binding vpn-instance evrf1
+ local-service-id 100 remote-service-id 200
+#
+mpls lsr-id 2.2.2.2
+#               
+mpls
+#
+mpls ldp
+#
+interface Eth-Trunk1
+ mode lacp-static
+ e-trunk 1
+ esi 0001.0002.0003.0004.0005
+#
+interface Eth-Trunk1.1
+ vlan-type dot1q 1
+ evpl instance 1
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ eth-trunk 1
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.2.1.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 2.2.2.2 255.255.255.255
+#
+bgp 100
+ peer 3.3.3.3 as-number 100
+ peer 3.3.3.3 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 3.3.3.3 enable
+ #
+ l2vpn-family evpn
+  policy vpn-target
+  peer 3.3.3.3 enable
+#
+ospf 1
+ area 0.0.0.0
+  network 2.2.2.2 0.0.0.0
+  network 10.2.1.0 0.0.0.255
+#
+evpn source-address 2.2.2.2
+#
+return</pre>
+</li><li><p>PE3 configuration file</p>
+<pre class="screen">#
+sysname PE3
+#
+evpn redundancy-mode single-active
+#
+evpn vpn-instance evrf1 vpws
+ route-distinguisher 100:3
+ remote frr enable
+ vpn-target 1:1 export-extcommunity
+ vpn-target 1:1 import-extcommunity
+#
+evpl instance 1
+ evpn binding vpn-instance evrf1
+ local-service-id 200 remote-service-id 100
+#
+mpls lsr-id 4.4.4.4
+#               
+mpls
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown  
+ ip address 10.3.1.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ evpl instance 1
+#
+interface LoopBack1
+ ip address 4.4.4.4 255.255.255.255
+#
+bgp 100
+ peer 3.3.3.3 as-number 100
+ peer 3.3.3.3 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 3.3.3.3 enable
+ #
+ l2vpn-family evpn
+  policy vpn-target
+  peer 3.3.3.3 enable
+#
+ospf 1
+ area 0.0.0.0
+  network 4.4.4.4 0.0.0.0
+  network 10.3.1.0 0.0.0.255
+#
+evpn source-address 4.4.4.4
+#
+return</pre>
+</li><li><p>RR configuration file</p>
+<pre class="screen">#
+sysname RR
+#
+mpls lsr-id 3.3.3.3
+#
+mpls
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.2.1.2 255.255.255.0
+ mpls           
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.1.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown
+ ip address 10.3.1.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 3.3.3.3 255.255.255.255
+#
+bgp 100
+ peer 1.1.1.1 as-number 100
+ peer 1.1.1.1 connect-interface LoopBack1
+ peer 2.2.2.2 as-number 100
+ peer 2.2.2.2 connect-interface LoopBack1
+ peer 4.4.4.4 as-number 100
+ peer 4.4.4.4 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 1.1.1.1 enable
+  peer 2.2.2.2 enable
+  peer 4.4.4.4 enable
+ #
+ l2vpn-family evpn
+  undo policy vpn-target
+  peer 1.1.1.1 enable
+  peer 1.1.1.1 reflect-client
+  peer 2.2.2.2 enable
+  peer 2.2.2.2 reflect-client
+  peer 4.4.4.4 enable
+  peer 4.4.4.4 reflect-client
+#
+ospf 1
+ area 0.0.0.0   
+  network 3.3.3.3 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+  network 10.2.1.0 0.0.0.255
+  network 10.3.1.0 0.0.0.255
+#
+return</pre>
+</li><li>CE1 configuration file<pre class="screen">#
+sysname CE1
+#
+interface Eth-Trunk1
+ mode lacp-static
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ eth-trunk 1
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ eth-trunk 1
+#</pre>
+</li><li>CE2 configuration file<pre class="screen">#
+sysname CE2
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+#</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_0010.html">EVPN Configuration Examples
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_0153-eth-trunk.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_evpn_cfg_vpws-df-result.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

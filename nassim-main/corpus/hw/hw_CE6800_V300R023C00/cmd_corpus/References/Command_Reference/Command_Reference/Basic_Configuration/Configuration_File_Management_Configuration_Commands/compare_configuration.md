@@ -1,0 +1,91 @@
+compare configuration
+=====================
+
+compare configuration
+
+Function
+--------
+
+
+
+The **compare configuration** command compares whether the current configurations are identical with the next startup configuration file or the specified configuration file.
+
+
+
+
+Format
+------
+
+**compare configuration** [ *configuration-file* ]
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| *configuration-file* | Indicates the name of the configuration file to be compared with the current configurations.  If this parameter is not specified, the next startup configuration file is compared with the current configurations by default. | The value is a string of 5 to 64 characters without spaces. |
+
+
+
+Views
+-----
+
+User view
+
+
+Default Level
+-------------
+
+3: Management level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+
+
+After a series of operations are performed, you can run the compare configuration command to compare whether the current configurations are identical with the next startup or a specified configuration file from the first line. The command output helps decide whether to save and set the current configurations as the next startup configuration file.The command output respectively displays nine lines of the current configurations and the next startup or a specified configuration file from the line that contains differences. If the lines from the differences to the end of the configuration file are less than nine, the command displays the content till the end of the configuration file.
+
+
+
+**Precautions**
+
+
+
+The filename extension of the configuration file must be .cfg or .zip.After this command is run once, only the first difference between the two configuration files is displayed. To compare all differences, modify the difference recognized to be the same and run the compare configuration command repeatedly.
+
+
+
+
+Example
+-------
+
+# Compare whether the current configurations are identical with the next startup configuration file.
+```
+<HUAWEI> compare configuration
+Building configuration...
+Warning: The current configuration is not the same as the next startup configuration file. There may be several differences, and the following are some configurations beginning from the first:
+====== Current configuration line 13 ======
+local-user newuser password irreversible-cipher $1a${EEb6TTv$H$@*AZK.okDUWG"QOxes+;qR)H#,(&8JA{&>6k<>8+$
+local-user newuser service-type none
+#
+authentication-scheme default
+#
+authorization-scheme default
+#
+accounting-scheme default
+#
+
+====== Configuration file line 15 ======
+authentication-scheme default
+#
+authorization-scheme default
+#
+accounting-scheme default
+#
+domain default
+
+```

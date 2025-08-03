@@ -1,0 +1,209 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="topic">
+<meta name="DC.Title" content="Mappings Between Commands and YANG">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../toctopics/en-us_topic_0000001513154142.html">
+<meta name="DC.Relation" scheme="URI" content="../toctopics/en-us_topic_0000001563874121.html">
+<meta name="DC.Relation" scheme="URI" content="../toctopics/en-us_topic_0000001513034206.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="MD-CLI">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="MD-CLI">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="MD-CLI">
+<meta name="featuretype" content="System Management">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TOPIC_0000001563874129">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Mappings Between Commands and YANG</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TOPIC_0000001563874129"></a><a name="EN-US_TOPIC_0000001563874129"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Mappings Between Commands and YANG</h1>
+<div><p>The MD-CLI commands are generated based on the YANG model supported by a device. The following uses huawei-arp.yang as an example to describe how the MD-CLI commands are generated based on YANG model nodes.</p>
+<p>The YANG tree structure of huawei-arp.yang is as follows:</p>
+<pre class="screen">module: huawei-arp
++--rw arp  
+   +--rw global 
+   |  +--rw strict-learn-enable?      boolean 
+   |  +--rw l2topo-detect-enable?     boolean 
+   |  +--rw rate-trap-interval?       uint32 
+   |  +--rw passive-learn-enable?     boolean 
+   |  +--rw topo-detect-disable?      boolean 
+   |  +--rw con-send-enable?          boolean 
+   |  +--rw con-send-maxnum?          uint16 
+   |  +--rw gratuitous-drop?          boolean 
+   |  +--rw vlanif-expiretime?        uint32 
+   |  +--rw host-conflict-period?     uint16 
+   |  +--rw host-conflict-threshold?  uint16 
+   |  +--rw broadcast-max-num?        uint16 
+   +--rw speed-limits 
+   |  +--rw speed-limit* [slot-id suppress-type ip-type] 
+   |     +--rw slot-id           string                                
+   |     +--rw suppress-type     suppress-type                
+   |     +--rw ip-type           suppress-ip-type              
+   |     +--rw suppress-value    uint32 
+   +--rw static-arps         
+      +--rw static-arp* [ip-addr ni-name] 
+         +--rw ip-addr     ipv4-address-no-zone          
+         +--rw ni-name     leafref                      
+         +--rw mac-addr    mac-address
+         +--rw vlan-id?    uint16 </pre>
+<p>The mappings between MD-CLI commands and the YANG model are as follows:</p>
+<ul><li>The container node in the YANG model is mapped to the MD-CLI node view. The container node name corresponds to the MD-CLI node view name.<div class="p">Take huawei-arp.yang as an example. In the YANG tree structure, the arp and speed-limits nodes are both container nodes.<pre class="screen">module: huawei-arp
++--rw arp
+   +--rw speed-limits</pre>
+</div>
+<p>On the MD-CLI, the arp and speed-limits nodes are mapped to node views.</p>
+<pre class="screen">[ADMIN@HUAWEI]
+MDCLI&gt; <strong>arp</strong>
+
+[ADMIN@HUAWEI]/arp
+MDCLI&gt; <strong>speed-limits</strong>
+
+[ADMIN@HUAWEI]/arp/speed-limits
+MDCLI&gt; </pre>
+<p>You can specify the names of container nodes of different levels at one time to directly access the view corresponding to the target container node.</p>
+<pre class="screen">[ADMIN@HUAWEI]
+MDCLI&gt; <strong>arp </strong><strong>speed-limits</strong>
+
+[ADMIN@HUAWEI]/arp/speed-limits
+MDCLI&gt; </pre>
+</li><li>The list node in the YANG model is also mapped to the MD-CLI node view. Different from the container node, in the list view, you need to specify all the related key values of the list node in addition to the name of the list node.<p>Take huawei-arp.yang as an example. In the YANG tree structure, the speed-limit node is a list node, and its key consists of three nodes: slot-id, suppress-type, and ip-type.</p>
+<pre class="screen">module: huawei-arp
++--rw arp
+   +--rw speed-limits
+      +--rw speed-limit* [slot-id suppress-type ip-type]
+         +--rw slot-id           string
+         +--rw suppress-type     suppress-type
+         +--rw ip-type           suppress-ip-type
+         +--rw suppress-value    uint32</pre>
+<p>On the MD-CLI, the speed-limit node is mapped to the MD-CLI node view. To enter the MD-CLI node view, you need to specify slot-id, suppress-type, and ip-type.</p>
+<pre class="screen">[ADMIN@HUAWEI]/arp/speed-limits
+MDCLI&gt; <strong>speed-limit</strong> <strong>slot-id</strong> <em>1</em> <strong>suppress-type</strong> <em>arp</em> <strong>ip-type</strong> <em>src-ip</em>
+
+[ADMIN@HUAWEI]/arp/speed-limits/speed-limit[slot-id="1"][suppress-type="arp"][ip-type="src-ip"]
+MDCLI&gt;</pre>
+<p>If a list node is nested in a container node, you can specify both the container and list nodes to enter the list node view.</p>
+<pre class="screen">[ADMIN@HUAWEI]
+MDCLI&gt; <strong>arp speed-limit</strong> <strong>slot-id</strong> <em>1</em> <strong>suppress-type</strong> <em>arp</em> <strong>ip-type</strong> <em>src-ip</em>
+
+[ADMIN@HUAWEI]/arp/speed-limits/speed-limit[slot-id="1"][suppress-type="arp"][ip-type="src-ip"]
+MDCLI&gt;</pre>
+</li><li>Leaf and leaf-list nodes in the YANG model are mapped to MD-CLI operation objects, with the node names being the names of the operation objects. You can enter an object name and parameter value to modify the configuration and run the <strong>remove</strong> &lt;<em>object name</em>&gt; command to delete the configuration.<p>Take huawei-arp.yang as an example. In the YANG tree structure, strict-learn-enable, l2topo-detect-enable, and rate-trap-interval are all leaf nodes.</p>
+<pre class="screen">module: huawei-arp
++--rw arp
+   +--rw global
+      +--rw strict-learn-enable?      boolean
+      +--rw l2topo-detect-enable?     boolean
+      +--rw rate-trap-interval?       uint32</pre>
+<p>On the MD-CLI, strict-learn-enable, l2topo-detect-enable, and rate-trap-interval are mapped to MD-CLI operation objects. You can run the <strong>remove</strong> &lt;<em>object name</em>&gt; command to delete the configuration.</p>
+<pre class="screen">[*(ex)ADMIN@HUAWEI]/arp/global
+MDCLI&gt; <strong>strict-learn-enable</strong> <em>false</em>
+
+[*(ex)ADMIN@HUAWEI]/arp/global
+MDCLI&gt; <strong>remove</strong> <strong>rate-trap-interval</strong></pre>
+<p>You can enter multiple operation objects and values in one MD-CLI command line.</p>
+<pre class="screen">[*(ex)ADMIN@HUAWEI]/arp/global
+MDCLI&gt; <strong>strict-learn-enable </strong><em>false</em><strong> l2topo-detect-enable </strong><em>true</em></pre>
+</li></ul>
+<p>As shown in the preceding information, the hierarchy of the YANG tree is expressed through the view hierarchy on the MD-CLI. The following example shows the mapping between YANG nodes and MD-CLI commands.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>On the MD-CLI command list on the right, indentation indicates the nesting relationship between MD-CLI views, text in bold indicates the MD-CLI view names and operation object commands, and text in italics indicates related command parameters (including specific parameter types).</p>
+</div></div>
+<pre class="screen">MD-CLI commands in the YANG tree structure
+module: huawei-arp
++--rw arp  ----------------------------------------------------------<strong>&gt;</strong> <strong>arp</strong>
+   +--rw global -----------------------------------------------------<strong>&gt;</strong>     <strong>global</strong>
+   |  +--rw strict-learn-enable?      boolean -----------------------<strong>&gt;</strong>         <strong>strict-learn-enable</strong> <em>boolean</em>
+   |  +--rw l2topo-detect-enable?     boolean -----------------------<strong>&gt;</strong>         <strong>l2topo-detect-enable</strong><em> boolean</em>
+   |  +--rw rate-trap-interval?       uint32 ------------------------<strong>&gt;</strong>         <strong>rate-trap-interval</strong> <em>uint32</em>
+   |  +--rw passive-learn-enable?     boolean -----------------------<strong>&gt;</strong>         <strong>passive-learn-enable</strong> <em>boolean</em>
+   |  +--rw topo-detect-disable?      boolean -----------------------<strong>&gt;</strong>         <strong>topo-detect-disable</strong> <em>boolean</em>
+   |  +--rw con-send-enable?          boolean -----------------------<strong>&gt;</strong>         <strong>con-send-enable</strong> <em>boolean</em>
+   |  +--rw con-send-maxnum?          uint16 ------------------------<strong>&gt;</strong>         <strong>con-send-maxnum</strong> <em>uint16</em>
+   |  +--rw gratuitous-drop?          boolean -----------------------<strong>&gt;</strong>         <strong>gratuitous-drop</strong> <em>boolean</em>
+   |  +--rw vlanif-expiretime?        uint32 ------------------------<strong>&gt;</strong>         <strong>vlanif-expiretime</strong> <em>uint32</em>
+   |  +--rw host-conflict-period?     uint16 ------------------------<strong>&gt;</strong>         <strong>host-conflict-period</strong> <em>uint16</em>
+   |  +--rw host-conflict-threshold?  uint16 ------------------------<strong>&gt;</strong>         <strong>host-conflict-threshold</strong> <em>uint16</em>
+   |  +--rw broadcast-max-num?        uint16 ------------------------<strong>&gt;</strong>         <strong>broadcast-max-num</strong> <em>uint16</em>
+   +--rw speed-limits -----------------------------------------------<strong>&gt;</strong>      <strong>speed-limits</strong>
+   |  +--rw speed-limit* [slot-id suppress-type ip-type] ------------<strong>&gt;</strong>         <strong>speed-limit</strong> <strong>slot-id</strong> <em>string</em> <strong>suppress-type</strong> <em>type</em> <strong>ip-type</strong> <em>ip-type</em>
+   |     +--rw slot-id           string                                
+   |     +--rw suppress-type     suppress-type                
+   |     +--rw ip-type           suppress-ip-type              
+   |     +--rw suppress-value    uint32 -----------------------------<strong>&gt;</strong>            <strong>suppress-value</strong> <em>uint32</em>
+   +--rw static-arps ------------------------------------------------<strong>&gt;</strong>      <strong>static-arps</strong>        
+      +--rw static-arp* [ip-addr ni-name] ---------------------------<strong>&gt;</strong>         <strong>static-arp</strong> <strong>ip-addr</strong><em> ipv4-address</em> <strong>ni-name</strong> <em>string</em>
+         +--rw ip-addr     ipv4-address-no-zone          
+         +--rw ni-name     leafref                      
+         +--rw mac-addr    mac-address  -----------------------------<strong>&gt;</strong>            <strong>mac-addr</strong><em> mac-address</em>
+         +--rw vlan-id?    uint16 -----------------------------------<strong>&gt;</strong>            <strong>vlan-id</strong> <em>uint16</em></pre>
+<p>The RPC/action node in the YANG model is a maintenance node, through which you can perform maintenance operations. Similar to the container and list nodes, the RPC/action node has its name mapped to that of the MD-CLI node view.</p>
+<p>Take huawei-file-operation.yang as an example. In the YANG tree structure, copy-file is an RPC node.</p>
+<pre class="screen">module: huawei-file-operation
++---x copy-file
+   +---- input
+      +---w src-file-name    leafref
+      +---w des-file-name    string</pre>
+<p>On the MD-CLI, the copy-file node is mapped to an MD-CLI node view. You can enter the name of an RPC node to enter the RPC view and then perform maintenance operations, for example, copying files.</p>
+<pre class="screen">[ADMIN@HUAWEI]
+MDCLI&gt; <strong>copy-file</strong>
+
+[(x)ADMIN@HUAWEI]/copy-file
+MDCLI&gt; <strong>src-file-name</strong> file-1.txt <strong>des-file-name</strong> file-2.txt
+
+[(x)ADMIN@HUAWEI]/copy-file
+MDCLI&gt; <strong>emit</strong></pre>
+<div class="section"><h4 class="sectiontitle">Common Parameter Value Types</h4><p>The MD-CLI supports all built-in types defined by the YANG language. Common parameter value types are as follows:</p>
+</div>
+<ul><li>Integer: uint8, uint16, uint32, uint64, int8, int16, int32, int64</li><li>String</li><li>Boolean</li><li>Enumeration</li><li>IP address type: ipv4-address or ipv6-address</li><li>MAC address</li><li>Bits<p>If the value type is bits and multiple bits need to be input, you need to add "" to enclose multiple bits, for example, "circuit-id remote-id".</p>
+</li><li>identityref</li><li>Union</li></ul>
+<p>For details about all built-in types defined by the YANG language, see the description of built-in types in RFC 7950.</p>
+<div class="caution"><span class="cautiontitle"><img src="../public_sys-resources/caution_3.0-en-us.png"> </span><div class="cautionbody"><p>In a YANG tree, if different YANG nodes use the same name due to the introduction of the extended data type (augment), in the MD-CLI command tree, &lt;model name + ":" + node name&gt; is used as the command word corresponding to the node, to avoid conflicts.</p>
+</div></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../toctopics/en-us_topic_0000001513154142.html">Understanding MD-CLI
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../toctopics/en-us_topic_0000001563874121.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../toctopics/en-us_topic_0000001513034206.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

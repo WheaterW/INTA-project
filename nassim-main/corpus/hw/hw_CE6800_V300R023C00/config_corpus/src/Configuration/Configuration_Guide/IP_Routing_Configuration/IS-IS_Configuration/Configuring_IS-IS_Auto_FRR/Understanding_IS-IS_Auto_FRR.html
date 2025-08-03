@@ -1,0 +1,86 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding IS-IS Auto FRR">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0064_copy.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0066_copy.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IS-IS">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001130624316">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding IS-IS Auto FRR</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001130624316"></a><a name="EN-US_CONCEPT_0000001130624316"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding IS-IS Auto FRR</h1>
+<div><div class="section"><h4 class="sectiontitle">Background</h4><p>As networks develop, services such as Voice over IP (VoIP) and online video services have higher requirements on real-time transmission. However, if a link fails, IS-IS must complete the following procedure before switching traffic to a new link: detect the fault, update LSPs, flood LSPs, calculate routes, and deliver route entries to the FIB. This is a lengthy process, and the associated traffic interruption is often longer than users can tolerate. As a result, real-time transmission requirements cannot be met.</p>
+<p>IS-IS Auto Fast Reroute (FRR) is dynamic IP FRR in which a backup link is pre-computed by an IGP based on the LSDBs on the entire network. The backup link is stored in the forwarding table and is used to protect traffic if a link failure occurs. Because IP FRR helps implement fast route convergence, it becomes increasingly popular with carriers.</p>
+<p>Major FRR techniques include loop-free alternate (LFA), U-turn, Not-Via, remote LFA, and maximally redundant tree (MRT). Of these, only LFA is supported by IS-IS.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Related Concepts</h4><p><strong>LFA</strong></p>
+<p>LFA uses the SPF algorithm to compute the shortest path from the neighbor that can provide a backup link to the destination node and then computes a loop-free backup link with the smallest cost based on the following inequality:</p>
+<p>LFA inequality: Distance_opt (N, D) &lt; Distance_opt (N, S) + Distance_opt (S, D). In this inequality, Distance_opt (X, Y) indicates the shortest path between nodes X and Y. N, D, and S indicate the node that provides a backup link, destination node, and source node, respectively.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">IS-IS LFA Auto FRR</h4><div class="p">IS-IS LFA Auto FRR protects against both link and node-and-link failures.<ul><li><p>Link protection: takes effect when the traffic to be protected flows along a specified link.</p>
+<p>In <a href="#EN-US_CONCEPT_0000001130624316__fig_dc_vrp_isis_feature_001501">Figure 1</a>, traffic flows from DeviceS to DeviceD, and link costs meet the link protection inequality: Distance_opt (N, D) &lt; Distance_opt (N, S) + Distance_opt (S, D). If the primary link fails, DeviceS switches the traffic to the backup link (DeviceS -&gt; DeviceN -&gt; DeviceD), minimizing traffic loss.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130624316__fig_dc_vrp_isis_feature_001501"><a name="EN-US_CONCEPT_0000001130624316__fig_dc_vrp_isis_feature_001501"></a><a name="fig_dc_vrp_isis_feature_001501"></a><span class="figcap"><b>Figure 1 </b>Networking for IS-IS LFA Auto FRR link protection</span><br><span><img class="vsd" src="figure/en-us_image_0000001176663923.png" width="NaN" height="NaN"></span></div>
+</li><li><p>Node-and-link protection: takes effect when the traffic to be protected flows along a specified node and link, and takes precedence over link protection. <a href="#EN-US_CONCEPT_0000001130624316__fig_dc_vrp_isis_feature_001502">Figure 2</a> illustrates a network where IS-IS LFA auto FRR node-and-link protection is used.</p>
+<div class="p">Node-and-link protection takes effect only if the following conditions are met:<ol><li><p>Link costs meet the inequality: Distance (N, D) &lt; Distance (N, S) + Distance (S, D).</p>
+</li><li><p>Interface costs meet the inequality: Distance (N, D) &lt; Distance (N, E) + Distance (E, D).</p>
+<p>DeviceS stands for the source node, DeviceE for the faulty node, DeviceN for a node along the backup link, and DeviceD for the destination node.</p>
+</li></ol>
+</div>
+<div class="fignone" id="EN-US_CONCEPT_0000001130624316__fig_dc_vrp_isis_feature_001502"><a name="EN-US_CONCEPT_0000001130624316__fig_dc_vrp_isis_feature_001502"></a><a name="fig_dc_vrp_isis_feature_001502"></a><span class="figcap"><b>Figure 2 </b>Networking for IS-IS LFA auto FRR node-and-link protection</span><br><span><img class="vsd" src="figure/en-us_image_0000001130624380.png" width="NaN" height="NaN"></span></div>
+</li></ul>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">IS-IS FRR in the Scenario Where Multiple Nodes Advertise the Same Route</h4><p>IS-IS LFA FRR uses the SPF algorithm to calculate the shortest path to the destination node, with each neighbor that provides a backup link as the root node. The calculated backup next hop is node-based, which applies to the scenario where each route is received from a single node. As networks diversify, multiple nodes may advertise the same route. In this case, LFA conditions in the scenario where each route is received from a single node cannot be met. As a result, the backup next hop cannot be calculated. IS-IS FRR for the scenario where multiple nodes advertise the same route can address this problem by using one of the route sources to protect the primary route source, improving network reliability.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130624316__fig_dc_vrp_isis_feature_001504"><a name="EN-US_CONCEPT_0000001130624316__fig_dc_vrp_isis_feature_001504"></a><a name="fig_dc_vrp_isis_feature_001504"></a><span class="figcap"><b>Figure 3 </b>IS-IS FRR in the scenario where multiple nodes advertise the same route</span><br><span><img class="vsd" src="figure/en-us_image_0000001176743829.png" width="NaN" height="NaN"></span></div>
+<p>As shown in <a href="#EN-US_CONCEPT_0000001130624316__fig_dc_vrp_isis_feature_001504">Figure 3</a>(a), the cost of the DeviceA-to-DeviceB link is 5, and that of the DeviceA-to-DeviceC link is 10. DeviceB and DeviceC advertise the route 10.1.1.0/24 simultaneously. IS-IS FRR is enabled on DeviceA. However, DeviceA cannot calculate the backup next hop of the route 10.1.1.0/24 because the LFA conditions in the scenario where each route is received from a single node cannot be met. To address this issue, IS-IS FRR for the scenario where multiple nodes advertise the same route can be used. The implementation is as follows:</p>
+<p>In <a href="#EN-US_CONCEPT_0000001130624316__fig_dc_vrp_isis_feature_001504">Figure 3</a>(b), a virtual node is simulated between DeviceB and DeviceC and is connected to DeviceB and DeviceC. The cost of the link from DeviceB or DeviceC to the virtual node is 0, whereas the cost of the link from the virtual node to DeviceB or DeviceC is the maximum value. After the virtual node advertises the route 10.1.1.0/24, DeviceA can use the LFA algorithm to calculate the backup next hop of the virtual node because the scenario where multiple nodes advertise the same route has been converted to the scenario where the route is received from only one node. DeviceA computes two links to the virtual node. The primary link is from DeviceA to DeviceB, and the backup link is from DeviceA to DeviceC.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">IS-IS SRLG FRR</h4><p>A shared risk link group (SRLG) is a set of links that share a common physical resource (such as a fiber). These links share the same risk level. If one of the links fails, all the other links in the SRLG may also fail. On the network shown in <a href="#EN-US_CONCEPT_0000001130624316__fig_dc_vrp_isis_feature_002506">Figure 4</a>, traffic from DeviceA to DeviceB is balanced between link 1 and link 2.</p>
+<div class="p">If IS-IS LFA Auto FRR is enabled, it implements protection for the two links. That is, link 1 and link 2 back up each other.<ul><li>If link 1 fails but the backup link (link 2) is normal, traffic can be forwarded normally after being switched to the backup link.</li><li>If both link 1 and link 2 fail, traffic is interrupted after being switched to the backup link.</li></ul>
+</div>
+<p>IS-IS SRLG FRR prevents service interruptions in the scenario where links have the same risk of failure. To prevent traffic interruption in this case, add link 1 and link 2 to an SRLG so that a link outside the SRLG is preferentially selected as a backup link.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130624316__fig_dc_vrp_isis_feature_002506"><a name="EN-US_CONCEPT_0000001130624316__fig_dc_vrp_isis_feature_002506"></a><a name="fig_dc_vrp_isis_feature_002506"></a><span class="figcap"><b>Figure 4 </b>Networking for IS-IS SRLG FRR</span><br><span><img class="vsd" src="figure/en-us_image_0000001130624382.png" width="NaN" height="NaN"></span></div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_isis_ipv4_cfg_0064_copy.html">Configuring IS-IS Auto FRR
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_isis_ipv4_cfg_0066_copy.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

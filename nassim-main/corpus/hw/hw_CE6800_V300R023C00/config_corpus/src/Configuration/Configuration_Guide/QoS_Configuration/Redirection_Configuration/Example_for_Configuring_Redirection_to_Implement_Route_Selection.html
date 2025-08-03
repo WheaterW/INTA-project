@@ -1,0 +1,218 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Redirection to Implement Route Selection">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_qos_redirect_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_qos_redirect_cfg_0008.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Redirection">
+<meta name="featuretype" content="QoS">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Redirection">
+<meta name="featuretype" content="QoS">
+<meta name="featuretype" content="QoS">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001512850602">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Redirection to Implement Route Selection</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001512850602"></a><a name="EN-US_TASK_0000001512850602"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Redirection to Implement Route Selection</h1>
+<div class="taskbody" id="taskbody1587385157140"><div class="context"><a name="EN-US_TASK_0000001512850602__1.3.1"></a><a name="1.3.1"></a>
+<div class="p" id="EN-US_TASK_0000001512850602__context1141145180175348"><h4 class="sectiontitle">Networking Requirements</h4><p id="EN-US_TASK_0000001512850602__p1735396219183249">In <a href="#EN-US_TASK_0000001512850602__fig766814017525">Figure 1</a>, the PC needs to access the server through link A, link B, and link C (is used by default) in descending order of priority.</p>
+<div class="fignone" id="EN-US_TASK_0000001512850602__fig766814017525"><a name="EN-US_TASK_0000001512850602__fig766814017525"></a><a name="fig766814017525"></a><span class="figcap"><b>Figure 1 </b>Network diagram for configuring redirection to implement route selection</span><div class="note" id="EN-US_TASK_0000001512850602__note843713491413"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p id="EN-US_TASK_0000001512850602__p54371449184118">In this example, interface 1, interface 2, and interface 3 represent <span>100GE</span> <span>1/0/1</span>, <span>100GE</span> <span>1/0/2</span>, and <span>100GE</span> <span>1/0/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" id="EN-US_TASK_0000001512850602__image39551747113916" src="figure/en-us_image_0000001564010413.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001512850602__1.3.2"></a><a name="1.3.2"></a>
+<div class="p" id="EN-US_TASK_0000001512850602__context546635775183249"><h4 class="sectiontitle">Configuration Roadmap</h4><div class="p" id="EN-US_TASK_0000001512850602__p1915999275183249">The configuration roadmap is as follows:<ol id="EN-US_TASK_0000001512850602__ol1540626493183249"><li id="EN-US_TASK_0000001512850602__li523949910183249">Configure a dynamic routing protocol to generate a route or configure a static route destined for the server and specify 10.1.1.2/24 as the next-hop address so that packets pass through link A.</li><li id="EN-US_TASK_0000001512850602__li18581334104510">Redirect the packets that match the network segment where the server resides to the next-hop address 10.1.2.2/24 and allow the packets to pass through link B; specify <strong id="EN-US_TASK_0000001512850602__b1495115975813">low-preference</strong> for redirection to a next-hop address; configure a high priority for the traffic classifier when binding the traffic classifier and the traffic behavior to the traffic policy. In this way, packets preferentially pass through link A.</li><li id="EN-US_TASK_0000001512850602__li1776614194914">Configure a default route and specify 10.1.3.2/24 as the next-hop address so that packets pass through link C.</li><li id="EN-US_TASK_0000001512850602__li1201750450183249">After the configuration is complete, <span class="keyword" id="EN-US_TASK_0000001512850602__keyword078012193511">DeviceA</span> handles packets in one of the following ways (listed in descending order of priority): forwards packets according to the route generated by a routing protocol or static route &gt; redirects packets matching the network segment where the server resides to a next-hop address &gt; forwards packets to a next-hop address according to the default route if no matching route is found.</li></ol>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001512850602__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol id="EN-US_TASK_0000001512850602__steps1342050634183249"><li id="EN-US_TASK_0000001512850602__step2088414829183249"><span id="EN-US_TASK_0000001512850602__cmd1515304435183249">Create VLANs and configure interfaces.</span><p><p id="EN-US_TASK_0000001512850602__p258241413555"># Create VLANs 10, 20, and 30 on <span class="keyword" id="EN-US_TASK_0000001512850602__keyword0581151475512">DeviceA</span>.</p>
+<pre class="screen" id="EN-US_TASK_0000001512850602__screen1658515194610">&lt;<span class="keyword" id="EN-US_TASK_0000001512850602__keyword0659161510466">HUAWEI</span>&gt; <strong id="EN-US_TASK_0000001512850602__b206599150463">system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword" id="EN-US_TASK_0000001512850602__keyword10659131514618">HUAWEI</span>] <strong id="EN-US_TASK_0000001512850602__b1965901574612">sysname DeviceA</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword106593158466">HUAWEI</span>] <a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001512850602__cmdname126594156463">commit</span></b></a>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword" id="EN-US_TASK_0000001512850602__keyword2659101514620">DeviceA</span>] <strong id="EN-US_TASK_0000001512850602__b196591115164610">vlan batch 10 20 30</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword9661215174610">DeviceA</span>] <a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001512850602__cmdname566117157463">commit</span></b></a></pre>
+<p id="EN-US_TASK_0000001512850602__p20161151234612"># Configure <span>100GE</span> <span>1/0/1</span>, <span>100GE</span> <span>1/0/2</span>, and <span>100GE</span> <span>1/0/3</span> on <span class="keyword" id="EN-US_TASK_0000001512850602__keyword397074985616">DeviceA</span> as trunk interfaces and add them to VLAN 10, VLAN 20, and VLAN 30, respectively.</p>
+<pre class="screen" id="EN-US_TASK_0000001512850602__screen505416182183249">[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword" id="EN-US_TASK_0000001512850602__keyword1138995810589">DeviceA</span>] <strong id="EN-US_TASK_0000001512850602__b12531361108">interface </strong><strong id="EN-US_TASK_0000001512850602__b22531069016"><span>100ge</span> <span>1/0/1</span></strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword" id="EN-US_TASK_0000001512850602__keyword14279181210389">DeviceA</span>-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001512850602__b350295892514">portswitch</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword" id="EN-US_TASK_0000001512850602__keyword7590321236">DeviceA</span>-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001512850602__b1302277740183249">port link-type trunk</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword119813431426">DeviceA</span>-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001512850602__b1037166628183249">port trunk allow-pass vlan 10</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword186251145527">DeviceA</span>-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001512850602__b2071747697183249">quit</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword585315555219">DeviceA</span>] <strong id="EN-US_TASK_0000001512850602__b759835215514">interface </strong><strong id="EN-US_TASK_0000001512850602__b175988521518"><span>100ge</span> <span>1/0/2</span></strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword198547227388">DeviceA</span>-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001512850602__b15936103573811">portswitch</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword127931759527">DeviceA</span>-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001512850602__b785329844183249">port link-type trunk</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword137461113314">DeviceA</span>-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001512850602__b242155109183249">port trunk allow-pass vlan 20</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword73121155314">DeviceA</span>-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001512850602__b359235478183249">quit</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword1769314710313">DeviceA</span>] <strong id="EN-US_TASK_0000001512850602__b781227083183249">interface </strong><strong id="EN-US_TASK_0000001512850602__b1376199110183249"><span>100ge</span> <span>1/0/3</span></strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword5601745123812">DeviceA</span>-<span>100GE</span><span>1/0/3</span>] <strong id="EN-US_TASK_0000001512850602__b12841185173814">portswitch</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword82004121130">DeviceA</span>-<span>100GE</span><span>1/0/3</span>] <strong id="EN-US_TASK_0000001512850602__b1397585460183249">port link-type trunk</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword1533717142311">DeviceA</span>-<span>100GE</span><span>1/0/3</span>] <strong id="EN-US_TASK_0000001512850602__b1272697703183249">port trunk allow-pass vlan 30</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword1587001517313">DeviceA</span>-<span>100GE</span><span>1/0/3</span>] <strong id="EN-US_TASK_0000001512850602__b2136087054183249">quit</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword795057269">DeviceA</span>] <a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001512850602__cmdname3956575610">commit</span></b></a></pre>
+<p id="EN-US_TASK_0000001512850602__p782569044183249"># Create VLANIF 10, VLANIF 20, and VLANIF 30 and configure IP addresses for them.</p>
+<pre class="screen" id="EN-US_TASK_0000001512850602__screen251410509183249">[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword" id="EN-US_TASK_0000001512850602__keyword19907152110815">DeviceA</span>] <strong id="EN-US_TASK_0000001512850602__b257250361183249">interface vlanif 10</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword243816431184">DeviceA</span>-Vlanif10] <strong id="EN-US_TASK_0000001512850602__b329108822183249">ip address 10.1.1.1 24</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword14744144519814">DeviceA</span>-Vlanif10] <strong id="EN-US_TASK_0000001512850602__b1943286601183249">quit</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword878920531784">DeviceA</span>] <strong id="EN-US_TASK_0000001512850602__b1964634779183249">interface vlanif 20</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword8920471090">DeviceA</span>-Vlanif20] <strong id="EN-US_TASK_0000001512850602__b1571308649183249">ip address 10.1.2.1 24</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword74381495910">DeviceA</span>-Vlanif20] <strong id="EN-US_TASK_0000001512850602__b106467674183249">quit</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword526235117918">DeviceA</span>] <strong id="EN-US_TASK_0000001512850602__b1182575084183249">interface vlanif 30</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword428517541797">DeviceA</span>-Vlanif30] <strong id="EN-US_TASK_0000001512850602__b1149212900183249">ip address 10.1.3.1 24</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword8335456795">DeviceA</span>-Vlanif30] <strong id="EN-US_TASK_0000001512850602__b2000225293183249">quit</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword7945101381117">DeviceA</span>] <a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001512850602__cmdname19945213201110">commit</span></b></a></pre>
+</p></li><li id="EN-US_TASK_0000001512850602__step1097514476183249"><span id="EN-US_TASK_0000001512850602__cmd1188754049183249">Configure a static route and a default route to the server.</span><p><p id="EN-US_TASK_0000001512850602__p855524195183249"># Configure a static route to the server and specify 10.1.1.2 as the next-hop address.</p>
+<pre class="screen" id="EN-US_TASK_0000001512850602__screen672726835183249">[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword" id="EN-US_TASK_0000001512850602__keyword654882721913">DeviceA</span>] <strong id="EN-US_TASK_0000001512850602__b1334005033183249">ip route-static 10.1.4.0 24 10.1.1.2</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword12853133917192">DeviceA</span>] <a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001512850602__cmdname12853193941913">commit</span></b></a></pre>
+</p><p><p id="EN-US_TASK_0000001512850602__p15526556173412"># Configure a default route to the server and specify 10.1.3.2 as the next-hop address.</p>
+<pre class="screen" id="EN-US_TASK_0000001512850602__screen18526135613346">[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword" id="EN-US_TASK_0000001512850602__keyword152665610348">DeviceA</span>] <strong id="EN-US_TASK_0000001512850602__b852625611344">ip route-static </strong><strong id="EN-US_TASK_0000001512850602__b13591226184520">0.0.0.0 0 10.1.3.2</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword11526115611348">DeviceA</span>] <a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001512850602__cmdname7526195616347">commit</span></b></a></pre>
+</p></li><li id="EN-US_TASK_0000001512850602__step269164818183249"><span id="EN-US_TASK_0000001512850602__cmd1252535544183249">Configure a traffic classifier.</span><p><p id="EN-US_TASK_0000001512850602__p1061735928183249"># On <span class="keyword" id="EN-US_TASK_0000001512850602__keyword456142616208">DeviceA</span>, create ACL 3001 to allow packets destined for the network segment 10.1.4.0/24 to pass through.</p>
+<pre class="screen" id="EN-US_TASK_0000001512850602__screen955771643183249">[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword" id="EN-US_TASK_0000001512850602__keyword154661845112010">DeviceA</span>] <strong id="EN-US_TASK_0000001512850602__b323500964183249">acl 3001</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword64442567206">DeviceA</span>-acl4-advance-3001] <strong id="EN-US_TASK_0000001512850602__b1912234562183249">rule permit ip destination 10.1.4.0 0.0.0.255</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword8556258202010">DeviceA</span>-acl4-advance-3001] <strong id="EN-US_TASK_0000001512850602__b1891523832183249">quit</strong></pre>
+<p id="EN-US_TASK_0000001512850602__p1748535126183249"># On <span class="keyword" id="EN-US_TASK_0000001512850602__keyword149116528211">DeviceA</span>, create a traffic classifier <strong id="EN-US_TASK_0000001512850602__b697025982019">c1</strong> and configure a matching rule based on ACL 3001.</p>
+<pre class="screen" id="EN-US_TASK_0000001512850602__screen456737606183249">[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword" id="EN-US_TASK_0000001512850602__keyword18635154113224">DeviceA</span>] <strong id="EN-US_TASK_0000001512850602__b528926087183249">traffic classifier c1</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword86564461228">DeviceA</span>-classifier-c1] <strong id="EN-US_TASK_0000001512850602__b356951880183249">if-match acl 3001</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword781234952213">DeviceA</span>-classifier-c1] <strong id="EN-US_TASK_0000001512850602__b2140354298183249">quit</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword1826118112230">DeviceA</span>] <a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001512850602__cmdname42629115235">commit</span></b></a></pre>
+</p></li><li id="EN-US_TASK_0000001512850602__step29433928183249"><span id="EN-US_TASK_0000001512850602__cmd774789086183249">Configure a traffic behavior.</span><p><p id="EN-US_TASK_0000001512850602__p1088234536183249"># On <span class="keyword" id="EN-US_TASK_0000001512850602__keyword338314482412">DeviceA</span>, create a traffic behavior <strong id="EN-US_TASK_0000001512850602__b1337918515239">b1</strong>, specify 10.1.2.2 as the next-hop address to which packets are redirected, and specify <strong id="EN-US_TASK_0000001512850602__b2065964417253">low-preference</strong> so that the priority of redirection to the next-hop address is lower than that of the route generated by a dynamic routing protocol or a static route.</p>
+<pre class="screen" id="EN-US_TASK_0000001512850602__screen1073856977183249">[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword" id="EN-US_TASK_0000001512850602__keyword158205902910">DeviceA</span>] <strong id="EN-US_TASK_0000001512850602__b360705198183249">traffic behavior b1</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword179016172299">DeviceA</span>-behavior-b1] <strong id="EN-US_TASK_0000001512850602__b1843978723183249">redirect nexthop 10.1.2.2 low-precedence</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword386851916293">DeviceA</span>-behavior-b1] <strong id="EN-US_TASK_0000001512850602__b213738240183249">quit</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword17508153513112">DeviceA</span>] <a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001512850602__cmdname155086355315">commit</span></b></a></pre>
+</p></li><li id="EN-US_TASK_0000001512850602__step817774458183249"><span id="EN-US_TASK_0000001512850602__cmd439974806183249">Configure a traffic policy.</span><p><p id="EN-US_TASK_0000001512850602__p1749971554183249"># On <span class="keyword" id="EN-US_TASK_0000001512850602__keyword435415133011">DeviceA</span>, create a traffic policy <strong id="EN-US_TASK_0000001512850602__b1155622519291">p1</strong> and bind the traffic classifier to the traffic behavior in the traffic policy.</p>
+<pre class="screen" id="EN-US_TASK_0000001512850602__screen224161984183249">[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword" id="EN-US_TASK_0000001512850602__keyword1679877183020">DeviceA</span>] <strong id="EN-US_TASK_0000001512850602__b1146374291183249">traffic policy p1</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword118461212163016">DeviceA</span>-trafficpolicy-p1] <strong id="EN-US_TASK_0000001512850602__b121127022183249">classifier c1 behavior b1</strong><strong id="EN-US_TASK_0000001512850602__b1535073519155"> precedence 5</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword578651916304">DeviceA</span>-trafficpolicy-p1] <strong id="EN-US_TASK_0000001512850602__b2082776396183249">quit</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword564417374314">DeviceA</span>] <a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001512850602__cmdname186444370315">commit</span></b></a></pre>
+<p id="EN-US_TASK_0000001512850602__p701444004183249"># Apply the traffic policy <strong id="EN-US_TASK_0000001512850602__b02777248534">p1</strong> to the system. After the configuration is complete, all packets received by <span class="keyword" id="EN-US_TASK_0000001512850602__keyword2996141323217">DeviceA</span> match the traffic policy <strong id="EN-US_TASK_0000001512850602__b15782173375315">p1</strong>.</p>
+<pre class="screen" id="EN-US_TASK_0000001512850602__screen2086307184183249">[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword" id="EN-US_TASK_0000001512850602__keyword4855115414312">DeviceA</span>] <strong id="EN-US_TASK_0000001512850602__b374607017183249">traffic-policy p1 global inbound</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001512850602__keyword1781244618315">DeviceA</span>] <a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001512850602__cmdname2081224623118">commit</span></b></a>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword" id="EN-US_TASK_0000001512850602__keyword57812028173317">DeviceA</span>] <strong id="EN-US_TASK_0000001512850602__b1207537595183249">quit</strong></pre>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0000001512850602__example567395428175348"><a name="EN-US_TASK_0000001512850602__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p id="EN-US_TASK_0000001512850602__p76931541141816"># Check the ACL configuration.</p>
+<pre class="screen" id="EN-US_TASK_0000001512850602__screen06930414188">&lt;<span class="keyword" id="EN-US_TASK_0000001512850602__keyword106931441101818">DeviceA</span>&gt; <strong id="EN-US_TASK_0000001512850602__b96931941121814">display acl 3001</strong>
+Advanced ACL 3001, 1 rule                                                                                                           
+ACL's step is 5                                                                                                                     
+ rule 5 permit ip destination 10.1.4.0 0.0.0.255 (0 times matched)</pre>
+<p id="EN-US_TASK_0000001512850602__p983647611175348"># Check the traffic classifier configuration.</p>
+<pre class="screen" id="EN-US_TASK_0000001512850602__screen135827482175348">&lt;<span class="keyword" id="EN-US_TASK_0000001512850602__keyword12599185620171">DeviceA</span>&gt; <strong id="EN-US_TASK_0000001512850602__b751170756175348">display traffic classifier</strong>
+  Traffic Classifier Information:
+    Classifier: c1
+      Type: OR
+      Rule(s):
+        if-match acl 3001
+
+Total classifier number is 1 </pre>
+<p id="EN-US_TASK_0000001512850602__p485839082175348"># Check the traffic policy configuration.</p>
+<pre class="screen" id="EN-US_TASK_0000001512850602__screen514937312175348">&lt;<span class="keyword" id="EN-US_TASK_0000001512850602__keyword52001603186">DeviceA</span>&gt; <strong id="EN-US_TASK_0000001512850602__b332190497175348">display traffic policy</strong>
+  Traffic Policy Information:
+    Policy: p1                                                                                                                      
+      Classifier: c1                                                                                                                
+        Type: OR                                                                                                                    
+      Behavior: b1                                                                                                                  
+        Redirect:                                                                                                                   
+          Redirect nexthop                                                                                                          
+          10.1.2.2 low-precedence                                                                                                                  
+Total policy number is 1</pre>
+<p id="EN-US_TASK_0000001512850602__p1249506835175348"># Check the traffic policy application records.</p>
+<pre class="screen" id="EN-US_TASK_0000001512850602__screen742316760175348">&lt;<span class="keyword" id="EN-US_TASK_0000001512850602__keyword11359155191810">DeviceA</span>&gt; <strong id="EN-US_TASK_0000001512850602__b1095114097175348">display traffic-policy applied-record</strong>
+Total records : 1 
+--------------------------------------------------------------------------------                                                    
+Policy Type/Name                     Apply Parameter            Slot  State                                                         
+--------------------------------------------------------------------------------                                                    
+p1                                   Global(IN)                 <span>1</span>     success                                                       
+--------------------------------------------------------------------------------  </pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001512850602__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><div class="p" id="EN-US_TASK_0000001512850602__p1354988653175348"><span class="keyword" id="EN-US_TASK_0000001512850602__keyword14417101041820">DeviceA</span><pre class="screen" id="EN-US_TASK_0000001512850602__screen530091914182">#
+sysname <span class="keyword" id="EN-US_TASK_0000001512850602__keyword7301141133416">DeviceA</span>
+#
+vlan batch 10 20 30
+#
+traffic-policy p1 global inbound
+#
+acl number 3001
+ rule 5 permit ip destination 10.1.4.0 0.0.0.255
+#
+traffic classifier c1 type or
+ if-match acl 3001
+#
+traffic behavior b1
+ redirect nexthop 10.1.2.2 low-precedence
+#
+traffic policy p1
+ classifier c1 behavior b1 precedence 5
+#
+interface Vlanif10
+ ip address 10.1.1.1 255.255.255.0
+#
+interface Vlanif20
+ ip address 10.1.2.1 255.255.255.0
+#
+interface Vlanif30
+ ip address 10.1.3.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/1</span>
+ port link-type trunk
+ port trunk allow-pass vlan 10
+#
+interface <span>100GE</span><span>1/0/2</span>
+ port link-type trunk
+ port trunk allow-pass vlan 20
+#
+interface <span>100GE</span><span>1/0/3</span>
+ port link-type trunk
+ port trunk allow-pass vlan 30
+#
+ip route-static 10.1.4.0 255.255.255.0 10.1.1.2
+ip route-static 0.0.0.0 0 10.1.3.2
+#
+return</pre>
+</div>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_qos_redirect_cfg_0001.html">Redirection Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_qos_redirect_cfg_0008.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

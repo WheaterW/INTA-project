@@ -1,0 +1,155 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring MLD Snooping SSM Mapping">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_l2mc6_cfg_0044.html">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_l2mc6_cfg_0048.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="MLD Snooping">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="MLD Snooping">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="MLD Snooping">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001372550981">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring MLD Snooping SSM Mapping</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001372550981"></a><a name="EN-US_TASK_0000001372550981"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring MLD Snooping SSM Mapping</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001372550981__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the multicast network shown in <a href="#EN-US_TASK_0000001372550981__fig_dc_cfg_vxlan_cfgcase_000401">Figure 1</a>, a router (Router) connects to the user network through a Layer 2 device (<span class="keyword">Device</span>). Router runs MLDv2 and uses both the ASM and SSM models to provide multicast services. UserA, UserB, and UserC run MLDv1, which cannot be upgraded to MLDv2. Multicast sources Source1 and Source2 simultaneously send multicast data to multicast group FF13::3. However, hosts want to receive multicast data from only Source1. To meet this requirement, configure MLD snooping SSM mapping on <span class="keyword">Device</span>.</p>
+<div class="fignone" id="EN-US_TASK_0000001372550981__fig_dc_cfg_vxlan_cfgcase_000401"><a name="EN-US_TASK_0000001372550981__fig_dc_cfg_vxlan_cfgcase_000401"></a><a name="fig_dc_cfg_vxlan_cfgcase_000401"></a><span class="figcap"><b>Figure 1 </b>Network diagram of Layer 2 multicast SSM mapping</span><div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 and interface2 represent <span>100GE</span><span>1/0/1</span> and <span>100GE</span><span>1/0/3</span>, respectively.</p>
+</div></div>
+<p><span><img src="figure/en-us_image_0000001444662086.png"></span></p>
+<p></p>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001372550981__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Create a VLAN on <span class="keyword">Device</span> and add related interfaces to the VLAN.</p>
+</li><li><p>Enable MLD snooping globally and in the VLAN so that users can receive multicast data.</p>
+</li><li><p>Configure an MLD snooping SSM group policy to add the ASM group address to the SSM group address range.</p>
+</li><li><p>Configure MLD snooping SSM mapping so that users receive only the multicast data from a specified multicast source.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001372550981__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Create a VLAN and add related interfaces to the VLAN.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname Device</strong>
+<span>[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></span>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>] <strong>vlan 10</strong>
+[<span><span class="keyword">*</span></span><span class="keyword">Device</span>-vlan10] <strong>quit</strong>
+[<span><span class="keyword">*</span></span><span class="keyword">Device</span>] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span><span class="keyword">*</span></span><span class="keyword">Device</span>-<span>100GE</span><span>1/0/1</span>] <strong>port link-type access</strong>
+[<span><span class="keyword">*</span></span><span class="keyword">Device</span>-<span>100GE</span><span>1/0/1</span>] <strong>port default vlan 10</strong>
+[<span><span class="keyword">*</span></span><span class="keyword">Device</span>-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span><span class="keyword">*</span></span><span class="keyword">Device</span>] <strong>interface <span>100ge</span> <span>1/0/3</span></strong>
+[<span><span class="keyword">*</span></span><span class="keyword">Device</span>-<span>100GE</span><span>1/0/3</span>] <strong>port link-type trunk</strong>
+[<span><span class="keyword">*</span></span><span class="keyword">Device</span>-<span>100GE</span><span>1/0/3</span>] <strong>port trunk allow-pass vlan 10</strong>
+<span>[<span><span class="keyword">*</span></span><span class="keyword">Device</span>-<span>100GE</span><span>1/0/3</span>] <strong>commit</strong></span>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-<span>100GE</span><span>1/0/3</span>] <strong>quit</strong></pre>
+</p></li><li><span>Enable MLD snooping.</span><p><p># Enable MLD snooping globally.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>] <strong>mld snooping enable</strong></pre>
+<p># Enable MLD snooping in VLAN 10.</p>
+<pre class="screen">[<span><span class="keyword">*</span></span><span class="keyword">Device</span>] <strong>vlan 10</strong>
+[<span><span class="keyword">*</span></span><span class="keyword">Device</span>-vlan10] <strong>mld snooping enable</strong>
+<span>[<span><span class="keyword">*</span></span><span class="keyword">Device</span>-vlan10] <strong>commit</strong></span>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-vlan10] <strong>quit</strong></pre>
+</p></li><li><span>Configure an MLD snooping SSM group policy.</span><p><p># Create an ACL6 and configure a rule that permits data packets sent to multicast group FF13::3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>] <strong>acl ipv6 number 2008</strong>
+[<span><span><span class="keyword">*</span></span></span><span class="keyword">Device</span>-acl4-basic-2008] <strong>rule 5 permit source FF13::3 64</strong>
+[<span><span><span class="keyword">*</span></span></span><span class="keyword">Device</span>-acl4-basic-2008] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-acl4-basic-2008] <strong>quit</strong></pre>
+<p># Configure an SSM mapping policy in the VLAN to include group address FF13::3 in the SSM group address range.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>] <strong>vlan 10</strong> 
+[<span><span><span class="keyword">*</span></span></span><span class="keyword">Device</span>-vlan10] <strong>mld snooping ssm-policy 2008</strong>
+[<span><span><span class="keyword">*</span></span></span><span class="keyword">Device</span>-vlan10] <strong>commit</strong></pre>
+</p></li><li><span>Configure the SSM mapping function.</span><p><p># Configure <span class="keyword">Device</span> to run MLDv2, enable SSM mapping, and map group FF13::3 to the source address FC00:0:0:3::3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-vlan10] <strong>mld snooping version 2</strong>
+[<span><span><span class="keyword">*</span></span></span><span class="keyword">Device</span>-vlan10] <strong>mld snooping ssm-mapping enable</strong> 
+[<span><span><span class="keyword">*</span></span></span><span class="keyword">Device</span>-vlan10] <strong>mld snooping ssm-mapping ff13::3 64 fc00:0:0:3::3</strong>
+[<span><span><span class="keyword">*</span></span></span><span class="keyword">Device</span>-vlan10] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-vlan10] <strong>quit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001372550981__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check the MLD snooping configuration in the VLAN.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>] <strong>display mld snooping vlan configuration</strong>
+ MLD Snooping Configuration for VLAN 10
+    mld snooping enable
+     mld snooping version 2
+     mld snooping ssm-policy 2008
+     mld snooping ssm-mapping enable
+     mld snooping ssm-mapping FF13:: 64 FC00:0:0:3::3</pre>
+<p>The command output shows that an SSM mapping policy has been configured in VLAN 10.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001372550981__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><pre class="screen">#
+sysname <span class="keyword">Device</span>
+#
+vlan batch 10
+#
+mld snooping enable
+#
+acl ipv6 number 2008
+ rule 5 permit source FF13::/64
+#
+vlan 10
+ mld snooping enable
+ mld snooping version 2
+ mld snooping ssm-policy 2008
+ mld snooping ssm-mapping enable
+ mld snooping ssm-mapping FF13:: 64 FC00:0:0:3::3
+#
+interface <span>100GE</span><span>1/0/1</span>
+ port default vlan 10
+#
+interface <span>100GE</span><span>1/0/3</span>
+ port link-type trunk
+ port trunk allow-pass vlan 10 
+#
+return </pre>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../vrp/vrp_l2mc6_cfg_0044.html">Configuring MLD Snooping SSM Mapping
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../vrp/vrp_l2mc6_cfg_0048.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

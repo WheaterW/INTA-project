@@ -1,0 +1,106 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring Segment VXLAN to Implement Layer 2 Interworking (Mapping VNI Mode)">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../vrp/dc_vrp_vxlan_cfg_1241.html">
+<meta name="DC.Relation" scheme="URI" content="../vrp/dc_vrp_vxlan_cfg_1241-dc1.html">
+<meta name="DC.Relation" scheme="URI" content="../vrp/dc_vrp_vxlan_cfg_1241-dc3.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001259707903">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Configuring Segment VXLAN to Implement Layer 2 Interworking (Mapping VNI Mode)</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001259707903"></a><a name="EN-US_TASK_0000001259707903"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring Segment VXLAN to Implement Layer 2 Interworking (Mapping VNI Mode)</h1>
+<div class="taskbody"><div class="prereq" style="margin-left:0"><a name="EN-US_TASK_0000001259707903__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Prerequisites</h4>
+<div class="p"><p>Before configuring segment VXLAN for Layer 2 interworking (mapping VNI mode), you have completed the following tasks:</p>
+<ul><li>Configure BGP EVPN to establish one VXLAN tunnel in DC A and another one in DC B.<ul><li>If the underlay network is an IPv4 network, see <a href="../dc/dc_vrp_vxlan_cfg_1066.html">Establishing VXLAN Tunnels in BGP EVPN Mode (Distributed VXLAN Gateway)</a>.</li><li>If the underlay network is an IPv6 network, see <a href="../dc/dc_vrp_vxlan6_cfg_1066.html">Establishing IPv6 VXLAN Tunnels in BGP EVPN Mode (Distributed VXLAN Gateway)</a>.</li></ul>
+</li><li>Enable EVPN as the VXLAN control plane on DC border leaf nodes, configure BGP EVPN peer relationships, and configure EVPN instances.<ul><li>If the underlay network is an IPv4 network, see <a href="../dc/dc_vrp_vxlan_cfg_1090.html">Configuring a VXLAN Tunnel</a>.</li><li>If the underlay network is an IPv6 network, see <a href="../dc/dc_vrp_vxlan6_cfg_1090.html">Configuring an IPv6 VXLAN Tunnel</a>.</li></ul>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001259707903__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>On the network shown in <a href="#EN-US_TASK_0000001259707903__fig_dc_vrp_vxlan_cfg_120301">Figure 1</a>, one VXLAN tunnel needs to be configured within DC A, one within DC B, and one between the transit leaf nodes in the two DCs. To enable communication between VM1 and VM2, Layer 2 connectivity must be established between DC A and DC B. Because different DCs typically have their own VNI spaces, the VXLAN tunnels within DC A and DC B tend to use different VNIs. To configure a VXLAN tunnel between Transit Leaf1 and Transit Leaf2 in such cases, perform a VNI conversion.</p>
+<p><a href="#EN-US_TASK_0000001259707903__fig_dc_vrp_vxlan_cfg_120301">Figure 1</a> shows segment VXLAN in mapping VNI mode. The VXLAN tunnel in DC A uses VNI 10, and that in DC B uses VNI 20. A VNI mapping table must be configured on Transit Leaf1 to map local VNI 10 to mapping VNI 30. Similarly, a VNI mapping table must also be configured on Transit Leaf2 to map local VNI 20 to mapping VNI 30. After the configuration is complete, Layer 2 packets can be forwarded properly. The following uses DC A sending packets to DC B as an example. After receiving VXLAN packets within DC A, Transit Leaf1 decapsulates the packets, searches the VNI mapping table for mapping VNI 30, and then uses the mapping VNI to re-encapsulate the packets before sending them to Transit Leaf2. Upon receipt, Transit Leaf2 decapsulates the VXLAN packets, searches the VNI mapping table for local VNI 20, and then uses the local VNI to re-encapsulate the packets before forwarding them within the DC.</p>
+<div class="fignone" id="EN-US_TASK_0000001259707903__fig_dc_vrp_vxlan_cfg_120301"><a name="EN-US_TASK_0000001259707903__fig_dc_vrp_vxlan_cfg_120301"></a><a name="fig_dc_vrp_vxlan_cfg_120301"></a><span class="figcap"><b>Figure 1 </b>Configuring segment VXLAN for Layer 2 interworking</span><br><span><img class="vsd" src="figure/en-us_image_0000001259788159.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001259707903__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure route re-origination on Transit Leaf1 and Transit Leaf2.</span><ol type="a"><li class="substepexpand"><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Enter the BGP view.</span><p><pre class="screen"><a href="cmdqueryname=bgp"><b><span class="cmdname">bgp</span></b></a> <i><span class="varname">as-number</span></i></pre>
+</p></li><li class="substepexpand"><span>Enter the BGP-EVPN address family view.</span><p><pre class="screen"><a href="cmdqueryname=l2vpn-family"><b><span class="cmdname">l2vpn-family</span></b></a> <strong><span>evpn</span></strong></pre>
+</p></li><li class="substepexpand"><span>Configure a split horizon group to which BGP EVPN peers (or peer groups) belong.</span><p><pre class="screen"><a href="cmdqueryname=peer"><b><span class="cmdname">peer</span></b></a> { <i><span class="varname">group-name</span></i> | <i><span class="varname">ipv6-address</span></i> | <i><span class="varname">ipv4-address</span></i> } <strong><span>split-group</span></strong> <i><span class="varname">split-group-name</span></i></pre>
+<p>On Transit Leaf1 and Transit Leaf2, specify the name of the split horizon group between them. This ensures that devices within DC A and DC B belong to the default split horizon group and Transit Leaf1 and Transit Leaf2 belong to the specified split horizon group. After this configuration is complete, when a transit leaf node receives BUM traffic, it does not forward traffic to a device belonging to the same split horizon group, thereby preventing loops from occurring.</p>
+</p></li><li class="substepexpand"><span>Configure the device to add a re-origination flag to routes received from BGP EVPN peers or peer groups.</span><p><pre class="screen"><a href="cmdqueryname=peer"><b><span class="cmdname">peer</span></b></a> { <i><span class="varname">ipv4-address</span></i> | <i><span class="varname">ipv6-address</span></i> | <i><span class="varname">group-name</span></i> } <strong><span>import</span></strong> <strong><span>reoriginate</span></strong></pre>
+<p>On transit leaf nodes, enable the function to add a re-origination flag to the routes received from a BGP EVPN peer in the local DC and to the routes received from a BGP EVPN peer (transit leaf node) in the other DC.</p>
+</p></li><li class="substepexpand"><span>Configure the device to advertise re-originated EVPN routes to BGP EVPN peers or peer groups.</span><p><pre class="screen"><a href="cmdqueryname=peer"><b><span class="cmdname">peer</span></b></a> { <i><span class="varname">ipv4-address</span></i> | <i><span class="varname">ipv6-address</span></i> | <i><span class="varname">group-name</span></i> } <strong><span>advertise</span></strong> <strong><span>route-reoriginated</span></strong> <strong><span>evpn</span></strong> <strong><span>mac</span></strong></pre>
+<p>In Layer 2 interworking scenarios, configure the function to advertise only re-originated MAC routes to BGP EVPN peers. On transit leaf nodes, enable the function to advertise re-originated MAC routes to a BGP EVPN peer in the local DC and to a BGP EVPN peer (transit leaf node) in the other DC.</p>
+</p></li><li class="substepexpand"><span>Return to the BGP view.</span><p><pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Return to the system view.</span><p><pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001259707903__en-us_task_0234857734_screen14848162118611"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001259707903__en-us_task_0234857734_cmdname1784862115612">commit</span></b></a></pre>
+</p></li></ol>
+</li><li><span>Configure the mapping VNI function on Transit Leaf1 and Transit Leaf2.</span><ol type="a"><li class="substepexpand"><span>Enter the BD view.</span><p><pre class="screen"><a href="cmdqueryname=bridge-domain"><b><span class="cmdname">bridge-domain</span></b></a> <i><span class="varname">bd-id</span></i></pre>
+</p></li><li class="substepexpand"><span>Configure a mapping VNI associated with a BD, and specify the split horizon group to which the mapping VNI belongs.</span><p><pre class="screen"><a href="cmdqueryname=vxlan+vni"><b><span class="cmdname">vxlan vni</span></b></a> <i><span class="varname">map-vni-id</span></i> <strong><span>split-group</span></strong> <i><span class="varname">split-group-name</span></i></pre>
+<p>The mapping VNI is used for the VXLAN tunnel between the DCs. After this configuration is complete, a transit leaf node replaces the VNI in VXLAN packets received from the local DC with the mapping VNI. This configuration decouples a DCN's VNI space from a DCI network's VNI space and isolates faults. Additionally, to prevent loops from occurring when a transit leaf node forwards BUM traffic, specify the split horizon group to which the mapping VNI belongs. The group name must be the one configured using the <a href="cmdqueryname=peer+split-group"><b><span class="cmdname">peer split-group</span></b></a> command in Step 1.</p>
+</p></li><li class="substepexpand"><span>Return to the system view.</span><p><pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001259707903__en-us_task_0234857734_screen14848162118611_1"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001259707903__en-us_task_0234857734_cmdname1784862115612_1">commit</span></b></a></pre>
+</p></li></ol>
+</li><li><span>Configure ingress replication for the mapping VNI on Transit Leaf1 and Transit Leaf2.</span><ol type="a"><li class="substepexpand"><span>Enter the NVE interface view.</span><p><pre class="screen"><a href="cmdqueryname=interface+nve"><b><span class="cmdname">interface nve</span></b></a> <i><span class="varname">nve-number</span></i></pre>
+</p></li><li class="substepexpand"><span>Configure ingress replication for the mapping VNI.</span><p><pre class="screen"><a href="cmdqueryname=vni"><b><span class="cmdname">vni</span></b></a> <i><span class="varname">map-vni-id</span></i> <strong><span>head-end peer-list protocol bgp</span></strong></pre>
+</p></li><li class="substepexpand"><span>Return to the system view.</span><p><pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001259707903__en-us_task_0234857734_screen14848162118611_2"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001259707903__en-us_task_0234857734_cmdname1784862115612_2">commit</span></b></a></pre>
+</p></li></ol>
+</li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../vrp/dc_vrp_vxlan_cfg_1241.html">Configuring Segment VXLAN to Implement Layer 2 Interworking (Mapping VNI Mode)
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../vrp/dc_vrp_vxlan_cfg_1241-dc1.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../vrp/dc_vrp_vxlan_cfg_1241-dc3.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

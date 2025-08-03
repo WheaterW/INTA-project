@@ -1,0 +1,681 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring IFIT in an Inter-AS VPN Option A Service Scenario">
+<meta name="abstract" content="This section provides an example for configuring IFIT to implement hop-by-hop packet loss and delay measurement in an inter-AS VPN Option A scenario.">
+<meta name="description" content="This section provides an example for configuring IFIT to implement hop-by-hop packet loss and delay measurement in an inter-AS VPN Option A scenario.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ifit_cfg_0043.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ifit_cfg_0017.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ifit_cfg_0023.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00606909">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="IFIT">
+<meta name="featuretype" content="System Monitor">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IFIT">
+<meta name="featuretype" content="System Monitor">
+<meta name="featurename" content="IFIT">
+<meta name="featuretype" content="System Monitor">
+<meta name="featurename" content="IFIT">
+<meta name="featuretype" content="System Monitor">
+<meta name="featurename" content="IFIT">
+<meta name="featuretype" content="System Monitor">
+<meta name="OWNER" content="l00425560">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="c00511010">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001158610113">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring IFIT in an Inter-AS VPN Option A Service Scenario</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001158610113"></a><a name="EN-US_TASK_0000001158610113"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring IFIT in an Inter-AS VPN Option A Service Scenario</h1>
+<div class="taskbody"><p>This section provides an example for configuring IFIT to implement hop-by-hop packet loss and delay measurement in an inter-AS VPN Option A scenario.</p>
+<div class="context"><a name="EN-US_TASK_0000001158610113__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>To meet users' higher requirements on service quality, IFIT is required in the inter-AS Option A scenario to monitor the packet loss rate and delay of links between PEs in real time. This enables timely responses to service quality deterioration. As a basic BGP/MPLS IP VPN application in inter-AS scenarios, Option A does not require special inter-AS configuration, nor does it require MPLS to run between ASBRs. In this mode, the ASBRs of two ASs directly connect to each other and function as PEs in their own ASs. Each ASBR views the peer ASBR as its CE, creates a VPN instance for each VPN, and advertises IPv4 routes to the peer ASBR through EBGP.</p>
+<p>In the inter-AS VPN Option A scenario shown in <a href="#EN-US_TASK_0000001158610113__fig_dc_vrp_mpls-l3vpn-v4_cfg_011101">Figure 1</a>, CE1 and CE2 belong to the same VPN. CE1 is connected to PE1 in AS 100, and CE2 is connected to PE2 in AS 200. Inter-AS BGP/MPLS IP VPN is implemented through Option A. Service flows enter the network through PE1, traverse ASBR1 and ASBR2, and leave the network through PE2.</p>
+<div class="fignone" id="EN-US_TASK_0000001158610113__fig_dc_vrp_mpls-l3vpn-v4_cfg_011101"><a name="EN-US_TASK_0000001158610113__fig_dc_vrp_mpls-l3vpn-v4_cfg_011101"></a><a name="fig_dc_vrp_mpls-l3vpn-v4_cfg_011101"></a><span class="figcap"><b>Figure 1 </b>Configuring IFIT in inter-AS VPN Option A scenarios</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interface1, interface2, and interface3 in this example represent GE <span>0/1/0</span>, GE <span>0/2/0</span>, and GE <span>0/3/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001112631530.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001158610113__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><div class="p">The configuration roadmap is as follows:<ol><li>Configure inter-AS VPN Option A. Specifically:<ol type="a"><li>Establish an EBGP peer relationship between each PE and its connected CE.</li><li>Establish an MP-IBGP peer relationship between the ASBR and PE in the same AS.</li><li>Create a VPN instance on each ASBR, bind the VPN instance to the interface connecting each ASBR to the other ASBR, and establish an EBGP peer relationship between ASBRs.</li></ol>
+</li><li><p>Configure basic 1588v2 functions to synchronize the clocks across all devices.</p>
+</li><li><p>Configure packet loss and delay measurement on the PEs to collect packet loss rate and delay statistics at intervals. </p>
+</li><li>Configure the device to send statistics to the NMS through telemetry.</li></ol>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001158610113__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><div class="p">To complete the configuration, you need the following data:<ul><li><p>IP address of each interface as listed in <a href="#EN-US_TASK_0000001158610113__fig_dc_vrp_mpls-l3vpn-v4_cfg_011101">Figure 1</a></p>
+</li><li>MPLS LSR IDs of the PEs and ASBRs</li><li>Name, VPN target, and RD of the VPN instance on each PE and ASBR</li><li><p>IFIT instance ID (1) and measurement interval (10s)</p>
+</li><li><p>Target flow's source IP address (11.11.11.11) and destination IP address (22.22.22.22) in the IFIT instance</p>
+</li><li>NMS's IPv4 address (192.168.100.100) and port number (10001), and reachable routes between the NMS and devices</li></ul>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001158610113__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure inter-AS VPN Option A. For configuration details, see <a href="#EN-US_TASK_0000001158610113__section_05">Configuration Files</a>.</span></li><li><span>Configure 1588v2 to synchronize the clocks of devices. For detailed configurations, see <a href="#EN-US_TASK_0000001158610113__section_05">Configuration Files</a>.</span></li><li><span>Configure hop-by-hop IFIT measurement for the inter-AS Option A link between PE1 and PE2.</span><p><p># Configure PE1.</p>
+<pre class="screen">&lt;PE1&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>ifit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ifit]<strong> node-id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ifit]<strong> </strong><strong>encapsulation nexthop</strong> <strong>2.2.2.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ifit]<strong> instance 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ifit-instance-1] <strong>measure-mode trace</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ifit-instance-1] <strong>interval 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ifit-instance-1] <strong>flow unidirectional source 11.11.11.11 destination 22.22.22.22 dscp 63 vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ifit-instance-1] <strong>binding interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ifit-instance-1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-ifit-instance-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-ifit] <strong>quit</strong></pre>
+<div class="p"># Run the <a href="cmdqueryname=display+ifit+static"><b><span class="cmdname">display ifit static</span></b></a> and <a href="cmdqueryname=display+ifit+dynamic-hop"><b><span class="cmdname">display ifit dynamic-hop</span></b></a> commands to check the configuration and status of PE1.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display ifit static instance 1</strong></pre>
+<pre class="screen">-------------------------------------------------------------------------
+Flow Classification                     : static
+Instance Id                             : 1
+Instance Name                           : 1 
+Instance Type                           : instance
+Flow Id                                 : 1572865
+Flow Monitor Id                         : 524289
+Flow Node Id                            : 1
+Flow Type                               : unidirectional
+Source IP Address/Mask Length           : 11.11.11.11/32
+Destination IP Address/Mask Length      : 22.22.22.22/32
+Protocol                                : any
+Source Port                             : any
+Destination Port                        : any
+Gtp                                     : disable
+Gtp TeId                                : --
+Dscp                                    : 63
+Interface                               : GigabitEthernet<span>0/2/0</span>
+vpn-instance                            : vpn1
+Measure State                           : enable 
+Loss Measure                            : enable
+Delay Measure                           : enable
+Delay Per packet Measure                : disable
+Disorder Measure                        : disable
+Gtpu Sequence Measure                   : disable
+Single Device Measure                   : disable
+Measure Mode                            : trace
+Interval                                : 10(s)
+Tunnel Type                             : --
+Flow Match Priority                     : 0
+Flow InstType Priority                  : 9</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display ifit dynamic-hop</strong></pre>
+<pre class="screen">2020-01-14 17:24:39.28 +08:00
+-------------------------------------------------------------------------
+Flow Classification                     : dynamic-hop
+Instance Id                             : 514
+Instance Type                           : instance
+Flow Id                                 : 1572865
+Flow Monitor Id                         : 524289
+Flow Node Id                            : 1
+Flow Type                               : unidirectional
+Interface                               : GigabitEthernet<span>0/1/0</span>
+Direction                               : transitOutput
+Loss Measure                            : enable
+Delay Measure                           : enable
+Disorder Measure                        : disable
+Interval                                : 10(s)</pre>
+</div>
+<div class="p"># Enable IFIT on ASBR1.<pre class="screen">&lt;ASBR1&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1] <strong>ifit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-ifit]<strong> node-id 3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-ifit] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1-ifit] <strong>quit</strong></pre>
+</div>
+<p># Run the <a href="cmdqueryname=display+ifit+dynamic-hop"><b><span class="cmdname">display ifit dynamic-hop</span></b></a> command to check the configuration and status of ASBR1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1] <strong>display ifit dynamic-hop</strong></pre>
+<pre class="screen">-------------------------------------------------------------------------
+Flow Classification                     : dynamic-hop
+Instance Id                             : 6
+Instance Type                           : instance
+Flow Id                                 : 1572865
+Flow Monitor Id                         : 524289
+Flow Node Id                            : 1
+Flow Type                               : unidirectional
+Interface                               : GigabitEthernet<span>0/1/0</span>
+Direction                               : transitInput
+Loss Measure                            : enable
+Delay Measure                           : enable
+Disorder Measure                        : disable
+Interval                                : 10(s)
+-------------------------------------------------------------------------
+Flow Classification                     : dynamic-hop
+Instance Id                             : 7
+Instance Type                           : instance
+Flow Id                                 : 1572865
+Flow Monitor Id                         : 524289
+Flow Node Id                            : 1
+Flow Type                               : unidirectional
+Interface                               : GigabitEthernet<span>0/2/0</span>
+Direction                               : egress
+Loss Measure                            : enable
+Delay Measure                           : enable
+Disorder Measure                        : disable
+Interval                                : 10(s)</pre>
+<div class="p"># Enable IFIT and IFIT mapping in the inbound direction on ASBR2.<pre class="screen">&lt;ASBR2&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR2] <strong>ifit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-ifit] <strong>node-id 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-ifit] <strong>encapsulation nexthop</strong> <strong>4.4.4.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-ifit] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2] <strong>interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR2-GigabitEthernet<span>0/2/0</span>] <strong>ifit ingress mapping enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR2-GigabitEthernet<span>0/2/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR2-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+</div>
+<div class="p"># Enable IFIT mapping in the outbound direction on ASBR1.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1] <strong>interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1-GigabitEthernet<span>0/2/0</span>] <strong>ifit egress mapping enable</strong>
+Warning: If the IFIT ingress mapping is not configured on the peer end, this operation could cause the abnormal data reception on the receiving end. Continue? [Y/N]:<strong>y</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>ASBR1-GigabitEthernet<span>0/2/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>You are advised to configure IFIT mapping in the inbound direction and then in the outbound direction. Otherwise, traffic may be interrupted.</li><li>After IFIT mapping in the outbound direction is configured, the instance in the egress direction starts to age.</li></ul>
+</div></div>
+</div>
+<p># Run the <a href="cmdqueryname=display+ifit+dynamic-hop"><b><span class="cmdname">display ifit dynamic-hop</span></b></a> command to check the configuration and status of ASBR1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR1] <strong>display ifit dynamic-hop</strong></pre>
+<pre class="screen">-------------------------------------------------------------------------
+Flow Classification                     : dynamic-hop
+Instance Id                             : 6
+Instance Type                           : instance
+Flow Id                                 : 1572865
+Flow Monitor Id                         : 524289
+Flow Node Id                            : 1
+Flow Type                               : unidirectional
+Interface                               : GigabitEthernet<span>0/1/0</span>
+Direction                               : transitInput
+Loss Measure                            : enable
+Delay Measure                           : enable
+Disorder Measure                        : disable
+Interval                                : 10(s)
+-------------------------------------------------------------------------
+Flow Classification                     : dynamic-hop
+Instance Id                             : 8
+Instance Type                           : instance
+Flow Id                                 : 1572865
+Flow Monitor Id                         : 524289
+Flow Node Id                            : 1
+Flow Type                               : unidirectional
+Interface                               : GigabitEthernet<span>0/2/0</span>
+Direction                               : transitOutput
+Loss Measure                            : enable
+Delay Measure                           : enable
+Disorder Measure                        : disable
+Interval                                : 10(s)
+-------------------------------------------------------------------------
+Flow Classification                     : dynamic-hop
+Instance Id                             : 7
+Instance Type                           : instance
+Flow Id                                 : 1572865
+Flow Monitor Id                         : 524289
+Flow Node Id                            : 1
+Flow Type                               : unidirectional
+Interface                               : GigabitEthernet<span>0/2/0</span>
+Direction                               : egress
+Loss Measure                            : enable
+Delay Measure                           : enable
+Disorder Measure                        : disable
+Interval                                : 10(s)</pre>
+<div class="p"># Run the <a href="cmdqueryname=display+ifit+dynamic-hop"><b><span class="cmdname">display ifit dynamic-hop</span></b></a> command to check the configuration and status of ASBR2.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>ASBR2] <strong>display ifit dynamic-hop</strong></pre>
+<pre class="screen">-------------------------------------------------------------------------
+Flow Classification                     : dynamic-hop
+Instance Id                             : 5
+Instance Type                           : instance
+Flow Id                                 : 1572865
+Flow Monitor Id                         : 524289
+Flow Node Id                            : 1
+Flow Type                               : unidirectional
+Interface                               : GigabitEthernet<span>0/1/0</span>
+Direction                               : transitOutput
+Loss Measure                            : enable
+Delay Measure                           : enable
+Disorder Measure                        : disable
+Interval                                : 10(s)
+-------------------------------------------------------------------------
+Flow Classification                     : dynamic-hop
+Instance Id                             : 4
+Instance Type                           : instance
+Flow Id                                 : 1572865
+Flow Monitor Id                         : 524289
+Flow Node Id                            : 1
+Flow Type                               : unidirectional
+Interface                               : GigabitEthernet<span>0/2/0</span>
+Direction                               : transitInput
+Loss Measure                            : enable
+Delay Measure                           : enable
+Disorder Measure                        : disable
+Interval                                : 10(s)</pre>
+</div>
+<div class="p"># Configure PE2.<pre class="screen">&lt;PE2&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>ifit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ifit]<strong> node-id 4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ifit] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-ifit] <strong>quit</strong></pre>
+</div>
+</p></li><li><span>Configure the device to send statistics to the NMS through telemetry. The following uses PE1 as an example.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>telemetry</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-telemetry] <strong>destination-group ifit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-telemetry-destination-group-ifit] <strong>ipv4-address 192.168.100.100 port 10001 protocol grpc</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-telemetry-destination-group-ifit] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-telemetry] <strong>sensor-group ifit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-telemetry-sensor-group-ifit] <strong>sensor-path huawei-ifit:ifit/huawei-ifit-statistics:flow-hop-statistics/flow-hop-statistic</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-telemetry-sensor-group-ifit-path] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-telemetry-sensor-group-ifit] <strong>sensor-path huawei-ifit:ifit/huawei-ifit-statistics:flow-statistics/flow-statistic</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-telemetry-sensor-group-ifit-path] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-telemetry-sensor-group-ifit] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-telemetry] <strong>subscription ifit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-telemetry-subscription-ifit] <strong>sensor-group ifit</strong> <strong>sample-interval 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-telemetry-subscription-ifit] <strong>destination-group ifit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-telemetry-subscription-ifit] <strong>commit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>You are advised to configure devices to send data using a secure TLS encryption mode. For details, see <em>Telemetry Configuration</em>.</p>
+</div></div>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0000001158610113__section_05"><a name="EN-US_TASK_0000001158610113__section_05"></a><a name="section_05"></a><a name="EN-US_TASK_0000001158610113__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>PE1 configuration file</p>
+<pre class="screen">#
+sysname PE1
+#
+ptp enable
+ptp domain 1
+ptp device-type bc
+#
+clock source ptp synchronization enable
+clock source ptp priority 1
+#
+ip vpn-instance vpn1
+ ipv4-family
+  route-distinguisher 100:1
+  apply-label per-instance
+  vpn-target 1:1 export-extcommunity
+  vpn-target 1:1 import-extcommunity
+#
+mpls lsr-id 1.1.1.9
+#
+mpls
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.10.1.2 255.255.255.0
+ mpls
+ mpls ldp
+ ptp enable
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip binding vpn-instance vpn1
+ ip address 10.1.1.2 255.255.255.0
+ ptp enable
+#
+interface LoopBack1
+ ip address 1.1.1.9 255.255.255.255
+#
+bgp 100
+ peer 2.2.2.9 as-number 100
+ peer 2.2.2.9 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 2.2.2.9 enable
+ #
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 2.2.2.9 enable
+#
+ ipv4-family vpn-instance vpn1
+  peer 10.1.1.1 as-number 65001
+#
+ospf 1
+ area 0.0.0.0
+  network 1.1.1.9 0.0.0.0
+  network 10.10.1.0 0.0.0.255
+#
+ifit 
+ node-id 1
+ encapsulation nexthop 2.2.2.9                                                             
+ instance 1
+  measure-mode trace
+  interval 10
+  flow unidirectional source 11.11.11.11 destination 22.22.22.22 dscp 63 vpn-instance vpn1
+  binding interface GigabitEthernet<span>0/2/0</span>
+#
+telemetry
+ #
+ sensor-group ifit
+  sensor-path huawei-ifit:ifit/huawei-ifit-statistics:flow-hop-statistics/flow-hop-statistic
+  sensor-path huawei-ifit:ifit/huawei-ifit-statistics:flow-statistics/flow-statistic
+ #
+ destination-group ifit
+  ipv4-address 192.168.100.100 port 10001 protocol grpc
+ #
+ subscription ifit
+  sensor-group ifit sample-interval 0
+  destination-group ifit
+#
+return</pre>
+</li><li><p>ASBR1 configuration file</p>
+<pre class="screen">#
+sysname ASBR1
+#
+ptp enable
+ptp domain 1
+ptp device-type bc
+#
+clock source bits0 synchronization enable
+clock source bits0 priority 1
+clock source ptp synchronization enable
+clock source ptp priority 1
+clock bits-type bits0 2mhz
+#
+ip vpn-instance vpn1
+ ipv4-family
+  route-distinguisher 100:2
+  apply-label per-instance
+  vpn-target 1:1 export-extcommunity
+  vpn-target 1:1 import-extcommunity
+#
+mpls lsr-id 2.2.2.9
+#
+mpls
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.10.1.1 255.255.255.0
+ mpls
+ mpls ldp
+ ptp enable
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip binding vpn-instance vpn1
+ ip address 12.12.12.1 255.255.255.0
+ ptp enable
+ ifit egress mapping enable
+# 
+interface GigabitEthernet<span>0/3/0</span>                                                  
+ undo shutdown                                                                  
+ ip address 12.12.12.3 255.255.255.0                                             
+ ptp enable
+#
+interface LoopBack1
+ ip address 2.2.2.9 255.255.255.255
+#
+bgp 100
+ peer 1.1.1.9 as-number 100
+ peer 1.1.1.9 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 1.1.1.9 enable
+ #
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 1.1.1.9 enable
+#
+ ipv4-family vpn-instance vpn1
+  peer 12.12.12.2 as-number 200
+#
+ospf 1
+ area 0.0.0.0
+  network 2.2.2.9 0.0.0.0
+  network 10.10.1.0 0.0.0.255
+#
+ifit
+ node-id 3
+#
+telemetry
+ #
+ sensor-group ifit
+  sensor-path huawei-ifit:ifit/huawei-ifit-statistics:flow-hop-statistics/flow-hop-statistic
+  sensor-path huawei-ifit:ifit/huawei-ifit-statistics:flow-statistics/flow-statistic
+ #
+ destination-group ifit
+  ipv4-address 192.168.100.100 port 10001 protocol grpc
+ #
+ subscription ifit
+  sensor-group ifit sample-interval 0
+  destination-group ifit
+#
+return</pre>
+</li><li><p>ASBR2 configuration file</p>
+<pre class="screen">#
+sysname ASBR2
+#
+ptp enable
+ptp domain 1
+ptp device-type bc
+#
+clock source ptp synchronization enable
+clock source ptp priority 1
+#
+ip vpn-instance vpn1
+ ipv4-family
+  route-distinguisher 200:2
+  apply-label per-instance
+  vpn-target 2:2 export-extcommunity
+  vpn-target 2:2 import-extcommunity
+#
+mpls lsr-id 3.3.3.9
+#
+mpls
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.40.1.1 255.255.255.0
+ mpls
+ mpls ldp
+ ptp enable
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip binding vpn-instance vpn1
+ ip address 12.12.12.2 255.255.255.0
+ ptp enable
+ ifit ingress mapping enable
+#
+interface LoopBack1
+ ip address 3.3.3.9 255.255.255.255
+#
+bgp 200
+ peer 4.4.4.9 as-number 200
+ peer 4.4.4.9 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 4.4.4.9 enable
+ #
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 4.4.4.9 enable
+#
+ ipv4-family vpn-instance vpn1
+  peer 12.12.12.1 as-number 100
+#
+ospf 1
+ area 0.0.0.0
+  network 3.3.3.9 0.0.0.0
+  network 10.40.1.0 0.0.0.255
+#
+ifit
+ node-id 2
+ encapsulation nexthop 4.4.4.9
+#
+telemetry
+ #
+ sensor-group ifit
+  sensor-path huawei-ifit:ifit/huawei-ifit-statistics:flow-hop-statistics/flow-hop-statistic
+  sensor-path huawei-ifit:ifit/huawei-ifit-statistics:flow-statistics/flow-statistic
+ #
+ destination-group ifit
+  ipv4-address 192.168.100.100 port 10001 protocol grpc
+ #
+ subscription ifit
+  sensor-group ifit sample-interval 0
+  destination-group ifit
+#
+return</pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#
+sysname PE2
+#
+ptp enable
+ptp domain 1
+ptp device-type bc
+#
+clock source ptp synchronization enable
+clock source ptp priority 1
+#
+ip vpn-instance vpn1
+ ipv4-family
+  route-distinguisher 200:1
+  apply-label per-instance
+  vpn-target 2:2 export-extcommunity
+  vpn-target 2:2 import-extcommunity
+#
+mpls lsr-id 4.4.4.9
+#
+mpls
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip binding vpn-instance vpn1
+ ip address 10.2.1.2 255.255.255.0
+ ptp enable
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.40.1.2 255.255.255.0
+ mpls
+ mpls ldp
+ ptp enable
+#
+interface LoopBack1
+ ip address 4.4.4.9 255.255.255.255
+#
+bgp 200
+ peer 3.3.3.9 as-number 200
+ peer 3.3.3.9 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 3.3.3.9 enable
+ #
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 3.3.3.9 enable
+#
+ ipv4-family vpn-instance vpn1
+  peer 10.2.1.1 as-number 65002
+#
+ospf 1
+ area 0.0.0.0
+  network 4.4.4.9 0.0.0.0
+  network 10.40.1.0 0.0.0.255
+#
+ifit
+ node-id 4
+#
+telemetry
+ #
+ sensor-group ifit
+  sensor-path huawei-ifit:ifit/huawei-ifit-statistics:flow-hop-statistics/flow-hop-statistic
+  sensor-path huawei-ifit:ifit/huawei-ifit-statistics:flow-statistics/flow-statistic
+ #
+ destination-group ifit
+  ipv4-address 192.168.100.100 port 10001 protocol grpc
+ #
+ subscription ifit
+  sensor-group ifit sample-interval 0
+  destination-group ifit
+#
+return</pre>
+</li><li><p>CE1 configuration file</p>
+<pre class="screen">#
+sysname CE1
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.1.1 255.255.255.0
+#
+interface Loopback 1
+ undo shutdown
+ ip address 11.11.11.11 255.255.255.255
+#
+bgp 65001
+ peer 10.1.1.2 as-number 100
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 10.1.1.2 enable
+  network 11.11.11.11 255.255.255.255
+#
+return</pre>
+</li><li><p>CE2 configuration file</p>
+<pre class="screen">#
+ sysname CE2
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.2.1.1 255.255.255.0
+#
+interface Loopback 1
+ undo shutdown
+ ip address 22.22.22.22 255.255.255.255
+#
+bgp 65002
+ peer 10.2.1.2 as-number 200
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 10.2.1.2 enable
+  network 22.22.22.22 255.255.255.255
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ifit_cfg_0043.html">Examples for Configuring Performance Measurement Based on Static IFIT Flows on an MPLS Network
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ifit_cfg_0017.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ifit_cfg_0023.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

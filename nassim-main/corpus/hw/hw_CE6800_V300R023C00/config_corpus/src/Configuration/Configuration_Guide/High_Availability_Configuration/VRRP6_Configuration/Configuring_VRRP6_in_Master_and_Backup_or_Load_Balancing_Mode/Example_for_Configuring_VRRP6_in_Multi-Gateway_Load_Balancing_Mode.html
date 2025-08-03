@@ -1,0 +1,276 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring VRRP6 in Multi-Gateway Load Balancing Mode">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_vrrp6_cfg_0008.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_vrrp6_cfg_0015.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_vrrp6_cfg_0017.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="VRRP6">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VRRP6">
+<meta name="featuretype" content="High Availability">
+<meta name="featurename" content="VRRP6">
+<meta name="featuretype" content="High Availability">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130622212">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring VRRP6 in Multi-Gateway Load Balancing Mode</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130622212"></a><a name="EN-US_TASK_0000001130622212"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring VRRP6 in Multi-Gateway Load Balancing Mode</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130622212__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>Hosts are connected to an upper-layer network through gateways. To improve network reliability, configure VRRP6 groups working in master/backup mode on gateways. If multiple VRRP6 groups run on a device, configure the groups to work in multi-gateway load balancing mode to balance traffic.</p>
+<div class="p">In <a href="#EN-US_TASK_0000001130622212__fig_dc_vrp_vrrp6_cfg_011601">Figure 1</a>,<ul><li><p>DeviceA functions as the master in VRRP6 group 1 and as the backup in VRRP6 group 2.</p>
+</li><li><p>DeviceB functions as the master in VRRP6 group 2 and as the backup in VRRP6 group 1.</p>
+</li><li><p>HostA uses the virtual IPv6 address of VRRP6 group 1 as a default gateway address, and HostB uses the virtual IPv6 address of VRRP6 group 2 as a default gateway address. The two VRRP6 groups back up each other and balance data traffic.</p>
+</li></ul>
+</div>
+<div class="fignone" id="EN-US_TASK_0000001130622212__fig_dc_vrp_vrrp6_cfg_011601"><a name="EN-US_TASK_0000001130622212__fig_dc_vrp_vrrp6_cfg_011601"></a><a name="fig_dc_vrp_vrrp6_cfg_011601"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring VRRP6 groups working in multi-gateway load balancing mode</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1, interface 2, and interface 3 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, and <span>100GE</span><span>1/0/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001130622232.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130622212__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Assign an IPv6 address to each interface on the devices and configure OSPFv3 to ensure IPv6 connectivity.</p>
+</li><li><p>Create VRRP6 groups 1 and 2 on DeviceA's interface <span>100GE</span><span>1/0/1</span>. Configure DeviceA as the master in VRRP6 group 1 and as the backup in VRRP6 group 2.</p>
+</li><li><p>Create VRRP6 groups 1 and 2 on DeviceB's interface <span>100GE</span><span>1/0/1</span>. Configure DeviceB as the backup in VRRP6 group 1 and as the master in VRRP6 group 2.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130622212__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Procedure</h4><ol><li>Configure OSPFv3 on DeviceA, DeviceB, and DeviceC to ensure that they can communicate. For configuration details, see <a href="#EN-US_TASK_0000001130622212__section_05">Configuration Scripts</a> in this section.</li><li>Configure VRRP6 groups.<p># Configure an IPv6 address for DeviceA's interface <span>100GE</span><span>1/0/1</span>. Create VRRP6 groups 1 and 2 on DeviceA's <span>100GE</span><span>1/0/1</span>. Set the priority to 120 for DeviceA to ensure that it functions as the master in VRRP6 group 1, and use the default priority 100 for DeviceA to ensure that it functions as the backup in VRRP6 group 2.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ipv6 enable</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ipv6 address 2001:db8::1 64</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>vrrp6 vrid 1 virtual-ip fe80::1 link-local</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>vrrp6 vrid 1 virtual-ip 2001:db8::100</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>vrrp6 vrid 1 priority 120</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>vrrp6 vrid 2 virtual-ip fe80::2 link-local</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>vrrp6 vrid 2 virtual-ip 2001:db8::60</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure an IPv6 address for DeviceB's interface <span>100GE</span><span>1/0/1</span>. Create VRRP6 groups 1 and 2 on DeviceB's <span>100GE</span><span>1/0/1</span>. Use the default priority 100 for DeviceB to ensure that it functions as the backup in VRRP6 group 1, and set the priority to 120 for DeviceB to ensure that it functions as the master in VRRP6 group 2.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceB</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>ipv6 enable</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>ipv6 address 2001:db8::2 64</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>vrrp6 vrid 1 virtual-ip fe80::1 link-local</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>vrrp6 vrid 1 virtual-ip 2001:db8::100</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>vrrp6 vrid 2 virtual-ip fe80::2 link-local</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>vrrp6 vrid 2 virtual-ip 2001:db8::60</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>vrrp6 vrid 2 priority 120</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130622212__1.3.4"></a><a name="1.3.4"></a>
+<div class="p"><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check the states of DeviceA and DeviceB in the VRRP6 groups.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display vrrp6 verbose</strong>
+<span>100GE</span><span>1/0/1</span> | Virtual Router 1
+State           : <strong>Master</strong>
+Virtual IP      : FE80::1
+                  2001:DB8::100
+Master IP       : 2001:DB8::1
+PriorityRun     : 120
+PriorityConfig  : 120
+MasterPriority  : 120
+Preempt         : YES   Delay Time : 0s   Remain : --
+Hold Multiplier : 4
+TimerRun        : 100cs
+TimerConfig     : 100cs
+Virtual MAC     : 0000-5e00-0201
+Check hop limit : YES
+Config Type     : Normal
+Create Time     : 2020-07-27 20:15:46
+Last Change Time: 2020-07-27 20:15:46
+
+<span>100GE</span><span>1/0/1</span> | Virtual Router 2
+State           : <strong>Backup</strong>
+Virtual IP      : FE80::2
+                  2001:DB8::60
+Master IP       : 2001:DB8::2
+PriorityRun     : 100
+PriorityConfig  : 100
+MasterPriority  : 120
+Preempt         : YES   Delay Time : 0s   Remain : --
+Hold Multiplier : 4
+TimerRun        : 100cs
+TimerConfig     : 100cs
+Virtual MAC     : 00-e0-fc-12-78-80
+Check hop limit : YES
+Config Type     : Normal
+Create Time     : 2020-07-27 20:17:46
+Last Change Time: 2020-07-27 20:17:46</pre>
+<p>The command output shows that two VRRP6 groups have been created on DeviceA. DeviceA is in the <strong>Master</strong> and <strong>Backup</strong> states in VRRP6 groups 1 and 2, respectively.</p>
+<pre class="screen">&lt;DeviceB&gt; <strong>display vrrp6 verbose</strong>
+<span>100GE</span><span>1/0/1</span> | Virtual Router 1
+State           : <strong>Backup</strong>
+Virtual IP      : FE80::1
+                  2001:DB8::100
+Master IP       : 2001:DB8::1
+PriorityRun     : 100
+PriorityConfig  : 100
+MasterPriority  : 120
+Preempt         : YES   Delay Time : 0s   Remain : --
+Hold Multiplier : 4
+TimerRun        : 100cs
+TimerConfig     : 100cs
+Virtual MAC     : 0000-5e00-0202
+Check hop limit : YES
+Config Type     : Normal
+Create Time     : 2020-07-27 20:19:46
+Last Change Time: 2020-07-27 20:19:46
+
+<span>100GE</span><span>1/0/1</span> | Virtual Router 2
+State           : <strong>Master</strong>
+Virtual IP      : FE80::2
+                  2001:DB8::60
+Master IP       : 2001:DB8::2
+PriorityRun     : 120
+PriorityConfig  : 120
+MasterPriority  : 120
+Preempt         : YES   Delay Time : 0s   Remain : --
+Hold Multiplier : 4
+TimerRun        : 100cs
+TimerConfig     : 100cs
+Virtual MAC     : 00-e0-fc-12-78-80
+Check hop limit : YES
+Config Type     : Normal
+Create Time     : 2020-07-27 20:21:46
+Last Change Time: 2020-07-27 20:21:46</pre>
+<p>The command output shows that two VRRP6 groups have been created on DeviceB. DeviceB is in the <strong>Backup</strong> and <strong>Master</strong> states in VRRP6 groups 1 and 2, respectively.</p>
+</div></div>
+<div class="example" id="EN-US_TASK_0000001130622212__section_05"><a name="EN-US_TASK_0000001130622212__section_05"></a><a name="section_05"></a><a name="EN-US_TASK_0000001130622212__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+ sysname DeviceA
+#
+ospfv3 1
+ router-id 1.1.1.1
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8::1/64
+ vrrp6 vrid 1 virtual-ip FE80::1 link-local
+ vrrp6 vrid 1 virtual-ip 2001:DB8::100
+ vrrp6 vrid 1 priority 120
+ vrrp6 vrid 2 virtual-ip FE80::2 link-local
+ vrrp6 vrid 2 virtual-ip 2001:DB8::60
+ ospfv3 1 area 0.0.0.0
+ #
+interface <span>100GE</span><span>1/0/2</span>
+<strong> </strong>undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8:1::1/64
+ ospfv3 1 area 0.0.0.0
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+ sysname DeviceB
+#
+ospfv3 1
+ router-id 1.1.1.1
+#
+interface <span>100GE</span><span>1/0/1</span>
+<strong> </strong>undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8::2/64
+ vrrp6 vrid 1 virtual-ip FE80::1 link-local
+ vrrp6 vrid 1 virtual-ip 2001:DB8::100
+ vrrp6 vrid 2 virtual-ip FE80::2 link-local
+ vrrp6 vrid 2 virtual-ip 2001:DB8::60
+ vrrp6 vrid 2 priority 120
+ ospfv3 1 area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+<strong> </strong>undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8:2::1/64
+ ospfv3 1 area 0.0.0.0
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+ sysname DeviceC
+#
+ospfv3 1
+ router-id 3.3.3.3
+#
+interface <span>100GE</span><span>1/0/3</span>
+<strong> </strong>undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8:3::2/64
+ ospfv3 1 area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/1</span>
+<strong> </strong>undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8:1::2/64
+ ospfv3 1 area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+<strong> </strong>undo portswitch
+ ipv6 enable
+ ipv6 address 2001:DB8:2::2/64
+ ospfv3 1 area 0.0.0.0
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_vrrp6_cfg_0008.html">Configuring VRRP6 in Master/Backup or Load Balancing Mode
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_vrrp6_cfg_0015.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_vrrp6_cfg_0017.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

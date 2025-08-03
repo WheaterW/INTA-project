@@ -1,0 +1,81 @@
+arp learning strict (System view)
+=================================
+
+arp learning strict (System view)
+
+Function
+--------
+
+
+
+Using the **arp learning strict** command, you can enable strict Address Resolution Protocol (ARP) learning to allow a device to learn the address information of only the ARP reply message in response to the ARP request sent by itself.
+
+Using the **undo arp learning strict** command, you can disable strict ARP learning to allow a device to receive all ARP reply messages and respond to ARP requests sent from other devices.
+
+
+
+By default, strict ARP learning is disabled.
+
+
+Format
+------
+
+**arp learning strict**
+
+**undo arp learning strict**
+
+
+Parameters
+----------
+
+None
+
+Views
+-----
+
+System view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+
+
+The attacker sends a large number of stimulate ARP request and reply messages to a device on a network. As a result, the ARP buffer is overflowed and unable to cache normal ARP entries. Enabling strict ARP learning can address such a problem. Strict ARP learning allows a device to receive only ARP reply message in response to the request sent by itself, ensuring the device security.
+
+
+
+**Configuration Impact**
+
+
+
+When other devices send ARP request messages to a device enabled with strict ARP learning, the device responds to these devices with reply messages, but does not add MAC addresses of these devices immediately into its ARP entry (or refresh its ARP entry). Instead, the device sends an ARP request message to these devices, and adds MAC address of devices responding to the request to the ARP entry (or refresh the ARP entry).
+
+
+
+**Precautions**
+
+
+
+After the **arp learning strict** command is run, all interfaces on the device refresh or add ARP entries in ARP learning strict mode. If strict ARP learning is enabled globally when network devices change frequently (for example, during the environment establishment), ARP entries will be refreshed slowly, affecting the network efficiency. To implement refined management and improve the network efficiency, you can run the **arp learning strict** command on an interface as required to enable strict ARP learning on the interface.
+
+
+
+
+Example
+-------
+
+# Enable strict ARP learning.
+```
+<HUAWEI> system-view
+[~HUAWEI] arp learning strict
+
+```

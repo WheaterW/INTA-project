@@ -1,0 +1,756 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="CP-CAR Configuration Example">
+<meta name="abstract" content="">
+<meta name="description" content="">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_enhance_1007.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_enhance_1010.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="q00517581,z00588052">
+<meta name="DC.Publisher" content="20240229">
+<meta name="OWNER" content="q00517581,z00588052">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="x60031980">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001180623065">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/jquery.min.idp.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/RowOrColfreezeSupport.js"></script>
+
+<script type="text/javascript">
+setTimeout(function(){
+	jQueryHW(document).ready(function(){
+		jQueryHW("table[rowfreeze='yes']").rowfreeze();
+		jQueryHW("table[colfreeze='yes']").colfreeze();
+	});
+},500);
+</script>
+<title>CP-CAR Configuration Example</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_CONCEPT_0000001180623065"></a><a name="EN-US_CONCEPT_0000001180623065"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">CP-CAR Configuration Example</h1>
+<div><p></p>
+<div class="section"><h4 class="sectiontitle">Networking Requirements</h4><p>Security requirements for <span class="keyword">Router</span>s are as follows:</p>
+<ul><li>Save system resources by preventing excessive usage of CPU resources.</li><li>Prevent attackers from manipulating managed <span class="keyword">Router</span>s using management packets.</li><li>Record attack packet information for fault analysis and location.</li><li>Notify users of dropped packets by reporting an alarm.</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The roadmap for configuring attack defense on the <span class="keyword">Router</span> is as follows:</p>
+<ul><li>Identify and group the protocols used by various services on the <span class="keyword">Router</span> and differentiate normal service traffic from malicious traffic.</li><li>Configure a CPU defense policy to specify the match sequence of traffic sent to the CPU.<ol><li>Configure TCP/IP attack defense check to prevent TCP/IP attacks.</li><li>Configure application layer association. Configure the application layer association check to enable the router to check the bandwidth of received packets.</li><li>Configure a processing policy for authorized packets. This policy enables the <span class="keyword">Router</span> to compare normal protocol packets and packets to be protected against the whitelist and user-defined flows. If matching the whitelist or user-defined flows, these packets will be sent to the CPU over different channels with different bandwidth based on priorities.</li><li>Configure a processing policy for unauthorized packets and unknown packets. This policy enables the <span class="keyword">Router</span> to compare unauthorized packets and unknown packets against the blacklist. If matching the blacklist, these packets will be dropped or sent to the CPU over channels with limited bandwidth at a lower priority.</li><li>Configure attack source tracing, so that dropped packets can be recorded for fault analysis and location.</li><li>Enable the packet drop alarm function.</li></ol>
+<div class="notice"><span class="noticetitle"><img src="../../../../public_sys-resources/notice_3.0-en-us.png"> </span><div class="noticebody"><p>By default, TCP SYN flood attack defense is enabled. TCP SYN flood attack defense takes precedence over the configured blacklist function. Therefore, the ACL specified for TCP SYN flood attack defense other than the ACL specified in the <strong>blacklist acl</strong> command is used to filter TCP SYN packets.</p>
+<p>Before using the ACL specified in the <strong>blacklist acl</strong> command to filter TCP SYN packets, run the <strong>undo tcpsyn-flood enable</strong> command to disable TCP SYN flood attack defense.</p>
+<p>If TCP SYN flood attack defense is disabled, the TCP SYN packets that fail to match the ACL specified in the <strong>blacklist acl</strong> command will be sent to the CPU. Therefore, exercise caution when running the <strong>undo tcpsyn-flood enable</strong> command.</p>
+</div></div>
+</li><li>Configure management plane protection to prevent unauthorized users from launching attacks through non-management interfaces (management plane) using management packets.</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Data Preparation</h4><div class="p"><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The data used in this example is for your reference only. For configuration data required for live networks, contact Huawei engineers.</p>
+</div></div>
+</div>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" rowfreeze="yes" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Service information related to <span class="keyword">Device</span></caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="20%" id="mcps1.4.3.3.2.6.1.1" liSelected="liSelected"><p>Category</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="20%" id="mcps1.4.3.3.2.6.1.2" liSelected="liSelected"><p>Traffic Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="20%" id="mcps1.4.3.3.2.6.1.3" liSelected="liSelected"><p>Priority</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="20%" id="mcps1.4.3.3.2.6.1.4" liSelected="liSelected"><p>Action</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="20%" id="mcps1.4.3.3.2.6.1.5" liSelected="liSelected"><p>Remarks</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.1 "><p>Trusted network segment</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.2 "><p>Source IP address</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.3 "><p>High</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.4 "><p>User-defined flow 1. The rate limit is 1 Mbit/s.</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.5 "><p>Packets from the trusted network segment of the <span class="keyword">Router</span> are filtered using ACL 3331.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="4" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.1 "><p>Routing protocol</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.2 "><p>BGP</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.3 "><p>High</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.4 "><p>User-defined flow 2. The rate limit is 512 kbit/s.</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.5 "><p>Protocol packets are filtered using ACL 3332.</p>
+<div class="note"><span class="notetitle"> NOTE: </span><div class="notebody"><p>The device supports BGP dynamic link protection. BGP protocol packets for which BGP routes are established match the whitelist and sent to the CPU. The ACL limits the BGP protocol packets for which BGP routes are not established.</p>
+</div></div>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.2 "><p>LDP</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.3 "><p>High</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.4 "><p>User-defined flow 3. The rate limit is 512 kbit/s.</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.5 "><p>Packets coming from the source IP addresses of LDP peers and directly-connected address are filtered using ACL 3333.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.2 "><p>OSPF,RIP</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.3 "><p>High</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.4 "><p>User-defined flow 4. The rate limit is 1 Mbit/s.</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.5 "><p>Packets coming from the source IP addresses of OSPF neighbors are filtered using ACL 3334.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.2 "><p>ISIS</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.3 "><p>NA</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.4 "><p>NA</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.5 "><p>IS-IS is a Layer 2 protocol and does not involve the ACL.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.1 "><p>Reliability protocol</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.2 "><p>VRRP</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.3 "><p>High</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.4 "><p>User-defined flow 5. The rate limit is 1300 kbit/s.</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.5 "><p>Virtual <span class="keyword">Router</span> protocol packets are filtered using ACL 3335.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="5" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.1 "><p>Multicast protocol</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.2 "><p>PIM</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.3 "><p>High</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.4 "><p>User-defined flow 6. The rate limit is 1 Mbit/s.</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.5 "><p>PIM packets are filtered using ACL 3336.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.2 "><p>IGMP</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.3 "><p>High</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.4 "><p>User-defined flow 7. The rate limit is 512 kbit/s.</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.5 "><p>IGMP packets are filtered using ACL 3337.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.2 "><p>MSDP</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.3 "><p>Low</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.4 "><p>User-defined flow 8. The rate limit is 512 kbit/s.</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.5 "><p>MSDP packets are filtered using ACL 3338.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.2 "><p>Reserved multicast addresses</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.3 "><p>High</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.4 "><p>User-defined flow 9. The rate limit is 512 kbit/s.</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.5 "><p>Packets coming from multicast addresses 224.0.0.0 to 224.0.0.255 are filtered using ACL 3339.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.2 "><p>Reserved broadcast address</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.3 "><p>Low</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.4 "><p>User-defined flow 10. The rate limit is 512 kbit/s.</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.5 "><p>Packets coming from the broadcast address 255.255.255.255 are filtered using ACL 3340.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="4" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.1 "><p>Access protocol</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.2 "><p>SSH</p>
+</td>
+<td class="cellrowborder" rowspan="2" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.3 "><p>Medium</p>
+</td>
+<td class="cellrowborder" rowspan="2" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.4 "><p>User-defined flow 11. The rate limit is 512 kbit/s.</p>
+</td>
+<td class="cellrowborder" rowspan="2" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.5 "><p>Protocol packets are filtered using ACL 3341.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.2 "><p>TELNET</p>
+<div class="note"><span class="notetitle"> NOTE: </span><div class="notebody"><p>Use the STelnet protocol because this protocol is not secure.</p>
+</div></div>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.2 "><p>FTP</p>
+<div class="note"><span class="notetitle"> NOTE: </span><div class="notebody"><p>Use the SFTP protocol because this protocol is not secure.</p>
+</div></div>
+</td>
+<td class="cellrowborder" rowspan="2" valign="top" headers="mcps1.4.3.3.2.6.1.3 "><p>Low</p>
+</td>
+<td class="cellrowborder" rowspan="2" valign="top" headers="mcps1.4.3.3.2.6.1.4 "><p>User-defined flow 12. The rate limit is 512 kbit/s.</p>
+</td>
+<td class="cellrowborder" rowspan="2" valign="top" headers="mcps1.4.3.3.2.6.1.5 "><p>Protocol packets are filtered using ACL 3342.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.2 "><p>TFTP</p>
+<div class="note"><span class="notetitle"> NOTE: </span><div class="notebody"><p>Use the SFTP protocol because this protocol is not secure.</p>
+</div></div>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.1 "><p>Network management protocol</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.2 "><p>SNMP</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.3 "><p>Low</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.4 "><p>User-defined flow 13. The rate limit is 1 Mbit/s.</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.5 "><p>Protocol packets are filtered using ACL 3343.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="2" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.1 "><p>Service protocol</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.2 "><p>TACACS</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.3 "><p>Low</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.4 "><p>User-defined flow 14. The rate limit is 1 Mbit/s.</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.5 "><p>Protocol packets are filtered using ACL 3344.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.2 "><p>NTP</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.3 "><p>Low</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.4 "><p>User-defined flow 15. The rate limit is 150 kbit/s.</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.5 "><p>Protocol packets are filtered using ACL 3345.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="2" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.1 "><p>Tool protocol</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.2 "><p>ICMP</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.3 "><p>Low</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.4 "><p>User-defined flow 16. The rate limit is 512 kbit/s.</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.5 "><p>ICMP TTL-threshold-crossing packets, port unreachable packets, response packets, and response acknowledgement packets are filtered using ACL 3346.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.2 "><p>LSPPING</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.3 "><p>High</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.4 "><p>User-defined flow 17. The rate limit is 1 Mbit/s.</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.5 "><p>Protocol packets are filtered using ACL 3347.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="2" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.1 "><p>Others</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.2 "><p>Packets of unkn<u>o</u>wn protocols</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.3 "><p>Low</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.4 "><p>512 kbit/s best-effort bandwidth is reserved.</p>
+</td>
+<td class="cellrowborder" valign="top" width="20%" headers="mcps1.4.3.3.2.6.1.5 "><p>Protocol packets are filtered using ACL 3348.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.2 "><p>Attack packets or unauthorized protocol packets (blacklist)</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.3 "><p>Low</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.4 "><p>The bandwidth is 0.</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.3.3.2.6.1.5 "><p>Protocol packets are filtered using ACL 3330.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Procedure</h4><ol><li>Configure a CPU defense policy.<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname <span class="keyword">Device</span>A</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>cpu-defend policy 10</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>commit</strong></pre>
+</li><li>Configure defense against TCP/IP packet attacks.<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>fragment-flood enable</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>udp-packet-defend enable</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>abnormal-packet-defend enable</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>commit</strong></pre>
+</li><li>Set the match sequence of packets to be sent to the CPU.<p>The match sequence of packets to be sent to the CPU is as follows: TCPSYN packets -&gt; packet fragments -&gt; dynamic link protection -&gt; management protocol ACL -&gt; whitelist -&gt; user-defined flow -&gt; blacklist.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>process-sequence tcpsyn-flood fragment-flood dynamic-link-protection management-acl whitelist user-defined-flow blacklist</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>commit</strong></pre>
+</li><li>Configure the match rules of a blacklist.<p>It is recommended to add unauthorized user packets, invalid protocol packets, and attack packets into the blacklist and configure the policy action as discard. Use ACL 3330 to match these packets.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> acl number 3330</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3330] <strong>rule deny ip source 10.1.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3330] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl-adv-3330] <strong>quit</strong></pre>
+</li><li>Configure the action of a blacklist.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>blacklist acl 3330</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car blacklist cir 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>commit</strong></pre>
+</li><li>Configure a user-defined flow.<ul><li>Add the IP address of a trusted network segment to ACL 3331.<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>system-view</strong> 
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3331</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3331] <strong>rule permit ip source 10.1.2.0 0.0.0.255</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3331] <strong>rule permit ip source 10.1.3.0 0.0.0.255</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3331] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl-adv-3331] <strong>quit</strong></pre>
+</li><li>Add BGP to ACL 3332.<p>The device supports BGP dynamic link protection. BGP protocol packets for which BGP routes are established match the whitelist and sent to the CPU. This ACL limits the BGP<span> peer</span> protocol packets for which BGP routes are not established.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3332</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3332] <strong>rule permit tcp source 10.12.1.0 0.0.0.255 destination-port eq bgp</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3332] <strong>rule permit tcp source 10.12.1.0 0.0.0.255 source-port eq bgp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3332] <strong>commit</strong></pre>
+</li><li>Add LDP to ACL 3333.<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The establishment of an LDP session is different from that of a BGP session. LDP establishes a connection using TCP but maintains the peer relationship using UDP. This process involves not only the peer address, but also the IP address of the directly connected interface. Perform the following steps to establish an LDP session:</p>
+</div></div>
+<p>Run the <strong>display mpls ldp peer</strong> command to obtain peer information:</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3332] <strong>display mpls ldp peer</strong> 
+         LDP Peer Information in Public network 
+ ------------------------------------------------------------------------------ 
+ Peer-ID                TransportAddress   DiscoverySource 
+ ------------------------------------------------------------------------------ 
+ 1.1.1.32:0             1.1.1.32           GigabitEthernet<span>0/3/1</span> 
+ ------------------------------------------------------------------------------ 
+ TOTAL: 1 Peer(s) Found. </pre>
+<p>View the IP address of the interface directly connected to the local device.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/3/1</span>]<strong>display this</strong> 
+# 
+interface GigabitEthernet<span>0/3/1</span> 
+undo shutdown 
+<strong>ip address 11.11.11.2 255.255.255.0</strong> 
+mpls 
+mpls ldp 
+#</pre>
+<p>Local LDP discovers peers through bidirectional Hello packets. Hello packets are UDP packets with the source address being the local interface address and destination address being the multicast IP address. Remote LDP discovers peers similarly. The only difference is that the destination address is changed to the configured remote peer address. Add the peer's Hello packets to the ACL.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3333</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3333] <strong>rule permit udp source 11.11.11.1 0 destination-port eq 646</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3333] <strong>rule permit udp source 11.11.11.1 0 source-port eq 646</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3333] <strong>commit</strong></pre>
+<p>The local LDP transport address is carried in the Hello packet payload. After using the LDP Hello packet to discover the peer and obtain the transport address of the peer, the device attempts to establish an LDP session using TCP to transmit notification messages. In TCP interaction, the device with a larger transport address initiates a TCP connection setup request, with the destination port number of 646 and a random source port number. You can skip this step and add two ACL rules.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3333] <strong>rule permit tcp source 1.1.1.32 0 destination-port eq 646</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3333] <strong>rule permit tcp source 1.1.1.32 0 source-port eq 646</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3333] <strong>commit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>If a device has multiple LDP peers, add four ACL rules for each peer address.</li><li>ACL rules can be configured based on the source IP address + port number or solely on the port number. ACL rules configured based on the source IP address + port number are more secure, but complicated in information collection. ACL rules configured based solely on the port number are less secure, but easy to configure. Choose either of the preceding methods as needed. A simplified configuration procedure is as follows:</li></ul>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl-adv-3332] <strong>acl number 3333</strong> 
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3333] <strong>rule permit tcp source-port eq 646</strong> 
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3333] <strong>rule permit tcp destination-port eq 646</strong> 
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3333] <strong>rule permit udp source-port eq 646</strong> 
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3333] <strong>rule permit udp destination-port eq 646</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3333] <strong>commit</strong></pre>
+</div></div>
+</li><li>Add OSPF and RIP to ACL 3334.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3334</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The device supports OSPF dynamic link protection. OSPF protocol packets for which OSPF routes are established match the whitelist and sent to the CPU. This ACL limits the OSPF protocol packets for which OSPF routes are not established.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3334] <strong>rule 5 permit ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3334] <strong>commit</strong></pre>
+<p>Configuring ACL rules for RIP is similar to configuring ACL rules for OSPF.</p>
+</div></div>
+</li><li>Add VRRP to ACL 3335.<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>VRRP is an IP-based protocol, and its protocol number is 112. VRRP sends packets based on the IP addresses of virtual interfaces on peers. The protocol number and IP addresses of virtual interfaces need to be added to the ACL for protection. VRRP peer information can be obtained using the <strong>display vrrp</strong> command.</p>
+</div></div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3335</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3335] <strong>rule permit 112 source 11.11.11.100 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3335] <strong>quit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>If a device has multiple VRRP peers, define an ACL rule for each peer address.</li><li>ACL rules can be configured based on the source IP address + port number or solely on the port number. ACL rules configured based on the source IP address + port number are more secure, but complicated in information collection. ACL rules configured based solely on the port number are less secure, but easy to configure. Choose either of the preceding methods as needed. A simplified configuration procedure is as follows:</li></ul>
+</div></div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl-adv-3335] <strong>rule 5 permit 112</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3335] <strong>commit</strong></pre>
+</li><li>Multicast protocols.<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>PIM is a multicast protocol, and the port number is 103.</p>
+</div></div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3336</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3336] <strong>rule permit 103</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3336] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3337</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3337] <strong>rule permit igmp</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3337] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl-adv-3337] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3338</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3338] <strong>rule permit udp destination-port eq 639</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3338] <strong>rule permit udp source-port eq 639</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3338] <strong>rule permit tcp destination-port eq 639</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3338] <strong>rule permit tcp source-port eq 639</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3338] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl-adv-3338] <strong>quit</strong></pre>
+</li><li>Add reserved multicast addresses from 224.0.0.0 to 224.0.0.255 to ACL 3339.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3339</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3339] <strong>rule permit ip destination 224.0.0.0 0.0.0.255</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3339] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl-adv-3339] <strong>quit</strong></pre>
+</li><li>Add reserved broadcast address 255.255.255.255 to ACL 3340.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3340</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3340] <strong>rule permit ip destination 255.255.255.255 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3340] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl-adv-3340] <strong>quit</strong></pre>
+</li><li>Add Telnet and SSH to ACL 3341.<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Telnet and SSH are TCP-based protocols. They are used for login and are very important protocols. Therefore, the two protocols are added to a separate ACL for protection. The device supports Telnet and SSH dynamic link protection. Telnet and SSH protocol packets for which Telnet and SSH links are established match the whitelist and sent to the CPU. This ACL limits the Telnet and SSH protocol packets for which Telnet and SSH links are not established. The SSH port number is 22.<span> </span> <span>Configuring the device to drop management protocol packets with unknown source addresses is recommended.</span></p>
+</div></div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3341</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3341] <strong>rule permit tcp source 192.168.1.0 0.0.0.255 source-port eq telnet</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3341] <strong>rule permit tcp source 192.168.1.0 0.0.0.255 destination-port eq telnet</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3341] <strong>rule permit tcp source 192.168.1.0 0.0.0.255 source-port eq 22</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3341] <strong>rule permit tcp source 192.168.1.0 0.0.0.255 destination-port eq 22</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3341] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3341] <strong>rule deny tcp destination-port eq telnet</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3341] <strong>rule deny tcp destination-port eq 22</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3341] <strong>commit</strong></pre>
+</li><li>Add FTP and TFTP to ACL 3342.<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>FTP is based on TCP whereas TFTP is based on UDP. Each source address requires three ACL rules.</p>
+</div></div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3342</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3342] <strong>rule permit udp source 192.168.1.0 0.0.0.255 destination-port eq tftp</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3342] <strong>rule permit tcp source 192.168.1.0 0.0.0.255 source-port eq ftp</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3342] <strong>rule permit tcp source 192.168.1.0 0.0.0.255 destination-port eq ftp</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3342] <strong>quit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>The ranges of FTP and TFTP source address segments must be confirmed by carriers.</li><li>ACL rules can be configured based on the source IP address + port number or solely on the port number. ACL rules configured based on the source IP address + port number are more secure, but complicated in information collection. ACL rules configured based solely on the port number are less secure, but easy to configure. Choose either of the preceding methods as needed. A simplified configuration procedure is as follows:</li></ul>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3342] <strong>rule permit udp destination-port eq tftp</strong> 
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3342] <strong>rule permit tcp source-port eq ftp</strong> 
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3342] <strong>rule permit tcp destination-port eq ftp</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3342] <strong>commit</strong></pre>
+</div></div>
+</li><li>Add SNMP to ACL 3343.<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>A network management system (NMS) is deployed on most live networks. An NMS server sends a large number of UDP request packets, and devices send UDP reply packets through SNMP ports. As a large number of packets need to be exchanged, these devices need to be added to a separate ACL for protection.</p>
+<p>The source address segment added to the ACL must be confirmed by the customer. Otherwise, the NMS servers with IP addresses not being listed in the ACL will fail to manage the device. SNMP is a system management protocol. Configuring the device to drop SNMP protocol packets with unknown source addresses is recommended.</p>
+</div></div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3343</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3343] <strong>rule permit udp source 10.20.20.0 0.0.0.255 source-port eq snmp</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3343] <strong>rule permit udp source 10.20.20.0 0.0.0.255 destination-port eq snmp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3343] <strong>rule deny udp destination-port eq snmp</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3343] <strong>commit</strong></pre>
+</li><li>Add Tacacs to ACL 3344.<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Tacacs is a service protocol. Both the Tacacs protocols: TCP-based Huawei enhanced Tacacs and UDP-based standard Tacacs need to be added to the ACL 3344.</p>
+</div></div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3344</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3344] <strong>rule permit tcp source 5.5.5.5 0 source-port eq tacacs</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3344] <strong>rule permit tcp source 6.6.6.6 0 destination-port eq tacacs</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3344] <strong>rule permit udp source 5.5.5.5 0 source-port eq tacacs-ds</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3344] <strong>rule permit udp source 6.6.6.6 0 destination-port eq tacacs-ds</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3344] <strong>quit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>The TACACS source address segment added to the ACL must be confirmed by carriers.</li><li>ACL rules can be configured based on the source IP address + port number or solely on the port number. ACL rules configured based on the source IP address + port number are more secure, but complicated in information collection. ACL rules configured based solely on the port number are less secure, but easy to configure. Choose either of the preceding methods as needed. A simplified configuration procedure is as follows:</li></ul>
+</div></div>
+<pre class="screen">acl number 3344 
+ rule permit tcp source-port eq tacacs 
+ rule permit tcp destination-port eq tacacs   
+ rule permit udp source-port eq tacacs-ds 
+ rule permit udp destination-port eq tacacs-ds </pre>
+</li><li>Add NTP to ACL 3345.<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>NTP is a service protocol, and the port number is 123.</p>
+</div></div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3345</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3345] <strong>rule permit udp source 172.16.0.0 0.0.255.255 source-port eq 123 </strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3345] <strong>rule permit udp source 172.16.0.0 0.0.255.255 destination-port eq 123</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3345] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl-adv-3345] <strong>quit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>The NTP source address segment added to the ACL must be confirmed by carriers.</li><li>ACL rules can be configured based on the source IP address + port number or solely on the port number. ACL rules configured based on the source IP address + port number are more secure, but complicated in information collection. ACL rules configured based solely on the port number are less secure, but easy to configure. Choose either of the preceding methods as needed. A simplified configuration procedure is as follows:</li></ul>
+</div></div>
+<pre class="screen">acl number 3345 
+ rule permit udp source- port eq 123 
+ rule permit udp destination- port eq 123 </pre>
+</li><li>Add ICMP and Tracert to ACL 3346.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3346</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3346] <strong>rule permit icmp icmp-type echo</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3346] <strong>rule permit icmp icmp-type echo-reply</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3346] <strong>rule permit icmp icmp-type ttl-exceeded</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3346] <strong>rule permit icmp icmp-type port-unreachable</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3346] <strong>rule permit icmp icmp-type Fragmentneed-DFset</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3346] <strong>rule permit icmp</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3346] <strong>rule permit udp destination-port range 33434 33678</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3346] <strong>quit</strong></pre>
+</li><li>Add Ping-LSP to ACL 3347.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3347</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3347] <strong>rule permit udp destination-port eq 3503</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3347] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl-adv-3347] <strong>quit</strong></pre>
+</li><li>Add unknown protocols to ACL 3348.<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If unauthorized protocol packets and attack packets are limited by ACL 3330 to which the blacklist is bound, and authorized protocol packets and packets from the trusted network segments is limited by ACLs from 3331 to 3347, other protocol packets are considered as packets of unknown protocols and limited by ACL 3348. The corresponding user-defined flow configures a best-effort bandwidth for these packets of unknown protocols and sends them to the CPU with low priority.</p>
+<p>This configuration is optional. If no ACL is configured to filter packets of unknown protocols, these packets are sent to the CPU from the default channel. Ensure that the system can process authorized service and protocol packets based on the preceding configurations before you configure this ACL and corresponding user-defined flow for packets of unknown protocols.</p>
+</div></div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 3348</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3348] <strong>rule permit udp</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3348] <strong>rule permit tcp</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3348] <strong>rule permit ip</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-adv-3348] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl-adv-3348] <strong>quit</strong></pre>
+</li></ul>
+</li><li>Configure a user-defined flow.<p>After classifying packets using an ACL, create user-defined flows to direct protocol packets to different channels.</p>
+<ul><li>Configure the action of user-defined flow 1.<p>User-defined flow 1 uses ACL 3331 to match packets from the trusted network segment that is allowed to access the local device. Set the priority of user-defined flow 1 to high and bandwidth to 1 Mbit/s. The configuration is as follows:</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 1 acl 3331</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow 1 cir 1000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 1 high</strong></pre>
+</li><li>Configure the action of user-defined flow 2.<p>User-defined flow 2 uses ACL 3332 to match BGP packets. As BGP is a routing protocol, set the priority to high and bandwidth to 512 kbit/s for user-defined flow 2. In addition, configure the alarm function for user-defined flow 2. The configuration is as follows: You can adjust the threshold for dropping packets and interval for reporting alarms.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 2 acl 3332</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow 2 cir 512 cbs 1000000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 2 high</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>alarm drop-rate user-defined-flow 2 enable</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>alarm drop-rate user-defined-flow 2 threshold 100 interval 60</strong></pre>
+</li><li>Configure the action of user-defined flow 3.<p>User-defined flow 3 uses ACL 3333 to match LDP packets. Set its priority to high and bandwidth to 512 kbit/s. In addition, configure the alarm function for user-defined flow 3. You can adjust the threshold for dropping packets and interval for reporting alarms.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 3 acl 3333</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow 3 cir 512 cbs 1000000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 3 high</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>alarm drop-rate user-defined-flow 3 enable</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>alarm drop-rate user-defined-flow 3 threshold 100 interval 60</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>LDP is easy to flap. If more than three LDP packets get lost, LDP may go Down. The attack defense alarm function must be configured.</p>
+</div></div>
+</li><li>Configure the action of user-defined flow 4.<p>User-defined flow 4 uses ACL 3334 to match OSPF and RIP packets. Set its priority to high and bandwidth to 1 Mbit/s. In addition, configure the alarm function for user-defined flow 4. You can adjust the threshold for dropping packets and interval for reporting alarms.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 4 acl 3334</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow 4 cir 1000 cbs 1000000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 4 high</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>alarm drop-rate user-defined-flow 4 enable</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>alarm drop-rate user-defined-flow 4 threshold 100 interval 60</strong></pre>
+</li><li>Configure the action of user-defined flow 5.<p>User-defined flow 5 uses ACL 3335 to match VRRP packets. As VRRP is a reliability protocol, set the priority of user-defined flow 5 to high and the bandwidth to 1.3 Mbit/s. The configuration is as follows:</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 5 acl 3335</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow 5 cir 1300 cbs 1000000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 5 high</strong></pre>
+</li><li>Configure the action of user-defined flow 6.<p>User-defined flow 6 uses ACL 3336 to implement rate limit for PIM packets.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 6 acl 3336</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow 6 cir 1000 cbs 1000000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 6 high</strong></pre>
+</li><li>Configure the action of user-defined flow 7.<p>User-defined flow 7 uses ACL 3337 to implement rate limit for IGMP packets.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 7 acl 3337</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow 7 cir 512 cbs 512000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 7 high</strong></pre>
+</li><li>Configure the action of user-defined flow 8.<p>User-defined flow 8 uses ACL 3338 to implement rate limit for MSDP packets.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 8 acl 3338</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow 8 cir 512 cbs 512000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 8 low</strong></pre>
+</li><li>Configure the action of user-defined flow 9.<p>User-defined flow 9 uses ACL 3339 to implement rate limit for packets with the broadcast address. The live network is prone to suffer attacks launched using default reserved multicast addresses. Therefore, reserved multicast addresses are added to an independent ACL. To protect other types of protocol packets, set the CIR of the packets with the default reserved multicast address to 512 kbit/s. The configuration is as follows:</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 9 acl 3339</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow 9 cir 512 cbs 40000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 9 high</strong></pre>
+</li><li>Configure the action of user-defined flow 10.<p>User-defined flow 10 uses ACL 3340 to implement rate limit for packets with the broadcast address. The destination IP address is the broadcast address 255.255.255.255. Limit the processing bandwidth to 512 kbit/s and set the priority to low to protect other protocols.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 10 acl 3339</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow cir 512 cbs 20000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 10 low</strong></pre>
+</li><li>Configure the action of user-defined flow 11.<p>User-defined flow 11 uses ACL 3341 to match access protocol packets. Access protocol packets require low bandwidth and have no requirements for real-time transmission. Therefore, set the priority to low for them.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 11 acl 3341</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow 11 cir 512 cbs 300000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 11 middle</strong></pre>
+</li><li>Configure the action of user-defined flow 12.<p>User-defined flow 12 uses ACL 3342 to match FTP and TFTP packets. Set the priority to low and the bandwidth to 512 kbit/s or lower. The configuration is as follows:</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 12 acl 3342</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow 12 cir 512 cbs 5120</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 12 low</strong></pre>
+</li><li>Configure the action of user-defined flow 13.<p>User-defined flow 13 uses ACL 3343 to match SNMP packets. SNMP traffic is heavy but has low requirements for real-time transmission. Therefore, set the priority to low and bandwidth to 1 Mbit/s. The configuration is as follows:</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 13 acl 3343</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow 13 cir 1000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 13 low</strong></pre>
+</li><li>Configure the action of user-defined flow 14.<p>User-defined flow 14 uses ACL 3341 to protect TACACS protocol packets. TACACS traffic is heavy but has low requirements for real-time transmission. Therefore, set the priority to low and bandwidth to 1 Mbit/s. The configuration is as follows:</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 14 acl 3344</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow 14 cir 1000 cbs 1000000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 14 low</strong></pre>
+</li><li>Configure the action of user-defined flow 15.<p>User-defined flow 15 uses ACL 3345 to implement rate limit for NTP packets. Set the bandwidth to 150 kbit/s and priority to low.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 15 acl 3345</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow 15 cir 150 cbs 15000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 15 low</strong></pre>
+</li><li>Configure the action of user-defined flow 16.<p>User-defined flow 16 uses ACL 3346 to match ICMP packets. ICMP is frequently used in network access. Set the priority to low and bandwidth to 512 kbit/s.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 16 acl 3346</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow 16 cir 512 cbs 256000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 16 low</strong></pre>
+</li><li>Configure the action of user-defined flow 17.<p>User-defined flow 17 uses ACL 3347 to match LSP ping packets. Set the CIR to 1 Mbit/s and priority to high.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 17 acl 3347</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow 17 cir 1000 cbs 40000 </strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 17 high</strong></pre>
+</li><li>Configure the action of user-defined flow 18.<p>User-defined flow 18 uses ACL 3348 to implement rate limit for unknown protocol packets. Before configuring user-defined flow 18, ensure that all services on the device have been filtered using the previous user-defined flows. Otherwise, do not configure user-defined flow 18 and route the unknown protocol packets along the specific channel.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>user-defined-flow 18 acl 3348</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>car user-defined-flow 18 cir 512 cbs 1000000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>priority user-defined-flow 18 low</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-cpu-defend-policy-10] <strong>commit</strong></pre>
+</li></ul>
+</li><li>Apply an attack defense policy.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>slot <span>1</span></strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-slot-<span>1</span>] <strong>cpu-defend-policy 10</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-slot-<span>1</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-slot-<span>1</span>] <strong>quit</strong></pre>
+</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration Files</h4><pre class="screen">#
+ sysname <span class="keyword">Device</span>A
+#
+cpu-defend policy 10
+ blacklist acl 3330
+ user-defined-flow 1 acl 3331
+ user-defined-flow 2 acl 3332
+ user-defined-flow 3 acl 3333
+ user-defined-flow 4 acl 3334
+ user-defined-flow 5 acl 3335
+ user-defined-flow 6 acl 3336
+ user-defined-flow 7 acl 3337
+ user-defined-flow 8 acl 3338
+ user-defined-flow 9 acl 3339
+ user-defined-flow 10 acl 3340
+ user-defined-flow 11 acl 3341
+ user-defined-flow 12 acl 3342
+ user-defined-flow 13 acl 3343
+ user-defined-flow 14 acl 3344
+ user-defined-flow 15 acl 3345
+ user-defined-flow 16 acl 3346
+ user-defined-flow 17 acl 3347
+ user-defined-flow 18 acl 3348
+ alarm drop-rate user-defined-flow 2 threshold 100 interval 60
+ alarm drop-rate user-defined-flow 3 threshold 100 interval 60
+ alarm drop-rate user-defined-flow 4 threshold 100 interval 60
+ car blacklist cir 0
+ car user-defined-flow 1 cir 1000
+ car user-defined-flow 2 cir 512 cbs 1000000
+ car user-defined-flow 3 cir 512 cbs 1000000
+ car user-defined-flow 4 cir 1000 cbs 1000000
+ car user-defined-flow 5 cir 1300 cbs 1000000
+ car user-defined-flow 6 cir 1000 cbs 1000000
+ car user-defined-flow 7 cir 512 cbs 512000
+ car user-defined-flow 8 cir 512 cbs 5120
+ car user-defined-flow 9 cir 512 cbs 40000
+ car user-defined-flow 10 cir 512
+ car user-defined-flow 11 cir 512 cbs 300000
+ car user-defined-flow 12 cir 512 cbs 5120
+ car user-defined-flow 13 cir 1000
+ car user-defined-flow 14 cir 1000 cbs 1000000
+ car user-defined-flow 15 cir 150 cbs 15000
+ car user-defined-flow 16 cir 512 cbs 256000
+ car user-defined-flow 17 cir 1000 cbs 40000
+ car user-defined-flow 18 cir 512 cbs 1000000
+ priority user-defined-flow 1 high
+ priority user-defined-flow 2 high
+ priority user-defined-flow 3 high
+ priority user-defined-flow 4 high
+ priority user-defined-flow 5 high
+ priority user-defined-flow 6 high
+ priority user-defined-flow 7 high
+ priority user-defined-flow 8 low
+ priority user-defined-flow 9 high
+ priority user-defined-flow 10 low
+ priority user-defined-flow 11 middle
+ priority user-defined-flow 12 low
+ priority user-defined-flow 13 low
+ priority user-defined-flow 14 low
+ priority user-defined-flow 15 low
+ priority user-defined-flow 16 low
+ priority user-defined-flow 17 high
+ priority user-defined-flow 18 low
+ process-sequence tcpsyn-flood fragment-flood dynamic-link-protection management-acl whitelist user-defined-flow blacklist
+#
+#
+acl number 3330
+ rule 5 deny ip source 10.1.1.0 0.0.0.255
+#
+acl number 3331
+ rule 5 permit ip source 10.1.2.0 0.0.0.255
+ rule 10 permit ip source 10.1.3.0 0.0.0.255
+#
+acl number 3332
+<span> rule 5 permit tcp  source 10.12.1.0 0.0.0.255 destination-port eq bgp</span>
+<span> rule 10 permit tcp  source 10.12.1.0 0.0.0.255 source-port eq bgp</span>
+
+#
+acl number 3333
+ rule 5 permit udp source 11.11.11.1 0 destination-port eq 646
+ rule 10 permit udp source 11.11.11.1 0 source-port eq 646
+ rule 15 permit tcp source 1.1.1.32 0 destination-port eq 646
+ rule 20 permit tcp source 1.1.1.32 0 source-port eq 646
+#
+acl number 3334
+ rule 5 permit ospf
+#
+acl number 3335
+ rule 5 permit 112 source 11.11.11.100 0
+#
+acl number 3336
+ rule 5 permit 103
+#
+acl number 3337
+ rule 5 permit igmp
+#
+acl number 3338
+ rule 5 permit udp destination-port eq 639
+ rule 10 permit udp source-port eq 639
+ rule 15 permit tcp destination-port eq 639
+ rule 20 permit tcp source-port eq 639
+#
+acl number 3339
+ rule 5 permit ip destination 224.0.0.0 0.0.0.255
+#
+acl number 3340
+ rule 5 permit ip destination 255.255.255.255 0
+#
+acl number 3341
+<span> rule 5 permit tcp source 192.168.1.0 0.0.0.255 source-port eq telnet</span>
+<span> rule 10 permit tcp source 192.168.1.0 0.0.0.255 destination-port eq telnet</span>
+<span> rule 15 permit tcp source 192.168.1.0 0.0.0.255 source-port eq 22</span>
+<span> rule 20 permit tcp source 192.168.1.0 0.0.0.255 destination-port eq 22</span>
+<span> rule 100 deny tcp destination-port eq telnet</span>
+<span> rule 105 deny tcp destination-port eq 22</span>
+#
+acl number 3342
+ rule 5 permit udp source 192.168.1.0 0.0.0.255 destination-port eq tftp
+ rule 10 permit tcp source 192.168.1.0 0.0.0.255 source-port eq ftp
+ rule 15 permit tcp source 192.168.1.0 0.0.0.255 destination-port eq ftp
+#
+acl number 3343
+ rule 5 permit udp source 10.20.20.0 0.0.0.255 source-port eq snmp
+ rule 10 permit udp source 10.20.20.0 0.0.0.255 destination-port eq snmp
+<span> rule 100 deny udp destination-port eq snmp</span>
+#
+acl number 3344
+ rule 5 permit tcp source 5.5.5.5 0 source-port eq tacacs
+ rule 10 permit tcp source 6.6.6.6 0 destination-port eq tacacs
+ rule 15 permit udp source 5.5.5.5 0 source-port eq tacacs-ds
+ rule 20 permit udp source 6.6.6.6 0 destination-port eq tacacs-ds
+#
+acl number 3345
+ rule 5 permit udp source 172.16.0.0 0.0.255.255 source-port eq ntp
+ rule 10 permit udp source 172.16.0.0 0.0.255.255 destination-port eq ntp
+#
+acl number 3346
+ rule 5 permit icmp icmp-type echo
+ rule 10 permit icmp icmp-type echo-reply
+ rule 15 permit icmp icmp-type ttl-exceeded
+ rule 20 permit icmp icmp-type port-unreachable
+ rule 25 permit icmp icmp-type fragmentneed-DFset
+ rule 30 permit icmp
+ rule 35 permit udp destination-port range 33434 33678
+#
+acl number 3347
+ rule 5 permit udp destination-port eq 3503
+#
+acl number 3348
+ rule 5 permit udp
+ rule 10 permit tcp
+ rule 15 permit ip
+#
+slot <span>1</span>
+ cpu-defend-policy 10
+#
+return</pre>
+</div>
+<div class="section"><h4 class="sectiontitle">Verifying the Security Hardening Result</h4><ul><li>Run the <strong>display cpu-defend policy</strong> <em>policy-number</em> command to check the ACL rules for filtering packets to be sent to the CPU.</li><li>Run the <strong>display cpu-defend car</strong> { <strong>blacklist </strong>| <strong>index </strong><em>index</em> | <em>protocol</em> | <strong>user-defined-flow</strong> <em>flow-id</em> | <strong>whitelist</strong> } <strong>statistics</strong> [ <strong>slot</strong> <em>slot-id</em> ] command to check statistics about the packets dropped by CAR.</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_enhance_1007.html">CPU Protection by Limiting the Packet Rate Based on the CP-CAR
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_enhance_1010.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

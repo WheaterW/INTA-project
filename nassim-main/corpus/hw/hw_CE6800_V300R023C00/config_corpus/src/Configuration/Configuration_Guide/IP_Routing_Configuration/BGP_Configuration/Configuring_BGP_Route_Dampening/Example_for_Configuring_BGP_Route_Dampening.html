@@ -1,0 +1,266 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring BGP Route Dampening">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0094.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0096.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001176663673">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring BGP Route Dampening</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001176663673"></a><a name="EN-US_TASK_0000001176663673"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring BGP Route Dampening</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001176663673__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>As shown in <a href="#EN-US_TASK_0000001176663673__fig_dc_vrp_bgp_cfg_307901">Figure 1</a>, all devices are configured with BGP. DeviceA is in AS 100, DeviceB is in AS 200, DeviceC is in AS 300, and DeviceD is in AS 400. EBGP runs between DeviceC and DeviceA, between DeviceC and DeviceB, and between DeviceC and DeviceD. DeviceC applies different route dampening policies for routes from different EBGP neighbors. BGP route dampening can be configured to suppress unstable routes and improve network stability.</p>
+<div class="fignone" id="EN-US_TASK_0000001176663673__fig_dc_vrp_bgp_cfg_307901"><a name="EN-US_TASK_0000001176663673__fig_dc_vrp_bgp_cfg_307901"></a><a name="fig_dc_vrp_bgp_cfg_307901"></a><span class="figcap"><b>Figure 1 </b>Network diagram of BGP route dampening</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1, interface 2, and interface 3 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, and <span>100GE</span><span>1/0/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001130783982.png"></span></div>
+<p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Router IDs and AS numbers of DeviceA, DeviceB, DeviceC, and DeviceD</p>
+</li><li><p>Name of the route dampening policy to be applied to DeviceC</p>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176663673__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>During the configuration, note the following:</p>
+<ul><li><p>BGP route dampening applies only to EBGP routes.</p>
+</li><li><p>Set a small <strong>MaxSuppressTime</strong> value for routes with smaller destination address masks.</p>
+</li><li>To improve security, you are advised to deploy BGP security measures. For details, see "Configuring BGP Authentication." Keychain authentication is used as an example. For details, see Example for Configuring Keychain Authentication for BGP.</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176663673__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Establish EBGP connections between DeviceA and DeviceC, between DeviceB and DeviceC, and between DeviceD and DeviceC.</p>
+</li><li><p>Configure route dampening policies on DeviceC.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001176663673__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface. For detailed configurations, see <a href="#EN-US_TASK_0000001176663673__postreq438925219229">Configuration Scripts</a>.</span></li><li><span>Configure BGP connections.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> bgp 100</strong>
+[<span class="keyword">*</span>DeviceA-bgp]<strong> router-id 10.1.1.1</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.10.1.2 as-number 300</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv4] <strong>network 10.0.0.0 255.0.0.0</strong>
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv4]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> bgp 200</strong>
+[<span class="keyword">*</span>DeviceB-bgp]<strong> router-id 10.2.2.2</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.10.2.2 as-number 300</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv4] <strong>network 10.1.1.0 255.255.255.0</strong>
+[<span class="keyword">*</span>DeviceB-bgp-af-ipv4]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC]<strong> bgp 300</strong>
+[<span class="keyword">*</span>DeviceC-bgp]<strong> router-id 10.3.3.3</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 10.10.1.1 as-number 100</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 10.10.2.1 as-number 200</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 10.10.3.1 as-number 400</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD]<strong> bgp 400</strong>
+[<span class="keyword">*</span>DeviceD-bgp]<strong> router-id 10.4.4.4</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 10.10.3.2 as-number 300</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+<p># Check the BGP peers of DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>display bgp peer</strong>
+
+ BGP local router ID : 10.3.3.3
+ Local AS number : 300
+ Total number of peers : 3         Peers in established state : 3
+
+  Peer            V          AS  MsgRcvd  MsgSent  OutQ  Up/Down       State  PrefRcv
+  10.10.1.1       4         100        3        3     0 00:00:01 <strong>Established</strong>    0
+  10.10.2.1       4         200        3        3     0 00:00:00 <strong>Established</strong>    0
+  10.10.3.1       4         400        3        3     0 00:00:01 <strong>Established</strong>    0</pre>
+<p>The command output shows that the status of the BGP connection between DeviceC and each peer is <strong>Established</strong>.</p>
+</p></li><li><span>Configure BGP route dampening policies.</span><p><p># Configure an IP prefix list named <strong>prefix-a</strong> on DeviceC to permit the routes with prefix 172.16.1.0/24.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>ip ip-prefix prefix-a index 10 permit 172.16.1.0 24</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure an IP prefix list named <strong>prefix-b</strong> on DeviceC to permit the routes with prefix 192.168.1.0/24.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>ip ip-prefix prefix-b index 20 permit 192.168.1.0 24</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure a route-policy named <strong>dampen-policy</strong> on DeviceC to apply different dampening policies to the routes with different prefix lengths.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>route-policy dampen-policy permit node 10</strong>
+[<span class="keyword">*</span>DeviceC-route-policy] <strong>if-match ip-prefix prefix-a</strong>
+[<span class="keyword">*</span>DeviceC-route-policy] <strong>apply dampening 10 1000 2000 5000</strong>
+[<span class="keyword">*</span>DeviceC-route-policy] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>route-policy dampen-policy permit node 20</strong>
+[<span class="keyword">*</span>DeviceC-route-policy] <strong>if-match ip-prefix prefix-b</strong>
+[<span class="keyword">*</span>DeviceC-route-policy] <strong>apply dampening 10 800 3000 10000</strong>
+[<span class="keyword">*</span>DeviceC-route-policy] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Apply the route dampening policies to the routes that flap.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>bgp 300</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-bgp-af-ipv4] <strong>dampening route-policy dampen-policy</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001176663673__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check the configured BGP route dampening parameters on DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>display bgp routing-table dampening parameter</strong>
+
+ Maximum Suppress Time(in second) : 3973
+ Ceiling Value                    : 16000
+ Reuse Value                      : 750
+ HalfLife Time(in  second)        : 900
+ Suppress-Limit                   : 2000
+ <strong>Route-policy                     : dampen-policy</strong></pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001176663673__postreq438925219229"></a><a name="postreq438925219229"></a><a name="EN-US_TASK_0000001176663673__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.10.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 172.16.1.1 255.0.0.0
+#
+bgp 100
+ router-id 10.1.1.1
+ peer 10.10.1.2 as-number 300
+ #
+ ipv4-family unicast
+  network 10.0.0.0 255.0.0.0
+  peer 10.10.1.2 enable
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.10.2.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.1.1 255.255.255.0
+#
+bgp 200
+ router-id 10.2.2.2
+ peer 10.10.2.2 as-number 300
+ #
+ ipv4-family unicast
+  network 10.1.1.0 255.255.255.0
+  peer 10.10.2.2 enable
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.10.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.10.2.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.10.3.2 255.255.255.0
+#
+bgp 300
+ router-id 10.3.3.3
+ peer 10.10.1.1 as-number 100
+ peer 10.10.2.1 as-number 200
+ peer 10.10.3.1 as-number 400
+ #
+ ipv4-family unicast
+  dampening route-policy dampen-policy
+  peer 10.10.1.1 enable
+  peer 10.10.2.1 enable
+  peer 10.10.3.1 enable
+#
+ip ip-prefix prefix-a index 10 permit 172.16.1.0 24
+#
+ip ip-prefix prefix-b index 20 permit 192.168.1.0 24
+#
+route-policy dampen-policy permit node 10
+ if-match ip-prefix prefix-a
+ apply dampening 10 1000 2000 5000
+#
+route-policy dampen-policy permit node 20
+ if-match ip-prefix prefix-b
+ apply dampening 10 800 3000 10000
+#
+return</pre>
+</li><li><p>DeviceD</p>
+<pre class="screen">#
+sysname DeviceD
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.10.3.1 255.255.255.0
+#
+bgp 400
+ router-id 10.4.4.4
+ peer 10.10.3.2 as-number 300
+ #
+ ipv4-family unicast
+  peer 10.10.3.2 enable
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bgp_cfg_0094.html">Configuring BGP Route Dampening
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bgp_cfg_0096.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

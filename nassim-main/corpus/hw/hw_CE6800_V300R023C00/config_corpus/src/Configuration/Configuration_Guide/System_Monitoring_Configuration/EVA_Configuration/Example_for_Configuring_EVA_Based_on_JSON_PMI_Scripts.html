@@ -1,0 +1,141 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring EVA Based on JSON PMI Scripts">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../toctopics/en-us_topic_0000001512671434.html">
+<meta name="DC.Relation" scheme="URI" content="../toctopics/en-us_topic_0000001533788278.html">
+<meta name="DC.Relation" scheme="URI" content="../toctopics/en-us_task_0000001513150574.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="EVA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="EVA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featurename" content="EVA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001513150578">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring EVA Based on JSON PMI Scripts</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001513150578"></a><a name="EN-US_TASK_0000001513150578"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring EVA Based on JSON PMI Scripts</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001513150578__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>A customized JSON script is stored on an SFTP server. O&amp;M personnel want to use EVA to collect <span>routing information</span>, interface diagnostic information, and device health information from devices. The JSON script is a PMI script. The script defines the commands for collecting <span>routing information</span>, interface diagnostic information, and device health information.</p>
+<div class="fignone"><span class="figcap"><b>Figure 1 </b>Networking diagram of performing a PMI on devices through EVA</span><br><span><img class="vsd" src="../images/en-us_image_0000001513030630.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001513150578__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><ol><li><p>Compile a JSON script and define events, strategies, and tasks in the script.</p>
+</li><li><p>Upload the JSON script to the device.</p>
+</li><li><p>Install and register the JSON script.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001513150578__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Compile a JSON script and define events, strategies, and tasks in the script.</span><p><p># Compile a customized script <strong>CollectInformation.json</strong> to collect <span>routing information</span>, interface diagnostic information, and device health information. After the script is executed, you can collect information obtained using the <a href="cmdqueryname=display+bgp+peer"><b><span class="cmdname">display bgp peer</span></b></a>, <a href="cmdqueryname=display+isis+peer"><b><span class="cmdname">display isis peer</span></b></a>, <a href="cmdqueryname=display+ospf+peer"><b><span class="cmdname">display ospf peer</span></b></a>, <a href="cmdqueryname=display+interface+troubleshooting"><b><span class="cmdname">display interface troubleshooting</span></b></a>, <a href="cmdqueryname=display+interface+counters+errors"><b><span class="cmdname">display interface counters errors</span></b></a>, <a href="cmdqueryname=display+debugging"><b><span class="cmdname">display debugging</span></b></a>, <a href="cmdqueryname=display+device"><b><span class="cmdname">display device</span></b></a>, and <a href="cmdqueryname=display+health"><b><span class="cmdname">display health</span></b></a> commands.</p>
+<pre class="screen">{"inspection_1":{"description":"Collect IP routing information","events":{"e1":{"trigger":"eva.singleCollect()"}},"strategy":"e1","tasks":{"mainTask":{"parameters":{"IProute_cmdArray":["display bgp peer","display isis peer","display ospf peer"]},"action":"eva.cliArray(\"user\",${IProute_cmdArray})"}}}}
+{"inspection_2":{"description":"Collect statistics on error packets and diagnosis information on the interfaces","events":{"e1":{"trigger":"eva.singleCollect()"}},"strategy":"e1","tasks":{"mainTask":{"parameters":{"Interface_cmdArray":["display interface troubleshooting",<span>"display interface counters errors",</span>]},"action":"eva.cliArray(\"user\",${Interface_cmdArray})"}}}}
+{"inspection_3":{"description":"Collect system management information","events":{"e1":{"trigger":"eva.singleCollect()"}},"strategy":"e1","tasks":{"mainTask":{"parameters":{"Health_cmdArray":["display debugging","display device","display health"]},"action":"eva.cliArray(\"user\",${Health_cmdArray})"}}}}</pre>
+</p></li><li><span>Upload the JSON script to the device.</span><p><p># Configure DeviceA functioning as an SFTP client to download the JSON script <strong>CollectInformation.json</strong> from the SFTP server. For details, see "Managing Files Using SFTP" in <span>Configuration Guide</span> &gt; Basic Configuration &gt; File System Management Configuration.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>sftp </strong><strong>client-transfile get host-ip 10.2.1.1 username </strong><strong>client001</strong><strong> password </strong><strong>Helloworld@6789</strong><strong> sourcefile CollectInformation.json</strong>
+Trying 10.2.1.1 ... 
+Press CTRL+K to abort 
+Connected to 10.2.1.1 ... 
+Remote file: /CollectInformation.json ---&gt;  Local file: /CollectInformation.json 
+Downloading the file. Please wait.. 
+Downloading file successfully ended.   
+File download is completed in 1 seconds. 
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</p></li><li><span>Install and register the JSON script.</span><p><pre class="screen">&lt;DeviceA&gt; <strong>install eva script CollectInformation.json inspection</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001513150578__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Display the script registration status.</p>
+<pre class="screen">&lt;DeviceA&gt; <a href="cmdqueryname=display+eva+register-status"><b><span class="cmdname">display eva register-status</span></b></a>
+Inspection install status: running
+Inspection data path: <span>flash</span>:/eva/eva_inspection_20211109154918.zip
+Total: 6
+--------------------------------------------------------------------------
+FileName                         Status     FaultInfo                     
+--------------------------------------------------------------------------
+SystemExceptionCheck             Success    -      
+cpuHigh.py                       Success    -                             
+memHigh.py                       Success    -                             
+inspection_1                     Success    -    
+inspection_2                     Success    -    
+inspection_3                     Success    -    
+--------------------------------------------------------------------------</pre>
+<p># Display the script running status.</p>
+<pre class="screen">&lt;DeviceA&gt; <a href="cmdqueryname=display+eva+script-item+status"><b><span class="cmdname">display eva script-item status</span></b></a>
+Inspection running status: running
+---------------------------------------------------------------------------------------------------------------
+Script-item          Type            RegisterTime             Status         LastExecTime            Result
+---------------------------------------------------------------------------------------------------------------
+SystemExceptionCheck Build-in        2023-5-09 15:50:07    Idle           -                      -
+inspection_1         inspection      2023-5-09 15:50:11    Running        -                      -
+inspection_2         inspection      2023-5-09 15:50:15    Running        -                      -
+inspection_3         inspection      2023-5-09 15:50:18    Idle           -                      -
+----------------------------------------------------------------------------------------------------------------</pre>
+<p># After a PMI script is executed, it is automatically uninstalled. You can view the data collected during the PMI in the <strong>eva_inspection_</strong><em>latest date</em><strong>.zip</strong> file in the <strong><span>flash</span>:/eva</strong> directory.</p>
+<p></p>
+<p># Display the execution history of the script.</p>
+<pre class="screen">&lt;DeviceA&gt;<a href="cmdqueryname=display+eva+inspection+history"><b><span class="cmdname"> display eva inspection history</span></b></a>
+------------------------------------------------------------------------------------------------------------------------
+RegisterTime          FileName                   ServerType   IpAddress      Port   UserName      Status    ResultFileName
+------------------------------------------------------------------------------------------------------------------------
+2023-5-09 15:50:10   CollectInformation.json    -            -              -      -             Running   -     
+------------------------------------------------------------------------------------------------------------------------</pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001513150578__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><div class="p">DeviceA<pre class="screen">#
+sysname DeviceA
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.0
+#</pre>
+</div>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../toctopics/en-us_topic_0000001512671434.html">EVA Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../toctopics/en-us_topic_0000001533788278.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../toctopics/en-us_task_0000001513150574.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

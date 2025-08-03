@@ -1,0 +1,278 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Multicast Static Routes to Connect RPF Routes">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_mcast_cfg_0008.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_mcast_cfg_0012.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IPv4 Multicast Route Management">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IPv4 Multicast Route Management">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="IPv4 Multicast Route Management">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001176742427">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Multicast Static Routes to Connect RPF Routes</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001176742427"></a><a name="EN-US_TASK_0000001176742427"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Multicast Static Routes to Connect RPF Routes</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001176742427__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><div class="p"><h4 class="sectiontitle">Networking Scenario</h4><p>In <a href="#EN-US_TASK_0000001176742427__fig1912652714446">Figure 1</a>, PIM-SM is running on the network, all devices support multicast, and the receiver can receive information from multicast source Source1. OSPF is running on DeviceB and DeviceC and is isolated from the unicast route of DeviceA. To enable the receiver to receive multicast data from multicast source Source2 that is not in the OSPF domain, configure multicast static routes to connect the RPF routes.</p>
+<div class="fignone" id="EN-US_TASK_0000001176742427__fig1912652714446"><a name="EN-US_TASK_0000001176742427__fig1912652714446"></a><a name="fig1912652714446"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring multicast static routes to connect the RPF routes</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1, interface2, and interface3 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, and <span>100GE</span><span>1/0/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001216726716.png"></span></div>
+<h4 class="sectiontitle">Precautions</h4><p>Note the following during the configuration:</p>
+<ul><li><p>When configuring a multicast static route, if the next hop is a P2P interface, you can specify the outbound interface number. If the next hop is not a P2P interface, you must specify the next-hop address.</p>
+</li></ul>
+<h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure interface IP addresses and OSPF on the devices.</p>
+</li><li><p>Enable the multicast function on all the devices, enable PIM-SM on all the involved interfaces, and enable IGMP on the interface connecting to the host.</p>
+</li><li><p>Configure a C-BSR and a C-RP.</p>
+</li><li><p>Configure a multicast static route on DeviceB and DeviceC.</p>
+</li></ol>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001176742427__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure interface IPv4 addresses and OSPF on the devices.</span><p><p># Configure DeviceB.</p>
+<pre class="screen">&lt;HUAWEI&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceB</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface </strong><strong><span>100GE</span></strong> <strong><span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>undo </strong><strong>portswitch</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>ip address 10.1.2.2 255.255.255.0</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>interface </strong><strong><span>100GE</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong>undo </strong><strong>portswitch</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong>ip address 10.1.3.1 255.255.255.0</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>interface </strong><strong><span>100GE</span> <span>1/0/3</span></strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/3</span>] <strong>undo </strong><strong>portswitch</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/3</span>] <strong>ip address 10.1.4.1 255.255.255.0</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/3</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0] <strong>network 10.1.2.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0] <strong>network 10.1.3.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p>The configurations of DeviceA and DeviceC are similar to the configuration of DeviceB. For detailed configurations, see Configuration Scripts.</p>
+</p></li><li><span>Enable the multicast function on all the devices and enable PIM-SM on all the involved interfaces.</span><p><p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>multicast routing-enable</strong>
+[<span class="keyword">*</span>DeviceB] <strong>interface </strong><strong><span>100GE</span></strong> <strong><span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>pim sm</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>interface </strong><strong><span>100GE</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong>pim sm</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>interface </strong><strong><span>100GE</span> <span>1/0/3</span></strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/3</span>]<strong> pim sm</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/3</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p>The configurations of DeviceA and DeviceC are similar to the configuration of DeviceB. For detailed configurations, see Configuration Scripts.</p>
+</p></li><li><span>Enable IGMP on the interface connecting to the host.</span><p><p># Enable IGMP on the interface connecting DeviceC to the host.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>interface </strong><strong><span>100GE</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>] <strong>igmp enable</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li><li><span>Configure a C-BSR and a C-RP.</span><p><p># Configure <span>100GE</span><span>1/0/1</span> on DeviceB as the C-BSR and C-RP.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>pim</strong>
+[<span class="keyword">*</span>DeviceB-pim] <strong>c-bsr </strong><strong><span>100GE</span> </strong><strong><span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceB-pim] <strong>c-rp </strong><strong><span>100GE</span> </strong><strong><span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceB-pim] <strong>commit</strong></pre>
+<p>Source1 (10.1.3.0/24) and Source2 (10.1.5.0/24) both send multicast data to multicast group G (225.1.1.1). After the receiver joins group G, it can receive multicast data from Source1 but cannot receive multicast data from Source2. After the <strong>display multicast rpf-info 10.1.5.0</strong> command is run on DeviceB and DeviceC, no command output is displayed, indicating that the devices have no RPF routes to Source2.</p>
+</p></li><li><span>Configure multicast static routes.</span><p><p># On DeviceB, configure a multicast static route that specifies DeviceA as the RPF neighbor to Source2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ip rpf-route-static 10.1.5.0 255.255.255.0 10.1.4.2</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># On DeviceC, configure a multicast static route that specifies DeviceB as the RPF neighbor to Source2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>ip rpf-route-static 10.1.5.0 255.255.255.0 10.1.2.2</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001176742427__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Run the <a href="cmdqueryname=display+multicast+rpf-info"><b><span class="cmdname">display multicast rpf-info</span></b></a> command on DeviceB and DeviceC to check the RPF route information to Source2. The displayed information is as follows:</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display multicast rpf-info 10.1.5.0</strong>
+VPN-Instance: public net
+RPF information about source 10.1.5.2:
+     RPF interface: <strong><span>100GE</span><span>1/0/3</span></strong>, RPF neighbor: <strong>10.1.4.2</strong>
+     Referenced route/mask: 10.1.5.0/24
+     Referenced route type:<strong>mstatic</strong>
+     Route selection rule: preference-preferred
+     Load splitting rule: disable</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>display multicast rpf-info 10.1.5.0</strong>
+VPN-Instance: public net
+RPF information about source 10.1.5.2:
+     RPF interface: <strong><span>100GE</span></strong><strong><span>1/0/1</span></strong>, RPF neighbor: <strong>10.1.2.2</strong>
+     Referenced route/mask: 10.1.5.0/24
+     Referenced route type:<strong>mstatic</strong>
+     Route selection rule: preference-preferred
+     Load splitting rule: disable</pre>
+<p># Run the <strong>display pim routing-table</strong> command on DeviceC to check the routing table information. DeviceC has the multicast entry of Source2. The receiver can receive multicast data from Source2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>display pim routing-table</strong>
+VPN-Instance: public net
+ Total 1 (*, G) entry; 2 (S, G) entries
+
+ (*, 225.1.1.1)
+     RP: 10.1.2.2
+     Protocol: PIM-SM, Flag: WC
+     UpTime: 03:54:19
+     Upstream interface: NULL, Refresh time: 03:54:19
+         Upstream neighbor: NULL
+         RPF prime neighbor: NULL
+     Downstream interface(s) information:
+     Total number of downstreams: 1
+         1: <strong><span>100GE</span></strong><strong><span>1/0/2</span></strong>
+             Protocol: PIM-SM, UpTime: 01:38:19, Expires: never
+
+(10.1.3.0, 225.1.1.1)     
+     RP: 10.1.2.2
+     Protocol: PIM-SM, Flag: ACT
+     UpTime: 00:00:44
+     Upstream interface: <strong><span>100GE</span></strong><strong><span>1/0/1</span></strong>, Refresh time: 00:00:44
+         Upstream neighbor: 10.1.2.2
+         RPF prime neighbor: 10.1.2.2
+     Downstream interface(s) information:
+     Total number of downstreams: 1
+          1: <strong><span>100GE</span></strong><strong><span>1/0/2</span></strong>
+              Protocol: PIM-SM, UpTime: 00:00:44, Expires: never
+
+(10.1.5.0, 225.1.1.1)     
+     RP: 10.1.2.2
+     Protocol: PIM-SM, Flag: ACT
+     UpTime: 00:00:44
+     Upstream interface: <strong><span>100GE</span></strong><strong><span>1/0/1</span></strong>, Refresh time: 00:00:44
+         Upstream neighbor: 10.1.2.2
+         RPF prime neighbor: 10.1.2.2
+     Downstream interface(s) information:
+     Total number of downstreams: 1
+          1: <strong><span>100GE</span></strong><strong><span>1/0/2</span></strong>
+              Protocol: PIM-SM, UpTime: 00:00:44, Expires: never</pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001176742427__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+multicast routing-enable
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.5.1 255.255.255.0
+ pim sm
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.1.4.2 255.255.255.0
+ pim sm
+#
+ospf 1
+ area 0.0.0.0
+  network 10.1.5.0 0.0.0.255
+   network 10.1.4.0 0.0.0.255
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+multicast routing-enable
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.2.2 255.255.255.0
+ pim sm
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.3.1 255.255.255.0
+ pim sm
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.1.4.1 255.255.255.0
+ pim sm
+#
+ospf 1
+ area 0.0.0.0
+  network 10.1.2.0 0.0.0.255
+  network 10.1.3.0 0.0.0.255
+#
+pim
+ c-bsr <span>100GE</span><span>1/0/1</span>
+ c-rp <span>100GE</span><span>1/0/1</span>
+#
+ip rpf-route-static 10.1.5.0 24 10.1.4.2
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+multicast routing-enable
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.0
+ pim sm
+ igmp enable
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.1.2.1 255.255.255.0
+ pim sm
+#
+ospf 1
+ area 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+  network 10.1.2.0 0.0.0.255
+#
+ip rpf-route-static 10.1.5.0 24 10.1.2.2
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_mcast_cfg_0008.html">Configuring Multicast Static Routes
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_mcast_cfg_0012.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

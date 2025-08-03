@@ -1,0 +1,102 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="SRv6 Trusted Domain">
+<meta name="abstract" content="">
+<meta name="description" content="">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_hardening_forwarding_level2.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_enhance_5005.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_maintenance_0030.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z00588052,w00845984,w00606909">
+<meta name="DC.Publisher" content="20240229">
+<meta name="OWNER" content="z00588052,l00587852">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="x60031980">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001664936092">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>SRv6 Trusted Domain</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_CONCEPT_0000001664936092"></a><a name="EN-US_CONCEPT_0000001664936092"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">SRv6 Trusted Domain</h1>
+<div><p></p>
+<div class="section"><h4 class="sectiontitle">Security Policy</h4><p>SRv6 forwards IPv6 data packets on a network based on source routing. It inherits the security risks of source routing, IPv6 security risks, and SDN risks caused by centralized management and control, and also faces a series of attacks initiated when attackers modify packet headers to manipulate traffic paths. As such, SRv6 divides the network into a trusted domain and an untrusted network outside the domain. Traffic filtering is performed on the edge nodes of the trusted domain to prevent attackers from sending attack packets to nodes in the trusted domain by means of packet forging.</p>
+<p>The SRv6 trusted domain is defined according to the following security requirements:</p>
+<ol><li>A clear border is defined for the SRv6 trusted domain to distinguish networks inside and outside the SRv6 trusted domain.</li><li>Traffic filtering is performed on the edge nodes of the SRv6 trusted domain in order to discard packets whose source or destination addresses are in the SID range of the SRv6 trusted domain.</li><li>Nodes in the SRv6 trusted domain discard packets whose destination addresses are local SIDs and source addresses are not within the SRv6 trusted domain.</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration and Maintenance Methods</h4><p>SRv6 improves security by filtering traffic on the edge nodes of the SRv6 trusted domain and discarding packets that do not meet the preceding security requirements.</p>
+<ol><li>Configure ACL6 policies on the edge nodes of the SRv6 trusted domain in order to discard packets whose destination addresses are in the SID range of the SRv6 trusted domain.<pre class="screen">&lt;HUAWEI&gt; system-view
+[<font style="font-size:8pt" Face="Courier New" >~</font>HUAWEI] acl ipv6-pool srv6_deny_destination_address
+[*HUAWEI-acl-ipv6-pool-srv6_deny_destination_address] ipv6 address 2001:DB8:: 32
+[*HUAWEI-acl-ipv6-pool-srv6_deny_destination_address] quit
+[*HUAWEI] acl ipv6-pool srv6_deny_source_address
+[*HUAWEI-acl-ipv6-pool-srv6_deny_source_address] ipv6 address 2001:DB8:: 32
+[*HUAWEI-acl-ipv6-pool-srv6_deny_source_address] quit
+[*HUAWEI] acl ipv6 3200
+[*HUAWEI-acl6-advance-3200] rule 10 deny ipv6 source-pool srv6_deny_source_address destination-pool srv6_deny_destination_address
+[*HUAWEI-acl6-advance-3200] quit
+[*HUAWEI] commit</pre>
+</li><li>Configure a traffic policy.<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>HUAWEI] traffic classifier tcSrv6TrustDomain operator or 
+[*HUAWEI-classifier-tcSrv6TrustDomain] if-match ipv6 acl 3200
+[*HUAWEI-classifier-tcSrv6TrustDomain] quit
+[*HUAWEI] traffic behavior tbSrv6TrustDomain 
+[*HUAWEI-behavior-tbSrv6TrustDomain] quit
+[*HUAWEI] traffic policy tpSrv6TrustDomain 
+[*HUAWEI-trafficpolicy-tpSrv6TrustDomain] share-mode 
+[*HUAWEI-trafficpolicy-tpSrv6TrustDomain] statistics enable 
+[*HUAWEI-trafficpolicy-tpSrv6TrustDomain] classifier tcSrv6TrustDomain behavior tbSrv6TrustDomain precedence 1 
+[*HUAWEI-trafficpolicy-tpSrv6TrustDomain] quit
+[*HUAWEI] commit</pre>
+</li><li>Apply the traffic policy to the inbound direction of the upstream interface.<pre class="screen">[*HUAWEI] interface GigabitEthernet1/0/0 
+[*HUAWEI-GigabitEthernet1/0/0] undo shutdown 
+[*HUAWEI-GigabitEthernet1/0/0] traffic-policy tpSrv6TrustDomain inbound
+[*HUAWEI-GigabitEthernet1/0/0] quit
+[*HUAWEI] commit</pre>
+</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Checking the Security Hardening Result</h4><ul><li>Run the <a href="cmdqueryname=display+current-configuration"><b><span class="cmdname">display current-configuration</span></b></a> <strong><span>configuration</span></strong> <strong><span>acl-ipv6-pool</span></strong> command to check the configured IPv6 address pool.</li><li>Run the <a href="cmdqueryname=display+current-configuration"><b><span class="cmdname">display current-configuration</span></b></a> <strong><span>configuration</span></strong> <strong><span>acl6-adv</span></strong> command to check the global ACL6 configuration.</li><li>Run the <a href="cmdqueryname=display+current-configuration"><b><span class="cmdname">display current-configuration</span></b></a> <strong><span>configuration</span></strong> <strong><span>segment-routing-ipv6</span></strong> command to check SRv6 configurations.</li><li>Run the <a href="cmdqueryname=display+interface"><b><span class="cmdname">display interface</span></b></a> [ <i><span class="varname">interface-type</span></i> [ <i><span class="varname">interface-number</span></i> ] ] command to check interface traffic information.</li><li>Run the <a href="cmdqueryname=display+traffic+behavior"><b><span class="cmdname">display traffic behavior</span></b></a> { <strong><span>system-defined</span></strong> | <strong><span>user-defined</span></strong> } [ <i><span class="varname">behavior-name</span></i> ] command to check the traffic behavior configuration.</li><li>Run the <a href="cmdqueryname=display+traffic+classifier"><b><span class="cmdname">display traffic classifier</span></b></a> { <strong><span>system-defined</span></strong> | <strong><span>user-defined</span></strong> } [ <i><span class="varname">classifier-name</span></i> ] command to check the traffic classifier configuration.</li><li>Run the <a href="cmdqueryname=display+traffic+policy+statistics"><b><span class="cmdname">display traffic policy statistics</span></b></a> <strong><span>interface</span></strong> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> [ .<i><span class="varname">sub-interface</span></i> ] { <strong><span>inbound</span></strong> | <strong><span>outbound</span></strong> } [ <strong><span>verbose</span></strong> { <strong><span>classifier-based</span></strong> [ <strong><span>class</span></strong> <i><span class="varname">class-name</span></i> ] | <strong><span>rule-based</span></strong> [ <strong><span>class</span></strong> <i><span class="varname">class-name</span></i> ] [ <strong><span>filter</span></strong> ] } ] command to check traffic policy statistics about the specified interface.</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_hardening_forwarding_level2.html">Forwarding Plane
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_enhance_5005.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_maintenance_0030.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

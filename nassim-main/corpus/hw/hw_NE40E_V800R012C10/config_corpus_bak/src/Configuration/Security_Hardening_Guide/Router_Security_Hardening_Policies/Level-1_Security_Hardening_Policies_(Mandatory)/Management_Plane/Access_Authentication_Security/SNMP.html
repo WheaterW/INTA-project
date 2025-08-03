@@ -1,0 +1,204 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="SNMP">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0005.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0008.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z00588052,j00655225">
+<meta name="DC.Publisher" content="20240229">
+<meta name="OWNER" content="z00588052,j00655225">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="j00655225">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001134623442">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>SNMP</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_CONCEPT_0000001134623442"></a><a name="EN-US_CONCEPT_0000001134623442"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">SNMP</h1>
+<div><p>SNMP is used to manage network devices. Network administrators can use SNMP to obtain data from devices and configure devices. SNMP also provides the trap and inform functions. When the important status changes on a device, the device reports the event to an NMS.</p>
+<div class="section"><h4 class="sectiontitle">Security Policy</h4><p>SNMPv1, SNMPv2c, and SNMPv3 support different security policies.</p>
+<p>SNMPv1 and SNMPv2c support <span>ACLs and </span>the view-based access control model (VACM). Associate <span>an ACL and </span>a MIB view with a community name to limit the NMSs and nodes that can access a device, enhancing system security to some extent. SNMPv1 and SNMPv2c do not support encryption algorithms.</p>
+<p>In addition to support for ACLs and VACM, SNMPv3 supports the user-based security model (USM), authentication algorithms, and encryption algorithms. A supported authentication algorithm can be message digest algorithm 5 (MD5) or secure hash algorithm (SHA-1/SHA-2). A supported encryption algorithm can be data encryption standard (DES), 3DES, or Advanced Encryption Standard (AES). SNMPv3 authenticates and encrypts communication data to solve security problems such as message forging, modification, and disclosure.</p>
+<p>Configure the lock mechanism for SNMP so that the IP address of a user is locked after the user fails the authentication. (The lock mechanism is enabled by default.)</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>To ensure high security, you are advised to use the SHA algorithm as the authentication algorithm. Do not use the DES or 3DES algorithm as the SNMPv3 encryption algorithm.</p>
+</div></div>
+<p>CPCAR-based security policies can be used to defend against flood attacks. If a device is connected to the public address space of the Internet, the management and control plane of the device may suffer from flood attacks. In this case, you can deploy a CPU attack defense policy to protect the device against traffic attacks.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Attack Methods</h4><div class="p"><ul><li><p>User name and password cracking</p>
+<p>An attacker continuously sends SNMPv1/v2c community names and SNMPv3 user names and passwords to crack authorized user names and passwords.</p>
+</li><li><p>Unauthorized management operations</p>
+<ul><li><p>An attacker modifies the source IP address of sent packets to obtain the rights of an authorized user and perform unauthorized management operations.</p>
+</li><li><p>An attacker listens to communication between NMSs and SNMP agents to collect information, such as user names, community names, and passwords in order to obtain unauthorized access rights.</p>
+</li><li><p>An attacker intercepts, reorders, delays, or retransmits SNMP messages to affect normal operations and obtain unauthorized operation rights.</p>
+</li></ul>
+</li><li><p>DoS attack</p>
+<p>An attacker launches DoS attacks to slow the device response. For example, mass packet attacks result in a full SNMP message cache table and a failure to process requests from the NMS.</p>
+</li><li><p>Invalid packet attack</p>
+<ul><li><p>An attacker sends invalid packets, such as overlong packets, packets with incorrect SNMP version, write-intended packets with the read right, SNMPv3 packets with incorrect contextname field, packets with incorrect security model, and packets with incorrect security level.</p>
+</li><li><p>An attacker sends invalid inform reply packets to the device.</p>
+</li></ul>
+</li><li><p>SNMP GetBulk reply magnifying DoS attack</p>
+<p>SNMP packets are transmitted based on UDP, which is connectionless-oriented. To be specific, both the client and server do not record the peer status or implement data verification for the peer. In this case, the source IP address of such request packets sent from the client can be easily spoofed, causing the response packet to be sent to the bogus IP address. The attacker sends a short request packet and triggers response of overlong packets, causing packet flooding.</p>
+</li></ul>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration and Maintenance Methods</h4><p>For security purposes, disabling the insecure SNMPv1 and SNMPv2c is recommended. Configure SNMPv3 users with authentication and encryption configuration, use an SNMPv3 authentication and encryption mode to manage devices, and associate <span>an ACL and </span>a MIB view with the user to control access rights.</p>
+<ol><li><p>Disable the insecure SNMPv1 and SNMPv2c if they are not used.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>undo snmp-agent sys-info version v1 v2c</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+</li><li><p>Configure an ACL numbered 2001 and define a rule to permit some IP addresses and a rule to deny some IP addresses.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>acl 2001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-acl4-basic-2001] <strong>rule 5 permit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-acl4-basic-2001] <strong>rule 10 deny source 10.138.90.111 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-acl4-basic-2001] <strong>commit</strong></pre>
+</li><li><p>Configure an SNMP ACL.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>snmp-agent acl 2001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+</li><li><p>Configure a MIB view named <strong>iso-view</strong> to access nodes in the subtree whose root node is <strong>iso</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>snmp-agent</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>snmp-agent mib-view included iso-view iso</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+</li><li><p>Configure an SNMPv3 group named <strong>v3group</strong>, <span>associate ACL 2001 with the group, </span>and associate the read view, write view, and notification view named <strong>iso-view</strong> with the group.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>snmp-agent group v3 v3group privacy read-view iso-view write-view iso-view notify-view iso-view<span> acl 2001</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+</li><li><p>Configure an SNMPv3 user named <strong>v3user</strong> and add the user to <strong>v3group</strong>. Set the authentication mode and password to <strong>sha2-256</strong> and <strong>hello-1234</strong>, respectively. Set the encryption mode and password to <strong>aes256</strong> and <strong>Hello-2012</strong>, respectively.<span> Associate ACL 2001 with the user.</span></p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>snmp-agent usm-user v3 v3user v3group</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>snmp-agent usm-user v3 v3user v3group acl 2001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>snmp-agent usm-user v3 v3user v3group authentication-mode sha2-256 Hello-1234 privacy-mode aes256 Hello-2012</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+</li><li><p>Check the current SNMP configurations.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>display current-configuration | include snmp</strong></pre>
+<div class="p"><pre class="screen">snmp-agent
+snmp-agent acl 2001
+snmp-agent local-engineid 800007DB0338BA376BEA01
+undo snmp-agent sys-info version v3
+snmp-agent group v3 v3group privacy read-view iso-view write-view iso-view notify-view iso-view acl 2001
+snmp-agent mib-view included iso-view iso
+snmp-agent usm-user v3 v3user
+snmp-agent usm-user v3 v3user group v3group
+snmp-agent usm-user v3 v3user authentication-mode sha2-256 cipher %^%#!h7X2jV15<font style="font-size:8pt" Face="Courier New" >~</font>c13:<font style="font-size:8pt" Face="Courier New" >~</font>1|(V-:ea+I&amp;v*X8[V;Z61$y];%^%#
+snmp-agent usm-user v3 v3user privacy-mode aes256 cipher %^%#Ko$vVUNO[A3t4O%KX6I5nv\4N_o%b#GL'K#dYTZ'%^%#
+snmp-agent usm-user v3 v3user acl 2001</pre>
+</div>
+</li></ol>
+<p>Configure SNMPv1 and SNMPv2c community names. Restrict user access rights using the association between <span>an ACL, </span>a MIB view, and a community name.</p>
+<ol><li><p>Configure an ACL numbered 2001 and define a rule to permit some IP addresses and a rule to deny some IP addresses.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-acl-basic-2001] <strong>display this</strong></pre>
+<pre class="screen">#</pre>
+<pre class="screen">acl number 2001</pre>
+<pre class="screen"> rule 5 permit</pre>
+<pre class="screen"> rule 10 permit source 10.138.90.111 0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-acl-basic-2001]</pre>
+</li><li><p>Configure a MIB view named <strong>iso-view</strong> to access nodes in the subtree whose root node is <strong>iso</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>snmp-agent</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>snmp-agent mib-view included iso-view iso</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+</li><li><p>Configure a read-write community name.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>snmp-agent community read cipher Public-123456 mib-view iso<span>-view</span> acl 2001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>snmp-agent community write cipher Private-123456 mib-view iso<span>-view</span> acl 2001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>snmp-agent sys-info version all</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+</li><li><p>Check the SNMP configurations.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>display this | include snmp</strong></pre>
+<div class="p"><pre class="screen">snmp-agent
+snmp-agent local-engineid 800007DB0338BA376BEA01
+snmp-agent community read cipher %^%#{H1SU1d}/A{%ZQ8eZwr1,7#s&lt;+=_J$q+G8C|_$m5wG62/.GguS`8ur&gt;lpTzGS[hHLQitwV9Ih*MQcC&gt;W%^%# mib-view iso-viewiso acl 2001
+snmp-agent community write cipher %^%#<font style="font-size:8pt" Face="Courier New" >~</font>]`4X&amp;Vz`#6W1^8&lt;h&lt;L*gBDu3T/^IXLQ%]7=O@1&lt;'jHCF4o=-KBCH{,8JC<font style="font-size:8pt" Face="Courier New" >~</font>!"v':C8y'sPCq["-/\29G%^%# mib-view iso-viewiso acl 2001
+snmp-agent sys-info version all
+snmp-agent mib-view included iso-view iso</pre>
+</div>
+</li></ol>
+<div class="p">Configure CPCAR-based flood attack defense policies.<ol><li><p>Configure a CPU defense policy.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>cpu-defend policy 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-cpu-defend-policy-10] <strong>commit</strong></pre>
+</li><li><p>Configure TCP/IP attack defense.</p>
+<p>If the function is disabled, run the following command to enable it:</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-cpu-defend-policy-10] <strong>ctcpsyn-flood enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-cpu-defend-policy-10] <strong>fragment-flood enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-cpu-defend-policy-10] <strong>udp-packet-defend enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-cpu-defend-policy-10] <strong>abnormal-packet-defend enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-cpu-defend-policy-10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+</li><li><p>Create an ACL.</p>
+<p>Add SNMP to ACL 3341.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>acl number 3341</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-acl-adv-3341] <strong>rule permit udp source 10.20.20.0 0.0.0.255 source-port eq snmp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-acl-adv-3341] <strong>rule permit udp source 10.20.20.0 0.0.0.255 destination-port eq snmp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-acl-adv-3341] <strong>rule deny udp destination-port eq snmp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-acl-adv-3341] <strong>commit</strong></pre>
+</li><li><p>Create a user-defined flow.</p>
+<p>After the ACL is used to classify protocol packets, you can apply the ACL to create user-defined flows so that different protocol packets are transmitted through different channels.</p>
+<p>ACL 3341 corresponds to user-defined flow 11 and is used to protect SNMP. SNMP traffic is heavy but does not require high real-time performance. Therefore, set the priority to low and bandwidth to 1 Mbit/s.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>cpu-defend policy 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-cpu-defend-policy-10] <strong>user-defined-flow 11 acl 3341</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-cpu-defend-policy-10] <strong>car user-defined-flow 11 cir 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-cpu-defend-policy-10] <strong>priority user-defined-flow 11 low</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-cpu-defend-policy-10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+</li><li><p>Apply the attack defense policy.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>slot </strong><span>10</span></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-slot-<span>10</span>] <strong>cpu-defend-policy 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-slot-<span>10</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+</li></ol>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration and Maintenance Suggestions</h4><ul><li><p>SNMPv1 and SNMPv2c community names are stored in ciphertext. Only high-level commands can query ciphertext community names.</p>
+</li><li><p>Store community names and user passwords in ciphertext to effectively protect them from being disclosed.</p>
+</li><li><p>Passwords and community names are stored as ****** in the operation logs on the SNMP server, CLI, and NETCONF tool, to prevent user information leaks.</p>
+</li><li><p>SNMPv1 and SNMPv2c are not secure. Therefore, using SNMPv3 is recommended.</p>
+</li><li><p>Disable SNMP if it is unnecessary on a device. (SNMP is disabled by default.)</p>
+</li><li><p>When SNMPv3 is configured, ensure that authentication and encryption passwords meet the password complexity requirements and that the authentication password is different from the encryption password. If SNMPv1 or SNMPv2c is configured, the SNMP community name must pass the complexity check.</p>
+</li><li><p>Configure the lock mechanism for SNMP so that the IP address of a user is locked after the user fails the authentication. (The lock mechanism is enabled by default.)</p>
+</li><li><p>Configure URPF on the edge devices to prevent response attacks.</p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Verifying the Security Hardening Result</h4><ul><li>Run the <strong>display this | include snmp</strong> command in the system view to check the SNMP configuration.</li><li>Run the <strong>display cpu-defend</strong> <strong>tcpip-defend</strong> <strong>statistics</strong> [ <strong>slot</strong> <em>slot-id</em> ] command to view information about defense against TCP/IP attacks.</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0005.html">Access Authentication Security
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0008.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

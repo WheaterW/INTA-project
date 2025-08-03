@@ -1,0 +1,425 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Static BFD for SR-MPLS TE">
+<meta name="abstract" content="This section provides an example for configuring static BFD for SR-MPLS TE to implement rapid traffic switching if a tunnel fault occurs.">
+<meta name="description" content="This section provides an example for configuring static BFD for SR-MPLS TE to implement rapid traffic switching if a tunnel fault occurs.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr-te_cfg_0090.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr-te_cfg_0325.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr-te_cfg_0305.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="segment_routing_vrp,w00604599,l00455378,l00587852,w00606909,w00800033">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="Segment Routing MPLS">
+<meta name="featuretype" content="Segment Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Segment Routing MPLS">
+<meta name="featuretype" content="Segment Routing">
+<meta name="featurename" content="Segment Routing MPLS">
+<meta name="featuretype" content="Segment Routing">
+<meta name="featurename" content="Segment Routing MPLS">
+<meta name="featuretype" content="Segment Routing">
+<meta name="OWNER" content="l00468467">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00468467">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172368889">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Static BFD for SR-MPLS TE</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172368889"></a><a name="EN-US_TASK_0172368889"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Static BFD for SR-MPLS TE</h1>
+<div class="taskbody"><p>This section provides an example for configuring static BFD for SR-MPLS TE to implement rapid traffic switching if a tunnel fault occurs.</p>
+<div class="context"><a name="EN-US_TASK_0172368889__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0172368889__fig_dc_vrp_sr-te_cfg_030601">Figure 1</a>, a tunnel and an LSP need to be established from PE1 to PE2. The SR protocol is used for path generation and data forwarding. PE1 and PE2 are the path's ingress and egress, respectively. P1 collects network topology information and reports the information to the controller using BGP-LS. The controller calculates an LSP based on the collected topology information and delivers the path information to a third-party adapter. The third-party adapter then sends the path information to PE1.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>You do not need to configure a PCE client (PCC) because the third-party adapter delivers the path information.</p>
+<p>If a Huawei device connects to a non-Huawei device that does not support BFD, configure U-BFD to detect links.</p>
+</div></div>
+<div class="fignone" id="EN-US_TASK_0172368889__fig_dc_vrp_sr-te_cfg_030601"><a name="EN-US_TASK_0172368889__fig_dc_vrp_sr-te_cfg_030601"></a><a name="fig_dc_vrp_sr-te_cfg_030601"></a><span class="figcap"><b>Figure 1 </b>Configuring static BFD for SR-MPLS TE</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 through 3 in this example represent GE <span>0/1/0</span>, GE <span>0/2/0</span>, and GE <span>0/1/1</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_sr-te_cfg_0306.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368889__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Assign an IP address and a mask to each interface, and configure a loopback address as an MPLS LSR ID on each node.</p>
+</li><li><p>Configure LSR IDs and enable MPLS TE globally and on interfaces on each LSR.</p>
+</li><li><p>Enable SR globally on each node.</p>
+</li><li><p>Configure IS-IS TE on each node.</p>
+</li><li><p>Establish a BGP-LS peer relationship between P1 and the controller so that P1 can report network topology information to the controller using BGP-LS.</p>
+</li><li><p>Configure a tunnel interface on the ingress PE1, and specify an IP address, tunneling protocol, destination IP address, and tunnel bandwidth.</p>
+</li><li><p>Configure a BFD session on PE1 to monitor the primary SR-MPLS TE tunnel.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368889__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>IP address of each interface, as shown in <a href="#EN-US_TASK_0172368889__fig_dc_vrp_sr-te_cfg_030601">Figure 1</a></p>
+</li><li><p>IS-IS process ID: 1; IS-IS system ID of each node: converted from the loopback 0 address; IS-IS level: level-2</p>
+</li><li><p>BGP-LS peer relationship between P1 and the controller, as shown in <a href="#EN-US_TASK_0172368889__fig_dc_vrp_sr-te_cfg_030601">Figure 1</a></p>
+</li><li><p>Name of a BFD session</p>
+</li><li><p>Local and remote discriminators of the BFD session</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172368889__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address and a mask to each interface.</span><p><p># Configure PE1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname PE1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>interface loopback 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack0] <strong>ip address 10.21.2.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet</strong><strong><span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>ip address 10.1.23.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure P1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname P1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>interface loopback 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-LoopBack0] <strong>ip address </strong><strong>10.31.2.9</strong><strong> 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-LoopBack0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/0</span>] <strong>ip address 10.1.23.3 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1]<strong> interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/2/0</span>] <strong>ip address 10.20.34.3 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1]<strong> interface gigabitethernet<span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/1</span>] <strong>ip address 10.7.2.10 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname PE2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>interface loopback 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack0] <strong>ip address </strong><strong>10.41.2.9</strong><strong> 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>]<strong> ip address </strong><strong>10.20.34.</strong><strong>4 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> commit</strong></pre>
+</p></li><li><span>Configure IS-IS to advertise the route to each network segment of each interface and to advertise the host route to each loopback address (used as an LSR ID).</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>is-level level-2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>network-entity 11.1111.1111.1111.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface loopback 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack0] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet</strong><strong><span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure P1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-isis-1] <strong>is-level level-2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-isis-1] <strong>network-entity 11.2222.2222.2222.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>interface loopback 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-LoopBack0] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-LoopBack0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/0</span>] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1]<strong> interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/2/0</span>] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-isis-1] <strong>is-level level-2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-isis-1] <strong>network-entity 11.3333.3333.3333.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface loopback 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack0] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>]<strong> </strong><strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> commit</strong></pre>
+</p></li><li><span>Establish a BGP-LS peer relationship between P1 and the controller.</span><p><p>Establish a BGP-LS peer relationship between P1 and the controller so that P1 can report network topology information to the controller using BGP-LS. This example uses the configuration of P1. For controller configuration details, see <a href="#EN-US_TASK_0172368889__section_dc_vrp_sr-te_cfg_030605">Configuration Files</a> in this section.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>isis 1</strong>
+[<span class="keyword">*</span>P1-isis-1] <strong>bgp-ls enable level-2</strong>
+[<span class="keyword">*</span>P1-isis-1] <strong>quit</strong>
+[<span class="keyword">*</span>P1] <strong>bgp 100</strong>
+[<span class="keyword">*</span>P1-bgp] <strong>peer 10.7.2.9 as-number 100</strong>
+[<span class="keyword">*</span>P1-bgp] <strong>link-state-family unicast</strong>
+[<span class="keyword">*</span>P1-bgp-af-ls] <strong>peer 10.7.2.9 enable</strong>
+[<span class="keyword">*</span>P1-bgp-af-ls] <strong>quit</strong>
+[<span class="keyword">*</span>P1-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>P1] <strong>commit</strong></pre>
+</p></li><li><span>Configure basic MPLS functions and enable MPLS TE.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> mpls lsr-id 10.21.2.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls] <strong>mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls] <strong>mpls te cspf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<p>The configurations except the LSR ID configuration on P1 and PE2 are the same as those on PE1.</p>
+</p></li><li><span>Enable SR globally on each node.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing] <strong>qu</strong><strong>it</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p>The configurations on P1 and PE2 are similar to the configuration on PE1.</p>
+</p></li><li><span>Configure IS-IS TE on each node.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> isis 1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-isis-1]<strong> cost-style wide</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1]<strong> traffic-eng level-2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1]<strong> segment-routing mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-isis-1]<strong> quit</strong></pre>
+<p>The configuration on P1 and PE2 is the same as that on PE1.</p>
+</p></li><li><span>Configure a tunnel interface on PEs.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> interface Tunnel10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel10] <strong>ip address unnumbered interface loopback 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel10] <strong>tunnel-protocol mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel10] <strong>destination 10.41.2.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel10] <strong>mpls te tunnel-id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel10] <strong>mpls te signal-protocol segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel10] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-Tunnel10] <strong>quit</strong></pre>
+</p><p><p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong> interface Tunnel10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Tunnel10] <strong>ip address unnumbered interface loopback 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Tunnel10] <strong>tunnel-protocol mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Tunnel10] <strong>destination 10.21.2.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Tunnel10] <strong>mpls te tunnel-id 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Tunnel10] <strong>mpls te signal-protocol segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Tunnel10] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-Tunnel10] <strong>quit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p>After completing the configuration, run the <strong>display interface tunnel</strong> command on PE1. You can check that the tunnel interface is Up.</p>
+<p>Run the <strong>display mpls te tunnel</strong> command on each node to check MPLS TE tunnel establishment.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> display mpls te tunnel</strong></pre>
+<pre class="screen">* means the LSP is detour LSP
+------------------------------------------------------------------------------
+Ingress LsrId    Destination      LSPID   In/Out Label     R  Tunnel-name
+------------------------------------------------------------------------------
+10.21.2.9        10.41.2.9        1       --/20            I  Tunnel10
+-------------------------------------------------------------------------------
+R: Role, I: Ingress, T: Transit, E: Egress</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>display mpls te tunnel</strong></pre>
+<pre class="screen">* means the LSP is detour LSP
+------------------------------------------------------------------------------
+Ingress LsrId    Destination      LSPID   In/Out Label     R  Tunnel-name
+------------------------------------------------------------------------------
+10.41.2.9        10.21.2.9        1       --/120           I  Tunnel10 
+-------------------------------------------------------------------------------
+R: Role, I: Ingress, T: Transit, E: Egress</pre>
+</p></li><li><span>Configure BFD for SR-MPLS TE.</span><p><p># Configure a BFD session on PE1 to detect the SR-MPLS TE tunnel, and set the minimum intervals at which BFD packets are sent and received.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> bfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> bfd pe1tope2 bind mpls-te interface Tunnel10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1tope2]<strong> discriminator local 12</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1tope2]<strong> discriminator remote 21</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1tope2]<strong> min-tx-interval 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1tope2]<strong> min-rx-interval 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1tope2]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bfd-lsp-session-pe1tope2]<strong> quit</strong></pre>
+<p># Configure a BFD session on PE2 to detect the reverse SR-MPLS TE tunnel, and set the minimum intervals at which BFD packets are sent and received.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong> bfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> bfd pe2tope1 bind mpls-te interface Tunnel10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd-lsp-session-pe2tope1]<strong> discriminator local 21</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd-lsp-session-pe1tope2]<strong> discriminator remote 12</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd-lsp-session-pe2tope1]<strong> min-tx-interval 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd-lsp-session-pe2tope1]<strong> min-rx-interval 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd-lsp-session-pe2tope1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-bfd-lsp-session-pe2tope1]<strong> quit</strong></pre>
+<p># After completing the configuration, run the <a href="cmdqueryname=display+bfd+session"><b><span class="cmdname">display bfd session</span></b></a> { <strong><span>all</span></strong> | <strong><span>discriminator</span></strong> <i><span class="varname">discr-value</span></i> | <strong><span>mpls-te</span></strong> <strong><span>interface</span></strong> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> } [ <strong><span>verbose</span></strong> ] command on PE1 and PE2. You can check that the BFD session is Up.</p>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0172368889__section_dc_vrp_sr-te_cfg_030605"><a name="EN-US_TASK_0172368889__section_dc_vrp_sr-te_cfg_030605"></a><a name="section_dc_vrp_sr-te_cfg_030605"></a><a name="EN-US_TASK_0172368889__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>PE1 configuration file</p>
+<pre class="screen">#
+sysname PE1
+#
+bfd
+#
+mpls lsr-id 10.21.2.9
+#
+mpls
+ mpls te
+ mpls te cspf
+#
+segment-routing
+#
+isis 1
+ is-level level-2
+ cost-style wide
+ network-entity 11.1111.1111.1111.00
+ traffic-eng level-2
+ segment-routing mpls
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.23.2 255.255.255.0
+ isis enable 1
+ mpls
+ mpls te
+#
+interface LoopBack0
+ ip address 10.21.2.9 255.255.255.255
+ isis enable 1
+#
+interface Tunnel10
+ ip address unnumbered interface LoopBack0
+ tunnel-protocol mpls te
+ destination 10.41.2.9
+ mpls te signal-protocol segment-routing
+ mpls te tunnel-id 1
+#
+bfd pe1tope2 bind mpls-te interface Tunnel10
+ discriminator local 12
+ discriminator remote 21
+ min-tx-interval 100
+ min-rx-interval 100
+#
+return</pre>
+</li><li><p>P1 configuration file</p>
+<pre class="screen">#
+sysname P1
+#
+mpls lsr-id 10.31.2.9
+#
+mpls
+ mpls te
+ mpls te cspf
+#
+segment-routing
+#
+isis 1
+ is-level level-2
+ cost-style wide
+ bgp-ls enable level-2
+ network-entity 11.2222.2222.2222.00
+ traffic-eng level-2
+ segment-routing mpls
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.23.3 255.255.255.0
+ isis enable 1
+ mpls
+ mpls te
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.7.2.10 255.255.255.0
+ isis enable 1
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.20.34.3 255.255.255.0
+ isis enable 1
+ mpls
+ mpls te
+#
+interface LoopBack0
+ ip address 10.31.2.9 255.255.255.255
+ isis enable 1
+#
+bgp 100
+ peer 10.7.2.9 as-number 100
+ #               
+ ipv4-family unicast 
+  undo synchronization 
+  peer 10.7.2.9 enable
+ # 
+ link-state-family unicast 
+  peer 10.7.2.9 enable
+#
+return</pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#
+sysname PE2
+#
+bfd
+#
+mpls lsr-id 10.41.2.9
+#
+mpls
+ mpls te
+ mpls te cspf
+#
+segment-routing
+#
+isis 1
+ is-level level-2
+ cost-style wide
+ network-entity 11.3333.3333.3333.00
+ traffic-eng level-2
+ segment-routing mpls
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.20.34.4 255.255.255.0
+ isis enable 1
+ mpls
+ mpls te
+#
+interface LoopBack0 
+ ip address 10.41.2.9 255.255.255.255
+ isis enable 1
+#
+interface Tunnel10
+ ip address unnumbered interface LoopBack0
+ tunnel-protocol mpls te
+ destination 10.21.2.9
+ mpls te signal-protocol segment-routing
+ mpls te tunnel-id 2
+#
+bfd pe2tope1 bind mpls-te interface Tunnel10
+ discriminator local 21
+ discriminator remote 12
+ min-tx-interval 100
+ min-rx-interval 100
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr-te_cfg_0090.html">Configuring Examples for SR-MPLS TE
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr-te_cfg_0325.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr-te_cfg_0305.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,383 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring M-LAG Devices as DHCP Servers">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_dhcpv4_cfg_0012.html">
+<meta name="DC.Relation" scheme="URI" content="toctopics/en-us_task_0000001513046146.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="DHCPv4">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="DHCPv4">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featurename" content="DHCPv4">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001564126225">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring M-LAG Devices as DHCP Servers</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001564126225"></a><a name="EN-US_TASK_0000001564126225"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring M-LAG Devices as DHCP Servers</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001564126225__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In <a href="#EN-US_TASK_0000001564126225__fig_dc_cfg_dhcp_009201">Figure 1</a>, DeviceA and DeviceB form an M-LAG, which functions as a dual-active gateway for downstream servers. You need to enable the DHCP server function on both DeviceA and DeviceB to dynamically allocate IP addresses to the servers.</p>
+<div class="fignone" id="EN-US_TASK_0000001564126225__fig_dc_cfg_dhcp_009201"><a name="EN-US_TASK_0000001564126225__fig_dc_cfg_dhcp_009201"></a><a name="fig_dc_cfg_dhcp_009201"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring M-LAG devices as DHCP servers</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1, interface 2, interface 3, interface 4, and interface 5 represent <span>100GE</span> <span>1/0/1</span>, <span>100GE</span> <span>1/0/2</span>, <span>100GE</span> <span>1/0/3</span>, <span>100GE</span> <span>1/0/4</span>, and <span>100GE</span> <span>1/0/5</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001513166166.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001564126225__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>This example applies only to ZTP deployment. For detailed configuration precautions when both the M-LAG and DHCP server are used, see "Configuration Precautions for DHCPv4."</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001564126225__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Configure routes on DeviceA, DeviceB, and DeviceD to ensure Layer 3 connectivity.</li><li>Configure DeviceA and DeviceB to set up an M-LAG.</li><li>Configure an interconnection VLAN.</li><li>Configure IP and MAC addresses for VLANIF interfaces on DeviceA and DeviceB so that these devices function as dual-active gateways for access devices, and configure the DHCP server function on DeviceA and DeviceB.</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001564126225__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure routes on DeviceA, DeviceB, and DeviceD to ensure Layer 3 connectivity. OSPF is used as an example.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[*<span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA]<strong> interface loopback 0</strong>
+[*DeviceA-LoopBack0]<strong> ip address 10.1.1.1 32</strong>
+[*DeviceA-LoopBack0]<strong> quit</strong>
+[*DeviceA]<strong> interface <span>100ge</span> <span>1/0/2</span></strong>
+[*DeviceA-<span>100GE</span><span>1/0/2</span>]<strong> undo portswitch</strong>
+[*DeviceA-<span>100GE</span><span>1/0/2</span>]<strong> ip address 192.168.1.1 24</strong>
+[*DeviceA-<span>100GE</span><span>1/0/2</span>]<strong> quit</strong>
+[*DeviceA]<strong> ospf 1</strong>
+[*DeviceA-ospf-1]<strong> area 0</strong>
+[*DeviceA-ospf-1-area-0.0.0.0]<strong> network 10.1.1.1 0.0.0.0</strong>
+[*DeviceA-ospf-1-area-0.0.0.0]<strong> network 192.168.1.1 0.0.0.255</strong>
+[*DeviceA-ospf-1-area-0.0.0.0]<strong> quit</strong>
+[*DeviceA-ospf-1]<strong> quit</strong>
+[*DeviceA]<strong> commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">HUAWEI</span>] <strong>sysname DeviceB</strong>
+[*<span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceB]<strong> interface loopback 0</strong>
+[*DeviceB-LoopBack0]<strong> ip address 10.1.1.2 32</strong>
+[*DeviceB-LoopBack0]<strong> quit</strong>
+[*DeviceB]<strong> interface <span>100ge</span> <span>1/0/2</span></strong>
+[*DeviceB-<span>100GE</span><span>1/0/2</span>]<strong> undo portswitch</strong>
+[*DeviceB-<span>100GE</span><span>1/0/2</span>]<strong> ip address 192.168.2.1 24</strong>
+[*DeviceB-<span>100GE</span><span>1/0/2</span>]<strong> quit</strong>
+[*DeviceB]<strong> ospf 1</strong>
+[*DeviceB-ospf-1]<strong> area 0</strong>
+[*DeviceB-ospf-1-area-0.0.0.0]<strong> network 10.1.1.2 0.0.0.0</strong>
+[*DeviceB-ospf-1-area-0.0.0.0]<strong> network 192.168.2.0 0.0.0.255</strong>
+[*DeviceB-ospf-1-area-0.0.0.0]<strong> quit</strong>
+[*DeviceB-ospf-1]<strong> quit</strong>
+[*DeviceB]<strong> commit</strong></pre>
+<p># Configure DeviceD.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">HUAWEI</span>] <strong>sysname DeviceD</strong>
+[*<span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceD]<strong> interface <span>100ge</span> <span>1/0/1</span></strong>
+[*DeviceD-<span>100GE</span><span>1/0/1</span>]<strong> undo portswitch</strong>
+[*DeviceD-<span>100GE</span><span>1/0/1</span>]<strong> ip address 192.168.1.2 24</strong>
+[*DeviceD-<span>100GE</span><span>1/0/1</span>]<strong> quit</strong>
+[*DeviceD]<strong> interface <span>100ge</span> <span>1/0/2</span></strong>
+[*DeviceD-<span>100GE</span><span>1/0/2</span>]<strong> undo portswitch</strong>
+[*DeviceD-<span>100GE</span><span>1/0/2</span>]<strong> ip address 192.168.2.2 24</strong>
+[*DeviceD-<span>100GE</span><span>1/0/2</span>]<strong> quit</strong>
+[*DeviceD]<strong> ospf 1</strong>
+[*DeviceD-ospf-1]<strong> area 0</strong>
+[*DeviceD-ospf-1-area-0.0.0.0]<strong> network 192.168.1.0 0.0.0.255</strong>
+[*DeviceD-ospf-1-area-0.0.0.0]<strong> network 192.168.2.0 0.0.0.255</strong>
+[*DeviceD-ospf-1-area-0.0.0.0]<strong> quit</strong>
+[*DeviceD-ospf-1]<strong> quit</strong>
+[*DeviceD]<strong> commit</strong></pre>
+</p></li><li><span>Configure DeviceA and DeviceB to set up an M-LAG.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA]<strong> stp mode rstp</strong>
+[*DeviceA]<strong> stp v-stp enable</strong>
+[*DeviceA]<strong> dfs-group 1</strong>
+[*DeviceA-dfs-group-1]<strong> </strong><strong>dual-active detection</strong> <strong>source ip 10.1.1.1 peer</strong> <strong>10.1.1.2</strong>
+[*DeviceA-dfs-group-1]<strong> priority 150</strong>
+[*DeviceA-dfs-group-1]<strong> quit</strong>
+[*DeviceA] <strong>interface eth-trunk 0</strong>
+[*DeviceA-Eth-Trunk0] <strong>trunkport <span>100ge</span> <span>1/0/4</span></strong>
+[*DeviceA-Eth-Trunk0] <strong>trunkport <span>100ge</span> <span>1/0/5</span></strong>
+[*DeviceA-Eth-Trunk0] <strong>mode lacp-static</strong>
+[*DeviceA-Eth-Trunk0] <strong>peer-link 1</strong>
+[*DeviceA-Eth-Trunk0] <strong>quit</strong>
+[*DeviceA]<strong> commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceB]<strong> stp mode rstp</strong>  
+[*DeviceB]<strong> stp v-stp enable</strong>
+[*DeviceB]<strong> dfs-group 1</strong>
+[*DeviceB-dfs-group-1]<strong> dual-active detection source ip 10.1.1.2</strong> <strong>peer</strong> <strong>10.1.1.1</strong>
+[*DeviceB-dfs-group-1]<strong> quit</strong>
+[*DeviceB] <strong>interface eth-trunk 0</strong>
+[*DeviceB-Eth-Trunk0] <strong>trunkport <span>100ge</span> <span>1/0/4</span></strong>
+[*DeviceB-Eth-Trunk0] <strong>trunkport <span>100ge</span> <span>1/0/5</span></strong>
+[*DeviceB-Eth-Trunk0] <strong>mode lacp-static</strong>
+[*DeviceB-Eth-Trunk0] <strong>peer-link 1</strong>
+[*DeviceB-Eth-Trunk0] <strong>quit</strong>
+[*DeviceB]<strong> commit</strong></pre>
+</p></li><li><span>Configure an interconnection VLAN.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA]<strong> vlan batch 10</strong>
+[*DeviceA]<strong> interface eth-trunk 1</strong>
+[*DeviceA-Eth-Trunk1]<strong> mode lacp-static</strong>
+[*DeviceA-Eth-Trunk1]<strong> port link-type trunk</strong>
+[*DeviceA-Eth-Trunk1]<strong> undo port trunk allow-pass vlan 1</strong>
+[*DeviceA-Eth-Trunk1]<strong> port trunk allow-pass vlan 10</strong>
+[*DeviceA-Eth-Trunk1]<strong> trunkport <span>100ge</span> <span>1/0/1</span></strong>
+[*DeviceA-Eth-Trunk1]<strong> dfs-group 1 m-lag 1</strong>
+[*DeviceA-Eth-Trunk1]<strong> quit</strong>
+[*DeviceA]<strong> commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceB]<strong> vlan batch 10</strong>
+[*DeviceB]<strong> interface eth-trunk 1</strong>
+[*SwitchB-Eth-Trunk1]<strong> mode lacp-static</strong>
+[*DeviceB-Eth-Trunk1]<strong> port link-type trunk</strong>
+[*DeviceB-Eth-Trunk1]<strong> undo port trunk allow-pass vlan 1</strong>
+[*DeviceB-Eth-Trunk1]<strong> port trunk allow-pass vlan 10</strong>
+[*DeviceB-Eth-Trunk1]<strong> trunkport <span>100ge</span> <span>1/0/1</span></strong>
+[*DeviceB-Eth-Trunk1]<strong> dfs-group 1 m-lag 1</strong>
+[*DeviceB-Eth-Trunk1]<strong> quit</strong>
+[*DeviceB]<strong> commit</strong></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">HUAWEI</span>] <strong>sysname DeviceC</strong>
+[*<span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceC]<strong> vlan batch 10</strong>
+[*DeviceC]<strong> interface eth-trunk 1</strong>
+[*DeviceC-Eth-Trunk1]<strong> mode lacp-static</strong>
+[*DeviceC-Eth-Trunk1]<strong> port link-type trunk</strong>
+[*DeviceC-Eth-Trunk1]<strong> undo port trunk allow-pass vlan 1</strong>
+[*DeviceC-Eth-Trunk1]<strong> port trunk allow-pass vlan 10</strong>
+[*DeviceC-Eth-Trunk1]<strong> trunkport <span>100ge</span> <span>1/0/1</span></strong>
+[*DeviceC-Eth-Trunk1]<strong> trunkport <span>100ge</span> <span>1/0/2</span></strong>
+[*DeviceC-Eth-Trunk1]<strong> quit</strong>
+[*DeviceC]<strong> interface <span>100ge</span> <span>1/0/3</span></strong>
+[*DeviceC-<span>100GE</span><span>1/0/3</span>]<strong> port link-type access</strong>
+[*DeviceC-<span>100GE</span><span>1/0/3</span>]<strong> port default vlan 10</strong>
+[*DeviceC-<span>100GE</span><span>1/0/3</span>]<strong> quit</strong>
+[*DeviceC]<strong> commit</strong></pre>
+</p></li><li><span>Configure IP and MAC addresses for VLANIF interfaces on DeviceA and DeviceB so that these devices function as dual-active gateways for access devices, and configure the DHCP server function on DeviceA and DeviceB. DeviceA and DeviceB must be configured with the same virtual IP address and virtual MAC address.</span><p><p># Configure DeviceA as the active-active gateway for access devices, enable the DHCP server function for the interface address pool, and assign an address range to the interface address pool.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>dhcp enable</strong>
+[*DeviceA] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA]<strong> interface vlanif 10</strong>
+[*DeviceA-Vlanif10]<strong> ip address 10.2.1.1 24</strong>
+[*DeviceA-Vlanif10] <strong>mac-address 0000-5e00-0101</strong>
+[*DeviceA-Vlanif10] <strong>dhcp select interface</strong>
+[*DeviceA-Vlanif10] <strong>dhcp server ip-range 10.2.1.1 10.2.1.128</strong>
+[*DeviceA-Vlanif10]<strong> quit</strong>
+[*DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceB as the active-active gateway for access devices, enable the DHCP server function for the interface address pool, and assign an address range to the interface address pool.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceB] <strong>dhcp enable</strong>
+[*DeviceB] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceB]<strong> interface vlanif 10</strong>
+[*DeviceB-Vlanif10]<strong> ip address 10.2.1.1 24</strong>
+[*DeviceB-Vlanif10] <strong>mac-address 0000-5e00-0101</strong>
+[*DeviceB-Vlanif10] <strong>dhcp select interface</strong>
+[*DeviceB-Vlanif10] <strong>dhcp server ip-range 10.2.1.129 10.2.1.254</strong>
+[*DeviceB-Vlanif10]<strong> quit</strong>
+[*DeviceB] <strong>commit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p>Run the <strong>display ip pool</strong> command on DeviceA to check the IP address pool configuration.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>display ip pool</strong>
+ -----------------------------------------------------------------------------
+  Pool name      : pool1
+  Pool number    : 0
+  Position       : Local
+  Status         : Unlocked
+  Gateway        : 10.0.0.1
+  Mask           : 255.255.255.0
+  VPN instance   : --
+
+  All IP pool address statistic
+    Total       :253
+    Used        :0          Idle        :125        Expired     :0
+    Conflict    :0          Disable     :128</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001564126225__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li>DeviceA<pre class="screen">#
+sysname DeviceA
+#
+dfs-group 1
+ priority 150
+ dual-active detection source ip 10.1.1.1 peer 10.1.1.2
+#
+vlan batch 10
+#
+stp mode rstp
+stp v-stp enable
+#
+dhcp enable
+#
+interface Vlanif10
+ ip address 10.2.1.1 255.255.255.0
+ mac-address 0000-5e00-0101
+ dhcp select interface
+ dhcp server ip-range 10.2.1.1 10.2.1.128
+#
+interface Eth-Trunk0
+ mode lacp-static
+ peer-link 1
+#
+interface Eth-Trunk1
+ port link-type trunk
+ undo port trunk allow-pass vlan 1
+ port trunk allow-pass vlan 10
+ mode lacp-static
+ dfs-group 1 m-lag 1
+#
+interface <span>100GE</span><span>1/0/1</span>
+ eth-trunk 1
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/4</span>
+  eth-trunk 0
+#
+interface <span>100GE</span><span>1/0/5</span>
+  eth-trunk 0
+#
+interface LoopBack0
+ ip address 10.1.1.1 255.255.255.255
+#
+ospf 1
+ area 0.0.0.0
+  network 10.1.1.1 0.0.0.0
+  network 192.168.1.0 0.0.0.255
+#
+return</pre>
+</li><li>DeviceB<pre class="screen">#
+sysname DeviceB
+#
+dfs-group 1
+ dual-active detection source ip 10.1.1.2 peer 10.1.1.1 
+#
+vlan batch 10
+#
+stp mode rstp
+stp v-stp enable
+#
+dhcp enable
+#
+interface Vlanif10
+ ip address 10.2.1.1 255.255.255.0
+ mac-address 0000-5e00-0101
+ dhcp select interface
+ dhcp server ip-range 10.2.1.129 10.2.1.254
+#
+interface Eth-Trunk0
+ mode lacp-static
+ peer-link 1
+#
+interface Eth-Trunk1
+ port link-type trunk
+ undo port trunk allow-pass vlan 1
+ port trunk allow-pass vlan 10
+ mode lacp-static
+ dfs-group 1 m-lag 1
+#
+interface <span>100GE</span><span>1/0/1</span>
+ eth-trunk 1
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.2.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/4</span>
+  eth-trunk 0
+#
+interface <span>100GE</span><span>1/0/5</span>
+  eth-trunk 0
+#
+interface LoopBack0
+ ip address 10.1.1.2 255.255.255.255
+#
+ospf 1
+ area 0.0.0.0
+  network 10.1.1.2 0.0.0.0
+  network 192.168.2.0 0.0.0.255
+#
+return</pre>
+</li><li>DeviceC<pre class="screen">#
+sysname DeviceC
+#
+vlan batch 10
+#
+interface Eth-Trunk1
+ port link-type trunk
+ undo port trunk allow-pass vlan 1
+ port trunk allow-pass vlan 10
+ mode lacp-static
+#
+interface <span>100GE</span><span>1/0/1</span>
+ eth-trunk 1
+#
+interface <span>100GE</span><span>1/0/2</span>
+ eth-trunk 1
+#
+interface <span>100GE</span><span>1/0/3</span>
+  port default vlan 10
+#
+return</pre>
+</li><li>DeviceD<pre class="screen">#
+sysname DeviceD
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.2.2 255.255.255.0
+#
+ospf 1
+ area 0.0.0.0
+  network 192.168.1.0 0.0.0.255
+  network 192.168.2.0 0.0.0.255
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_dhcpv4_cfg_0012.html">Configuring a Device to Function as a DHCPv4 Server
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="toctopics/en-us_task_0000001513046146.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

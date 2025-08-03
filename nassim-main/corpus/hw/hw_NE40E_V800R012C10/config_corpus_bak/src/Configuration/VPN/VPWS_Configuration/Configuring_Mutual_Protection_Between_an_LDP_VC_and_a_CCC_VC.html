@@ -1,0 +1,136 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring Mutual Protection Between an LDP VC and a CCC VC">
+<meta name="abstract" content="This section describes how to configure mutual protection between an LDP VC and a CCC VC. If a CCC VC (or LDP VC) functioning as the primary path fails, traffic is switched to the LDP VC (CCC VC) functioning as the backup path, improving reliability.">
+<meta name="description" content="This section describes how to configure mutual protection between an LDP VC and a CCC VC. If a CCC VC (or LDP VC) functioning as the primary path fails, traffic is switched to the LDP VC (CCC VC) functioning as the backup path, improving reliability.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_3000.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_5007.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_6065.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00606909">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="VPWS">
+<meta name="featuretype" content="VPN">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VPWS">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="VPWS">
+<meta name="featuretype" content="VPN">
+<meta name="OWNER" content="l00415692">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="q00824768">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172369844">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/jquery.min.idp.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/RowOrColfreezeSupport.js"></script>
+
+<script type="text/javascript">
+setTimeout(function(){
+	jQueryHW(document).ready(function(){
+		jQueryHW("table[rowfreeze='yes']").rowfreeze();
+		jQueryHW("table[colfreeze='yes']").colfreeze();
+	});
+},500);
+</script>
+<title>Configuring Mutual Protection Between an LDP VC and a CCC VC</title>
+</head>
+<body><a name="EN-US_TASK_0172369844"></a><a name="EN-US_TASK_0172369844"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring Mutual Protection Between an LDP VC and a CCC VC</h1>
+<div class="taskbody"><p>This section describes how to configure mutual protection between an LDP VC and a CCC VC. If a CCC VC (or LDP VC) functioning as the primary path fails, traffic is switched to the LDP VC (CCC VC) functioning as the backup path, improving reliability.</p>
+<div class="context"><a name="EN-US_TASK_0172369844__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><div class="p"><h4 class="sectiontitle">Usage Scenario</h4><p>Widespread L2VPN adoption has raised reliability requirements for L2VPNs, especially for L2VPNs that carry real-time services such as VoIP and IPTV.</p>
+<p>To improve service reliability, you can configure an LDP VC to protect a CCC VC. If the CCC VC functioning as the primary path fails, traffic can be switched to the LDP VC functioning as the backup path.</p>
+<p>Similarly, you can also configure a CCC VC to protect an LDP VC. If the LDP VC functioning as the primary path fails, traffic can be switched to the CCC VC functioning as the backup path.</p>
+<p>Mutual protection between an LDP VC and a CCC VC applies to the following scenarios:</p>
+<ul><li><p>Dual-homing 2PE scenario: On the network shown in <a href="#EN-US_TASK_0172369844__fig_dc_vrp_vpws_cfg_607201">Figure 1</a>, CE1 is dual-homed to PE1 and PE2 through an Eth-Trunk, and AC1 is selected as the active AC. CE2 is dual-homed to PE1 and PE2 through another Eth-Trunk, and AC3 is selected as the active AC. PW1 VC1 is deployed between PE1 and PE2 to protect AC3. If AC3 fails, CE1 can access CE2 through PW1 VC1 and AC4. PW2 VC1 is deployed between PE1 and PE2 to protect AC1. If AC1 fails, CE2 can access CE1 through PW2 VC1 and AC2. Therefore, CE1 and CE2 both use AC1 and AC3 for primary links and AC2 and AC4 for backup links. If the primary link fails, service data can be transmitted over the backup link.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If a CE and PEs support low-speed interfaces, the CE can be dual-homed to PEs through a CPOS-Trunk interface.</p>
+</div></div>
+<div class="fignone" id="EN-US_TASK_0172369844__fig_dc_vrp_vpws_cfg_607201"><a name="EN-US_TASK_0172369844__fig_dc_vrp_vpws_cfg_607201"></a><a name="fig_dc_vrp_vpws_cfg_607201"></a><span class="figcap"><b>Figure 1 </b>Mutual protection between an LDP VC and a CCC VC (dual-homing 2PE scenario)</span><br><span><img class="vsd" src="images/fig_dc_vrp_vpws_cfg_607201.png"></span><br></div>
+</li><li><p>Dual-homing 3PE scenario: On the network shown in <a href="#EN-US_TASK_0172369844__fig_dc_vrp_vpws_cfg_607202">Figure 2</a>, CE1 is dual-homed to PE1 and PE2 through an Eth-Trunk. AC1 serves as the primary path, and AC2 the backup path. CE2 is dual-homed to PE2 and PE3 through another Eth-Trunk. AC3 serves as the primary path, and AC4 the backup path. The independent PW redundancy mode is configured on PE1, with PW1 VC1 being the primary PW and PW2 VC1 the secondary PW. The independent PW redundancy mode is also configured on PE3, with PW2 VC2 being the primary PW and PW3 VC1 being the secondary PW. For AC1, there are two paths to CE2: PW1 VC1 (primary) and PW2 VC1 (backup). For AC2, there are two paths to CE2: AC3 (primary) and PW3 VC2 (backup). If the primary path fails, service data can be transmitted over the backup path.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If a CE and PEs support low-speed interfaces, the CE can be dual-homed to PEs through a CPOS-Trunk interface.</p>
+</div></div>
+<div class="fignone" id="EN-US_TASK_0172369844__fig_dc_vrp_vpws_cfg_607202"><a name="EN-US_TASK_0172369844__fig_dc_vrp_vpws_cfg_607202"></a><a name="fig_dc_vrp_vpws_cfg_607202"></a><span class="figcap"><b>Figure 2 </b>LDP VC protecting CCC VC (dual-homing 3PE scenario)</span><br><span><img class="vsd" src="images/fig_dc_vrp_vpws_cfg_607202.png"></span><br></div>
+</li></ul>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" rowfreeze="yes" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Mutual protection between an LDP VC and a CCC VC</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="32.5%" id="mcps1.4.1.7.2.3.1.1" liSelected="liSelected"><p>Scenario</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="67.5%" id="mcps1.4.1.7.2.3.1.2" liSelected="liSelected"><p>Key Configurations</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="32.5%" headers="mcps1.4.1.7.2.3.1.1 "><p>Dual-homing 2PE scenario</p>
+</td>
+<td class="cellrowborder" valign="top" width="67.5%" headers="mcps1.4.1.7.2.3.1.2 "><div class="p"><span>LDP VC protecting CCC VC</span><ul><li>Configure a primary PW (CCC VC) on PE1.</li><li>Configure a secondary (bypass) PW on PE1 to protect the CCC VC.</li></ul>
+<span>CCC VC protecting LDP VC</span><ul><li>Configure a primary PW (LDP VC) on PE1.</li><li>Configure a secondary PW (CCC VC) on PE1 to protect the primary PW (LDP VC).</li></ul>
+</div>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="32.5%" headers="mcps1.4.1.7.2.3.1.1 "><p>Dual-homing 3PE scenario</p>
+</td>
+<td class="cellrowborder" valign="top" width="67.5%" headers="mcps1.4.1.7.2.3.1.2 "><div class="p"><span>LDP VC protecting CCC VC</span><ul><li>Configure a primary PW (CCC VC) on PE2.</li><li>Configure a secondary (bypass) PW on PE1 to protect the CCC VC.</li><li>Configure PW redundancy on PE1 and PE3.</li></ul>
+<span>CCC VC protecting LDP VC</span><ul><li>Configure a primary PW on PE1.</li><li>Configure a secondary PW (CCC VC) on PE2 to protect the primary PW (LDP VC).</li><li>Configure PW redundancy on PE1 and PE3.</li></ul>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 class="sectiontitle">Pre-configuration Tasks</h4><div class="p">Before configuring mutual protection between an LDP VC and a CCC VC, complete the following tasks:<ul><li><p>Configure PW status negotiation. You can configure E-Trunk or VRRP to determine the primary/secondary status of PWs.</p>
+</li><li><p>Configure static routing or an IGP for the PEs and Ps on the MPLS backbone network to implement IP connectivity.</p>
+</li><li><p>Configure basic MPLS functions on the PEs and Ps of the MPLS backbone network.</p>
+</li><li><p>Establish tunnels between PEs based on tunnel policies. If no tunnel policy is configured, LDP tunnels are established by default.</p>
+</li></ul>
+</div>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172369844__1.4.2"></a><a name="1.4.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure MPLS L2VPN.</span><ol type="a"><li><span>Run the <a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a> command to enter the system view.</span></li><li><span>Run the <a href="cmdqueryname=mpls+l2vpn"><b><span class="cmdname">mpls l2vpn</span></b></a> command to configure MPLS L2VPN.</span></li><li><span>Run the <a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a> command to return to the system view.</span></li></ol>
+</li><li><span>Create a CCC VC.</span><ol type="a"><li><span>Run the <a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> [ .<i><span class="varname">subinterface-number</span></i> ] command to enter the AC interface view.</span></li><li><span>Run the <a href="cmdqueryname=mpls+ccc"><b><span class="cmdname">mpls ccc</span></b></a> [ <strong><span>instance-name</span></strong> <i><span class="varname">instance-name</span></i> ] <strong><span>out-interface</span></strong> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> [ [ <strong><span>ip-interworking</span></strong> | <strong><span>ip-layer2</span></strong> | <strong><span>raw</span></strong> | <strong><span>tagged</span></strong> ] | [ <strong><span>access-port</span></strong> ] ] <sup>*</sup> command to create a primary CCC VC.</span></li><li><span>(Optional) Run the <a href="cmdqueryname=mpls+ccc"><b><span class="cmdname">mpls ccc</span></b></a> <strong><span>out-interface</span></strong> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> [ [ <strong><span>ip-interworking</span></strong> | <strong><span>ip-layer2</span></strong> | <strong><span>raw</span></strong> | <strong><span>tagged</span></strong> ] | [ <strong><span>access-port</span></strong> ] | [ <strong><span>secondary</span></strong> ] ] <sup>*</sup> command to create a secondary CCC VC.</span></li></ol>
+<p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If you specify the <strong><span>secondary</span></strong> keyword, a secondary CCC VC is created. If this keyword is not specified, the created CCC will be a primary VC.</p>
+</div></div>
+</p></li><li><span>Run the <span><span><a href="cmdqueryname=mpls+l2vc"><b><span class="cmdname">mpls l2vc</span></b></a></span> { <i><span class="varname">ip-address</span></i> | <strong><span>pw-template</span></strong> <i><span class="varname">template-name</span></i> } <sup>*</sup> <i><span class="varname">vc-id</span></i> [ <strong><span>tunnel-policy</span></strong> <i><span class="varname">policy-name</span></i><span> [ { <strong><span>endpoint</span></strong> <i><span class="varname">endpoint-address</span></i> | [ <strong><span>endpoint</span></strong> <i><span class="varname">endpoint4-address</span></i> ] } <strong><span>color</span></strong> <i><span class="varname">color-value</span></i> ]</span> | [ <strong><span>control-word</span></strong> | <strong><span>no-control-word</span></strong> ] | [ <strong><span>raw</span></strong> | <strong><span>tagged</span></strong> | <strong><span>ip-layer2</span></strong> | <strong><span>ip-interworking</span></strong> ] | <strong><span>access-port</span></strong> | [ <strong><span>secondary</span></strong> | <strong><span>bypass</span></strong> ] | <strong><span>ignore-standby-state</span></strong> ] <sup>*</sup></span> command to create a PW.</span><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If you specify the <strong><span>secondary</span></strong> or <strong><span>bypass</span></strong> keyword, a backup VC is created. If this keyword is not specified, a primary VC is created.</p>
+</div></div>
+</p></li><li><span>(Optional) Run the <a href="cmdqueryname=mpls+l2vpn+pw+ignore-ac-state"><b><span class="cmdname">mpls l2vpn pw ignore-ac-state</span></b></a> [ <strong><span>secondary</span></strong> | <strong><span>bypass</span></strong> ] command for the PW to ignore the impact of AC status changes on PW service status.</span><p><p>If you want an LDP-based bypass PW to ignore AC status changes, specify the <strong><span>bypass</span></strong> keyword.</p>
+<p>If you want an LDP-based secondary PW to ignore AC status changes, also specify the <strong><span>secondary</span></strong> keyword.</p>
+<p>In reliability scenarios where an LDP VC protects a local CCC VC, if an AC interface goes down, the PW status changes to down accordingly. When the AC interface recovers, the PW needs to be re-established. If a primary/secondary PW switchover is performed in this case, traffic is switched back to the primary PW only after PW status negotiation is complete. As a result, the switchback performance is poor. To improve switchback performance, run the <a href="cmdqueryname=mpls+l2vpn+pw+ignore-ac-state"><b><span class="cmdname">mpls l2vpn pw ignore-ac-state</span></b></a> command. After this command is run, the PW remains up after the AC interface goes down. After the AC interface recovers, the PW does not need to be re-established, enhancing switchback performance.</p>
+</p></li><li><span>Run the <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a> command to commit the configuration.</span></li></ol></div>
+<div class="postreq"><a name="EN-US_TASK_0172369844__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Verifying the Configuration</h4><div class="p">After configuring mutual protection between an LDP VC and a CCC VC, verify the configuration.<ul><li>Run the <a href="cmdqueryname=display+mpls+l2vpn+vpws"><b><span class="cmdname">display mpls l2vpn vpws</span></b></a> [ <strong><span>interface</span></strong> <i><span class="varname">interface-type interface-number</span></i> [ <strong><span>verbose</span></strong> ] ] command to check VPWS PW information.</li></ul>
+</div>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_3000.html">VPWS Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_5007.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_6065.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

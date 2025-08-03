@@ -1,0 +1,20 @@
+Configuration Precautions for MAC
+=================================
+
+Configuration_Precautions_for_MAC
+
+#### Feature Requirements
+
+**Table 1** Feature requirements
+| Feature Requirements | Series | Models |
+| --- | --- | --- |
+| To prevent uplink traffic interruptions, do not configure the action to be taken upon detection of MAC address flapping on uplink interfaces. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| 1. To make IMAC limit take effect immediately, the EMAC address corresponding to the IMAC is learned only after the IMAC is learned. Therefore, the first packet triggers IMAC learning and the second packet triggers EMAC learning. The EMAC address can be learned only when at least two packets are received. If the traffic volume is low and MAC address learning limit is configured on an interface, the number of MAC addresses displayed in the display mac-address command output may be different from the maximum number of MAC addresses limited. In this case, you need to wait for an aging period.  2. Alarm matching: When MAC address learning limit is deleted or a board is reset, the existing alarm for MAC address learning limit does not support alarm matching. That is, after the alarm is triggered, the clear alarm is not triggered when the board is removed and then inserted or the MAC limit is deleted.  3. In V800R009C10 and later versions, the command for MAC address limit does not automatically clear MAC addresses. Therefore, the MAC address limit may not take effect immediately after being configured, and the change of the MAC address limit may not take effect. You need to run the reset mac-address command to make the MAC address limit take effect. When MAC address learning limit is configured on an interface, the upstream MAC addresses are learned quickly and MAC address learning limit takes effect immediately. The remaining MAC addresses are aged after an aging period. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| After MAC accounting is enabled, packet statistics are collected after a period of time. Packet statistics are not collected in a timely manner, affecting statistics accuracy. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| The sub-interface for QinQ stacking accesses a VSI. When the CE-VLAN ID of user packets changes, the CE-VLAN ID is not updated in the displayed MAC address entry if the MAC address is not relearned. After the MAC address is relearned, the latest CE-VLAN ID is displayed in the MAC address entry. When the same MAC address corresponds to different CE VLANs, only the VLAN involved in MAC address learning is displayed. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| In the scenario where primary and secondary PWs exist, the VSI MAC addresses cannot be dynamically queried based on the key node pwRole. All nodes will be displayed. After a full query, you can filter nodes based on pwRole. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| When the configured MAC-limit exceeds the upper limit, configurations such as command lines can be delivered normally, but the maximum number of MAC address entries allowed by a board takes effect. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| The sticky-mac function and the sticky-mac source MAC address check function do not apply to scenarios where EVPN and VPLS coexist or are stitched. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| The reverse address check function depends on MAC address learning. After the mac-learnning disable command is run, the reverse address check function cannot be configured. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| The sticky MAC address whitelist does not allow EVPN MAC address qualify. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| The sticky-mac function/sticky-mac source MAC address check function conflicts with the UMR function. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |

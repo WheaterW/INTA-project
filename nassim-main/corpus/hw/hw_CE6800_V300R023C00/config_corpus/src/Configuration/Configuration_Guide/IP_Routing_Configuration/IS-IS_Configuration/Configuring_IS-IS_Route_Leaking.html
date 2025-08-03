@@ -1,0 +1,115 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring IS-IS Route Leaking">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0019.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0021.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0114.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IS-IS">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130784106">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<link rel="stylesheet" type="text/css" href="public_sys-resources/imagePopup.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/customQuery.js"></script>
+<script language="javascript" type="text/javascript" src="public_sys-resources/imagePopup.js"></script>
+<title>Configuring IS-IS Route Leaking</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130784106"></a><a name="EN-US_TASK_0000001130784106"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring IS-IS Route Leaking</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130784106__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>When Level-1 and Level-2 areas both exist on an IS-IS network, Level-2 routing devices do not advertise the learned routing information about a Level-1 area and the backbone area to any other Level-1 area by default. As a result, Level-1 routing devices do not know the routing information beyond the local area, unable to select the optimal route to a destination beyond the local area.</p>
+<p>With route leaking, Level-1-2 devices can select routes of other Level-1 areas and the backbone area using routing policies or tags and advertise the selected routes to the local Level-1 area. <a href="#EN-US_TASK_0000001130784106__fig_dc_vrp_isis_feature_003201">Figure 1</a> shows the typical networking for route leaking.</p>
+<ul><li><p>Devices A, B, C, and D belong to area 10. DeviceA and DeviceB are Level-1 devices, and DeviceC and DeviceD are Level-1-2 devices.</p>
+</li><li><p>DeviceE and DeviceF belong to area 20 and are Level-2 devices.</p>
+</li></ul>
+<div class="fignone" id="EN-US_TASK_0000001130784106__fig_dc_vrp_isis_feature_003201"><a name="EN-US_TASK_0000001130784106__fig_dc_vrp_isis_feature_003201"></a><a name="fig_dc_vrp_isis_feature_003201"></a><span class="figcap"><b>Figure 1 </b>Network diagram of route leaking</span><br><span><img class="imgResize" src="figure/en-us_image_0000001176743813.png" width="517.7025" height="227.43" title="Click to enlarge"></span></div>
+<p>The optimal route for DeviceA to send packets to DeviceF is DeviceA -&gt; DeviceB -&gt; DeviceD -&gt; DeviceE -&gt; DeviceF, as its cost is 40 (10 + 10 + 10 + 10 = 40), which is less than that (10 + 50 + 10 = 70) of the other route (DeviceA -&gt; DeviceC -&gt; DeviceE -&gt; DeviceF). However, if you check routes on DeviceA, you can find that the selected route is the latter.</p>
+<p>This is due to DeviceA being unaware of routes beyond the local area, and sending the packets beyond the local area to the nearest Level-1-2 device.</p>
+<p>Enable route leaking on Level-1-2 devices (DeviceC and DeviceD) and then check the selected path. The path is DeviceA -&gt; DeviceB -&gt; DeviceD -&gt; DeviceE -&gt; DeviceF, which is the optimal route from DeviceA to DeviceF.</p>
+</div></div>
+<div class="steps-unordered"><a name="EN-US_TASK_0000001130784106__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ul><li><span>Configure route leaking from a Level-2 area to the local Level-1 area.</span><ol><li class="substepexpand"><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Enter the IS-IS view.</span><p><pre class="screen"><a href="cmdqueryname=isis"><b><span class="cmdname">isis</span></b></a> [ <i><span class="varname">process-id</span></i> ]</pre>
+</p></li><li class="substepexpand"><span>Configure route leaking from a Level-2 area to the local Level-1 area.</span><p><pre class="screen"><a href="cmdqueryname=import-route+isis+level-2+into+level-1"><b><span class="cmdname">import-route isis level-2 into level-1</span></b></a> [ <strong><span>tag</span></strong> <i><span class="varname">tag</span></i> | <strong><span>filter-policy</span></strong> { <i><span class="varname">acl-number</span></i><span> | <strong><span>acl-name</span></strong> <i><span class="varname">acl-name</span></i></span> | <strong><span>ip-prefix</span></strong> <i><span class="varname">ip-prefix-name</span></i> | { <strong><span>route-policy</span></strong> <i><span class="varname">route-policy-name</span></i> } <span>}</span><span> | <strong><span>direct</span></strong> { <strong><span>allow-filter-policy</span></strong> | <strong><span>allow-up-down-bit</span></strong> } <sup>*</sup></span> ] <sup>*</sup></pre>
+</p><p><p>By default, Level-2 routing information is not leaked to Level-1 areas.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>This command can be run only on Level-1-2 devices connected to an external area.</p>
+</div></div>
+</p></li><li class="substepexpand"><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001130784106__en-us_task_0234857734_screen14848162118611"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001130784106__en-us_task_0234857734_cmdname1784862115612">commit</span></b></a></pre>
+</p></li></ol>
+</li><li><span>Configure route leaking from the local Level-1 area to the Level-2 area.</span><ol><li class="substepexpand"><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Enter the IS-IS view.</span><p><pre class="screen"><a href="cmdqueryname=isis"><b><span class="cmdname">isis</span></b></a> [ <i><span class="varname">process-id</span></i> ]</pre>
+</p></li><li class="substepexpand"><span>Configure route leaking from the local Level-1 area to the Level-2 area.</span><p><pre class="screen"><a href="cmdqueryname=import-route+isis+level-1+into+level-2"><b><span class="cmdname">import-route isis level-1 into level-2</span></b></a> [ <strong><span>tag</span></strong> <i><span class="varname">tag-value</span></i> | <strong><span>filter-policy</span></strong> { <i><span class="varname">acl-number</span></i><span> | <strong><span>acl-name</span></strong> <i><span class="varname">acl-name-value</span></i></span> | <strong><span>ip-prefix</span></strong> <i><span class="varname">ip-prefix-name</span></i> | { <strong><span>route-policy</span></strong> <i><span class="varname">route-policy-name</span></i> } <span>} | <strong><span>direct</span></strong> <strong><span>allow-filter-policy</span></strong> </span>] <sup>*</sup></pre>
+<p>By default, all routing information (except default route information) in the Level-1 area is leaked to the Level-2 area. You can specify parameters as required in the command so that only information about the routes that meet specified conditions is leaked to the Level-2 area.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>This command can be run only on Level-1-2 devices connected to an external area.</p>
+</div></div>
+</p></li><li class="substepexpand"><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001130784106__en-us_task_0234857734_screen14848162118611_1"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001130784106__en-us_task_0234857734_cmdname1784862115612_1">commit</span></b></a></pre>
+</p></li></ol>
+</li></ul></div>
+<div class="example"><a name="EN-US_TASK_0000001130784106__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>Run the <a href="cmdqueryname=display+isis+route"><b><span class="cmdname">display isis route</span></b></a> [ <i><span class="varname">process-id</span></i><span> | <strong><span>vpn-instance</span></strong> <i><span class="varname">vpn-instance-name</span></i></span> ] [ <strong><span>ipv4</span></strong> ] [ <strong><span>verbose</span></strong> | [ <strong><span>level-1</span></strong> | <strong><span>level-2</span></strong> ] | <i><span class="varname">ip-address</span></i> [ <i><span class="varname">mask</span></i> | <i><span class="varname">mask-length</span></i> ] ] command to check IS-IS route leaking information.</p>
+</div>
+</div>
+
+<ul class="ullinks">
+<dl>
+<dt>
+<a href="vrp_isis_ipv4_cfg_0114.html">Example for Configuring IS-IS Route Leaking</a>
+</dt>
+<dd>
+</dd>
+</dl>
+</ul>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_isis_ipv4_cfg_0001.html">IS-IS Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_isis_ipv4_cfg_0019.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_isis_ipv4_cfg_0021.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+
+<script language="JavaScript">
+<!--
+initImageViewer('.imgResize');
+var msg_imageMax = "view original image";
+var msg_imageClose = "close";
+//--></script></body>
+</html>

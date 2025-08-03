@@ -1,0 +1,142 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Attack Source Tracing">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_localattackdefense_cfg_0024.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_localattackdefense_cfg_0027.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Local Attack Defense">
+<meta name="featuretype" content="Security">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Local Attack Defense">
+<meta name="featuretype" content="Security">
+<meta name="featurename" content="Local Attack Defense">
+<meta name="featuretype" content="Security">
+<meta name="featuretype" content="Security">
+<meta name="featuretype" content="Security Protection">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001563996785">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Attack Source Tracing</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001563996785"></a><a name="EN-US_TASK_0000001563996785"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Attack Source Tracing</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001563996785__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In <a href="#EN-US_TASK_0000001563996785__fig_dc_cfg_LocalAttackDefense_002501">Figure 1</a>, users on different network segments access the Internet through <span class="keyword">DeviceA</span>. Because there are a large number of access users, <span class="keyword">DeviceA</span> often processes a large number of ARP packets, leading to a high CPU usage and hence affecting services.</p>
+<p>The administrator requires that the device analyze the ARP packets sent to the CPU, identify the packets whose rate exceeds the threshold as attack packets, find out the attack source user or source interface, and send logs and alarms to notify the administrator so that the administrator can take security measures to protect the CPU. Users on Net2 are fixed authorized users, so the administrator needs to ensure that ARP packets of these users can be sent to the CPU.</p>
+<div class="fignone" id="EN-US_TASK_0000001563996785__fig_dc_cfg_LocalAttackDefense_002501"><a name="EN-US_TASK_0000001563996785__fig_dc_cfg_LocalAttackDefense_002501"></a><a name="fig_dc_cfg_LocalAttackDefense_002501"></a><span class="figcap"><b>Figure 1 </b>Networking diagram of attack source tracing</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1, interface 2, interface 3, and interface 4 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, <span>100GE</span><span>1/0/3</span>, and <span>100GE</span><span>1/0/4</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001512677510.png"></span></div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001563996785__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure an attack defense policy.</span><p><p># Create an attack defense policy.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[*<span class="keyword">DeviceA</span>] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>cpu-defend policy test1</strong></pre>
+<p># Enable attack source tracing.</p>
+<pre class="screen">[*DeviceA-cpu-defend-policy-test1] <strong>auto-defend enable</strong></pre>
+<p># Set the attack source tracing threshold to 100 pps.</p>
+<pre class="screen">[*DeviceA-cpu-defend-policy-test1] <strong>auto-defend threshold 100</strong></pre>
+<p># Set the sampling ratio for attack source tracing to 7. That is, one packet is sampled in every seven packets.</p>
+<pre class="screen">[*DeviceA-cpu-defend-policy-test1] <strong><a href="cmdqueryname=auto-defend+attack-packet+sample+7"><b><span class="cmdname">auto-defend attack-packet sample 7</span></b></a></strong></pre>
+<p># Set the packet type for attack source tracing to ARP packets.</p>
+<pre class="screen">[*DeviceA-cpu-defend-policy-test1] <strong>auto-defend protocol arp</strong></pre>
+<p># Set the attack source tracing mode to source tracing based on source MAC addresses and source IP addresses.</p>
+<pre class="screen">[*DeviceA-cpu-defend-policy-test1] <strong>auto-defend trace-type source-mac source-ip</strong></pre>
+<p># Enable the event reporting function for attack source tracing.</p>
+<pre class="screen">[*DeviceA-cpu-defend-policy-test1] <strong>auto-defend alarm enable</strong></pre>
+<p># Configure a punishment action for attack source tracing: When the device is attacked, it discards packets from the attack source for 360s. Configure the punishment action when you confirm that the device is under attack; otherwise, the device may discard a lot of valid protocol packets, affecting services.</p>
+<pre class="screen">[*DeviceA-cpu-defend-policy-test1] <strong>auto-defend action deny timeout 360</strong>
+[*DeviceA-cpu-defend-policy-test1] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA-cpu-defend-policy-test1] <strong>quit</strong></pre>
+<p># Configure a whitelist for attack source tracing.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>acl number 2001</strong>
+[*DeviceA-acl-basic-2001] <strong>rule permit source 10.2.2.0 0.0.0.255</strong>
+[*DeviceA-acl-basic-2001] <strong>quit</strong>
+[*DeviceA] <strong>cpu-defend policy test1</strong>
+[*DeviceA-cpu-defend-policy-test1] <strong>auto-defend whitelist 1 acl 2001</strong>
+[*DeviceA-cpu-defend-policy-test1] <strong>quit</strong></pre>
+</p></li><li><span>Apply the attack defense policy.</span><p><pre class="screen">[*DeviceA] <strong>cpu-defend-policy test1</strong>
+[*<span class="keyword">DeviceA</span>] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001563996785__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Verifying the Configuration</h4><div class="p"># Display the configuration of attack source tracing.<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>display auto-defend configuration cpu-defend policy test1</strong>                                                                 
+-----------------------------------------------------------------------                                                             
+ Name  : test1                                                                                                                      
+ Related slot : ***                                                                                                          
+ auto-defend                      : enable                                                                                          
+ auto-defend threshold            : 100 (pps)                                                                                       
+ auto-defend attack-packet sample : 7 (pps)                                                                                         
+ auto-defend alarm                : enable                                                                                          
+ auto-defend alarm threshold      : 128 (pps)                                                                                       
+ auto-defend action               : deny timer: 360 (second)                                                                        
+ auto-defend trace-type           : source-mac source-ip                                                                            
+ auto-defend protocol             : arp                                                                                             
+ auto-defend whitelist 1          : acl number 2001                                                                                 
+-----------------------------------------------------------------------     </pre>
+</div>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001563996785__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Configuration Scripts</h4><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+cpu-defend policy test1                                                                                                             
+ auto-defend enable
+ auto-defend threshold 100  
+ auto-defend attack-packet sample 7 
+ auto-defend protocol arp
+ auto-defend trace-type source-mac source-ip
+ auto-defend alarm enable                                                                                                           
+ auto-defend action deny timeout 360                                                                                              
+ auto-defend whitelist 1 acl 2001
+#
+cpu-defend-policy test1
+#
+acl number 2001
+ rule 5 permit source 10.2.2.0 0.0.0.255
+# 
+return </pre>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_localattackdefense_cfg_0024.html">Configuring Attack Source Tracing
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_localattackdefense_cfg_0027.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

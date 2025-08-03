@@ -1,0 +1,124 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="M-LAG Setup Process">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../toctopics/en-us_concept_0000001513048806.html">
+<meta name="DC.Relation" scheme="URI" content="../toctopics/en-us_concept_0000001564128889.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="M-LAG">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="M-LAG">
+<meta name="featuretype" content="High Availability">
+<meta name="featurename" content="M-LAG">
+<meta name="featuretype" content="High Availability">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001512689650">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>M-LAG Setup Process</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001512689650"></a><a name="EN-US_CONCEPT_0000001512689650"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">M-LAG Setup Process</h1>
+<div><p>During M-LAG setup, an M-LAG can work in dual-active or active/standby mode depending on the generation mode of M-LAG master and backup member interfaces.</p>
+<div class="section"><h4 class="sectiontitle">Dual-Active Mode</h4><p>In <a href="#EN-US_CONCEPT_0000001512689650__fig356791610172">Figure 1</a>, Eth-Trunks are established between DeviceA and DeviceC (a user-side device) and between DeviceB and DeviceC. DeviceA and DeviceB set up an M-LAG. In dual-active mode, DeviceA and DeviceB use the dynamic fabric service (DFS) group protocol for pairing between one another over the peer-link, negotiating the M-LAG master and backup device roles and member interfaces, and synchronizing required entries. The peer-link between DeviceA and DeviceB is an Eth-Trunk used to exchange negotiation packets and forward part of traffic. The interfaces at both ends of the peer-link are known as peer-link interfaces, which are added to all VLANs and bridge domains (BDs) by default. M-LAG member interfaces are Eth-Trunk interfaces on DeviceA and DeviceB that connect to DeviceC.</p>
+<p>In dual-active mode, both Eth-Trunks can load balance traffic sent from the user-side device and provide backup for each other.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001512689650__fig356791610172"><a name="EN-US_CONCEPT_0000001512689650__fig356791610172"></a><a name="fig356791610172"></a><span class="figcap"><b>Figure 1 </b>Basic topology of an M-LAG in dual-active mode</span><br><span><img class="vsd" src="../images/en-us_image_0000001563888849.png" width="NaN" height="NaN"></span></div>
+<div class="p">The M-LAG setup process includes the following stages:<ol><li><p>DFS group pairing</p>
+<p>A DFS group is used to pair DeviceA and DeviceB. After two M-LAG devices are configured, they send DFS group Hello packets to each other through the peer-link (an Eth-Trunk). Upon receiving Hello packets from the peer device, the local device checks whether the DFS group ID in the packets is the same as that of the local device. If the DFS group IDs are the same, DFS group pairing of the two devices is successful.</p>
+</li><li><p>DFS master/backup device negotiation</p>
+<p>After DeviceA and DeviceB are paired successfully, they send DFS group device information packets to each other through the peer-link to determine the DFS master and backup devices based on the DFS group priorities and system MAC addresses carried in the packets. The DFS master and backup devices are also known as the M-LAG master device and M-LAG backup device, respectively.</p>
+<p>For example, after receiving packets from DeviceA, DeviceB checks and records DeviceA's information, and compares their DFS group priorities. If DeviceA has a higher DFS group priority than DeviceB, DeviceA acts as the M-LAG master device and DeviceB as the M-LAG backup device. If DeviceA and DeviceB have the same DFS group priority, the device with a smaller system MAC address acts as the M-LAG master device.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Under normal circumstances, both the M-LAG master and backup devices forward service traffic and their forwarding behaviors are the same. These devices will only use different forwarding behaviors when a fault occurs in the M-LAG.</p>
+</div></div>
+</li><li><p>M-LAG master and backup member interface negotiation</p>
+<p>Once the M-LAG master and backup devices are determined, both devices send M-LAG device information packets carrying the configuration information of M-LAG member interfaces to one another through the peer-link. After member interface information is synchronized between the two devices, M-LAG master and backup member interfaces are determined.</p>
+<p>When the local and peer devices synchronize information about M-LAG member interfaces, the first M-LAG member interface that changes from down to up becomes the M-LAG master member interface, with the other becoming the M-LAG backup member interface. By default, the master and backup roles of M-LAG member interfaces remain unchanged after a fault is rectified. Specifically, if the device providing the M-LAG master member interface fails, the M-LAG member interface on the peer device changes from the backup state to the master state. After the faulty device recovers, the M-LAG member interface on it is in the backup state, and the M-LAG member interface on the peer device remains in the master state.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The forwarding behaviors of M-LAG master and backup member interfaces are different only when the M-LAG forwards multicast traffic.</p>
+</div></div>
+</li><li><p>Dual-Active Detection (DAD)</p>
+<p>After M-LAG master and backup devices are determined, both devices send DAD packets at an interval of 1s through the DAD link (also known as the heartbeat link) at Layer 3. If both devices can successfully receive DAD packets from one another, the M-LAG starts to work. If an M-LAG member device detects that the peer-link fails, it sends three DAD packets separately at intervals of 200 ms to accelerate DAD after the DAD delay (3s by default). This prevents accelerated DAD from being incorrectly triggered and causing interfaces on the other M-LAG member device to enter the error-down state.</p>
+<p>Under normal circumstances, the DAD link does not participate in any traffic forwarding behaviors in the M-LAG, and the M-LAG continues to work even if DAD fails. Instead, it is only used to detect if two M-LAG master devices exist when the DFS group pairing or peer-link fails. <a href="#EN-US_CONCEPT_0000001512689650__table18480195010717">Table 1</a> describes the DAD link deployment modes supported by the device.</p>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001512689650__table18480195010717"></a><a name="table18480195010717"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001512689650__table18480195010717" frame="border" border="1" rules="all"><caption><b>Table 1 </b>DAD link deployment modes</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="35.57%" id="mcps1.3.2.5.1.4.4.2.3.1.1" liSelected="liSelected"><p>Mode</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="64.42999999999999%" id="mcps1.3.2.5.1.4.4.2.3.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="35.57%" headers="mcps1.3.2.5.1.4.4.2.3.1.1 "><p>An independent heartbeat link is used as the DAD link.</p>
+</td>
+<td class="cellrowborder" valign="top" width="64.42999999999999%" headers="mcps1.3.2.5.1.4.4.2.3.1.2 "><p>This mode is recommended.</p>
+<p>When an independent heartbeat link is used as the DAD link, you are advised to use Layer 3 main interfaces to establish the DAD link. If a VLANIF interface is used, the corresponding VLAN cannot be allowed on the peer-link interface; otherwise, a loop or MAC address flapping occurs.</p>
+<p>In addition, you need to configure interfaces at both ends of the DAD link not to enter the error-down state upon peer-link failure to prevent them from entering the error-down state if the peer-link fails.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="35.57%" headers="mcps1.3.2.5.1.4.4.2.3.1.1 "><p>There is no independent heartbeat link, and a link between management interfaces is used as the DAD link.</p>
+</td>
+<td class="cellrowborder" valign="top" width="64.42999999999999%" headers="mcps1.3.2.5.1.4.4.2.3.1.2 "><p>This mode is recommended.</p>
+<p>When a link between management interfaces is used as the DAD link, the management interface IP addresses bound to the DFS group must be reachable to each other, and VPN instances must be bound to the management interfaces to ensure that DAD packets and service packets are transmitted separately.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="35.57%" headers="mcps1.3.2.5.1.4.4.2.3.1.1 "><p>There is no independent heartbeat link, and a link between service interfaces is used as the DAD link.</p>
+</td>
+<td class="cellrowborder" valign="top" width="64.42999999999999%" headers="mcps1.3.2.5.1.4.4.2.3.1.2 "><p>This mode is not recommended.</p>
+<p>When a link between service interfaces is used as the DAD link, you need to disable the enhanced DAD for double-fault failures function (that is, do not configure the <strong>peer</strong> <em>ip-address</em> parameter for DAD). Otherwise, if the peer-link fails, service interfaces on one M-LAG member device are set to the error-down state, causing error-down flapping.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>A link cannot function as both the DAD link and peer-link. Otherwise, if the link is down, DAD packets cannot be forwarded over this link, resulting in a DAD failure. As a result, interfaces on one M-LAG member device will not enter the error-down state, leading to abnormal packet forwarding.</p>
+</div></div>
+</li><li><p>M-LAG information synchronization</p>
+<p>When working properly, the M-LAG master and backup devices send M-LAG synchronization packets through the peer-link to synchronize information with each other in real time. M-LAG synchronization packets contain MAC address entries, ARP entries, and ND entries. The devices also send the status of M-LAG member interfaces. As such, traffic forwarding is not affected if either device fails, ensuring that normal services are not interrupted.</p>
+</li></ol>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Active/Standby Mode</h4><p>In <a href="#EN-US_CONCEPT_0000001512689650__fig47561245113319">Figure 2</a>, Eth-Trunks are established between DeviceA and a user-side server and between DeviceB and the user-side server. DeviceA and DeviceB set up an M-LAG. In active/standby mode, DeviceA and DeviceB use the DFS group protocol for pairing between one another over the peer-link, negotiating the M-LAG master and backup device roles and member interfaces, and synchronizing required entries. The peer-link between DeviceA and DeviceB is an Eth-Trunk used to exchange negotiation packets and forward part of traffic. The interfaces at both ends of the peer-link are known as peer-link interfaces, which are added to all VLANs and BDs by default. M-LAG member interfaces are Eth-Trunk interfaces on DeviceA and DeviceB that connect to the active and standby network interface cards (NICs) on the user-side server.</p>
+<p>The active/standby mode applies only to a scenario where the active and standby NICs of a server connect to an M-LAG. In active/standby mode, both links provide backup for each other but do not load balance traffic. Under normal circumstances, only the M-LAG device connected to the active NIC sends and receives traffic. After the M-LAG device connected to the standby NIC receives traffic, it forwards the traffic to the M-LAG device connected to the active NIC through the peer-link interface. When the M-LAG member interface connected to the active NIC of the server becomes down, traffic is diverted from the peer-link interface to the M-LAG device connected to the standby NIC, and is directly forwarded to the server through the M-LAG backup member interface, implementing fast switchover. This improves the switchover performance when a fault occurs in a scenario where the active and standby NICs of a server connect to an M-LAG.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001512689650__fig47561245113319"><a name="EN-US_CONCEPT_0000001512689650__fig47561245113319"></a><a name="fig47561245113319"></a><span class="figcap"><b>Figure 2 </b>Basic topology of an M-LAG in active/standby mode</span><br><span><img class="vsd" src="../images/en-us_image_0000001513048890.png" width="NaN" height="NaN"></span></div>
+<p>Similar to that in dual-active mode, the M-LAG setup process in active/standby mode includes the following stages:</p>
+<ol><li>DFS group pairing</li><li>DFS master/backup device negotiation</li><li>M-LAG master and backup member interface election</li><li>DAD</li><li>M-LAG information synchronization</li></ol>
+<p>The active/standby mode differs from the dual-active mode only in the generation mode of M-LAG master and backup member interfaces. In active/standby mode, the M-LAG master and backup devices negotiate the M-LAG master and backup member interfaces based on the protocol packets (for electing the M-LAG master member interface) sent by the active NIC of the server. The M-LAG member interface connected to the active NIC becomes the M-LAG master member interface, and the M-LAG member interface on the peer device becomes the M-LAG backup member interface. (That is, the M-LAG member interface connected to the standby NIC becomes the M-LAG backup member interface.)</p>
+<p>When the active NIC of the server fails, the standby NIC becomes the active NIC. The new active NIC sends packets for electing the M-LAG master member interface. After the M-LAG device where the original M-LAG backup member interface resides receives the packets, the original M-LAG backup member interface becomes the M-LAG master member interface. After the active NIC of the server recovers, the master and backup roles of M-LAG member interfaces remain unchanged by default. Whether the master and backup roles are changed depends on whether the active NIC sends packets for electing the M-LAG master member interface after the fault is rectified. If the active NIC sends packets for electing the M-LAG master member interface again after the fault is rectified, the master/backup status of M-LAG member interfaces is switched back.</p>
+<p>Currently, the <span>CE6885-LL (low latency mode)</span> supports M-LAG master and backup member interface election using only ARP, IGMP, and DHCP packets. Other models support M-LAG master and backup member interface election using ARP, ND, IGMP, DHCP, and MLD packets.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In active/standby mode, M-LAG master and backup member interface election depends on the packets for electing the M-LAG master member interface sent to the CPU. To ensure that IGMP/DHCP/MLD packets can be sent to the CPU, you need to enable IGMP snooping in a VLAN or BD so that M-LAG master and backup member interface election can be performed through IGMP packets. Alternatively, you need to enable DHCP globally so that M-LAG master and backup member interface election can be performed through DHCP packets. You can also enable MLD snooping in a VLAN or BD so that M-LAG master and backup member interface election can be performed through MLD packets. In addition, when an M-LAG device functions as a Layer 2 transparent transmission device or Layer 2 gateway, ARP/ND packets are not sent to the CPU, and M-LAG master and backup member interface election cannot be performed through packets for electing the M-LAG master member interface. In this case, you need to enable Layer 2 proxy ARP in a VLAN and enable ARP broadcast suppression or NS multicast suppression in a BD so that ARP/ND packets can be used for M-LAG master and backup member interface election.</p>
+</div></div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../toctopics/en-us_concept_0000001513048806.html">Understanding M-LAG
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../toctopics/en-us_concept_0000001564128889.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

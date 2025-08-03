@@ -1,0 +1,374 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring HTTP Redirect for Layer 2 IPoE Users Access with Dual Portal Servers and Dual RADIUS Servers Deployed">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_ipox_cfg_0083.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_014455.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_014458.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z50024784,z00603461,w00800033,z00588052,c00549182,w00556928,l00593348,w00606909,w00447999">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+<meta name="OWNER" content="c00549182">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="z00588052">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0202550852">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring HTTP Redirect for Layer 2 IPoE Users Access with Dual Portal Servers and Dual RADIUS Servers Deployed</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_CONCEPT_0202550852"></a><a name="EN-US_CONCEPT_0202550852"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring HTTP Redirect for Layer 2 IPoE Users Access with Dual Portal Servers and Dual RADIUS Servers Deployed</h1>
+<div><p>This section provides an example for configuring HTTP redirect for Layer 2 IPoE user access with dual portal servers and dual RADIUS servers deployed.</p>
+<div class="section"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_CONCEPT_0202550852__fig1733344912107">Figure 1</a>, the Layer 2 IPoE user belongs to the <strong>isp1</strong> domain, and web authentication based on HTTP redirect is used. RADIUS authentication and accounting are implemented to allow the user to access the network in Layer 2 IPoE mode through GE <span>0/1/2</span> of DeviceA. Configure the two portal&amp;web servers to work in master/backup mode to implement redundant backup. Configure the two RADIUS servers to work in master/backup and load-sharing modes. This allows both RADIUS servers to authenticate users and improves the user access performance. After the configurations are complete, ensure that the user can access the network after the user enters the correct username and password on the web authentication page and passes the authentication.</p>
+<div class="fignone" id="EN-US_CONCEPT_0202550852__fig1733344912107"><a name="EN-US_CONCEPT_0202550852__fig1733344912107"></a><a name="fig1733344912107"></a><span class="figcap"><b>Figure 1 </b>Configuring redirection of Layer 2 IPoE access users from HTTP pages to the web authentication page on a network with dual portal servers and dual RADIUS servers deployed</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interface 1 and interface 2 in this example represent GE <span>0/1/2</span>.1 and GE <span>0/1/1</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0214972052.png" width="NaN" height="NaN"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration Roadmap</h4><ol><li><p>Configure a user group.</p>
+</li><li><p>Configure an address pool.</p>
+</li><li><p>Configure authentication and accounting schemes.</p>
+</li><li><p>Configure a RADIUS server group.</p>
+</li><li><p>Configure web pre-authentication and authentication domains.</p>
+</li><li>Configure a loopback interface.</li><li><p>Configure the master and backup web authentication servers.</p>
+</li><li><p>Configure ACL rules and a traffic policy.</p>
+</li><li><p>Configure a BAS interface and an upstream interface.</p>
+</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Authentication scheme name and authentication mode</p>
+</li><li><p>Accounting scheme name and accounting mode</p>
+</li><li><p>RADIUS server group name, and IP addresses and port numbers of the RADIUS authentication and accounting servers</p>
+</li><li><p>IP address pool name, gateway address, and DNS server address</p>
+</li><li><p>Domain names</p>
+</li><li><p>IP addresses of the master and backup portal and web servers In this example, the master web server and master portal server are deployed on the same device, and their backup servers are also deployed on the same device.</p>
+</li></ul>
+<ul><li><p>BAS interface parameters</p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Procedure</h4><ol><li><p>Configure a user group.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname <span class="keyword">Device</span>A</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>user-group huawei</strong></pre>
+</li><li>Configure a local address pool on DeviceA.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>ip pool huawei bas local</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-ip-pool-huawei] <strong>gateway 10.10.10.1 24</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-ip-pool-huawei] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-ip-pool-huawei] <strong>section 0 10.10.10.2 10.10.10.200</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-ip-pool-huawei] <strong>quit</strong></pre>
+</li><li>Configure AAA schemes.<p># Configure an authentication scheme.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>aaa</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa] <strong>authentication-scheme auth2</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-aaa-authen-auth2] <strong>authentication-mode radius</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-aaa-authen-auth2] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa-authen-auth2] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa]<strong> authentication-scheme none</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-aaa-authen-none] <strong>authentication-mode none</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-aaa-authen-none]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa-authen-none] <strong>quit</strong></pre>
+<p># Configure an accounting scheme.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa] <strong>accounting-scheme acct2</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-aaa-accounting-acct2] <strong>accounting-mode radius</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-aaa-accounting-acct2] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa-accounting-acct2] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa] <strong>accounting-scheme</strong> <strong>none</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-aaa-accounting-none] <strong>accounting-mode none</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-aaa-accounting-none] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa-accounting-none] <strong>quit</strong></pre>
+<p># Configure the IPoE user password.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa]<strong> </strong><strong>default-password cipher YsHsjx_202206</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-aaa]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa]<strong> quit</strong></pre>
+</li><li>Configure a RADIUS server group and bind the two RADIUS servers to the group to implement redundancy backup and load balancing.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> radius-server group rd2</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-radius-rd2]<strong> radius-server authentication 192.168.2.2 1812</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-radius-rd2]<strong> radius-server authentication 192.168.2.3 1812</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-radius-rd2]<strong> radius-server accounting 192.168.2.2 1813</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-radius-rd2]<strong> radius-server accounting 192.168.2.3 1813</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-radius-rd2]<strong> radius-server shared-key Huawei</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-radius-rd2]<strong> radius-server algorithm loading-share</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-radius-rd2]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-radius-rd2]<strong> quit</strong></pre>
+</li><li>Configure domains and HTTP redirect.<p># Configure a web pre-authentication domain named <strong>web_before</strong>. Bind the two web servers to the domain to implement redundancy backup.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> aaa</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa]<strong> domain web</strong><strong>_before</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-aaa-domain-web_before]<strong> authentication-scheme none</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-aaa-domain-web_before]<strong> accounting-scheme none</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-aaa-domain-web_before] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa-domain-web_before]<strong> user-group huawei</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa-domain-web_before] <strong>dns primary-ip 192.168.2.254</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-aaa-domain-web_before] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa-domain-web_before]<strong> web-server</strong> <strong>192.168.2.4</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa-domain-web_before]<strong> web-server</strong> <strong>192.168.2.5</strong> <strong>slave</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa-domain-web_before]<strong> web-server url http://192.168.2.4/portal.html </strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa-domain-web_before] <strong>web-server url http://192.168.2.5/portal.html slave</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa-domain-web_before]<strong> ip-pool huawei</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa-domain-web_before]<strong> quit</strong></pre>
+<p># Configure a web authentication domain named <strong>isp1</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa]<strong> domain</strong> <strong>isp1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-aaa-domain-isp1]<strong> authentication-scheme auth2</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-aaa-domain-isp1]<strong> accounting-scheme acct2</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-aaa-domain-isp1]<strong> radius-server group rd2</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-aaa-domain-isp1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa-domain-isp1]<strong> quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-aaa]<strong> quit</strong></pre>
+</li><li>Configure a loopback interface.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>interface Loopback 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-LoopBack0] <strong>ip address 192.168.2.1 32</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-LoopBack0] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-LoopBack0] <strong>quit</strong></pre>
+</li><li>Configure a web authentication server. That is, configure the portal authentication server.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> web-auth-server enable</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> web-auth-server source interface LoopBack0</strong>
+<span>[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> web-auth-server source-ip 192.168.2.1</strong></span>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> web-auth-server 192.168.2.4 key cipher Huawei</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> web-auth-server 192.168.2.5 key cipher Huawei</strong></pre>
+</li><li>Configure a traffic policy.<ol type="a"><li>Configure ACLs.<p># Configure an ACL numbered 6000 to permit the traffic originating from the user group <strong>huawei</strong> to the web server and DNS server.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl 6000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-ucl-6000] <strong>rule 5 permit ip source user-group huawei destination ip-address 192.168.2.4</strong> <strong>0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-ucl-6000] <strong>rule 10 permit ip source user-group huawei destination ip-address 192.168.2.5 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-ucl-6000] <strong>rule 15 permit ip source user-group huawei destination ip-address 192.168.2.254 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-ucl-6000] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl-ucl-6000] <strong>quit</strong></pre>
+<p># Configure an ACL numbered 6001 to allow HTTP redirect for the TCP packets originating from the user group <strong>huawei</strong> and whose destination port information is www.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl 6001</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-ucl-6001] <strong>rule 5 permit tcp destination-port eq www source user-group huawei</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-ucl-6001] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl-ucl-6001] <strong>quit</strong></pre>
+<p># Configure an ACL numbered 6002 to deny the traffic originating from the user group <strong>huawei</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl 6002</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-ucl-6002] <strong>rule 5 permit ip source user-group huawei</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-acl-ucl-6002] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl-ucl-6002] <strong>quit</strong></pre>
+</li><li>Configure traffic classifiers.<p># Configure a traffic classifier named <strong>c1</strong> and apply ACL 6000 to the classifier.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>traffic classifier c1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-classifier-c1] <strong>if-match acl 6000</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-classifier-c1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-classifier-c1] <strong>quit</strong></pre>
+<p># Configure a traffic classifier named <strong>c2</strong> and apply ACL 6001 to the classifier.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>traffic classifier c2</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-classifier-c2] <strong>if-match acl 6001</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-classifier-c2] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-classifier-c2] <strong>quit</strong></pre>
+<div class="p"># Configure a traffic classifier named <strong>c3</strong> and apply ACL 6002 to the classifier.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>traffic classifier c3</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-classifier-c3] <strong>if-match acl 6002</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-classifier-c3] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-classifier-c3] <strong>quit</strong></pre>
+</div>
+</li><li>Configure traffic behaviors.<p># Configure a traffic behavior named <strong>b1</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>traffic behavior b1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-b1] <strong>permit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-b1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-behavior-b1] <strong>quit</strong></pre>
+<p># Configure a traffic behavior named <strong>b2</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>traffic behavior b2</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-b2] <strong>http-redirect</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-b2] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-behavior-b2] <strong>quit</strong></pre>
+<p># Configure a traffic behavior named <strong>b3</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>traffic behavior b3</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-b3] <strong>deny </strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-b3] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-behavior-b3] <strong>quit</strong></pre>
+</li><li>Configure a traffic policy.<p># Configure a traffic policy named <strong>p1</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>traffic policy p1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-trafficpolicy-p1] <strong>classifier c1 behavior b1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-trafficpolicy-p1] <strong>classifier c2 behavior b2</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-trafficpolicy-p1] <strong>classifier c3 behavior b3</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-trafficpolicy-p1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-trafficpolicy-p1] <strong>quit</strong></pre>
+</li><li>Apply the traffic policy.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>traffic-policy p1 inbound</strong></pre>
+</li></ol>
+</li><li>Configure interfaces.<p># Configure a BAS interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>interface GigabitEthernet <span>0/1/2</span>.1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>.1] <strong>user-vlan 1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>.1-vlan-1-1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>.1-vlan-1-1] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>.1] <strong>bas</strong> 
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>.1-bas]<strong> access-type layer2-subscriber default-domain pre-authentication web_before authentication isp1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>.1-bas]<strong> authentication-method web</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>.1-bas]<strong> quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/2</span>.1]<strong> quit</strong></pre>
+<p># Configure an upstream interface connecting the BRAS to the Internet.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>interface GigabitEthernet <span>0/1/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/1</span>]<strong> ip address 192.168.3.1 255.255.255.0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/1</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> quit</strong></pre>
+</li><li>Verify the configuration.<p>After completing the configurations, have the user go online. Then, run the <strong>display access-user domain</strong> command to check information about the user in the domain. The command output shows that the user has gone online successfully.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>display access-user domain web_before</strong>
+  ------------------------------------------------------------------------------
+  UserID  Username             Interface         IP address       MAC
+          Vlan                 IPv6 address      Access type
+  ------------------------------------------------------------------------------
+  20      user1@web_before     GE<span>0/1/2</span>.1         10.10.10.200     00e0-fc12-3456
+          1/-                  -                 IPOE 
+  ------------------------------------------------------------------------------</pre>
+<p>Normally, after the user opens a browser on the PC and enters an HTTP address in the address bar, a web authentication page is displayed. The user then enters the username and password. If the user is authenticated, it can enter the post-authentication domain.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>display access-user domain isp1</strong>
+  ------------------------------------------------------------------------------
+  UserID  Username             Interface         IP address       MAC
+          Vlan                 IPv6 address      Access type
+  ------------------------------------------------------------------------------
+  20      user1@isp1           GE<span>0/1/2</span>.1         10.10.10.200     00e0-fc12-3456
+          1/-                  -                 IPOE 
+  ------------------------------------------------------------------------------</pre>
+</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration Files</h4><pre class="screen">#
+sysname DeviceA
+#
+radius-server group rd2
+ radius-server shared-key-cipher %^%#`E)v.Q@BHVzxxZ;ij{&gt;&amp;_M0!TGP7YRA@8a7mq&lt;\/%^%# 
+ radius-server authentication 192.168.2.2 1812 weight 0
+ radius-server authentication 192.168.2.3 1812 weight 0
+ radius-server accounting 192.168.2.2 1813 weight 0
+ radius-server accounting 192.168.2.3 1813 weight 0
+ radius-server algorithm loading-share      
+#
+ip pool huawei bas local
+ gateway 10.10.10.1 255.255.255.0
+ section 0 10.10.10.2 10.10.10.200 
+#
+user-group huawei
+#
+acl number 6000
+ rule 5 permit ip source user-group huawei destination ip-address 192.168.2.4 0
+ rule 10 permit ip source user-group huawei destination ip-address 192.168.2.5 0
+ rule 15 permit ip source user-group huawei destination ip-address 192.168.2.254 0
+#
+acl number 6001
+ rule 5 permit tcp source user-group huawei destination-port eq www 
+#
+acl number 6002
+ rule 5 permit ip source user-group huawei 
+#
+traffic classifier c1 operator or
+ if-match acl 6000 precedence 8
+#
+traffic classifier c2 operator or
+ if-match acl 6001 precedence 9
+#
+traffic classifier c3 operator or
+ if-match acl 6002 precedence 10
+#
+traffic behavior b1
+#
+traffic behavior b2
+ http-redirect
+#
+traffic behavior b3
+ deny
+#
+traffic policy p1
+ classifier c1 behavior b1 precedence 2
+ classifier c2 behavior b2 precedence 3
+ classifier c3 behavior b3 precedence 4
+#
+aaa 
+ default-password cipher $$e:TY%^%glhJ;yPG#$=tC&amp;(Is%q!S_";(k.Ef$%^%#:978 
+ #
+ authentication-scheme none
+  authentication-mode none
+ #
+ authentication-scheme auth2
+ #
+ accounting-scheme acct2
+ #
+ domain isp1
+  authentication-scheme auth2
+  accounting-scheme acct2
+  radius-server group rd2
+ #  
+ domain web_before
+  authentication-scheme none
+  accounting-scheme none
+  ip-pool huawei
+  dns primary-ip 192.168.2.254
+<strong>  </strong>user-group huawei
+  web-server 192.168.2.4
+  web-server 192.168.2.5 slave
+  web-server url http://192.168.2.4/portal.html  
+  web-server url http://192.168.2.5/portal.html slave
+#
+interface GigabitEthernet<span>0/1/1</span>
+ ip address 192.168.3.1 255.255.255.0
+#
+interface GigabitEthernet<span>0/1/2</span>
+ undo shutdown
+#
+interface GigabitEthernet<span>0/1/2</span>.1
+ user-vlan 1 
+ bas
+ #
+  access-type layer2-subscriber default-domain pre-authentication web_before authentication isp1
+  authentication-method web
+ #
+#
+interface LoopBack0
+ ip address 192.168.2.1 255.255.255.255
+#
+web-auth-server enable
+web-auth-server source interface LoopBack0 
+web-auth-server 192.168.2.4 port 50100 key cipher %^%#`E)v.Q@BHVzxxZ;ij{&gt;&amp;_M0!TGP7YRA@8a7mq&lt;\/%^%#
+web-auth-server 192.168.2.5 port 50100 key cipher %^%#Nc67(,q}Y3l).&lt;Ny&gt;huLjy&amp;GBFKkF6''OlL^yW|H%^%#
+<span>#</span>
+<span>undo web-auth-server source-ip all</span>
+<span>web-auth-server source-ip 192.168.2.1</span>
+<span>#</span>
+<span>undo web-auth-server source-ipv6 all</span>
+#
+traffic-policy p1 inbound
+#
+return</pre>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_ipox_cfg_0083.html">Configuration Examples for IPoE Access Authentication
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_014455.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_014458.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,421 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring OSPF Route Filtering">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_ospf_cfg_0058.html">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_ospf_cfg_0062.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001535276928">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring OSPF Route Filtering</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001535276928"></a><a name="EN-US_TASK_0000001535276928"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring OSPF Route Filtering</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001535276928__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0000001535276928__fig_dc_vrp_ospf_cfg_009401">Figure 1</a>, DeviceA, DeviceB, DeviceC, DeviceD and DeviceE run OSPF to implement interworking, and DeviceE and DeviceF run RIP to implement interworking. OSPF and RIP are configured to import routes from each other on DeviceE so that all Devices can communicate with each other. PC1 is connected to the network through DeviceC; PC2 and PC3 are connected to the network through DeviceD; PC4 and PC5 are connected to the network through DeviceF. The requirements are as follows:</p>
+<ul><li>Configure DeviceE to filter imported routes so that the network segment where PC4 resides cannot access PC1, PC2, or PC3.</li><li>Configure route filtering on DeviceC so that the network segment where PC1 resides cannot access PC2.</li><li>Configure route filtering on DeviceD so that the network segment where PC2 resides and the network segment where PC3 resides cannot access PC5.</li></ul>
+<div class="fignone" id="EN-US_TASK_0000001535276928__fig_dc_vrp_ospf_cfg_009401"><a name="EN-US_TASK_0000001535276928__fig_dc_vrp_ospf_cfg_009401"></a><a name="fig_dc_vrp_ospf_cfg_009401"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring OSPF route filtering</span><div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1, interface 2, and interface 3 represent <span>100GE</span> <span>1/0/1</span>, <span>100GE</span> <span>1/0/2</span>, and <span>100GE</span> <span>1/0/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001535596636.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001535276928__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>During the configuration, note the following:</p>
+<ul><li>During route filtering, the keyword <strong>export</strong> filters the imported external routes to be advertised and takes effect only on ASBRs.</li><li>The route filtering function filters the routing information in the routing table rather than the LSAs advertised by OSPF.</li><li>Route communication is bidirectional. After a destination network segment is filtered out through the route filtering function, other network segments connected to the device cannot access the devices on the destination network segment, and nor can the devices on the destination network segment access the devices on the source network segment.</li><li>If an ACL is used to filter routes, its last rule must be configured to permit all source addresses; otherwise, all network segment routes may be filtered out.</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001535276928__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Enable OSPF or RIP on each device according to the networking diagram.</p>
+</li><li>Configure OSPF and RIP to import routes from each other.</li><li>Configure ACL rules and route filtering.</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001535276928__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface. For detailed configurations, see Configuration Scripts.</span></li><li><span>Configure basic OSPF functions.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>router id 1.1.1.1</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>network 10.1.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>area 1</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.1] <strong>network 10.4.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>area 2</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.2] <strong>network 10.2.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1-area-0.0.0.2] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA-ospf-1] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceA] <strong>commit</strong></span></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>router id 2.2.2.2</strong>
+[<span class="keyword">*</span>DeviceB] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0] <strong>network 10.1.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>area 3</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.3] <strong>network 10.3.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1-area-0.0.0.3] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB-ospf-1] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceB] <strong>commit</strong></span></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>router id 3.3.3.3</strong>
+[<span><span class="keyword">*</span></span>DeviceC] <strong>ospf 1</strong>
+[<span><span class="keyword">*</span></span>DeviceC-ospf-1] <strong>area 2</strong>
+[<span><span class="keyword">*</span></span>DeviceC-ospf-1-area-0.0.0.2] <strong>network 10.2.1.0 0.0.0.255</strong>
+[<span><span class="keyword">*</span></span>DeviceC-ospf-1-area-0.0.0.2] <strong>network 10.10.3.0 0.0.0.255</strong>
+[<span><span class="keyword">*</span></span>DeviceC-ospf-1-area-0.0.0.2] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>DeviceC-ospf-1] <strong>quit</strong>
+<span>[<span><span class="keyword">*</span></span>DeviceC] <strong>commit</strong></span></pre>
+<p># Configure DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>router id 4.4.4.4</strong>
+[<span><span class="keyword">*</span></span>DeviceD] <strong>ospf 1</strong>
+[<span><span class="keyword">*</span></span>DeviceD-ospf-1] <strong>area 3</strong>
+[<span><span class="keyword">*</span></span>DeviceD-ospf-1-area-0.0.0.3] <strong>network 10.3.1.0 0.0.0.255</strong>
+[<span><span class="keyword">*</span></span>DeviceD-ospf-1-area-0.0.0.3] <strong>network 10.10.1.0 0.0.0.255</strong>
+[<span><span class="keyword">*</span></span>DeviceD-ospf-1-area-0.0.0.3] <strong>network 10.10.2.0 0.0.0.255</strong>
+[<span><span class="keyword">*</span></span>DeviceD-ospf-1-area-0.0.0.3] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>DeviceD-ospf-1] <strong>quit</strong>
+<span>[<span><span class="keyword">*</span></span>DeviceD] <strong>commit</strong></span></pre>
+<p># Configure DeviceE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceE] <strong>router id 5.5.5.5</strong>
+[<span><span class="keyword">*</span></span>DeviceE] <strong>ospf 1</strong>
+[<span><span class="keyword">*</span></span>DeviceE-ospf-1]<strong> area 1</strong>
+[<span><span class="keyword">*</span></span>DeviceE-ospf-1-area-0.0.0.1] <strong>network 10.4.1.0 0.0.0.255</strong>
+[<span><span class="keyword">*</span></span>DeviceE-ospf-1-area-0.0.0.1] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>DeviceE-ospf-1]<strong> quit</strong>
+<span>[<span><span class="keyword">*</span></span>DeviceE] <strong>commit</strong></span>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceE] <strong>rip 1</strong>
+[<span><span class="keyword">*</span></span>DeviceE-rip-1] <strong>network 10.0.0.0</strong>
+[<span><span class="keyword">*</span></span>DeviceE-rip-1]<strong> version 2</strong>
+[<span><span class="keyword">*</span></span>DeviceE-rip-1] <strong>quit</strong>
+<span>[<span><span class="keyword">*</span></span>DeviceE] <strong>commit</strong></span></pre>
+<p># Configure DeviceF.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceF] <strong>rip 1</strong>
+[<span><span class="keyword">*</span></span>DeviceF-rip-1] <strong>network 10.0.0.0</strong>
+[<span><span class="keyword">*</span></span>DeviceF-rip-1] <strong>network 172.16.0.0</strong>
+[<span><span class="keyword">*</span></span>DeviceF-rip-1] <strong>network 192.168.1.0</strong>
+[<span><span class="keyword">*</span></span>DeviceF-rip-1] <strong>version 2</strong>
+[<span><span class="keyword">*</span></span>DeviceF-rip-1] <strong>quit</strong>
+<span>[<span><span class="keyword">*</span></span>DeviceF] <strong>commit</strong></span></pre>
+</p></li><li><span>Configure OSPF and RIP to import routes from each other.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceE] <strong>ospf 1</strong>
+[<span><span><span class="keyword">*</span></span></span>DeviceE-ospf-1] <strong>import-route direct</strong>
+[<span><span><span class="keyword">*</span></span></span>DeviceE-ospf-1] <strong>import-route rip 1</strong>
+<span>[<span><span class="keyword">*</span></span>DeviceE-ospf-1] <strong>quit</strong></span>
+[<span><span><span class="keyword">*</span></span></span>DeviceE] <strong>rip 1</strong>
+[<span><span><span class="keyword">*</span></span></span>DeviceE-rip-1] <strong>import-route direct</strong>
+[<span><span><span class="keyword">*</span></span></span>DeviceE-rip-1] <strong>import-route ospf 1</strong>
+<span>[<span><span><span class="keyword">*</span></span></span>DeviceE-rip-1] <strong>quit</strong></span>
+<span>[<span><span><span class="keyword">*</span></span></span>DeviceE] <strong>commit</strong></span></pre>
+</p></li><li><span>Configure ACL rules and route filtering.</span><p><p># Configure DeviceE to filter imported routes so that the network segment where PC4 resides cannot access PC1, PC2, or PC3.</p>
+</p><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceE] <strong>acl number 2000</strong>
+[<span class="keyword">*</span>DeviceE-acl4-basic-2000] <strong>rule 0 deny source 172.16.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>DeviceE-acl4-basic-2000] <strong>rule 5 permit</strong>
+<span>[<span><span><span class="keyword">*</span></span></span>DeviceE-acl4-basic-2000] <strong>commit</strong></span>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceE<span>-acl4-basic-2000</span>] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceE] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceE-ospf-1] <strong>filter-policy 2000 export rip 1</strong>
+[<span class="keyword">*</span>DeviceE-ospf-1] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceE] <strong>commit</strong></span></pre>
+<p># Configure route filtering on DeviceC so that the network segment where PC1 resides cannot access PC2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>acl number 2000</strong>
+[<span class="keyword">*</span>DeviceC-acl4-basic-2000] <strong>rule 0 deny source 10.10.2.0 0.0.0.25</strong><strong>5</strong>
+[<span class="keyword">*</span>DeviceC-acl4-basic-2000] <strong>rule 5 permit</strong>
+<span>[<span class="keyword">*</span>DeviceC-acl4-basic-2000] <strong>commit</strong></span>
+<span>[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-acl4-basic-2000] <strong>quit</strong></span>
+[<span><span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span></span>DeviceC] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1] <strong>filter-policy 2000 import</strong>
+[<span class="keyword">*</span>DeviceC-ospf-1] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceC] <strong>commit</strong></span></pre>
+<p># Configure route filtering on DeviceD so that the network segment where PC2 resides and the network segment where PC3 resides cannot access PC5.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>acl number 2000</strong>
+[<span class="keyword">*</span>DeviceD-acl4-basic-2000] <strong>rule 0 deny source 192.168.1.0 0.0.0.25</strong><strong>5</strong>
+[<span class="keyword">*</span>DeviceD-acl4-basic-2000] <strong>rule 5 permit</strong>
+<span>[<span class="keyword">*</span>DeviceD-acl4-basic-2000] <strong>commit</strong></span>
+<span>[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD-acl4-basic-2000] <strong>quit</strong></span>
+[<span><span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span></span>DeviceD] <strong>ospf 1</strong>
+[<span class="keyword">*</span>DeviceD-ospf-1] <strong>filter-policy 2000 import</strong>
+[<span class="keyword">*</span>DeviceD-ospf-1] <strong>quit</strong>
+<span>[<span class="keyword">*</span>DeviceD] <strong>commit</strong></span></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001535276928__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># On DeviceF, use the source address 172.16.1.1 to ping the destination addresses 10.10.3.1, 10.10.2.1, and 10.10.1.1. The ping operations fail, indicating that the network segment where PC4 resides cannot access the network segments where PC1, PC2, and PC3 reside.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceF] <strong>ping -a 172.16.1.1 10.10.3.1</strong>
+  PING 10.10.3.1: 56  data bytes, press CTRL_C to break
+    Request time out
+    Request time out
+    Request time out
+    Request time out
+    Request time out
+
+  --- 10.10.3.1 ping statistics ---
+    5 packet(s) transmitted
+    0 packet(s) received
+    100.00% packet loss</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceF] <strong>ping -a 172.16.1.1 10.10.2.1</strong>
+  PING 10.10.2.1: 56  data bytes, press CTRL_C to break
+    Request time out
+    Request time out
+    Request time out
+    Request time out
+    Request time out
+
+  --- 10.10.2.1 ping statistics ---
+    5 packet(s) transmitted
+    0 packet(s) received
+    100.00% packet loss</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceF] <strong>ping -a 172.16.1.1 10.10.1.1</strong>
+  PING 10.10.1.1: 56  data bytes, press CTRL_C to break
+    Request time out
+    Request time out
+    Request time out
+    Request time out
+    Request time out
+
+  --- 10.10.1.1 ping statistics ---
+    5 packet(s) transmitted
+    0 packet(s) received
+    100.00% packet loss</pre>
+<p># On DeviceC, use the source address 10.10.3.1 to ping the destination address 10.10.2.1. The ping operation fails, indicating that the network segment where PC1 resides cannot access the network segment where PC2 resides.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>ping -a 10.10.3.1 10.10.2.1</strong>
+  PING 10.10.2.1: 56  data bytes, press CTRL_C to break
+    Request time out
+    Request time out
+    Request time out
+    Request time out
+    Request time out
+
+  --- 10.10.2.1 ping statistics ---
+    5 packet(s) transmitted
+    0 packet(s) received
+    100.00% packet loss</pre>
+<p># On DeviceD, use the source addresses 10.10.1.1 and 10.10.2.1 to ping the destination address 192.168.1.1. The ping operations fail, indicating that the network segment where PC2 resides and the network segment where PC3 resides cannot access PC5.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>ping -a 10.10.1.1 192.168.1.1</strong>
+  PING 192.168.1.1: 56  data bytes, press CTRL_C to break
+    Request time out
+    Request time out
+    Request time out
+    Request time out
+    Request time out
+
+  --- 192.168.1.1 ping statistics ---
+    5 packet(s) transmitted
+    0 packet(s) received
+    100.00% packet loss</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>ping -a 10.10.2.1 192.168.1.1</strong>
+  PING 192.168.1.1: 56  data bytes, press CTRL_C to break
+    Request time out
+    Request time out
+    Request time out
+    Request time out
+    Request time out
+
+  --- 192.168.1.1 ping statistics ---
+    5 packet(s) transmitted
+    0 packet(s) received
+    100.00% packet loss</pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001535276928__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+router id 1.1.1.1
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.2.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.4.1.1 255.255.255.0
+#
+ospf 1
+ area 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+ area 0.0.0.1
+  network 10.4.1.0 0.0.0.255
+ area 0.0.0.2
+  network 10.2.1.0 0.0.0.255
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+router id 2.2.2.2
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.3.1.1 255.255.255.0
+#
+ospf 1 
+ area 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+ area 0.0.0.3
+  network 10.3.1.0 0.0.0.255
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+acl number 2000   
+ rule 0 deny source 10.10.2.0 0.0.0.255
+ rule 5 permit
+#
+router id 3.3.3.3
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.2.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.10.3.1 255.255.255.0
+#
+ospf 1  
+ filter-policy 2000 import   
+ area 0.0.0.2
+  network 10.2.1.0 0.0.0.255
+  network 10.10.3.0 0.0.0.255
+#
+return</pre>
+</li><li><p>DeviceD</p>
+<pre class="screen">#
+sysname DeviceD
+#
+acl number 2000   
+ rule 0 deny source 192.168.1.0 0.0.0.255
+ rule 5 permit
+#
+router id 4.4.4.4
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.3.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.10.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.10.2.1 255.255.255.0
+#
+ospf 1    
+ filter-policy 2000 import    
+ area 0.0.0.3
+  network 10.3.1.0 0.0.0.255
+  network 10.10.1.0 0.0.0.255
+  network 10.10.2.0 0.0.0.255
+#
+return</pre>
+</li><li><p>DeviceE</p>
+<pre class="screen">#
+sysname DeviceE
+#
+router id 5.5.5.5
+#
+acl number 2000   
+ rule 0 deny source 172.16.1.0 0.0.0.255
+ rule 5 permit
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.4.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.5.1.1 255.255.255.0
+#
+ospf 1
+ import-route direct
+ import-route rip 1
+ filter-policy 2000 export rip 1
+ area 0.0.0.1
+  network 10.4.1.0 0.0.0.255
+#
+rip 1
+ version 2
+ network 10.0.0.0
+ import-route direct 
+ import-route ospf 1 
+#
+return</pre>
+</li><li><p>DeviceF</p>
+<pre class="screen">#
+sysname DeviceF
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.5.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 172.16.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 192.168.1.1 255.255.255.0
+#
+rip 1 
+ version 2
+ network 10.0.0.0
+ network 172.16.0.0
+ network 192.168.1.0
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../vrp/vrp_ospf_cfg_0058.html">Configuring OSPF to Filter Routes
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../vrp/vrp_ospf_cfg_0062.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

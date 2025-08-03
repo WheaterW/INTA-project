@@ -1,0 +1,511 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Roaming User Access (Dual-Stack User Access)">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_ipox_cfg_0083.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_013600_mac.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_1005.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z00588052,w00606909,w00447999">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+<meta name="OWNER" content="c00549182">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="z00588052">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001504949597">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Roaming User Access (Dual-Stack User Access)</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001504949597"></a><a name="EN-US_TASK_0000001504949597"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Roaming User Access (Dual-Stack User Access)</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001504949597__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>When a WLAN user roams between different APs, the user needs to be re-authenticated for login after being logged out, causing services to be interrupted. WLAN user roaming switching ensures service continuity when a user roams between different APs. On the network shown in <a href="#EN-US_TASK_0000001504949597__fig_dc_ne_cfg_01360001">Figure 1</a>, when a user roams from AP1 to AP2, the user is switched from interface1 to interface2 for login, ensuring service continuity.</p>
+<div class="fignone" id="EN-US_TASK_0000001504949597__fig_dc_ne_cfg_01360001"><a name="EN-US_TASK_0000001504949597__fig_dc_ne_cfg_01360001"></a><a name="fig_dc_ne_cfg_01360001"></a><span class="figcap"><b>Figure 1 </b>Configuring roaming user access</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interfaces 1 and 2 represent GE<span>0/1/2</span>.1 and GE<span>0/1/1</span>.1, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001455589700.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001504949597__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><ol><li>Configure an AAA scheme and adopt RADIUS authentication and accounting.</li><li>Configure a local IPv4 address pool.</li><li>Configure a local IPv6 prefix pool.</li><li>Configure a local IPv6 address pool, and bind the local IPv6 prefix pool to this address pool.</li><li>Configure a domain.</li><li>Configure a DUID for the device.</li><li>Configure a BAS interface.</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001504949597__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li>Authentication scheme name and authentication mode</li><li>Accounting scheme name and accounting mode</li><li>Local prefix pool name</li><li>IPv6 prefix to be assigned/Prefix length</li><li>Local address pool names</li><li>Domain name</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001504949597__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span># Configure an AAA authentication scheme.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt;<strong> system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> aaa</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa]<strong> authentication-scheme huawei</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa-authen-huawei]<strong> authentication-mode radius</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa-authen-huawei] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa-authen-huawei]<strong> quit</strong></pre>
+</p></li><li><span>Configure an AAA accounting scheme.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa]<strong> accounting-scheme huawei</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa-accounting-huawei]<strong> accounting-mode radius</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa-accounting-huawei] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa-accounting-huawei]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa] <strong>quit</strong></pre>
+</p></li><li><span>Configure a RADIUS server group.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> radius-server group rd1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-radius-rd1]<strong> radius-server authentication 192.168.7.249 1812</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-radius-rd1]<strong> radius-server accounting 192.168.7.249 1813</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-radius-rd1]<strong> radius-server shared-key-cipher YsHsjx_202206 </strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-radius-rd1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong></pre>
+</p></li><li><span>Configure a username generation mode and password.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> aaa</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa]<strong> default-user-name include sysname</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa] <strong>default-password cipher YsHsjx_202206</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa]<strong> quit</strong></pre>
+</p></li><li><span>Configure an address pool.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> ip pool pool1 bas local</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-ip-pool-pool1]<strong> gateway 10.0.0.1 255.255.255.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-ip-pool-pool1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-ip-pool-pool1]<strong> section 0 10.0.0.2 10.0.0.100</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-ip-pool-pool1]<strong> quit</strong></pre>
+</p></li><li><span>Configure a local IPv6 prefix pool.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> ipv6 prefix pre1 local</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-ipv6-prefix-pre1]<strong> prefix 2001:DB8::/64</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-ipv6-prefix-pre1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-ipv6-prefix-pre1]<strong> quit</strong></pre>
+</p></li><li><span>Configure a local IPv6 address pool, and bind the local IPv6 prefix pool to this address pool.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> ipv6 pool pool2 bas local</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-ipv6-pool-pool2]<strong> prefix pre1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-ipv6-pool-pool2]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-ipv6-pool-pool2]<strong> quit</strong></pre>
+</p></li><li><span>Configure a domain.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> aaa</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa]<strong> domain huawei</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa-domain-huawei]<strong> authentication-scheme huawei</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa-domain-huawei]<strong> accounting-scheme huawei</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa-domain-huawei] <strong>radius-server group rd1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa-domain-huawei] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa-domain-huawei]<strong> ip-pool pool1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa-domain-huawei] <strong>ipv6-pool pool2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-aaa-domain-huawei] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa-domain-huawei]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-aaa]<strong> quit</strong></pre>
+</p></li><li><span>Configure a DUID for the device.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> dhcpv6 duid llt</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong></pre>
+</p></li><li><span>Configure the same MAC addresses for main interfaces of the BAS interfaces before and after roaming.</span><p><p>The main interfaces include GE and Eth-Trunk main interfaces. If the MAC addresses are different, IP/ARP packets for triggering roaming cannot reach the new BAS interface after the switchover. As a result, roaming cannot be triggered. You are advised to change the address to the MAC address of a roaming interface (GE<strong><span>0/1/1</span></strong> in this example).</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> interface GigabitEthernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]-GigabitEthernet<span>0/1/2</span>] <strong>mac-address</strong> <strong>00e0-fc12-3456</strong></pre>
+</p></li><li><span>Enable IPv6 and configure stateful address autoconfiguration on the interface.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> interface GigabitEthernet <span>0/1/2</span></strong><strong>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1] <strong>ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1] <strong>ipv6 address auto link-local</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1] <strong>ipv6 nd autoconfig managed-address-flag</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> interface GigabitEthernet <span>0/1/1</span></strong><strong>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1] <strong>ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1] <strong>ipv6 address auto link-local</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1] <strong>ipv6 nd autoconfig managed-address-flag</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1] <strong>commit</strong></pre>
+</p></li><li><span>Configure user VLANs.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> interface </strong><strong>GigabitEthernet <span>0/1/2</span></strong>.<strong>1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1]<strong> user-vlan 100 200 qinq 300 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-vlan-100-200-QinQ-300-400]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-vlan-100-200-QinQ-300-400] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> interface </strong><strong>GigabitEthernet <span>0/1/1</span></strong><strong>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1]<strong> user-vlan 500 600 qinq 700 800</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-vlan-500-600-QinQ-700-800]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-vlan-500-600-QinQ-700-800] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1] <strong>quit</strong></pre>
+</p></li><li><span>Configure a BAS interface for IPoE user access.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> interface </strong><strong>GigabitEthernet <span>0/1/2</span></strong><strong>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1]<strong> bas</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas]<strong> access-type layer2-subscriber default-domain authentication huawei</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>authentication-method bind</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>authentication-method-ipv6 bind</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> interface </strong><strong>GigabitEthernet <span>0/1/1</span></strong>.<strong>1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1] <strong>bas</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas]<strong> access-type layer2-subscriber default-domain authentication huawei</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>authentication-method bind</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>authentication-method-ipv6 bind</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1] <strong>quit</strong></pre>
+</p></li><li><span>Configure roaming. Three roaming modes are available. Select one as required.</span><p><ul><li>Configure traffic-triggered roaming without logging out users.<div class="p">When receiving a packet sent by a user to trigger roaming procedures, the device updates the user's access information in a timely manner to keep the user online.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> interface </strong><strong>GigabitEthernet <span>0/1/2</span></strong>.<strong>1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1]<strong> bas</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>ip-trigger</strong><strong> </strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>arp-trigger</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>ipv6-trigger</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>nd-trigger</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>wlan-switch enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> interface </strong><strong>GigabitEthernet <span>0/1/1</span></strong>.<strong>1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1]<strong> bas</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>ip-trigger</strong><strong> </strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>arp-trigger</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>ipv6-trigger</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>nd-trigger</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>wlan-switch enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong></pre>
+</div>
+</li></ul>
+</p><p><ul><li>Configure protocol packet-triggered roaming without logging out users.<div class="p">Perform this step to trigger quick login of terminal users to a new AP when they send DHCPv4 Discover or Request messages, DHCPv6 Solicit messages, or ND RS messages for login.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> interface </strong><strong>GigabitEthernet <span>0/1/2</span></strong>.<strong>1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1]<strong> bas</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>wlan-switch enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>dhcp session-mismatch action roam ipv4 ipv6 nd</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> interface </strong><strong>GigabitEthernet <span>0/1/1</span></strong>.<strong>1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1]<strong> bas</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>wlan-switch enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>dhcp session-mismatch action roam ipv4 ipv6 nd</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1] <strong>quit</strong></pre>
+</div>
+</li><li>Configure roaming with logging out users.<div class="p">Perform this step to configure the device to log out online users whose physical location information is changed but MAC addresses remain unchanged when they resend DHCP or ND login requests.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> interface </strong><strong>GigabitEthernet <span>0/1/2</span></strong>.<strong>1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1]<strong> bas</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>ip-trigger</strong><strong> </strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>arp-trigger</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>ipv6-trigger</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>nd-trigger</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>wlan-switch enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>dhcp session-mismatch action offline</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1-bas] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/2</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> interface </strong><strong>GigabitEthernet <span>0/1/1</span></strong><strong>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1]<strong> bas</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>ip-trigger</strong><strong> </strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>arp-trigger</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>ipv6-trigger</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>nd-trigger</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>wlan-switch enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>dhcp session-mismatch action offline</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1-bas] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/1</span>.1]<strong> commit</strong></pre>
+</div>
+</li></ul>
+</p></li><li><span>Verify the configuration.</span><p><p>The user goes online through GigabitEthernet<span>0/1/2</span>.1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>display access-user domain huawei</strong></pre>
+<pre class="screen">--------------------------------------------------------------
+UserID     Username       Interface   IP address  MAC             
+           Vlan    IPv6 address  Access type 
+--------------------------------------------------------------- 
+208896     HUAWEI@huawei  GE<span>0/1/2</span>.1   10.0.0.98  00e0-fc12-3456  
+           300/100  -            IPOE                              
+---------------------------------------------------------------- 
+Normal users                       : 1 
+RUI Local users                    : 0 
+RUI Remote users                   : 0 
+Total users                        : 1</pre>
+<p>The user roams to GigabitEthernet<span>0/1/1</span>.1 successfully.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>display access-user domain huawei</strong></pre>
+<pre class="screen">-----------------------------------------------------------------
+UserID     Username       Interface   IP address  MAC             
+           Vlan    IPv6 address  Access type 
+------------------------------------------------------------------ 
+208896     HUAWEI@huawei  GE<span>0/1/1</span>.1   10.0.0.98  00e0-fc12-3456  
+           700/500  -            IPOE                              
+-------------------------------------------------------------------
+Normal users                       : 1 
+RUI Local users                    : 0 
+RUI Remote users                   : 0 
+Total users                        : 1</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001504949597__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><span class="keyword">HUAWEI</span> configuration file (traffic-triggered roaming without logging out users)<pre class="screen">#
+sysname <span class="keyword">HUAWEI</span>
+#
+radius-server group rad_group1
+ radius-server shared-key-cipher %^%#x*CgITP4C<font style="font-size:8pt" Face="Courier New" >~</font>;q,*+DEW'JBWe#)"Q&amp;|7bX]b:Y&lt;{w'%^%#  
+ radius-server authentication 192.168.7.249 1812 weight 0  
+ radius-server accounting 192.168.7.249 1813 weight 0  
+#
+ip pool pool1 bas local
+ gateway 10.0.0.1 255.255.255.0
+ section 0 10.0.0.2 10.0.0.100
+#
+ipv6 prefix pre1 local
+ prefix 2001:DB8::/64
+#
+ipv6 pool pool2 bas local
+ prefix pre1
+#
+dhcpv6 duid llt
+#
+aaa
+ default-password cipher %^%#4*RHO=w*}.d\&gt;j09'Z:%=:co<font style="font-size:8pt" Face="Courier New" >~</font>p\w9'G-^|-zR'N4%^%# 
+ default-user-name include sysname
+ #
+ authentication-scheme default0
+ #
+ authentication-scheme default1
+ #
+ authentication-scheme huawei
+ #
+ authentication-scheme default
+ #
+ accounting-scheme huawei
+ #
+ domain default0
+ #
+ domain default1
+ #
+ domain default_admin
+ #
+ domain huawei
+  authentication-scheme huawei
+  accounting-scheme huawei
+  radius-server group rd1
+  ip-pool pool1
+  ipv6-pool pool2
+#
+interface GigabitEthernet<span>0/1/2</span>
+ mac-address 00e0-fc12-3456
+#
+interface GigabitEthernet<span>0/1/2</span>.1
+ ipv6 enable
+ ipv6 address auto link-local
+ user-vlan 100 200 qinq 300 400
+ ipv6 nd autoconfig managed-address-flag
+ bas
+ #
+  access-type layer2-subscriber default-domain authentication huawei
+  authentication-method bind
+  authentication-method-ipv6 bind
+  ip-trigger
+  arp-trigger
+  wlan-switch enable
+  ipv6-trigger
+  nd-trigger
+ #
+#
+interface GigabitEthernet<span>0/1/1</span>.1
+ ipv6 enable
+ ipv6 address auto link-local
+ user-vlan 500 600 qinq 700 800
+ ipv6 nd autoconfig managed-address-flag
+ bas
+ #
+  access-type layer2-subscriber default-domain authentication huawei
+  authentication-method bind
+  authentication-method-ipv6 bind
+  ip-trigger
+  arp-trigger
+  wlan-switch enable
+  ipv6-trigger
+  nd-trigger
+ #
+#
+return</pre>
+</li><li><span class="keyword">HUAWEI</span> configuration file (protocol packet-triggered roaming without logging out users)<pre class="screen">#
+sysname <span class="keyword">HUAWEI</span>
+#
+radius-server group rad_group1
+ radius-server shared-key-cipher %^%#x*CgITP4C<font style="font-size:8pt" Face="Courier New" >~</font>;q,*+DEW'JBWe#)"Q&amp;|7bX]b:Y&lt;{w'%^%#  
+ radius-server authentication 192.168.7.249 1812 weight 0  
+ radius-server accounting 192.168.7.249 1813 weight 0  
+#
+ip pool pool1 bas local
+ gateway 10.0.0.1 255.255.255.0
+ section 0 10.0.0.2 10.0.0.100
+#
+ipv6 prefix pre1 local
+ prefix 2001:DB8::/64
+#
+ipv6 pool pool2 bas local
+ prefix pre1
+#
+dhcpv6 duid llt
+#
+aaa
+ default-password cipher %^%#4*RHO=w*}.d\&gt;j09'Z:%=:co<font style="font-size:8pt" Face="Courier New" >~</font>p\w9'G-^|-zR'N4%^%# 
+ default-user-name include sysname
+ #
+ authentication-scheme default0
+ #
+ authentication-scheme default1
+ #
+ authentication-scheme huawei
+ #
+ authentication-scheme default
+ #
+ accounting-scheme huawei
+ #
+ domain default0
+ #
+ domain default1
+ #
+ domain default_admin
+ #
+ domain huawei
+  authentication-scheme huawei
+  accounting-scheme huawei
+  radius-server group rd1
+  ip-pool pool1
+  ipv6-pool pool2
+#
+interface GigabitEthernet<span>0/1/2</span>
+ mac-address 00e0-fc12-3456
+#
+interface GigabitEthernet<span>0/1/2</span>.1
+ ipv6 enable
+ ipv6 address auto link-local
+ ipv6 nd autoconfig managed-address-flag
+ user-vlan 100 200 qinq 300 400
+ bas
+ #
+  access-type layer2-subscriber default-domain authentication huawei
+  dhcp session-mismatch action roam ipv4 ipv6 nd
+  authentication-method bind
+  authentication-method-ipv6 bind
+  wlan-switch enable
+ #
+#
+interface GigabitEthernet<span>0/1/1</span>.1
+ ipv6 enable
+ ipv6 address auto link-local
+ user-vlan 500 600 qinq 700 800
+ ipv6 nd autoconfig managed-address-flag
+ bas
+ #
+  access-type layer2-subscriber default-domain authentication huawei
+  dhcp session-mismatch action roam ipv4 ipv6 nd
+  authentication-method bind
+  authentication-method-ipv6 bind
+  wlan-switch enable
+ #
+#
+return</pre>
+</li><li><span class="keyword">HUAWEI</span> configuration file (roaming with logging out users)<pre class="screen">#
+sysname <span class="keyword">HUAWEI</span>
+#
+radius-server group rad_group1
+ radius-server shared-key-cipher %^%#x*CgITP4C<font style="font-size:8pt" Face="Courier New" >~</font>;q,*+DEW'JBWe#)"Q&amp;|7bX]b:Y&lt;{w'%^%#  
+ radius-server authentication 192.168.7.249 1812 weight 0  
+ radius-server accounting 192.168.7.249 1813 weight 0  
+#
+ip pool pool1 bas local
+ gateway 10.0.0.1 255.255.255.0
+ section 0 10.0.0.2 10.0.0.100
+#
+ipv6 prefix pre1 local
+ prefix 2001:DB8::/64
+#
+ipv6 pool pool2 bas local
+ prefix pre1
+#
+dhcpv6 duid llt
+#
+aaa
+ default-password cipher %^%#4*RHO=w*}.d\&gt;j09'Z:%=:co<font style="font-size:8pt" Face="Courier New" >~</font>p\w9'G-^|-zR'N4%^%# 
+ default-user-name include sysname
+ #
+ authentication-scheme default0
+ #
+ authentication-scheme default1
+ #
+ authentication-scheme huawei
+ #
+ authentication-scheme default
+ #
+ accounting-scheme huawei
+ #
+ domain default0
+ #
+ domain default1
+ #
+ domain default_admin
+ #
+ domain huawei
+  authentication-scheme huawei
+  accounting-scheme huawei
+  radius-server group rd1
+  ip-pool pool1
+  ipv6-pool pool2
+#
+interface GigabitEthernet<span>0/1/2</span>.1
+ ipv6 enable
+ ipv6 address auto link-local
+ user-vlan 100 200 qinq 300 400
+ ipv6 nd autoconfig managed-address-flag
+ bas
+ #
+  access-type layer2-subscriber default-domain authentication huawei
+  dhcp session-mismatch action offline
+  authentication-method bind
+  authentication-method-ipv6 bind
+  ip-trigger
+  arp-trigger
+  wlan-switch enable
+  ipv6-trigger
+  nd-trigger
+ #
+#
+interface GigabitEthernet<span>0/1/1</span>.1
+ ipv6 enable
+ ipv6 address auto link-local
+ user-vlan 500 600 qinq 700 800
+ ipv6 nd autoconfig managed-address-flag
+ bas
+ #
+  access-type layer2-subscriber default-domain authentication huawei
+  dhcp session-mismatch action offline
+  authentication-method bind
+  authentication-method-ipv6 bind
+  ip-trigger
+  arp-trigger
+  wlan-switch enable
+  ipv6-trigger
+  nd-trigger
+ #
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_ipox_cfg_0083.html">Configuration Examples for IPoE Access Authentication
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_013600_mac.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_1005.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

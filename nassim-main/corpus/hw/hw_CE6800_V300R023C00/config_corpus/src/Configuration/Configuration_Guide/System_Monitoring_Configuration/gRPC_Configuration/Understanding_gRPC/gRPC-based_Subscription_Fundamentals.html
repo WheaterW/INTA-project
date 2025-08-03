@@ -1,0 +1,257 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="gRPC-based Subscription Fundamentals">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_gRPC_cfg_0003.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_gRPC_cfg_0006.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_gRPC_cfg_0013.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="gRPC">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="gRPC">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featurename" content="gRPC">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001564125893">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>gRPC-based Subscription Fundamentals</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_CONCEPT_0000001564125893"></a><a name="EN-US_CONCEPT_0000001564125893"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">gRPC-based Subscription Fundamentals</h1>
+<div><p>In both dial-in and dial-out modes, gRPC supports the subscription function (subscribe operation) using telemetry.</p>
+<p>Telemetry is a technology that remotely collects data from physical or virtual devices at a high speed. Devices periodically send interface traffic statistics, CPU usage, and memory usage to collectors in push mode. Compared with the traditional pull mode (question-answer interaction), the push mode used by telemetry collects device data at the level of subseconds. In <a href="#EN-US_CONCEPT_0000001564125893__fig183182151492">Figure 1</a>, a gRPC connection is established between the NMS and the device so that the NMS can subscribe to data of a specified module on the device. Telemetry supports dynamic subscription and static subscription, which are used in dial-in and dial-out modes, respectively.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001564125893__fig183182151492"><a name="EN-US_CONCEPT_0000001564125893__fig183182151492"></a><a name="fig183182151492"></a><span class="figcap"><b>Figure 1 </b>Network diagram of gRPC-based telemetry function</span><br><span><img class="vsd" src="figure/en-us_image_0000001563885797.png" width="NaN" height="NaN"></span></div>
+<div class="section"><h4 class="sectiontitle">gRPC-based Telemetry Fundamentals</h4><p><strong>Telemetry implementation</strong>:</p>
+<ol><li>A user defines a static telemetry subscription or dynamic telemetry subscription.<ul><li><p>Static telemetry subscription: defined in the <strong>huawei-grpc-dialout.proto</strong> file.</p>
+</li><li><p>Dynamic telemetry subscription: defined in the <strong>huawei-grpc-dialin.proto</strong> file.</p>
+</li></ul>
+</li><li>The user encodes collected information in GPB or JSON format and defines key information including the sampling path and timestamp in the <strong>huawei-telemetry.proto</strong> file.<ul><li>If the GPB format is used, the value of the <strong>encoding</strong> field in the <strong>huawei-telemetry.proto</strong> file is <strong>0</strong> (GPB encoding), the <strong>data_gpb</strong> field carries sampled data in GPB format, and the <strong>data_str</strong> field is empty.</li><li>If the JSON format is used, the value of the <strong>encoding</strong> field in the <strong>huawei-telemetry.proto</strong> file is <strong>1</strong> (JSON encoding), the <strong>data_str</strong> field carries sampled data in JSON format.</li></ul>
+</li><li>The device transmits data to the collector, decodes the data, and analyzes the decoded data.<ul><li><p>The <strong>data_gpb</strong> field in the <strong>huawei-telemetry.proto</strong> file needs to be decoded using the .proto file of the corresponding service, which is determined by the <strong>sensor_path</strong> field in the <strong>huawei-telemetry.proto</strong> file. For example, if the value of the <strong>sensor_path</strong> field is <strong>huawei-ifm:ifm/interfaces/interface</strong>, the .proto file is <strong>huawei-ifm.proto</strong>.</p>
+</li><li><p>If the pure JSON encoding format (both the telemetry layer and data model layer use the JSON encoding format) is used, you only need to decode the <strong>huawei-grpc-dialout.proto</strong> or <strong>huawei-grpc-dialin.proto</strong> file. If the hybrid JSON encoding format (the telemetry layer and data model layer use the GPB and JSON encoding formats, respectively) is used, you only need to decode the <strong>huawei-grpc-dialout.proto</strong> or <strong>huawei-grpc-dialin.proto</strong> file and the <strong>huawei-telemetry.proto</strong> file. The .proto file of a service is not required.</p>
+</li></ul>
+</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Proto Files</h4><ul><li><div class="p">The <strong>huawei-grpc-dialout.proto</strong> file is the RPC header file, which defines the RPC interface in dial-out mode. <a href="#EN-US_CONCEPT_0000001564125893__table1516419419364">Table 1</a> describes the file content and meaning.
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001564125893__table1516419419364"></a><a name="table1516419419364"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001564125893__table1516419419364" frame="border" border="1" rules="all"><caption><b>Table 1 </b>huawei-grpc-dialout.proto file</caption><thead align="left"><tr id="EN-US_CONCEPT_0000001564125893__row816554123619"><th align="left" class="cellrowborder" valign="top" width="100%" id="mcps1.3.5.2.1.1.3.2.2.1.1" liSelected="liSelected"><p id="EN-US_CONCEPT_0000001564125893__p8165441113617">huawei-grpc-dialout.proto</p>
+</th>
+</tr>
+</thead>
+<tbody><tr id="EN-US_CONCEPT_0000001564125893__row11165134115368"><td class="cellrowborder" valign="top" width="100%" headers="mcps1.3.5.2.1.1.3.2.2.1.1 "><pre class="screen" id="EN-US_CONCEPT_0000001564125893__screen342413760214014">syntax = "proto3";                          //The .proto file version is defined as v3.
+package huawei_dialout;                     //The package name is huawei_dialout.
+service gRPCDataservice {                   //The service name is gRPCDataservice.
+    rpc dataPublish(stream serviceArgs) returns(stream serviceArgs) {};                 //The method is <strong id="EN-US_CONCEPT_0000001564125893__b103451695812">dataPublish</strong>, which is used to push data. The method uses the bidirectional streaming mode. The input parameter is the serviceArgs data flow.
+}
+message serviceArgs {                       //Message format description.
+    int64 ReqId = 1;                        //Request ID.
+    oneof MessageData {
+        bytes data = 2;         //Sampled data in GPB format is carried.
+        string data_json = 4;   //Sampled data in JSON format is carried.
+        bytes packed_data = 5; //Sampled data in GPB encoding format after packet combination.
+        string packed_data_json = 6; //Sampled data in JSON encoding format after packet combination.
+    }
+    string errors = 3;         //Error description.
+}</pre>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li><li><div class="p">The <strong>huawei-grpc-dialin.proto</strong> file is the RPC header file, which defines the RPC interface in dial-in mode. <a href="#EN-US_CONCEPT_0000001564125893__table18908162018391">Table 2</a> describes the file content and meaning.
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001564125893__table18908162018391"></a><a name="table18908162018391"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001564125893__table18908162018391" frame="border" border="1" rules="all"><caption><b>Table 2 </b>huawei-grpc-dialin.proto file</caption><thead align="left"><tr id="EN-US_CONCEPT_0000001564125893__row7909720173920"><th align="left" class="cellrowborder" valign="top" width="100%" id="mcps1.3.5.2.2.1.3.2.2.1.1" liSelected="liSelected"><p id="EN-US_CONCEPT_0000001564125893__p1690922010393">huawei-grpc-dialin.proto</p>
+</th>
+</tr>
+</thead>
+<tbody><tr id="EN-US_CONCEPT_0000001564125893__row0909162073913"><td class="cellrowborder" valign="top" width="100%" headers="mcps1.3.5.2.2.1.3.2.2.1.1 "><pre class="screen" id="EN-US_CONCEPT_0000001564125893__screen279138600214014">syntax = "proto3";                          //The .proto file version is defined as v3.
+package huawei_dialin;                     //The package name is huawei_dialin.
+service gRPCConfigOper {                   //The service name is gRPCConfigOper.
+    rpc Subscribe (SubsArgs) returns (stream SubsReply) {}; //The method is <strong id="EN-US_CONCEPT_0000001564125893__b20711185118214">Subscribe</strong>, which is used for dynamic subscription. The method uses the server streaming mode. The input parameter <strong id="EN-US_CONCEPT_0000001564125893__b197191551102117">SubsArgs</strong> includes the parameters to be subscribed.
+    rpc Cancel (CancelArgs) returns (CancelReply) {}; //The method is <strong id="EN-US_CONCEPT_0000001564125893__b981201932215">Cancel</strong>, which is used for canceling dynamic subscription. The method uses the query and response mode. The input parameter <strong id="EN-US_CONCEPT_0000001564125893__b10821619162210">CancelArgs</strong> includes the parameters to be unsubscribed.
+}
+message Path {                //Path message structure.
+    string path = 1;          //Subscribed sampling path.
+    uint32 depth = 2;         //Sampling depth of the sampling path. The value <strong id="EN-US_CONCEPT_0000001564125893__b146855571249">1</strong> indicates the current level, and the value <strong id="EN-US_CONCEPT_0000001564125893__b02141121051">2</strong> indicates the current level and its sub-level, and so on.
+}
+message SubsArgs {            //Subscription request parameters.
+    uint64 request_id = 1;    //Request ID, which is transferred by the caller.
+    uint32 encoding = 2;      //Encoding type. The value 0 indicates GPB encoding, and the value 1 indicates JSON encoding. Currently, this parameter can only be set to 0.
+    repeated Path path = 5;   //Subscribed path structure.
+    uint64 sample_interval = 6; //Sampling interval.
+    uint64 heartbeat_interval = 7; //Redundancy suppression interval. This parameter is valid only when <strong id="EN-US_CONCEPT_0000001564125893__b13436353236">suppress_redundant</strong> is set to <strong id="EN-US_CONCEPT_0000001564125893__b353135122313">1</strong>.
+    oneof Suppress {
+        bool suppress_redundant = 8;  //Redundancy suppression. The sampled data is not reported if the data content remains unchanged. 0: disabled; 1: enabled.
+        uint64 delay_time = 9;        //Delay, which ranges from 100 ms to 60000 ms. When data changes, the latest data will be reported after this delay. This prevents frequent reporting of massive data generated due to service flapping.
+    }
+}
+message SubsReply {            //Subscription response parameters.
+    uint32 subscription_id = 1; //If the subscription is successful, a subscription ID is returned. If the subscription fails, the value <strong id="EN-US_CONCEPT_0000001564125893__b1762292415">0</strong> is returned.
+    uint64 request_id = 2;        //ID of the subscription request.
+    string response_code = 3; //Return code. The value <strong id="EN-US_CONCEPT_0000001564125893__b17211168182511">200</strong> indicates a success.
+    oneof MessageData {
+        bytes message = 4;        //If an error occurs, the error description is returned. If no error occurs, the data in GPB format is returned.
+        string message_json = 5;  //If no error occurs, the data in JSON format is returned. 
+    }
+}
+message CancelArgs {            //Unsubscription request parameters.
+    uint64 request_id = 1;    //Request ID, which is transferred by the caller.
+    uint32 subscription_id = 2;   //ID of the subscription to be canceled.
+}
+message CancelReply {            //Unsubscription response parameters.
+    uint64 request_id = 1;    //Request ID, which is transferred by the caller.
+    string response_code = 2; //Return code. The value <strong id="EN-US_CONCEPT_0000001564125893__b35151813267">200</strong> indicates a success.
+    string message = 3;            //Error description.
+}</pre>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li><li><div class="p"><strong>huawei-telemetry.proto</strong> is the telemetry header file, which defines the header for the sampled data to be reported, including key information such as the sampling path and sampling timestamp. <a href="#EN-US_CONCEPT_0000001564125893__table5256101511412">Table 3</a> describes the file content and meaning.
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001564125893__table5256101511412"></a><a name="table5256101511412"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001564125893__table5256101511412" frame="border" border="1" rules="all"><caption><b>Table 3 </b>huawei-telemetry.proto file</caption><thead align="left"><tr id="EN-US_CONCEPT_0000001564125893__row172561515204113"><th align="left" class="cellrowborder" valign="top" width="100%" id="mcps1.3.5.2.3.1.3.2.2.1.1" liSelected="liSelected"><p id="EN-US_CONCEPT_0000001564125893__p3256515104112">huawei-telemetry.proto</p>
+</th>
+</tr>
+</thead>
+<tbody><tr id="EN-US_CONCEPT_0000001564125893__row102561415144110"><td class="cellrowborder" valign="top" width="100%" headers="mcps1.3.5.2.3.1.3.2.2.1.1 "><pre class="screen" id="EN-US_CONCEPT_0000001564125893__screen1980392190214014">syntax = "proto3";                           //The .proto file version is defined as v3.
+package telemetry;                          //The package name is telemetry.
+message TelemetryPacked { 
+   repeated Telemetry telemetry = 1;
+}
+message Telemetry {                           //Telemetry message structure definition.
+   string node_id_str = 1;                     //Device name.
+   string subscription_id_str = 2;             //Static subscription name.
+   string sensor_path = 3;                     //Sampling path.
+   string proto_path = 13;                    //Sampling path corresponding to the message path defined in the .proto file.
+   uint64 collection_id = 4;                   //Sampling round.
+   uint64 collection_start_time = 5;           //Start time of a sampling round.
+   uint64 msg_timestamp = 6;                   //Timestamp when the message is generated.
+   TelemetryGPBTable data_gpb = 7;             //Carried data is defined by TelemetryGPBTable.
+   uint64 collection_end_time = 8;                   //End time of a sampling round.
+   uint32 current_period = 9;                  //Sampling precision, in milliseconds.
+   string except_desc = 10;        //Exception description, which is reported when a sampling exception occurs.
+   string product_name = 11;       //Product name.
+   enum Encoding {
+    Encoding_GPB = 0;        //GPB encoding format.
+    Encoding_JSON = 1;       //JSON encoding format.
+  };
+  Encoding encoding = 12;   //Data encoding format. If the GPB encoding format is used, the <strong id="EN-US_CONCEPT_0000001564125893__b5364182718311">data_gpb</strong> field is valid. Otherwise, the <strong id="EN-US_CONCEPT_0000001564125893__b225053373112">data_str</strong> field is valid.
+  string data_str = 14;   //This field is valid only when a non-GPB encoding format is used.
+  string ne_id = 15;               //Unique NE ID, which identifies the NE to which data belongs in the gateway scenario.
+  string software_version = 16;    //Software version number.
+  string mac_address = 17;    //System MAC address.
+  string esn = 18;    //Device ESN.
+}
+message TelemetryGPBTable {                 //TelemetryGPBTable message structure definition.
+  repeated TelemetryRowGPB row = 1;           //TelemetryRowGPB data.
+  repeated DataPath delete = 2;      //Delete a data path.
+  Generator generator = 3;           //Data source description, which applies to the OnChange+ service that requires high reliability.
+} 
+message Generator {
+   uint64 generator_id = 1;         //Data source ID. Multiple data sources can provide data concurrently and maintain their own reliability.
+   uint32 generator_sn = 2;         //Message sequence number. The sequence numbers of messages sent by each data source must be consecutive. If the sequence numbers are not consecutive, data out-of-synchronization occurs. In this case, the collector must be automatically disconnected from the device and re-connected. Values are assigned from 0 up to 0xFFFFFFFF, after which it starts from 0 again.
+   bool generator_sync = 3;         //Data source synchronization. The value <strong id="EN-US_CONCEPT_0000001564125893__b175141118728">true</strong> indicates that full OnChange data is being synchronized. If the value is <strong id="EN-US_CONCEPT_0000001564125893__b1189214291723">true</strong> and no data is contained, the synchronization is complete.
+}
+message TelemetryRowGPB { 
+   uint64 timestamp = 1;                       //Timestamp of the current sampling instance.
+   Path path = 2;                    //Data tree node, which contains only the data path and key field information.
+   bytes content = 11;                         //Sampling instance data carried. It is used with the <strong id="EN-US_CONCEPT_0000001564125893__b18126124710393">sensor_path</strong> field to determine which .proto file is used for encoding.
+}
+message DataPath {
+   uint64 timestamp = 1;                //Timestamp of the current sampling instance.
+   Path path = 2;                       //Data tree node, which contains only the data path and <strong id="EN-US_CONCEPT_0000001564125893__b672616191634">key</strong> field information.
+}
+message Path {
+   repeated PathElem node = 1;          //Data tree node, which contains only the data path and <strong id="EN-US_CONCEPT_0000001564125893__b189319281312">key</strong> field information.
+}                                       
+message PathElem {                      
+  string name = 1;                      //Name of the data tree node.
+  map&lt;string, string&gt; key = 2;          //<strong id="EN-US_CONCEPT_0000001564125893__b17738500319">key</strong> field name and value mapping table of the data tree node.
+}
+
+message TelemetrySelfDefinedEvent {
+  string path = 1;         //Sampling path that triggers the customized event, which describes the method of parsing the content.
+  string proto_path = 13;  //Sampling path corresponding to the message path defined in the .proto file.
+  uint32 level = 2;        //Level of the customized event.
+  string description = 3;  //Description of the customized event.
+  string fieldName = 4; //Name of the field that triggers the customized event.
+  uint64 fieldValue = 5;   //Value of the field that triggers the customized event.
+  TelemetrySelfDefineThresTable data_threshold = 6; //Threshold filter criteria when the customized event is triggered.
+  enum ThresholdRelation {
+      ThresholdRelation_INVALID = 0; //The relationship between thresholds is not configured.
+      ThresholdRelation_AND = 1; //The relationship between thresholds is And.
+      ThresholdRelation_OR = 2; //The relationship between thresholds is Or.
+  }
+  ThresholdRelation thresholdRelation = 7; //Relationship between threshold filter criteria when the customized event is triggered.
+  bytes content = 8; //Sampled data that triggers the customized event.
+}
+message TelemetrySelfDefineThresTable {
+  repeated TelemetryThreshold row = 1; //Multiple thresholds are included.
+}
+message TelemetryThreshold {
+  uint64 thresholdValue = 1; //Delivered threshold.
+  enum ThresholdOpType {
+      ThresholdOpType_EQ = 0; //The actual value in the data sent is equal to the configured data threshold.
+      ThresholdOpType_GT = 1; //The actual value in the data sent is greater than the configured data threshold.
+      ThresholdOpType_GE = 2; //The actual value in the data sent is greater than or equal to the configured data threshold.
+      ThresholdOpType_LT = 3; //The actual value in the data sent is less than the configured data threshold.
+      ThresholdOpType_LE = 4; //The actual value in the data sent is less than or equal to the configured data threshold.
+  }
+  ThresholdOpType thresholdOpType = 2; //Threshold on the device.
+}</pre>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li><li><p>A service data file describes the detailed service data formats. For details, see the sampling paths supported by telemetry.</p>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_gRPC_cfg_0003.html">Understanding gRPC
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_gRPC_cfg_0006.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="galaxy_gRPC_cfg_0013.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

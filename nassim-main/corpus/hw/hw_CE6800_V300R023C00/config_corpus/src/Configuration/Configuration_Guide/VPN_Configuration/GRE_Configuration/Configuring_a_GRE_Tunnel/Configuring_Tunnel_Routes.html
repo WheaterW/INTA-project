@@ -1,0 +1,88 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring Tunnel Routes">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_gre_cfg_0006.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_gre_cfg_0008.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_gre_cfg_0011.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="GRE">
+<meta name="featuretype" content="VPN">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="GRE">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="GRE">
+<meta name="featuretype" content="VPN">
+<meta name="featuretype" content="VPN">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130782616">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Configuring Tunnel Routes</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130782616"></a><a name="EN-US_TASK_0000001130782616"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring Tunnel Routes</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130782616__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><div class="p">Routes with GRE tunnel interfaces as the outbound interfaces must exist on both the local and remote devices of a GRE tunnel, so that GRE-encapsulated packets can be properly forwarded. These routes can be either static or dynamic routes. When configuring GRE tunnel routes, note the following:<ul><li><p>If you configure a static route, it must be configured on both the local and remote devices. Additionally, the destination address of the route must be that of the original packet which is not encapsulated using GRE and the outbound interface of the route must be the local tunnel interface. The destination address cannot be the tunnel destination address or the remote tunnel interface address.</p>
+</li><li><p>If you configure a dynamic routing protocol to generate a dynamic route, the protocol must be enabled on both tunnel interfaces and the interfaces connected to private networks. If you configure a route to the IP address of a physical interface on the tunnel destination, ensure that the next-hop address of the route is a physical interface address instead of a tunnel interface address. Otherwise, packets cannot be properly forwarded.</p>
+<p>For example, in <a href="#EN-US_TASK_0000001130782616__fig_dc_vrp_gre_cfg_200501">Figure 1</a>, the source physical interface of Tunnel 1 is interface 1 on DeviceA, and the destination physical interface of Tunnel 1 is interface 2 on DeviceB. When configuring a dynamic routing protocol to generate a dynamic route, you need to enable the protocol on both the tunnel interfaces and the interfaces connected to the PCs. In the IP routing table of DeviceA, the outbound interface for the route to the subnet where interface 2 on DeviceB resides cannot be Tunnel 1.</p>
+<p>In real-world configurations, different routing protocols or different processes of the same routing protocol need to be used on tunnel interfaces and public network physical interfaces. This prevents a tunnel interface from being selected as the outbound interface of routes to the tunnel destination, and ensures that packets are forwarded through the GRE tunnel instead of the physical interfaces.</p>
+<div class="fignone" id="EN-US_TASK_0000001130782616__fig_dc_vrp_gre_cfg_200501"><a name="EN-US_TASK_0000001130782616__fig_dc_vrp_gre_cfg_200501"></a><a name="fig_dc_vrp_gre_cfg_200501"></a><span class="figcap"><b>Figure 1 </b>Configuring a dynamic routing protocol for GRE</span><br><span><img class="vsd" src="figure/en-us_image_0000001176742333.png"></span></div>
+</li></ul>
+</div>
+<p>Perform the following steps on the devices at both ends of a GRE tunnel.</p>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130782616__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li><span>Choose either of the following methods to configure a GRE tunnel route:</span><p><ul><li><p>Configure an IPv4 static route.</p>
+<pre class="screen"><a href="cmdqueryname=ip+route-static"><b><span class="cmdname">ip route-static</span></b></a> <i><span class="varname">dest-ip-address</span></i> { <i><span class="varname">mask</span></i> | <i><span class="varname">mask-length</span></i> } <strong><span>tunnel</span></strong> <i><span class="varname">interface-number</span></i> [ <strong><span>description</span></strong> <i><span class="varname">text</span></i> ]
+<a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></pre>
+</li><li>Configure an IPv6 static route.<pre class="screen"><a href="cmdqueryname=ipv6+route-static"><b><span class="cmdname">ipv6 route-static</span></b></a><strong> </strong><i><span class="varname">dest-ipv6-address</span></i><em> </em><i><span class="varname">prefix-length</span></i> <strong><span>tunnel</span></strong> <i><span class="varname">interface-number</span></i> [ <strong><span>description</span></strong> <i><span class="varname">text</span></i> ]
+<a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></pre>
+</li><li><p>Configure an IPv4 or IPv6 dynamic routing protocol. The dynamic routing protocol can be IGP or BGP. For details about how to configure a dynamic routing protocol, see the <em><span> Configuration Guide</span></em><em>-IP Routing Configuration</em>.</p>
+</li></ul>
+</p></li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_gre_cfg_0006.html">Configuring a GRE Tunnel
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_gre_cfg_0008.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_gre_cfg_0011.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

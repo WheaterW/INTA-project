@@ -1,0 +1,238 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring STelnet Login (RADIUS Authentication)">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_login_cfg_0013.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_login_cfg_0017.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Stelnet">
+<meta name="featurename" content="CLI-based Device Login">
+<meta name="featuretype" content="Basic Configuration">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Stelnet">
+<meta name="featurename" content="CLI-based Device Login">
+<meta name="featuretype" content="Basic Configuration">
+<meta name="featurename" content="Console">
+<meta name="featurename" content="Stelnet">
+<meta name="featurename" content="Telnet">
+<meta name="featurename" content="CLI-based Device Login">
+<meta name="featuretype" content="Basic Configuration">
+<meta name="featuretype" content="Basic Configuration">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001608515697">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring STelnet Login (RADIUS Authentication)</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001608515697"></a><a name="EN-US_TASK_0000001608515697"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring STelnet Login (RADIUS Authentication)</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001608515697__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>The network administrator requires secure remote login to a device and high network security for protecting the network against unauthorized access. To meet the requirements, you can configure STelnet login based on RADIUS authentication.</p>
+<p>In <a href="#EN-US_TASK_0000001608515697__fig1016891519504">Figure 1</a>, DeviceA functions as an SSH server and there are reachable routes between it and the RADIUS server. The IP address and port number of the RADIUS server are 10.1.6.6 and 1812, respectively.</p>
+<div class="fignone" id="EN-US_TASK_0000001608515697__fig1016891519504"><a name="EN-US_TASK_0000001608515697__fig1016891519504"></a><a name="fig1016891519504"></a><span class="figcap"><b>Figure 1 </b>Network diagram for configuring STelnet login based on RADIUS authentication</span><br><span><img src="figure/en-us_image_0000001821163306.png" width="NaN" height="NaN"></span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 and interface2 represent <span>100GE</span><span>1/0/1</span> and <span>100GE</span><span>1/0/2</span>, respectively.</p>
+</div></div>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001608515697__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Set device interface parameters.</li><li>Configure the SSH server to generate a local key pair to implement secure data exchange between the server and client.</li><li>Configure STelnet to enable users to log in to the device through STelnet.</li><li>Configure an ACL rule to ensure that only users matching the ACL rule can log in to the device.</li><li>Configure the RADIUS protocol to implement RADIUS authentication. After the configuration is complete, users must use the user name and password configured on the RADIUS server to log in to the device through STelnet, ensuring login security.</li><li>Configure the RADIUS server.</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001608515697__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Precautions</h4><ul><li>Ensure that the SSH server login software has been installed on the user terminal before configuring STelnet login.</li><li>Ensure that there are reachable routes between the user terminal and the device and between the device and RADIUS server.</li></ul>
+<ul><li>After a domain is configured as the global default administrative domain, the AAA configuration in this domain is used, regardless of whether the user name of the administrator contains the domain name.</li><li>Ensure that a user has been configured on the RADIUS server. In this example, the user <strong>admin123@huawei.com</strong> (<em>user name</em>@<em>domain name</em>) and password <strong>YsHsjx_202206</strong> have been configured on the RADIUS server.</li><li>If the RADIUS server does not support the user names containing domain names, run the <strong>undo radius-server user-name domain-included</strong> command to configure the device not to encapsulate the domain name in the user name when sending packets to the RADIUS server.</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001608515697__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Set interface parameters.</span><p><p># Configure IP addresses for interfaces.</p>
+<pre class="screen">&lt;<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword26471340123819">HUAWEI</span>&gt; <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b842153192110">system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword136861840132114">HUAWEI</span>] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b13433316214">sysname DeviceA</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword174313382115">DeviceA</span>] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b8431938217">commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword8438311219">DeviceA</span>] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b12431331217">vlan batch 10 20</strong>
+[*DeviceA] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b3431530219">interface </strong><strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b18438322111"><span>100ge</span> </strong><strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b7431637215"><span>1/0/1</span></strong> 
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b3433392116">portswitch</strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b204312312213">port link-type trunk</strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b1143139214">port trunk allow-pass vlan 10</strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b443335219">quit</strong>
+[*DeviceA] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b1143163132114">interface </strong><strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b204317315212"><span>100ge</span></strong><strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b6446316215"> <span>1/0/2</span></strong> 
+[*DeviceA-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b164415332113">portswitch</strong>
+[*DeviceA-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b104410332118">port link-type trunk</strong>
+[*DeviceA-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b1244031214">port trunk allow-pass vlan 20</strong>
+[*DeviceA-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b194483142117">quit</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword94412317210">DeviceA</span>] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b1144538219">interface vlanif 10</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword2443316212">DeviceA-Vlanif10</span>] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b944539215">ip address </strong><strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b54417317215">10.1.1.2 255.255.255.0</strong>
+[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword94515312211">*DeviceA-Vlanif10</span>] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b54511314219">quit</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword134517352110">DeviceA</span>]<strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b114503192114"> interface vlanif 20</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword24512317216">DeviceA</span>-Vlanif20]<strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b20454318219"> ip address</strong> <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b94516342113">10.1.6.2 255.255.255.0</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword1145633211">DeviceA</span>-Vlanif20] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b18450322119">quit</strong>
+[*<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword204517342113">DeviceA</span>] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b2453352110">commit</strong></pre>
+</p></li><li><span>Configure STelnet login.</span><p><p># Configure DeviceA to generate a local key pair.</p>
+</p><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> rsa local-key-pair create</strong>
+The key name will be:Host
+The range of public key size is (2048, 4096).
+NOTE: Key pair generation will take a short while.
+Please input the modulus [default = 3072]:3072
+[*<span class="keyword">Device</span>A] <strong>commit</strong></pre>
+<p># Configure a VTY user interface on the SSH server.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> user-interface vty 0 4 </strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-ui-vty0-4] <strong>authentication-mode aaa</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-ui-vty0-4] <strong>protocol inbound ssh</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-ui-vty0-4] <strong>user privilege level 3</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-ui-vty0-4] <strong>quit</strong>
+[*<span class="keyword">Device</span>A] <strong>commit</strong></pre>
+<div class="p"># Configure the public key algorithm, encryption algorithm, key exchange algorithm list, HMAC authentication algorithm, and minimum key length on the SSH server.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>ssh server cipher aes128_ctr aes256_ctr aes192_ctr aes128_gcm aes256_gcm</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ssh server hmac sha2_256 sha2_512</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ssh server key-exchange dh_group_exchange_sha256</strong> <strong>dh_group16_sha512</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ssh server publickey rsa_sha2_256 rsa_sha2_512</strong>
+[*<span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</div>
+<p># Create an SSH user on the server and set the authentication mode to password authentication.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>ssh user admin123</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ssh user admin123 authentication-type </strong><strong>password</strong>
+[*DeviceA] <strong>commit</strong></pre>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>To configure password authentication for multiple SSH users, run the <strong>ssh authentication-type default password</strong> command to specify password authentication as the default authentication mode of SSH users. After this configuration is complete, you do not need to repeatedly configure the authentication mode and service type for each SSH user, simplifying configuration and improving efficiency.</p>
+</div></div>
+<p># Enable the STelnet function and set the user service type to STelnet.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>stelnet server enable</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ssh server-source all-interface</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ssh user admin123 service-type stelnet</strong>
+[*DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>Configure an ACL rule to allow the administrator to log in.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>acl 2000</strong>
+[<span class="keyword">*</span>DeviceA-acl<span>4</span>-basic-2000] <strong>rule permit source </strong><strong>10.137.217.10 0</strong>
+[<span class="keyword">*</span>DeviceA-acl<span>4</span>-basic-2000] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>ssh server acl 2000</strong>
+[*DeviceA] <strong>commit</strong></pre>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The ACL configuration is optional.</p>
+</div></div>
+</p></li><li><span>Configure RADIUS authentication.</span><p><p id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_p9373114672215"># Configure a RADIUS server template for communication between DeviceA and the RADIUS server.</p>
+<pre class="screen" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_screen745313542914">[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword1359912324316"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b1758353911180144">radius-server template</strong><strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b13781896219"> template</strong><strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b472762517217">1</strong>
+[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword4508118124011">*</span>DeviceA-radius-template1] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b1194759545180144">radius-server authentication 10.1.6.6 1812</strong> <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b043710362341">weight 80</strong>
+[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword1245516169401">*</span>DeviceA-radius-template1] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b346754776180144">radius-server shared-key cipher </strong><strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b185491541125813">YsHsjx_202206</strong>
+[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword8664914174013">*</span>DeviceA-radius-template1] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b148166832180144">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword215391212114">*</span>DeviceA] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b422917533376">commit</strong></pre>
+<p id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_p1357134092918"># Configure an AAA authentication scheme and set the authentication mode to RADIUS.</p>
+<pre class="screen" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_screen1686145582917">[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword1527110242131"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b948752124180144">aaa</strong>
+[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword1655150154019">*</span>DeviceA-aaa] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b198444264180144">authentication-scheme auth1</strong>
+[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword161321022401">*</span>DeviceA-aaa-authen-auth1] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b669094026180144">authentication-mode radius</strong>
+[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword13380144164017">*</span>DeviceA-aaa-authen-auth1] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b1720147555180144">quit</strong></pre>
+<p id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_p361375972919"># Create a domain, and apply the AAA authentication scheme and RADIUS server template to the domain.</p>
+<pre class="screen" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_screen122312118308">[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword1016496401">*</span>DeviceA-aaa] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b357582002180144">domain huawei.com</strong>
+[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword1698075216393">*</span>DeviceA-aaa-domain-huawei.com] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b759893035180144">authentication-scheme auth1</strong>
+[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword10188550153919">*</span>DeviceA-aaa-domain-huawei.com] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b2116772086180144">radius-server template1</strong>
+[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword12410548163910">*</span>DeviceA-aaa-domain-huawei.com] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b236323317180144">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword47887458394">*</span>DeviceA-aaa] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b1576618770180144">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword44635616122">*</span>DeviceA] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b15646650193914">commit</strong></pre>
+<p id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_p092142418305"># Configure the domain <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b183689167316">huawei.com</strong> as the global default administrative domain so that the administrator does not need to enter the domain name when logging in to the device.</p>
+<pre class="screen" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_screen7292742163016">[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword20118143314394"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b807690754180144">domain huawei.com admin</strong>
+[<span class="keyword" id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_keyword93641140153916">*</span>DeviceA] <strong id="EN-US_TASK_0000001608515697__en-us_task_0000001601628757_b115369584019">commit</strong></pre>
+</p></li><li><span>Configure the RADIUS server.</span><p><p>The configuration includes the following steps: add a device, add a user, and set the user privilege level to 3.</p>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001608515697__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>Use OpenSSH to log in to the SSH server from the client. Access the Windows CLI and run the OpenSSH commands to access the device using STelnet. On the login page, enter the user name <strong>admin123</strong> and password <strong>YsHsjx_202206</strong> configured on the RADIUS server as prompted, and press <strong>Enter</strong>. If the authentication succeeds, you can successfully log in to DeviceA through STelnet. (The following information is for reference only.)</p>
+<pre class="screen">C:\Documents and Settings\Administrator&gt; <strong>ssh admin123@10.1.1.2</strong>
+Enter passphrase for key 'C:\Users\User/.ssh/id_rsa':
+Enter password:
+
+Warning: Negotiated key exchange algorithm and identity key for server authentication are not safe. It is recommended that you disable the insecure algorithm or upgrade the client.
+
+Warning: The initial password poses security risks.
+The password needs to be changed. Change now? [Y/N]:n
+Info: The max number of VTY users is 21, the number of current VTY users online is 1, and total number of terminal users online is 2.
+      The current login time is 2022-09-28 12:07:34.
+      The last login time is 2022-09-28 06:44:35 from 172.16.0.1 through SSH.
+      The last login failure time is 2022-09-28 11:59:21 from 172.16.0.1 through SSH. Consecutive login failures since the last successful login: 3.
+&lt;DeviceA&gt;</pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001608515697__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><pre class="screen">#
+sysname DeviceA
+#
+acl number 2000
+ rule 5 permit source 10.137.217.10 0
+#
+radius-server template template1                                                        
+ radius-server shared-key cipher %+%##!!!!!!!!!"!!!!"!!!!*!!!!SKvr${[Fs.3t@/5k|BENhEu&gt;W(3\<font style="font-size:8pt" Face="Courier New" >~</font>XG!!D;!!!!!2jp5!!!!!!A!!!!3"pK8qv!}9M#(4$jGWvQF/R[CNe/+:W^jk8HUe&amp;W%+%#
+ radius-server authentication 10.1.6.6 1812 weight 80                           
+#
+aaa
+ authentication-scheme auth1    
+  authentication-mode radius   
+ domain huawei.com            
+  authentication-scheme auth1     
+  radius-server template1      
+#  
+domain huawei.com admin 
+#
+vlan batch 10 20
+#
+interface Vlanif10
+ ip address 10.1.1.2 255.255.255.0
+#
+interface Vlanif20
+ ip address 10.1.6.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/1</span>
+ port link-type trunk
+ port trunk allow-pass vlan 10
+#
+interface <span>100GE</span><span>1/0/2</span>
+ port link-type trunk
+ port trunk allow-pass vlan 20
+#
+stelnet server enable
+ssh user admin123
+ssh user admin123 authentication-type password
+ssh user admin123 service-type stelnet
+ssh server-source all-interface
+ssh server acl 2000
+#
+user-interface vty 0 4           
+ authentication-mode aaa 
+ user privilege level 3
+ protocol inbound ssh
+#
+ssh server cipher aes128_ctr aes256_ctr aes192_ctr aes128_gcm aes256_gcm
+ssh server hmac sha2_256 sha2_512
+ssh server key-exchange dh_group_exchange_sha256 dh_group16_sha512
+ssh server publickey rsa_sha2_256 rsa_sha2_512
+#
+return </pre>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_login_cfg_0013.html">Configuring Remote Login Through STelnet
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_login_cfg_0017.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

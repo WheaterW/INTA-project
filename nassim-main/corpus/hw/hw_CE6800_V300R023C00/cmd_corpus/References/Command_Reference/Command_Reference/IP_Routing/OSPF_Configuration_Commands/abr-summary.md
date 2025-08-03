@@ -1,0 +1,94 @@
+abr-summary
+===========
+
+abr-summary
+
+Function
+--------
+
+
+
+The **abr-summary** command configures route summarization on an area border router (ABR).
+
+The **undo abr-summary** command disables route summarization from an ABR.
+
+
+
+By default, route summarization is not configured on ABRs.
+
+
+Format
+------
+
+**abr-summary** *ip-address* *mask* [ [ **advertise** | [ **cost** { *cost-value* | **inherit-minimum** } ] | [ **generate-null0-route** ] ] \* | [ **not-advertise** | [ **cost** { *cost-value* | **inherit-minimum** } ] ] \* | [ **generate-null0-route** | [ **advertise** ] | [ **cost** { *cost-value* | **inherit-minimum** } ] ] \* ]
+
+**undo abr-summary** *ip-address* *mask*
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| *ip-address* | Specifies the IP address of a summary route. | The value is in dotted decimal notation. |
+| *mask* | Specifies the IP address mask of the summary route. | The value is in dotted decimal notation. |
+| **advertise** | Advertises the summary route.  By default, the summary route is advertised. | - |
+| **cost** *cost-value* | Specifies the cost of the summary route. | The value is an integer ranging from 0 to 16777214.  By default, the largest cost of the specific routes for summarization is used as the cost of the summary route. |
+| **inherit-minimum** | Indicates that the smallest cost of the specific routes for summarization is used as the cost of the summary route. | - |
+| **generate-null0-route** | Generates a blackhole route to prevent routing loops. After this parameter is specified, if the local device has advertised the summary LSA, the device ignores the routes within the same prefix mask range advertised by other devices. | - |
+| **not-advertise** | Prevents the summary route from being advertised.  By default, the summary route is advertised. | - |
+
+
+
+Views
+-----
+
+OSPF area view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+When a large-scale OSPF network is deployed, the route search speed may be slowed down because the size of the OSPF routing table is too large. To solve this problem, you can configure route summarization to reduce the size of the routing table and simplify management.Route summarization allows multiple routes with the same IP prefix to be summarized into one route. If a link within the summary IP address range frequently alternates between Up and Down, the change is not advertised to the devices beyond the summary IP address range. This prevents route flapping on the network and improves network stability. The **abr-summary** command configures route summarization on an ABR. When sending routing information to other areas, an ABR generates Type-3 LSA (Link Status Advertisement) based on network segments and ignores Type 3 LSAs received from other areas. If consecutive network segments (routes with the same prefix) exist in an area, you can run the **abr-summary** command to summarize these network segments into one network segment. The ABR then sends only one summary LSA. LSAs of the specified summary network segment are not sent separately. In this manner, the size of the routing table is reduced and the performance of the device is improved.
+
+**Prerequisites**
+
+The segments that need to be summarized have been specified using the **network** command.
+
+**Precautions**
+
+* This command applies only to ABRs and is used to summarize routes in an area. Using the **asbr-summary** command, you can configure an AS boundary router (ASBR) to summarize the routes imported by OSPF.
+* In the same process, ABRs in different areas cannot be configured with abr-summary summarized routes with the same prefix mask.
+* The cost inherit-minimum parameter can be configured only for VPN OSPF processes.
+* Route summarization takes effect only when the routes in an area are within the summary network segment configured on the device. If **generate-null0-route** is specified when route summarization takes effect, a blackhole route is generated. The blackhole route has a higher priority than the Type 5 and Type 7 LSAs received from other devices.
+* When the summarized routes change, the cost of the summary LSA may change, triggering route update. In specific scenarios, routing microloops may be triggered, causing temporary service interruptions. To prevent this problem, specify a fixed cost value when configuring summarization.
+* After routes are summarized:
+* If the local device is a non-PE, the local device summarizes all intra-area routes within the summary address range configured using the command. The cost of the LSA generated after summarization is the largest cost of the summarized routes.
+* If the local device is a PE and the command is configured in the backbone area:
+* If the function of importing BGP routes is configured and the cost value is set to inherit the minimum value (inherit-minimum), all Type 3 LSAs within the summary address range generated by importing BGP routes are summarized, and the cost value of the LSA generated for the backbone area is the smallest cost value of the summarized routes.
+* If BGP route import is configured and inherit-minimum is not specified, all Type 3 LSAs within the summary address range generated when BGP routes are imported are summarized, and the maximum cost of the summarized routes is used as the cost of the LSA generated for the backbone area,
+* If intra-area routes within the summary address range exist in the backbone area, the maximum cost of all summarized routes is used as the cost of LSAs generated for areas outside the backbone area.
+* If a cost value is specified, the cost value of the LSA generated after summarization is the configured value.
+
+
+Example
+-------
+
+# In OSPF area 1, summarize routes in the network segments (10.42.10.0/24 and 10.42.110.0/24) into one 10.42.0.0/16, and advertise the summary route to other areas.
+```
+<HUAWEI> system-view
+[~HUAWEI] ospf 100
+[*HUAWEI-ospf-100] area 1
+[*HUAWEI-ospf-100-area-0.0.0.1] network 10.42.10.0 0.0.0.255
+[*HUAWEI-ospf-100-area-0.0.0.1] network 10.42.110.0 0.0.0.255
+[*HUAWEI-ospf-100-area-0.0.0.1] abr-summary 10.42.0.0 255.255.0.0
+
+```

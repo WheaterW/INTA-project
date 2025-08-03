@@ -1,0 +1,88 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Setting the Overload Status for an IS-IS Device">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0046.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0048.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IS-IS">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130624338">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Setting the Overload Status for an IS-IS Device</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130624338"></a><a name="EN-US_TASK_0000001130624338"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Setting the Overload Status for an IS-IS Device</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130624338__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>IS-IS uses the OL field in LSPs to identify the overload status of an IS-IS device. If a device sets the OL bit to 1, other devices ignore this device (except for direct routes to it) when performing SPF calculation.</p>
+<p>In <a href="#EN-US_TASK_0000001130624338__fig_dc_feature_isis_000801">Figure 1</a>, packets from DeviceA to network segment 10.1.1.0/24 are forwarded through DeviceB. If DeviceA receives an LSP with the OL bit set to 1 from DeviceB, DeviceA considers that the LSDB of DeviceB is incomplete. Consequently, the packets to network segment 10.1.1.0/24 are forwarded through DeviceD and DeviceE. However, the packets destined for the network segment directly connected to DeviceB are still forwarded through DeviceA.</p>
+<div class="fignone" id="EN-US_TASK_0000001130624338__fig_dc_feature_isis_000801"><a name="EN-US_TASK_0000001130624338__fig_dc_feature_isis_000801"></a><a name="fig_dc_feature_isis_000801"></a><span class="figcap"><b>Figure 1 </b>Network diagram with DeviceB in overload status</span><br><span><img class="vsd" src="figure/en-us_image_0000001176743851.png" width="NaN" height="NaN"></span></div>
+<p>If a device can neither store new LSPs nor perform LSDB synchronization normally, the routing information calculated by the device is incorrect. In this case, the device automatically enters the overload status. As a result, other devices ignore it (except for direct routes to it) when performing SPF calculation.</p>
+<div class="p">A device may enter the overload status due to a device exception or a manual configuration. If a device needs to be isolated from the network temporarily for upgrade or maintenance purposes, you can set the overload status for the device to prevent other devices from using it to forward traffic. IS-IS routes converge more quickly than BGP routes do. To prevent routing black holes on a network where both IS-IS and BGP are configured, configure an IS-IS device to enter the overload status during its start or restart. When BGP convergence completes, the device exits the overload status.<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>If a device enters the overload status due to a device exception, the device deletes all imported and leaked routing information.</li><li>If a device enters the overload status due to a manual configuration, the device determines whether to delete all imported and leaked routing information based on the configuration.</li></ul>
+</div></div>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130624338__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li><span>Enter the IS-IS view.</span><p><pre class="screen"><a href="cmdqueryname=isis"><b><span class="cmdname">isis</span></b></a> [ <i><span class="varname">process-id</span></i> ]</pre>
+</p></li><li><span>Set the overload status for the device.</span><p><pre class="screen"><a href="cmdqueryname=set-overload"><b><span class="cmdname">set-overload</span></b></a> { <strong><span>on-startup</span></strong> [ <i><span class="varname">timeout1</span></i> | <strong><span>start-from-nbr</span></strong> <i><span class="varname">system-id</span></i> [ <i><span class="varname">timeout1</span></i> [ <i><span class="varname">timeout2</span></i> ] ] | <strong><span>wait-for-bgp</span></strong> [ <i><span class="varname">timeout1</span></i> ] ]<span> [ <strong><span>route-delay-distribute</span></strong> <i><span class="varname">timeout4</span></i> ]</span> [ <strong><span>send-sa-bit</span></strong> [ <i><span class="varname">timeout3</span></i> ] ] [ <strong><span>route-max-metric</span></strong> ] } [ <strong><span>allow</span></strong> { <strong><span>interlevel</span></strong> | <strong><span>external</span></strong> } <sup>*</sup> ]</pre>
+<p>By default, the overload status is not set for the device.</p>
+<p><strong><span>on-startup</span></strong>: If <strong><span>on-startup</span></strong> is specified, the device enters the overload status when it restarts or encounters an exception, and it stays in the status for a specified period. To delay route advertisement in this case, you must specify both the <strong><span>on-startup</span></strong> and <span><strong><span>route-delay-distribute</span></strong></span> parameters.</p>
+<p><strong><span>start-from-nbr</span></strong>: This parameter configures the device to remain in the overload status for a specified period based on the status of the neighbor with a specified system ID.</p>
+<p><strong><span>wait-for-bgp</span></strong>: IS-IS routes converge faster than BGP routes do. On a network where both IS-IS and BGP are configured, you can specify <strong><span>wait-for-bgp</span></strong> so that the device stays in the overload status for a specified period. This prevents routing black holes by ensuring the device waits until BGP convergence is complete. After the period elapses, the device exits the overload status.</p>
+<p><strong><span>send-sa-bit</span></strong>: This parameter configures the device to set the SA bit in the IIHs it sends after a restart.</p>
+<p><strong><span>allow</span></strong>: This parameter allows the device to advertise prefix routes even in the overload status. By default, a device in the overload status does not advertise prefix routes.</p>
+<p><strong><span>route-max-metric</span></strong>: This parameter sets the metrics of locally originated routes to the maximum value.</p>
+</p></li><li><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001130624338__en-us_task_0234857734_screen163801330213"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001130624338__en-us_task_0234857734_en-us_concept_0141113565_cmdname1667501373175340">commit</span></b></a></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001130624338__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>Run the <a href="cmdqueryname=display+isis+lsdb"><b><span class="cmdname">display isis lsdb</span></b></a> [ [ <strong><span>level-1</span></strong> | <strong><span>level-2</span></strong> ] | <strong><span>verbose</span></strong> [ <strong><span>no-name</span></strong> ] | [ <strong><span>local</span></strong> | <i><span class="varname">lsp-id</span></i> | <strong><span>is-name</span></strong> <i><span class="varname">symbolic-name</span></i> ] ] <sup>*</sup> [ <i><span class="varname">process-id</span></i><span> | <strong><span>vpn-instance</span></strong> <i><span class="varname">vpn-instance-name</span></i></span> ] command to check IS-IS LSDB information.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_isis_ipv4_cfg_0001.html">IS-IS Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_isis_ipv4_cfg_0046.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_isis_ipv4_cfg_0048.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

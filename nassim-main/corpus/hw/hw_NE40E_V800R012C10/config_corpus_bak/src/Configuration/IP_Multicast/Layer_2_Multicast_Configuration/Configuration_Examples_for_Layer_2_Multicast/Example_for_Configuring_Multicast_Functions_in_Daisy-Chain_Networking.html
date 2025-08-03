@@ -1,0 +1,799 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Multicast Functions in Daisy-Chain Networking">
+<meta name="abstract" content="This section provides an example for configuring multicast functions in daisy-chain networking. Deploying multicast services in daisy-chain networking prevents the transmission of duplicate multicast data on a MAN ring, thereby saving network bandwidth.">
+<meta name="description" content="This section provides an example for configuring multicast functions in daisy-chain networking. Deploying multicast services in daisy-chain networking prevents the transmission of duplicate multicast data on a MAN ring, thereby saving network bandwidth.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_l2mc_cfg_0033.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_l2mc_cfg_0037.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_l2mc_cfg_0043.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z00603461,w00800033,l2multicastvrp,c00549182,w00556928,w00437000,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="Layer 2 Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Layer 2 Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="Layer 2 Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="Layer 2 Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="OWNER" content="w00447999">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="w00447999">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172367978">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Multicast Functions in Daisy-Chain Networking</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172367978"></a><a name="EN-US_TASK_0172367978"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Multicast Functions in Daisy-Chain Networking</h1>
+<div class="taskbody"><p>This section provides an example for configuring multicast functions in daisy-chain networking. Deploying multicast services in daisy-chain networking prevents the transmission of duplicate multicast data on a MAN ring, thereby saving network bandwidth.</p>
+<div class="context"><a name="EN-US_TASK_0172367978__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p><a href="#EN-US_TASK_0172367978__fig_dc_vrp_l2mc_cfg_003801">Figure 1</a> shows a typical multicast networking. SRs function as service termination nodes (BSRs function as backup nodes). PIM-SM is enabled on the network side to receive multicast data, and IGMP is enabled on the user side to manage multicast group members. On the MAN, UPEs and NPEs function only as bearer channels and use PWs to transparently transmit user requests and multicast traffic. That is, a PW is set up between NPE1 and each UPE (NPE2 is the backup device).</p>
+<p>After multicast traffic reaches NPEs, it must be replicated on the leaf network. If devices attached to each UPE require this multicast traffic, NPE1 must replicate a copy of multicast traffic for each PW connecting a UPE.</p>
+<div class="fignone" id="EN-US_TASK_0172367978__fig_dc_vrp_l2mc_cfg_003801"><a name="EN-US_TASK_0172367978__fig_dc_vrp_l2mc_cfg_003801"></a><a name="fig_dc_vrp_l2mc_cfg_003801"></a><span class="figcap"><b>Figure 1 </b>Networking diagram for deploying multicast services in the common VPLS networking</span><br><span><img class="vsd" src="images/fig_dc_vrp_l2mc_cfg_003801.png" width="NaN" height="NaN"></span><br></div>
+<div class="p">A PW is a virtual tunnel and actually, traffic is transmitted along the MAN ring. Use the <a href="#EN-US_TASK_0172367978__fig_dc_vrp_l2mc_cfg_003801">Figure 1</a> to illustrate the actual traffic forwarding path (traffic forwarding for NPE2 is not provided):<ul><li>The traffic forwarding path corresponding to the PW from NPE1 to UPE1 is NPE1 -&gt; UPE1.</li><li>The traffic forwarding path corresponding to the PW from NPE1 to UPE2 is NPE1 -&gt; UPE1 -&gt; UPE2.</li><li>The traffic forwarding path corresponding to the PW from NPE1 to UPE3 is NPE1 -&gt; UPE1 -&gt; UPE2 -&gt; UPE3.</li></ul>
+Therefore, one multicast packet is transmitted several times over the links between NPE1 and UPE1 and between UPE1 and UPE2. If there are more nodes on the MAN ring, the multicast packet is transmitted multiple times. This greatly wastes network bandwidth because multicast traffic generally uses a large amount of bandwidth.</div>
+<p>The daisy-chain networking can solve this problem. <a href="#EN-US_TASK_0172367978__fig_dc_vrp_l2mc_cfg_003802">Figure 2</a> shows the daisy-chain networking.</p>
+<p>In this networking, a UPE sets up a PW with only an adjacent UPE or NPE. As a result, on the entire MAN ring, a chain composed of VPLS PWs is formed and only one copy of data is transmitted along the chain. Such a chain is called a daisy chain. On a daisy chain, an NPE no long needs to set up PWs with all UPEs, preventing duplicate multicast traffic transmission.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><div class="p">The daisy-chain networking does not apply to unicast services for the following reasons:<ul><li>Unicast services are transmitted over point-to-point connections and therefore will not be transmitted repeatedly over a PW.</li><li>The daisy-chain networking makes configuration and reliability protection more complex.</li></ul>
+</div>
+</div></div>
+<div class="fignone" id="EN-US_TASK_0172367978__fig_dc_vrp_l2mc_cfg_003802"><a name="EN-US_TASK_0172367978__fig_dc_vrp_l2mc_cfg_003802"></a><a name="fig_dc_vrp_l2mc_cfg_003802"></a><span class="figcap"><b>Figure 2 </b>Daisy-chain networking</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 through 3 in this example represent GE<span>0/1/0</span>, GE<span>0/1/1</span>, and GE<span>0/1/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_l2mc_cfg_003802.png" width="NaN" height="NaN"></span><br><div class="tableBorder"><table cellpadding="4" cellspacing="0" summary=""><tr><td valign="top"><p>Device</p>
+</td>
+<td valign="top"><p>Interface</p>
+</td>
+<td valign="top"><p>IP Address</p>
+</td>
+</tr>
+<tr><td valign="top"><p>NPE1</p>
+</td>
+<td valign="top"><p>GE<span>0/1/0</span></p>
+</td>
+<td valign="top"><p>10.11.11.1/30</p>
+</td>
+</tr>
+<tr><td valign="top"><p>NPE2</p>
+</td>
+<td valign="top"><p>GE<span>0/1/0</span></p>
+</td>
+<td valign="top"><p>10.11.14.2/30</p>
+</td>
+</tr>
+<tr><td valign="top"><p>UPE1</p>
+</td>
+<td valign="top"><p>GE<span>0/1/0</span></p>
+</td>
+<td valign="top"><p>10.11.11.2/30</p>
+</td>
+</tr>
+<tr><td valign="top"><p>UPE1</p>
+</td>
+<td valign="top"><p>GE<span>0/1/1</span></p>
+</td>
+<td valign="top"><p>10.11.12.1/30</p>
+</td>
+</tr>
+<tr><td valign="top"><p>UPE2</p>
+</td>
+<td valign="top"><p>GE<span>0/1/0</span></p>
+</td>
+<td valign="top"><p>10.11.13.1/30</p>
+</td>
+</tr>
+<tr><td valign="top"><p>UPE2</p>
+</td>
+<td valign="top"><p>GE<span>0/1/1</span></p>
+</td>
+<td valign="top"><p>10.11.12.2/30</p>
+</td>
+</tr>
+<tr><td valign="top"><p>UPE3</p>
+</td>
+<td valign="top"><p>GE<span>0/1/0</span></p>
+</td>
+<td valign="top"><p>10.11.14.1/30</p>
+</td>
+</tr>
+<tr><td valign="top"><p>UPE3</p>
+</td>
+<td valign="top"><p>GE<span>0/1/1</span></p>
+</td>
+<td valign="top"><p>10.11.13.2/30</p>
+</td>
+</tr>
+</table></div>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172367978__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure basic MPLS functions and L2VPN functions on each device to ensure that multicast services run properly on the L2VPN.</p>
+</li><li><p>Create the VSI <strong>btv</strong> on each device; create a PW between an NPE and its adjacent UPE and a Spoke PW between every two UPEs so that virtual tunnels exist between adjacent devices.</p>
+</li><li><p>Configure IGMP snooping and IGMP Snooping proxy for the VSI to manage the forwarding of multicast data packets. An IGMP Snooping Proxy substitutes for both upstream and downstream devices to send multicast protocol packets, which implements on-demand multicast data forwarding on the Layer 2 VPLS network and saves network bandwidth.</p>
+</li><li><p>Add the sub-interface bound to the VSI on each device to a multicast group statically so that users attached to each device can steadily receive multicast data for the multicast groups, avoiding network attacks.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172367978__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>IP addresses of the interfaces and loopback address of each device (for details, see <a href="#EN-US_TASK_0172367978__fig_dc_vrp_l2mc_cfg_003802">Figure 2</a>)</p>
+</li><li><p>IP routing protocol (IS-IS is used in this example and the process ID is 1)</p>
+</li><li><p>MPLS Label Switch Router (LSR) ID of each device (consistent with loopback address of each device)</p>
+</li><li><p>VSI name (btv is used in this example) used when setting up a PW between every two adjacent devices</p>
+</li><li><p>Sub-interfaces bound to the VSI on UPE1, UPE2, and UPE3 (GE<span>0/1/1</span>.1, GE<span>0/1/1</span>.1, and GE<span>0/1/1</span>.1, respectively) and VLAN to which users belong (VLAN 10)</p>
+</li><li><p>Address of the multicast group to which users attached to UPE1, UPE2, and UPE3 are to be statically added (225.0.0.1 is used in this example)</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172367978__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure interface IP addresses, loopback addresses, and IS-IS on all NPEs and UPEs.</span><p><p># Configure NPE1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname NPE1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1]<strong> interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-LoopBack0]<strong> ip address 1.1.1.1 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-LoopBack0]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-gigabitethernet<span>0/1/0</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>]<strong> ip address 10.11.11.1 30</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1]<strong> isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-isis-1]<strong> is-level level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-isis-1]<strong> network-entity 49.0010.0100.1001.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-isis-1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>]<strong> isis enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1]<strong> interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-LoopBack0]<strong> isis enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-LoopBack0]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1-LoopBack0]<strong> quit</strong></pre>
+</p><p><p># Configure NPE2.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname NPE2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2]<strong> interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-LoopBack0]<strong> ip address 5.5.5.5 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-LoopBack0]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>]<strong> ip address 10.11.14.2 30</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2]<strong> isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-isis-1]<strong> is-level level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-isis-1]<strong> network-entity 49.0050.0500.5005.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-isis-1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>]<strong> isis enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2]<strong> interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-LoopBack0]<strong> isis enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-LoopBack0]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2-LoopBack0]<strong> quit</strong></pre>
+</p><p><p># Configure UPE1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname UPE1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1]<strong> interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-LoopBack0]<strong> ip address 2.2.2.2 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-LoopBack0]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/0</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/0</span>]<strong> ip address 10.11.11.2 30</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1]<strong> interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/1</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/1</span>]<strong> ip address 10.11.12.1 30</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1]<strong> isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-isis-1]<strong> is-level level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-isis-1]<strong> network-entity 49.0020.0200.2002.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-isis-1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1]<strong> interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-LoopBack0]<strong> isis enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-LoopBack0]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/0</span>]<strong> isis enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1]<strong> interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/1</span>]<strong> isis enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/1</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<p># Configure UPE2.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname UPE2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2]<strong> interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-LoopBack0]<strong> ip address 4.4.4.4 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-LoopBack0]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/0</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/0</span>]<strong> ip address 10.11.13.1 30</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2]<strong> interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/1</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/1</span>]<strong> ip address 10.11.12.2 30</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2]<strong> isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-isis-1]<strong> is-level level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-isis-1]<strong> network-entity 49.0040.0400.4004.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-isis-1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2]<strong> interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-LoopBack0]<strong> isis enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-LoopBack0]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/0</span>]<strong> isis enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2]<strong> interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/1</span>]<strong> isis enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/1</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<p># Configure UPE3.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname UPE3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE3]<strong> interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-LoopBack0]<strong> ip address 6.6.6.6 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-LoopBack0]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/0</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/0</span>]<strong> ip address 10.11.14.1 30</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3]<strong> interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/1</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/1</span>]<strong> ip address 10.11.13.2 30</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3]<strong> isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-isis-1]<strong> is-level level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-isis-1]<strong> network-entity 49.0060.0600.6006.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-isis-1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3]<strong> interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-LoopBack0]<strong> isis enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-LoopBack0]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/0</span>]<strong> isis enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3]<strong> interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/1</span>]<strong> isis enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/1</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE3-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+</p></li><li><span>Configure basic MPLS functions and Label Distribution Protocol (LDP) on all NPEs and UPEs.</span><p><p># Configure NPE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1]<strong> mpls lsr-id 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1]<strong> mpls </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-mpls]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-mpls-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<p># Configure NPE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2]<strong> mpls lsr-id 5.5.5.5</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2]<strong> mpls </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-mpls]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-mpls-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<p># Configure UPE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1]<strong> mpls lsr-id 2.2.2.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1]<strong> mpls </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-mpls]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-mpls-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/0</span>]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/0</span>]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1]<strong> interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/1</span>]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/1</span>]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/1</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<p># Configure UPE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2]<strong> mpls lsr-id 4.4.4.4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2]<strong> mpls </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-mpls]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-mpls-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/0</span>]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/0</span>0]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2]<strong> interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/1</span>]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/1</span>]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/1</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+<p># Configure UPE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE3]<strong> mpls lsr-id 6.6.6.6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3]<strong> mpls </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-mpls]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-mpls-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/0</span>]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/0</span>]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3]<strong> interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/1</span>]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/1</span>]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/1</span>]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE3-GigabitEthernet<span>0/1/1</span>]<strong> quit</strong></pre>
+</p></li><li><span>Verify the MPLS configuration.</span><p><p>After the preceding configurations are complete, run the <a href="cmdqueryname=display+mpls+ldp+session"><b><span class="cmdname">display mpls ldp session</span></b></a> command on each device. The command output shows that the status of the LDP session between every two adjacent devices is <strong>Operational</strong>.</p>
+<p>The following example uses the command output on UPE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2]<strong> display mpls ldp session</strong></pre>
+<pre class="screen"> LDP Session(s) in Public Network
+ Codes: LAM(Label Advertisement Mode), SsnAge Unit(DDDD:HH:MM)
+<span> An asterisk (*) before a session means the session is being deleted.</span>
+ ------------------------------------------------------------------------------
+ PeerID             Status      LAM  SsnRole  SsnAge      KASent/Rcv
+ ------------------------------------------------------------------------------
+ 2.2.2.2:0          <strong>Operational</strong> DU   Active   0000:06:49  1639/1638
+ 6.6.6.6:0          <strong>Operational</strong> DU   Passive  0000:06:50  1643/1643
+ ------------------------------------------------------------------------------
+ TOTAL: 2 session(s) Found.
+
+</pre>
+</p></li><li><span>Enable MPLS L2VPN, create VSIs, and configure PWs on all NPEs and UPEs.</span><p><p># Configure NPE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1]<strong> mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-l2vpn]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1]<strong> vsi btv static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-btv]<strong> pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-btv-ldp]<strong> vsi-id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-btv-ldp]<strong> peer 2.2.2.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-btv-ldp]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1-vsi-btv-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1-vsi-btv]<strong> quit</strong></pre>
+<p># Configure NPE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2]<strong> mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-l2vpn]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2]<strong> vsi btv static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-btv]<strong> pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-btv-ldp]<strong> vsi-id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-btv-ldp]<strong> peer 6.6.6.6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-btv-ldp]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2-vsi-btv-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2-vsi-btv]<strong> quit</strong></pre>
+<p># Configure UPE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1]<strong> mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-l2vpn]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1]<strong> vsi btv static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-vsi-btv]<strong> pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-vsi-btv-ldp]<strong> vsi-id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-vsi-btv-ldp]<strong> peer 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-vsi-btv-ldp]<strong> peer 4.4.4.4 upe</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-vsi-btv-ldp]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1-vsi-btv-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1-vsi-btv]<strong> quit</strong></pre>
+<p># Configure UPE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2]<strong> mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-l2vpn]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2]<strong> vsi btv static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-vsi-btv]<strong> pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-vsi-btv-ldp]<strong> vsi-id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-vsi-btv-ldp]<strong> peer 2.2.2.2 upe</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-vsi-btv-ldp]<strong> peer 6.6.6.6 upe</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-vsi-btv-ldp]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2-vsi-btv-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2-vsi-btv]<strong> quit</strong></pre>
+<p># Configure UPE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE3]<strong> mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-l2vpn]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3]<strong> vsi btv static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-vsi-btv]<strong> pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-vsi-btv-ldp]<strong> vsi-id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-vsi-btv-ldp]<strong> peer 4.4.4.4 upe</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-vsi-btv-ldp]<strong> peer 5.5.5.5</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-vsi-btv-ldp]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE3-vsi-btv-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE3-vsi-btv]<strong> quit</strong></pre>
+</p></li><li><span>Bind interfaces to the VSIs on all NPEs and UPEs.</span><p><p># Configure NPE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1]<strong> vlan 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vlan10]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1]<strong> interface gigabitethernet <span>0/1/2</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/2</span>.1]<strong> vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/2</span>.1]<strong> l2 binding vsi btv</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/2</span>.1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1-GigabitEthernet<span>0/1/2</span>.1]<strong> quit</strong></pre>
+</p><p><p># Configure NPE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2]<strong> vlan 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vlan10]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2]<strong> interface gigabitethernet <span>0/1/2</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/2</span>.1]<strong> vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/2</span>.1]<strong> l2 binding vsi btv</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/2</span>.1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2-GigabitEthernet<span>0/1/2</span>.1]<strong> quit</strong></pre>
+</p><p><p># Configure UPE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1]<strong> vlan 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-vlan10]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1]<strong> interface gigabitethernet <span>0/1/2</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/2</span>.1]<strong> vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/2</span>.1]<strong> l2 binding vsi btv</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/2</span>.1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1-GigabitEthernet<span>0/1/2</span>.1]<strong> quit</strong></pre>
+</p><p><p># Configure UPE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2]<strong> vlan 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-vlan10]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2]<strong> interface gigabitethernet <span>0/1/2</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/2</span>.1]<strong> vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/2</span>.1]<strong> l2 binding vsi btv</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/2</span>.1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2-GigabitEthernet<span>0/1/2</span>.1]<strong> quit</strong></pre>
+</p><p><p># Configure UPE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE3]<strong> vlan 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-vlan10]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3]<strong> interface gigabitethernet <span>0/1/2</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/2</span>.1]<strong> vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/2</span>.1]<strong> l2 binding vsi btv</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/2</span>.1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE3-GigabitEthernet<span>0/1/2</span>.1]<strong> quit</strong></pre>
+</p></li><li><span>After the preceding configurations are complete, run the <a href="cmdqueryname=display+vsi"><b><span class="cmdname">display vsi</span></b></a> command to check the VSI status.</span><p><p>The following example uses the command output on UPE2. The command output shows that the VSI is Up.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2]<strong> display vsi</strong></pre>
+<pre class="screen">Total VSI number is 1, 1 is up, 0 is down, 1 is LDP mode, 0 is BGP mode
+
+Vsi                             Mem    PW   Mac       Encap     Mtu   Vsi
+Name                            Disc   Type Learn     Type      Value State
+--------------------------------------------------------------------------
+v123                            static ldp  unqualify vlan      1500  <strong>up</strong></pre>
+</p></li><li><span>Enable IGMP snooping and IGMP Snooping Proxy for the VSI on all NPEs and UPEs.</span><p></p><p><p># Configure NPE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1]<strong> igmp-snooping enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1]<strong> vsi btv</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-VSI-btv]<strong> igmp-snooping enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-VSI-btv]<strong> igmp-snooping proxy</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-VSI-btv]<strong> igmp-snooping proxy router-protocol-pass</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-VSI-btv]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1-VSI-btv]<strong> quit</strong></pre>
+<p># Configure NPE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2]<strong> igmp-snooping enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2]<strong> vsi btv</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-VSI-btv]<strong> igmp-snooping enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-VSI-btv]<strong> igmp-snooping proxy</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-VSI-btv]<strong> igmp-snooping proxy router-protocol-pass</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-VSI-btv]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2-VSI-btv]<strong> quit</strong></pre>
+<p># Configure UPE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1]<strong> igmp-snooping enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1]<strong> vsi btv</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-VSI-btv]<strong> igmp-snooping enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-VSI-btv]<strong> igmp-snooping proxy</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-VSI-btv]<strong> igmp-snooping proxy router-protocol-pass</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-VSI-btv]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1-VSI-btv]<strong> quit</strong></pre>
+<p># Configure UPE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2]<strong> igmp-snooping enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2]<strong> vsi btv</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-VSI-btv]<strong> igmp-snooping enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-VSI-btv]<strong> igmp-snooping proxy</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-VSI-btv]<strong> igmp-snooping proxy router-protocol-pass</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-VSI-btv]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2-VSI-btv]<strong> quit</strong></pre>
+<p># Configure UPE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE3]<strong> igmp-snooping enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3]<strong> vsi btv</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-VSI-btv]<strong> igmp-snooping enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-VSI-btv]<strong> igmp-snooping proxy</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-VSI-btv]<strong> igmp-snooping proxy router-protocol-pass</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-VSI-btv]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE3-VSI-btv]<strong> quit</strong></pre>
+</p></li><li><span>Add the sub-interfaces bound to the VSIs on UPE1, UPE2, and UPE3 to a multicast group statically.</span><p><p># Add GE <span>0/1/2</span>.1 bound to the VSI <strong>btv</strong> on UPE1 to the multicast group 225.0.0.1 statically.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1]<strong> interface gigabitethernet <span>0/1/2</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1-GigabitEthernet<span>0/1/2</span>.1]<strong> l2-multicast static-group group-address 225.0.0.1 vsi btv</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/2</span>.1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1-GigabitEthernet<span>0/1/2</span>.1]<strong> quit</strong></pre>
+</p><p><p># Add GE <span>0/1/2</span>.1 bound to the VSI <strong>btv</strong> on UPE2 to the multicast group 225.0.0.1 statically.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2]<strong> interface gigabitethernet <span>0/1/2</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2-GigabitEthernet<span>0/1/2</span>.1]<strong> l2-multicast static-group group-address 225.0.0.1 vsi btv</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/2</span>.1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2-GigabitEthernet<span>0/1/2</span>.1]<strong> quit</strong></pre>
+</p><p><p># Add GE <span>0/1/2</span>.1 bound to the VSI <strong>btv</strong> on UPE3 to the multicast group 225.0.0.1 statically.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE3]<strong> interface gigabitethernet <span>0/1/2</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE3-GigabitEthernet<span>0/1/2</span>.1]<strong> l2-multicast static-group group-address 225.0.0.1 vsi btv</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE3-GigabitEthernet<span>0/1/2</span>.1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE3-GigabitEthernet<span>0/1/2</span>.1]<strong> quit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p>After the preceding configurations are complete, run the <strong>display igmp-snooping port-info</strong> command on UPE1, UPE2, and UPE3 to check static member port information of the VSI. Use the information of VSI <strong>btv</strong> on UPE2 as an example.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2] <strong>display igmp-snooping port-info vsi btv</strong></pre>
+<pre class="screen"> -----------------------------------------------------------------------------------
+  Flag: S:Static     D:Dynamic     M:Ssm-mapping
+        A:Active     P:Protocol    F:Fast-channel                                
+                    (Source, Group)  Port                                      Flag
+ -----------------------------------------------------------------------------------
+ VSI btv, 1 Entry(s)
+                      (*, 225.0.0.1)                                            P--
+                                      GE<span>0/1/2</span>.1                                 S--
+                                                        1 port(s) include
+ -----------------------------------------------------------------------------------</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172367978__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>NPE1 configuration file</p>
+<pre class="screen">#
+sysname NPE1
+#
+vlan batch 10
+#
+<span>igmp-snooping enable</span>
+#
+mpls lsr-id 1.1.1.1
+mpls
+#
+mpls l2vpn
+#
+vsi btv static
+ pwsignal ldp
+  vsi-id 1
+  peer 2.2.2.2
+ <span>igmp-snooping enable</span>
+ <span>igmp-snooping proxy</span>
+ <span>igmp-snooping proxy router-protocol-pass</span>
+#
+mpls ldp
+#
+isis 1
+ is-level level-1
+ network-entity 49.0010.0100.1001.00
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.11.11.1 255.255.255.252
+ isis enable 1
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/2</span>.1
+ vlan-type dot1q 10
+ l2 binding vsi btv
+#
+interface LoopBack0
+ ip address 1.1.1.1 255.255.255.255
+ isis enable 1
+#
+return</pre>
+</li><li><p>NPE2 configuration file</p>
+<pre class="screen">#
+sysname NPE2
+#
+vlan batch 10
+#
+<span>igmp-snooping enable</span>
+#
+mpls lsr-id 5.5.5.5
+mpls
+#
+mpls l2vpn
+#
+vsi btv static
+ pwsignal ldp
+  vsi-id 1
+  peer 6.6.6.6
+ <span>igmp-snooping enable</span>
+ <span>igmp-snooping proxy</span>
+ <span>igmp-snooping proxy router-protocol-pass</span>
+#
+mpls ldp
+#
+isis 1
+ is-level level-1
+ network-entity 49.0050.0500.5005.00
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.11.14.2 255.255.255.252
+ isis enable 1
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/2</span>.1
+ vlan-type dot1q 10
+ l2 binding vsi btv
+#
+interface LoopBack0
+ ip address 5.5.5.5 255.255.255.255
+ isis enable 1
+#
+return</pre>
+</li><li><p>UPE1 configuration file</p>
+<pre class="screen">#
+sysname UPE1
+#
+vlan batch 10
+#
+<span>igmp-snooping enable</span>
+#
+mpls lsr-id 2.2.2.2
+ mpls
+#
+mpls l2vpn
+#
+vsi btv static
+ pwsignal ldp
+  vsi-id 1
+  peer 1.1.1.1
+  peer 4.4.4.4 upe
+ <span>igmp-snooping enable</span>
+ <span>igmp-snooping proxy</span>
+ <span>igmp-snooping proxy router-protocol-pass</span>
+#
+mpls ldp
+#
+isis 1
+ is-level level-1
+ network-entity 49.0020.0200.2002.00
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.11.11.2 255.255.255.252
+ isis enable 1
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.11.12.1 255.255.255.252
+ isis enable 1
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/2</span>.1
+ vlan-type dot1q 10
+ l2 binding vsi btv
+ <span>l2-multicast static-group group-address 225.0.0.1 vsi btv</span>
+#
+interface LoopBack0
+ ip address 2.2.2.2 255.255.255.255
+ isis enable 1
+#
+return</pre>
+</li><li><p>UPE2 configuration file</p>
+<pre class="screen">#
+sysname UPE2
+#
+vlan batch 10
+#
+<span>igmp-snooping enable</span>
+#
+mpls lsr-id 4.4.4.4
+ mpls
+#
+ mpls l2vpn
+#
+vsi btv static
+ pwsignal ldp
+  vsi-id 1
+  peer 2.2.2.2 upe
+  peer 6.6.6.6 upe
+ <span>igmp-snooping enable</span>
+ <span>igmp-snooping proxy</span>
+ <span>igmp-snooping proxy router-protocol-pass</span>
+#
+mpls ldp
+#
+isis 1
+ is-level level-1
+ network-entity 49.0040.0400.4004.00
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.11.13.1 255.255.255.252
+ isis enable 1
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.11.12.2 255.255.255.252
+ isis enable 1
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/2</span>.1
+ vlan-type dot1q 10
+ l2 binding vsi btv
+ <span>l2-multicast static-group group-address 225.0.0.1 vsi btv</span>
+#
+interface LoopBack0
+ ip address 4.4.4.4 255.255.255.255
+ isis enable 1
+#
+return</pre>
+</li><li><p>UPE3 configuration file</p>
+<pre class="screen">#
+sysname UPE1
+#
+vlan batch 10
+#
+<span>igmp-snooping enable</span>
+#
+mpls lsr-id 6.6.6.6
+ mpls
+#
+ mpls l2vpn
+#
+vsi btv static
+ pwsignal ldp
+  vsi-id 1
+  peer 5.5.5.5
+  peer 4.4.4.4 upe
+ <span>igmp-snooping enable</span>
+ <span>igmp-snooping proxy</span>
+ <span>igmp-snooping proxy router-protocol-pass</span>
+#
+mpls ldp
+#
+isis 1
+ is-level level-1
+ network-entity 49.0060.0600.6006.00
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.11.14.1 255.255.255.252
+ isis enable 1
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.11.13.2 255.255.255.252
+ isis enable 1
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/2</span>.1
+ vlan-type dot1q 10
+ l2 binding vsi btv
+ <span>l2-multicast static-group group-address 225.0.0.1 vsi btv</span>
+#
+interface LoopBack0
+ ip address 6.6.6.6 255.255.255.255
+ isis enable 1
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_l2mc_cfg_0033.html">Configuration Examples for Layer 2 Multicast
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_l2mc_cfg_0037.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_l2mc_cfg_0043.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

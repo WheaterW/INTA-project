@@ -1,0 +1,658 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring NG MVPN over BIER Dual-Root 1+1 Protection">
+<meta name="abstract" content="This section provides an example for configuring NG MVPN over BIER dual-root 1+1 protection.">
+<meta name="description" content="This section provides an example for configuring NG MVPN over BIER dual-root 1+1 protection.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_bier_cfg_example.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_bier_cfg_11.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z00603461,w00606909,w00447999">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="BIER">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BIER">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="BIER">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="BIER">
+<meta name="featuretype" content="IP Multicast">
+<meta name="OWNER" content="w00447999">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="w00447999">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0216585636">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/thickbox.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/jquery.min.js"></script>
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/imageResize.js"></script>
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/jquery-migrate-1.2.1.min.js"></script>
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/jquery-ui.min.js"></script>
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/jquery.mousewheel.min.js"></script>
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/thickbox.js"></script>
+<title>Example for Configuring NG MVPN over BIER Dual-Root 1+1 Protection</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0216585636"></a><a name="EN-US_TASK_0216585636"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring NG MVPN over BIER Dual-Root 1+1 Protection</h1>
+<div class="taskbody"><p>This section provides an example for configuring NG MVPN over BIER dual-root 1+1 protection.</p>
+<div class="context"><a name="EN-US_TASK_0216585636__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In an NG MVPN over BIER scenario shown in <a href="#EN-US_TASK_0216585636__fig1347875220488">Figure 1</a>, if Root1 fails, the subsequent forwarding of multicast services depends on unicast route convergence. However, this is unacceptable for multicast services that require high reliability, because the convergence takes a long time to complete. To address this problem, configure flow-based dual-root 1+1 protection. When both the primary and secondary links are working properly, the same multicast data flow is forwarded along both the primary tunnel (over the primary link) and the secondary tunnel (over the secondary link). The leaf node accepts the multicast flow received from the primary tunnel (with Root1 as the root) and discards the multicast flow received from the secondary tunnel (with Root2 as the root). If Root1 fails, the leaf node uses flow-based dual-root 1+1 protection to quickly detect the tunnel fault and accepts the multicast flow received from the secondary tunnel. Flow-based dual-root 1+1 protection accelerates the convergence of multicast services and improves reliability.</p>
+<div class="fignone" id="EN-US_TASK_0216585636__fig1347875220488"><a name="EN-US_TASK_0216585636__fig1347875220488"></a><a name="fig1347875220488"></a><span class="figcap"><b>Figure 1 </b>NG MVPN over BIER dual-root 1+1 protection</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1, 2, and 3 in this example represent GE <span>0/1/0</span>, GE <span>0/1/1</span>, and GE <span>0/1/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="imgResize" src="figure/en-us_image_0216587215.png" width="492.1" height="331.347289" title="Click to enlarge"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0216585636__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure BGP/MPLS IP VPN to ensure that unicast VPN services are properly transmitted. In this example, MPLS LDP is configured on the public network, and IS-IS is deployed as the unicast routing protocol. In addition, an IS-IS neighbor relationship is established in a VPN instance between the CE and Root1 and between the CE and Root2.</p>
+</li><li><p>Configure BIER on Root1, Root2, and the leaf node, and configure IS-IS as an underlay protocol of BIER.</p>
+</li><li><p>Establish a BGP MVPN peer relationship between Root1 and the leaf node and between Root2 and the leaf node so that the peers can use BGP to transmit A-D and C-multicast routes.</p>
+</li><li>Configure Root1 and Root2 to transmit multicast flows over BIER tunnels.</li><li>Enable MVPN FRR on the leaf node and set the flow-based detection mode for MVPN FRR.</li><li><p>Configure PIM-SM on the interfaces bound to the VPN instance on Root1, Root2, and the leaf node and on CE interfaces.</p>
+</li><li>Configure a static rendezvous point (RP).</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0216585636__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li>IP addresses of interfaces (shown in <a href="#EN-US_TASK_0216585636__fig1347875220488">Figure 1</a>)</li></ul>
+<ul><li><p>IS-IS process ID (1000) of the public network, and VPN instance name (<strong>bier</strong>) on Root1, Root2, and the leaf node</p>
+</li><li>BFR-IDs (1, 2, and 3) for Root1, Root2, and the leaf node, respectively, sub-domain ID (0), BSL (256), and Max-SI (2)</li><li>IS-IS process ID (1000) configured on the CE, and IS-IS process ID (100) used by Root1 and Root2 to establish an IS-IS neighbor relationship with the CE in the VPN instance</li><li>IP address (226.0.0.1) of the multicast group that users connected to Receiver join</li><li>IBGP peer AS number (1000)</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0216585636__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure BGP/MPLS IP VPN.</span><ol type="a"><li class="substepexpand"><span>Assign an IP address to each interface on the BGP/MPLS IP VPN backbone network and VPN.</span><p><p>Configure an IP address for each interface. For configuration details, see Configuration Files in this section.</p>
+</p></li><li class="substepexpand"><span>Configure an IGP to interconnect devices on the BGP/MPLS IP VPN backbone network.</span><p><p>This example uses IS-IS as the IGP. For configuration details, see <a href="#EN-US_TASK_0216585636__example_dc_vrp_cfg_ngmvpn_001301">Configuration Files</a> in this section.</p>
+</p></li><li class="substepexpand"><span>Configure basic MPLS functions and enable MPLS LDP on the BGP/MPLS IP VPN backbone network.</span><p><ul><li><p># Configure Root1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Root1] <strong>mpls lsr-id 3.3.3.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1] <strong>interface gigabitethernet<span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-GigabitEthernet<span>0/1/1</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-GigabitEthernet<span>0/1/1</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1] <strong>commit</strong></pre>
+<p>The configuration of Root2 is similar to the configuration of Root1. For configuration details, see <a href="#EN-US_TASK_0216585636__example_dc_vrp_cfg_ngmvpn_001301">Configuration Files</a> in this section.</p>
+</li><li><p># Configure the leaf node.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf] <strong>mpls lsr-id 2.2.2.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-GigabitEthernet<span>0/1/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-GigabitEthernet<span>0/1/0</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>interface gigabitethernet<span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-GigabitEthernet<span>0/1/1</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-GigabitEthernet<span>0/1/1</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>commit</strong></pre>
+</li></ul>
+</p></li><li class="substepexpand"><span>Establish an MP-IBGP peer relationship between Root1 and the leaf node and between Root2 and the leaf node.</span><p><ul><li><p># Configure Root1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Root1] <strong>bgp 100</strong><strong>0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bgp] <strong>peer 2.2.2.1 as-number 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bgp] <strong>peer 2.2.2.1 connect-interface LoopBack1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bgp] <strong>ipv4-family vpnv4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bgp-af-vpnv4] <strong>peer 2.2.2.1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bgp-af-vpnv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1] <strong>commit</strong></pre>
+<p>The configuration of Root2 is similar to the configuration of Root1. For configuration details, see <a href="#EN-US_TASK_0216585636__example_dc_vrp_cfg_ngmvpn_001301">Configuration Files</a> in this section.</p>
+</li><li><p># Configure the leaf node.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf] <strong>bgp 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp] <strong>peer 3.3.3.1 as-number 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp] <strong>peer 3.3.3.1 connect-interface LoopBack1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp] <strong>peer 4.4.4.1 as-number 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp] <strong>peer 4.4.4.1 connect-interface LoopBack1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp] <strong>ipv4-family vpnv4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp-af-vpnv4] <strong>peer 3.3.3.1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp-af-vpnv4] <strong>peer 4.4.4.1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp-af-vpnv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>commit</strong></pre>
+</li></ul>
+</p></li><li class="substepexpand"><span>Configure a VPN instance on Root1, Root2, and the leaf node.</span><p><ul><li><p># Configure Root1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Root1] <strong>ip vpn-instance bier</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-vpn-instance-bier] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-vpn-instance-bier-af-ipv4] <strong>route-distinguisher 1000:1000</strong><strong>0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-vpn-instance-bier-af-ipv4] <strong>vpn-target 1000:100</strong><strong>0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-vpn-instance-bier-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-vpn-instance-bier] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1] <strong>interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-GigabitEthernet<span>0/1/0</span>] <strong>ip binding vpn-instance bier</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-GigabitEthernet<span>0/1/0</span>] <strong>ip address 10.1.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1] <strong>commit</strong></pre>
+<p>The configurations of the leaf node and Root2 are similar to the configuration of Root1. For configuration details, see <a href="#EN-US_TASK_0216585636__example_dc_vrp_cfg_ngmvpn_001301">Configuration Files</a> in this section.</p>
+</li></ul>
+</p></li><li class="substepexpand"><span>Establish an IS-IS neighbor relationship in the VPN instance between the CE and Root1 and between the CE and Root2.</span><p><ul><li><div class="p"># Configure IS-IS on Root1 to establish an IS-IS neighbor relationship in the VPN instance, and configure IS-IS to import BGP routes.<pre class="screen">[<span class="keyword">*</span>Root1] <strong>isis 100 vpn-instance bier</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-isis-100] <strong>network-entity 10.1334.6e9f.0001.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-isis-100] <strong>import-route bgp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-isis-100] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bgp] <strong>quit</strong></pre>
+</div>
+<pre class="screen">[<span class="keyword">*</span>Root1] <strong>interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-GigabitEthernet<span>0/1/0</span>] <strong>isis enable 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1] <strong>commit</strong></pre>
+<p>The configuration of Root2 is similar to the configuration of Root1. For configuration details, see <a href="#EN-US_TASK_0216585636__example_dc_vrp_cfg_ngmvpn_001301">Configuration Files</a> in this section.</p>
+</li><li><p># Configure the CE.</p>
+<pre class="screen">[<span class="keyword">*</span>CE] <strong>isis 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE-isis-1000] <strong>network-entity 10.1234.6e9f.0001.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE-isis-1000] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE] <strong>interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE-GigabitEthernet<span>0/1/0</span>] <strong>isis enable 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE] <strong>interface gigabitethernet<span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE-GigabitEthernet<span>0/1/1</span>] <strong>isis enable 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE] <strong>interface gigabitethernet<span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE-GigabitEthernet<span>0/1/2</span>] <strong>isis enable 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE-GigabitEthernet<span>0/1/2</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE] <strong>commit</strong></pre>
+</li></ul>
+</p></li><li class="substepexpand"><span>Configure route import on Root1, Root2, and the leaf node.</span><p><ul><li><p># Configure Root1 to import direct routes and IS-IS routes into BGP.</p>
+<pre class="screen">[<span class="keyword">*</span>Root1] <strong>bgp 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bgp] <strong>ipv4-family vpn-instance bier</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bgp-bier] <strong>import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bgp-bier] <strong>import-route isis 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bgp-bier] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1] <strong>commit</strong></pre>
+<p>The configurations of the leaf node and Root2 are similar to the configuration of Root1. For configuration details, see <a href="#EN-US_TASK_0216585636__example_dc_vrp_cfg_ngmvpn_001301">Configuration Files</a> in this section.</p>
+</li></ul>
+</p></li></ol>
+</li><li><span>Configure BIER on Root1, Root2, and the leaf node, and configure IS-IS as an underlay protocol of BIER.</span><p><ul><li><p># Configure Root1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Root1] <strong>interface LoopBack1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-LoopBack1] <strong>ip address 3.3.3.1 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-LoopBack1] <strong>isis enable 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-LoopBack1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Root1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Root1] <strong>bier</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bier] <strong>sub-domain 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bier-sub-domain-0] <strong>bfr-id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bier-sub-domain-0] <strong>bfr-prefix interface loopback1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bier-sub-domain-0]<strong> protocol isis</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bier-sub-domain-0] <strong>encapsulation-type mpls bsl 256 max-si 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bier-sub-domain-0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bier] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1] <strong>isis 1</strong><strong>000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-isis-1000] <strong>cost-style wide</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-isis-1000] <strong>bier enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-isis-1000] <strong>quit</strong></pre>
+<p>The configurations of the leaf node and Root2 are similar to the configuration of Root1. For configuration details, see <a href="#EN-US_TASK_0216585636__example_dc_vrp_cfg_ngmvpn_001301">Configuration Files</a> in this section.</p>
+</li></ul>
+</p></li><li><span>Establish a BGP MVPN peer relationship between Root1 and the leaf node and between Root2 and the leaf node.</span><p><ul><li><p># Configure Root1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Root1] <strong>bgp 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bgp] <strong>ipv4-family mvpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bgp-af-mvpn] <strong>peer 2.2.2.1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-bgp-af-mvpn] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Root1-bgp-af-mvpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Root1-bgp] <strong>quit</strong></pre>
+<p>The configurations of the leaf node and Root2 are similar to the configuration of Root1. For configuration details, see <a href="#EN-US_TASK_0216585636__example_dc_vrp_cfg_ngmvpn_001301">Configuration Files</a> in this section.</p>
+</li></ul>
+<p>After completing the configurations, run the <a href="cmdqueryname=display+bgp+mvpn+all+peer"><b><span class="cmdname">display bgp mvpn all peer</span></b></a> command on the leaf node to check information about BGP MVPN peer relationships. The command output shows that the leaf node has established a BGP MVPN peer relationship with Root1 and Root2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf] <strong>display bgp mvpn all peer</strong></pre>
+<pre class="screen"> BGP local router ID : 2.2.2.1
+ Local AS number : 1000
+ Total number of peers : 2                 Peers in established state : 2
+
+  Peer            V          AS  MsgRcvd  MsgSent  OutQ  Up/Down       State  PrefRcv
+  3.3.3.1         4        1000      163      165     0 02:10:22 Established        4
+  4.4.4.1         4        1000      288      289     0 03:44:42 Established        4
+</pre>
+</p></li><li><span>Configure Root1 and Root2 to transmit multicast flows over BIER tunnels.</span><p><ul><li><p># Configure Root1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Root1] <strong>multicast mvpn 3.3.3.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1] <strong>ip vpn-instance bier</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-vpn-instance-bier] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-vpn-instance-bier-af-ipv4] <strong>multicast routing-enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-vpn-instance-bier-af-ipv4] <strong>mvpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-vpn-instance-bier-af-ipv4-mvpn] <strong>sender-enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-vpn-instance-bier-af-ipv4-mvpn] <strong>c-multicast signaling bgp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-vpn-instance-bier-af-ipv4-mvpn] <strong>rpt-spt mode</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-vpn-instance-bier-af-ipv4-mvpn] <strong>ipmsi-tunnel</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-vpn-instance-bier-af-ipv4-mvpn-ipmsi] <strong>bier</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-vpn-instance-bier-af-ipv4-mvpn-ipmsi] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-vpn-instance-bier-af-ipv4-mvpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-vpn-instance-bier-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-vpn-instance-bier] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1] <strong>commit</strong></pre>
+<p>The configuration of Root2 is similar to the configuration of Root1. For configuration details, see <a href="#EN-US_TASK_0216585636__example_dc_vrp_cfg_ngmvpn_001301">Configuration Files</a> in this section.</p>
+</li></ul>
+</p></li><li><span>Enable MVPN FRR on the leaf node and set the flow-based detection mode for MVPN FRR.</span><p><ul><li><p># Configure the leaf node.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>Leaf] <strong>ip vpn-instance bier</strong> </pre>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>Leaf-vpn-instance-bier] <strong>ipv4-family</strong> </pre>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>Leaf-vpn-instance-bier-af-ipv4] <strong>vpn frr</strong> </pre>
+<pre class="screen">[*Leaf-vpn-instance-bier-af-ipv4] <strong>quit</strong> </pre>
+<pre class="screen">[*Leaf-vpn-instance-bier] <strong>quit</strong> </pre>
+<pre class="screen">[*Leaf] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Leaf] <strong>acl number 2166</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-acl4-basic-2166]<strong> rule 5 permit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-acl4-basic-2166]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>multicast mvpn 2.2</strong><strong>.2.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>ip vpn-instance bier</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-vpn-instance-bier] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-vpn-instance-bier-af-ipv4] <strong>multicast routing-enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-vpn-instance-bier-af-ipv4] <strong>mvpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-vpn-instance-bier-af-ipv4-mvpn] <strong>c-multicast signaling bgp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-vpn-instance-bier-af-ipv4-mvpn] <strong>c-multicast frr</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-vpn-instance-bier-af-ipv4-mvpn] <strong>c-multicast frr flow-detection-based 2166</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-vpn-instance-bier-af-ipv4-mvpn] <strong>rpt-spt mode</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-vpn-instance-bier-af-ipv4-mvpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-vpn-instance-bier-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf-vpn-instance-bier] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Leaf] <strong>commit</strong></pre>
+</li></ul>
+</p></li><li><span>Configure PIM-SM on the interfaces bound to the VPN instance on Root1, Root2, and the leaf node and on CE interfaces.</span><p><ul><li><p># Configure Root1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Root1] <strong>interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-GigabitEthernet<span>0/1/0</span>] <strong>pim sm</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1] <strong>commit</strong></pre>
+<p>The configurations of the leaf node and Root2 are similar to the configuration of Root1. For configuration details, see <a href="#EN-US_TASK_0216585636__example_dc_vrp_cfg_ngmvpn_001301">Configuration Files</a> in this section.</p>
+</li><li><p># Configure the CE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE] <strong>interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE-GigabitEthernet<span>0/1/0</span>] <strong>pim sm</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE] <strong>interface gigabitethernet<span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE-GigabitEthernet<span>0/1/1</span>] <strong>pim sm</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE] <strong>interface gigabitethernet<span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE-GigabitEthernet<span>0/1/2</span>] <strong>pim sm</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE-GigabitEthernet<span>0/1/2</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE] <strong>commit</strong></pre>
+</li></ul>
+</p></li><li><span>Configure a static RP.</span><p><ul><li><div class="p"># Configure Root1.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Root1] <strong>pim vpn-instance bier</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-pim-bier] <strong>static-rp 10.1.5.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-pim-bier] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>Root1-pim-bier] <strong>commit</strong></pre>
+</div>
+<p>The configurations of the leaf node and Root2 are similar to the configuration of Root1. For configuration details, see <a href="#EN-US_TASK_0216585636__example_dc_vrp_cfg_ngmvpn_001301">Configuration Files</a> in this section.</p>
+</li></ul>
+</p><p><ul><li><div class="p"># Configure the CE.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE] <strong>pim</strong> </pre>
+<pre class="screen">[<span class="keyword">*</span>CE-pim] <strong>static-rp 10.1.5.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE-pim] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE-pim] <strong>commit</strong></pre>
+</div>
+</li></ul>
+</p></li><li><span>Verify the configuration.</span><p><p>If users connected to Receiver join the multicast group, Source uses the BGP/MPLS IP VPN to forward multicast data to the users. </p>
+<p>Run the <a href="cmdqueryname=display+pim+vpn-instance"><b><span class="cmdname">display pim vpn-instance</span></b></a> <strong><span>routing-table</span></strong> command on the receiver leaf node to check the PIM routing table of the VPN instance.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>Leaf]display pim vpn-instance bier routing-table
+ VPN-Instance: bier
+ Total 1 (*, G) entry; 1 (S, G) entry
+
+ (*, 226.0.0.1)
+     RP: 10.1.5.2 
+     Protocol: pim-sm, Flag: WC 
+     UpTime: 00:42:24
+     Upstream interface: GigabitEthernet<span>0/1/2</span>, Refresh time: 00:42:24
+         Upstream neighbor: 10.1.5.2
+         RPF prime neighbor: 10.1.5.2
+     Downstream interface(s) information: none
+
+ (10.1.6.100, 226.0.0.1)
+     RP: 10.1.5.2 
+     Protocol: pim-sm, Flag: RPT SPT ACT BGP 
+     UpTime: 00:37:45
+     <strong>Upstream interface: through-BG</strong><strong>P</strong>, Refresh time: 00:37:45
+       <strong>  U</strong><strong>pstream neighbor: 3.3.3.1</strong>
+<strong>         RPF prime neighbor: 3.3.3.1</strong>
+     <strong>Backup upstream interface: through-BGP</strong>
+  <strong>       Backup upstream neighbor: 4.4.4.1</strong>
+<strong>         Backup RPF prime neighbor: 4.4.4.1</strong>
+     Downstream interface(s) information:
+     Total number of downstreams: 1
+        1: GigabitEthernet<span>0/1/2</span>
+             Protocol: pim-sm, UpTime: 00:37:45, Expires: -</pre>
+<p>The preceding command output shows that the IP address of the upstream neighbor on the primary link and that on the secondary link is 3.3.3.1 and 4.4.4.1, respectively. In normal cases, the leaf node receives a multicast flow from both links and accepts the multicast flow received from the primary link based on its PIM routing table. If the primary link fails, the leaf node accepts the multicast flow received from the secondary link.</p>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0216585636__example_dc_vrp_cfg_ngmvpn_001301"><a name="EN-US_TASK_0216585636__example_dc_vrp_cfg_ngmvpn_001301"></a><a name="example_dc_vrp_cfg_ngmvpn_001301"></a><a name="EN-US_TASK_0216585636__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>CE configuration file</p>
+<pre class="screen">#
+sysname CE
+#
+multicast routing-enable
+#
+isis 1000
+ network-entity 10.1234.6e9f.0001.00
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.1.1 255.255.255.0
+ pim sm
+ isis enable 1000
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.1.2.1 255.255.255.0
+ pim sm
+ isis enable 1000
+#
+interface GigabitEthernet<span>0/1/2</span>
+ undo shutdown
+ ip address 10.1.6.1 255.255.255.0
+ pim sm
+ isis enable 1000
+#
+pim
+ static-rp 10.1.5.2
+#
+return</pre>
+</li><li><p>Root1 configuration file</p>
+<pre class="screen">#
+sysname Root1
+#
+multicast mvpn 3.3.3.1
+#
+ip vpn-instance bier
+ ipv4-family
+  route-distinguisher 1000:10000
+  apply-label per-instance
+  vpn-target 1000:1000 export-extcommunity
+  vpn-target 1000:1000 import-extcommunity
+  multicast routing-enable
+  mvpn
+   sender-enable
+   c-multicast signaling bgp
+   rpt-spt mode
+   ipmsi-tunnel
+    bier   
+#
+mpls lsr-id 3.3.3.1
+#
+mpls
+#
+mpls ldp
+ #
+ ipv4-family
+#
+isis 100 vpn-instance bier
+ network-entity 10.1334.6e9f.0001.00
+ import-route bgp
+#
+isis 1000
+ cost-style wide
+ network-entity 10.1234.8e9f.0001.00
+ bier enable
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip binding vpn-instance bier
+ ip address 10.1.1.2 255.255.255.0
+ pim sm
+ igmp enable
+ isis enable 100
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.1.3.1 255.255.255.0
+ isis enable 1000
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 3.3.3.1 255.255.255.255
+ isis enable 1000
+#
+bgp 1000
+ peer 2.2.2.1 as-number 1000
+ peer 2.2.2.1 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 2.2.2.1 enable
+ #
+ ipv4-family mvpn
+  policy vpn-target
+  peer 2.2.2.1 enable
+ #
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 2.2.2.1 enable
+ #
+ ipv4-family vpn-instance bier
+  import-route direct
+  import-route isis 100
+#
+pim vpn-instance bier
+ static-rp 10.1.5.2
+#
+bier
+ sub-domain 0
+  bfr-id 1
+  bfr-prefix interface LoopBack1
+  protocol isis
+  encapsulation-type mpls bsl 256 max-si 2
+#
+return</pre>
+</li><li>Root2 configuration file<pre class="screen">#
+sysname Root2
+#
+multicast mvpn 4.4.4.1
+#
+ip vpn-instance bier
+ ipv4-family
+  route-distinguisher 1000:1000
+  apply-label per-instance
+  vpn-target 1000:1000 export-extcommunity
+  vpn-target 1000:1000 import-extcommunity
+  multicast routing-enable
+  mvpn
+   sender-enable
+   c-multicast signaling bgp
+   rpt-spt mode
+   ipmsi-tunnel
+    bier   
+#
+mpls lsr-id 4.4.4.1
+#
+mpls
+#
+mpls ldp
+ #
+ ipv4-family
+#
+isis 100 vpn-instance bier
+ network-entity 10.1434.6e9f.0001.00
+ import-route bgp
+#
+isis 1000
+ cost-style wide
+ network-entity 10.1234.9e9f.0001.00
+ bier enable
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip binding vpn-instance bier
+ ip address 10.1.2.2 255.255.255.0
+ pim sm
+ isis enable 100
+ undo dcn
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.1.4.1 255.255.255.0
+ isis enable 1000
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 4.4.4.1 255.255.255.255
+ isis enable 1000
+#
+bgp 1000
+ peer 2.2.2.1 as-number 1000
+ peer 2.2.2.1 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 2.2.2.1 enable
+ #
+ ipv4-family mvpn
+  policy vpn-target
+  peer 2.2.2.1 enable
+ #
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 2.2.2.1 enable
+ #
+ ipv4-family vpn-instance bier
+  import-route direct
+  import-route isis 100
+#
+pim vpn-instance bier
+ static-rp 10.1.5.2
+#
+bier
+ sub-domain 0
+  bfr-id 2
+  bfr-prefix interface LoopBack1
+  protocol isis
+  encapsulation-type mpls bsl 256 max-si 2
+#
+return</pre>
+</li><li>Leaf configuration file<pre class="screen">#
+sysname Leaf
+#
+multicast mvpn 2.2.2.1
+#
+ip vpn-instance bier
+ ipv4-family
+  vpn frr
+  route-distinguisher 72:72
+  apply-label per-instance
+  vpn-target 1000:1000 export-extcommunity
+  vpn-target 1000:1000 import-extcommunity
+  multicast routing-enable
+  mvpn
+   c-multicast signaling bgp
+   c-multicast frr
+   c-multicast frr flow-detection-based 2166
+   rpt-spt mode
+#
+mpls lsr-id 2.2.2.1
+#
+mpls
+#
+mpls ldp
+ #
+ ipv4-family
+#
+acl number 2166
+ rule 5 permit
+#
+isis 1000
+ cost-style wide
+ network-entity 10.1234.7e9f.0001.00
+ traffic-eng level-2
+ bier enable
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.3.2 255.255.255.0
+ isis enable 1000
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.1.4.2 255.255.255.0
+ isis enable 1000
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/2</span>
+ undo shutdown
+ ip binding vpn-instance bier
+ ip address 10.1.5.2 255.255.255.0
+ pim sm
+ igmp enable
+ igmp static-group 226.0.0.1
+#
+interface LoopBack1
+ ip address 2.2.2.1 255.255.255.255
+ isis enable 1000
+#
+bgp 1000
+ peer 3.3.3.1 as-number 1000
+ peer 3.3.3.1 connect-interface LoopBack1
+ peer 4.4.4.1 as-number 1000
+ peer 4.4.4.1 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 3.3.3.1 enable
+  peer 4.4.4.1 enable
+ #
+ ipv4-family mvpn
+  policy vpn-target
+  peer 3.3.3.1 enable
+  peer 4.4.4.1 enable
+ #
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 3.3.3.1 enable
+  peer 4.4.4.1 enable
+ #
+ ipv4-family vpn-instance bier
+  import-route direct
+  auto-frr
+#
+pim vpn-instance bier
+ static-rp 10.1.5.2
+#
+bier
+ sub-domain 0
+  bfr-id 3
+  bfr-prefix interface LoopBack1
+  protocol isis
+  encapsulation-type mpls bsl 256 max-si 2
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_bier_cfg_example.html">Configuration Examples for NG MVPN over BIER
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_bier_cfg_11.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+
+<script language="JavaScript">
+<!--
+image_size('.imgResize');
+var msg_imageMax = "view original image";
+var msg_imageClose = "close";
+//--></script></body>
+</html>

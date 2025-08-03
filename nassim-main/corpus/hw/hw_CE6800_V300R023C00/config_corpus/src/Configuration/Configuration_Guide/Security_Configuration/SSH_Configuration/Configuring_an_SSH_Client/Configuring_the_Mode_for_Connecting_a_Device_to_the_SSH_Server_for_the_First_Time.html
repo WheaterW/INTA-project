@@ -1,0 +1,117 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring the Mode for Connecting a Device to the SSH Server for the First Time">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ssh_cfg_0013.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ssh_cfg_0015.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="SSH">
+<meta name="featuretype" content="Security">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="SSH">
+<meta name="featuretype" content="Security">
+<meta name="featurename" content="SSH">
+<meta name="featuretype" content="Security">
+<meta name="featuretype" content="Security">
+<meta name="featuretype" content="Security Protection">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001563873329">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Configuring the Mode for Connecting a Device to the SSH Server for the First Time</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001563873329"></a><a name="EN-US_TASK_0000001563873329"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring the Mode for Connecting a Device to the SSH Server for the First Time</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001563873329__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>When a device functioning as an SSH client connects to the SSH server for the first time, the client cannot check the validity of the SSH server because the client does not have the server's public key or has no related PKI certificate bound. As a result, the connection fails.</p>
+<p>You can use any of the following methods based on requirements:</p>
+<ul><li>Enable the first login function for the SSH client. The client will not perform a validity check on the SSH server, meaning that the first connection is set up successfully. The client then automatically assigns a public key to the server and saves it for subsequent authentication.</li><li>Bind the public key of the SSH server to the SSH client. The public key generated on the server will be saved on the client, ensuring that the client can successfully validate the server upon the first connection.</li><li>Bind the PKI realm used for authentication with the server to the client to ensure that the certificate of the SSH server is valid when the client connects to the server for the first time.</li></ul>
+<p>The first method is simple, and the other two methods are complex but more secure.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>To ensure security, you are advised to periodically change the key.</li><li>For security purposes, do not use the RSA algorithm whose length is less than 3072 digits. You are advised to use the ECC authentication algorithm instead.</li></ul>
+</div></div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001563873329__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li><span>(Optional) Generate a local key pair.</span><p><p>Perform this step only when the device connects to the SSH server through RSA, DSA, or ECC authentication. This step is not required if password authentication is used.</p>
+<ul><li>Generate a local RSA key pair.<pre class="screen"><a href="cmdqueryname=rsa+local-key-pair+create"><b><span class="cmdname">rsa local-key-pair create</span></b></a></pre>
+</li><li>Generate a DSA key pair.<pre class="screen"><a href="cmdqueryname=dsa+local-key-pair+create"><b><span class="cmdname">dsa local-key-pair create</span></b></a></pre>
+</li><li>Generate an ECC key pair.<pre class="screen"><a href="cmdqueryname=ecc+local-key-pair+create"><b><span class="cmdname">ecc local-key-pair create</span></b></a></pre>
+</li></ul>
+<p>After a key pair is generated, you can run the <a href="cmdqueryname=display+rsa+local-key-pair+public"><b><span class="cmdname">display rsa local-key-pair public</span></b></a>, <a href="cmdqueryname=display+dsa+local-key-pair+public"><b><span class="cmdname">display dsa local-key-pair public</span></b></a>, or <a href="cmdqueryname=display+ecc+local-key-pair+public"><b><span class="cmdname">display ecc local-key-pair public</span></b></a> command to view information about the RSA, DSA, or ECC public key in the local key pair.</p>
+<p>If you no longer need the local DSA or ECC key pairs, run the <strong>dsa local-key-pair destroy</strong> or <a href="cmdqueryname=ecc+local-key-pair+destroy"><b><span class="cmdname">ecc local-key-pair destroy</span></b></a> command to destroy all the local DSA or ECC key pairs. After this command is run, the file that stores the corresponding keys on the device is cleared. Exercise caution when running this command.</p>
+</p></li><li><span>Configure the mode for connecting a device to the SSH server for the first time.</span><p><ul><li>Enable the first login function for the SSH client.<pre class="screen"><a href="cmdqueryname=ssh+client+first-time+enable"><b><span class="cmdname">ssh client first-time enable</span></b></a></pre>
+<p>By default, the first login function for the SSH client is disabled.</p>
+</li><li>Bind the public key of the SSH server to the SSH client.<ol type="a"><li>Enter the RSA, DSA, SM2, or ECC public key view.<ul><li>Enter the RSA public key view.<pre class="screen"><a href="cmdqueryname=rsa+peer-public-key"><b><span class="cmdname">rsa peer-public-key</span></b></a> <i><span class="varname">key-name</span></i><span> [ <strong><span>encoding-type</span></strong> <em>enc-type</em> ]</span></pre>
+</li><li>Enter the DSA public key view.<pre class="screen"><a href="cmdqueryname=dsa+peer-public-key"><b><span class="cmdname">dsa peer-public-key</span></b></a> <i><span class="varname">key-name</span></i> <strong><span>encoding-type</span></strong> <em>enc-type</em></pre>
+</li><li>Enter the ECC public key view.<pre class="screen"><a href="cmdqueryname=ecc+peer-public-key"><b><span class="cmdname">ecc peer-public-key</span></b></a> <i><span class="varname">key-name</span></i> <span>[ <strong><span>encoding-type</span></strong> <em>enc-type</em> ]</span></pre>
+</li><li>Enter the SM2 public key view.<pre class="screen"><strong>sm2 peer-public-key</strong> <i><span class="varname">key-name</span></i></pre>
+</li></ul>
+</li><li>Enter the public key editing view.<pre class="screen"><a href="cmdqueryname=public-key-code+begin"><b><span class="cmdname">public-key-code begin</span></b></a></pre>
+<p>By default, no key pair exists in the system.</p>
+</li><li>Edit the public key.<pre class="screen"><em>hex-data</em></pre>
+<ul><li>The public key must be a hexadecimal character string in the public key encoding format, and that is randomly generated by the SSH server.</li><li>After entering the public key editing view, enter the RSA<span>, DSA, or ECC</span> public key on the client (this key is generated on the server).</li></ul>
+</li><li>Exit the public key editing view.<pre class="screen"><a href="cmdqueryname=public-key-code+end"><b><span class="cmdname">public-key-code end</span></b></a></pre>
+<ul><li>If <em>hex-data</em> is invalid, the key cannot be generated after you run this command.</li><li>If the key specified by <i><span class="varname">key-name</span></i> has been deleted, the system displays a message indicating that the key does not exist and directly returns to the system view when you run this command.</li></ul>
+</li><li>Return to the system view from the public key view.<pre class="screen"><a href="cmdqueryname=peer-public-key+end"><b><span class="cmdname">peer-public-key end</span></b></a></pre>
+</li><li>Bind the RSA<span>, DSA, or ECC</span> public key to the SSH server.<pre class="screen"><a href="cmdqueryname=ssh+client+peer"><b><span class="cmdname">ssh client peer</span></b></a> <i><span class="varname">server-name</span></i> <strong><span>assign</span></strong> <span>{ </span><strong><span>rsa-key</span></strong><span> | <strong><span>dsa-key</span></strong> | <strong><span>ecc-key</span></strong> | <strong>sm2-key</strong> }</span> <i><span class="varname">key-name</span></i></pre>
+<p>By default, no public key is assigned to an SSH server.</p>
+<p>If the SSH server public key saved on the SSH client becomes invalid, run the <span><a href="cmdqueryname=undo+ssh+client+peer"><b><span class="cmdname">undo ssh client peer</span></b></a> <i><span class="varname">server-name</span></i> <strong><span>assign</span></strong> { <strong><span>rsa-key</span></strong> | <strong><span>dsa-key</span></strong> | <strong><span>ecc-key</span></strong> <span>| <strong>sm2-key</strong> </span>}</span> command to cancel the binding between the SSH server and RSA, DSA, or ECC public key. Then, run this command again to assign a new RSA, DSA, or ECC public key to the SSH server.</p>
+</li></ol>
+</li><li>Bind the SSH client to the PKI realm or host key that is used for authentication with the SSH server.<pre class="screen"><strong><a href="cmdqueryname=ssh+client+assign"><b><span class="cmdname">ssh client assign</span></b></a> </strong>{ <strong>sm2-host-key </strong><em><i><span class="varname">key-name</span></i></em> | <strong>pki</strong><em> <i><span class="varname">pki-domain</span></i></em> }</pre>
+<p>By default, no PKI realm is bound to an SSH client.</p>
+<p>By default, no SM2 host key is assigned to an SSH client.</p>
+</li></ul>
+</p></li><li><span>Configure a public key algorithm for the SSH client.</span><p><pre class="screen"><a href="cmdqueryname=ssh+client+publickey"><b><span class="cmdname">ssh client publickey</span></b></a> { <strong><span>dsa</span></strong> | <strong><span>ecc</span></strong> | <strong><span>rsa</span></strong> | <strong><span>sm2</span></strong> | <strong><span>rsa_sha2_256</span></strong> | <strong><span>rsa_sha2_512</span></strong> | <strong><span>x509v3-ssh-rsa | x509v3-rsa2048-sha256 </span></strong>} <sup>*</sup></pre>
+<div class="p">By default:<ul><li>When a device boots with the factory defaults, the RSA_SHA2_256 and RSA_SHA2_512 public key algorithms are enabled.</li><li>When a device starts with a configuration file which does not contain the <a href="cmdqueryname=ssh+client+publickey"><b><span class="cmdname">ssh client publickey</span></b></a> command configuration, the ECC, RSA_SHA2_256, and RSA_SHA2_512 public key algorithms are enabled.</li></ul>
+</div>
+<p>This command enables you to use a more secure public key algorithm when logging in to the device, while rejects other public key algorithms, thereby improving device security. You are advised to use the RSA_SHA2_256 or RSA_SHA2_512 public key algorithm.</p>
+<ul><li><p>If the <a href="cmdqueryname=ssh+client+first-time+enable"><b><span class="cmdname">ssh client first-time enable</span></b></a> command is executed, a message is displayed asking you to save the server's public key when the client connects to the server. During the saving process, the SSH client automatically selects a public key algorithm that can ensure successful negotiation among all public key algorithms configured using the <a href="cmdqueryname=ssh+client+publickey"><b><span class="cmdname">ssh client publickey</span></b></a>, and allocates the selected algorithm to the SSH server.</p>
+</li><li><p>If the <a href="cmdqueryname=ssh+client+first-time+enable"><b><span class="cmdname">ssh client first-time enable</span></b></a> command is not executed, you must run the <a href="cmdqueryname=ssh+client+peer+assign"><b><span class="cmdname">ssh client peer assign</span></b></a> command to allocate a public key algorithm to the SSH server. Ensure that the SSH server can use the allocated public key algorithm to successfully negotiate with the SSH client for which the public key algorithm is configured using the <a href="cmdqueryname=ssh+client+publickey"><b><span class="cmdname">ssh client publickey</span></b></a> command. Otherwise, the SSH server's public key fails to be authenticated by the SSH client.</p>
+</li></ul>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Parameters <strong>dsa</strong>, <strong>ecc</strong>, and <strong>rsa</strong> in the command can be used only after the weak security algorithm/protocol feature package is installed by running the <strong>install feature-software WEAKEA</strong> command.</p>
+</div></div>
+</p></li><li><span>Commit the configuration.</span><p><pre class="screen"><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></pre>
+</p></li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_ssh_cfg_0013.html">Configuring an SSH Client
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_ssh_cfg_0015.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

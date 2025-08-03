@@ -1,0 +1,94 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding NPCC">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ai_npcc_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ai_npcc_cfg_0002.html">
+<meta name="DC.Relation" scheme="URI" content="spec/NPCC_limitation_CE_v6r23c00.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="NPCC">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="NPCC">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001512680458">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding NPCC</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001512680458"></a><a name="EN-US_CONCEPT_0000001512680458"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding NPCC</h1>
+<div><div class="section"><h4 class="sectiontitle">RoCEv2 Packet Format</h4><div class="p">NPCC takes effect only on RoCEv2 packets, which are encapsulated based on UDP. <a href="#EN-US_CONCEPT_0000001512680458__fig4958336487">Figure 1</a> shows the format of an RoCEv2 packet.<div class="fignone" id="EN-US_CONCEPT_0000001512680458__fig4958336487"><a name="EN-US_CONCEPT_0000001512680458__fig4958336487"></a><a name="fig4958336487"></a><span class="figcap"><b>Figure 1 </b>RoCEv2 packet format</span><br><span><img class="vsd" src="figure/en-us_image_0000001563759965.png"></span></div>
+<ul><li>Ethernet Header: contains the source and destination MAC addresses.</li><li>IP Header: contains the source and destination IP addresses.</li><li>UDP Header: contains the source and destination port numbers. The destination port number is 4791.</li><li>InfiniBand Base Transport Header: indicates the header field of the InfiniBand transport layer, including key information of the RoCEv2 packet. For details about the main fields involved in the NPCC function, see <a href="#EN-US_CONCEPT_0000001512680458__table45490246526">Table 1</a>.</li><li>InfiniBand Payload: indicates the message payload.</li></ul>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001512680458__table45490246526"></a><a name="table45490246526"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001512680458__table45490246526" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Some fields in the InfiniBand Base Transport Header</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="16.76%" id="mcps1.3.1.2.4.2.3.1.1" liSelected="liSelected"><p>Field</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="83.24000000000001%" id="mcps1.3.1.2.4.2.3.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="16.76%" headers="mcps1.3.1.2.4.2.3.1.1 "><p>Opcode</p>
+</td>
+<td class="cellrowborder" valign="top" width="83.24000000000001%" headers="mcps1.3.1.2.4.2.3.1.2 "><div class="p">RoCEv2 packet type, which can be:<ul><li>Communication Management (ConnectMsg): The packet is used to set up an RoCEv2 connection.</li><li>Send: The sender does not control where the receiver stores data.</li><li>Write: The address, key, and length of the data to be written by the receiver are specified in the packet.</li><li>Read: The address, key, and length of the data to be read by the receiver are specified in the packet.</li><li>Acknowledge (ACK): The packet is used by the receiver to respond to the sender.</li></ul>
+</div>
+<p>RoCEv2 packets of the Send, Write, and Read types are also called data packets.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="16.76%" headers="mcps1.3.1.2.4.2.3.1.1 "><p>Dest QP</p>
+</td>
+<td class="cellrowborder" valign="top" width="83.24000000000001%" headers="mcps1.3.1.2.4.2.3.1.2 "><p>Destination Queue Pair, which is used to identify an RoCEv2 flow.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">NPCC Implementation</h4><div class="fignone" id="EN-US_CONCEPT_0000001512680458__fig0810227163617"><a name="EN-US_CONCEPT_0000001512680458__fig0810227163617"></a><a name="fig0810227163617"></a><span class="figcap"><b>Figure 2 </b>NPCC implementation</span><br><span><img class="vsd" src="figure/en-us_image_0000001563879617.png"></span></div>
+<p><a href="#EN-US_CONCEPT_0000001512680458__fig0810227163617">Figure 2</a> shows how NPCC is implemented.</p>
+<ol><li>Maintaining an RoCEv2 flow table and obtaining path information<p>An NPCC-enabled port on a forwarding device replicates the RoCEv2 ACK packet and data packet passing through it and sends them to the CPU.</p>
+<ol type="a"><li>The forwarding device creates an RoCEv2 flow table based on the source IP address, destination IP address, and QP information in the ACK packet.</li><li>The forwarding device updates the Target Port (TP) information (port index information) in the flow table according to the data packet, and associates the flow table with the NPCC-enabled port.</li></ol>
+<p>The forwarding device repeats these operations to continuously maintain the RoCEv2 flow table, based on which it can obtain the address information and forwarding path of each RoCEv2 flow.</p>
+</li><li>Detecting the congestion status of a lossless queue and calculating the number of CNPs<p>The forwarding device detects the length (buffer usage) of an NPCC-enabled lossless queue on the NPCC-enabled port and intelligently calculates the number of CNPs to be sent based on the lossless queue's congestion status.</p>
+<ul><li>If the queue length increases: When the queue is shallow, the forwarding device sends a small number of CNPs to prevent incorrect determination of the congestion status. When the queue is deep, the forwarding device sends a large number of CNPs to quickly relieve queue congestion and reduce the forwarding latency.</li><li>If the queue length decreases: When the queue is shallow, the forwarding device does not send CNPs, preventing the throughput from decreasing due to excess rate reduction. When the queue is deep, the forwarding device sends a small number of CNPs to relieve queue congestion while maintaining the highest-possible throughput and lowest-possible latency.</li><li>If the queue has a sudden low jitter: The forwarding device considers that a microburst has occurred and therefore does not send CNPs, preventing excess rate reduction.</li></ul>
+</li><li>Constructing and forwarding CNPs<p>The forwarding device constructs CNPs based on address information in the RoCEv2 flow table (the number of CNPs is calculated based on the congestion status in Step 2). It then proactively sends the CNPs to the receiver. After receiving the CNPs, the receiver reduces the rate at which it sends RoCEv2 packets.</p>
+</li></ol>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_ai_npcc_cfg_0001.html">NPCC Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_ai_npcc_cfg_0002.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="spec/NPCC_limitation_CE_v6r23c00.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

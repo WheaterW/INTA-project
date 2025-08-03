@@ -1,0 +1,70 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding How to Use Segment VXLAN for Layer 3 Interworking">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../vrp/dc_vrp_vxlan_cfg_1231.html">
+<meta name="DC.Relation" scheme="URI" content="../vrp/dc_vrp_vxlan_cfg_1261.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001560863472">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Understanding How to Use Segment VXLAN for Layer 3 Interworking</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001560863472"></a><a name="EN-US_CONCEPT_0000001560863472"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding How to Use Segment VXLAN for Layer 3 Interworking</h1>
+<div><div class="section"><h4 class="sectiontitle">Background</h4><p><span>Segment VXLAN is usually used to establish one VXLAN tunnel segment in each of two DCs and also to establish one VXLAN tunnel segment between the DCs. </span>As shown in <a href="#EN-US_CONCEPT_0000001560863472__fig_dc_vrp_vxlan_feature_300701">Figure 1</a>, <span>BGP EVPN is configured to create a VXLAN tunnel in distributed gateway mode within both DC A and DC B so that the VMs deployed in each DC can communicate with each other. Leaf2 and Leaf3 are the edge devices within the DCs that connect to the backbone network. BGP EVPN is configured to create a VXLAN tunnel between Leaf2 and Leaf3 so that the VXLAN packets received by one DC can be decapsulated, re-encapsulated, and sent to the peer DC. This process allows the VXLAN tunnel to transmit inter-DC packets end to end and ensures that the VMs in different DCs can communicate with each other.</span></p>
+<div class="fignone" id="EN-US_CONCEPT_0000001560863472__fig_dc_vrp_vxlan_feature_300701"><a name="EN-US_CONCEPT_0000001560863472__fig_dc_vrp_vxlan_feature_300701"></a><a name="fig_dc_vrp_vxlan_feature_300701"></a><span class="figcap"><b>Figure 1 </b>Configuring segment VXLAN for Layer 3 interworking</span><br><span><img class="vsd" src="figure/en-us_image_0000001581730682.png" width="NaN" height="NaN"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Fundamentals</h4><p><strong>Control Plane</strong></p>
+<div class="p">The following describes how a segment VXLAN tunnel is established. <ol><li>Leaf4 learns the IP address of VMb2 in DC B and saves it to the routing table of the L3VPN instance. Leaf4 then sends a BGP EVPN route to Leaf3.</li><li>Upon receipt (as shown in <a href="#EN-US_CONCEPT_0000001560863472__fig_dc_vrp_vxlan_feature_300702">Figure 2</a>), Leaf3 obtains the host IP route contained in the route and establishes a VXLAN tunnel to Leaf4. Leaf3 then sets the next hop of the route to its own VTEP address, re-encapsulates the route with the L3VNI of the L3VPN instance, sets the source MAC address to its own MAC address, and sends the re-encapsulated BGP EVPN route to Leaf2.<div class="fignone" id="EN-US_CONCEPT_0000001560863472__fig_dc_vrp_vxlan_feature_300702"><a name="EN-US_CONCEPT_0000001560863472__fig_dc_vrp_vxlan_feature_300702"></a><a name="fig_dc_vrp_vxlan_feature_300702"></a><span class="figcap"><b>Figure 2 </b>Control plane process</span><br><span><img class="vsd" src="images/fig_dc_fd_vxlan_002802dcf.png" width="NaN" height="NaN"></span></div>
+</li><li>Upon receipt, Leaf2 obtains the host IP route contained in the route and establishes a VXLAN tunnel to Leaf3. Leaf2 then sets the next hop of the route to its own VTEP address, re-encapsulates the route with the L3VNI of the L3VPN instance, sets the source MAC address to its own MAC address, and sends the re-encapsulated BGP EVPN route to Leaf1.</li><li>Upon receipt, Leaf1 establishes a VXLAN tunnel to Leaf2.</li></ol>
+</div>
+<div class="p"><strong>Forwarding Plane</strong><ol><li>Leaf1 receives a Layer 2 packet destined for VMb2 from VMa1 and determines that the destination MAC address in the packet is the gateway interface's MAC address. Leaf1 then terminates the Layer 2 packet and finds the L3VPN instance corresponding to the VBDIF interface through which VMa1 accesses the BD. Leaf1 then searches the routing table of the L3VPN instance for VMb2's host route and determines that it needs to send the packet to Leaf2 over the VXLAN tunnel. Leaf1 then encapsulates the received packet as a VXLAN packet and sends it to Leaf2 over this tunnel.</li><li>Upon receipt, Leaf2 parses the VXLAN packet (as shown in <a href="#EN-US_CONCEPT_0000001560863472__fig_dc_vrp_vxlan_feature_300703">Figure 3</a>). It finds the L3VPN instance corresponding to the L3VNI of the packet, searches the routing table of the L3VPN instance for VMb2's host route, and determines that it needs to send the packet to Leaf3 over the VXLAN tunnel. Leaf2 then re-encapsulates the packet as a VXLAN packet and sends it to Leaf3 over this tunnel.<div class="fignone" id="EN-US_CONCEPT_0000001560863472__fig_dc_vrp_vxlan_feature_300703"><a name="EN-US_CONCEPT_0000001560863472__fig_dc_vrp_vxlan_feature_300703"></a><a name="fig_dc_vrp_vxlan_feature_300703"></a><span class="figcap"><b>Figure 3 </b>Data packet forwarding</span><br><span><img class="vsd" src="figure/en-us_image_0000001563646326.png" width="NaN" height="NaN"></span></div>
+</li><li>Upon receipt, Leaf3 parses the VXLAN packet (as shown in <a href="#EN-US_CONCEPT_0000001560863472__fig_dc_vrp_vxlan_feature_300703">Figure 3</a>). It finds the L3VPN instance corresponding to the L3VNI of the packet, searches the routing table of the L3VPN instance for VMb2's host route, and determines that it needs to send the packet to Leaf4 over the VXLAN tunnel. Leaf3 then re-encapsulates the packet as a VXLAN packet and sends it to Leaf4 over this tunnel.</li><li>Upon receipt, Leaf4 parses the VXLAN packet. It finds the L3VPN instance corresponding to the L3VNI of the packet, and then searches the routing table of the L3VPN instance for VMb2's host route. Using this routing information, Leaf4 forwards the packet to VMb2.</li></ol>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../vrp/dc_vrp_vxlan_cfg_1231.html">Configuring Segment VXLAN for Layer 3 Interworking
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../vrp/dc_vrp_vxlan_cfg_1261.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

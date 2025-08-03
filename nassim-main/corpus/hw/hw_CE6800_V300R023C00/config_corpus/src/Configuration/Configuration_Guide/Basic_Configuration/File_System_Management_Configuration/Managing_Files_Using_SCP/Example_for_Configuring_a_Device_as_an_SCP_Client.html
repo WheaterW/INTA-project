@@ -1,0 +1,195 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring a Device as an SCP Client">
+<meta name="abstract" content="">
+<meta name="description" content="">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_file_cfg_0018.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_file_cfg_0020.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="SCP">
+<meta name="featurename" content="File System Management">
+<meta name="featuretype" content="Basic Configuration">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="SCP">
+<meta name="featurename" content="File System Management">
+<meta name="featuretype" content="Basic Configuration">
+<meta name="featurename" content="FTP">
+<meta name="featurename" content="SCP">
+<meta name="featurename" content="SFTP">
+<meta name="featurename" content="TFTP">
+<meta name="featurename" content="File System Management">
+<meta name="featuretype" content="Basic Configuration">
+<meta name="featuretype" content="Basic Configuration">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001513150622">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring a Device as an SCP Client</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001513150622"></a><a name="EN-US_TASK_0000001513150622"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring a Device as an SCP Client</h1>
+<div class="taskbody"><p></p>
+<div class="context"><a name="EN-US_TASK_0000001513150622__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>Compared with SFTP, SCP simplifies file transfer operations by combining user identity authentication and file transfer to improve configuration efficiency.</p>
+<p>In <a href="#EN-US_TASK_0000001513150622__fig_dc_cfg_file_0037">Figure 1</a>, the routes between the SCP client and SSH server are reachable. The SCP client needs to download files from the SSH server.</p>
+<div class="fignone" id="EN-US_TASK_0000001513150622__fig_dc_cfg_file_0037"><a name="EN-US_TASK_0000001513150622__fig_dc_cfg_file_0037"></a><a name="fig_dc_cfg_file_0037"></a><span class="figcap"><b>Figure 1 </b>Network diagram for configuring a device to access files on another device as an SCP client</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 represents <span>100GE</span><span>1/0/1</span>.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001564110705.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001513150622__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Generate a local key pair on the SSH server.</p>
+</li><li><p>Create an SSH user on the SSH server.</p>
+</li><li><p>Enable the SCP server function on the SSH server.</p>
+</li><li><p>Download files from the SSH server to the SCP client.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001513150622__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Generate a local key pair on the server.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt;<strong> system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname SSH Server</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>SSH Server]<strong> rsa local-key-pair create</strong>
+The key name will be:Host
+The range of public key size is (2048, 4096).
+NOTE: Key pair generation will take a short while.
+Please input the modulus [default = 3072]:
+[<span class="keyword">*</span>SSH Server] <strong>commit</strong></pre>
+</p></li><li><span>Create an SSH user on the server.</span><p><p># Configure a VTY user interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>SSH Server]<strong> user-interface vty 0 4</strong>
+[<span class="keyword">*</span>SSH Server-ui-vty0-4]<strong> authentication-mode aaa</strong>
+[<span class="keyword">*</span>SSH Server-ui-vty0-4]<strong> protocol inbound ssh</strong>
+[<span class="keyword">*</span>SSH Server-ui-vty0-4]<strong> quit</strong></pre>
+<p># Create an SSH user named <strong>Client</strong>, set the authentication mode to <strong>password</strong>, and set the service type to <strong>all</strong>.</p>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> ssh user Client</strong>
+[<span class="keyword">*</span>SSH Server] <strong>ssh user Client authentication-type password</strong>
+[<span class="keyword">*</span>SSH Server]<strong> ssh user Client service-type all</strong></pre>
+<p># Set a password for the <strong>Client</strong> user.</p>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> aaa</strong>
+[<span class="keyword">*</span>SSH Server-aaa] <strong>local-user Client password</strong>
+Please configure the login password (8-128)
+It is recommended that the password consist of four types of characters, including lowercase letters, uppercase letters, numerals and special characters. 
+Please enter password:                                      
+Please confirm password:                               
+Info: Add a new user.
+[<span class="keyword">*</span>SSH Server-aaa] <strong>local-user Client service-type ssh</strong>
+[<span class="keyword">*</span>SSH Server-aaa] <strong>local-user Client privilege level 3 </strong>
+[<span class="keyword">*</span>SSH Server-aaa] <strong>quit</strong></pre>
+</p></li><li><span>Enable the SCP server function on the SSH server.</span><p><pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> scp server enable</strong> 
+<span><span>[<span class="keyword">*</span>SSH Server]</span> <strong>ssh server-source all-interface</strong></span>
+[<span class="keyword">*</span>SSH Server] <strong>commit</strong></pre>
+</p></li><li><span>Configure the public key algorithm, encryption algorithm, key exchange algorithm list, HMAC authentication algorithm, and minimum key length on the SSH server.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>SSH Server]<strong> ssh server cipher aes128_ctr aes256_ctr aes192_ctr aes128_gcm aes256_gcm</strong>
+[<span class="keyword">*</span>SSH Server]<strong> ssh server hmac sha2_256 sha2_512</strong>
+[<span class="keyword">*</span>SSH Server]<strong> ssh server key-exchange dh_group_exchange_sha256</strong> <strong>dh_group16_sha512</strong>
+[<span class="keyword">*</span>SSH Server]<strong> ssh server publickey rsa_sha2_256 rsa_sha2_512</strong>
+[<span class="keyword">*</span>SSH Server]<strong> ssh server dh-exchange min-len 3072</strong>
+[<span class="keyword">*</span>SSH Server] <strong>commit</strong></pre>
+</p></li><li><span>Configure the encryption algorithm, HMAC authentication algorithm, key exchange algorithm list, and public key algorithm on the client.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt;<strong> system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname SCP Client</strong>
+[<span class="keyword">*</span>SCP Client] <strong>ssh client cipher aes128_ctr aes256_ctr aes192_ctr aes128_gcm aes256_gcm</strong>
+[<span class="keyword">*</span>SCP Client] <strong>ssh client hmac sha2_256 sha2_512</strong>
+[<span class="keyword">*</span>SCP Client] <strong>ssh client key-exchange dh_group_exchange_sha256 dh_group16_sha512</strong>
+[<span class="keyword">*</span>SCP Client] <strong>ssh client publickey rsa_sha2_256 rsa_sha2_512</strong>
+[<span class="keyword">*</span>SCP Client] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001513150622__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>Download files from the SSH server to the SCP client.</p>
+<p># Enable the first login function for the SSH client.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt;<strong> system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname SCP Client</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>SCP Client] <strong>ssh client first-time enable</strong>
+[<span class="keyword">*</span>SCP Client] <strong>commit</strong></pre>
+<p># Download the <strong>backup.cfg</strong> file from the SSH server at 10.1.1.1 to the local directory using the aes256_ctr encryption algorithm.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>SCP Client]<strong> scp -cipher aes256_ctr Client@10.1.1.1:backup.cfg backup.cfg</strong>
+Trying 10.1.1.1 ...
+Press CTRL+K to abort
+Connected to 10.1.1.1 ...
+ Continue to access it? [Y/N]:<strong>y</strong>
+ [Y/N]:<strong>y</strong>
+The server's public key will be saved with the name 10.1.1.1. Please wait...
+
+Enter password:
+backup.cfg                     100%        19174Bytes            7Kb/s</pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001513150622__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>SSH server</p>
+<pre class="screen">#
+sysname SSH Server
+#
+aaa
+ local-user Client password irreversible-cipher $#z$!9S&lt;a#&gt;H7{7dI&gt;%0S{AcKGC=t:zjv14LlQqHO\\P.*=&lt;x1]u;y*P`'GR3[m}$
+ local-user Client service-type terminal ssh
+ local-user Client privilege level 3 
+#
+scp server enable
+ssh user Client
+ssh user Client authentication-type password
+ssh user Client service-type all  
+ssh server-source all-interface
+#
+user-interface vty 0 4
+ authentication-mode aaa
+ protocol inbound ssh
+#
+ssh server cipher aes128_ctr aes256_ctr aes192_ctr aes128_gcm aes256_gcm
+ssh server hmac sha2_256 sha2_512
+ssh server key-exchange dh_group_exchange_sha256 dh_group16_sha512
+ssh server publickey rsa_sha2_256 rsa_sha2_512
+ssh server dh-exchange min-len 3072
+#
+return</pre>
+</li><li><p>SCP client</p>
+<pre class="screen">#
+sysname SCP Client
+#
+ssh client first-time enable
+#
+ssh client cipher aes128_ctr aes256_ctr aes192_ctr aes128_gcm aes256_gcm
+ssh client hmac sha2_256 sha2_512
+ssh client key-exchange dh_group_exchange_sha256 dh_group16_sha512
+ssh client publickey rsa_sha2_256 rsa_sha2_512
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_file_cfg_0018.html">Managing Files Using SCP
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_file_cfg_0020.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

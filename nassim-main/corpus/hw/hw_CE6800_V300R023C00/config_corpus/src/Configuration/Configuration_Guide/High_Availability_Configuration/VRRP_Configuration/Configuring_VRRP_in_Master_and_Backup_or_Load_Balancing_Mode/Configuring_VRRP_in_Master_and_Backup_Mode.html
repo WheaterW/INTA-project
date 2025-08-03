@@ -1,0 +1,93 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring VRRP in Master/Backup Mode">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_vrrp_cfg_0104.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_vrrp_cfg_0007.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_vrrp_cfg_0150.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130784066">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Configuring VRRP in Master/Backup Mode</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130784066"></a><a name="EN-US_TASK_0000001130784066"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring VRRP in Master/Backup Mode</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130784066__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Procedure</h4><ol><li>Enter the system view.<pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</li><li>Enter the interface view.<pre class="screen"><a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i></pre>
+</li><li>Switch the interface working mode to Layer 3.<pre class="screen"><a href="cmdqueryname=undo+portswitch"><b><span class="cmdname">undo portswitch</span></b></a></pre>
+<p> Determine whether to perform this step based on the current interface working mode.</p>
+</li><li>Create a VRRP group and configure a virtual IP address for it.<pre class="screen"><a href="cmdqueryname=vrrp+vrid"><b><span class="cmdname">vrrp vrid</span></b></a> <i><span class="varname">virtual-router-id</span></i> <strong><span>virtual-ip</span></strong> <i><span class="varname">virtual-address</span></i></pre>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li><p>The virtual IP addresses of VRRP groups must be unique.</p>
+</li><li><p>Two devices in a VRRP group must be configured with the same VRID.</p>
+</li><li><p>VRRP groups on different interfaces of a device can be configured with the same VRID.</p>
+</li></ul>
+</div></div>
+<p>Multiple virtual IP addresses can be configured for a VRRP group to serve different user groups, whereas a single virtual IP address serves a separate user group in which users have the same reliability requirements. This configuration facilitates user management and prevents the default gateway address on the user side from changing with VRRP configurations.</p>
+<p>You can specify a virtual IP address for a VRRP group when you create the VRRP group. If another virtual IP address is specified for the VRRP group later, the system adds the virtual IP address to the virtual IP address list for the VRRP group.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Direct routes destined for virtual IP addresses of a VRRP group can be imported to OSPF, IS-IS, and RIP. By default, such routes can be advertised to neighbors through these protocols. On a live network, there may be a large number of routes destined for virtual IP addresses of VRRP groups; therefore, if OSPF, IS-IS, or RIP imports and advertises these routes to neighbors, some devices on the network may be overloaded, and network performance may be impacted. To resolve this issue, run the <strong><a href="cmdqueryname=vrrp+virtual-ip+route-advertise+disable"><b><span class="cmdname">vrrp virtual-ip route-advertise disable</span></b></a> </strong>{ <strong><span>isis</span></strong> | <strong><span>ospf</span></strong> | <strong><span>rip</span></strong> }<strong> </strong><sup>*</sup> command to disable OSPF, IS-IS, and RIP from advertising the routes destined for virtual IP addresses of VRRP groups to neighbors.</p>
+</div></div>
+</li><li>Configure a priority for each device in the VRRP group.<pre class="screen"><a href="cmdqueryname=vrrp+vrid"><b><span class="cmdname">vrrp vrid</span></b></a> <i><span class="varname">virtual-router-id</span></i> <strong><span>priority</span></strong> <i><span class="varname">priority-value</span></i></pre>
+<p>The default value of <i><span class="varname">priority-value</span></i> is 100.</p>
+<p>VRRP assigns roles to devices in a VRRP group according to their priorities. A device with a higher priority is more likely to be elected as the master device. Therefore, you can specify a device as the master device to forward traffic by configuring a higher priority for the device.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li><p>The master device's priority must be higher than the priority of a backup device. It is recommended that you use the default priority on a backup device.</p>
+</li><li><p>If devices in a VRRP group have the same VRRP priority, the device that enters the Master state the earliest becomes the master device. In addition, the other devices become backup devices and no longer preempt the master role.</p>
+</li></ul>
+</div></div>
+</li><li>Commit the configuration.<pre class="screen"><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></pre>
+</li></ol>
+</div></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_vrrp_cfg_0104.html">Configuring VRRP in Master/Backup or Load Balancing Mode
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_vrrp_cfg_0007.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_vrrp_cfg_0150.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

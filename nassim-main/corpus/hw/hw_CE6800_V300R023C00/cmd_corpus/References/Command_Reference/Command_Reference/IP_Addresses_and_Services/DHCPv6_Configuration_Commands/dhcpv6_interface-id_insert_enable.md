@@ -1,0 +1,68 @@
+dhcpv6 interface-id insert enable
+=================================
+
+dhcpv6 interface-id insert enable
+
+Function
+--------
+
+
+
+The **dhcpv6 interface-id insert enable** command enables the function of adding the Interface-ID option in DHCPv6 packets.
+
+The **undo dhcpv6 interface-id insert enable** command disables the function of adding the Interface-ID option in DHCPv6 packets.
+
+
+
+By default, the function of adding the Interface-ID option in DHCPv6 packets is enabled.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**dhcpv6 interface-id insert enable**
+
+**undo dhcpv6 interface-id insert enable**
+
+
+Parameters
+----------
+
+None
+
+Views
+-----
+
+100ge sub-interface view,100GE interface view,10GE sub-interface view,10GE interface view,200GE sub-interface view,200GE interface view,25GE sub-interface view,25GE interface view,400GE sub-interface view,400GE interface view,50GE sub-interface view,50GE interface view,Eth-Trunk sub-interface view,Eth-Trunk interface view,VBDIF interface view,VLANIF interface view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+The Interface-ID option records user access information such as the inbound interface of the DHCPv6 Request packets sent from the clients to the device. The user access information can be used by the DHCPv6 server to assign IPv6 addresses and network parameters. When the device functions as a DHCPv6 relay agent or lightweight DHCPv6 relay agent (LDRA), and the device receives the Request packets sent from the DHCPv6 clients and forwards the packets to the DHCPv6 server, the device adds the Interface-ID option in the packets to identify location information of the DHCPv6 clients by default. If the DHCPv6 server interconnected to the device does not support the Interface-ID option, you can run the **undo dhcpv6 interface-id insert enable** command to configure the device not to add the Interface-ID option in DHCPv6 packets to flexibly control option information obtained by the DHCPv6 server.
+
+
+Example
+-------
+
+# Enable the function of adding the Interface-ID option in DHCPv6 packets on the interface 100GE1/0/1.
+```
+<HUAWEI> system-view
+[~HUAWEI] interface 100GE 1/0/1
+[~HUAWEI-100GE1/0/1] undo portswitch
+[*HUAWEI-100GE1/0/1] dhcpv6 interface-id insert enable
+
+```

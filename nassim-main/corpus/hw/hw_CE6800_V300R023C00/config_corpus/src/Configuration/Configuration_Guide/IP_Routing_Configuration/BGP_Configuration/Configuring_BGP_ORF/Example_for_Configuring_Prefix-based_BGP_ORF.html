@@ -1,0 +1,388 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Prefix-based BGP ORF">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0057.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0059.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001176663631">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Prefix-based BGP ORF</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001176663631"></a><a name="EN-US_TASK_0000001176663631"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Prefix-based BGP ORF</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001176663631__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0000001176663631__fig_dc_vrp_bgp_cfg_407801">Figure 1</a>, DeviceA and DeviceB belong to AS 100, and DeviceC, DeviceD, and DeviceE belong to AS 200. DeviceA requires DeviceC to send only routes that match the import routing policy of DeviceA, and DeviceC does not expect to maintain a separate export routing policy for DeviceA. To meet these requirements, configure prefix-based BGP ORF.</p>
+<div class="fignone" id="EN-US_TASK_0000001176663631__fig_dc_vrp_bgp_cfg_407801"><a name="EN-US_TASK_0000001176663631__fig_dc_vrp_bgp_cfg_407801"></a><a name="fig_dc_vrp_bgp_cfg_407801"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring prefix-based BGP ORF</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1, interface 2, and interface 3 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, and <span>100GE</span><span>1/0/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001176663711.png"></span></div>
+<p>To complete the configuration, you need the following data:</p>
+<ul><li><p>In AS 100: DeviceA's router ID: 1.1.1.1; DeviceB's router ID: 2.2.2.2</p>
+</li><li><p>In AS 200: DeviceC's router ID: 3.3.3.3; DeviceD's router ID: 4.4.4.4; DeviceE's router ID: 5.5.5.5</p>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176663631__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>During the configuration, note the following:</p>
+<ul><li>To improve security, you are advised to deploy BGP security measures. For details, see "Configuring BGP Authentication." Keychain authentication is used as an example. For details, see Example for Configuring Keychain Authentication for BGP.</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176663631__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Establish an EBGP peer relationship between DeviceA and DeviceC. Establish IBGP peer relationships between DeviceA and DeviceB, between DeviceC and DeviceD, and between DeviceC and DeviceE.</p>
+</li><li><p>Configure an import routing policy that is based on an IP prefix list on DeviceA, and enable prefix-based BGP ORF on DeviceA and DeviceC.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001176663631__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface.</span><p><p>Assign an IP address to each interface according to <a href="#EN-US_TASK_0000001176663631__fig_dc_vrp_bgp_cfg_407801">Figure 1</a>. For detailed configurations, see <a href="#EN-US_TASK_0000001176663631__postreq1549320114817">Configuration Scripts</a>.</p>
+</p></li><li><span>Configure BGP peer relationships.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>router-id 1.1.1.1</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.2.1.1 as-number 100</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.1.1.2 as-number 200</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv4] <strong>import-route direct</strong>
+[<span class="keyword">*</span>DeviceA-bgp-af-ipv4] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>router-id 2.2.2.2</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.2.1.2 as-number 100</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>bgp 200</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>router-id 3.3.3.3</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 10.1.1.1 as-number 100</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 10.3.1.1 as-number 200</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>peer 10.4.1.1 as-number 200</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>ipv4-family unicast</strong>
+[<span class="keyword">*</span>DeviceC-bgp-af-ipv4] <strong>import-route direct</strong>
+[<span class="keyword">*</span>DeviceC-bgp-af-ipv4] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<p># Configure DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD] <strong>bgp 200</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>router-id 4.4.4.4</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>peer 10.3.1.2 as-number 200</strong>
+[<span class="keyword">*</span>DeviceD-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+<p># Configure DeviceE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceE] <strong>bgp 200</strong>
+[<span class="keyword">*</span>DeviceE-bgp] <strong>router-id 5.5.5.5</strong>
+[<span class="keyword">*</span>DeviceE-bgp] <strong>peer 10.4.1.2 as-number 200</strong>
+[<span class="keyword">*</span>DeviceE-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceE] <strong>commit</strong></pre>
+</p></li><li><span>Configure an import routing policy that is based on an IP prefix list on DeviceA.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>ip ip-prefix 1 index 10 permit 10.3.1.0 24 less-equal 32</strong>
+[<span class="keyword">*</span>DeviceA] <strong>bgp 100</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>peer 10.1.1.2 ip-prefix 1 import</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Check information about the routes advertised by DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>display bgp routing-table peer 10.1.1.1 advertised-routes</strong>
+ BGP Local router ID is 3.3.3.3
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+<span> RPKI validation codes: V - valid, I - invalid, N - not-found</span>
+
+
+ Total Number of Routes: 7
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *&gt;   3.3.3.3/32         10.1.1.2        0                     0      200?
+ *&gt;   10.1.1.0/30        10.1.1.2        0                     0      200?
+ *&gt;   10.1.1.1/32        10.1.1.2        0                     0      200?
+ *&gt;   10.3.1.0/30        10.1.1.2        0                     0      200?
+ *&gt;   10.3.1.1/32        10.1.1.2        0                     0      200?
+ *&gt;   10.4.1.0/30        10.1.1.2        0                     0      200?
+ *&gt;   10.4.1.1/32        10.1.1.2        0                     0      200?</pre>
+<p># Check information about the routes accepted by DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display bgp routing-table peer 10.1.1.2 received-routes</strong>
+ BGP Local router ID is 1.1.1.1
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+<span> RPKI validation codes: V - valid, I - invalid, N - not-found</span>
+
+
+ Total Number of Routes: 2
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *&gt;   10.3.1.0/30        10.1.1.2        0                     0      200?
+ *&gt;   10.3.1.1/32        10.1.1.2        0                     0      200?</pre>
+<p>When prefix-based BGP ORF is not enabled, DeviceC sends seven routes. Of these, DeviceA accepts only two routes. This is because DeviceA applies the configured import routing policy to the seven routes.</p>
+</p></li><li><span>Enable prefix-based BGP ORF.</span><p><p># Enable prefix-based BGP ORF on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>bgp 100</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-bgp] <strong>peer 10.1.1.2 capability-advertise orf ip-prefix both</strong>
+[<span class="keyword">*</span>DeviceA-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Enable prefix-based BGP ORF on DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>bgp 200</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-bgp] <strong>peer 10.1.1.1 capability-advertise orf ip-prefix both</strong>
+[<span class="keyword">*</span>DeviceC-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001176663631__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check information about prefix-based BGP ORF negotiation on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display bgp peer 10.1.1.2 verbose</strong>
+
+         BGP Peer is 10.1.1.2,  remote AS 200                                   
+         Type: EBGP link                                                        
+         BGP version 4, Remote router ID 3.3.3.3                                
+         Update-group ID: 1                                                     
+         BGP current state: Established, Up for 00h00m01s                       
+         BGP current event: RecvRouteRefresh                                    
+         BGP last state: OpenConfirm                                            
+         BGP Peer Up count: 2                                                   
+         Received total routes: 0                                               
+         Received active routes total: 0                                        
+         Advertised total routes: 5                                             
+         Port:  Local - 179      Remote - 54545                                 
+         Configured: Active Hold Time: 180 sec   Keepalive Time:60 sec          
+         Received  : Active Hold Time: 180 sec                                  
+         Negotiated: Active Hold Time: 180 sec   Keepalive Time:60 sec          
+         Peer optional capabilities:                                            
+         Peer supports bgp multi-protocol extension                             
+         Peer supports bgp route refresh capability                             
+         Peer supports bgp outbound route filter capability                     
+         <strong>Support Address-Prefix: IPv4-UNC address-family, rfc-compatible, both</strong>  
+         Peer supports bgp 4-byte-as capability                                 
+         Address family IPv4 Unicast: advertised and received                   
+ Received: Total 3 messages                                                     
+                  Update messages                1                              
+                  Open messages                  1                              
+                  KeepAlive messages             1                              
+                  Notification messages          0                              
+                  Refresh messages               1                              
+ Sent: Total 9 messages                                                         
+                  Update messages                5                              
+                  Open messages                  2                              
+                  KeepAlive messages             1                              
+                  Notification messages          0                              
+                  Refresh messages               1                              
+ Authentication type configured: None                                           
+ Last keepalive received: 2019-03-06 19:17:37 UTC-8:00
+ Last keepalive sent    : 2019-03-06 19:17:37 UTC-8:00
+ Last update    received: 2019-03-06 19:17:43 UTC-8:00
+ Last update    sent    : 2019-03-06 19:17:37 UTC-8:00                         
+ Minimum route advertisement interval is 30 seconds                             
+ Optional capabilities:                                                         
+ Route refresh capability has been enabled                                      
+ Outbound route filter capability has been enabled                              
+ <strong>Enable Address-Prefix: IPv4-UNC address-family, rfc-compatible, both</strong>           
+ 4-byte-as capability has been enabled                                          
+ Multi-hop ebgp has been enabled                                                
+ Peer Preferred Value: 0                                                        
+ Routing policy configured:                                                     
+ No import update filter list                                                   
+ No export update filter list                                                   
+ Import prefix list is: 1                                                       
+ No export prefix list                                                          
+ No import route policy                                                         
+ No export route policy                                                         
+ No import distribute policy                                                    
+ No export distribute policy                                                    </pre>
+<p># Check information about the routes advertised by DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>display bgp routing-table peer 10.1.1.1 advertised-routes</strong>
+ BGP Local router ID is 3.3.3.3
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+<span> RPKI validation codes: V - valid, I - invalid, N - not-found</span>
+
+
+ Total Number of Routes: 2
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *&gt;   10.3.1.0/30        10.1.1.2        0                     0      200?
+ *&gt;   10.3.1.1/32        10.1.1.2        0                     0      200?</pre>
+<p># Check information about the routes accepted by DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display bgp routing-table peer 10.1.1.2 received-routes</strong>
+ BGP Local router ID is 1.1.1.1
+ Status codes: * - valid, &gt; - best, d - damped,<span> x - best external,</span><span> a - add path,</span>
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+<span> RPKI validation codes: V - valid, I - invalid, N - not-found</span>
+
+
+ Total Number of Routes: 2
+      Network            NextHop        MED        LocPrf    PrefVal Path/Ogn
+
+ *&gt;   10.3.1.0/30        10.1.1.2        0                     0      200?
+ *&gt;   10.3.1.1/32        10.1.1.2        0                     0      200?</pre>
+<p>After prefix-based BGP ORF is enabled, DeviceC sends only two routes based on the import routing policy provided by DeviceA, and DeviceA accepts only the two routes.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001176663631__postreq1549320114817"></a><a name="postreq1549320114817"></a><a name="EN-US_TASK_0000001176663631__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA 
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.252
+# 
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.2.1.2 255.255.255.252
+#       
+interface LoopBack1
+ ip address 1.1.1.1 255.255.255.255
+#
+bgp 100 
+ router-id 1.1.1.1
+ peer 10.1.1.2 as-number 200
+ peer 10.2.1.1 as-number 100
+ #      
+ ipv4-family unicast
+  import-route direct
+  peer 10.1.1.2 enable
+  peer 10.1.1.2 ip-prefix 1 import
+  peer 10.1.1.2 capability-advertise orf ip-prefix both
+  peer 10.2.1.1 enable
+#
+ip ip-prefix 1 index 10 permit 10.3.1.0 24 greater-equal 24 less-equal 32
+#
+return </pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch 
+ ip address 10.2.1.1 255.255.255.252
+#
+interface LoopBack1
+ ip address 2.2.2.2 255.255.255.255
+#
+bgp 100
+ router-id 2.2.2.2
+ peer 10.2.1.2 as-number 100
+ #
+ ipv4-family unicast
+  peer 10.2.1.2 enable
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.2 255.255.255.252
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.3.1.2 255.255.255.252
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.4.1.2 255.255.255.252
+#
+interface LoopBack1
+ ip address 3.3.3.3 255.255.255.255
+#
+bgp 200
+ router-id 3.3.3.3
+ peer 10.1.1.1 as-number 100
+ peer 10.3.1.1 as-number 200
+ peer 10.4.1.1 as-number 200
+ #
+ ipv4-family unicast
+  import-route direct
+  peer 10.1.1.1 enable
+  peer 10.1.1.1 capability-advertise orf ip-prefix both
+  peer 10.3.1.1 enable
+  peer 10.4.1.1 enable
+#
+return</pre>
+</li><li><p>DeviceD</p>
+<pre class="screen">#
+sysname DeviceD
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.3.1.1 255.255.255.252      
+#   
+interface LoopBack1
+ ip address 4.4.4.4 255.255.255.255
+#
+bgp 200
+ router-id 4.4.4.4
+ peer 10.3.1.2 as-number 200
+ #
+ ipv4-family unicast
+  peer 10.3.1.2 enable
+#
+return</pre>
+</li><li><p>DeviceE</p>
+<pre class="screen">#
+sysname DeviceE
+#   
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.4.1.1 255.255.255.252      
+#
+interface LoopBack1
+ ip address 5.5.5.5 255.255.255.255
+#   
+bgp 200
+ router-id 5.5.5.5
+ peer 10.4.1.2 as-number 200
+ #
+ ipv4-family unicast
+  peer 10.4.1.2 enable
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bgp_cfg_0057.html">Configuring BGP ORF
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bgp_cfg_0059.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

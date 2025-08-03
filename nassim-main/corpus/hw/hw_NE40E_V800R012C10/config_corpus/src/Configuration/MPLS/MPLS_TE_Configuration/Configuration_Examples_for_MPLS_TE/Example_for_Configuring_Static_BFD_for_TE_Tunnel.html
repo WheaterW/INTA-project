@@ -1,0 +1,471 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Static BFD for TE Tunnel">
+<meta name="abstract" content="After static BFD for TE tunnel is configured, the VPN is enabled to rapidly detect tunnel faults and perform traffic switchover.">
+<meta name="description" content="After static BFD for TE tunnel is configured, the VPN is enabled to rapidly detect tunnel faults and perform traffic switchover.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0093.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0150.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0072.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,te-p2pvrp,w00556928,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="OWNER" content="l00468467">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="w00845984">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172368363">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Static BFD for TE Tunnel</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172368363"></a><a name="EN-US_TASK_0172368363"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Static BFD for TE Tunnel</h1>
+<div class="taskbody"><p>After static BFD for TE tunnel is configured, the VPN is enabled to rapidly detect tunnel faults and perform traffic switchover.</p>
+<div class="context"><a name="EN-US_TASK_0172368363__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p><a href="#EN-US_TASK_0172368363__fig_dc_vrp_te-p2p_cfg_013101">Figure 1</a> illustrates an MPLS network. Layer 2 devices (switches) are deployed between PE1 and PE2. PE1 is configured with VPN FRR and the MPLS TE tunnel. The primary path of VPN FRR is PE1 â Switch â PE2; the backup path of VPN FRR is PE1 â PE3. In a normal situation, VPN traffic is transmitted over the primary path. If the primary path fails, VPN traffic is switched to the backup path. BFD for TE tunnel is required to monitor the TE tunnel over the primary path and enable VPN to rapidly detect tunnel faults. Traffic rapidly switches between the primary and backup paths, and fault recovery is sped up.</p>
+<div class="fignone" id="EN-US_TASK_0172368363__fig_dc_vrp_te-p2p_cfg_013101"><a name="EN-US_TASK_0172368363__fig_dc_vrp_te-p2p_cfg_013101"></a><a name="fig_dc_vrp_te-p2p_cfg_013101"></a><span class="figcap"><b>Figure 1 </b>Static BFD for TE tunnel with automatically negotiated discriminators</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 and 2 in this example represent GE <span>0/1/0</span> and GE <span>0/2/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_te-p2p_cfg_013101.png" width="NaN" height="NaN"></span><br></div>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>For simplicity, the IP addresses of the interfaces connected the PEs and the CEs are not shown in the diagram.</p>
+</div></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368363__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>None.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368363__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure an MPLS network and establish bidirectional TE tunnels between PE1 and PE2, and between PE1 and PE3.</p>
+</li><li><p>Configure VPN FRR on PE1.</p>
+</li><li><p>Enable global BFD on PE1, PE2, and PE3.</p>
+</li><li><p>Establish a BFD session on PE1 to monitor the TE tunnel of the primary path.</p>
+</li><li><p>Establish a BFD session on PE2 and PE3, and specify the TE tunnel as the reverse tunnel.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368363__1.4.4"></a><a name="1.4.4"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>An IGP and its parameters</p>
+</li><li><p>BGP AS number and interface names used by BGP sessions</p>
+</li><li><p>MPLS LSR ID</p>
+</li><li><p>Tunnel interface number and explicit paths</p>
+</li><li><p>VPN instance name, RD, and route target (RT)</p>
+</li><li><p>Name of the tunnel policy</p>
+</li><li><p>Name of a BFD session</p>
+</li><li><p>Local and remote discriminators of BFD sessions</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172368363__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface.</span><p><p>Assign an IP address to each interface according to <a href="#EN-US_TASK_0172368363__fig_dc_vrp_te-p2p_cfg_013101">Figure 1</a>, create loopback interfaces on routers, and configure the IP addresses of the loopback interfaces as MPLS LSR IDs. For configuration details, see <a href="#EN-US_TASK_0172368363__section_dc_vrp_te-p2p_cfg_013105">Configuration Files</a> in this section.</p>
+</p></li><li><span>Configure an IGP.</span><p><p>Configure OSPF or IS-IS on each router to ensure interworking between PE1 and PE2, and between PE1 and PE3. OSPF is used in the example. For configuration details, see <a href="#EN-US_TASK_0172368363__section_dc_vrp_te-p2p_cfg_013105">Configuration Files</a> in this section.</p>
+</p></li><li><span>Configure basic MPLS functions.</span><p><p>On each router, configure an LSR ID and enable MPLS in the system and interface views. For configuration details, see <a href="#EN-US_TASK_0172368363__section_dc_vrp_te-p2p_cfg_013105">Configuration Files</a> in this section.</p>
+</p></li><li><span>Configure basic MPLS TE functions.</span><p><p>Enable MPLS TE and MPLS RSVP-TE in the MPLS and interface views on each LSR. For configuration details, see <a href="#EN-US_TASK_0172368363__section_dc_vrp_te-p2p_cfg_013105">Configuration Files</a> in this section.</p>
+</p></li><li><span>Enable OSPF TE and configure the CSPF.</span><p><p>Enable OSPF TE on each router and configure CSPF on PE1. For configuration details, see <a href="#EN-US_TASK_0172368363__section_dc_vrp_te-p2p_cfg_013105">Configuration Files</a> in this section.</p>
+</p></li><li><span>Configure tunnel interfaces.</span><p><p>Specify explicit paths between PE1 and PE2 and between PE1 and PE3. For PE1, two explicit paths must be specified.</p>
+<p># Configure explicit paths from PE1 to PE2 and PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> explicit-path tope2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-explicit-path-tope2]<strong> next hop 10.2.1.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-explicit-path-tope2]<strong> next hop 3.3.3.3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-explicit-path-tope2]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> explicit-path tope3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-explicit-path-tope3]<strong> next hop 10.1.1.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-explicit-path-tope3]<strong> next hop 2.2.2.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-explicit-path-tope3]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-explicit-path-tope3]<strong> quit</strong></pre>
+<p># Configure an explicit path from PE2 to PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong> explicit-path tope1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-explicit-path-tope1]<strong> next hop 10.2.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-explicit-path-tope1]<strong> next hop 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-explicit-path-tope1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-explicit-path-tope1]<strong> quit</strong></pre>
+<p># Configure an explicit path from PE3 to PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3]<strong> explicit-path tope1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-explicit-path-tope1]<strong> next hop 10.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-explicit-path-tope1]<strong> next hop 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-explicit-path-tope1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-explicit-path-tope1]<strong> quit</strong></pre>
+<p>Create tunnel interfaces and specify explicit paths on PE1, PE2, and PE3. Bind the tunnel to the specified VPN. For PE1, two tunnel interfaces must be created.</p>
+<p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> interface tunnel 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel2]<strong> ip address unnumbered interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel2]<strong> tunnel-protocol mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel2]<strong> destination 3.3.3.3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel2]<strong> mpls te tunnel-id 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel2]<strong> mpls te path explicit-path tope2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel2]<strong> mpls te reserved-for-binding</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel2]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface tunnel 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel1]<strong> ip address unnumbered interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel1]<strong> tunnel-protocol mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel1]<strong> destination 2.2.2.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel1]<strong> mpls te tunnel-id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel1]<strong> mpls te path explicit-path tope3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel1]<strong> mpls te reserved-for-binding</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-Tunnel1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-Tunnel1]<strong> quit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong> interface tunnel 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Tunnel2]<strong> ip address unnumbered interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Tunnel2]<strong> tunnel-protocol mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Tunnel2]<strong> destination 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Tunnel2]<strong> mpls te tunnel-id 3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Tunnel2]<strong> mpls te path explicit-path tope1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Tunnel2]<strong> mpls te reserved-for-binding</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Tunnel2]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-Tunnel2]<strong> quit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3]<strong> interface tunnel 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Tunnel1]<strong> ip address unnumbered interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Tunnel1]<strong> tunnel-protocol mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Tunnel1]<strong> destination 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Tunnel1]<strong> mpls te tunnel-id 4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Tunnel1]<strong> mpls te path explicit-path tope1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Tunnel1]<strong> mpls te reserved-for-binding</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Tunnel1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-Tunnel1]<strong> quit</strong></pre>
+<p>After completing the preceding configuration, run the <strong>display mpls te tunnel-interface tunnel</strong> <em>interface-number</em> command on the PEs. The command output shows that the status of Tunnel1 and Tunnel2 on PE1, Tunnel2 on PE2, and Tunnel1 on PE3 is <strong>CR-LSP is Up</strong>.</p>
+</p></li><li><span>Configure VPN FRR.</span><p><p># Configure a VPN instance on PE1, PE2, and PE3. Set the VPN instance name to <strong>vpn1</strong>, RDs to 100:1, 100:2, and 100:3 respectively, and all RTs to 100:1. Configure the CEs to access the PEs. For configuration details, see <a href="#EN-US_TASK_0172368363__section_dc_vrp_te-p2p_cfg_013105">Configuration Files</a> in this section.</p>
+<p># Establish MP IBGP peer relationship between PE1 and PE2, and between PE1 and PE3. The BGP AS number of PE1, PE2, and PE3 are 100. The loopback interfaces Loopback1 is used as the interface to establish BGP sessions. For configuration details, see <a href="#EN-US_TASK_0172368363__section_dc_vrp_te-p2p_cfg_013105">Configuration Files</a> in this section.</p>
+<p># Configure tunnel policies for PE1, PE2, and PE3 and apply the policies to the VPN instances.</p>
+<p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> tunnel-policy policy1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-tunnel-policy-policy1]<strong> tunnel binding destination 3.3.3.3 te tunnel 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-tunnel-policy-policy1]<strong> tunnel binding destination 2.2.2.2 te tunnel 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-tunnel-policy-policy1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> ip vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpn1]<strong> tnl-policy policy1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpn1]<strong> quit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong> tunnel-policy policy1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-tunnel-policy-policy1]<strong> tunnel binding destination 1.1.1.1 te tunnel 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-tunnel-policy-policy1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> ip vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpn1]<strong> tnl-policy policy1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpn1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-vpn-instance-vpn1]<strong> quit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3]<strong> tunnel-policy policy1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-tunnel-policy-policy1]<strong> tunnel binding destination 1.1.1.1 te tunnel 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-tunnel-policy-policy1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3]<strong> ip vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-vpn-instance-vpn1]<strong> tnl-policy policy1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-vpn-instance-vpn1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-vpn-instance-vpn1]<strong> quit</strong></pre>
+<p># Configure VPN FRR on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp]<strong> ipv4-family vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-vpn1]<strong> auto-frr</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-vpn1]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bgp-vpn1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bgp]<strong> quit</strong></pre>
+<p>After the configuration is complete, CEs can communicate, and traffic flows through PE1, the switch, and PE2. If the cable to any interface connecting PE1 to PE2 is removed, or the switch fails, or PE2 fails, VPN traffic is switched to the backup path between PE1 and PE3. Time taken in fault recovery is close to the IGP convergence time.</p>
+</p></li><li><span>Configure BFD for TE tunnel.</span><p><p># Configure a BFD session on PE1 to monitor the TE tunnel of the primary path. Set the minimum intervals at which BFD packets are sent and received.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> bfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> bfd pe1tope2 bind mpls-te interface tunnel2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1tope2]<strong> discriminator local 12</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1tope2]<strong> discriminator remote 21</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1tope2]<strong> min-tx-interval 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1tope2]<strong> min-rx-interval 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1tope2]<strong> process-pst</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1tope2]<strong> commit</strong></pre>
+<p># Establish a BFD session on PE2 and specify the TE tunnel as the reverse tunnel. Set the minimum intervals at which BFD packets are sent and received.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong> bfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> bfd pe2tope1 bind mpls-te interface tunnel2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd-lsp-session-pe2tope1]<strong> discriminator local 21</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd-lsp-session-pe2tope1]<strong> discriminator remote 12</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd-lsp-session-pe2tope1]<strong> min-tx-interval 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd-lsp-session-pe2tope1]<strong> min-rx-interval 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd-lsp-session-pe2tope1]<strong> commit</strong></pre>
+<p># After completing the configuration, run the <strong>display bfd session </strong>{<strong> all </strong>|<strong>discriminator</strong> <em>discr-value</em> | <strong>mpls-te</strong> <strong>interface</strong> <em>interface-type</em> <em>interface-number</em> } [ <strong>verbose</strong> ] command on PE1 and PE2. The command output shows that the BFD session is Up.</p>
+</p></li><li><span>Verify the configuration.</span><p><p>Connect tester's Port 1 and Port 2 to CE1 and CE2, respectively. Inject traffic destined for Port 2 into Port 1. The test shows that a fault can be rectified in milliseconds.</p>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0172368363__section_dc_vrp_te-p2p_cfg_013105"><a name="EN-US_TASK_0172368363__section_dc_vrp_te-p2p_cfg_013105"></a><a name="section_dc_vrp_te-p2p_cfg_013105"></a><a name="EN-US_TASK_0172368363__1.4.6"></a><a name="1.4.6"></a><h4 class="sectiontitle">Configuration Files</h4><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Configuration files of CE1, CE2, and the switch and the configuration of PE accessing CE are not provided.</p>
+</div></div>
+<ul><li><p>PE1 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname PE1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ip vpn-instance vpn1</pre>
+<pre class="screen"> route-distinguisher 100:1</pre>
+<pre class="screen"> tnl-policy policy1</pre>
+<pre class="screen"> vpn-target 100:1 export-extcommunity</pre>
+<pre class="screen"> vpn-target 100:1 import-extcommunity</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bfd</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls lsr-id 1.1.1.1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls</pre>
+<pre class="screen"> mpls te</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen"> mpls te cspf</pre>
+<pre class="screen">#</pre>
+<pre class="screen">explicit-path tope2</pre>
+<pre class="screen"> next hop 10.2.1.2</pre>
+<pre class="screen"> next hop 3.3.3.3</pre>
+<pre class="screen">#</pre>
+<pre class="screen">explicit-path tope3</pre>
+<pre class="screen"> next hop 10.1.1.2</pre>
+<pre class="screen"> next hop 2.2.2.2</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface gigabitethernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.2.1.1 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls te</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.1.1.1 255.255.255.252</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls te</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 1.1.1.1 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface Tunnel1</pre>
+<pre class="screen"> ip address unnumbered interface LoopBack1</pre>
+<pre class="screen"> tunnel-protocol mpls te</pre>
+<pre class="screen"> destination 2.2.2.2</pre>
+<pre class="screen"> mpls te tunnel-id 1</pre>
+<pre class="screen"> mpls te path explicit-path tope3</pre>
+<pre class="screen"> mpls te reserved-for-binding</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface Tunnel2</pre>
+<pre class="screen"> ip address unnumbered interface LoopBack1</pre>
+<pre class="screen"> tunnel-protocol mpls te</pre>
+<pre class="screen"> destination 3.3.3.3</pre>
+<pre class="screen"> mpls te tunnel-id 2</pre>
+<pre class="screen"> mpls te path explicit-path tope2</pre>
+<pre class="screen"> mpls te reserved-for-binding</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 100</pre>
+<pre class="screen"> peer 2.2.2.2 as-number 100</pre>
+<pre class="screen"> peer 2.2.2.2 connect-interface LoopBack1</pre>
+<pre class="screen"> peer 3.3.3.3 as-number 100</pre>
+<pre class="screen"> peer 3.3.3.3 connect-interface LoopBack1</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  peer 2.2.2.2 enable</pre>
+<pre class="screen">  peer 3.3.3.3 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> ipv4-family vpnv4</pre>
+<pre class="screen">  policy vpn-target</pre>
+<pre class="screen">  peer 2.2.2.2 enable</pre>
+<pre class="screen">  peer 3.3.3.3 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> ipv4-family vpn-instance vpn1</pre>
+<pre class="screen">  import-route direct</pre>
+<pre class="screen">  auto-frr</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> opaque-capability enable</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 10.1.1.0 0.0.0.3</pre>
+<pre class="screen">  network 10.2.1.0 0.0.0.255</pre>
+<pre class="screen">  network 1.1.1.1 0.0.0.0</pre>
+<pre class="screen">  mpls-te enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">tunnel-policy policy1</pre>
+<pre class="screen"> tunnel binding destination 3.3.3.3 te tunnel 2</pre>
+<pre class="screen"> tunnel binding destination 2.2.2.2 te tunnel 1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bfd pe1tope2 bind mpls-te interface Tunnel2</pre>
+<pre class="screen"> discriminator local 12</pre>
+<pre class="screen"> discriminator remote 21</pre>
+<pre class="screen"> min-tx-interval 100</pre>
+<pre class="screen"> min-rx-interval 100</pre>
+<pre class="screen"> process-pst</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname PE2</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ip vpn-instance vpn1</pre>
+<pre class="screen"> route-distinguisher 100:2</pre>
+<pre class="screen"> tnl-policy policy1</pre>
+<pre class="screen"> vpn-target 100:1 export-extcommunity</pre>
+<pre class="screen"> vpn-target 100:1 import-extcommunity</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bfd</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls lsr-id 3.3.3.3</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls</pre>
+<pre class="screen"> mpls te</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen"> mpls te cspf</pre>
+<pre class="screen">#</pre>
+<pre class="screen">explicit-path tope1</pre>
+<pre class="screen"> next hop 10.2.1.1</pre>
+<pre class="screen"> next hop 1.1.1.1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface gigabitethernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.2.1.2 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls te</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 3.3.3.3 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface Tunnel2</pre>
+<pre class="screen"> ip address unnumbered interface LoopBack1</pre>
+<pre class="screen"> tunnel-protocol mpls te</pre>
+<pre class="screen"> destination 1.1.1.1</pre>
+<pre class="screen"> mpls te tunnel-id 3</pre>
+<pre class="screen"> mpls te path explicit-path tope1</pre>
+<pre class="screen"> mpls te reserved-for-binding</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 100</pre>
+<pre class="screen"> peer 1.1.1.1 as-number 100</pre>
+<pre class="screen"> peer 1.1.1.1 connect-interface LoopBack1</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  peer 1.1.1.1 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> ipv4-family vpnv4</pre>
+<pre class="screen">  policy vpn-target</pre>
+<pre class="screen">  peer 1.1.1.1 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> ipv4-family vpn-instance vpn1</pre>
+<pre class="screen">  import-route direct</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> opaque-capability enable</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 10.2.1.0 0.0.0.255</pre>
+<pre class="screen">  network 3.3.3.3 0.0.0.0</pre>
+<pre class="screen">  mpls-te enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">tunnel-policy policy1</pre>
+<pre class="screen"> tunnel binding destination 1.1.1.1 te tunnel 2</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bfd pe2tope1 bind mpls-te interface Tunnel2</pre>
+<pre class="screen"> discriminator local 21</pre>
+<pre class="screen"> discriminator remote 12</pre>
+<pre class="screen"> min-tx-interval 100</pre>
+<pre class="screen"> min-rx-interval 100</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>PE3 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname PE3</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ip vpn-instance vpn1</pre>
+<pre class="screen"> route-distinguisher 100:3</pre>
+<pre class="screen"> tnl-policy policy1</pre>
+<pre class="screen"> vpn-target 100:1 export-extcommunity</pre>
+<pre class="screen"> vpn-target 100:1 import-extcommunity</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls lsr-id 2.2.2.2</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls</pre>
+<pre class="screen"> mpls te</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen"> mpls te cspf</pre>
+<pre class="screen">#</pre>
+<pre class="screen">explicit-path tope1</pre>
+<pre class="screen"> next hop 10.1.1.1</pre>
+<pre class="screen"> next hop 1.1.1.1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.1.1.2 255.255.255.252</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls te</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 2.2.2.2 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface Tunnel1</pre>
+<pre class="screen"> ip address unnumbered interface LoopBack1</pre>
+<pre class="screen"> tunnel-protocol mpls te</pre>
+<pre class="screen"> destination 1.1.1.1</pre>
+<pre class="screen"> mpls te tunnel-id 4</pre>
+<pre class="screen"> mpls te path explicit-path tope1</pre>
+<pre class="screen"> mpls te reserved-for-binding</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 100</pre>
+<pre class="screen"> peer 1.1.1.1 as-number 100</pre>
+<pre class="screen"> peer 1.1.1.1 connect-interface LoopBack1</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  peer 1.1.1.1 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> ipv4-family vpnv4</pre>
+<pre class="screen">  policy vpn-target</pre>
+<pre class="screen">  peer 1.1.1.1 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> ipv4-family vpn-instance vpn1</pre>
+<pre class="screen">  import-route direct</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> opaque-capability enable</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 10.1.1.0 0.0.0.3</pre>
+<pre class="screen">  network 2.2.2.2 0.0.0.0</pre>
+<pre class="screen">  mpls-te enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">tunnel-policy policy1</pre>
+<pre class="screen"> tunnel binding destination 1.1.1.1 te tunnel 1</pre>
+<pre class="screen">return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0093.html">Configuration Examples for MPLS TE
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0150.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0072.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

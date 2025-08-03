@@ -1,0 +1,490 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring PIM FRR and M-LAG for Protection">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_pim_cfg_0073.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_pim_cfg_0075.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="PIM">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="PIM">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="PIM">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001315452113">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring PIM FRR and M-LAG for Protection</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001315452113"></a><a name="EN-US_TASK_0000001315452113"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring PIM FRR and M-LAG for Protection</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001315452113__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>Multicast services are deployed on the ISP network shown in <a href="#EN-US_TASK_0000001315452113__fig_dc_vrp_multicast_cfg_003701">Figure 1</a>. DeviceB and DeviceC are the first-hop PIM devices connected to the multicast source, and they are responsible for forwarding multicast data from the multicast source. DeviceA is the last-hop PIM device connected to a multicast group member, and it is responsible for forwarding multicast data to the member.</p>
+<p>To ensure high reliability of multicast services, M-LAG is deployed between DeviceB and DeviceC. When the two devices are working properly, links work in load balancing mode. If either fails, services are not affected. In addition, PIM FRR is deployed on DeviceA, DeviceB, and DeviceC. In normal cases, DeviceA accepts traffic from the primary link. If the primary link fails, traffic is immediately switched to the backup link.</p>
+<div class="fignone" id="EN-US_TASK_0000001315452113__fig_dc_vrp_multicast_cfg_003701"><a name="EN-US_TASK_0000001315452113__fig_dc_vrp_multicast_cfg_003701"></a><a name="fig_dc_vrp_multicast_cfg_003701"></a><span class="figcap"><b>Figure 1 </b>Configuring PIM FRR and M-LAG for protection</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1, interface2, interface3, interface4, and interface5 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, <span>100GE</span><span>1/0/3</span>, <span>100GE</span><span>1/0/4</span>, and <span>100GE</span><span>1/0/5</span>, respectively.</p>
+</div></div>
+<p><span><img class="vsd" src="figure/en-us_image_0000001318137805.png"></span></p>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001315452113__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Create Eth-Trunk interfaces on DeviceB and DeviceC, and add Ethernet physical interfaces to the Eth-Trunk interfaces.</li><li>Configure V-STP on DeviceB and DeviceC.</li><li>Configure IP addresses for the management network ports on DeviceB and DeviceC.</li><li>Configure a DFS group on DeviceB and DeviceC, and bind the IP address of the corresponding management network port to the DFS group.</li><li>Configure the links between DeviceB and DeviceC as peer-links.</li><li>Bind the DFS group to the user-side Eth-Trunk interfaces on DeviceB and DeviceC, and enable STP edge ports on the Eth-Trunk interfaces to speed up network convergence.</li><li>Configure IP addresses and MAC addresses for VLANIF interfaces on DeviceB and DeviceC, and enable PIM-SM and IGMP.</li><li>Enable IGMP snooping in the VLAN on DeviceB and DeviceC.</li><li>Assign an IP address to each <span class="keyword">device</span> interface and configure OSPF to implement IP interworking. Enable multicast and public network FRR, and enable PIM-SM on each interface.</li><li>Enable IGMP on the interface connecting <span class="keyword">Device</span>A to the host and configure a static multicast group on the interface.</li><li>Configure a static RP on all devices.</li><li>Enable OSPF IP FRR on DeviceA.</li><li>Enable PIM FRR on all devices.</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001315452113__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Multicast group address: 225.1.0.0</p>
+</li><li><p>Multicast source address: 10.0.5.100</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001315452113__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Create Eth-Trunk interfaces on DeviceB and DeviceC, and add Ethernet physical interfaces to the Eth-Trunk interfaces.</span><p><p># Create Eth-Trunk interfaces in LACP mode on DeviceB and add member interfaces to the Eth-Trunk interfaces. The configuration of DeviceC is similar to that of DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface eth-trunk 0</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk0] <strong>mode lacp-static</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk0] <strong>trunkport <span>100ge</span><span>1/0/3</span></strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk0] <strong>trunkport <span>100ge</span></strong><strong> <span>1/0/5</span></strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>vlan 10</strong><strong>0</strong>
+[<span class="keyword">*</span>DeviceB-vlan100] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>interface eth-trunk 100</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk100] <strong>port link-type trunk</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk100] <strong>port trunk allow-pass vlan 100</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk100] <strong>mode lacp-static</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk100] <strong>lacp mixed-rate link enable</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk100] <strong>trunkport <span>100ge</span><span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk100] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li><li><span>Configure V-STP on DeviceB and DeviceC.</span><p><p># Configure DeviceB. The configuration of DeviceC is similar to that of DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> stp mode rstp</strong>
+[<span class="keyword">*</span>DeviceB]<strong> stp v-stp enable</strong></pre>
+</p></li><li><span>Configure IP addresses for the management network ports on DeviceB and DeviceC.</span><p><p># Configure DeviceB. The configuration of DeviceC is similar to that of DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> interface meth <span>0/0/0</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-MEth<span>0/0/0</span>]<strong> ip address 10.1.1.1 24</strong>
+[<span class="keyword">*</span>DeviceB-MEth<span>0/0/0</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB]<strong> commit</strong></pre>
+</p></li><li><span>Configure a DFS group on DeviceB and DeviceC, and bind the IP address of the corresponding management network port to the DFS group.</span><p><p>Ensure that DeviceB and DeviceC can communicate at Layer 3 through their management network ports.</p>
+<p># Configure DeviceB. The configuration of DeviceC is similar to that of DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>dfs-group 1</strong>
+[<span class="keyword">*</span>DeviceB-dfs-group-1] <strong>dual-active detection </strong><strong>source ip 10.1.1.1</strong> <strong>peer 10.1.1.2</strong>
+[<span class="keyword">*</span>DeviceB-dfs-group-1] <strong>priority 120</strong>
+[<span class="keyword">*</span>DeviceB-dfs-group-1] <strong>m-lag active-standby election arp</strong>
+[<span class="keyword">*</span>DeviceB-dfs-group-1] <strong>dual-active detection delay 0</strong>
+[<span class="keyword">*</span>DeviceB-dfs-group-1] <strong>authentication-mode hmac-sha256 password</strong> <strong>YsHsjx_202206</strong>
+[<span class="keyword">*</span>DeviceB-dfs-group-1] <strong>dual-active detection error-down mode routing-switch</strong>
+[<span class="keyword">*</span>DeviceB-dfs-group-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li><li><span>Configure the links between DeviceB and DeviceC as peer-links.</span><p><p># Configure DeviceB. The configuration of DeviceC is similar to that of DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface eth-trunk 0</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-Eth-Trunk0] <strong>peer-link 1</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk0] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li><li><span>Bind the DFS group to the user-side Eth-Trunk interfaces on DeviceB and DeviceC, and enable STP edge ports on the Eth-Trunk interfaces to speed up network convergence.</span><p><p># Configure DeviceB. The configuration of DeviceC is similar to that of DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface eth-trunk 100</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-Eth-Trunk100] <strong>dfs-group 1 m-lag 1 active-standby</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk100] <strong>stp edged-port enable</strong>
+[<span class="keyword">*</span>DeviceB-Eth-Trunk100] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li><li><span>Configure IP addresses and MAC addresses for VLANIF interfaces on DeviceB and DeviceC, and enable PIM-SM and IGMP.</span><p><p># Configure DeviceB. The configuration of DeviceC is similar to that of DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface vlanif 10</strong><strong>0</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-Vlanif100] <strong>ip address 10.100.0.1 255.255.255.0</strong>
+[<span class="keyword">*</span>DeviceB-Vlanif100] <strong>mac-address 0000-5e00-0101</strong>
+[<span class="keyword">*</span>DeviceB-Vlanif100]<strong> </strong><strong>pim sm</strong>
+[<span class="keyword">*</span>DeviceB-Vlanif100]<strong> </strong><strong>igmp enable</strong>
+[<span class="keyword">*</span>DeviceB-Vlanif100] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li><li><span>Enable IGMP snooping in the VLAN on DeviceB and DeviceC.</span><p><p># Configure DeviceB. The configuration of DeviceC is similar to that of DeviceB.</p>
+</p><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>vlan 10</strong><strong>0</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-vlan100] <strong>igmp snooping enable</strong>
+[<span class="keyword">*</span>DeviceB-vlan100] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li><li><span>Assign an IP address to each <span class="keyword">device</span> interface and configure OSPF to implement IP interworking. Enable multicast and public network FRR, and enable PIM-SM on each interface.</span><p><p># Configure <span class="keyword">Device</span>B. The configuration of DeviceC is similar to that of DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>multicast routing-enable</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>ip frr</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>interface <span>100ge</span> <span>1/0/4</span></strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-<span>100GE</span><span>1/0/4</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-<span>100GE</span><span>1/0/4</span>] <strong>ip address 10.10.1.1 24</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-<span>100GE</span><span>1/0/4</span>] <strong>ospf enable</strong><strong> 1 area 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-<span>100GE</span><span>1/0/4</span>] <strong>pim sm</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-<span>100GE</span><span>1/0/4</span>] <strong>m-lag unpaired-port reserved</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-<span>100GE</span><span>1/0/4</span>] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-<span>100GE</span><span>1/0/2</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-<span>100GE</span><span>1/0/2</span>] <strong>ip address 10.9.7.1 24</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-<span>100GE</span><span>1/0/2</span>] <strong>ospf enable</strong><strong> 1 area 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-<span>100GE</span><span>1/0/2</span>] <strong>pim sm</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-<span>100GE</span><span>1/0/2</span>] <strong>m-lag unpaired-port reserved</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>ospf</strong><strong> 1</strong> 
+[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1-area-0.0.0.0] <strong>network 10.10.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1-area-0.0.0.0] <strong>network 10.9.7.0 0.0.0.255</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1] <strong>import-route direct type 1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B] <strong>commit</strong></pre>
+<p># Configure <span class="keyword">Device</span>C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>multicast routing-enable</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>ip frr</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>interface <span>100ge</span> <span>1/0/4</span></strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-<span>100GE</span><span>1/0/4</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-<span>100GE</span><span>1/0/4</span>] <strong>ip address 10.10.1.2 24</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-<span>100GE</span><span>1/0/4</span>] <strong>ospf enable</strong><strong> 1 area 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-<span>100GE</span><span>1/0/4</span>] <strong>pim sm</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-<span>100GE</span><span>1/0/4</span>] <strong>m-lag unpaired-port reserved</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-<span>100GE</span><span>1/0/4</span>] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-<span>100GE</span><span>1/0/2</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-<span>100GE</span><span>1/0/2</span>] <strong>ip address 10.6.1.1 24</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-<span>100GE</span><span>1/0/2</span>] <strong>ospf enable</strong><strong> 1 area 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-<span>100GE</span><span>1/0/2</span>] <strong>pim sm</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-<span>100GE</span><span>1/0/2</span>] <strong>m-lag unpaired-port reserved</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>interface loopback 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-LoopBack0] <strong>ip address 10.6.6.6 32</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-LoopBack0] <strong>pim sm</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-LoopBack0] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>ospf</strong><strong> 1</strong> 
+[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf-1-area-0.0.0.0] <strong>network 10.10.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf-1-area-0.0.0.0] <strong>network 10.6.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf-1-area-0.0.0.0] <strong>network 10.6.6.6 0.0.0.0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf-1] <strong>import-route direct type 1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C] <strong>commit</strong></pre>
+<p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>multicast routing-enable</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/1</span>] <strong>ip address 10.6.1.9 24</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/1</span>] <strong>pim sm</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/1</span>] <strong>ospf enable</strong><strong> 1 area 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/2</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/2</span>] <strong>ip address 10.9.7.9 24</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/2</span>] <strong>ospf enable</strong><strong> 1 area 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/2</span>] <strong>pim sm</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>interface <span>100ge</span> <span>1/0/3</span></strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/3</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/3</span>] <strong>ip address 10.9.1.1 24</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/3</span>] <strong>ospf enable</strong><strong> 1 area 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/3</span>] <strong>pim sm</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/3</span>] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>ospf</strong><strong> 1</strong> 
+[<span class="keyword">*</span><span class="keyword">Device</span>A-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-ospf-1-area-0.0.0.0] <strong>network 10.6.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-ospf-1-area-0.0.0.0] <strong>network 10.9.7.0 0.0.0.255</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-ospf-1-area-0.0.0.0] <strong>network 10.9.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</p></li><li><span>Enable IGMP on the interface connecting <span class="keyword">Device</span>A to the host and configure a static multicast group on the interface.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> interface <span>100ge</span><span>1/0/3</span></strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/3</span>]<strong> igmp enable</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/3</span>] <strong>igmp static-group</strong> <strong>225.1.0.0 source 10.100.0.2</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-<span>100GE</span><span>1/0/3</span>]<strong> quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A]<strong> commit</strong></pre>
+</p></li><li><span>Configure a static RP on all devices.</span><p><p># Configure DeviceB. The configurations of DeviceA and DeviceC are similar to the configuration of DeviceB.</p>
+</p><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>pim</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-pim] <strong>static-rp 10.6.6.6</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-pim] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>B-pim] <strong>commit</strong></pre>
+</p></li><li><span>Enable OSPF IP FRR on DeviceA.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>ospf</strong><strong> 1</strong> 
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-ospf-1] <strong>frr</strong> 
+[<span class="keyword">*</span><span class="keyword">Device</span>A-ospf-1] <strong>loop-free-alternate</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</p></li><li><span>Enable PIM FRR on all devices.</span><p><p># Configure DeviceB. The configurations of DeviceA and DeviceC are similar to the configuration of DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span> B] <strong>pim</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span> B-pim] <strong>rpf-frr</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span> B-pim] <strong>quit</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span> B] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001315452113__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Run the <strong>display pim routing-table</strong> command on <span class="keyword">Device</span>C to check the PIM routing table.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span> C] <strong>display pim routing-table</strong>
+ VPN-Instance: public net
+ Total 0 (*, G) entry; 1 (S, G) entry
+
+ (10.100.0.2, 225.1.0.0)
+     RP: 10.6.6.6 (local)
+     Protocol: pim-sm, Flag: SPT SG_RCVR
+     UpTime: 01:22:40
+    <strong> Upstream interface: Vlanif100, Refresh time: 01:22:40</strong>
+<strong>         Upstream neighbor: NULL</strong>
+<strong>         RPF prime neighbor: NULL</strong>
+     Backup upstream interface: <span>100GE</span><span>1/0/4</span>
+        Backup upstream neighbor: 10.10.1.2
+        Backup RPF prime neighbor: 10.10.1.2     
+     Downstream interface(s) information:
+     Total number of downstreams: 2
+        1: <span>100GE</span><span>1/0/2</span>
+             Protocol: pim-sm, UpTime: 01:06:04, Expires: -
+        2: <span>100GE</span><span>1/0/4</span>
+             Protocol: pim-sm, UpTime: 01:06:04, Expires: -</pre>
+<p># Run the <strong>shutdown</strong> command on <span>100GE</span><span>1/0/3</span> of <span class="keyword">Device</span>C to simulate a link fault.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>interface Eth-trunk</strong><strong> 0</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-Eth-trunk0] <strong>shutdown</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>C-Eth-trunk0] <strong>commit</strong></pre>
+<p># Run the <strong>display pim routing-table</strong> command on <span class="keyword">Device</span>C immediately to check the PIM routing table.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span> C] <strong>display pim routing-table</strong>
+ VPN-Instance: public net
+ Total 0 (*, G) entry; 1 (S, G) entry
+
+ (10.100.0.2, 225.1.0.0)
+     RP: 10.6.6.6 (local)
+     Protocol: pim-sm, Flag: SPT SG_RCVR
+     UpTime: 01:22:40
+     Upstream interface: <span>100GE</span><span>1/0/4</span>, Refresh time: 01:22:40
+         Upstream neighbor: 10.10.1.2
+         RPF prime neighbor: 10.10.1.2
+     Downstream interface(s) information:
+     Total number of downstreams: 1
+        1: <span>100GE</span><span>1/0/2</span>
+             Protocol: pim-sm, UpTime: 01:06:04, Expires: -</pre>
+<p>The command output shows that the inbound interface of the route on <span class="keyword">Device</span>C has been changed to <span>100GE</span><span>1/0/4</span>, which was on the original backup link.</p>
+<h4 class="sectiontitle">Configuration Scripts</h4><ul><li><div class="p"><span class="keyword">Device</span>A<pre class="screen">#
+sysname <span class="keyword">Device</span>A
+#
+multicast routing-enable
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.6.1.9 255.255.255.0
+ pim sm
+ ospf enable 1 area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/2</span> 
+ undo portswitch
+ ip address 10.9.7.9 255.255.255.0
+ pim sm
+ ospf enable 1 area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.9.1.1 255.255.255.0
+ pim sm
+ igmp enable
+ igmp static-group 225.1.0.0 source 10.100.0.2
+ ospf enable 1 area 0.0.0.0
+#
+ospf 1
+ frr
+  loop-free-alternate 
+ area 0.0.0.0
+  network 10.6.1.0 0.0.0.255
+  network 10.9.7.0 0.0.0.255
+  network 10.9.1.0 0.0.0.255
+#
+pim
+ static-rp 10.6.6.6
+ rpf-frr
+#
+return</pre>
+</div>
+</li><li><p><span class="keyword">Device</span>B</p>
+<pre class="screen">#
+sysname <span class="keyword">Device</span>B
+#
+dfs-group 1   
+ authentication-mode hmac-sha256 password %+%##!!!!!!!!!"!!!!"!!!!*!!!!C+tR0CW9x*eB&amp;pWp`t),Azgw-h\o8#4LZPD!!!!!!!!!!!!!!!9!!!!&gt;fwJ)I0E{=:%,*,XRhbH&amp;t0MCy_8=7!!!!!!!!!!%+%# 
+ dual-active detection source ip 10.1.1.1 peer 10.1.1.2
+ priority 120
+ m-lag active-standby election arp
+ dual-active detection delay 0
+ dual-active detection error-down mode routing-switch
+#
+stp mode rstp
+stp v-stp enable
+#
+ip frr 
+#
+multicast routing-enable
+#
+igmp snooping enable
+#
+vlan 100
+ igmp snooping enable
+#
+interface Vlanif100
+ ip address 10.100.0.1 255.255.255.0
+ pim sm
+ igmp enable
+ mac-address 0000-5e00-0101
+#
+interface MEth0/0/0
+ ip address 10.1.1.1 255.255.224.0
+#
+interface Eth-Trunk0
+ peer-link 1
+# 
+interface Eth-Trunk100
+ port link-type trunk
+ port trunk allow-pass vlan 100
+ stp edged-port enable
+ mode lacp-static
+ dfs-group 1 m-lag 1 active-standby
+#
+interface <span>100GE</span><span>1/0/1</span>
+ eth-trunk 100
+#
+interface <span>100GE</span><span>1/0/2</span> 
+ undo portswitch
+ ip address 10.9.7.1 255.255.255.0
+ pim sm
+ ospf enable 1 area 0.0.0.0
+<strong> </strong>m-lag unpaired-port reserved
+#
+interface <span>100GE</span><span>1/0/3</span>
+ eth-trunk 0
+#
+interface <span>100GE</span><span>1/0/4</span>
+ undo portswitch
+ ip address 10.10.1.1 255.255.255.0
+ pim sm
+ ospf enable 1 area 0.0.0.0
+ m-lag unpaired-port reserved
+#
+interface <span>100GE</span><span>1/0/5</span>
+ eth-trunk 0
+#
+ospf 1
+ import-route direct type 1
+ area 0.0.0.0
+  network 10.10.1.0 0.0.0.255
+  network 10.9.7.0 0.0.0.255
+#
+pim
+ static-rp 10.6.6.6
+ rpf-frr
+#
+return</pre>
+</li><li><p><span class="keyword">Device</span>C</p>
+<pre class="screen">#
+sysname <span class="keyword">Device</span>C
+#
+#
+dfs-group 1   
+ authentication-mode hmac-sha256 password %+%##!!!!!!!!!"!!!!"!!!!*!!!!C+tR0CW9x*eB&amp;pWp`t),Azgw-h\o8#4LZPD!!!!!!!!!!!!!!!9!!!!&gt;fwJ)I0E{=:%,*,XRhbH&amp;t0MCy_8=7!!!!!!!!!!%+%# 
+ dual-active detection source ip 10.1.1.2 peer 10.1.1.1
+ m-lag active-standby election arp
+ dual-active detection delay 0
+ dual-active detection error-down mode routing-switch
+#
+stp mode rstp
+stp v-stp enable
+#
+ip frr 
+#
+multicast routing-enable
+#
+igmp snooping enable
+#
+vlan 100
+ igmp snooping enable
+#
+interface Vlanif100
+ ip address 10.100.0.1 255.255.255.0
+ pim sm
+ igmp enable
+ mac-address 0000-5e00-0101
+#
+interface MEth0/0/0
+ ip address 10.1.1.2 255.255.224.0
+#
+interface loopback0
+ ip address 10.6.6.6 255.255.255.255
+ pim sm
+#
+interface Eth-Trunk0
+ peer-link 1
+# 
+interface Eth-Trunk100
+ port link-type trunk
+ port trunk allow-pass vlan 100
+ stp edged-port enable
+ mode lacp-static
+ dfs-group 1 m-lag 1 active-standby
+#
+interface <span>100GE</span><span>1/0/1</span>
+ eth-trunk 100
+#
+interface <span>100GE</span><span>1/0/2</span> 
+ undo portswitch
+ ip address 10.6.1.1 255.255.255.0
+ pim sm
+ ospf enable 1 area 0.0.0.0
+ m-lag unpaired-port reserved
+#
+interface <span>100GE</span><span>1/0/3</span>
+ eth-trunk 0
+#
+interface <span>100GE</span><span>1/0/4</span>
+ undo portswitch
+ ip address 10.10.1.2 255.255.255.0
+ pim sm
+ ospf enable 1 area 0.0.0.0
+ m-lag unpaired-port reserved
+#
+interface <span>100GE</span><span>1/0/5</span>
+ eth-trunk 0
+#
+ospf 1
+ import-route direct type 1
+ area 0.0.0.0
+  network 10.10.1.0 0.0.0.255
+  network 10.6.1.0 0.0.0.255
+  network 10.6.6.6 0.0.0.0
+#
+pim
+ static-rp 10.6.6.6
+ rpf-frr
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_pim_cfg_0073.html">Configuring IPv4 PIM FRR
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_pim_cfg_0075.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,128 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="ARP Flooding Attack">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0075.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0076.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0081.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z00588052,y00852169">
+<meta name="DC.Publisher" content="20240229">
+<meta name="OWNER" content="z00588052,y00852169">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="y00852169">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001134623474">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>ARP Flooding Attack</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_CONCEPT_0000001134623474"></a><a name="EN-US_CONCEPT_0000001134623474"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">ARP Flooding Attack</h1>
+<div><div class="section"><h4 class="sectiontitle">Security Policies</h4><div class="p">ARP flooding attack defense is implemented by configuring ARP entry limit, ARP packet rate limit, and strict ARP learning.<ul><li><p>ARP entry limit</p>
+<p>The device limits the number of ARP entries that an interface can learn to prevent ARP entry overflow and improve ARP entry security.</p>
+</li><li><p>ARP packet rate limit</p>
+<p>The device counts the number of received ARP packets. If the number of ARP packets received in one second exceeds an upper limit, the device does not process the excess ARP packets. This function prevents ARP entry overflow.</p>
+</li><li><p>Strict ARP learning</p>
+<p>The device learns the MAC addresses of only the ARP reply packets in response to the ARP request packets sent by itself. This prevents attacks that send ARP request packets and ARP reply packets that are not in response to the request packets that the device itself sends.</p>
+</li></ul>
+</div>
+<p>Attacks by sending IP packets that cannot be parsed can be prevented by configuring the aging time of ARP fake entries. A devices stops parsing its received packets once the configured aging time of ARP faked entries expires, protecting the device from being attacked.</p>
+<p>Memory exhaustion during ARP entry learning can be prevented by configuring the device to check the memory usage.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Attack Types</h4><p>After receiving an IP packet in which the next-hop IP address has no matching ARP entry, the device will send an ARP request packet to learn the ARP entry. Attackers send a large number of packets whose destination IP addresses are unreachable to the device.</p>
+<p>In this manner, the device is busy learning ARP entries, which exhausts system resources and even causes the device to restart.</p>
+<ul><li><p>ARP request flood attack</p>
+<div class="p">An attacker keeps sending to a device a large number of ARP request packets with fake source IP and MAC addresses, causing ARP entries on the device to overflow and the CPU usage of the device to increase. As a result, the device is paralyzed and cannot process valid ARP packets.<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>As attackers keep sending ARP request packets with varied source IP or MAC addresses to target devices, target devices are busy responding to these ARP request packets and updating local ARP entries. ARP entries consume system resources. To reduce system resource consumption and improve ARP search efficiency, a network device or host generally restricts its ARP table size. Attackers exploit this rule and send excessive ARP packets with fake source IP addresses to have ARP entries on target devices overflow. In this case, the target devices cannot process valid ARP packets, causing communications to be interrupted in this DoS attack.</p>
+</div></div>
+</div>
+</li><li><p>ARP response flood attack</p>
+<p>An attacker keeps replying with ARP reply packets to update the mappings between the destination IP and MAC addresses in the ARP cache on target devices, causing interrupted communications on target devices.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>A host on a subnet generally stores the mappings between the IP and MAC addresses of the subnet gateway (ARP entries) in its ARP cache. Attackers pretend to be the subnet gateway or a host on the subnet and broadcast an incorrect MAC address, causing all devices on the subnet to store the incorrect MAC address. As a result, devices on the subnet cannot communicate with the subnet gateway or host.</p>
+</div></div>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration Guide</h4><div class="p"><ul><li><p><strong>Configure the ARP entry limit.</strong></p>
+<p>A device limits the number of ARP entries that an interface can learn. The excess ARP entries cannot be added to the ARP entry table, preventing ARP entry overflow.</p>
+<div class="p">Configure a limit for the number of ARP entries that a specified interface can learn.<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/0</span>] <strong>arp-limit maximum 20</strong></pre>
+</div>
+</li><li><p><strong>Configure ARP packet rate limit.</strong></p>
+<p>A device limits the number of ARP packets that can be processed every second. The excess ARP entries will be discarded, preventing ARP entry overflow.</p>
+<div class="p">An ARP packet rate can be limited based either on source IP addresses or destination IP addresses.<ul><li><p>If <a href="cmdqueryname=source-ip"><b><span class="cmdname">source-ip</span></b></a> is specifies, the ARP packet rate is limited based on source IP addresses.</p>
+</li><li><p>If <a href="cmdqueryname=destination-ip"><b><span class="cmdname">destination-ip</span></b></a> is specifies, the ARP packet rate is limited based on destination IP addresses.</p>
+</li></ul>
+</div>
+<p>Configure an limit on the ARP packet rate to 50 pps based on destination IP addresses.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>arp speed-limit destination-ip maximum 50</strong></pre>
+</li><li><p><strong>Configure strict ARP learning.</strong></p>
+<div class="p">Strict ARP learning can be configured globally and in the interface view and takes effect as follows:<ul><li><p>If strict ARP learning is configured globally and in the interface view, only the function configured in the interface view takes effect.</p>
+</li><li><p>If strict ARP learning is not configured in the interface view, the function configured globally takes effect.</p>
+</li></ul>
+</div>
+<div class="p">Enable strict ARP learning globally.<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>arp learning strict</strong></pre>
+</div>
+<div class="p">Enable strict ARP learning in the interface view.<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>interface gigabitethernet <span>0/2/3</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/2/3</span>] <strong>arp learning strict force-enable</strong></pre>
+</div>
+</li></ul>
+</div>
+<p>Long aging time of ARP fake entries affects service convergence. Therefore, retaining the default aging time of ARP fake entries (5s) is recommended.</p>
+<p>Configure the aging time of dynamic ARP fake entries on a specified interface to 10s.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>-GigabitEthernet<span>0/1/0</span>] <strong>arp-fake expire-time 10</strong></pre>
+<p>If the memory usage is so high that the traffic forwarding fails, check whether it caused by failure to learn ARP entries.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration Suggestions</h4><p>You can configure ARP entry limit, ARP packet rate limit, and strict ARP to prevent ARP flooding attacks. However, this may lead to a lower rate of learning ARP entries.</p>
+<p>Long aging time of ARP fake entries affects service convergence. Therefore, retaining the default aging time of ARP fake entries (5s) is recommended.</p>
+<p>If the memory usage is so high that the traffic forwarding fails, check whether it caused by failure to learn ARP entries.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Verifying the Hardening Result</h4><ul><li>Run the <a href="cmdqueryname=display+arp+learning+strict"><b><span class="cmdname">display arp learning strict</span></b></a> command to check the configuration of strict ARP learning.</li><li>Run the <a href="cmdqueryname=display+arp-limit"><b><span class="cmdname">display arp-limit</span></b></a> [ <strong><span>interface</span></strong> { <i><span class="varname">interface-name</span></i> | <i><span class="varname">interface-type interface-number</span></i> } ] command to check the configuration of ARP entry limit.</li><li>Run the <a href="cmdqueryname=display+arp+speed-limit"><b><span class="cmdname">display arp speed-limit</span></b></a> <span>{ </span><strong><span>destination-ip</span></strong><span> | <strong><span>source-ip</span></strong> }</span><span> [ <strong><span>slot</span></strong> <i><span class="varname">slot-id</span></i> ]</span> command to check the configuration of ARP packet rate limit.</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0075.html">ARP
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0076.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0081.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

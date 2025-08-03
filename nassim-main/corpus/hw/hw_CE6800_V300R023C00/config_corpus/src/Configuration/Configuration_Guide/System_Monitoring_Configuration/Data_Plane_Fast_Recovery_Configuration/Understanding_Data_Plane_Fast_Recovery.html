@@ -1,0 +1,71 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding Data Plane Fast Recovery">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_dpfr_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_dpfr_cfg_0002.html">
+<meta name="DC.Relation" scheme="URI" content="spec/Fast_Recovery_of_Data-Plane_Link_Faults_limitation_CE_v6r23c00.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001539735320">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding Data Plane Fast Recovery</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001539735320"></a><a name="EN-US_CONCEPT_0000001539735320"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding Data Plane Fast Recovery</h1>
+<div><div class="section"><h4 class="sectiontitle">Overall Function Analysis</h4><p>If any link between nodes on the network fails, traffic will be interrupted. To implement fast path switching, you need to perform local and remote fast fault convergence. As a sub-millisecond-level fault recovery technology, DPFR provides local or remote fast fault convergence based on the data plane. <a href="#EN-US_CONCEPT_0000001539735320__fig205052035133516">Figure 1</a> shows the overall functions of DPFR.</p>
+<ul><li>Fast fault detection: If an optical module on a port is faulty or a transmission optical cable is incorrectly connected, the data plane can quickly detect the port fault, trigger the troubleshooting mechanism, and generate the corresponding fault table.</li><li>Local fast fault convergence: If the local device where a faulty port resides has a redundant path available, the data plane performs fast path switching for data packets before fault convergence on the control plane.</li><li>Remote fault advertisement: If the local device where a faulty port resides has no redundant path available, the data plane generates an advertisement packet carrying the fault status based on the data packet information and sends the advertisement packet to the adjacent upstream device. The upstream device then learns the advertisement packet and generates a fault table for subsequent path switching.</li><li>Remote fault relay: When a device performs remote advertisement and the upstream device cannot provide a redundant path, it performs advertisement packet relay, constructs a relay fault advertisement packet, and sends the packet to the adjacent upstream device.</li><li>Remote fast fault convergence: When a device performs remote advertisement and the upstream device can provide redundant paths, the data packets mapping to entries in the fault table are quickly switched to normal links on the upstream device.</li><li>Entry aging: Entries in the fault table are aged in a specified period to ensure that the behavior on the data plane is consistent with the route convergence result on the control plane.</li></ul>
+<div class="fignone" id="EN-US_CONCEPT_0000001539735320__fig205052035133516"><a name="EN-US_CONCEPT_0000001539735320__fig205052035133516"></a><a name="fig205052035133516"></a><span class="figcap"><b>Figure 1 </b>Overall function analysis</span><br><span><img src="figure/en-us_image_0000001647392578.png" width="NaN" height="NaN"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Local Fast Fault Convergence</h4><p>In <a href="#EN-US_CONCEPT_0000001539735320__fig14820102821813">Figure 2</a>, data packets are forwarded from Spine1 to Server1. The normal packet forwarding path is Spine1 -&gt; Leaf1 -&gt; Server1. If the link between Spine1 and Leaf1 is faulty and Spine1 has a redundant path available to Server1, packets are quickly switched on Spine1 to implement local fast fault convergence. The process is as follows:</p>
+<ol><li><strong>Fast fault detection</strong>:<ul><li>If an optical module on a port is faulty or a transmission optical cable is incorrectly connected, Spine1 detects a fault on interface1.</li><li>Spine1 samples traffic whose outbound interface is interface1, determines information about the faulty flow, and generates the corresponding fault table, including the destination address of the faulty flow, faulty interface (interface1), and entry creation time.</li></ul>
+</li><li><strong>Local fast fault convergence</strong>:<ul><li>After receiving a new data packet, Spine1 matches it with the fault table based on the destination address and selects an available redundant path for the packet.</li><li>The data packet is forwarded along the path Spine1 -&gt; Leaf2 -&gt; Server1. Local fast fault convergence is performed on Spine1.</li></ul>
+</li><li><strong>Entry aging</strong>: Entries in the fault table on Spine1 are aged in a specified period based on the entry creation time.</li></ol>
+<div class="fignone" id="EN-US_CONCEPT_0000001539735320__fig14820102821813"><a name="EN-US_CONCEPT_0000001539735320__fig14820102821813"></a><a name="fig14820102821813"></a><span class="figcap"><b>Figure 2 </b>Local fast fault convergence</span><br><span><img src="figure/en-us_image_0000001723918044.png" width="NaN" height="NaN"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Remote Fast Fault Convergence</h4><p>In <a href="#EN-US_CONCEPT_0000001539735320__fig148525497282">Figure 3</a>, data packets are forwarded from Core1 to Server1. The normal packet forwarding path is Core1 -&gt; Spine1 -&gt; Leaf1 -&gt; Server1. If the link between Leaf1 and Server1 is faulty but Leaf1 has no redundant path available for Server1, Leaf1 notifies its upstream device Spine1 of the fault. After receiving data packets, Spine1 still cannot provide redundant paths. In this case, Spine1 performs advertisement packet relay, constructs relay fault advertisement packets, and sends the packets to the adjacent upstream device Core1. Upon recipient, Core1 performs fast path switching to implement remote fast fault convergence. The process is as follows:</p>
+<ol><li><strong>Fast fault detection</strong>:<ul><li>If an optical module on a port is faulty or a transmission optical cable is incorrectly connected, Leaf1 detects a fault on interface1.</li><li>Leaf1 samples traffic whose outbound interface is interface1 (faulty interface), determines information about the faulty flow, and generates the corresponding fault table, including the destination address of the faulty flow, faulty interface, and entry creation time.</li></ul>
+</li><li><strong>Remote fault advertisement and receiving</strong>:<ul><li>After receiving a new data packet, Leaf1 matches it with the fault table based on the destination address, but has no redundant path available.</li><li>Leaf1 performs remote fault advertisement, generates an advertisement packet based on the sampled packet, and sends the advertisement packet to the adjacent upstream device Spine1.</li><li>Spine1 learns the fault advertisement packet and generates a fault table, including the destination address of the faulty flow, interface1 that receives the fault advertisement packet, and entry creation time.</li></ul>
+</li><li><strong>Remote fault relay and receiving</strong>:<ul><li>After receiving a new data packet, Spine1 matches it with the fault table based on the destination address, but has no redundant path available.</li><li>Spine1 performs advertisement packet relay, samples the data packet that matches the fault table on the interface where the advertisement packet is received, and generates the corresponding advertisement packet. It then sends the packet to the adjacent upstream device Core1.</li><li>Core1 learns the relay fault advertisement packet and generates a fault table, including the destination address of the faulty flow, interface1 that receives the fault advertisement packet, and entry creation time.</li></ul>
+</li><li><strong>Remote fast fault convergence</strong>:<ul><li>After receiving a new data packet, Core1 matches it with the fault table based on the destination address and selects an available redundant path for the packet.</li><li>The data packet is forwarded along the path Core1 -&gt; Spine2 -&gt; Leaf2 -&gt; Server1, and remote fast fault convergence is performed on Core1.</li></ul>
+</li><li><strong>Entry aging</strong>: Entries in the fault tables on Leaf1, Spine1, and Core1 are aged in a specified period based on the entry creation time.</li></ol>
+<div class="fignone" id="EN-US_CONCEPT_0000001539735320__fig148525497282"><a name="EN-US_CONCEPT_0000001539735320__fig148525497282"></a><a name="fig148525497282"></a><span class="figcap"><b>Figure 3 </b>Remote fast fault convergence</span><br><span><img src="figure/en-us_image_0000001724109118.png" width="NaN" height="NaN"></span></div>
+<p></p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_dpfr_cfg_0001.html">Data Plane Fast Recovery Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_dpfr_cfg_0002.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="spec/Fast_Recovery_of_Data-Plane_Link_Faults_limitation_CE_v6r23c00.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

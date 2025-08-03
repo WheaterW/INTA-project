@@ -1,0 +1,298 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring NQA for IPv6 Static Route">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_ipv6-static-route_cfg_0023.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_ipv6-static-route_cfg_0025.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IPv6 Static Route">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130783468">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring NQA for IPv6 Static Route</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130783468"></a><a name="EN-US_TASK_0000001130783468"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring NQA for IPv6 Static Route</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130783468__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0000001130783468__fig_dc_vrp_static-route_disjoin_cfg_004201">Figure 1</a>, DeviceA establishes an OSPFv3 neighbor relationship with each of DeviceB and DeviceC. Static routes to users are configured on DeviceB and DeviceC. DeviceB is the master device, and DeviceC is the backup device. Normally, traffic is transmitted over link A. If link A fails, traffic is switched to link B.</p>
+<div class="fignone" id="EN-US_TASK_0000001130783468__fig_dc_vrp_static-route_disjoin_cfg_004201"><a name="EN-US_TASK_0000001130783468__fig_dc_vrp_static-route_disjoin_cfg_004201"></a><a name="fig_dc_vrp_static-route_disjoin_cfg_004201"></a><span class="figcap"><b>Figure 1 </b>NQA for IPv6 static route</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 and interface 2 represent <span>100GE</span> <span>1/0/1</span> and <span>100GE</span> <span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img src="figure/en-us_image_0000001931914744.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130783468__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Create an ICMP NQA test instance to monitor the active link.</p>
+<p>Create an ICMP NQA test instance on the NQA client DeviceB to test whether the active link A to SwitchA is running properly.</p>
+</li><li><p>Configure static routes and associate the static route along the active link with the NQA test instance.</p>
+<p>Configure static routes on DeviceB and DeviceC, and associate the static route configured on DeviceB with the NQA test instance. If the NQA test instance detects a link fault, it instructs the routing management module to delete the associated static route from the IPv6 routing table.</p>
+</li><li>Configure a dynamic routing protocol.<p>Configure a dynamic routing protocol on DeviceA, DeviceB, and DeviceC so that they can learn routes from one another.</p>
+</li><li><p>Configure OSPFv3 to import static routes and set a smaller cost for the active link than that for the standby link.</p>
+<p>Configure OSPFv3 on DeviceB and DeviceC to import static routes, and set a higher cost for the static route imported by DeviceC than for the static route imported by DeviceB. After DeviceA learns routes to the same destination from DeviceB and DeviceC, it preferentially selects link B, which has a lower cost.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130783468__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure IPv6 addresses for interfaces on each device.</span><p><p># Configure DeviceA.</p>
+<pre class="screen"><span class="keyword">&lt;HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>undo </strong><strong>portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ipv6 enable</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ipv6 address 2001:db8:1::1 64</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>undo </strong><strong>portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>ipv6 enable</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>ipv6 address </strong><strong>2001:db8:2::1 64</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p>The configuration of DeviceB is similar to the configuration of DeviceA. For detailed configurations, see Configuration Scripts.</p>
+</p></li><li><span>Create an NQA test instance on DeviceB to monitor the link between DeviceB and SwitchA.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> nqa test-instance admin test</strong>
+[<span class="keyword">*</span>DeviceB-nqa-admin-test]<strong> test-type icmp</strong>
+[<span class="keyword">*</span>DeviceB-nqa-admin-test]<strong> destination-address ipv6 2001:db8:3::2</strong>
+[<span class="keyword">*</span>DeviceB-nqa-admin-test]<strong> frequency 9</strong>
+[<span class="keyword">*</span>DeviceB-nqa-admin-test]<strong> interval seconds 3</strong>
+[<span class="keyword">*</span>DeviceB-nqa-admin-test]<strong> start now</strong>
+[<span class="keyword">*</span>DeviceB-nqa-admin-test]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li><li><span>Configure IPv6 static routes.</span><p><p># Configure an IPv6 static route on DeviceB and associate it with the NQA test instance.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ipv6 route-static 2001:db8:7:: 64 <span>100ge</span> <span>1/0/1</span> 2001:db8:3::2 track nqa admin test</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure an IPv6 static route on DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>ipv6 route-static 2001:db8:7:: 64 <span>100ge</span> <span>1/0/1</span> 2001:db8:6::2</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+<div class="p"><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The next hop address of the IPv6 static route configured on the local end must be the link-local address of the peer end, which can be obtained using the <a href="cmdqueryname=display+ipv6+interface"><b><span class="cmdname">display ipv6 interface</span></b></a> [ <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> ] command on the peer end.</p>
+</div></div>
+</div>
+</p></li><li><span>Configure a dynamic routing protocol on DeviceA, DeviceB, and DeviceC.</span><p><p># Configure OSPFv3 on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ospfv3 1 area 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>ospfv3 1 area 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure OSPFv3 on DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>ospfv3 1 area 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure OSPFv3 on DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>ospfv3 1 area 0.0.0.0</strong>
+[<span class="keyword">*</span>DeviceC-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li><li><span>Configure OSPFv3 on DeviceB and DeviceC to import static routes.</span><p><p># Configure OSPFv3 on DeviceB to import a static route and set the cost to 10 for the static route.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>ospfv3 1</strong>
+[<span class="keyword">*</span>DeviceB-ospfv3-1] <strong>import-route static cost 10</strong>
+[<span class="keyword">*</span>DeviceB-ospfv3-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure OSPFv3 on DeviceC to import a static route and set the cost to 20 for the static route.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong>ospfv3 1</strong>
+[<span class="keyword">*</span>DeviceC-ospfv3-1] <strong>import-route static cost 20</strong>
+[<span class="keyword">*</span>DeviceC-ospfv3-1] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001130783468__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check NQA test results.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display nqa results test-instance admin test</strong>
+ NQA entry(admin, test) : testflag is active ,testtype is icmp
+  1 . Test 359 result     The test is finished
+   Send operation times: 3                Receive response times: 3
+   <strong>Completion:success</strong>                   RTD OverThresholds number:0
+   Attempts number:1                      Drop operation number:0
+   Disconnect operation number:0          Operation timeout number:0
+   System busy operation number:0         Connection fail number:0
+   Operation sequence errors number:0     RTT Stats errors number:0
+   Destination ip address:2001:db8:3::2
+   Min/Max/Average Completion Time: 1/3/2
+   Sum/Square-Sum  Completion Time: 7/19
+   Last Good Probe Time: 2012-11-14 12:15:22.3
+   <strong>Lost packet ratio: 0 %</strong></pre>
+<p>The command output shows "Lost packet ratio 0 %", indicating that the link is running properly.</p>
+<p># Check information about routes in the IPv6 routing table of DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display ipv6 routing-table 2001:db8:7::</strong>
+Routing Table : _public_
+Summary Count : 1
+
+Destination  : 2001:db8:7::                            PrefixLength : 64
+NextHop      : 2001:db8:1::1                           Preference   : 60
+Cost         : 0                                       Protocol     : Static
+RelayNextHop : ::                                      TunnelID     : 0x0
+Interface    : <span>100GE</span><span>1/0/1</span>                               Flags        : D</pre>
+<p>The command output contains the static route destined for 2001:db8:7::/64.</p>
+<p># Check information about the routing table of DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display ipv6 routing-table 2001:db8:7::</strong>
+Routing Table : _public_
+Summary Count : 1
+
+Destination  : 2001:db8:7::                            PrefixLength : 64
+NextHop      : FE80::2200:10FF:FE03:0                  Preference   : 150
+Cost         : 10                                      Protocol     : OSPFv3ASE
+RelayNextHop : ::                                      TunnelID     : 0x0
+Interface    : <strong><span>100GE</span></strong><strong><span>1/0/1</span></strong>                              Flags        : D</pre>
+<p>The command output shows that a route to 2001:db8:7::1/128 exists in the routing table. The outbound interface is <span>100GE</span> <span>1/0/1</span> and the cost is 10. In this situation, service traffic is preferentially transmitted over link A.</p>
+<p># Shut down <span>100GE</span> <span>1/0/2</span> on DeviceB to simulate a link fault.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong>shutdown</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Check NQA test results.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display nqa results test-instance admin test</strong>
+ NQA entry(admin, test) : testflag is active ,testtype is icmp
+  1 . Test 1156 result    The test is finished
+   Send operation times: 3                Receive response times: 0
+   <strong>Completion:failed</strong>                    RTD OverThresholds number:0
+   Attempts number:1                      Drop operation number:0
+   Disconnect operation number:0          Operation timeout number:3
+   System busy operation number:0         Connection fail number:0
+   Operation sequence errors number:0     RTT Stats errors number:0
+   Destination ip address:2001:db8:3::2
+   Min/Max/Average Completion Time: 0/0/0
+   Sum/Square-Sum  Completion Time: 0/0
+   Last Good Probe Time: 0000-00-00 00:00:00.0
+   <strong>Lost packet ratio: 100 %</strong></pre>
+<p>The command output shows "Completion:failed" and "Lost packet ratio is 100 %", indicating that the link is faulty.</p>
+<p># Check information about the routing table of DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display ipv6 routing-table 2001:db8:7::</strong>
+Routing Table : _public_
+Summary Count : 1
+
+Destination  : 2001:db8:7::                            PrefixLength : 64
+NextHop      : FE80::3A00:10FF:FE03:0                  Preference   : 150
+Cost         : 20                                      Protocol     : OSPFv3ASE
+RelayNextHop : ::                                      TunnelID     : 0x0
+Interface    : <span>100GE</span><span>1/0/1</span>                               Flags        : D</pre>
+<p>The command output shows that the route type of 2001:db8:7::/64 has changed from a static route to an OSPFv3 route.</p>
+<p># Check information about the routing table of DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display ipv6 routing-table 2001:db8:7::</strong>
+Routing Table : _public_
+Summary Count : 1
+
+Destination  : 2001:db8:7::                            PrefixLength : 64
+NextHop      : FE80::3A00:10FF:FE03:107                Preference   : 150
+Cost         : 20                                      Protocol     : OSPFv3ASE
+RelayNextHop : ::                                      TunnelID     : 0x0
+Interface    : <span>100GE</span><span>1/0/2</span>                              Flags        : D</pre>
+<p>The static route is associated with the NQA test instance on DeviceB. When NQA detects a link fault, it rapidly notifies DeviceB that the associated static route is unavailable. In this case, DeviceA cannot learn the route to 2001:db8:7::/64 from DeviceB. However, DeviceA can learn the route to 2001:db8:7::/64 from DeviceC. The command output shows that the outbound interface of the route to 2001:db8:7::/64 is changed to <span>100GE</span><span>1/0/2</span> and the cost is 20. Service traffic is switched to link B.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001130783468__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+ospfv3 1
+ router-id 1.1.1.1
+ area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:db8:1::1/64
+ ospfv3 1 area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:db8:2::1/64
+ ospfv3 1 area 0.0.0.0
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+ospfv3 1
+ router-id 2.2.2.2
+ import-route static cost 10
+ area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:db8:1::2/64
+ ospfv3 1 area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:db8:3::1/64
+# 
+ipv6 route-static 2001:db8:7:: 64  <span>100GE</span><span>1/0/1</span> 2001:db8:3::2 track nqa admin test
+#
+nqa test-instance admin test
+ test-type icmp
+ destination-address ipv6 2001:db8:3::2
+ interval seconds 3
+ frequency 9
+ start now
+#
+return</pre>
+</li><li>DeviceC<pre class="screen">#
+sysname DeviceC
+#
+ospfv3 1
+ router-id 3.3.3.3
+ import-route static cost 20
+ area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:db8:2::2/64
+ ospfv3 1 area 0.0.0.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ipv6 enable
+ ipv6 address 2001:db8:6::1/64
+# 
+ipv6 route-static 2001:db8:7:: 64  <span>100GE</span><span>1/0/1</span> 2001:db8:6::2
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_ipv6-static-route_cfg_0023.html">Configuring NQA for IPv6 Static Route
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_ipv6-static-route_cfg_0025.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

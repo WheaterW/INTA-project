@@ -1,0 +1,73 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="ERPS Single-Ring">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_erps_cfg_0003.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_erps_cfg_0005.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_erps_cfg_0007.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="ERPS">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="ERPS">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="featurename" content="ERPS">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001141938798">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>ERPS Single-Ring</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001141938798"></a><a name="EN-US_CONCEPT_0000001141938798"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">ERPS Single-Ring</h1>
+<div><p>ERPS is a standard ring network protocol used to prevent loops on an ERPS ring at the Ethernet link layer. To prevent loops on an ERPS ring, you can enable the loop prevention mechanism to block the RPL owner port to eliminate loops. If a link on the ring network fails, the device running ERPS immediately unblocks the blocked port and performs link protection switching to restore communication between nodes on the ring network. In an ERPS single-ring scenario, only one ERPS ring is configured on an ERPS network. Both ERPSv1 and ERPSv2 support ERPS single-ring.</p>
+<p>This section describes how ERPS is implemented on a single-ring network when links are normal, when a link fails, and when the link recovers (including protection switching operations).</p>
+<div class="section"><h4 class="sectiontitle">Normal Links</h4><div class="p">In <a href="#EN-US_CONCEPT_0000001141938798__fig_dc_fd_erps_000501">Figure 1</a>, DeviceA through DeviceE constitute a ring and can communicate with each other.<ol><li>To prevent loops, ERPS blocks the RPL owner port and also the RPL neighbour port (if any). Other ports can forward service traffic.</li><li>The RPL owner port on the ERPS ring sends R-APS NRRB messages to other nodes on the ring at an interval of 5s, indicating that ERPS links are normal.</li></ol>
+</div>
+<div class="fignone" id="EN-US_CONCEPT_0000001141938798__fig_dc_fd_erps_000501"><a name="EN-US_CONCEPT_0000001141938798__fig_dc_fd_erps_000501"></a><a name="fig_dc_fd_erps_000501"></a><span class="figcap"><b>Figure 1 </b>ERPS single-ring networking (normal links)</span><br><span><img class="vsd" src="figure/en-us_image_0000001216615190.png" width="NaN" height="NaN"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Link Fault</h4><p>In <a href="#EN-US_CONCEPT_0000001141938798__fig_dc_fd_erps_000502">Figure 2</a>, if the link between DeviceD and DeviceE fails, the ERPS protection switching mechanism is triggered. The ports on both ends of the faulty link are blocked, and the RPL owner port and RPL neighbour port are unblocked to send and receive user traffic, ensuring uninterrupted traffic forwarding. The detailed process is as follows:</p>
+<ol><li>After DeviceD and DeviceE detect the link fault, they block their ports on the faulty link and update their FDB entries.</li><li>DeviceD and DeviceE send three consecutive R-APS SF messages carrying local link fault information to the other devices and then send R-APS SF messages at an interval of 5s.</li><li>After receiving R-APS SF messages, the other devices update their FDB entries. After receiving R-APS SF messages, DeviceC (where the RPL owner port resides) unblocks the RPL owner port and updates its FDB entries. Similarly, after receiving R-APS SF messages, DeviceB (where the RPL neighbour port resides) unblocks the RPL neighbour port and updates its FDB entries.</li></ol>
+<div class="fignone" id="EN-US_CONCEPT_0000001141938798__fig_dc_fd_erps_000502"><a name="EN-US_CONCEPT_0000001141938798__fig_dc_fd_erps_000502"></a><a name="fig_dc_fd_erps_000502"></a><span class="figcap"><b>Figure 2 </b>ERPS single-ring networking (link fault)</span><br><span><img class="vsd" src="figure/en-us_image_0000001261447981.png" width="NaN" height="NaN"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Link Recovery</h4><p>After the faulty link recovers, if the ERPS ring uses the revertive switching mode, the device where the RPL owner port resides blocks the RPL again, and the link that has recovered is used to forward traffic. If the ERPS ring uses the non-revertive switching mode, the link that has recovered is still blocked, and the RPL is not blocked. The following uses the revertive switching mode as an example to describe the recovery process:</p>
+<ol><li>After the link between DeviceD and DeviceE recovers, DeviceD and DeviceE start the Guard timer to prevent them from receiving out-of-date R-APS NR messages. They do not receive any R-APS NR messages before the Guard timer expires. At the same time, DeviceD and DeviceE send R-APS NR messages.</li><li>After receiving R-APS NR messages, DeviceC on which the RPL owner port resides starts the WTR timer. After the WTR timer expires, DeviceC blocks the RPL owner port and sends R-APS NRRB messages.</li><li>After receiving R-APS NRRB messages from DeviceC, DeviceD and DeviceE unblock their blocked ports, stop sending R-APS NR messages, and update their FDB entries. After receiving R-APS NRRB messages from DeviceC, the other devices update their FDB entries.</li></ol>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_erps_cfg_0003.html">Understanding ERPS
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_erps_cfg_0005.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_erps_cfg_0007.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

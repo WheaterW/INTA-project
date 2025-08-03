@@ -1,0 +1,87 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring an Interval for Detecting IS-IS Neighbor Faults">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0036.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0037.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv4_cfg_0039.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IS-IS">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IS-IS">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001176743763">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Configuring an Interval for Detecting IS-IS Neighbor Faults</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001176743763"></a><a name="EN-US_TASK_0000001176743763"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring an Interval for Detecting IS-IS Neighbor Faults</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001176743763__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>IS-IS uses IIHs to discover neighbors and establish neighbor relationships. After a neighbor relationship is established, the two ends exchange IIHs periodically to monitor the neighbor relationship and detect neighbor faults. An IS-IS neighbor is considered down if the local device has not received any IIHs from the neighbor when the holdtime expires. Then LSP flooding and SPF calculation are triggered, followed by IS-IS route re-convergence. To adjust the neighbor fault detection speed, you can configure the interval at which IIHs are sent, as well as a Hello multiplier (the number of IIHs sent before the neighbor is declared down).</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If the interval at which IIHs are sent is too short, a large number of system resources are consumed, leading to a heavy CPU load. If the Hello multiplier is too large, the local device needs to wait a long time before detecting the fault of its neighbor, which slows down IS-IS route convergence. If the Hello multiplier is too small, the IS-IS neighbor relationships will frequently alternate between up and down in the case of an IIH loss or error due to a network delay or transmission error. As a result, route flapping occurs on the IS-IS network. To ensure IS-IS route convergence is not slowed down if some devices detect link failures slower than others do, you are advised to set the same interval at which IIHs are sent and the same Hello multiplier on all the devices on the IS-IS network.</p>
+</div></div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001176743763__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li><span>Enter the interface view.</span><p><pre class="screen"><a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i></pre>
+</p></li><li><span>Switch the interface working mode to Layer 3.</span><p><pre class="screen"><a href="cmdqueryname=undo+portswitch"><b><span class="cmdname">undo portswitch</span></b></a></pre>
+<p> Determine whether to perform this step based on the current interface working mode.</p>
+</p></li><li><span>Configure the interval at which IIHs are sent.</span><p><pre class="screen"><a href="cmdqueryname=isis+timer"><b><span class="cmdname">isis timer</span></b></a> <strong><span>hello</span></strong> <i><span class="varname">hello-interval</span></i> [ <strong><span>level-1</span></strong> | <strong><span>level-2</span></strong> ] [ <strong><span>conservative</span></strong> ]</pre>
+<p>By default, the interval at which IIHs are sent is 10 seconds.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Parameters <strong><span>level-1</span></strong> and <strong><span>level-2</span></strong> are mandatory on broadcast network interfaces because Level-1 and Level-2 IIHs are sent on the broadcast network and each level requires one interval. Interfaces over P2P links send P2P IIHs, rather than Level-1 or Level-2 IIHs; therefore, such interfaces do not require the <strong><span>level-1</span></strong> or <strong><span>level-2</span></strong> configuration.</p>
+<p>The interval at which IIHs are sent should not be less than the time required for a device to perform a master/slave main control board switchover. Otherwise, an intermittent protocol interruption may occur during a switchover. The default timer value is recommended.</p>
+</div></div>
+</p></li><li><span>Configure a Hello multiplier.</span><p><pre class="screen"><a href="cmdqueryname=isis+timer+holding-multiplier"><b><span class="cmdname">isis timer holding-multiplier</span></b></a> <i><span class="varname">number</span></i> [ <strong><span>level-1</span></strong> | <strong><span>level-2</span></strong> ]</pre>
+<p>The holdtime is the interval at which IIHs are sent multiplied by the Hello multiplier. The default Hello multiplier is 3. That is, if the local device has not received any IIHs from its neighbor when the holdtime (three times the interval at which IIHs are sent) expires, the local device considers the neighbor down.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Parameters <strong><span>level-1</span></strong> and <strong><span>level-2</span></strong> are mandatory on broadcast network interfaces because Level-1 and Level-2 IIHs are sent on the broadcast network and each level requires one interval. Interfaces over P2P links send P2P IIHs, rather than Level-1 or Level-2 IIHs. Therefore, neither <strong><span>level-1</span></strong> nor <strong><span>level-2</span></strong> is required.</p>
+</div></div>
+</p></li><li><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001176743763__en-us_task_0234857734_screen163801330213"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001176743763__en-us_task_0234857734_en-us_concept_0141113565_cmdname1667501373175340">commit</span></b></a></pre>
+</p></li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_isis_ipv4_cfg_0036.html">Adjusting the IS-IS Route Convergence Speed
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_isis_ipv4_cfg_0037.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_isis_ipv4_cfg_0039.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

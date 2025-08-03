@@ -1,0 +1,1438 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring 3PE PW Redundancy When CEs Are Asymmetrically Connected to PEs on Mobile Transport Networks">
+<meta name="abstract" content="In PW redundancy scenarios in which CEs asymmetrically connect to PEs in 3PE mode, the E-Trunk determines the master/backup status of the PEs.">
+<meta name="description" content="In PW redundancy scenarios in which CEs asymmetrically connect to PEs in 3PE mode, the E-Trunk determines the master/backup status of the PEs.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_3012.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_6013.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_6018.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,vpws,w00556928,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="VPWS">
+<meta name="featuretype" content="VPN">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VPWS">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="VPWS">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="VPWS">
+<meta name="featuretype" content="VPN">
+<meta name="OWNER" content="l00415692">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00415692">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172369966">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring 3PE PW Redundancy When CEs Are Asymmetrically Connected to PEs on Mobile Transport Networks</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172369966"></a><a name="EN-US_TASK_0172369966"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring 3PE PW Redundancy When CEs Are Asymmetrically Connected to PEs on Mobile Transport Networks</h1>
+<div class="taskbody"><p>In PW redundancy scenarios in which CEs asymmetrically connect to PEs in 3PE mode, the E-Trunk determines the master/backup status of the PEs.</p>
+<div class="context"><a name="EN-US_TASK_0172369966__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0172369966__fig_dc_vrp_vpws_cfg_601701">Figure 1</a>, CE1 and CE2 are users of the same enterprise, and PE1 through PE3 are public network devices. CE1 is single-homed to PE1, and CE2 is dual-homed to PE2 and PE3. To allow CE1 and CE2 to communicate and also ensure reliability, deploy PW redundancy between PE1, PE2, and PE3 to protect PWs. In addition, to rapidly detect public network link faults to implement fast PW switching, deploy BFD.</p>
+<div class="fignone" id="EN-US_TASK_0172369966__fig_dc_vrp_vpws_cfg_601701"><a name="EN-US_TASK_0172369966__fig_dc_vrp_vpws_cfg_601701"></a><a name="fig_dc_vrp_vpws_cfg_601701"></a><span class="figcap"><b>Figure 1 </b>Configuring 3PE PW redundancy when CEs are asymmetrically connected to PEs</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><div class="p"><ul><li>In this example, interfaces 1 through 3 represent GE<span>0/1/0</span>, GE<span>0/1/1</span>, and GE<span>0/1/2</span>, respectively.</li></ul>
+</div>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_vpws_cfg_601701.png" width="NaN" height="NaN"></span><br></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172369966__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure an IP address and a routing protocol for each interface to ensure IP connectivity at the network layer. OSPF is used in this example.</p>
+</li><li><p>Configure MPLS and public network tunnels.</p>
+</li><li><p>Configure service PWs and mPWs, and bind the service PWs to the mPWs.</p>
+</li><li><p>Configure BFD to detect mPW connectivity.</p>
+</li><li><p>Configure an E-Trunk to determine the master/backup status of the PWs, and bind BFD to the E-Trunk.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172369966__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>PEs' interface numbers, IP addresses and OSPF process IDs</p>
+</li><li><p>PE's LSR IDs</p>
+</li><li><p>E-Trunk's LACP system IDs and priorities</p>
+</li><li><p>L2VC's destination IP addresses, VC IDs, and VC types</p>
+</li><li><p>BFD session name and local and remote BFD session discriminators</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172369966__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure an IP address and a routing protocol for each interface to ensure IP connectivity at the network layer.</span><p><p>For detailed configurations, see <a href="#EN-US_TASK_0172369966__sec_dc_vrp_vpws_cfg_601701">Configuration Files</a>.</p>
+</p></li><li><span>Configure basic MPLS functions. Configure a TE tunnel between PE1 and PE2 and between PE1 and PE3; configure an LDP LSP between PE2 and PE3.</span><p><p>For detailed configurations, see <a href="#EN-US_TASK_0172369966__sec_dc_vrp_vpws_cfg_601701">Configuration Files</a>.</p>
+</p></li><li><span>Configure PWE3.</span><ol type="a"><li class="substepexpand"><span>Configure a remote MPLS LDP session between PE1 and PE2 and between PE1 and PE3.</span><p><p>For detailed configurations, see <a href="#EN-US_TASK_0172369966__sec_dc_vrp_vpws_cfg_601701">Configuration Files</a>.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>PWE3 uses extended LDP signaling to distribute VPN labels. Because PE1 and PE2 and PE1 and PE3 are connected over TE tunnels without using MPLS LDP, you must globally enable MPLS LDP and establish remote LDP sessions.</p>
+<p>PE2 and PE3 are directly connected over an LDP LSP, and therefore do not need to establish a remote LDP session.</p>
+</div></div>
+</p></li><li class="substepexpand"><span>Configure service PWs.</span><p><p># Configure PE1.</p>
+<pre class="screen">&lt;PE1&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-l2vpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface gigabitethernet <span>0/1/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>.1] <strong>vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>.1] <strong>mpls l2vc 2.2.2.2 1 tunnel-policy policy</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>.1] <strong>mpls l2vc 3.3.3.3 2 tunnel-policy policy1 secondary</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>.1] <strong>mpls l2vpn redundancy independent</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">&lt;PE2&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-l2vpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface eth-trunk 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Eth-Trunk10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface eth-trunk 10.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Eth-Trunk10.1] <strong>vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Eth-Trunk10.1] <strong>mpls l2vc 1.1.1.1 1 tunnel-policy policy1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Eth-Trunk10.1] <strong>mpls l2vc 3.3.3.3 3 bypass</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Eth-Trunk10.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">&lt;PE3&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-l2vpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>interface eth-trunk 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Eth-Trunk10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>interface eth-trunk 10.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Eth-Trunk10.1] <strong>vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Eth-Trunk10.1] <strong>mpls l2vc 1.1.1.1 2 tunnel-policy policy1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Eth-Trunk10.1] <strong>mpls l2vc 2.2.2.2 3 bypass</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Eth-Trunk10.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>commit</strong></pre>
+</p></li><li class="substepexpand"><span>Configure mPWs.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-LoopBack1] <strong>mpls l2vc 2.2.2.2 4 tunnel-policy policy control-word admin</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface loopback 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack2] <strong>mpls l2vc 3.3.3.3 5 tunnel-policy policy1 control-word admin</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack2] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-LoopBack1] <strong>mpls l2vc 1.1.1.1 4 tunnel-policy policy1 control-word admin</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-LoopBack1] <strong>mpls l2vc 1.1.1.1 5 tunnel-policy policy1 control-word admin</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>commit</strong></pre>
+</p></li><li class="substepexpand"><span>Bind the service PWs to the mPWs.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>interface gigabitethernet <span>0/1/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-GigabitEthernet<span>0/1/0</span>.1] <strong>mpls l2vc track admin-vc interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>.1] <strong>mpls l2vc secondary track admin-vc interface loopback 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>interface eth-trunk 10.1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-Eth-Trunk10.1] <strong>mpls l2vc track admin-vc interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Eth-Trunk10.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>interface eth-trunk 10.1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-Eth-Trunk10.1] <strong>mpls l2vc track admin-vc interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Eth-Trunk10.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>commit</strong></pre>
+</p></li></ol>
+</li><li><span>Configure BFD to detect mPW connectivity.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>bfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>bfd pe1a bind pw interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1a] <strong>discriminator local 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1a] <strong>discriminator remote 1001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1a] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>bfd pe1b bind pw interface loopback 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1b] <strong>discriminator local 2000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1b] <strong>discriminator remote 2001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1b] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd-lsp-session-pe1b] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>bfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>bfd pe2 bind pw interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd-lsp-session-pe2] <strong>discriminator local 1001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd-lsp-session-pe2] <strong>discriminator remote 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd-lsp-session-pe2] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>bfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-bfd] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>bfd pe3 bind pw interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-bfd-lsp-session-pe3] <strong>discriminator local 2001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-bfd-lsp-session-pe3] <strong>discriminator remote 2000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-bfd-lsp-session-pe3] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>commit</strong></pre>
+</p></li><li><span>Configure an E-Trunk to determine the master/backup status of the PWs.</span><ol type="a"><li class="substepexpand"><span>Configure Eth-Trunk interfaces.</span><p><p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>interface gigabitethernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-GigabitEthernet<span>0/1/2</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/2</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface eth-trunk 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Eth-Trunk10] <strong>mode lacp-static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Eth-Trunk10] <strong>trunkport gigabitethernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Eth-Trunk10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>interface gigabitethernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-GigabitEthernet<span>0/1/2</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-GigabitEthernet<span>0/1/2</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>interface eth-trunk 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Eth-Trunk10] <strong>mode lacp-static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Eth-Trunk10] <strong>trunkport gigabitethernet <span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Eth-Trunk10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>commit</strong></pre>
+<p># Configure CE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2] <strong>interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/1</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2] <strong>interface eth-trunk 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-Eth-Trunk10] <strong>portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-Eth-Trunk10] <strong>mode lacp-static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-Eth-Trunk10] <strong>port trunk allow-pass vlan 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-Eth-Trunk10] <strong>trunkport gigabitethernet <span>0/1/0</span> to <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-Eth-Trunk10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2] <strong>vlan 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-vlan10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2] <strong>commit</strong></pre>
+</p></li><li class="substepexpand"><span>Configure an E-Trunk.</span><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>For security purposes, you are advised not to use weak security algorithms in this feature. If you need to use such an algorithm, run the <a href="cmdqueryname=undo+crypto+weak-algorithm+disable"><b><span class="cmdname">undo crypto weak-algorithm disable</span></b></a> command to enable the weak security algorithm function.</p>
+</div></div>
+</p><p><p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>lacp e-trunk system-id 00e0-fc00-0000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>lacp e-trunk priority 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>e-trunk 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-e-trunk-10] <strong>security-key cipher YsHsjx_202206</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-e-trunk-10] <strong>priority 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-e-trunk-10] <strong>peer-address 3.3.3.3 source-address 2.2.2.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-e-trunk-10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface eth-trunk 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Eth-Trunk10] <strong>e-trunk 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-Eth-Trunk10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>lacp e-trunk system-id 00e0-fc00-0000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>lacp e-trunk priority 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>e-trunk 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-e-trunk-10] <strong>security-key cipher YsHsjx_202206</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-e-trunk-10] <strong>priority 20</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-e-trunk-10] <strong>peer-address 2.2.2.2 source-address 3.3.3.3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-e-trunk-10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>interface eth-trunk 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Eth-Trunk10] <strong>e-trunk 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-Eth-Trunk10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>commit</strong></pre>
+</p></li><li class="substepexpand"><span>Bind BFD to the E-Trunk.</span><p><p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>bfd hello bind peer-ip 3.3.3.3 source-ip 2.2.2.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd-session-hello] <strong> discriminator local 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd-session-hello] <strong>discriminator remote 101</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd-session-hello] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>e-trunk 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-e-trunk-10] <strong>e-trunk track bfd-session session-name hello</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-e-trunk-10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure PE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong>bfd hello bind peer-ip 2.2.2.2 source-ip 3.3.3.3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-bfd-session-hello] <strong>discriminator local 101</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-bfd-session-hello] <strong>discriminator remote 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-bfd-session-hello] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>e-trunk 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-e-trunk-10] <strong>e-trunk track bfd-session session-name hello</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3-e-trunk-10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE3] <strong>commit</strong></pre>
+</p></li></ol>
+</li><li><span>Verify the configuration.</span><ol type="a"><li class="substepexpand"><span>Run the <a href="cmdqueryname=display+bfd+session+all"><b><span class="cmdname">display bfd session all</span></b></a> command on a PE to check whether the BFD session is Up. The following example uses the command output on PE1.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display bfd session all</strong></pre>
+<pre class="screen"><span>(w): State in WTR 
+(*): State is invalid</span>
+--------------------------------------------------------------------------------
+Local  Remote PeerIpAddr      State     Type      InterfaceName
+--------------------------------------------------------------------------------
+1000  1001   --.--.--.--     <strong>Up</strong>        S_PW(M)     LoopBack1
+2000  2001   --.--.--.--     <strong>Up</strong>        S_PW(M)     LoopBack2
+--------------------------------------------------------------------------------
+     Total UP/DOWN Session Number : 2/0        </pre>
+</p></li><li class="substepexpand"><span>Run the <a href="cmdqueryname=display+e-trunk"><b><span class="cmdname">display e-trunk</span></b></a> <i><span class="varname">trunk-id</span></i> command on PE2 and PE3 to check E-Trunk information. The following example uses the command output on PE2.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>display e-trunk 10</strong></pre>
+<pre class="screen">                           The E-Trunk information
+E-Trunk-ID : 10                        Revert-Delay-Time (s) : 120
+Priority : 10                           System-ID : 00e0-fc00-1234
+Peer-IP : 3.3.3.3                       Source-IP : 2.2.2.2
+State : Master                          Causation : PRI
+Send-Period (100ms) : 10                Fail-Time (100ms) : 30
+Receive : 88                            Send : 122
+RecDrop : 0                             SndDrop : 0
+Peer-Priority : 20                      Peer-System-ID : 00e0-fc12-3456
+Peer-Fail-Time (100ms) : 30             BFD-Session : 100
+--------------------------------------------------------------------------------
+                            The Member information
+Type        ID  LocalPhyState   Work-Mode      State    Causation
+Eth-Trunk   10  Up              auto           <strong>Master</strong>   PEER_MEMBER_UP  </pre>
+</p></li><li class="substepexpand"><span>Run the <a href="cmdqueryname=display+mpls+l2vc"><b><span class="cmdname">display mpls l2vc</span></b></a> command on a PE to check whether the <strong>VC state</strong> is <strong>up</strong>. The following example uses the command output on PE1.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display mpls l2vc</strong></pre>
+<pre class="screen"> Total LDP VC : 4     4 up       0 down                                         
+                                                                                
+ *client interface          : GigabitEthernet<span>0/1/0</span>.1 is up                           
+  Administrator PW          : no                                                     
+  session state             : up                                                     
+  AC status                 : up                                                     
+  VC state                  : <strong>up</strong>                                                     
+  Label state               : 0                                                      
+  Token state               : 0                                                      
+  VC ID                     : 1                                                      
+  VC type                   : VLAN                                                   
+  destination               : 2.2.2.2                                                
+  local VC label            : 1024         remote VC label      : 1025               
+  control word              : disable                                                
+  remote control word       : disable
+  forwarding entry          : exist                                                  
+  local group ID            : 0                                                      
+  remote group ID           : 0
+  local AC OAM State        : up
+  local PSN OAM State       : up
+  local forwarding state    : forwarding
+  local status code         : 0x0
+  remote AC OAM state       : up
+  remote PSN OAM state      : up
+  remote forwarding state   : forwarding
+  remote status code        : 0x0
+  ignore standby state      : no
+  BFD for PW                : unavailable
+  VCCV State                : up
+  manual fault              : not set                                                
+  active state              : <strong>active</strong>                                                 
+  OAM Protocol              : --                                                     
+  OAM Status                : --                                                     
+  OAM Fault Type            : --                                                     
+  PW APS ID                 : 0
+  PW APS Status             : --
+  TTL Value                 : 1                                                      
+  link state                : up                                                     
+  local VC MTU              : 1500         remote VC MTU        : 1500               
+  local VCCV                : alert ttl lsp-ping bfd
+  remote VCCV               : alert ttl lsp-ping bfd
+  tunnel policy name        : policy                                                
+  PW template name          : --                                                     
+  primary or secondary      : <strong>primary</strong>                                                
+  load balance type         : flow                                                   
+  Access-port               : false                                                  
+  Switchover Flag           : false
+  VC tunnel info            : 1 tunnels
+    NO.0  TNL type             : ldp   , TNL ID : 0x0000000001004c4e42
+  create time               : 0 days, 0 hours, 27 minutes, 28 seconds                
+  up time                   : 0 days, 0 hours, 24 minutes, 14 seconds                
+  last change time          : 0 days, 0 hours, 24 minutes, 14 seconds                
+  VC last up time           : 2014/09/20 14:00:58                                    
+  VC total up time          : 0 days, 0 hours, 24 minutes, 14 seconds                
+  CKey                      : 2                                                      
+  NKey                      : 1                                                      
+  PW redundancy mode        : independent
+  AdminPw interface         : LoopBack1                                              
+  AdminPw link state        : up                                                     
+<span>  Forward state             : send inactive, receive inactive </span>
+  Diffserv Mode             : uniform                                                
+  Service Class             : --                                                     
+  Color                     : --                                                     
+  DomainId                  : --                                                     
+  Domain Name               : --                                                     
+                                                                                
+ *client interface          : GigabitEthernet<span>0/1/0</span>.1 is up                           
+  Administrator PW          : no                                                     
+  session state             : up                                                     
+  AC status                 : up                                                     
+  VC state                  : <strong>up</strong>                                                     
+  Label state               : 0                                                      
+  Token state               : 0                                                      
+  VC ID                     : 2                                                      
+  VC type                   : VLAN                                                   
+  destination               : 3.3.3.3                                                
+  local VC label            : 1025         remote VC label      : 1025               
+  control word              : disable                                                
+  remote control word       : disable
+  forwarding entry          : exist                                                  
+  local group ID            : 0                                                      
+  remote group ID           : 0
+  local AC OAM State        : up
+  local PSN OAM State       : up
+  local forwarding state    : forwarding
+  local status code         : 0x0
+  remote AC OAM state        : up
+  remote PSN OAM state      : up
+  remote forwarding state   : forwarding
+  remote status code        : 0x0
+  ignore standby state      : no
+  BFD for PW                : unavailable
+  VCCV State                : up
+  manual fault              : not set                                                
+  active state              : <strong>inactive</strong>                                               
+  OAM Protocol              : --                                                     
+  OAM Status                : --                                                     
+  OAM Fault Type            : --                                                     
+  PW APS ID                 : 0
+  PW APS Status             : --
+  TTL Value                 : 1                                                      
+  link state                : down                                                   
+  local VC MTU              : 1500         remote VC MTU        : 1500               
+  local VCCV                : alert ttl lsp-ping bfd
+  remote VCCV               : alert ttl lsp-ping bfd
+  tunnel policy name        : policy1                                                
+  PW template name          : --                                                     
+  primary or secondary      : <strong>secondary</strong>                                              
+  load balance type         : flow                                                   
+  Access-port               : false                                                  
+  Switchover Flag           : false
+  VC tunnel info            : 1 tunnels
+    NO.0  TNL type          : ldp   , TNL ID : 0x0000000001004c4e43
+  create time               : 0 days, 0 hours, 27 minutes, 15 seconds                
+  up time                   : 0 days, 0 hours, 24 minutes, 23 seconds                
+  last change time          : 0 days, 0 hours, 24 minutes, 23 seconds                
+  VC last up time           : 2014/09/20 14:00:58                                    
+  VC total up time          : 0 days, 0 hours, 24 minutes, 23 seconds                
+  CKey                      : 4                                                      
+  NKey                      : 3                                                      
+  PW redundancy mode        : independent
+  AdminPw interface         : LoopBack2                                              
+  AdminPw link state        : up                                                     
+<span>  Forward state             : send inactive, receive inactive </span>
+  Diffserv Mode             : uniform                                                
+  Service Class             : --                                                     
+  Color                     : --                                                     
+  DomainId                  : --                                                     
+  Domain Name               : --                                                     
+                                                                                
+ *client interface          : LoopBack1 is up                                        
+  Administrator PW          : yes                                                    
+  session state             : up                                                     
+  AC status                 : up                                                     
+  VC state                  : <strong>up</strong>                                                     
+  Label state               : 0                                                      
+  Token state               : 0                                                      
+  VC ID                     : 4                                                      
+  VC type                   : IP-interworking                                        
+  destination               : 2.2.2.2                                                
+  local VC label            : 1026         remote VC label      : 1027               
+  control word              : enable                                                 
+  remote control word       : disable
+  forwarding entry          : exist                                                  
+  local group ID            : 0                                                      
+  remote group ID           : 0
+  local AC OAM State        : up
+  local PSN OAM State       : up
+  local forwarding state    : forwarding
+  local status code         : 0x0
+  remote AC OAM state       : up
+  remote PSN OAM state      : up
+  remote forwarding state   : forwarding
+  remote status code        : 0x0
+  ignore standby state      : no
+  BFD for PW                : unavailable
+  VCCV State                : up
+  manual fault              : not set                                                
+  active state              : <strong>active</strong>                                                 
+  OAM Protocol              : --                                                     
+  OAM Status                : --                                                     
+  OAM Fault Type            : --                                                     
+  PW APS ID                 : 0
+  PW APS Status             : --
+  TTL Value                 : 1                                                      
+  link state                : up                                                     
+  local VC MTU              : 1500         remote VC MTU        : 1500               
+  local VCCV                : alert ttl lsp-ping bfd
+  remote VCCV               : alert ttl lsp-ping bfd
+  tunnel policy name        : policy                                                
+  PW template name          : --                                                     
+  primary or secondary      : <strong>primary</strong>                                                
+  load balance type         : flow                                                   
+  Switchover Flag           : false
+  VC tunnel info            : 1 tunnels
+    NO.0  TNL type          : ldp   , TNL ID : 0x0000000001004c4e44
+  Access-port               : false                                                  
+  create time               : 0 days, 0 hours, 23 minutes, 51 seconds                
+  up time                   : 0 days, 0 hours, 22 minutes, 46 seconds                
+  last change time          : 0 days, 0 hours, 22 minutes, 46 seconds                
+  VC last up time           : 2014/09/20 14:02:43                                    
+  VC total up time          : 0 days, 0 hours, 22 minutes, 46 seconds                
+  CKey                      : 5                                                      
+  NKey                      : 1                                                      
+  PW redundancy mode        : independent
+  Diffserv Mode             : uniform                                                
+  Service Class             : --                                                     
+  Color                     : --                                                     
+  DomainId                  : --                                                     
+  Domain Name               : --                                                     
+                                                                                
+ *client interface          : LoopBack2 is up                                        
+  Administrator PW          : yes                                                    
+  session state             : up                                                     
+  AC status                 : up                                                     
+  VC state                  : <strong>up</strong>                                                     
+  Label state               : 0                                                      
+  Token state               : 0                                                      
+  VC ID                     : 5                                                      
+  VC type                   : IP-interworking                                        
+  destination               : 3.3.3.3                                                
+  local VC label            : 1027         remote VC label      : 1027               
+  control word              : enable                                                 
+  remote control word       : disable
+ forwarding entry           : exist                                                  
+  local group ID            : 0                                                      
+  remote group ID           : 0
+  local AC OAM State        : up
+  local PSN OAM State       : up
+  local forwarding state    : forwarding
+  local status code         : 0x0
+  remote AC OAM state       : up
+  remote PSN OAM state      : up
+  remote forwarding state   : forwarding
+  remote status code        : 0x0
+  ignore standby state      : no
+  BFD for PW                : unavailable
+  VCCV State                : up
+  manual fault              : not set                                                
+  active state              : <strong>active</strong>                                                 
+  OAM Protocol              : --                                                     
+  OAM Status                : --                                                     
+  OAM Fault Type            : --                                                     
+  PW APS ID                 : 0
+  PW APS Status             : --
+  TTL Value                 : 1                                                      
+  link state                : up                                                     
+  local VC MTU              : 1500         remote VC MTU        : 1500               
+  local VCCV                : alert ttl lsp-ping bfd
+  remote VCCV               : alert ttl lsp-ping bfd
+  tunnel policy name        : policy                                                
+  PW template name          : --                                                     
+  primary or secondary      : <strong>primary</strong>                                                
+  load balance type         : flow                                                   
+  Access-port               : false                                                  
+  Switchover Flag           : false
+  VC tunnel info            : 1 tunnels
+    NO.0  TNL type          : ldp   , TNL ID : 0x0000000001004c4e45
+  create time               : 0 days, 0 hours, 23 minutes, 23 seconds                
+  up time                   : 0 days, 0 hours, 21 minutes, 55 seconds                
+  last change time          : 0 days, 0 hours, 21 minutes, 55 seconds                
+  VC last up time           : 2014/09/20 14:03:41                                    
+  VC total up time          : 0 days, 0 hours, 21 minutes, 55 seconds                
+  CKey                      : 6                                                      
+  NKey                      : 3                                                      
+  PW redundancy mode        : independent
+  Diffserv Mode             : uniform                                                
+  Service Class             : --                                                     
+  Color                     : --                                                     
+  DomainId                  : --                                                     
+  Domain Name               : --</pre>
+</p></li><li class="substepexpand"><span>Configure CE1 to ping the VLANIF interface address of CE2.</span><p><p># Configure CE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2] <strong>interface vlanif 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-Vlanif10] <strong>ip address 10.1.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-Vlanif10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-Vlanif10] <strong>commit</strong></pre>
+<p># Perform the ping operation.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>ping 10.1.1.2</strong></pre>
+<pre class="screen">PING 10.1.1.2: 56  data bytes, press CTRL_C to break
+    Reply from 10.1.1.2: bytes=56 Sequence=1 ttl=255 time=40 ms
+    Reply from 10.1.1.2: bytes=56 Sequence=2 ttl=255 time=30 ms
+    Reply from 10.1.1.2: bytes=56 Sequence=3 ttl=255 time=40 ms
+    Reply from 10.1.1.2: bytes=56 Sequence=4 ttl=255 time=1 ms
+    Reply from 10.1.1.2: bytes=56 Sequence=5 ttl=255 time=1 ms
+
+  --- 10.1.1.2 ping statistics ---
+    5 packet(s) transmitted
+    5 packet(s) received
+    0.00% packet loss
+    round-trip min/avg/max = 1/22/40 ms  </pre>
+</p></li><li class="substepexpand"><span>Simulate a fault and a fault recovery.</span><p><p>Simulate a public network link fault between PE2 and PE1.</p>
+<div class="p"># Disable GE <span>0/1/0</span> on PE2 to simulate a fault on the primary PW.<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>This step is used only to verify the configuration. Do not do this in practice.</p>
+</div></div>
+</div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+<p>Then run the <strong>display mpls l2vc</strong> command on PE1. The command output shows that the VC status of the mPW and service PW between PE1 and PE2 is <strong>down</strong> and the VC status of the mPW and service PW between PE1 and PE3 is <strong>up</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display mpls l2vc</strong></pre>
+<pre class="screen"> Total LDP VC : 4     2 up       2 down                                         
+                                                                                
+ *client interface          : GigabitEthernet<span>0/1/0</span>.1 is up                           
+  Administrator PW          : no                                                     
+  session state             : up                                                     
+  AC status                 : up                                                     
+  VC state                  : <strong>down</strong>                                                   
+  Label state               : 0                                                      
+  Token state               : 0                                                      
+  VC ID                     : 1                                                      
+  VC type                   : VLAN                                                   
+  destination               : 2.2.2.2                                                
+  local VC label            : 1024         remote VC label      : 1025               
+  control word              : disable                                                
+  remote control word       : disable
+  forwarding entry          : not exist                                              
+  local group ID            : 0                                                      
+  remote group ID           : 0
+  local AC OAM State        : up
+  local PSN OAM State       : up
+  local forwarding state    : forwarding
+  local status code         : 0x0
+  remote AC OAM state       : up
+  remote PSN OAM state      : up
+  remote forwarding state   : forwarding
+  remote status code        : 0x0
+  ignore standby state      : no
+  BFD for PW                : unavailable
+  VCCV State                : up
+  manual fault              : not set                                                
+  active state              : <strong>inactive</strong>                                               
+  OAM Protocol              : --                                                     
+  OAM Status                : --                                                     
+  OAM Fault Type            : --                                                     
+  PW APS ID                 : 0 
+  PW APS Status             : --
+  TTL Value                 : 1                                                      
+  link state                : down                                                   
+  local VC MTU              : 1500         remote VC MTU        : 1500               
+  local VCCV                : alert ttl lsp-ping bfd
+  remote VCCV               : alert ttl lsp-ping bfd
+  tunnel policy name        : policy                                                
+  PW template name          : --                                                     
+  primary or secondary      : <strong>primary</strong>                                                
+  load balance type         : flow                                                   
+  Access-port               : false                                                  
+  Switchover Flag           : false
+  VC tunnel info            : 1 tunnels
+    NO.0  TNL type          : ldp   , TNL ID : 0x0000000001004c4e42
+  create time               : 0 days, 0 hours, 28 minutes, 50 seconds                
+  up time                   : 0 days, 0 hours, 0 minutes, 0 seconds                  
+  last change time          : 0 days, 0 hours, 0 minutes, 12 seconds                 
+  VC last up time           : 2014/09/20 14:00:58                                    
+  VC total up time          : 0 days, 0 hours, 25 minutes, 24 seconds                
+  CKey                      : 2                                                      
+  NKey                      : 1                                                      
+  PW redundancy mode        : independent
+  AdminPw interface         : LoopBack1                                              
+  AdminPw link state        : down                                                   
+<span>  Forward state             : send inactive, receive inactive </span>
+  Diffserv Mode             : uniform                                                
+  Service Class             : --                                                     
+  Color                     : --                                                     
+  DomainId                  : --                                                     
+  Domain Name               : --                                                     
+                                                                                
+ *client interface          : GigabitEthernet<span>0/1/0</span>.1 is up                           
+  Administrator PW          : no                                                     
+  session state             : up                                                     
+  AC status                 : up                                                     
+  VC state                  : <strong>up</strong>                                                     
+  Label state               : 0                                                      
+  Token state               : 0                                                      
+  VC ID                     : 2                                                      
+  VC type                   : VLAN                                                   
+  destination               : 3.3.3.3                                                
+  local VC label            : 1025         remote VC label      : 1025               
+  control word              : disable                                                
+  remote control word       : disable
+  forwarding entry          : exist                                                  
+  local group ID            : 0                                                      
+  remote group ID           : 0
+  local AC OAM State        : up
+  local PSN OAM State       : up
+  local forwarding state    : forwarding
+  local status code         : 0x0
+  remote AC OAM state       : up
+  remote PSN OAM state      : up
+  remote forwarding state   : forwarding
+  remote status code        : 0x0
+  ignore standby state      : no
+  BFD for PW                : unavailable
+  VCCV State                : up
+  manual fault              : not set                                                
+  active state              : <strong>active</strong>                                                 
+  OAM Protocol              : --                                                     
+  OAM Status                : --                                                     
+  OAM Fault Type            : --   
+  PW APS ID                 : 0 
+  PW APS Status             : --                                                     
+  TTL Value                 : 1                                                      
+  link state                : up                                                     
+  local VC MTU              : 1500         remote VC MTU        : 1500               
+  local VCCV                : alert ttl lsp-ping bfd
+  remote VCCV               : alert ttl lsp-ping bfd
+  tunnel policy name        : policy1                                                
+  PW template name          : --                                                     
+  primary or secondary      : secondary                                              
+  load balance type         : flow                                                   
+  Access-port               : false                                                  
+ Switchover Flag            : false
+  VC tunnel info            : 1 tunnels
+    NO.0  TNL type          : ldp   , TNL ID : 0x0000000001004c4e43
+  create time               : 0 days, 0 hours, 28 minutes, 37 seconds                
+  up time                   : 0 days, 0 hours, 25 minutes, 45 seconds                
+  last change time          : 0 days, 0 hours, 25 minutes, 45 seconds                
+  VC last up time           : 2014/09/20 14:00:58                                    
+  VC total up time          : 0 days, 0 hours, 25 minutes, 45 seconds                
+  CKey                      : 4                                                      
+  NKey                      : 3                                                      
+  PW redundancy mode        : independent
+  AdminPw interface         : LoopBack2                                              
+  AdminPw link state        : up                                                     
+<span>  Forward state             : send inactive, receive inactive </span>
+  Diffserv Mode             : uniform                                                
+  Service Class             : --                                                     
+  Color                     : --                                                     
+  DomainId                  : --                                                     
+  Domain Name               : --                                                     
+                                                                                
+ *client interface          : LoopBack1 is up                                        
+  Administrator PW          : yes                                                    
+  session state             : up                                                     
+  AC status                 : up                                                     
+  VC state                  : <strong>down</strong>                                                   
+  Label state               : 0                                                      
+  Token state               : 0                                                      
+  VC ID                     : 4                                                      
+  VC type                   : IP-interworking                                        
+  destination               : 2.2.2.2                                                
+  local VC label            : 1026         remote VC label      : 1027               
+  control word              : enable                                                 
+  remote control word       : disable
+  forwarding entry          : not exist                                              
+  local group ID            : 0                                                      
+  remote group ID           : 0
+  local AC OAM State        : up
+  local PSN OAM State       : up
+  local forwarding state    : forwarding
+  local status code         : 0x0
+  remote AC OAM state       : up
+  remote PSN OAM state      : up
+  remote forwarding state   : forwarding
+  remote status code        : 0x0
+  ignore standby state      : no
+  BFD for PW                : unavailable
+  VCCV State                : up
+  manual fault              : not set                                                
+  active state              : <strong>inactive</strong>                                               
+  OAM Protocol              : --                                                     
+  OAM Status                : --                                                     
+  OAM Fault Type            : --
+  PW APS ID                 : 0 
+  PW APS Status             : --                                             
+  TTL Value                 : 1                                                      
+  link state                : down                                                   
+  local VC MTU              : 1500         remote VC MTU        : 1500               
+  local VCCV                : alert ttl lsp-ping bfd
+  remote VCCV               : alert ttl lsp-ping bfd
+  tunnel policy name        : policy                                                
+  PW template name          : --                                                     
+  primary or secondary      : primary                                                
+  load balance type         : flow                                                   
+  Access-port               : false                                                  
+  Switchover Flag           : false
+  VC tunnel info            : 1 tunnels
+    NO.0  TNL type          : ldp   , TNL ID : 0x0000000001004c4e44
+  create time               : 0 days, 0 hours, 25 minutes, 15 seconds                
+  up time                   : 0 days, 0 hours, 0 minutes, 0 seconds                  
+  last change time          : 0 days, 0 hours, 0 minutes, 31 seconds                 
+  VC last up time           : 2014/09/20 14:02:43                                    
+  VC total up time          : 0 days, 0 hours, 23 minutes, 39 seconds                
+  CKey                      : 5                                                      
+  NKey                      : 1                                                      
+  PW redundancy mode        : independent
+  Diffserv Mode             : uniform                                                
+  Service Class             : --                                                     
+  Color                     : --                                                     
+  DomainId                  : --                                                     
+  Domain Name               : --                                                     
+                                                                                
+ *client interface          : LoopBack2 is up                                        
+  Administrator PW          : yes                                                    
+  session state             : up                                                     
+  AC status                 : up                                                     
+  VC state                  : <strong>up</strong>                                                     
+  Label state               : 0                                                      
+  Token state               : 0                                                      
+  VC ID                     : 5                                                      
+  VC type                   : IP-interworking                                        
+  destination               : 3.3.3.3                                                
+  local VC label            : 1027         remote VC label      : 1027               
+  control word              : enable                                                 
+  remote control word       : disable
+  forwarding entry          : exist                                                  
+  local group ID            : 0                                                      
+  remote group ID           : 0
+  local AC OAM State        : up
+  local PSN OAM State       : up
+  local forwarding state    : forwarding
+  local status code         : 0x0
+  remote AC OAM state       : up
+  remote PSN OAM state      : up
+  remote forwarding state   : forwarding
+  remote status code        : 0x0
+  ignore standby state      : no
+  BFD for PW                : unavailable
+  VCCV State                : up
+  manual fault              : not set                                                
+  active state              : <strong>active</strong>                                                 
+  OAM Protocol              : --                                                     
+  OAM Status                : --                                                     
+  OAM Fault Type            : --    
+  PW APS ID                 : 0 
+  PW APS Status             : --                                                  
+  TTL Value                 : 1                                                      
+  link state                : up                                                     
+  local VC MTU              : 1500         remote VC MTU        : 1500               
+  local VCCV                : alert ttl lsp-ping bfd
+  remote VCCV               : alert ttl lsp-ping bfd
+  tunnel policy name        : policy                                                
+  PW template name          : --                                                     
+  primary or secondary      : <strong>primary</strong>                                                
+  load balance type         : flow                                                   
+  Access-port               : false                                                  
+  Switchover Flag           : false
+  VC tunnel info            : 1 tunnels
+    NO.0  TNL type          : ldp   , TNL ID : 0x0000000001004c4e45
+  create time               : 0 days, 0 hours, 24 minutes, 50 seconds                
+  up time                   : 0 days, 0 hours, 23 minutes, 22 seconds                
+  last change time          : 0 days, 0 hours, 23 minutes, 22 seconds                
+  VC last up time           : 2014/09/20 14:03:41                                    
+  VC total up time          : 0 days, 0 hours, 23 minutes, 22 seconds                
+  CKey                      : 6                                                      
+  NKey                      : 3                                                      
+  PW redundancy mode        : independent
+  Diffserv Mode             : uniform                                                
+  Service Class             : --                                                     
+  Color                     : --                                                     
+  DomainId                  : --                                                     
+  Domain Name               : --</pre>
+<p># Enable GE <span>0/1/0</span> on PE2 to simulate a link fault recovery of the primary PW.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p>The link that bears the primary PW has restored, but it takes a period of time for the primary PW to be established. Therefore, traffic still travels along the secondary PW. After the primary PW is established, run the <strong>display mpls l2vc</strong> command on PE1. The command output shows that the VC status of the mPW and service PW between PE1 and PE2 has become <strong>up</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display mpls l2vc</strong></pre>
+<pre class="screen"> Total LDP VC : 4     4 up       0 down                                         
+                                                                                
+ *client interface          : GigabitEthernet<span>0/1/0</span>.1 is up                           
+  Administrator PW          : no                                                     
+  session state             : up                                                     
+  AC status                 : up                                                     
+  VC state                  : <strong>up</strong>                                                     
+  Label state               : 0                                                      
+  Token state               : 0                                                      
+  VC ID                     : 1                                                      
+  VC type                   : VLAN                                                   
+  destination               : 2.2.2.2                                                
+  local VC label            : 1024         remote VC label      : 1025               
+  control word              : disable                                                
+  remote control word       : disable
+  forwarding entry          : exist                                                  
+  local group ID            : 0                                                      
+  remote group ID           : 0
+  local AC OAM State        : up
+  local PSN OAM State       : up
+  local forwarding state    : forwarding
+  local status code         : 0x0
+  remote AC OAM state       : up
+  remote PSN OAM state      : up
+  remote forwarding state   : forwarding
+  remote status code        : 0x0
+  ignore standby state      : no
+  BFD for PW                : unavailable
+  VCCV State                : up
+  manual fault              : not set                                                
+  active state              : <strong>active</strong>                                                 
+  OAM Protocol              : --                                                     
+  OAM Status                : --                                                     
+  OAM Fault Type            : --   
+  PW APS ID                 : 0 
+  PW APS Status             : --                                                    
+  TTL Value                 : 1                                                      
+  link state                : up                                                     
+  local VC MTU              : 1500         remote VC MTU        : 1500               
+  local VCCV                : alert ttl lsp-ping bfd
+  remote VCCV               : alert ttl lsp-ping bfd
+  tunnel policy name        : policy                                                
+  PW template name          : --                                                     
+  primary or secondary      : <strong>primary</strong>                                                
+  load balance type         : flow                                                   
+  Access-port               : false                                                  
+  Switchover Flag           : false
+  VC tunnel info            : 1 tunnels
+    NO.0  TNL type          : ldp   , TNL ID : 0x0000000001004c4e42
+  create time               : 0 days, 0 hours, 31 minutes, 46 seconds                
+  up time                   : 0 days, 0 hours, 0 minutes, 19 seconds                 
+  last change time          : 0 days, 0 hours, 0 minutes, 19 seconds                 
+  VC last up time           : 2014/09/20 14:29:11                                    
+  VC total up time          : 0 days, 0 hours, 25 minutes, 43 seconds                
+  CKey                      : 2                                                      
+  NKey                      : 1                                                      
+  PW redundancy mode        : independent
+  AdminPw interface         : LoopBack1                                              
+  AdminPw link state        : up                                                     
+<span>  Forward state             : send inactive, receive inactive </span>
+  Diffserv Mode             : uniform                                                
+  Service Class             : --                                                     
+  Color                     : --                                                     
+  DomainId                  : --                                                     
+  Domain Name               : --                                                     
+                                                                                
+ *client interface          : GigabitEthernet<span>0/1/0</span>.1 is up                           
+  Administrator PW          : no                                                     
+  session state             : up                                                     
+  AC status                 : up                                                     
+  VC state                  : <strong>up</strong>                                                     
+  Label state               : 0                                                      
+  Token state               : 0                                                      
+  VC ID                     : 2                                                      
+  VC type                   : VLAN                                                   
+  destination               : 3.3.3.3                                                
+  local VC label            : 1025         remote VC label      : 1025               
+  control word              : disable                                                
+  remote control word       : disable
+  forwarding entry          : exist                                                  
+  local group ID            : 0                                                      
+  remote group ID           : 0
+  local AC OAM State        : up
+  local PSN OAM State       : up
+  local forwarding state    : forwarding
+  local status code         : 0x0
+  remote AC OAM state       : up
+  remote PSN OAM state      : up
+  remote forwarding state   : forwarding
+  remote status code        : 0x0
+  ignore standby state      : no
+  BFD for PW                : unavailable
+  VCCV State                : up
+  manual fault              : not set                                                
+  active state              : <strong>inactive</strong>                                               
+  OAM Protocol              : --                                                     
+  OAM Status                : --                                                     
+  OAM Fault Type            : --  
+  PW APS ID                 : 0 
+  PW APS Status             : --                                                     
+  TTL Value                 : 1                                                      
+  link state                : down                                                   
+  local VC MTU              : 1500         remote VC MTU        : 1500               
+  local VCCV                : alert ttl lsp-ping bfd
+  remote VCCV               : alert ttl lsp-ping bfd
+  tunnel policy name        : policy1                                                
+  PW template name          : --                                                     
+  primary or secondary      : <strong>secondary</strong>                                              
+  load balance type         : flow                                                   
+  Access-port               : false                                                  
+  Switchover Flag           : false
+  VC tunnel info            : 1 tunnels
+    NO.0  TNL type          : ldp   , TNL ID : 0x0000000001004c4e43
+  create time               : 0 days, 0 hours, 31 minutes, 27 seconds                
+  up time                   : 0 days, 0 hours, 28 minutes, 35 seconds                
+  last change time          : 0 days, 0 hours, 28 minutes, 35 seconds                
+  VC last up time           : 2014/09/20 14:00:58                                    
+  VC total up time          : 0 days, 0 hours, 28 minutes, 35 seconds                
+  CKey                      : 4                                                      
+  NKey                      : 3                                                      
+  PW redundancy mode        : independent
+  AdminPw interface         : LoopBack2                                              
+  AdminPw link state        : up                                                     
+<span>  Forward state             : send inactive, receive inactive </span>
+  Diffserv Mode             : uniform                                                
+  Service Class             : --                                                     
+  Color                     : --                                                     
+  DomainId                  : --                                                     
+  Domain Name               : --                                                     
+                                                                                
+ *client interface          : LoopBack1 is up                                        
+  Administrator PW          : yes                                                    
+  session state             : up                                                     
+  AC status                 : up                                                     
+  VC state                  : <strong>up</strong>                                                     
+  Label state               : 0                                                      
+  Token state               : 0                                                      
+  VC ID                     : 4                                                      
+  VC type                   : IP-interworking                                        
+  destination               : 2.2.2.2                                                
+  local VC label            : 1026         remote VC label      : 1027               
+  control word              : enable                                                 
+  remote control word       : disable
+  forwarding entry          : exist                                                  
+  local group ID            : 0                                                      
+  remote group ID           : 0
+  local AC OAM State        : up
+  local PSN OAM State       : up
+  local forwarding state    : forwarding
+  local status code         : 0x0
+  remote AC OAM state       : up
+  remote PSN OAM state      : up
+  remote forwarding state   : forwarding
+  remote status code        : 0x0
+  ignore standby state      : no
+  BFD for PW                : unavailable
+  VCCV State                : up
+  manual fault              : not set                                                
+  active state              : <strong>active</strong>                                                 
+  OAM Protocol              : --                                                     
+  OAM Status                : --                                                     
+  OAM Fault Type            : --   
+  PW APS ID                 : 0 
+  PW APS Status             : --                                                    
+  TTL Value                 : 1                                                      
+  link state                : up                                                     
+  local VC MTU              : 1500         remote VC MTU        : 1500               
+  local VCCV                : alert ttl lsp-ping bfd
+  remote VCCV               : alert ttl lsp-ping bfd
+  tunnel policy name        : policy                                                
+  PW template name          : --                                                     
+  primary or secondary      : <strong>primary</strong>                                                
+  load balance type         : flow                                                   
+  Access-port               : false                                                  
+  Switchover Flag           : false
+  VC tunnel info            : 1 tunnels
+    NO.0  TNL type          : ldp   , TNL ID : 0x0000000001004c4e44
+  create time               : 0 days, 0 hours, 27 minutes, 56 seconds                
+  up time                   : 0 days, 0 hours, 0 minutes, 23 seconds                 
+  last change time          : 0 days, 0 hours, 0 minutes, 23 seconds                 
+  VC last up time           : 2014/09/20 14:29:11                                    
+  VC total up time          : 0 days, 0 hours, 24 minutes, 2 seconds                 
+  CKey                      : 5                                                      
+  NKey                      : 1                                                      
+  PW redundancy mode        : independent
+  Diffserv Mode             : uniform                                                
+  Service Class             : --                                                     
+  Color                     : --                                                     
+  DomainId                  : --                                                     
+  Domain Name               : --                                                     
+                                                                                
+ *client interface          : LoopBack2 is up                                        
+  Administrator PW          : yes                                                    
+  session state             : up                                                     
+  AC status                 : up                                                     
+  VC state                  : <strong>up</strong>                                                     
+  Label state               : 0                                                      
+  Token state               : 0                                                      
+  VC ID                     : 5                                                      
+  VC type                   : IP-interworking                                        
+  destination               : 3.3.3.3                                                
+  local VC label            : 1027         remote VC label      : 1027               
+  control word              : enable                                                 
+  remote control word       : disable
+  forwarding entry          : exist                                                  
+  local group ID            : 0                                                      
+  remote group ID           : 0
+  local AC OAM State        : up
+  local PSN OAM State       : up
+  local forwarding state    : forwarding
+  local status code         : 0x0
+  remote AC OAM state       : up
+  remote PSN OAM state      : up
+  remote forwarding state   : forwarding
+  remote status code        : 0x0
+  ignore standby state      : no
+  BFD for PW                : unavailable
+  VCCV State                : up
+  manual fault              : not set                                                
+  active state              : <strong>active</strong>                                                 
+  OAM Protocol              : --                                                     
+  OAM Status                : --                                                     
+  OAM Fault Type            : --                                                     
+  PW APS ID                 : 0 
+  PW APS Status             : --
+  TTL Value                 : 1                                                      
+  link state                : up                                                     
+  local VC MTU              : 1500         remote VC MTU        : 1500               
+  local VCCV                : alert ttl lsp-ping bfd
+  remote VCCV               : alert ttl lsp-ping bfd
+  tunnel policy name        : policy                                                
+  PW template name          : --                                                     
+  primary or secondary      : <strong>primary</strong>                                                
+  load balance type         : flow                                                   
+  Access-port               : false                                                  
+  Switchover Flag           : false
+  VC tunnel info            : 1 tunnels
+    NO.0  TNL type          : ldp   , TNL ID : 0x0000000001004c4e45
+  create time               : 0 days, 0 hours, 27 minutes, 25 seconds                
+  up time                   : 0 days, 0 hours, 25 minutes, 57 seconds                
+  last change time          : 0 days, 0 hours, 25 minutes, 57 seconds                
+  VC last up time           : 2014/09/20 14:03:41                                    
+  VC total up time          : 0 days, 0 hours, 25 minutes, 57 seconds                
+  CKey                      : 6                                                      
+  PW redundancy mode        : independent
+  NKey                      : 3                                                      
+  Diffserv Mode             : uniform                                                
+  Service Class             : --                                                     
+  Color                     : --                                                     
+  DomainId                  : --                                                     
+  Domain Name               : --</pre>
+</p></li></ol>
+</li></ol></div>
+<div class="example" id="EN-US_TASK_0172369966__sec_dc_vrp_vpws_cfg_601701"><a name="EN-US_TASK_0172369966__sec_dc_vrp_vpws_cfg_601701"></a><a name="sec_dc_vrp_vpws_cfg_601701"></a><a name="EN-US_TASK_0172369966__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>CE1 configuration file</p>
+<pre class="screen">#
+ sysname CE1
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+#
+interface GigabitEthernet<span>0/1/0</span>.1
+ vlan-type dot1q 10
+ ip address 10.1.1.1 255.255.255.0
+#
+return                 </pre>
+</li><li><p>PE1 configuration file</p>
+<pre class="screen">#
+sysname PE1
+#
+bfd
+#
+mpls lsr-id 1.1.1.1
+#
+mpls
+ mpls te
+ mpls rsvp-te
+ mpls te cspf
+#
+mpls l2vpn
+#
+explicit-path tope2
+ next hop 10.1.2.2
+ next hop 2.2.2.2
+#
+explicit-path tope3
+ next hop 10.1.3.2
+ next hop 3.3.3.3
+#
+mpls ldp
+#
+mpls ldp remote-peer 2.2.2.2
+ remote-ip 2.2.2.2
+#
+mpls ldp remote-peer 3.3.3.3
+ remote-ip 3.3.3.3
+#
+interface LoopBack0
+ ip address 1.1.1.1 255.255.255.255
+#
+interface LoopBack1
+ mpls l2vc 2.2.2.2 4 tunnel-policy policy control-word admin
+#
+interface LoopBack2
+ mpls l2vc 3.3.3.3 5 tunnel-policy policy1 control-word admin
+#
+interface Tunnel11
+ ip address unnumbered interface LoopBack0
+ tunnel-protocol mpls te
+ destination 2.2.2.2
+ mpls te tunnel-id 100
+ mpls te path explicit-path tope2
+ mpls te reserved-for-binding
+#
+interface Tunnel12
+ ip address unnumbered interface LoopBack0
+ tunnel-protocol mpls te
+ destination 3.3.3.3
+ mpls te tunnel-id 200
+ mpls te path explicit-path tope3
+ mpls te reserved-for-binding
+#
+tunnel-policy policy
+ tunnel binding destination 2.2.2.2 te Tunnel11
+#
+tunnel-policy policy1
+ tunnel binding destination 3.3.3.3 te Tunnel12
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+#
+interface GigabitEthernet<span>0/1/0</span>.1
+ vlan-type dot1q 10
+ mpls l2vc 2.2.2.2 1 tunnel-policy policy
+ mpls l2vc track admin-vc interface LoopBack1
+ mpls l2vc 3.3.3.3 2 tunnel-policy policy1 secondary
+ mpls l2vc secondary track admin-vc interface LoopBack2
+ mpls l2vpn redundancy independent
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.1.2.1 255.255.255.0
+ mpls
+ mpls te
+ mpls rsvp-te
+#
+interface GigabitEthernet<span>0/1/2</span>
+ undo shutdown
+ ip address 10.1.3.1 255.255.255.0
+ mpls
+ mpls te
+ mpls rsvp-te
+#
+ospf 1
+ opaque-capability enable
+ area 0.0.0.0
+  network 1.1.1.1 0.0.0.0
+  network 10.1.2.0 0.0.0.255
+  network 10.1.3.0 0.0.0.255
+  mpls-te enable
+#
+bfd pe1a bind pw interface LoopBack1
+ discriminator local 1000
+ discriminator remote 1001
+#
+bfd pe1b bind pw interface LoopBack2
+ discriminator local 2000
+ discriminator remote 2001
+#
+return</pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#
+sysname PE2
+#
+lacp e-trunk system-id 00e0-fc00-0000
+lacp e-trunk priority 100
+#
+e-trunk 10
+#
+bfd
+#
+mpls lsr-id 2.2.2.2
+#
+mpls
+ mpls te
+ mpls rsvp-te
+ mpls te cspf
+#
+mpls l2vpn
+#
+explicit-path tope1
+ next hop 10.1.2.1
+ next hop 1.1.1.1
+#
+mpls ldp
+#
+mpls ldp remote-peer 1.1.1.1
+ remote-ip 1.1.1.1
+#
+interface LoopBack0
+ ip address 2.2.2.2 255.255.255.255
+#
+interface LoopBack1
+ mpls l2vc 1.1.1.1 4 tunnel-policy policy1 control-word admin
+#
+interface Tunnel10
+ ip address unnumbered interface LoopBack0
+ tunnel-protocol mpls te
+ destination 1.1.1.1
+ mpls te tunnel-id 100
+ mpls te path explicit-path tope1
+ mpls te reserved-for-binding
+#
+tunnel-policy policy1
+ tunnel binding destination 1.1.1.1 te Tunnel10
+#
+bfd hello bind peer-ip 3.3.3.3 source-ip 2.2.2.2
+ discriminator local 100
+ discriminator remote 101
+#
+interface Eth-Trunk10
+ mode lacp-static
+ e-trunk 10
+#
+interface Eth-Trunk10.1
+ vlan-type dot1q 10
+ mpls l2vc 1.1.1.1 1 tunnel-policy policy1
+ mpls l2vc track admin-vc interface LoopBack1
+ mpls l2vc 3.3.3.3 3 bypass
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.2.2 255.255.255.0
+ mpls
+ mpls te
+ mpls rsvp-te
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.1.4.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/2</span>
+ undo shutdown
+ eth-trunk 10
+#
+ospf 1
+ opaque-capability enable
+ area 0.0.0.0
+  network 2.2.2.2 0.0.0.0
+  network 10.1.2.0 0.0.0.255
+  network 10.1.4.0 0.0.0.255
+  mpls-te enable
+#
+bfd pe2 bind pw interface LoopBack1
+ discriminator local 1001
+ discriminator remote 1000
+#
+e-trunk 10
+ security-key cipher YsHsjx_202206
+ priority 10
+ peer-address 3.3.3.3 source-address 2.2.2.2
+ e-trunk track bfd-session session-name hello
+#
+return </pre>
+</li><li><p>PE3 configuration file</p>
+<pre class="screen">#
+sysname PE3
+#
+lacp e-trunk system-id 00e0-fc00-0000
+lacp e-trunk priority 100
+#
+e-trunk 10
+#
+bfd
+#
+mpls lsr-id 3.3.3.3
+#
+mpls
+ mpls te
+ mpls rsvp-te
+ mpls te cspf
+#
+mpls l2vpn
+#
+explicit-path tope1
+ next hop 10.1.3.1
+ next hop 1.1.1.1
+#
+mpls ldp
+#
+mpls ldp remote-peer 1.1.1.1
+ remote-ip 1.1.1.1
+#
+interface LoopBack0
+ ip address 3.3.3.3 255.255.255.255
+#
+interface LoopBack1
+ mpls l2vc 1.1.1.1 5 tunnel-policy policy1 control-word admin
+#
+interface Tunnel10
+ ip address unnumbered interface LoopBack0
+ tunnel-protocol mpls te
+ destination 1.1.1.1
+ mpls te tunnel-id 200
+ mpls te path explicit-path tope1
+ mpls te reserved-for-binding
+#
+tunnel-policy policy1
+ tunnel binding destination 1.1.1.1 te Tunnel10
+#
+bfd hello bind peer-ip 2.2.2.2 source-ip 3.3.3.3
+ discriminator local 101
+ discriminator remote 100
+#
+interface Eth-Trunk10
+ mode lacp-static
+ e-trunk 10
+#
+interface Eth-Trunk10.1
+ vlan-type dot1q 10
+ mpls l2vc 1.1.1.1 2 tunnel-policy policy1
+ mpls l2vc track admin-vc interface LoopBack1
+ mpls l2vc 2.2.2.2 3 bypass
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.3.2 255.255.255.0
+ mpls
+ mpls te
+ mpls rsvp-te
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.1.4.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/2</span>
+ undo shutdown
+ eth-trunk 10
+#
+ospf 1
+ opaque-capability enable
+ area 0.0.0.0
+  network 3.3.3.3 0.0.0.0
+  network 10.1.3.0 0.0.0.255
+  network 10.1.4.0 0.0.0.255
+  mpls-te enable
+#
+bfd pe3 bind pw interface LoopBack1
+ discriminator local 2001
+ discriminator remote 2000
+#
+e-trunk 10
+ security-key cipher YsHsjx_202206
+ priority 20
+ peer-address 2.2.2.2 source-address 3.3.3.3
+ e-trunk track bfd-session session-name hello
+#
+return</pre>
+</li><li><p>CE2 configuration file</p>
+<pre class="screen">#
+sysname CE2
+#
+vlan batch 10
+#
+interface Vlanif10
+ ip address 10.1.1.2 255.255.255.0
+#
+interface Eth-Trunk10
+ portswitch
+ port trunk allow-pass vlan 10
+ mode lacp-static
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ eth-trunk 10
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ eth-trunk 10
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_3012.html">Configuration Examples for VPWS
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_6013.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_vpws_cfg_6018.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

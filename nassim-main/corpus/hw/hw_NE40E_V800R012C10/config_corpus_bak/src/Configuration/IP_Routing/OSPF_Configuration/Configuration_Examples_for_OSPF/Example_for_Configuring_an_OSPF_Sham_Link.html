@@ -1,0 +1,651 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring an OSPF Sham Link">
+<meta name="abstract" content="This section provides an example for configuring an OSPF sham link so that traffic between sites of the same VPN in the same OSPF area is forwarded through the OSPF intra-area route over the MPLS VPN backbone network.">
+<meta name="description" content="This section provides an example for configuring an OSPF sham link so that traffic between sites of the same VPN in the same OSPF area is forwarded through the OSPF intra-area route over the MPLS VPN backbone network.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospf_cfg_0093.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospf_cfg_2071.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,w00606909">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Route">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="OSPF">
+<meta name="featuretype" content="IP Routing Basis">
+<meta name="OWNER" content="z00875216">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="z00875216">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172365680">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring an OSPF Sham Link</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172365680"></a><a name="EN-US_TASK_0172365680"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring an OSPF Sham Link</h1>
+<div class="taskbody"><p>This section provides an example for configuring an OSPF sham link so that traffic between sites of the same VPN in the same OSPF area is forwarded through the OSPF intra-area route over the MPLS VPN backbone network.</p>
+<div class="context"><a name="EN-US_TASK_0172365680__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In <a href="#EN-US_TASK_0172365680__fig_dc_vrp_cfg_00415201">Figure 1</a>, CE1 and CE2 reside in the same OSPF area, belong to VPN1, and are connected to PE1 and PE2, respectively. In this example, the cost of each link is 1.</p>
+<p>It is required that OSPF run between each CE and its connected PE and the VPN traffic between CE1 and CE2 be forwarded over the MPLS backbone network.</p>
+<div class="fignone" id="EN-US_TASK_0172365680__fig_dc_vrp_cfg_00415201"><a name="EN-US_TASK_0172365680__fig_dc_vrp_cfg_00415201"></a><a name="fig_dc_vrp_cfg_00415201"></a><span class="figcap"><b>Figure 1 </b>Networking for configuring an OSPF sham link</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 and 2 in this example represent GE <span>0/1/0</span> and GE <span>0/2/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_cfg_ospf_000105.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172365680__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>To improve security, OSPF area authentication or interface authentication is recommended. For details, see "Improving OSPF Network Security". OSPF area authentication is used as an example. For details, see Example for Configuring Basic OSPF Functions.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172365680__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure an MP-IBGP peer relationship between PEs and configure OSPF between each CE and its connected PE.</p>
+</li><li><p>Create a VPN instance on each PE and bind the VPN instance to the interface connected to the corresponding CE.</p>
+</li><li><p>Create an OSPF sham link between PEs.</p>
+</li><li><p>Adjust the cost of forwarding interfaces over the user network to ensure that the cost of the OSPF route used to forward the traffic over the user network is greater than that of the sham link.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172365680__1.4.4"></a><a name="1.4.4"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>MPLS LSR IDs of the PEs and P</p>
+</li><li><p>VPN instance name, RD, and VPN target of each PE</p>
+</li><li><p>Data used to configure OSPF (The OSPF process running on the backbone network, the OSPF process running on the user network, and the OSPF process connecting each PE to the corresponding CE are different.)</p>
+</li><li><p>Cost of the sham link and the cost of the OSPF route used to forward the traffic over the user network</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172365680__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure OSPF on the user network.</span><p><p>Configure OSPF on CE1, RT0, and CE2 and advertise network segments of their interfaces.</p>
+<p># Configure CE1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname CE1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1]<strong> interface GigabitEthernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-GigabitEthernet<span>0/2/0</span>] <strong>ip address 10.1.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1]<strong> interface GigabitEthernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>] <strong>ip address 172.16.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1]<strong> ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-ospf-1]<strong> area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-ospf-1-area-0.0.0.0]<strong> network 10.1.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-ospf-1-area-0.0.0.0] <strong>network 172.16.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-ospf-1-area-0.0.0.0]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-ospf-1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1]<strong> commit</strong></pre>
+<p># Configure RT0.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname RT0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>RT0]<strong> interface GigabitEthernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>RT0-GigabitEthernet<span>0/1/0</span>] <strong>ip address 10.1.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RT0-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RT0]<strong> interface GigabitEthernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RT0-GigabitEthernet<span>0/2/0</span>] <strong>ip address 10.2.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RT0-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RT0]<strong> ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RT0-ospf-1]<strong> area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RT0-ospf-1-area-0.0.0.0]<strong> network 10.1.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RT0-ospf-1-area-0.0.0.0] <strong>network 10.2.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RT0-ospf-1-area-0.0.0.0]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RT0-ospf-1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>RT0]<strong> commit</strong></pre>
+<p># Configure CE2.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname CE2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2]<strong> interface GigabitEthernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2-GigabitEthernet<span>0/2/0</span>] <strong>ip address 10.2.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2]<strong> interface GigabitEthernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>] <strong>ip address 172.16.2.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2]<strong> ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-ospf-1]<strong> area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-ospf-1-area-0.0.0.0]<strong> network 10.2.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-ospf-1-area-0.0.0.0] <strong>network 172.16.2.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-ospf-1-area-0.0.0.0]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-ospf-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2]<strong> commit</strong></pre>
+</p></li><li><span>Configure basic BGP/MPLS IP VPN functions on the backbone network, including an IGP (OSPF) on the backbone network, MPLS and LDP on the backbone network, and an MP-IBGP peer relationship between PEs.</span><p><p># Configure PE1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname PE1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-LoopBack1] <strong>ip address 1.1.1.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>mpls lsr-id 1.1.1.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface GigabitEthernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>ip address 10.10.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1]<strong> area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1-area-0.0.0.0] <strong>network 1.1.1.9 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1-area-0.0.0.0] <strong>network 10.10.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>peer 3.3.3.9 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>peer 3.3.3.9 connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>ipv4-family vpnv4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-vpnv4] <strong>peer 3.3.3.9 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-vpnv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> commit</strong></pre>
+<p># Configure the P.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname P</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P]<strong> interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P-LoopBack1] <strong>ip address 2.2.2.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P] <strong>mpls lsr-id 2.2.2.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P]<strong> interface GigabitEthernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/1/0</span>] <strong>ip address 10.10.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/1/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/1/0</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P]<strong> interface GigabitEthernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/2/0</span>] <strong>ip address 10.20.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/2/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/2/0</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/2/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P]<strong> ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-ospf-1]<strong> area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-ospf-1-area-0.0.0.0] <strong>network 2.2.2.9 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-ospf-1-area-0.0.0.0] <strong>network 10.10.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-ospf-1-area-0.0.0.0] <strong>network 10.20.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-ospf-1-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-ospf-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P]<strong> commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname PE2</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong> interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-LoopBack1] <strong>ip address 3.3.3.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>mpls lsr-id 3.3.3.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-mpls]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> interface GigabitEthernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong>ip address 10.20.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1]<strong> area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1-area-0.0.0.0] <strong>network 3.3.3.9 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1-area-0.0.0.0] <strong>network 10.20.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>peer 1.1.1.9 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>peer 1.1.1.9 connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>ipv4-family vpnv4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-vpnv4] <strong>peer 1.1.1.9 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-vpnv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> commit</strong></pre>
+<p>After completing the configurations, PE1 and PE2 learn the route to each other's loopback interface and establish an MP-IBGP peer relationship.</p>
+</p></li><li><span>Configure the connection between each PE and the corresponding CE, with OSPF running between them.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>ip vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpn1] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpn1-af-ipv4] <strong>route-distinguisher 100:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpn1-af-ipv4] <strong>vpn-target 1:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpn1-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpn1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<strong><span>0/1/0</span></strong>] <strong>ip binding vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<strong><span>0/1/0</span></strong>] <strong>ip address 172.16.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<strong><span>0/1/0</span></strong>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> ospf 100 vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-100] <strong>domain-id 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-100] <strong>import-route bgp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-100] <strong>area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-100-area-0.0.0.0] <strong>network 172.16.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-100-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-100] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp]<strong> ipv4-family vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-vpn1]<strong> import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-vpn1] <strong>import-route ospf 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-vpn1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>ip vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpn1] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpn1-af-ipv4] <strong>route-distinguisher 100:2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpn1-af-ipv4] <strong>vpn-target 1:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpn1-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpn1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> interface GigabitEthernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>ip binding vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>ip address 172.16.2.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> ospf 100 vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-100] <strong>import-route bgp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-100] <strong>domain-id 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-100] <strong>area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-100-area-0.0.0.0] <strong>network 172.16.2.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-100-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-100] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp]<strong> ipv4-family vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-vpn1] <strong>import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-vpn1] <strong>import-route ospf 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-vpn1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> commit</strong></pre>
+<p>After completing the configurations, run the <strong>display ip routing-table vpn-instance</strong> command on a PE. You may find that the route to the remote CE is an OSPF route over the user network rather than the BGP route over the backbone network.</p>
+<p>The following example uses the command output on PE1.</p>
+<pre class="screen">&lt;PE1&gt;<strong> display ip routing-table vpn-instance vpn1</strong></pre>
+<pre class="screen"><span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span></pre>
+<pre class="screen">------------------------------------------------------------------------------</pre>
+<pre class="screen">Routing Table: vpn1</pre>
+<pre class="screen">         Destinations : 5        Routes : 5</pre>
+<pre class="screen">Destination/Mask  Proto  Pre  Cost         Flags  NextHop       Interface</pre>
+<pre class="screen">     10.1.1.0/24  OSPF   10   2                D  172.16.1.1    GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">     10.2.1.0/24  OSPF   10   3                D  172.16.1.1    GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">    172.16.1.0/24 Direct 0    0                D  172.16.1.2    GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">    172.16.1.2/32 Direct 0    0                D  127.0.0.1     GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">    172.16.2.0/24 OSPF   10   4                D  172.16.1.1    GigabitEthernet<span>0/1/0</span></pre>
+</p></li><li><span>Configure a sham link.</span><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>To ensure that VPN traffic is forwarded over the MPLS backbone network, ensure that the cost of the sham link is smaller than that of the OSPF route used to forward the traffic over the user network when configuring the sham link. In most cases, you need to change the cost of the interfaces on the user network to ensure that the cost of the OSPF route used to forward the traffic over the user network is greater than that of the sham link.</p>
+</div></div>
+<p># Configure CE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1]<strong> interface GigabitEthernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-GigabitEthernet<span>0/2/0</span>]<strong> ospf cost 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/2/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1]<strong> </strong><strong>commit</strong></pre>
+<p># Configure CE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2]<strong> interface GigabitEthernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2-GigabitEthernet<span>0/2/0</span>]<strong> ospf cost 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/2/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2]<strong> interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-LoopBack1] <strong>ip address 8.8.8.8 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-LoopBack1] <strong>ospf enable 1 area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2]<strong> commit</strong></pre>
+<p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>interface loopback 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack10] <strong>ip binding vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack10] <strong>ip address 5.5.5.5 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> ospf 100 router-id 11.11.11.11</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-100]<strong> area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-100-area-0.0.0.0] <strong>sham-link 5.5.5.5 6.6.6.6 cost 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-100-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-100] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>interface loopback 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack10] <strong>ip binding vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack10] <strong>ip address 6.6.6.6 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack10] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> ospf 100 router-id 22.22.22.22</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-100]<strong> area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-100-area-0.0.0.0] <strong>sham-link 6.6.6.6 5.5.5.5 cost 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-100-area-0.0.0.0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-100] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> commit</strong></pre>
+</p></li><li><span>Verify the configuration. </span><p><p>After completing the configurations, run the <strong>display ip routing-table vpn-instance</strong> command again on the PE. You may find that the route to the remote CE becomes the BGP route over the backbone network and a route to the destination IP address of the sham link also exist in the routing table.</p>
+<p>The following example uses the command output on PE1.</p>
+<pre class="screen">&lt;PE1&gt;<strong> display ip routing-table vpn-instance vpn1</strong></pre>
+<pre class="screen"><span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span></pre>
+<pre class="screen">------------------------------------------------------------------------------</pre>
+<pre class="screen"> Routing Table: vpn1</pre>
+<pre class="screen">         Destinations : 10        Routes : 10</pre>
+<pre class="screen"> Destination/Mask  Proto  Pre  Cost      Flags  NextHop           Interface</pre>
+<pre class="screen">       5.5.5.5/32  Direct 0    0            D   127.0.0.1         LoopBack10</pre>
+<pre class="screen">       6.6.6.6/32  IBGP   255  0            RD  3.3.3.9           GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen">       8.8.8.8/32  IBGP   255  2            RD  3.3.3.9           GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen">      10.1.1.0/24  OSPF   10   11           D   172.16.1.1        GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">      10.2.1.0/24  OSPF   10   12           D   172.16.1.1        GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">     172.16.1.0/24 Direct 0    0            D   172.16.1.2        GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">     172.16.1.2/32 Direct 0    0            D   127.0.0.1         GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">   172.16.1.255/32 Direct 0    0            D   127.0.0.1         GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">     172.16.2.0/24 IBGP   255  0            RD  3.3.3.9           GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen">255.255.255.255/32 Direct 0    0            D   127.0.0.1         InLoopBack0</pre>
+<p>Run the <strong>display ip routing-table</strong> command on a CE. You may find that the cost of the OSPF route to the remote CE becomes 3 and the next hop is the IP address of the connected PE interface. The next hop indicates that the VPN traffic to the remote end is forwarded over the backbone network.</p>
+<p>The following example uses the command output on CE1.</p>
+<pre class="screen">&lt;CE1&gt;<strong> display ip routing-table</strong></pre>
+<pre class="screen"><span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span></pre>
+<pre class="screen">------------------------------------------------------------------------------</pre>
+<pre class="screen">Routing Table : _public_</pre>
+<pre class="screen">         Destinations : 15       Routes : 15        </pre>
+<pre class="screen">Destination/Mask    Proto   Pre  Cost        Flags NextHop         Interface</pre>
+<pre class="screen">        5.5.5.5/32  O_ASE   150  1             D   172.16.1.2      GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">        6.6.6.6/32  O_ASE   150  1             D   172.16.1.2      GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">        8.8.8.8/32  OSPF    10   3             D   172.16.1.2      GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">       10.1.1.0/24  Direct  0    0             D   10.1.1.1        GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen">       10.1.1.1/32  Direct  0    0             D   127.0.0.1       GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen">     10.1.1.255/32  Direct  0    0             D   127.0.0.1       GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen">       10.2.1.0/24  OSPF    10   11            D   10.1.1.2        GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen">      127.0.0.0/8   Direct  0    0             D   127.0.0.1       InLoopBack0</pre>
+<pre class="screen">      127.0.0.1/32  Direct  0    0             D   127.0.0.1       InLoopBack0</pre>
+<pre class="screen">127.255.255.255/32  Direct  0    0             D   127.0.0.1       InLoopBack0</pre>
+<pre class="screen">     172.16.1.0/24  Direct  0    0             D   172.16.1.1      GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">     172.16.1.1/32  Direct  0    0             D   127.0.0.1       GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">   172.16.1.255/32  Direct  0    0             D   127.0.0.1       GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">     172.16.2.0/24  OSPF    10   3             D   172.16.1.2      GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">255.255.255.255/32  Direct  0    0             D   127.0.0.1       InLoopBack0</pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Cost (3) of the OSPF route from CE1 to CE2 = Cost (1) of the link from CE1 to PE1 + Cost (1) of the sham link + Cost (1) of the link from PE2 to CE2</p>
+</div></div>
+<p>Run the <strong>tracert</strong> command and you may find that the next hop for CE1 to send data to CE2 is the IP address of PE1's GE <span>0/1/0</span>. The next hop indicates that the VPN traffic to the remote end is forwarded over the backbone network.</p>
+<pre class="screen">&lt;CE1&gt; <strong>tracert 172.16.2.1</strong></pre>
+<pre class="screen"> traceroute to 172.16.2.1(172.16.2.1), max hops: 30 ,packet length: 40,press CTRL_C to break</pre>
+<pre class="screen"> 1 172.16.1.2 131 ms  2 ms  1 ms</pre>
+<pre class="screen"> 2 10.10.1.2 475 ms  4 ms  4 ms</pre>
+<pre class="screen"> 3 172.16.2.2 150 ms  3 ms  4 ms</pre>
+<pre class="screen"> 4 172.16.2.1 76 ms  3 ms  5 ms</pre>
+<pre class="screen">&lt;CE1&gt; <strong>tracert 10.2.1.2</strong></pre>
+<pre class="screen"> traceroute to 10.2.1.2(10.2.1.2), max hops: 30 ,packet length: 40,press CTRL_C to break</pre>
+<pre class="screen"> 1 10.1.1.2 60 ms  1 ms  1 ms </pre>
+<pre class="screen"> 2 10.2.1.2 12 ms  2 ms  2 ms</pre>
+<p>Run the <strong>display ospf sham-link</strong> command on a PE to check whether the sham link is established.</p>
+<p>The following example uses the command output on PE1.</p>
+<pre class="screen">&lt;PE1&gt; <strong>display ospf sham-link</strong></pre>
+<pre class="screen">          OSPF Process 100 with Router ID 11.11.11.11</pre>
+<pre class="screen"> Area         NeighborId        Source-IP       Destination-IP  State Cost</pre>
+<pre class="screen"> 0.0.0.0      22.22.22.22       5.5.5.5         6.6.6.6         P-2-P  1</pre>
+<p>Run the <strong>display ospf sham-link</strong> <strong>area</strong> command. The following command output shows that the OSPF neighbor relationship is in Full state.</p>
+<pre class="screen">&lt;PE1&gt; <strong>display ospf sham-link area 0</strong></pre>
+<pre class="screen">          OSPF Process 100 with Router ID 11.11.11.11</pre>
+<pre class="screen">  Sham-Link: 5.5.5.5 --&gt; 6.6.6.6</pre>
+<pre class="screen"><strong>  NeighborID: 22.22.22.22,   State: Full</strong>,    GR status: Normal</pre>
+<pre class="screen">  Area: 0.0.0.0</pre>
+<pre class="screen">  Cost: 1 , State: P-2-P , Type: Sham</pre>
+<pre class="screen">  Timers: Hello 10 , Dead 40 , Retransmit 5 , Transmit Delay 1</pre>
+<p>Run the <strong>display ospf routing</strong> command on a CE. The following command output shows that the route to the remote CE is an intra-area route.</p>
+<pre class="screen">&lt;CE1&gt; <strong>display ospf routing</strong></pre>
+<pre class="screen">          OSPF Process 1 with Router ID 10.1.1.1</pre>
+<pre class="screen">                   Routing Tables</pre>
+<pre class="screen"> Routing for Network</pre>
+<pre class="screen"> Destination        Cost  Type       NextHop         AdvRouter       Area</pre>
+<pre class="screen"> 8.8.8.8/32         3     Stub       172.16.1.2      10.2.1.2        0.0.0.0</pre>
+<pre class="screen"> 10.1.1.0/24        10    Direct     10.1.1.1        10.1.1.1        0.0.0.0</pre>
+<pre class="screen"> 10.2.1.0/24        11    Transit    10.1.1.2        10.1.1.2        0.0.0.0</pre>
+<pre class="screen"> 172.16.1.0/24      1     Direct     172.16.1.1      10.1.1.1        0.0.0.0</pre>
+<pre class="screen"> 172.16.2.0/24      3     Transit    172.16.1.2      10.2.1.2        0.0.0.0</pre>
+<pre class="screen"> Routing for ASEs</pre>
+<pre class="screen"> Destination        Cost      Type       Tag         NextHop         AdvRouter</pre>
+<pre class="screen"> 6.6.6.6/32         1         Type2      3489661028  172.16.1.2      11.11.11.11</pre>
+<pre class="screen"> 5.5.5.5/32         1         Type2      3489661028  172.16.1.2      22.22.22.22</pre>
+<pre class="screen"> Total Nets: 7</pre>
+<pre class="screen"> Intra Area: 5  Inter Area: 0  ASE: 2  NSSA: 0</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172365680__1.4.6"></a><a name="1.4.6"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>PE1 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname PE1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ip vpn-instance vpn1</pre>
+<pre class="screen"> ipv4-family</pre>
+<pre class="screen">  route-distinguisher 100:1</pre>
+<pre class="screen">  apply-label per-instance</pre>
+<pre class="screen">  vpn-target 1:1 export-extcommunity</pre>
+<pre class="screen">  vpn-target 1:1 import-extcommunity</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls lsr-id 1.1.1.9</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip binding vpn-instance vpn1</pre>
+<pre class="screen"> ip address 172.16.1.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.10.1.1 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 1.1.1.9 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack10</pre>
+<pre class="screen"> ip binding vpn-instance vpn1</pre>
+<pre class="screen"> ip address 5.5.5.5 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 100</pre>
+<pre class="screen"> peer 3.3.3.9 as-number 100</pre>
+<pre class="screen"> peer 3.3.3.9 connect-interface LoopBack1</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  undo synchronization</pre>
+<pre class="screen">  peer 3.3.3.9 enable</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family vpnv4</pre>
+<pre class="screen">  policy vpn-target</pre>
+<pre class="screen">  peer 3.3.3.9 enable</pre>
+<pre class="screen">  #</pre>
+<pre class="screen"> ipv4-family vpn-instance vpn1</pre>
+<pre class="screen">  import-route direct</pre>
+<pre class="screen">  import-route ospf 100</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 1.1.1.9 0.0.0.0</pre>
+<pre class="screen">  network 10.10.1.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 100 router-id 11.11.11.11 vpn-instance vpn1</pre>
+<pre class="screen"> import-route bgp</pre>
+<pre class="screen"> domain-id 0.0.0.10</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 172.16.1.0 0.0.0.255</pre>
+<pre class="screen">  sham-link 5.5.5.5 6.6.6.6 cost 1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>P configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname P</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls lsr-id 2.2.2.9</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.10.1.2 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.20.1.1 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 2.2.2.9 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 2.2.2.9 0.0.0.0</pre>
+<pre class="screen">  network 10.10.1.0 0.0.0.255</pre>
+<pre class="screen">  network 10.20.1.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname PE2</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ip vpn-instance vpn1</pre>
+<pre class="screen"> ipv4-family</pre>
+<pre class="screen">  route-distinguisher 100:2</pre>
+<pre class="screen">  apply-label per-instance</pre>
+<pre class="screen">  vpn-target 1:1 export-extcommunity</pre>
+<pre class="screen">  vpn-target 1:1 import-extcommunity</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls lsr-id 3.3.3.9</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip binding vpn-instance vpn1</pre>
+<pre class="screen"> ip address 172.16.2.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.20.1.2 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 3.3.3.9 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack10</pre>
+<pre class="screen"> ip binding vpn-instance vpn1</pre>
+<pre class="screen"> ip address 6.6.6.6 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 100</pre>
+<pre class="screen"> peer 1.1.1.9 as-number 100</pre>
+<pre class="screen"> peer 1.1.1.9 connect-interface LoopBack1</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  undo synchronization</pre>
+<pre class="screen">  peer 1.1.1.9 enable</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family vpnv4</pre>
+<pre class="screen">  policy vpn-target</pre>
+<pre class="screen">  peer 1.1.1.9 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> ipv4-family vpn-instance vpn1</pre>
+<pre class="screen">  import-route direct</pre>
+<pre class="screen">  import-route ospf 100</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 3.3.3.9 0.0.0.0</pre>
+<pre class="screen">  network 10.20.1.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 100 router-id 22.22.22.22 vpn-instance vpn1</pre>
+<pre class="screen"> import-route bgp</pre>
+<pre class="screen"> domain-id 0.0.0.10</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 172.16.2.0 0.0.0.255</pre>
+<pre class="screen">  sham-link 6.6.6.6 5.5.5.5 cost 1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>CE1 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname CE1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 172.16.1.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.1.1.1 255.255.255.0</pre>
+<pre class="screen"> ospf cost 10</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 172.16.1.0 0.0.0.255</pre>
+<pre class="screen">  network 10.1.1.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>CE2 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname CE2</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 172.16.2.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.2.1.2 255.255.255.0</pre>
+<pre class="screen"> ospf cost 10</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 8.8.8.8 255.255.255.255</pre>
+<pre class="screen"> ospf enable 1 area 0.0.0.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 10.2.1.0 0.0.0.255</pre>
+<pre class="screen">  network 172.16.2.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>RT0 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname RT0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.1.1.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.2.1.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 10.1.1.0 0.0.0.255</pre>
+<pre class="screen">  network 10.2.1.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospf_cfg_0093.html">Configuration Examples for OSPF
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ospf_cfg_2071.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

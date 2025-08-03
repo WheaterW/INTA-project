@@ -1,0 +1,642 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring MSTP+VRRP Networking">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_stp_cfg_1077.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_stp_cfg_1186.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="MSTP">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="MSTP">
+<meta name="featurename" content="RSTP">
+<meta name="featurename" content="STP">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="featurename" content="MSTP">
+<meta name="featurename" content="RSTP">
+<meta name="featurename" content="STP">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001314911630">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring MSTP+VRRP Networking</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001314911630"></a><a name="EN-US_TASK_0000001314911630"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring MSTP+VRRP Networking</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001314911630__1.3.1"></a><a name="1.3.1"></a>
+<div class="p" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_context411564258183240"><h4 class="sectiontitle">Networking Requirements</h4><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p2140401024183240">On the network shown in <a href="#EN-US_TASK_0000001314911630__en-us_task_0000001259184125_fig_dc_cfg_stp_010801">Figure 1</a>, hosts access the Internet through DeviceC, which is uplinked to DeviceA and DeviceB through redundant links. However, these links cause a loop that may lead to broadcast storms and damage MAC address entries. It is therefore required that the loop be prevented while redundant links are available. In this way, if one uplink is disconnected, traffic can be switched to the other uplink for forwarding, and network bandwidth can be efficiently used.</p>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1354743026183240">MSTP can be deployed to prevent the loop. It blocks redundant links on the Layer 2 network and prunes the network into a tree topology. In addition, VRRP can be configured on DeviceA and DeviceB. HostA then uses DeviceA as the default gateway to access the Internet, and DeviceB functions as the backup gateway. Conversely, HostB uses DeviceB as the default gateway to access the Internet, and DeviceA functions as the backup gateway. This provides high reliability while ensuring traffic load balancing.</p>
+<div class="fignone" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_fig_dc_cfg_stp_010801"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_fig_dc_cfg_stp_010801"></a><a name="en-us_task_0000001259184125_fig_dc_cfg_stp_010801"></a><span class="figcap"><b>Figure 1 </b>Network diagram of MSTP+VRRP</span><div class="note" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_note356773753116"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p125679375318">In this example, interface1 through interface4 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, <span>100GE</span><span>1/0/3</span>, and <span>100GE</span><span>1/0/4</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_image1562125989183240" src="figure/en-us_image_0000001214544310.png"></span></div>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_table2009827132183240" frame="border" border="1" rules="all"><thead align="left"><tr id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_row1111292720183240"><th align="left" class="cellrowborder" valign="top" width="25.06250625062506%" id="mcps1.3.1.5.1.5.1.1" liSelected="liSelected"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1607595189183240">Device</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="24.81248124812481%" id="mcps1.3.1.5.1.5.1.2" liSelected="liSelected"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1104563347183240">Interface</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="25.06250625062506%" id="mcps1.3.1.5.1.5.1.3" liSelected="liSelected"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1759555098183240">VLANIF Interface</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="25.06250625062506%" id="mcps1.3.1.5.1.5.1.4" liSelected="liSelected"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1770122965183240">IP Address</p>
+</th>
+</tr>
+</thead>
+<tbody><tr id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_row1161516475183240"><td class="cellrowborder" rowspan="3" valign="top" width="25.06250625062506%" headers="mcps1.3.1.5.1.5.1.1 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p702687265183240">DeviceA</p>
+</td>
+<td class="cellrowborder" valign="top" width="24.81248124812481%" headers="mcps1.3.1.5.1.5.1.2 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1703336288183240">interface1 and interface2</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.06250625062506%" headers="mcps1.3.1.5.1.5.1.3 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p2119893382183240">VLANIF2</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.06250625062506%" headers="mcps1.3.1.5.1.5.1.4 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p682786143183240">10.1.2.102/24</p>
+</td>
+</tr>
+<tr id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_row1207858856183240"><td class="cellrowborder" valign="top" headers="mcps1.3.1.5.1.5.1.1 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p11532121942219">interface1 and interface2</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.1.5.1.2 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p838101690183240">VLANIF3</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.1.5.1.3 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1468375870183240">10.1.3.102/24</p>
+</td>
+</tr>
+<tr id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_row1049495918183240"><td class="cellrowborder" valign="top" headers="mcps1.3.1.5.1.5.1.1 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1958572619225">interface3</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.1.5.1.2 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p488955256183240">VLANIF4</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.1.5.1.3 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1436803824183240">10.1.4.102/24</p>
+</td>
+</tr>
+<tr id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_row914219031183240"><td class="cellrowborder" rowspan="3" valign="top" width="25.06250625062506%" headers="mcps1.3.1.5.1.5.1.1 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1021313308183240">DeviceB</p>
+</td>
+<td class="cellrowborder" valign="top" width="24.81248124812481%" headers="mcps1.3.1.5.1.5.1.2 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p51851222102214">interface1 and interface2</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.06250625062506%" headers="mcps1.3.1.5.1.5.1.3 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1313088338183240">VLANIF2</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.06250625062506%" headers="mcps1.3.1.5.1.5.1.4 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p968177471183240">10.1.2.103/24</p>
+</td>
+</tr>
+<tr id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_row1716830490183240"><td class="cellrowborder" valign="top" headers="mcps1.3.1.5.1.5.1.1 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1412122412210">interface1 and interface2</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.1.5.1.2 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1728714650183240">VLANIF3</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.1.5.1.3 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p602368006183240">10.1.3.103/24</p>
+</td>
+</tr>
+<tr id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_row898432193183240"><td class="cellrowborder" valign="top" headers="mcps1.3.1.5.1.5.1.1 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p14185932132213">interface3</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.1.5.1.2 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p509203515183240">VLANIF5</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.1.5.1.3 "><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p710031297183240">10.1.5.103/24</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001314911630__1.3.2"></a><a name="1.3.2"></a>
+<div class="p" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_context1863240165183240"><h4 class="sectiontitle">Configuration Roadmap</h4><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p432829350183240">The configuration roadmap is as follows:</p>
+<ol id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_ol735393645183240"><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li0242172416511">Configure the Layer 2 forwarding function on the devices.</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1026155314183240"><div class="p" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p151193341183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1026155314183240"></a><a name="en-us_task_0000001259184125_li1026155314183240"></a>Configure basic MSTP functions on the devices on the ring network, including:<ol type="a" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_ol1411144770183240"><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1708531663183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1287816004183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1708531663183240"></a><a name="en-us_task_0000001259184125_li1708531663183240"></a>Configure an MST region and create multiple MSTIs. Map VLAN 2 to MSTI 1 and map VLAN 3 to MSTI 2 to balance traffic.</p>
+</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1353645270183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p274296572183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1353645270183240"></a><a name="en-us_task_0000001259184125_li1353645270183240"></a>Configure the root bridge and secondary root bridge for each MSTI in the MST region.</p>
+</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1423895753183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p2005642150183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1423895753183240"></a><a name="en-us_task_0000001259184125_li1423895753183240"></a>Configure an appropriate path cost for an interface in each MSTI so that the interface can be blocked.</p>
+</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li2058769296183240"><div class="p" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1479037408183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li2058769296183240"></a><a name="en-us_task_0000001259184125_li2058769296183240"></a>Enable MSTP to prevent loops, including:<ul id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_ul492464669183240"><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li641918270183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1910005009183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li641918270183240"></a><a name="en-us_task_0000001259184125_li641918270183240"></a>Enable MSTP globally on the devices.</p>
+</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li471528007183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p756556219183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li471528007183240"></a><a name="en-us_task_0000001259184125_li471528007183240"></a>Enable MSTP on all interfaces except those connected to terminals.</p>
+</li></ul>
+<div class="note" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_note1323174452183240"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1399850079183240">Interfaces connected to terminals do not participate in MSTP calculation. You are advised to configure them as edge ports.</p>
+</div></div>
+</div>
+</li></ol>
+</div>
+</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li872739301183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p816122897183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li872739301183240"></a><a name="en-us_task_0000001259184125_li872739301183240"></a>Configure protection functions to protect devices or links. For example, configure root protection for the designated ports of the root bridge in each MSTI.</p>
+</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1016231332183240">Assign interface IP addresses and configure a routing protocol on each device to ensure network connectivity.</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li690048687183240">Create VRRP groups 1 and 2 on DeviceA and DeviceB. In VRRP group 1, configure DeviceA as the master device and DeviceB as the backup device. In VRRP group 2, configure DeviceB as the master device and DeviceA as the backup device. This implements load balancing.</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001314911630__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_steps700408159183240"><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_step1643216913513"><span id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_cmd1743217920511">Configure the Layer 2 forwarding function on the devices on the ring network.</span><p><ul id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_ul34323925116"><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li143215925112"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p4432129105119"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li143215925112"></a><a name="en-us_task_0000001259184125_li143215925112"></a>Create VLAN 2 and VLAN 3 on DeviceA, DeviceB, and DeviceC.</p>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p543209135114"># Create VLAN 2 and VLAN 3 on DeviceA.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen843219175114">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword184326995115"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b11432179205116">vlan batch 2 to 3</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1443209185119">*</span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b243215913512">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p343259185111"># Create VLAN 2 and VLAN 3 on DeviceB.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen0432997514">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1243315918519"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b64338918516">vlan batch 2 to 3</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword19433997512">*</span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b114331598517">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p94337917515"># Create VLAN 2 and VLAN 3 on DeviceC.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen1843313915510">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword3433292517"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b2433119135115">vlan batch 2 to 3</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword243311919519">*</span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b543313945113">commit</strong></pre>
+</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li194336995118"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p6433129155118"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li194336995118"></a><a name="en-us_task_0000001259184125_li194336995118"></a>Add desired interfaces on the devices to the VLANs.</p>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p6433894514"># Add <span>100GE</span><span>1/0/1</span> on DeviceA to VLANs.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen13433799513">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword10433495516"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b243311955115">interface <span>100ge</span><span>1/0/1</span></strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword84338913510"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b14341192511">portswitch</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword743419135111"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b11434493515">port link-type trunk</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1243479185113">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b34340919516">port trunk allow-pass vlan 2 to 3</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword0434198519">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1343410917517">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword20434189205114">*</span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b10434096511">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1043449155111"># Add <span>100GE</span><span>1/0/2</span> on DeviceA to VLANs.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen3434199135111">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1543415911512"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1943410915114">interface <span>100ge</span><span>1/0/2</span></strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword94356915117"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b134351799515">portswitch</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword194351394512">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b343515910512">port link-type trunk</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword3435796516">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b34351399511">port trunk allow-pass vlan 2 to 3</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword44351699519">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1543514914519">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword164351196513">*</span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1435179145110">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p84351985119"># Add <span>100GE</span><span>1/0/1</span> on DeviceB to VLANs.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen743618915110">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1443669135110"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b154361592518">interface <span>100ge</span><span>1/0/1</span></strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword124368914519"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b843614915115">portswitch</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1543669155117"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b9436199115114">port link-type trunk</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword19436199125118">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1143618925116">port trunk allow-pass vlan 2 to 3</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword74363905118">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b84366995113">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword13437109105119">*</span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b543718919516">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1243718914518"># Add <span>100GE</span><span>1/0/2</span> on DeviceB to VLANs.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen15437398519">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword11437994519"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b11437139155115">interface <span>100ge</span><span>1/0/2</span></strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1243712985112"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b0437199165113">portswitch</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword94371396512">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1943718910519">port link-type trunk</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword17437199185117">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b104384918515">port trunk allow-pass vlan 2 to 3</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword843829185115">*</span>DeviceB-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b15438139165118">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword20438159115119">*</span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1843818945120">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p124381994514"># Add <span>100GE</span><span>1/0/1</span> on DeviceC to VLANs.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen1643814905113">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword44386912514"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1143819910516">interface <span>100ge</span><span>1/0/1</span></strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword184382918518"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b19438497516">portswitch</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword743919935111"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b19439129135112">port link-type trunk</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword17439129155110">*</span>DeviceC-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1643929115118">port trunk allow-pass vlan 2 to 3</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword84394914517">*</span>DeviceC-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1343917995112">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword0439149125113">*</span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b7439793512">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p843910925116"># Add <span>100GE</span><span>1/0/2</span> on DeviceC to VLANs.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen204399995113">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword164401597516"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1044018915117">interface <span>100ge</span><span>1/0/2</span></strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword64401998511"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b644018910511">portswitch</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword24409935120"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b444017920515">port link-type access</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword154400955114">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1644015912512">port defualt vlan 2</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1244017995114">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b944015919512">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword2441109165116">*</span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b144113955117">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p15441492511"># Add <span>100GE</span><span>1/0/3</span> on DeviceC to VLANs.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen8441494510">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword14413916513"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1444118985111">interface <span>100ge</span><span>1/0/3</span></strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword7441109105115"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-<span>100GE</span><span>1/0/3</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b114411492513">portswitch</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword54419925111"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-<span>100GE</span><span>1/0/3</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b7441109185112">port link-type access</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword14441797515">*</span>DeviceC-<span>100GE</span><span>1/0/3</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b154414915111">port defualt vlan 3</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword13442991515">*</span>DeviceC-<span>100GE</span><span>1/0/3</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1544279115119">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword154425965114">*</span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1644229165116">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p4442129105116"># Add <span>100GE</span><span>1/0/4</span> on DeviceC to VLANs.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen24427910519">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword174426965117"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b644214919514">interface <span>100ge</span><span>1/0/4</span></strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword044229165116"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-<span>100GE</span><span>1/0/4</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b444212911516">portswitch</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1744215915112"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC-<span>100GE</span><span>1/0/4</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b244210915511">port link-type trunk</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword15443793512">*</span>DeviceC-<span>100GE</span><span>1/0/4</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b444339175111">port trunk allow-pass vlan 2 to 3</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword124431797513">*</span>DeviceC-<span>100GE</span><span>1/0/4</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b11443794516">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword144437995118">*</span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b19443119155115">commit</strong></pre>
+</li></ul>
+</p></li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_step69336011183240"><span id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_cmd1394200203183240">Configure basic MSTP functions.</span><p><ol type="a" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_ol72262345183240"><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li58708742183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1022832821183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li58708742183240"></a><a name="en-us_task_0000001259184125_li58708742183240"></a>On DeviceA, DeviceB, and DeviceC, configure an MST region named <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b11804149174415">RG1</strong> and create MSTI 1 and MSTI 2.</p>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1964035027183240"># Configure an MST region on DeviceA.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen616937242183240">&lt;<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword939064710819">HUAWEI</span>&gt; <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b165405410183240">system-view</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1315412111211"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword23981757172418">HUAWEI</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b727411099183240">sysname DeviceA</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword997631616253">*</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1497601672517">HUAWEI</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1999013384253">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword92533362259"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1778413268183240">stp region-configuration</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword14966144452518">*</span>DeviceA-mst-region] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b779669654183240">region-name RG1</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword75987462257">*</span>DeviceA-mst-region] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b249881362183240">instance 1 vlan 2</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword19225164862513">*</span>DeviceA-mst-region] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b95656937183240">instance 2 vlan 3</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword134416512253">*</span>DeviceA-mst-region] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b197906509183240">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1591715616256">*</span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b891725652510">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p972800693183240"># Configure an MST region on DeviceB.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen158452472611">&lt;<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword19584162410268">HUAWEI</span>&gt; <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1584102410267">system-view</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword15841024122610"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword3584824152617">HUAWEI</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b758413247269">sysname DeviceB</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword125846242269">*</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1458442416264">HUAWEI</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b3584182412262">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword8584192492615"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1058442418266">stp region-configuration</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword155841524172613">*</span>DeviceB-mst-region] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b19584132410264">region-name RG1</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword13584112402614">*</span>DeviceB-mst-region] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b95841824182619">instance 1 vlan 2</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword2584224162612">*</span>DeviceB-mst-region] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b758492492610">instance 2 vlan 3</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword9584324162614">*</span>DeviceB-mst-region] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b18584162414266">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1158482415268">*</span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b458422402619">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p449393111183240"># Configure an MST region on DeviceC.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen854415476269">&lt;<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword6544104710268">HUAWEI</span>&gt; <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b4544194716261">system-view</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword85441947192613"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword15441047112617">HUAWEI</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1054474718263">sysname DeviceC</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1544164716260">*</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1654404732617">HUAWEI</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1554415479264">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword17544134722614"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1154424711269">stp region-configuration</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1544154782614">*</span>DeviceC-mst-region] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b0544184762610">region-name RG1</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword654414715261">*</span>DeviceC-mst-region] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b205441547112612">instance 1 vlan 2</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1154417472269">*</span>DeviceC-mst-region] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1854411473261">instance 2 vlan 3</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword145443478264">*</span>DeviceC-mst-region] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1545194717262">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1354510476263">*</span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b17545647172613">commit</strong></pre>
+</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li674319983183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1024749062183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li674319983183240"></a><a name="en-us_task_0000001259184125_li674319983183240"></a>In RG1, configure root bridges and secondary root bridges for MSTI1 and MSTI2.</p>
+<ul id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_ul37074863183240"><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1019476872183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1723251938183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1019476872183240"></a><a name="en-us_task_0000001259184125_li1019476872183240"></a>Configure the root bridge and secondary root bridge for MSTI 1.</p>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p725730606183240"># Configure DeviceA as the root bridge of MSTI 1.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen1505471188183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword147171527132714"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b392527362183240">stp instance 1 root primary</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword6661941162718">*</span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b26617419275">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p2111302678183240"># Configure DeviceB as a secondary root bridge of MSTI 1.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen783538474183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword139589162813"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1707317727183240">stp instance 1 root secondary</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1488814119284">*</span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b6888104112819">commit</strong></pre>
+</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li427621504183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1554334866183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li427621504183240"></a><a name="en-us_task_0000001259184125_li427621504183240"></a>Configure the root bridge and secondary root bridge for MSTI 2.</p>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p660232444183240"># Configure DeviceB as the root bridge of MSTI 2.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen738985351183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1955884122819"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1161233193183240">stp instance 2 root primary</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1723524419284">*</span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1423554462814">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1558313942183240"># Configure DeviceA as the secondary root bridge of MSTI 2.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen350766215183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword18684879286"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b164175771183240">stp instance 2 root secondary</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword15442164562816">*</span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b144204510286">commit</strong></pre>
+</li></ul>
+</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li59665685183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p2073788293183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li59665685183240"></a><a name="en-us_task_0000001259184125_li59665685183240"></a>Set the path costs of the interfaces to be blocked in MSTI 1 and MSTI 2 to be greater than the default value.</p>
+<div class="note" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_note297238282183240"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_ul636842652183240"><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1802400517183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p541164637183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1802400517183240"></a><a name="en-us_task_0000001259184125_li1802400517183240"></a>The path cost range varies depending on which standard is used to calculate the path cost. This example uses the Huawei legacy standard and requires a path cost of 20000 for the interfaces to be blocked in MSTI 1 and MSTI 2.</p>
+</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1934760788183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p327181042183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1934760788183240"></a><a name="en-us_task_0000001259184125_li1934760788183240"></a>Devices on the same network must use the same standard to calculate the path costs of their interfaces.</p>
+</li></ul>
+</div></div>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1409858874183240"># Configure DeviceA to use the Huawei legacy standard to calculate the path costs of the desired interfaces.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen1889731727183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword847253616295"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1188730266183240">stp pathcost-standard legacy</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword527810423293">*</span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b32781042152913">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1907991231183240"># Configure DeviceB to use the Huawei legacy standard to calculate the path costs of the desired interfaces.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen692127457183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword56316505291"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1732878435183240">stp pathcost-standard legacy</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword115135717298">*</span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b551257112918">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p989756903183240"># Configure DeviceC to use the Huawei legacy standard to calculate the path costs of the desired interfaces, and set the path cost of <span>100GE</span><span>1/0/1</span> in MSTI 2 and <span>100GE</span><span>1/0/4</span> in MSTI 1 to 20000.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen98427631183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword747812323313"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1876711175183240">stp pathcost-standard legacy</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword739661117569">*</span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b339610111562">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword94611235165612"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b113589831183240">interface <span>100ge</span><span>1/0/1</span></strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword165871411103312">*</span>DeviceC-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b948346908183240">stp instance 2 cost 20000</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword0397412163310">*</span>DeviceC-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b194700122183240">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1222918142333">*</span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b891683050183240">interface <span>100ge</span><span>1/0/4</span></strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword032801513311">*</span>DeviceC-<span>100GE</span><span>1/0/4</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b2101715249183240">stp instance 1 cost 20000</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1548111633319">*</span>DeviceC-<span>100GE</span><span>1/0/4</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1584199569183240">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword470918219332">*</span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b197091214332">commit</strong></pre>
+</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1622376162183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p676288775183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1622376162183240"></a><a name="en-us_task_0000001259184125_li1622376162183240"></a>Enable MSTP to eliminate the loop.</p>
+<ul id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_ul1309001712183240"><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1872816005183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p750781956183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1872816005183240"></a><a name="en-us_task_0000001259184125_li1872816005183240"></a>Enable MSTP globally on the devices.</p>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1868396585183240"># Enable MSTP on DeviceA.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen354646827183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword19935123634212"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b419987950183240">stp enable</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword951544510425">*</span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1851584564215">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p2125542155183240"># Enable MSTP on DeviceB.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen1878765234219">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1678765254213"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b378775216422">stp enable</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1278755214429">*</span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b13787052174211">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1642515100183240"># Enable MSTP on DeviceC.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen14719954134216">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword77191554204219"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b17194541429">stp enable</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword13720115413426">*</span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b6720254134212">commit</strong></pre>
+</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1086623076183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p673104244183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li1086623076183240"></a><a name="en-us_task_0000001259184125_li1086623076183240"></a>Configure the interfaces connected to the hosts as edge ports.</p>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p956785735183240"># Configure <span>100GE</span><span>1/0/2</span> and <span>100GE</span><span>1/0/3</span> on DeviceC as edge ports.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen389807876183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword11997554437"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1739087269183240">interface <span>100ge</span><span>1/0/2</span></strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword26377114449">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1322892593183240">stp edged-port enable</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword04371531449">*</span>DeviceC-<span>100GE</span><span>1/0/2</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1573624938183240">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword109367512443">*</span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b626268908183240">interface </strong><strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b863964194412"><span>100ge</span></strong><strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b6135185284417"><span>1/0/3</span></strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword15740208174414">*</span>DeviceC-<span>100GE</span><span>1/0/3</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1390283357183240">stp edged-port enable</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword107481510194412">*</span>DeviceC-<span>100GE</span><span>1/0/3</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1083533422183240">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword528121512444">*</span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b7281111515443">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1522728995183240">(Optional) Configure BPDU protection on DeviceC.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen2026723014183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword53711422134513"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b945776172183240">stp bpdu-protection</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1826162816453">*</span>DeviceC] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b14261828194516">commit</strong></pre>
+</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li361733233183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p124242374183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li361733233183240"></a><a name="en-us_task_0000001259184125_li361733233183240"></a>Configure the interfaces connected to the network as edge ports.</p>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p149499277183240"># Configure <span>100GE</span><span>1/0/3</span> on DeviceA as an edge port.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen5526157104813">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword5776162595712"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b35275718483">interface </strong><strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b05271378482"><span>100ge</span></strong><strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1652713710488"><span>1/0/3</span></strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword72716665315"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/3</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b5527207124813">stp edged-port enable</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword65271724813">*</span>DeviceA-<span>100GE</span><span>1/0/3</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b152714716480">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword95271072488">*</span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b35279714820">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1076970007183240">(Optional) Configure BPDU protection on DeviceA.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen2088816413498">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword15888184119498"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b168889415493">stp bpdu-protection</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1588820410493">*</span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b138882419499">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p928738932183240"># Configure <span>100GE</span><span>1/0/3</span> on DeviceB as an edge port.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen6368185324911">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword19941830155719"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b15368753144912">interface </strong><strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b2368253134914"><span>100ge</span></strong><strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b173698538492"><span>1/0/3</span></strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword51264145538"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/3</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b836945314919">stp edged-port enable</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword18369165312491">*</span>DeviceB-<span>100GE</span><span>1/0/3</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b193691053124916">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1636995314920">*</span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b2036935324920">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1893838079183240">(Optional) Configure BPDU protection on DeviceB.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen758251506">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1958205115017"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b25817512500">stp bpdu-protection</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword45817575013">*</span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b17592511505">commit</strong></pre>
+<div class="note" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_note1750185620183240"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1061883784610">If an STP-enabled network device is connected to an edge port and BPDU protection is enabled, the edge port is shut down when it receives a BPDU, but its edge port attribute remains unchanged.</p>
+</div></div>
+</li></ul>
+</li></ol>
+</p></li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_step1711571210183240"><span id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_cmd833874905183240">Configure protection functions. For example, configure root protection for the designated ports of the root bridge in each MSTI.</span><p><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p399225245183240"># Enable root protection on <span>100GE</span><span>1/0/1</span> of DeviceA.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen1961963106183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword36681557135210"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b819772705183240">interface <span>100ge</span><span>1/0/1</span></strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword19372147115810">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b707357895183240">stp root-protection</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword148277219547">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1532555360183240">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword106662082542">*</span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1966616865416">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p561253166183240"># Enable root protection on <span>100GE</span><span>1/0/1</span> of DeviceB.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen4457112416546">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword12457182485420"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b4457132418541">interface <span>100ge</span><span>1/0/1</span></strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword103114117586">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1645716248548">stp root-protection</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1145710242546">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b945718249545">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1345752411544">*</span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b18457162445417">commit</strong></pre>
+</p></li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_step693347503183240"><span id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_cmd845214299183240">Verify the configuration.</span><p><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1588999839183240">After the preceding configurations are complete and the network becomes stable, perform the following operations to verify the configuration.</p>
+<div class="note" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_note390642883183240"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p677425702183240">This example uses MSTI 1 and MSTI 2. As such, you do not need to check the interface status in MSTI 0.</p>
+</div></div>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1014496332183240"># Run the <a href="cmdqueryname=display+stp+brief"><b><span class="cmdname" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_cmdname1268379527183240">display stp brief</span></b></a> command on DeviceA to check the interface status and protection type. The displayed information is as follows:</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen353086784183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword2622141317015"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword462211317011">Device</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword56228131306"></span>A] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1266894878183240">display stp brief</strong>
+ MSTID      Port                        Role  STP State       Protection
+   0        <span>100GE</span><span>1/0/1</span>                       <samp class="codeph" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_codeph425659755183240">DESI  FORWARDING      ROOT</samp>
+   0        <span>100GE</span><span>1/0/2</span>                       <samp class="codeph" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_codeph1461991638183240">DESI  FORWARDING      NONE</samp>
+   1        <span>100GE</span><span>1/0/1</span>                       DESI  FORWARDING      ROOT
+   1        <span>100GE</span><span>1/0/2</span>                       DESI  FORWARDING      NONE
+   2        <span>100GE</span><span>1/0/1</span>                       DESI  FORWARDING      ROOT
+   2        <span>100GE</span><span>1/0/2</span>                       ROOT  FORWARDING      NONE</pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p595143215183240">In MSTI 1, DeviceA is the root bridge; therefore, <span>100GE</span><span>1/0/1</span> and <span>100GE</span><span>1/0/2</span> on DeviceA become the designated ports. In MSTI 2, <span>100GE</span><span>1/0/1</span> on DeviceA becomes the designated port and <span>100GE</span><span>1/0/2</span> the root port.</p>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1650669953183240"># Run the <a href="cmdqueryname=display+stp+brief"><b><span class="cmdname" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_cmdname1228369619183240">display stp brief</span></b></a> command on DeviceB. The displayed information is as follows:</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen1587173400183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword2096941713014"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword896915171202">Device</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1596917171102"></span>B] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b935591734183240">display stp brief</strong>
+ MSTID      Port                        Role  STP State       Protection
+   0        <span>100GE</span><span>1/0/1</span>                       <samp class="codeph" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_codeph508188488183240">DESI  FORWARDING      ROOT</samp>
+   0        <span>100GE</span><span>1/0/2</span>                       <samp class="codeph" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_codeph828804813183240">ROOT  FORWARDING      NONE</samp>
+   1        <span>100GE</span><span>1/0/1</span>                       DESI  FORWARDING      ROOT
+   1        <span>100GE</span><span>1/0/2</span>                       ROOT  FORWARDING      NONE
+   2        <span>100GE</span><span>1/0/1</span>                       DESI  FORWARDING      ROOT
+   2        <span>100GE</span><span>1/0/2</span>                       DESI  FORWARDING      NONE</pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p186582719183240">In MSTI 2, DeviceB is the root bridge; therefore, <span>100GE</span><span>1/0/1</span> and <span>100GE</span><span>1/0/2</span> become the designated ports. In MSTI 1, <span>100GE</span><span>1/0/1</span> on DeviceB becomes the designated port and <span>100GE</span><span>1/0/2</span> the root port.</p>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p88849639183240"># Run the <a href="cmdqueryname=display+stp+interface+brief"><b><span class="cmdname" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_cmdname2128969763183240">display stp interface brief</span></b></a> command on DeviceC. The displayed information is as follows:</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen1535662398183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword94020234011"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword5401623700">Device</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword240223909"></span>C] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b199585459119">display stp interface </strong><strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b139521345511"><span>100ge</span><span>1/0/1</span></strong> <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b19589451615">brief</strong>
+ MSTID      Port                        Role  STP State       Protection
+   0        <span>100GE</span><span>1/0/1</span>            <samp class="codeph" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_codeph208866837183240">           ROOT  FORWARDING      NONE</samp>
+   1        <span>100GE</span><span>1/0/1</span>            <samp class="codeph" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_codeph174139505243">           </samp>ROOT  FORWARDING      NONE
+   2        <span>100GE</span><span>1/0/1</span>            <samp class="codeph" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_codeph15299135352415">           </samp>ALTE  DISCARDING      NONE</pre>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen1315544905183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword10878641919"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword128781546114">Device</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword687864616"></span>C] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b14413396183240">display stp interface <span>100ge</span><span>1/0/4</span> brief</strong>
+ MSTID      Port                        Role  STP State       Protection
+   0        <span>100GE</span><span>1/0/4</span>                       <samp class="codeph" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_codeph1391174822183240">ALTE  DISCARDING      NONE</samp>
+   1        <span>100GE</span><span>1/0/4</span>                       ALTE  DISCARDING      NONE
+   2        <span>100GE</span><span>1/0/4</span>                       ROOT  FORWARDING      NONE</pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1324774754183240"><span>100GE</span><span>1/0/1</span> on DeviceC is the root port in MSTI 1 and is blocked in MSTI 2. <span>100GE</span><span>1/0/4</span> on DeviceC is blocked in MSTI 1 and is the root port in MSTI 2.</p>
+</p></li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_step685782641183240"><span id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_cmd404113838183240">Enable network connectivity between devices.</span><p><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p237922749183240"># Configure interface IP addresses. The following uses DeviceA as an example. The configuration of DeviceB is similar to the configuration of DeviceA. For details, see Configuration Scripts.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen1366695349183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword3420731387"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1847111814265">Device</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1218664517101"></span>A] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b253434348183240">vlan batch 4</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword518664551016"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword13271257162811">*</span>Device</span>A] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b964895141183240">interface <span>100ge</span><span>1/0/3</span></strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword2187154519105"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword854205812811">*</span>Device</span>A-<span>100GE</span><span>1/0/3</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1248276094183240">port link-type trunk</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword8187845131015"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword15767858192812">*</span>Device</span>A-<span>100GE</span><span>1/0/3</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b708513035183240">port trunk allow-pass vlan 4</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword18187164518101"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword45291159112817">*</span>Device</span>A-<span>100GE</span><span>1/0/3</span>] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1827821060183240">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword81871453103"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword42791402293">*</span>Device</span>A] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1331402928183240">interface vlanif 2</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword569817162913">*</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword0187124531014">Device</span>A-Vlanif2] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1788925267183240">ip address 10.1.2.102 24</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword0187134541018"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword104721726299">*</span>Device</span>A-Vlanif2] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b937198826183240">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword5187134515106"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1920412312917">*</span>Device</span>A] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b931896817183240">interface vlanif 3</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1418774531012"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword428254122918">*</span>Device</span>A-Vlanif3] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1602632286183240">ip address 10.1.3.102 24</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword918774511102"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword11972134172917">*</span>Device</span>A-Vlanif3] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1287995155183240">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword0187194516106"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword38332562911">*</span>Device</span>A] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1137326010183240">interface vlanif 4</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword118784517102"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword186041368298">*</span>Device</span>A-Vlanif4] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b826148008183240">ip address 10.1.4.102 24</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1187184591016"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword6364892912">*</span>Device</span>A-Vlanif4] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1966508063183240">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword158749516284">*</span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b2874205116285">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p2088905047183240"># Configure OSPF on DeviceA and DeviceB. The following uses DeviceA as an example. The configuration of DeviceB is similar to the configuration of DeviceA. For details, see Configuration Scripts.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen230167548183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1542922412463"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword18429182414464">Device</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1442972424615"></span>A] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b546957312183240">ospf 1</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1618715451103"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword129801036102917">*</span>Device</span>A-ospf-1] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b207502568183240">area 0</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword918774511014"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword97714389292">*</span>Device</span>A-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1952687097183240">network 10.1.2.0 0.0.0.255</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword2187145151018"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword188111638102915">*</span>Device</span>A-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b427517840183240">network 10.1.3.0 0.0.0.255</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1418724551018"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1853640192910">*</span>Device</span>A-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1205205994183240">network 10.1.4.0 0.0.0.255</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword918794517105"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword161901241202910">*</span>Device</span>A-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b2009974671183240">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword418724541015"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword93294472916">*</span>Device</span>A-ospf-1] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1582918186183240">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1611515225291">*</span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b18116152242917">commit</strong></pre>
+</p></li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_step1788697190183240"><span id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_cmd10097977183240">Configure a VRRP group.</span><p><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1037685480183240"># Create VRRP group 1 on DeviceA and DeviceB, and set the VRRP priority to 120 and preemption delay to 20s on DeviceA, which then becomes the master device.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen809489158183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword61693318461"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1016113364613">Device</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword916833174615"></span>A] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b230429041183240">interface vlanif 2</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword99921426154710"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword699242614473">Device</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword159921426104718"></span>A-Vlanif2] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1273684309183240">vrrp vrid 1 virtual-ip 10.1.2.100</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword6187345111017"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword652982693110">*</span>Device</span>A-Vlanif2] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1376875680183240">vrrp vrid 1 priority 120</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword61872451103"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword16156112713317">*</span>Device</span>A-Vlanif2] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b630505356183240">vrrp vrid 1 preempt timer delay 20</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword20187645151020"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword13118122819319">*</span>Device</span>A-Vlanif2] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1481111468183240">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1734183303113">*</span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1134123353110">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p18620184933110"># Use the default VRRP priority for DeviceB, which functions as the backup device.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen1061282010183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword0788113824612"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword17788138204619">Device</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword078863811469"></span>B] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1920888529183240">interface vlanif 2</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword89011334184711"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword14901734144715">Device</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1590103417471"></span>B-Vlanif2] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b2087473292183240">vrrp vrid 1 virtual-ip 10.1.2.100</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword118724551017"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword17941512321">*</span>Device</span>B-Vlanif2] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b2041239994183240">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1174589143217">*</span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b6745998327">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1890064635183240"># Create VRRP group 2 on DeviceA and DeviceB, and set the VRRP priority to 120 and preemption delay to 20s on DeviceB, which then becomes the master device.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen436998626183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword13382145174613"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword13821745134618">Device</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword638264513465"></span>B] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1722014213324">interface vlanif 3</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword69032422475"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword79036426475">Device</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword19031442124713"></span>B-Vlanif3] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b2022054210324">vrrp vrid 2 virtual-ip 10.1.3.100</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword022054216320"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword42201942153213">*</span>Device</span>B-Vlanif3] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b722012428323">vrrp vrid 2 priority 120</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1722014273213"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword9220114223216">*</span>Device</span>B-Vlanif3] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b17220164211329">vrrp vrid 2 preempt timer delay 20</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1222044253215"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword22201642183219">*</span>Device</span>B-Vlanif3] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b622012422326">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword182205426323">*</span>DeviceB] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b52202426320">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p560074216339"># Use the default VRRP priority for DeviceA, which functions as the backup device.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen1728758361183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword197901054194615"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword187901954194612">Device</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword187901254184613"></span>A] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b6322165810332">interface vlanif 3</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword17779630204720"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword87791330124710">Device</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword47791930114715"></span>A-Vlanif3] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1322558183314">vrrp vrid 2 virtual-ip 10.1.3.100</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword23236582332"><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword1832335810330">*</span>Device</span>A-Vlanif3] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b432325815332">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword4323185819338">*</span>DeviceA] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b14323158143311">commit</strong></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p437083524183240"># Set the virtual IP address 10.1.2.100 of VRRP group 1 as the default gateway of HostA and the virtual IP address 10.1.3.100 of VRRP group 2 as the default gateway of HostB.</p>
+</p></li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_step2027581287183240"><span id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_cmd1288180013183240">Verify the configuration.</span><p><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1940467550183240"># After completing the preceding configurations, run the <a href="cmdqueryname=display+vrrp"><b><span class="cmdname" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_cmdname1719430941183240">display vrrp</span></b></a> command on DeviceA. The command output shows that DeviceA functions as the master device in VRRP group 1 and backup device in VRRP group 2.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen767889746183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword3601021106"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword56011221609">Device</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword2601321503"></span>A] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b656193617183240">display vrrp</strong>
+  Vlanif2 | Virtual Router 1
+    <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b849564358183240">State : Master</strong>
+    Virtual IP : 10.1.2.100
+    Master IP : 10.1.2.102
+    PriorityRun : 120
+    PriorityConfig : 120                                                        
+    MasterPriority : 120                                                        
+    Preempt : YES   Delay Time : 20 s                                           
+    TimerRun : 1 s                                                              
+    TimerConfig : 1 s                                                           
+    Auth type : NONE                                                            
+    Virtual MAC : 00e0-fc12-3456                                                
+    Check TTL : YES                                                             
+    Config type : normal-vrrp                                                   
+    Backup-forward : disabled
+    Create time : <samp class="codeph" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_codeph1967715376183240">2021-05-11 11:39:18</samp>                                           
+    Last change time : <samp class="codeph" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_codeph1440104578183240">2021-05-26 11:38:58</samp>
+
+  Vlanif3 | Virtual Router 2
+    <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1404953293183240">State : Backup</strong>
+    Virtual IP : 10.1.3.100
+    Master IP : 10.1.3.103
+    PriorityRun : 100
+    PriorityConfig : 100                                                        
+    MasterPriority : 120                                                        
+    Preempt : YES   Delay Time : 0 s                                            
+    TimerRun : 1 s                                                              
+    TimerConfig : 1 s                                                           
+    Auth type : NONE                                                            
+    Virtual MAC : 00e0-fc12-3457                                                
+    Check TTL : YES                                                             
+    Config type : normal-vrrp                                                   
+    Backup-forward : disabled
+    Create time : <samp class="codeph" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_codeph205669023183240">2021-05-11 11:40:18</samp>                                           
+    Last change time : <samp class="codeph" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_codeph836343303183240">2021-05-26 11:48:58</samp></pre>
+<p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1994954969183240"># Run the <a href="cmdqueryname=display+vrrp"><b><span class="cmdname" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_cmdname1531565329183240">display vrrp</span></b></a> command on DeviceB. The command output shows that DeviceB functions as the backup device in VRRP group 1 and master device in VRRP group 2.</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen531695607183240">[<span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword6617176806"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword16617561301">Device</span><span class="keyword" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_keyword161712614013"></span>B] <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b630648186183240">display vrrp</strong>
+  Vlanif2 | Virtual Router 1
+    <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b1662674703183240">State : Backup</strong>
+    Virtual IP : 10.1.2.100
+    Master IP : 10.1.2.102
+    PriorityRun : 100
+    PriorityConfig : 100                                                        
+    MasterPriority : 120                                                        
+    Preempt : YES   Delay Time : 0 s                                            
+    TimerRun : 1 s                                                              
+    TimerConfig : 1 s                                                           
+    Auth type : NONE                                                            
+    Virtual MAC : 00e0-fc12-3456                                                
+    Check TTL : YES                                                             
+    Config type : normal-vrrp                                                   
+    Backup-forward : disabled
+    Create time : <samp class="codeph" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_codeph1768144866183240">2021-05-11 11:39:18</samp>                                           
+    Last change time : <samp class="codeph" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_codeph346655081183240">2021-05-26 11:38:58</samp>
+
+  Vlanif3 | Virtual Router 2
+    <strong id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_b364106585183240">State : Master</strong>
+    Virtual IP : 10.1.3.100
+    Master IP : 10.1.3.103
+    PriorityRun : 120
+    PriorityConfig : 120                                                        
+    MasterPriority : 120                                                        
+    Preempt : YES   Delay Time : 20 s                                            
+    TimerRun : 1 s                                                              
+    TimerConfig : 1 s                                                           
+    Auth type : NONE                                                            
+    Virtual MAC : 00e0-fc12-3457                                                
+    Check TTL : YES                                                             
+    Config type : normal-vrrp                                                   
+    Backup-forward : disabled
+    Create time : <samp class="codeph" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_codeph1142338737183240">2021-05-11 11:40:18</samp>                                           
+    Last change time : <samp class="codeph" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_codeph916443638183240">2021-05-26 11:48:58</samp> 
+</pre>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_example627140345183240"><a name="EN-US_TASK_0000001314911630__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_ul956122631183240"><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li161844487183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p1405995907183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li161844487183240"></a><a name="en-us_task_0000001259184125_li161844487183240"></a>DeviceA</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen1600143466183240">#
+sysname DeviceA
+#
+vlan batch 2 to 4
+#
+stp instance 1 root primary
+stp instance 2 root secondary
+stp bpdu-protection 
+stp pathcost-standard legacy
+#
+stp region-configuration
+ region-name RG1
+ instance 1 vlan 2
+ instance 2 vlan 3
+#
+interface Vlanif2
+ ip address 10.1.2.102 255.255.255.0
+ vrrp vrid 1 virtual-ip 10.1.2.100
+ vrrp vrid 1 priority 120
+ vrrp vrid 1 preempt timer delay 20
+#
+interface Vlanif3
+ ip address 10.1.3.102 255.255.255.0
+ vrrp vrid 2 virtual-ip 10.1.3.100
+#
+interface Vlanif4
+ ip address 10.1.4.102 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/1</span>
+ port link-type trunk
+ port trunk allow-pass vlan 2 to 3
+ stp root-protection
+#
+interface <span>100GE</span><span>1/0/2</span>
+ port link-type trunk
+ port trunk allow-pass vlan 2 to 3
+#
+interface <span>100GE</span><span>1/0/3</span>
+ port link-type trunk
+ port trunk allow-pass vlan 4
+ stp edged-port enable 
+#
+ospf 1
+ area 0.0.0.0
+  network 10.1.2.0 0.0.0.255
+  network 10.1.3.0 0.0.0.255
+  network 10.1.4.0 0.0.0.255
+#
+return</pre>
+</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li147209199183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p243846249183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li147209199183240"></a><a name="en-us_task_0000001259184125_li147209199183240"></a>DeviceB</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen516400589183240">#
+sysname DeviceB
+#
+vlan batch 2 to 3 5
+#
+stp instance 1 root secondary
+stp instance 2 root primary
+stp bpdu-protection 
+stp pathcost-standard legacy
+#
+stp region-configuration
+ region-name RG1
+ instance 1 vlan 2
+ instance 2 vlan 3
+#
+interface Vlanif2
+ ip address 10.1.2.103 255.255.255.0
+ vrrp vrid 1 virtual-ip 10.1.2.100
+#
+interface Vlanif3
+ ip address 10.1.3.103 255.255.255.0
+ vrrp vrid 2 virtual-ip 10.1.3.100
+ vrrp vrid 2 priority 120
+ vrrp vrid 2 preempt timer delay 20
+#
+interface Vlanif5
+ ip address 10.1.5.103 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/1</span>
+ port link-type trunk
+ port trunk allow-pass vlan 2 to 3
+ stp root-protection
+#
+interface <span>100GE</span><span>1/0/2</span>
+ port link-type trunk
+ port trunk allow-pass vlan 2 to 3
+#
+interface <span>100GE</span><span>1/0/3</span>
+ port link-type trunk
+ port trunk allow-pass vlan 5
+ stp edged-port enable 
+#
+ospf 1
+ area 0.0.0.0
+  network 10.1.2.0 0.0.0.255
+  network 10.1.3.0 0.0.0.255
+  network 10.1.5.0 0.0.0.255
+#
+return</pre>
+</li><li id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li988617912183240"><p id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_p620270145183240"><a name="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_li988617912183240"></a><a name="en-us_task_0000001259184125_li988617912183240"></a>DeviceC</p>
+<pre class="screen" id="EN-US_TASK_0000001314911630__en-us_task_0000001259184125_screen1985436691183240">#
+sysname DeviceC
+#
+vlan batch 2 to 3
+#
+stp bpdu-protection 
+stp pathcost-standard legacy
+#
+stp region-configuration
+ region-name RG1
+ instance 1 vlan 2
+ instance 2 vlan 3
+#
+interface <span>100GE</span><span>1/0/1</span>
+ port link-type trunk
+ port trunk allow-pass vlan 2 to 3
+ stp instance 2 cost 20000
+#
+interface <span>100GE</span><span>1/0/2</span>
+ port link-type access
+ port default vlan 2
+ stp edged-port enable 
+#
+interface <span>100GE</span><span>1/0/3</span>
+ port link-type access
+ port default vlan 3
+ stp edged-port enable 
+#
+interface <span>100GE</span><span>1/0/4</span>
+ port link-type trunk
+ port trunk allow-pass vlan 2 to 3
+ stp instance 1 cost 20000
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_stp_cfg_1077.html">Configuring STP/RSTP/MSTP
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_stp_cfg_1186.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

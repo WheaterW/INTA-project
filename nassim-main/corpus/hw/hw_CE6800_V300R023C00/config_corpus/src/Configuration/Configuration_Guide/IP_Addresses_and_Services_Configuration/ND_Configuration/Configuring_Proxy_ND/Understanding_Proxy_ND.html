@@ -1,0 +1,121 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding Proxy ND">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_nd_cfg_0047.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_nd_cfg_0049.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="ND">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="ND">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featurename" content="ND">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001130622530">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding Proxy ND</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001130622530"></a><a name="EN-US_CONCEPT_0000001130622530"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding Proxy ND</h1>
+<div><p>ND applies only to communication between hosts that belong to the same physical network and network segment. After receiving an NS message from a host, a device checks whether the destination IPv6 address of the NS message is a local one to determine whether the requested MAC address is a local one. If yes, the device replies with an NA message. If no, the device discards the NS message.</p>
+<p>If hosts on different physical networks belong to the same network segment, or hosts on the same physical network belong to the same network segment but cannot communicate at Layer 2, you can configure proxy ND on the device between them to implement communication. After proxy ND is configured, if the device receives an NS message and finds that the destination address of the NS message is not its own address, it uses its own MAC address and the IPv6 address of the destination host to reply to the source host with an NA message.</p>
+<div class="section"><h4 class="sectiontitle">Routed Proxy ND</h4><p>Hosts that belong to the same network segment but different physical networks are unable to communicate with each other if the gateways connected to them have different IPv6 addresses. In this case, you can enable routed proxy ND on a device's interface connected to the hosts to allow them to communicate.</p>
+<p>As shown in <a href="#EN-US_CONCEPT_0000001130622530__fig186751057113612">Figure 1</a>, DeviceA and DeviceB are connected to different networks, and the IPv6 addresses of interfaces 1 and 2 belong to different network segments. Take HostA and HostB as an example. When HostA needs to communicate with HostB, it sends an NS message to request HostB's MAC address because the destination IPv6 address is on the same network segment as the local IPv6 address. However, as HostA and HostB are located on different physical networks, HostB cannot receive the NS message.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130622530__fig186751057113612"><a name="EN-US_CONCEPT_0000001130622530__fig186751057113612"></a><a name="fig186751057113612"></a><span class="figcap"><b>Figure 1 </b>Network diagram of routed proxy ND</span><br><span><img class="vsd" src="figure/en-us_image_0000001176742019.png"></span></div>
+<p>To address the preceding issue, enable routed proxy ND on DeviceA's interface 1 and DeviceB's interface 2. The implementation process is as follows:</p>
+<ol><li>HostA sends an NS message for the MAC address of HostB.</li><li>After receiving the NS message, DeviceA checks the destination IPv6 address of the message and finds that this address is not its own IPv6 address. Therefore, DeviceA determines that the message does not request its own MAC address. DeviceA then checks whether there is any route to HostB.<ul><li>If there is no route to HostB, DeviceA discards the NS message.</li><li>If a route to HostB is available, DeviceA checks whether routed proxy ND is enabled on the interface that receives the message.<ul><li><p>If routed proxy ND is enabled, DeviceA sends the MAC address of interface 1 to HostA through an NA message.</p>
+<p>After receiving the NA message, HostA considers that this message is from HostB. HostA then learns the MAC address of interface 1 from the message and uses this MAC address to send data packets to HostB.</p>
+</li><li>If routed proxy ND is not enabled, DeviceA discards the NS message.</li></ul>
+</li></ul>
+</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Proxy ND Anyway</h4><p>In scenarios where servers are partitioned into VMs, the flexible deployment and migration of VMs on multiple servers or gateways can be achieved by configuring Layer 2 interconnection between multiple gateways. However, this approach may lead to larger Layer 2 domains on the network and the risk of broadcast storms. To resolve this issue, enable proxy ND anyway on a VM gateway. In this way, the gateway sends its interface MAC address to a source VM and communication between VMs is implemented through route forwarding.</p>
+<p>As shown in <a href="#EN-US_CONCEPT_0000001130622530__fig12417825103810">Figure 2</a>, the IPv6 addresses of VM1 and VM2 are 2001:db8:300:400::1/64 and 2001:db8:300:400::2/64, respectively. VM1 and VM2 are located on the same network segment. DeviceA and DeviceB are connected to VM1 and VM2, respectively. The interconnection interfaces (interface 1) have the same IPv6 and MAC addresses. When VM1 needs to communicate with VM2, it sends an NS message to request VM2's MAC address because the destination IPv6 address is on the same network segment as the local IPv6 address. However, as VM1 and VM2 are located on different physical networks, VM2 cannot receive the NS message and therefore does not respond.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130622530__fig12417825103810"><a name="EN-US_CONCEPT_0000001130622530__fig12417825103810"></a><a name="fig12417825103810"></a><span class="figcap"><b>Figure 2 </b>Typical network diagram of proxy ND anyway</span><br><span><img class="vsd" src="figure/en-us_image_0000001176742009.png"></span><p>To address the preceding issue, enable proxy ND anyway on interface 1 of DeviceA and DeviceB. The implementation process is as follows:</p>
+<ol><li>VM1 sends an NS message for the MAC address of VM2.</li><li>After receiving the NS message, DeviceA checks the destination IPv6 address of the message and finds that this address is not its own IPv6 address. Therefore, DeviceA determines that the message does not request its own MAC address. DeviceA then checks whether proxy ND anyway is enabled on the interface that receives the message.<ul><li><p>If proxy ND anyway is enabled, DeviceA sends the MAC address of interface 1 to VM1 through an NA message.</p>
+<p>After receiving the NA message, VM1 considers that this message is from VM2. VM1 then learns the MAC address of interface 1 from the message and uses this MAC address to send data packets to VM2.</p>
+</li><li>If proxy ND anyway is not enabled, DeviceA discards the NS message.</li></ul>
+</li></ol>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Intra-VLAN Proxy ND</h4><p>Hosts that belong to the same VLAN are unable to communicate with each other if Layer 2 interface isolation is configured in the VLAN. In this case, you can enable intra-VLAN proxy ND on a device's interface associated with the VLAN to allow the hosts to communicate.</p>
+<p>As shown in <a href="#EN-US_CONCEPT_0000001130622530__fig134781934203714">Figure 3</a>, HostA and HostB are connected to Device, whose interfaces connected to HostA and HostB belong to the same VLAN. HostA and HostB cannot communicate at Layer 2 because intra-VLAN Layer 2 interface isolation is configured on Device.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130622530__fig134781934203714"><a name="EN-US_CONCEPT_0000001130622530__fig134781934203714"></a><a name="fig134781934203714"></a><span class="figcap"><b>Figure 3 </b>Network diagram of intra-VLAN proxy ND</span><br><span><img class="vsd" src="figure/en-us_image_0000001130622564.png"></span></div>
+<p>To address the preceding issue, enable intra-VLAN proxy ND on Device's interface 1. The implementation process is as follows:</p>
+<ol><li>HostA sends an NS message for the MAC address of HostB.</li><li>After receiving the NS message, Device checks the destination IPv6 address of the message and finds that this address is not its own IPv6 address. Therefore, Device determines that the message does not request its own MAC address. Device then checks whether there is any ND entry for HostB.<ul><li>If there is an ND entry for HostB and VLAN information in this entry is the same as that in the interface that receives the message, Device checks whether intra-VLAN proxy ND is enabled on interface 1.<ul><li><p>If intra-VLAN proxy ND is enabled on interface 1, Device sends the MAC address of interface 1 to HostA.</p>
+<p>After receiving an NA message from Device, HostA considers that this message is from HostB. HostA then learns the MAC address of interface 1 from the message and uses this MAC address to send data packets to HostB.</p>
+</li><li>If intra-VLAN proxy ND is not enabled on interface 1, Device discards the NS message.</li></ul>
+</li><li>If no ND entry for HostB is available, Device discards the NS message and checks whether intra-VLAN proxy ND is enabled on interface 1.<ul><li>If intra-VLAN proxy ND is enabled, Device multicasts the NS message in VLAN 10. The destination IPv6 address of the NS message is the IPv6 address of HostB. After receiving an NA message from HostB, Device generates an ND entry indicating the mapping between the IPv6 and MAC addresses of HostB.</li><li>If intra-VLAN proxy ND is not enabled, Device does not perform any operations.</li></ul>
+</li></ul>
+</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">Application Scenarios</h4><p><a href="#EN-US_CONCEPT_0000001130622530__tab_dc_vrp_arp_feature_002901">Table 1</a> describes the application scenarios of proxy ND. You can select a proper proxy ND type based on an application scenario.</p>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001130622530__tab_dc_vrp_arp_feature_002901"></a><a name="tab_dc_vrp_arp_feature_002901"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001130622530__tab_dc_vrp_arp_feature_002901" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Application scenarios of proxy ND</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="16.5%" id="mcps1.3.6.3.2.3.1.1" liSelected="liSelected"><p>Proxy ND Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="83.5%" id="mcps1.3.6.3.2.3.1.2" liSelected="liSelected"><p>Application Scenario</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="16.5%" headers="mcps1.3.6.3.2.3.1.1 "><p>Routed proxy ND</p>
+</td>
+<td class="cellrowborder" valign="top" width="83.5%" headers="mcps1.3.6.3.2.3.1.2 "><p>Two hosts that need to communicate belong to the same network segment but different physical networks, and the gateways to which they are connected have different IPv6 addresses.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="16.5%" headers="mcps1.3.6.3.2.3.1.1 "><p>Proxy ND anyway</p>
+</td>
+<td class="cellrowborder" valign="top" width="83.5%" headers="mcps1.3.6.3.2.3.1.2 "><p>Two VMs that need to communicate belong to the same network segment but different physical networks, and the gateways to which they are connected have the same IPv6 address.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="16.5%" headers="mcps1.3.6.3.2.3.1.1 "><p>Intra-VLAN proxy ND</p>
+</td>
+<td class="cellrowborder" valign="top" width="83.5%" headers="mcps1.3.6.3.2.3.1.2 "><p>Two hosts that need to communicate belong to the same network segment and the same VLAN in which user isolation is configured.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="16.5%" headers="mcps1.3.6.3.2.3.1.1 "><p>Inter-VLAN proxy ND</p>
+</td>
+<td class="cellrowborder" valign="top" width="83.5%" headers="mcps1.3.6.3.2.3.1.2 "><p>Two hosts that need to communicate belong to the same network segment but different VLANs.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_nd_cfg_0047.html">Configuring Proxy ND
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_nd_cfg_0049.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

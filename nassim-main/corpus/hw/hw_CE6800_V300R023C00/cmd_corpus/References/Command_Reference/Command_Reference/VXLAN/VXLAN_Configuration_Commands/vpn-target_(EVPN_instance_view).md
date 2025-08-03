@@ -1,0 +1,90 @@
+vpn-target (EVPN instance view)
+===============================
+
+vpn-target (EVPN instance view)
+
+Function
+--------
+
+
+
+The **vpn-target** command configures VPN targets for a BD EVPN instance.
+
+The **undo vpn-target** command deletes the VPN targets of a BD EVPN instance.
+
+
+
+By default, no VPN target is configured for BD EVPN instances.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**vpn-target** { *vrfRt* } &<1-8> [ *vrfRtType* ]
+
+**vpn-target auto** [ *vrfRtType* ]
+
+**undo vpn-target** { *vrfRt* } &<1-8> [ *vrfRtType* ]
+
+**undo vpn-target all**
+
+**undo vpn-target auto** [ *vrfRtType* ]
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| *vrfRt* | Specifies a VPN target to be configured for a BD EVPN instance. | The format of a VPN target can be as follows:   * 2-byte AS number:4-byte user-defined number, for example, 1:3. An AS number is an integer ranging from 0 to 65535, and a user-defined number is an integer ranging from 0 to 4294967295. The AS and user-defined numbers cannot be both 0s. This means that a VPN target cannot be 0:0. * Integral 4-byte AS number:2-byte user-defined number, for example, 65537:3. An AS number is an integer ranging from 65536 to 4294967295, and a user-defined number is an integer ranging from 0 to 65535. * 4-byte AS number in dotted notation:2-byte user-defined number, for example, 0.0:3 or 0.1:0. A 4-byte AS number in dotted notation is in the format of x.y, where x and y are integers ranging from 0 to 65535. A user-defined number is an integer ranging from 0 to 65535. The AS and user-defined numbers cannot be both 0s. This means that a VPN target cannot be 0.0:0. * 32-bit IP address:2-byte user-defined number. For example, 192.168.122.15:1. An IP address ranges from 0.0.0.0 to 255.255.255.255, and a user-defined number is an integer ranging from 0 to 65535. |
+| *vrfRtType* | Adds a VPN target to both the import or export VPN target lists of a BD EVPN instance. | The value can be both, export-extcommunity, and import-extcommunity. If none is specified, the configured VPN target is added to both the import and export VPN target lists by default. |
+| **auto** | Specifies the VPN target that is automatically generated. | - |
+| **all** | Deletes all VPN targets of the EVPN instance address family in the BD view. | - |
+
+
+
+Views
+-----
+
+EVPN instance view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+When a local PE advertises EVPN routes to peer PEs, the EVPN routes carry all the export VPN targets of the local EVPN instance. A peer PE installs a received EVPN route to its EVPN routing table only when the route's export VPN target is identical with the import VPN target in the PE's EVPN instance. To configure VPN targets for a BD EVPN instance, run the **vpn-target** command.NOTE:A maximum of eight VPN targets can be specified in the **vpn-target** command. If you want to configure more VPN targets in an EVPN instance, run the **vpn-target** command more than once.
+
+**Prerequisites**
+
+An RD has been configured for the BD EVPN instance using the **route-distinguisher** command.
+
+**Configuration Impact**
+
+If the **vpn-target** command is not run, a PE does not install received EVPN routes into its EVPN routing table.If all the VPN targets of an EVPN instance are deleted using the **undo vpn-target** command, all routes learned by the EVPN instance from other VPN instances will be deleted.
+
+
+Example
+-------
+
+# Add 5:5 to both the export and import VPN target lists of an EVPN instance in BD 11.
+```
+<HUAWEI> system-view
+[~HUAWEI] bridge-domain 11
+[*HUAWEI-bd11] evpn
+[*HUAWEI-bd11-evpn] route-distinguisher 22:1
+[*HUAWEI-bd11-evpn] vpn-target 5:5 both
+
+```

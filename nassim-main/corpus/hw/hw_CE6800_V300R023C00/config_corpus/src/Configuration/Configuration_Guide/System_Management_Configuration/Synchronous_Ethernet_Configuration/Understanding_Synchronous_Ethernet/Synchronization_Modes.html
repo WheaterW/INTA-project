@@ -1,0 +1,89 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Synchronization Modes">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_synce_cfg_0003.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_synce_cfg_0005.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_synce_cfg_0007.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Synchronous Ethernet">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Synchronous Ethernet">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="Synchronous Ethernet">
+<meta name="featuretype" content="System Management">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001513159814">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Synchronization Modes</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001513159814"></a><a name="EN-US_CONCEPT_0000001513159814"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Synchronization Modes</h1>
+<div><p>Two clock synchronization modes are available on a communications network: pseudo synchronization and master-slave synchronization.</p>
+<div class="section"><h4 class="sectiontitle">Pseudo Synchronization</h4><p>In pseudo synchronization, each switching office has an independent clock (typically a cesium clock) with high precision and stability. Clock synchronization is not performed between the switching offices, as each office has an independent clock. In this scenario, the frequency and phase differences among the clocks of different switching offices are too small to affect network transmission and can therefore be ignored.</p>
+<p>Pseudo synchronization is typically used on communications networks between countries.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Master-Slave Synchronization</h4><p><strong>Classification of Master-Slave Synchronization</strong></p>
+<p>In master-slave synchronization, a high-precision clock is configured as the master clock, a switching office synchronizes the time with the master clock, and all branch offices synchronize the time with their upper-level clocks.</p>
+<p>Master-slave synchronization is typically used on a communications network inside a country or region, where one high-precision master clock serves as the reference clock for other NEs on the network.</p>
+<div class="p">Master-slave synchronization is classified as direct or hierarchical master-slave synchronization.<ul><li><p>Direct master-slave synchronization</p>
+<p><a href="#EN-US_CONCEPT_0000001513159814__fig148541932153811">Figure 1</a> illustrates direct master-slave synchronization, which applies to simple networks. All slave clocks synchronize with the master clock.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001513159814__fig148541932153811"><a name="EN-US_CONCEPT_0000001513159814__fig148541932153811"></a><a name="fig148541932153811"></a><span class="figcap"><b>Figure 1 </b>Direct master-slave synchronization</span><br><span><img class="vsd" src="figure/en-us_image_0000001513159846.png" width="NaN" height="NaN"></span></div>
+</li><li><p>Hierarchical master-slave synchronization</p>
+<p><a href="#EN-US_CONCEPT_0000001513159814__fig1671742917412">Figure 2</a> illustrates hierarchical master-slave synchronization, which applies to large and complex networks. In this mode, there are three stratums of clocks: stratum-1 master clock, stratum-2 slave clock, and stratum-3 slave clock. The stratum-2 slave clock synchronizes with the stratum-1 master clock, and the stratum-3 slave clock synchronizes with the stratum-2 slave clock.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001513159814__fig1671742917412"><a name="EN-US_CONCEPT_0000001513159814__fig1671742917412"></a><a name="fig1671742917412"></a><span class="figcap"><b>Figure 2 </b>Hierarchical master-slave synchronization</span><br><span><img class="vsd" src="figure/en-us_image_0000001563879837.png" width="NaN" height="NaN"></span></div>
+</li></ul>
+</div>
+<p><strong>Reliability of Master-Slave Synchronization</strong></p>
+<p>To improve reliability of master-slave synchronization, two master clocks can be deployed on the network, one as the active master clock and the other as the standby master clock. Both the active and standby master clocks are cesium clocks.</p>
+<p>All NEs, including the standby master clock, typically synchronize the time with the active master clock. If the active master clock fails, the standby master clock takes over as the reference clock for the entire network. The system switches back to the active master clock when the failure is rectified, and the active master clock then functions as the reference clock for the entire network.</p>
+<p><strong>Working States of the Slave Clock</strong></p>
+<div class="p">In master-slave synchronization mode, a slave clock has three working states:<ul><li><p>Synchronization state (normal)</p>
+<p>The slave clock synchronizes the time with and locks its upper-level clock source. Such a clock source may be the active master clock or the clock built into the upper-level NE.</p>
+</li><li><p>Holdover state (Hold)</p>
+<p>The slave clock enters the hold state after its reference clock is lost. In this case, the clock chip oscillator of the slave clock uses the last frequency information stored before the reference clock is lost as the reference clock. It can then provide clock signals that are consistent with the source reference clock. This ensures that there is only a small difference between the frequency of the slave clock and that of the reference clock within a certain period of time. Because the inherent frequency of the oscillator on the clock chip is prone to drifts, the slave clock in the hold state may lose accuracy over a prolonged period of time.</p>
+<p>In the hold state, if the slave clock re-locks the upper-level clock, the slave clock returns to the normal state. Otherwise, the slave clock enters the free state.</p>
+</li><li><p>Free-running state (Free)</p>
+<p>The clock chip oscillator of the slave clock works in the free state if the slave clock is disconnected from the reference clock or has remained in the hold state for too long.</p>
+</li></ul>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_synce_cfg_0003.html">Understanding Synchronous Ethernet
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_synce_cfg_0005.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="galaxy_synce_cfg_0007.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

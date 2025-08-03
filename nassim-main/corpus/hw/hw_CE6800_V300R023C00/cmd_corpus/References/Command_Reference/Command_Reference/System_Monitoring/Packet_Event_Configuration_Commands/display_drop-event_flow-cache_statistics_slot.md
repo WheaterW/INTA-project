@@ -1,0 +1,90 @@
+display drop-event flow-cache statistics slot
+=============================================
+
+display drop-event flow-cache statistics slot
+
+Function
+--------
+
+
+
+The **display drop-event flow-cache statistics slot** command is used to display the flow table statistics of drop event.
+
+
+
+
+Format
+------
+
+**display drop-event flow-cache statistics slot** *slot-id*
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| *slot-id* | Slot ID. | The value is a string of 1 to 31 case-sensitive characters. It cannot contain spaces. |
+
+
+
+Views
+-----
+
+All views
+
+
+Default Level
+-------------
+
+1: Monitoring level
+
+
+Usage Guidelines
+----------------
+
+You can use the display drop-event flow-cache statistics slot command to view the detailed statistics of the flow table of drop event on the device in real time.
+
+
+Example
+-------
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+The actual command output varies according to the device. The command output here is only an example.
+
+
+# Display statistics of built-in CPU flow table for drop event.
+```
+<HUAWEI> display drop-event flow-cache statistics slot 1
+Slot: 1
+--------------------------------------------------------------------------------
+Type             Current          Aged       Created      Exported     Exported 
+                (Streams)       (Streams)   (Streams)     (Streams)    (Packets)
+--------------------------------------------------------------------------------
+V4                     0             0             0             0             0
+--------------------------------------------------------------------------------
+V6                     0             0             0             0             0
+--------------------------------------------------------------------------------
+VXLAN I4O6             0             0             0             0             0
+--------------------------------------------------------------------------------
+VXLAN I6O4             0             0             0             0             0
+--------------------------------------------------------------------------------
+Packet Type:
+    V4:Ethernet packets, common IPv4 packets, and VXLAN packets with inner 
+	    and outer IPv4 packets.
+    V6:Common IPv6 packets and VXLAN packets with inner and outer IPv6 packets.
+    VXLAN I4O6:VXLAN packets with inner IPv4 packets and outer IPv6 packets.
+    VXLAN I6O4:VXLAN packets with inner IPv6 packets and outer IPv4 packets.
+
+```
+
+**Table 1** Description of the **display drop-event flow-cache statistics slot** command output
+| Item | Description |
+| --- | --- |
+| Type | Flow type. |
+| Current | Number of active flows. |
+| Aged | Number of aged flows. |
+| Created | Number of created flows. |
+| Exported (packets) | Number of packets sent to the TDA. |
+| Exported(streams) | Number of flows sent to the TDA. |

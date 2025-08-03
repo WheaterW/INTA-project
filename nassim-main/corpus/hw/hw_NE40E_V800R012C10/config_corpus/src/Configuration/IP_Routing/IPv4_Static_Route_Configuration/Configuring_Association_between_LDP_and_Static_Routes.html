@@ -1,0 +1,102 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring Association between LDP and Static Routes">
+<meta name="abstract" content="On an MPLS network with primary and secondary LSPs established by label switched routers (LSRs) using static routes, association between LDP and static routes prevents MPLS traffic from being interrupted during traffic switching between the primary and secondary LSPs.">
+<meta name="description" content="On an MPLS network with primary and secondary LSPs established by label switched routers (LSRs) using static routes, association between LDP and static routes prevents MPLS traffic from being interrupted during traffic switching between the primary and secondary LSPs.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_static-route-ipv4_cfg_0000.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_static-route_disjoin_cfg_0031.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_static-route_disjoin_cfg_0033.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,static-routevrp,w00556928,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="Static Route">
+<meta name="featuretype" content="IP Route">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Static Route">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="Static Route">
+<meta name="featuretype" content="IP Routing Basis">
+<meta name="OWNER" content="z00809835">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="s00826690">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172365440">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Configuring Association between LDP and Static Routes</title>
+</head>
+<body><a name="EN-US_TASK_0172365440"></a><a name="EN-US_TASK_0172365440"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring Association between LDP and Static Routes</h1>
+<div class="taskbody"><p>On an MPLS network with primary and secondary LSPs established by label switched routers (LSRs) using static routes, association between LDP and static routes prevents MPLS traffic from being interrupted during traffic switching between the primary and secondary LSPs. </p>
+<div class="context"><a name="EN-US_TASK_0172365440__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Usage Scenario</h4><p>Association between LDP and static routes is mainly used on MPLS networks with primary and secondary LSPs established by LSRs using static routes. The association prevents traffic from being interrupted during traffic switchover from the primary LSP to the secondary LSP when the LDP session on the primary link fails (not because of a link fault) or during traffic switchback when the primary link recovers from a fault. <a href="#EN-US_TASK_0172365440__fig_dc_vrp_bgp_cfg_004001">Figure 1</a> shows the typical networking for association between LDP and static routes. LSRA and LSRD interwork through static routes. Primary and backup static routes are deployed on LSRA, with LSRB and LSRC as next hops. Primary and secondary LDP LSPs are established through the static routes. The primary LSP uses link A, and the secondary LSP uses link B. In normal cases, link A is preferred. The following part describes association between LDP and static routes in switchover and switchback scenarios.</p>
+<div class="fignone" id="EN-US_TASK_0172365440__fig_dc_vrp_bgp_cfg_004001"><a name="EN-US_TASK_0172365440__fig_dc_vrp_bgp_cfg_004001"></a><a name="fig_dc_vrp_bgp_cfg_004001"></a><span class="figcap"><b>Figure 1 </b>Networking for association between LDP and static routes</span><br><span><img class="vsd" src="figure/en-us_image_0256253471.png" width="NaN" height="NaN"></span></div>
+<p><strong>Switchover scenario</strong></p>
+<p>In the switchover scenario, traffic over the primary static route is not switched to the backup link when the LDP session on the primary link fails (not because of a link fault). As a result, LSP traffic over the primary link is interrupted.</p>
+<p>When the LDP session is normal, LSP traffic travels along the primary link (link A: LSRA -&gt; LSRB -&gt; LSRD). If the LDP session between LSRA and LSRB is interrupted, the LSP immediately switches to the backup link (LinkB: LSRA -&gt; LSRC -&gt; LSRD). However, because the link between LSRA and LSRB is normal, traffic over the static route is not switched to the backup link. The asynchrony between LDP and the static route causes an LSP traffic interruption.</p>
+<p>If association between LDP and static routes is enabled, traffic is automatically switched to the backup link when the LDP session goes down, ensuring uninterrupted traffic forwarding.</p>
+<p><strong>Switchback scenario</strong></p>
+<p>In the switchback scenario, after the primary link recovers from a fault, traffic transmitted through the static route is first switched back to the primary link because static routes converge faster than LDP. As a result, the secondary LSP cannot be used, and the primary LSP has not been set up yet, causing an LSP traffic interruption.</p>
+<p>If the link between LSRA and LSRB fails, traffic is immediately switched to the backup link (link B: LSRA -&gt; LSRC -&gt; LSRD). After the link between LSRA and LSRB recovers, traffic over the static route is immediately switched to the primary link (Link A: LSRA -&gt; LSRB -&gt; LSRD). As a result, the secondary LSP cannot be used, and the primary LSP has not been restored yet, causing a traffic interruption.</p>
+<p>If association between LDP and static routes is enabled, the static route on link A becomes active only after the LDP session goes up during the switchback. In this manner, the static route and LSP are synchronous, preventing traffic loss.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Only the static routes with outbound interfaces specified can be associated with LDP.</p>
+</div></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172365440__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Pre-configuration Tasks</h4><p>Before configuring association between LDP and static routes, complete the following tasks:</p>
+<ul><li><p>Enable MPLS.</p>
+</li><li><p>Enable MPLS LDP globally and on interfaces.</p>
+</li><li><p>Ensure that LDP sessions are set up between devices.</p>
+</li></ul>
+</div></div>
+<div class="steps-unordered"><a name="EN-US_TASK_0172365440__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ul><li><span>Enable association between LDP and static routes.</span><p><ol><li>Run <span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span><p>The system view is displayed.</p>
+</li><li><p>Run <a href="cmdqueryname=ip+route-static"><b><span class="cmdname">ip route-static</span></b></a> [ <strong><span>vpn-instance</span></strong> <i><span class="varname">vpn-instance-name</span></i> ] <i><span class="varname">ip-address</span></i> { <i><span class="varname">mask</span></i> | <i><span class="varname">mask-length</span></i> } <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> [ <i><span class="varname">nexthop-address</span></i> ] [ <strong><span>preference</span></strong> <i><span class="varname">preference</span></i> | <strong><span>tag</span></strong> <i><span class="varname">tag</span></i> ] <sup>*</sup> <strong><span>ldp-sync</span></strong> [ <strong><span>description</span></strong> <i><span class="varname">text</span></i> ]</p>
+<p>Association between LDP and static routes is configured.</p>
+</li><li>Run <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span><p>The configuration is committed.</p>
+</li></ol>
+</p></li><li><span>(Optional) Set a Hold-down timer.</span><p><ol><li>Run <span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span><p>The system view is displayed.</p>
+</li><li>Run <span><a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i></span><p>The view of the outbound interface corresponding to the primary link used by static routes is displayed.</p>
+</li><li><p>Run <a href="cmdqueryname=static-route+timer+ldp-sync+hold-down"><b><span class="cmdname">static-route timer ldp-sync hold-down</span></b></a> { <i><span class="varname">timer</span></i> | <strong><span>infinite</span></strong> }</p>
+<p>A period in which the static route is inactive and waits for the establishment of an LDP session is set.</p>
+</li><li>Run <span><a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span><p>The configuration is committed.</p>
+</li></ol>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The preceding configurations need to be performed on both ends of the primary and secondary links.</p>
+</div></div>
+</p></li></ul></div>
+<div class="postreq"><a name="EN-US_TASK_0172365440__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>After configuring association between LDP and static routes, run the <strong>display static-route ldp-sync</strong> command.</p>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_static-route-ipv4_cfg_0000.html">IPv4 Static Route Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_static-route_disjoin_cfg_0031.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_static-route_disjoin_cfg_0033.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

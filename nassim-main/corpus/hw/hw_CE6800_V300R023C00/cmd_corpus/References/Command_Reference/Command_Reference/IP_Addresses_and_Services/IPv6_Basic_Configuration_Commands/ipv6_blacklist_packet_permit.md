@@ -1,0 +1,82 @@
+ipv6 blacklist packet permit
+============================
+
+ipv6 blacklist packet permit
+
+Function
+--------
+
+
+
+The **ipv6 blacklist packet permit** command enables the system to reply with TCP/UDP packets to the source end.
+
+The **undo ipv6 blacklist packet permit** command disables the system from replying with TCP/UDP packets to the source end.
+
+
+
+By default, the system cannot reply with TCP/UDP packets to the source end.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**ipv6 blacklist packet permit**
+
+**undo ipv6 blacklist packet permit**
+
+
+Parameters
+----------
+
+None
+
+Views
+-----
+
+System view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+After an ACL is configured for services (for example, the snmp-agent acl command is configured for SNMP or the telnet ipv6 server command is configured for Telnet), if TCP6 or UDP6 packets are denied by a configured ACL6, the **ipv6 blacklist packet permit** command and its undo format can be used to control the system whether to reply with packets to the source end.
+
+* Running the **ipv6 blacklist packet permit** command enables the system to reply with packets to the source end.
+* Running the **undo ipv6 blacklist packet permit** command disables the system from replying with packets to the source end.
+
+**Configuration Impact**
+
+After the **ipv6 blacklist packet permit** command is run, the system will reply with specific packets to the source end based on the type of the packets denied by the system.
+
+* If the denied packets are TCP6 packets, the system will reply with TCP-RST packets to the source end.
+* If the denied packets are UDP6 packets, the system will reply with PORT-UNREACHABLE packets to the source end.
+
+Example
+-------
+
+# Disable the system from replying with packets to the source end.
+```
+<HUAWEI> system-view
+[~HUAWEI] undo ipv6 blacklist packet permit
+
+```
+
+# Enable the system to reply with packets to the source end.
+```
+<HUAWEI> system-view
+[~HUAWEI] ipv6 blacklist packet permit
+
+```

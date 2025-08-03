@@ -1,0 +1,350 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Congestion Management and Congestion Avoidance">
+<meta name="abstract" content="This section provides an example for configuring congestion management and congestion avoidance in a typical application scenario.">
+<meta name="description" content="This section provides an example for configuring congestion management and congestion avoidance in a typical application scenario.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cmca-qos_cfg_0029.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cmca-qos_cfg_0033.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00606909,m00390128">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="Congestion Management and Congestion Avoidance">
+<meta name="featuretype" content="QOS">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Congestion Management and Congestion Avoidance">
+<meta name="featuretype" content="QOS">
+<meta name="featurename" content="Congestion Management and Congestion Avoidance">
+<meta name="featuretype" content="QOS">
+<meta name="featurename" content="Congestion Management and Congestion Avoidance">
+<meta name="featuretype" content="QOS">
+<meta name="OWNER" content="m00390128">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="m00915594">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172371204">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Congestion Management and Congestion Avoidance</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172371204"></a><a name="EN-US_TASK_0172371204"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Congestion Management and Congestion Avoidance</h1>
+<div class="taskbody"><p>This section provides an example for configuring congestion management and congestion avoidance in a typical application scenario.</p>
+<div class="context"><a name="EN-US_TASK_0172371204__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>As shown in <a href="#EN-US_TASK_0172371204__fig_dc_ne_qos_cfg_205201">Figure 1</a>, Server sends mission-critical data, Telephone sends voice data, and PC1 and PC2 send non-mission-critical data to the network through <span class="keyword">Device</span>A. On <span class="keyword">Device</span>A, the rate of the inbound interface interface1 is greater than that of the outbound interface interface2. Therefore, congestion may occur on interface2 and may be intensifying.</p>
+<p>In the case of network congestion, the service data from the server and the telephone must be preferentially sent. In addition, the telephone requires 5 Mbit/s bandwidth, and the server requires 4 Mbit/s bandwidth. As PC1 and PC2 are VIP users, bandwidth must be assured for the data that PC1 and PC2 send. The delay must be as low as possible. If congestion intensifies on the network, packets are dropped according to priority.</p>
+<p>In this scenario, WRED needs to be configured on <span class="keyword">Device</span>A to work with WFQ for scheduling and discarding.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 and interface2 represent GE <span>0/1/0</span> and GE <span>0/2/0</span>, respectively.</p>
+</div></div>
+<div class="fignone" id="EN-US_TASK_0172371204__fig_dc_ne_qos_cfg_205201"><a name="EN-US_TASK_0172371204__fig_dc_ne_qos_cfg_205201"></a><a name="fig_dc_ne_qos_cfg_205201"></a><span class="figcap"><b>Figure 1 </b>Networking diagram for configuring congestion management and congestion avoidance</span><br><span><img class="vsd" src="images/fig_dc_ne_qos_cfg_205201.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172371204__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Mark the service priorities of different flows on the inbound interface interface1 of <span class="keyword">Device</span>A.</li><li><p>Configure a WRED profile and set the lower drop threshold, upper drop threshold, and drop probability for packets.</p>
+</li><li><p>On the outbound interface interface2 of <span class="keyword">Device</span>A, configure a different scheduling policy for port queues of each CoS and apply a configured WRED object to the scheduling policy.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172371204__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li>ACL numbers, traffic classifier names, traffic behavior names, re-marked service priorities, and traffic policy names</li><li><p>WRED profile name, lower and upper drop thresholds, drop probability, and packet color in each queue</p>
+</li><li><p>Interfaces and port queues to which WRED profiles are applied</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172371204__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure ACL rules for packets from Server, Telephone, PC1, and PC2.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt;<strong> system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname DeviceA</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 2001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl4-basic-2001]<strong> rule permit source 10.1.1.3 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl4-basic-2001] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl4-basic-2001] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 2002</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl4-basic-2002]<strong> rule permit source 10.1.1.2 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl4-basic-2002] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl4-basic-2002]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 2003</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl4-basic-2003]<strong> rule permit source 10.1.1.4 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl4-basic-2003] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl4-basic-2003] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>acl number 2004</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl4-basic-2004]<strong> rule permit source 10.1.1.5 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl4-basic-2004] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl4-basic-2004] <strong>return</strong></pre>
+</p></li><li><span>On <span class="keyword">Device</span>A's GE <span>0/1/0</span>, configure MF classification and mark the service priority of each flow.</span><p><pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>traffic classifier aa</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-classifier-aa] <strong>if-match acl 2001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-classifier-aa] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-classifier-aa] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>traffic classifier bb</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-classifier-bb] <strong>if-match acl 2002</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-classifier-bb] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-classifier-bb] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>traffic classifier cc</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-classifier-cc] <strong>if-match acl 2003</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-classifier-cc] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-classifier-cc] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>traffic classifier dd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-classifier-dd]<strong> if-match acl 2004</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-classifier-dd] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-classifier-dd] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> traffic behavior aa</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-aa] <strong>remark ip-precedence 5</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-aa] <strong>car cir 5000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-aa] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-behavior-aa] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>traffic behavior bb</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-bb] <strong>remark ip-precedence 4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-bb] <strong>car cir 4000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-bb] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-behavior-bb] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>traffic behavior cc</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-cc] <strong>remark ip-precedence 3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-cc] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-behavior-cc] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>traffic behavior dd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-dd] <strong>remark ip-precedence 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-behavior-dd] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-behavior-dd] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>traffic policy ee</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-trafficpolicy-ee] <strong>classifier aa behavior aa</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-trafficpolicy-ee] <strong>classifier bb behavior bb</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-trafficpolicy-ee] <strong>classifier cc behavior cc</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-trafficpolicy-ee] <strong>classifier dd behavior dd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-trafficpolicy-ee] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-trafficpolicy-ee] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>traffic-policy ee inbound</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/1/0</span>] <strong>return</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>For details about the mapping between the IP precedence and service class, see <a href="feature_0021577558.html#EN-US_CONCEPT_0172356827__qos_fea_img_01">Default Mapping Between IP Precedence/MPLS EXP/802.1p and Service Class</a> in the <em><span class="keyword">HUAWEI NE40E-M2 series</span> Feature Description - QoS Priority Mapping</em>.</p>
+<div class="p">The priorities of queues with specific service classes are calculated based on scheduling algorithms.<ul><li>If PQ scheduling is configured for all queues with the eight service classes, the priorities of the queues are placed in descending order as follows: CS7 &gt; CS6 &gt; EF &gt; AF4 &gt; AF3 &gt; AF2 &gt; AF1 &gt; BE.</li><li>If PQ scheduling is configured for the BE queue (not applied in most cases) and WFQ scheduling is configured for the queues with the other service classes, the priority of the BE queue is higher than that of the other queues.</li><li>If WFQ scheduling is configured for all queues with the eight service classes, all the queues have the same priority.</li></ul>
+</div>
+</div></div>
+</p></li><li><span>Configure a WRED profile on <span class="keyword">Device</span>A.</span><p><pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> port-wred pw</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-port-wred-pw]<strong> color green low-limit 70 high-limit 100 discard-percentage 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-port-wred-pw]<strong> color yellow low-limit 60 high-limit 90 discard-percentage 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-port-wred-pw]<strong> color red low-limit 50 high-limit 80 discard-percentage 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-port-wred-pw]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-port-wred-pw]<strong> quit</strong></pre>
+<p>After the preceding configuration is complete, run the <strong>display port-wred configuration verbose</strong> command to check the WRED profile parameters.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>display port-wred configuration verbose</strong></pre>
+<pre class="screen">Port wred name : pw
+---------------------------------------------------
+Color    Low-limit    High-limit    Discard-percent
+---------------------------------------------------
+green    70           100           100
+yellow   60           90            100
+red      50           80            100
+<span>Queue Depth : 8000</span>
+Reference relationships : NULL </pre>
+</p></li><li><span>On <span class="keyword">Device</span>A's GE <span>0/2/0</span>, configure port queues and apply the configured WRED object <strong>pw</strong> to the port queues.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>] <strong>port-queue ef pq port-wred pw outbound</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>] <strong>port-queue af4 wfq weight 15 shaping 100 port-wred pw outbound</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>] <strong>port-queue af3 wfq weight 10 shaping 50 port-wred pw outbound</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>] <strong>port-queue af2 wfq weight 10 shaping 50 port-wred pw outbound</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-GigabitEthernet<span>0/2/0</span>] <strong>return</strong></pre>
+<p>After the preceding configuration is complete, run the <strong>display port-queue configuration interface</strong> command to check the detailed configuration of port queues.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>display port-queue configuration interface gigabitethernet <span>0/2/0</span> outbound</strong></pre>
+<pre class="screen">GigabitEthernet<span>0/2/0</span> outbound current port-queue configuration:  
+ be : arithmetic: wfq                weight: 10         tm weight: 3                       
+       fact weight: 10.00             shaping(kbps): NA                                   
+       port-wred: NA                                                                                                                
+         green (low-high limit) (kbytes)                  12800 - 12800                                                            
+         yellow(low-high limit) (kbytes)                  12800 - 12800                                                             
+         red   (low-high limit) (kbytes)                  12800 - 12800                                                             
+       current queue-length     (kbytes)                  12800                                                                     
+       cir:123                        cir-percentage:NA
+       cir-arithmetic:pq              cir-weight:NA
+       pir:123                        pir-percentage:NA
+       pir-arithmetic:lpq             pir-weight:NA      
+ af1: arithmetic: wfq                weight: 10         tm weight: 3                                                               
+       fact weight: 10.00             shaping(kbps): NA                                                                             
+       port-wred: NA                                                                                                                
+         green (low-high limit) (kbytes)                  12800 - 12800                                                             
+         yellow(low-high limit) (kbytes)                  12800 - 12800                                                             
+         red   (low-high limit) (kbytes)                  12800 - 12800                                                             
+       current queue-length     (kbytes)                  12800                                                                     
+       cir:NA                         cir-percentage:10
+       cir-arithmetic:pq              cir-weight:NA
+       pir:NA                         pir-percentage:20
+       pir-arithmetic:wfq             pir-weight:15    
+ af2: arithmetic: wfq                weight: 10         tm weight: 3                                                               
+       fact weight: 10.00             shaping(kbps): NA                                                                             
+       port-wred: NA                                                                                                                
+         green (low-high limit) (kbytes)                  12800 - 12800                                                             
+         yellow(low-high limit) (kbytes)                  12800 - 12800                                                             
+         red   (low-high limit) (kbytes)                  12800 - 12800                                                             
+       current queue-length     (kbytes)                  12800                                                                     
+       cir:NA                         cir-percentage:NA
+       cir-arithmetic:NA              cir-weight:NA
+       pir:NA                         pir-percentage:NA
+       pir-arithmetic:NA              pir-weight:NA 
+ af3: arithmetic: wfq                weight: 15         tm weight: 2                                                               
+       fact weight: 15.00             shaping(kbps): NA                                                                             
+       port-wred: NA                                                                                                                
+         green (low-high limit) (kbytes)                  12800 - 12800                                                             
+         yellow(low-high limit) (kbytes)                  12800 - 12800                                                             
+         red   (low-high limit) (kbytes)                  12800 - 12800                                                            
+       current queue-length     (kbytes)                  12800                                                                     
+       cir:NA                         cir-percentage:NA
+       cir-arithmetic:NA              cir-weight:NA
+       pir:NA                         pir-percentage:NA
+       pir-arithmetic:NA              pir-weight:NA 
+ af4: arithmetic: wfq                weight: 15         tm weight: 2                                                               
+       fact weight: 15.00             shaping(kbps): NA                                                                             
+       port-wred: NA                                                                                                                
+         green (low-high limit) (kbytes)                  12800 - 12800                                                             
+         yellow(low-high limit) (kbytes)                  12800 - 12800                                                             
+         red   (low-high limit) (kbytes)                  12800 - 12800                                                             
+       current queue-length     (kbytes)                  12800                                                                     
+       cir:NA                         cir-percentage:NA
+       cir-arithmetic:NA              cir-weight:NA
+       pir:NA                         pir-percentage:NA
+       pir-arithmetic:NA              pir-weight:NA 
+ ef : arithmetic: pq                 weight: NA         tm weight: 0                                                               
+       fact weight: 0.00              shaping(kbps): NA                                                                             
+       port-wred: NA                                                                                                                
+         green (low-high limit) (kbytes)                  1280 - 1280                                                               
+         yellow(low-high limit) (kbytes)                  1280 - 1280                                                               
+         red   (low-high limit) (kbytes)                  1280 - 1280                                                               
+       current queue-length     (kbytes)                  1280                                                                      
+       cir:NA                         cir-percentage:NA
+       cir-arithmetic:NA              cir-weight:NA
+       pir:NA                         pir-percentage:NA
+       pir-arithmetic:NA              pir-weight:NA 
+ cs6: arithmetic: pq                 weight: NA         tm weight: 0                                                               
+       fact weight: 0.00              shaping(kbps): NA                                                                             
+       port-wred: NA                                                                                                                
+         green (low-high limit) (kbytes)                  1280 - 1280                                                               
+         yellow(low-high limit) (kbytes)                  1280 - 1280                                                               
+         red   (low-high limit) (kbytes)                  1280 - 1280                                                               
+       current queue-length     (kbytes)                  1280                                                                      
+       cir:NA                         cir-percentage:NA
+       cir-arithmetic:NA              cir-weight:NA
+       pir:NA                         pir-percentage:NA
+       pir-arithmetic:NA              pir-weight:NA 
+ cs7: arithmetic: pq                 weight: NA         tm weight: 0                                                               
+       fact weight: 0.00              shaping(kbps): NA                                                                             
+       port-wred: NA                                                                                                                
+         green (low-high limit) (kbytes)                  1280 - 1280                                                               
+         yellow(low-high limit) (kbytes)                  1280 - 1280                                                               
+         red   (low-high limit) (kbytes)                  1280 - 1280                                                               
+       current queue-length     (kbytes)                  1280                                                                      
+       cir:NA                         cir-percentage:NA
+       cir-arithmetic:NA              cir-weight:NA
+       pir:NA                         pir-percentage:NA
+       pir-arithmetic:NA              pir-weight:NA</pre>
+</p></li><li><span>Verify the configuration.</span><p><p>When the network has traffic, run the <span><a href="cmdqueryname=display+port-queue+statistics"><b><span class="cmdname">display port-queue statistics</span></b></a> [ <strong><span>slot</span></strong> <i><span class="varname">slot-id</span></i> | <strong><span>interface</span></strong> { <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> | <i><span class="varname">interface-name</span></i> } ] [ <i><span class="varname">cos-value</span></i> ] <strong><span>outbound</span></strong></span> command on <span class="keyword">Device</span>A. The command output shows that the traffic volumes of various CoSs increase rapidly. With the rapid increase in traffic volumes, the volume of discarded traffic also increases rapidly according to the configured WRED drop parameters.</p>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172371204__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><div class="p"><span class="keyword">Device</span>A configuration file<pre class="screen">#</pre>
+<pre class="screen"> sysname <span class="keyword">Device</span>A</pre>
+<pre class="screen">#</pre>
+<pre class="screen">acl number 2001</pre>
+<pre class="screen"> rule permit source 10.1.1.3 0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">acl number 2002</pre>
+<pre class="screen"> rule permit source 10.1.1.2 0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">acl number 2003</pre>
+<pre class="screen"> rule permit source 10.1.1.4 0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">acl number 2004</pre>
+<pre class="screen"> rule permit source 10.1.1.5 0 </pre>
+<pre class="screen">#</pre>
+<pre class="screen">traffic classifier aa operator or</pre>
+<pre class="screen"> if-match acl 2001</pre>
+<pre class="screen">traffic classifier bb operator or</pre>
+<pre class="screen"> if-match acl 2002</pre>
+<pre class="screen">traffic classifier cc operator or</pre>
+<pre class="screen"> if-match acl 2003</pre>
+<pre class="screen">traffic classifier dd operator or</pre>
+<pre class="screen"> if-match acl 2004</pre>
+<pre class="screen">#</pre>
+<pre class="screen">traffic behavior aa</pre>
+<pre class="screen"> remark ip-precedence 5</pre>
+<pre class="screen"> car cir 5000</pre>
+<pre class="screen">traffic behavior bb</pre>
+<pre class="screen"> car cir 4000</pre>
+<pre class="screen"> remark ip-precedence 4</pre>
+<pre class="screen">traffic behavior cc</pre>
+<pre class="screen"> remark ip-precedence 3</pre>
+<pre class="screen">traffic behavior dd</pre>
+<pre class="screen"> remark ip-precedence 2</pre>
+<pre class="screen">#</pre>
+<pre class="screen">traffic policy ee</pre>
+<pre class="screen"> classifier aa behavior aa</pre>
+<pre class="screen"> classifier bb behavior bb</pre>
+<pre class="screen"> classifier cc behavior cc</pre>
+<pre class="screen"> classifier dd behavior dd</pre>
+<pre class="screen">#</pre>
+<pre class="screen">port-wred pw</pre>
+<pre class="screen"> color green low-limit 70 high-limit 100 discard-percentage 100</pre>
+<pre class="screen"> color yellow low-limit 60 high-limit 90 discard-percentage 100</pre>
+<pre class="screen"> color red low-limit 50 high-limit 80 discard-percentage 100</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.1.1.1 255.255.255.0</pre>
+<pre class="screen"> traffic-policy ee inbound</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.10.1.1 255.255.255.0</pre>
+<pre class="screen"> port-queue af2 wfq weight 10 shaping 50 port-wred pw outbound</pre>
+<pre class="screen"> port-queue af3 wfq weight 10 shaping 50 port-wred pw outbound</pre>
+<pre class="screen"> port-queue af4 wfq weight 15 shaping 100 port-wred pw outbound</pre>
+<pre class="screen"> port-queue ef pq port-wred pw outbound</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 10.1.1.0 0.0.0.255</pre>
+<pre class="screen">  network 10.10.1.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cmca-qos_cfg_0029.html">Configuration Examples for Congestion Management and Congestion Avoidance
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cmca-qos_cfg_0033.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

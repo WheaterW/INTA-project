@@ -1,0 +1,92 @@
+peer oscillation-dampening disable(BGP multi-instance VPN instance view)
+========================================================================
+
+peer oscillation-dampening disable(BGP multi-instance VPN instance view)
+
+Function
+--------
+
+
+
+The **peer oscillation-dampening** command enables BGP to suppress the establishment of a specified peer relationship that flaps continuously.
+
+The **peer oscillation-dampening disable** command disables BGP from suppressing the establishment of a specified peer relationship that flaps continuously.
+
+The **undo peer oscillation-dampening** command deletes the configuration of enabling the suppression function for a specified peer.
+
+The **undo peer oscillation-dampening disable** command deletes the configuration of disabling the suppression function for a specified peer.
+
+
+
+By default, BGP suppresses the establishment of a BGP peer relationship that flaps continuously.
+
+
+Format
+------
+
+For CE8851-32CQ8DQ-P, CE8850-HAM, CE8850-SAN, CE8851K, CE8855, CE8851-32CQ4BQ, CE6860-SAN, CE6866, CE6860-HAM, CE6866K, CE6820H, CE6820H-K, CE6820S, CE6863H, CE6863H-K, CE6881H, CE6881H-K, CE6855-48XS8CQ, CE6885, CE6885-T, CE6885-LL (standard forwarding mode), CE6863E-48S8CQ, CE6885-SAN, CE6885-LL (low latency mode):
+
+**peer** *peerIpv4Addr* **oscillation-dampening**
+
+**peer** *peerIpv4Addr* **oscillation-dampening** **disable**
+
+**undo peer** *peerIpv4Addr* **oscillation-dampening**
+
+**undo peer** *peerIpv4Addr* **oscillation-dampening** **disable**
+
+For CE8851-32CQ8DQ-P, CE8850-HAM, CE8850-SAN, CE8851K, CE8855, CE8851-32CQ4BQ, CE6860-SAN, CE6866, CE6860-HAM, CE6866K, CE6820H, CE6820H-K, CE6820S, CE6863H, CE6863H-K, CE6881H, CE6881H-K, CE6855-48XS8CQ, CE6885, CE6885-T, CE6885-LL (standard forwarding mode), CE6863E-48S8CQ, CE6885-SAN:
+
+**peer** *peerIpv6Addr* **oscillation-dampening**
+
+**peer** *peerIpv6Addr* **oscillation-dampening** **disable**
+
+**undo peer** *peerIpv6Addr* **oscillation-dampening**
+
+**undo peer** *peerIpv6Addr* **oscillation-dampening** **disable**
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| *peerIpv4Addr* | Specifies an IPv4 peer address. | The value is in dotted decimal notation. |
+| *peerIpv6Addr* | Specifies the IPv6 address of a peer.  NOTE:  This parameter is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ. | The value is a 32-digit hexadecimal number, in the format of X:X:X:X:X:X:X:X. |
+
+
+
+Views
+-----
+
+BGP multi-instance VPN instance session view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+After a BGP peer relationship is established, the local device learns all routes from the peer and also advertises its local routes to the peer. If the peer relationship is disconnected, the local device deletes all the routes learned from the peer.Generally, a large number of BGP routes exist, and in this case, a large number of routes change and a large amount of data is processed when the BGP peer relationship is flapping. As a result, a high volume of resources are consumed, causing high CPU usage. To prevent high CPU usage in this case, BGP needs to be enabled to suppress the establishment of the peer relationship if it flaps continuously. Such suppression is implemented for a BGP peer relationship that flaps for more than five times consecutively, and the suppression period increases as the number of flapping times increases. You can run the **display bgp peer verbose** command to check the remaining time that BGP waits to establish the BGP peer relationship.After the peer relationship stops flapping for a certain period, suppression on the peer relationship establishment is automatically removed. To immediately remove the suppression, you can run the **peer oscillation-dampening disable** command. Alternatively, you can run a **reset** command or another command that can cause the peer relationship to be disconnected and re-established.
+
+
+Example
+-------
+
+# Enable BGP to suppress the establishment of a specified peer relationship that flaps continuously.
+```
+<HUAWEI> system-view
+[~HUAWEI] ip vpn-instance vpn3
+[*HUAWEI-vpn-instance-vpn3] ipv4-family
+[*HUAWEI-vpn-instance-vpn3-af-ipv4] route-distinguisher 100:1
+[*HUAWEI-vpn-instance-vpn3-af-ipv4] quit
+[*HUAWEI-vpn-instance-vpn3] quit
+[*HUAWEI] bgp 100 instance a
+[*HUAWEI-bgp-instance-a] vpn-instance vpn3
+[*HUAWEI-bgp-instance-a-instance-vpn3] peer 10.1.1.2 as-number 200
+[*HUAWEI-bgp-instance-a-instance-vpn3] peer 10.1.1.2 oscillation-dampening
+
+```

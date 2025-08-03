@@ -1,0 +1,1319 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="EVA Implementation Based on JSON Scripts">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../toctopics/en-us_topic_0000001513030598.html">
+<meta name="DC.Relation" scheme="URI" content="../toctopics/en-us_concept_0000001584547617.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="EVA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="EVA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featurename" content="EVA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featurename" content="EVA">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001563990837">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>EVA Implementation Based on JSON Scripts</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_CONCEPT_0000001563990837"></a><a name="EN-US_CONCEPT_0000001563990837"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">EVA Implementation Based on JSON Scripts</h1>
+<div><p>EVA obtains data by loading and parsing JSON scripts. Some JSON scripts are preset on the device before delivery. EVA also provides JSON script-based functions that allow you to customize a JSON script to subscribe to required data.</p>
+<div class="section"><h4 class="sectiontitle">JSON Scripts</h4><p>JSON scripts are classified into single-task scripts and PMI scripts based on the number of scripts in the script file.</p>
+<ul><li>Single-task scripts<p>A single-task script is a JSON script file that contains only one script.</p>
+<p>An example of a single-task script is as follows:</p>
+<pre class="screen">{
+	"<em>ItemName</em>": {
+		"description": "",
+		"define": {},
+		"events": {},
+		"strategy": "",
+		"tasks": {}
+        }
+}</pre>
+</li><li>PMI scripts<p>A PMI script is a JSON script file that contains multiple scripts. After the PMI script is loaded and registered on the device, the device has the PMI function. The PMI result is saved to the <strong><span>flash</span>:/eva</strong> directory and the file name is <strong>eva_inspection_</strong><em>current time</em><strong>.zip</strong>.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The content of a single script in a PMI script is compressed in single-line mode. Each script must occupy a line.</p>
+</div></div>
+<p>An example of a PMI script is as follows:</p>
+<pre class="screen">{"<em>ItemName1</em>": {"description": "","define": {},"events": {},"strategy": "","tasks": {}}}
+{"<em>ItemName2</em>": {"description": "","define": {},"events": {},"strategy": "","tasks": {}}}
+{"<em>ItemName3</em>": {"description": "","define": {},"events": {},"strategy": "","tasks": {}}}</pre>
+</li></ul>
+<p>JSON scripts are classified into preset scripts and customized scripts based on whether they are preset on the device before delivery.</p>
+<ul><li>Preset scripts<p>A preset script is a script delivered with the device. By default, the preset scripts are automatically loaded and registered.</p>
+<p>EVA presets a JSON script on a device to query exception information on the device. The script issues the diagnosis command to query device exception information every 24 hours. If any exception information is found, a failure message is displayed.</p>
+<ul><li>SystemExceptionCheck.json<pre class="screen">{
+	"SystemExceptionCheck": {
+		"description": "system exception check",
+		"define":{
+			"str_Prob_Adv": "**There were CPU exceptions.@@@**Please contact engineers."
+		},
+		"events": {
+			"e1": {
+				"trigger": "eva.cycle(24)"  
+			}
+		},
+		"strategy": "e1",
+		"tasks": {
+			"mainTask": {
+				"parameters": {
+					"cmd": "display exception 10 verbose all" 
+				},
+				"action": "eva.cli(\"diagnose\",${cmd})",
+				"publish": {
+					"exp_Result": "${result}" 
+				},
+				"switch": {
+					"eva.fail(${str_Prob_Adv})": "eva.strContainsIgnoreCase(${exp_Result}, \"Exception info\") == true" 
+			}
+		}
+	}
+}
+</pre>
+</li></ul>
+</li><li>Customized scripts<p>A customized script is a script edited by users based on the JSON function type provided by EVA. For details about the functions used for customizing a script, see <a href="#EN-US_CONCEPT_0000001563990837__section9145021617">JSON Function Types Supported by EVA</a>.</p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Data Storage</h4><p>The device processes data in different ways based on the functions contained in a JSON script.</p>
+<ul><li>If eva.fail is executed, the data collected by the task is stored in the <strong><span>flash</span>:/eva/checkresult</strong> directory. The file name is <strong>checkresult_</strong><em>current time</em> and the file name extension is .zip or .txt.</li><li>If eva.singleCollect() is executed, the data collected by the task is stored in the <strong><span>flash</span>:/eva/collection</strong> directory. The file name is <strong>collection_</strong><em>current time</em> and the file name extension is .zip or .txt.</li><li>If eva.singleCollect() and eva.fail are not executed, the collected data is not stored.</li></ul>
+<p>If the JSON script is a PMI script, the device compresses the contents in the <strong><span>flash</span>:/eva/checkresult</strong> and <strong><span>flash</span>:/eva/collection</strong> directories into the <strong>eva_inspection_</strong><em>current time</em><strong>.zip</strong> package and saves the package to the <strong><span>flash</span>:/eva</strong> directory after the PMI. After the <strong>eva_inspection_</strong><em>current time</em><strong>.zip</strong> package is compressed, the content in the <strong><span>flash</span>:/eva/collection</strong> directory is deleted. If the device directly downloads the script from the FTP or SFTP server and installs and registers the script, it automatically uploads the content in the <strong><span>flash</span>:/eva</strong> directory to the server and deletes the <strong>eva_inspection_</strong><em>current time</em><strong>.zip</strong> package after the PMI.</p>
+<p>If the PMI script is delivered by a PMI tool, the PMI tool obtains the <strong>eva_inspection_</strong><em>current time</em><strong>.zip</strong> file and deletes the file and PMI script after the PMI is complete.</p>
+</div>
+<div class="section" id="EN-US_CONCEPT_0000001563990837__section9145021617"><a name="EN-US_CONCEPT_0000001563990837__section9145021617"></a><a name="section9145021617"></a><h4 class="sectiontitle">JSON Function Types Supported by EVA</h4><p><strong>Fields in a JSON Script of EVA</strong></p>
+<p>An example of a JSON script is as follows:</p>
+<pre class="screen">{"<em>ItemName</em>": {"description": "","define": {},"events": {},"strategy": "","tasks": {}}}</pre>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Fields in a JSON script of EVA</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="15.409999999999998%" id="mcps1.3.4.5.2.6.1.1" liSelected="liSelected"><p>Field</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="17.36%" id="mcps1.3.4.5.2.6.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="10.99%" id="mcps1.3.4.5.2.6.1.3" liSelected="liSelected"><p>Attribute</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="14.979999999999999%" id="mcps1.3.4.5.2.6.1.4" liSelected="liSelected"><p>Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="41.260000000000005%" id="mcps1.3.4.5.2.6.1.5" liSelected="liSelected"><p>Value Range</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="15.409999999999998%" headers="mcps1.3.4.5.2.6.1.1 "><p><em>ItemName</em></p>
+</td>
+<td class="cellrowborder" valign="top" width="17.36%" headers="mcps1.3.4.5.2.6.1.2 "><p>Script name.</p>
+</td>
+<td class="cellrowborder" valign="top" width="10.99%" headers="mcps1.3.4.5.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="14.979999999999999%" headers="mcps1.3.4.5.2.6.1.4 "><p>Customized</p>
+</td>
+<td class="cellrowborder" valign="top" width="41.260000000000005%" headers="mcps1.3.4.5.2.6.1.5 "><p>The value is a string of 2 to 31 case-sensitive characters. It starts with a letter and can contain only letters, digits, and underscores (_).</p>
+<p>For a single-task script, the script name must be the same as the value of <em>ItemName</em>. The script name is <em>ItemName</em>.json.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="15.409999999999998%" headers="mcps1.3.4.5.2.6.1.1 "><p>description</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.36%" headers="mcps1.3.4.5.2.6.1.2 "><p>Script description.</p>
+</td>
+<td class="cellrowborder" valign="top" width="10.99%" headers="mcps1.3.4.5.2.6.1.3 "><p>Optional</p>
+</td>
+<td class="cellrowborder" valign="top" width="14.979999999999999%" headers="mcps1.3.4.5.2.6.1.4 "><p>Keyword</p>
+</td>
+<td class="cellrowborder" valign="top" width="41.260000000000005%" headers="mcps1.3.4.5.2.6.1.5 "><p>The value is a string of 1 to 256 characters. Chinese characters and special characters are supported. Each Chinese character is considered as three English characters.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="15.409999999999998%" headers="mcps1.3.4.5.2.6.1.1 "><p>define</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.36%" headers="mcps1.3.4.5.2.6.1.2 "><p>Global variable definition.</p>
+</td>
+<td class="cellrowborder" valign="top" width="10.99%" headers="mcps1.3.4.5.2.6.1.3 "><p>Optional</p>
+</td>
+<td class="cellrowborder" valign="top" width="14.979999999999999%" headers="mcps1.3.4.5.2.6.1.4 "><p>Keyword</p>
+</td>
+<td class="cellrowborder" valign="top" width="41.260000000000005%" headers="mcps1.3.4.5.2.6.1.5 "><p>For details, see <a href="#EN-US_CONCEPT_0000001563990837__li8888135525910">â¢ Global variable define</a>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="15.409999999999998%" headers="mcps1.3.4.5.2.6.1.1 "><p>events</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.36%" headers="mcps1.3.4.5.2.6.1.2 "><p>Event definition.</p>
+</td>
+<td class="cellrowborder" valign="top" width="10.99%" headers="mcps1.3.4.5.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="14.979999999999999%" headers="mcps1.3.4.5.2.6.1.4 "><p>Keyword</p>
+</td>
+<td class="cellrowborder" valign="top" width="41.260000000000005%" headers="mcps1.3.4.5.2.6.1.5 "><p>For details, see <a href="#EN-US_CONCEPT_0000001563990837__li7946141105211">â¢ events</a>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="15.409999999999998%" headers="mcps1.3.4.5.2.6.1.1 "><p>strategy</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.36%" headers="mcps1.3.4.5.2.6.1.2 "><p>Strategy definition.</p>
+</td>
+<td class="cellrowborder" valign="top" width="10.99%" headers="mcps1.3.4.5.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="14.979999999999999%" headers="mcps1.3.4.5.2.6.1.4 "><p>Keyword</p>
+</td>
+<td class="cellrowborder" valign="top" width="41.260000000000005%" headers="mcps1.3.4.5.2.6.1.5 "><p>For details, see <a href="#EN-US_CONCEPT_0000001563990837__li15817536540">â¢ strategy</a>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="15.409999999999998%" headers="mcps1.3.4.5.2.6.1.1 "><p>tasks</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.36%" headers="mcps1.3.4.5.2.6.1.2 "><p>Task definition.</p>
+</td>
+<td class="cellrowborder" valign="top" width="10.99%" headers="mcps1.3.4.5.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="14.979999999999999%" headers="mcps1.3.4.5.2.6.1.4 "><p>Keyword</p>
+</td>
+<td class="cellrowborder" valign="top" width="41.260000000000005%" headers="mcps1.3.4.5.2.6.1.5 "><p>For details, see <a href="#EN-US_CONCEPT_0000001563990837__li1925501419555">â¢ tasks</a>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul><li id="EN-US_CONCEPT_0000001563990837__li8888135525910"><a name="EN-US_CONCEPT_0000001563990837__li8888135525910"></a><a name="li8888135525910"></a><strong>Global variable define</strong><p>The global variable <strong>define</strong> is used to define global variables for the entire script. A maximum of 15 global variables can be defined. Other variables cannot be referenced.</p>
+<pre class="screen">"define": {"<em>name</em>": <em>value</em>}</pre>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 2 </b>Fields in the global variable <strong>define</strong></caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="12.051205120512051%" id="mcps1.3.4.6.1.4.2.6.1.1" liSelected="liSelected"><p>Field</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="15.941594159415938%" id="mcps1.3.4.6.1.4.2.6.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="13.661366136613662%" id="mcps1.3.4.6.1.4.2.6.1.3" liSelected="liSelected"><p>Attribute</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="11.051105110511052%" id="mcps1.3.4.6.1.4.2.6.1.4" liSelected="liSelected"><p>Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="47.294729472947296%" id="mcps1.3.4.6.1.4.2.6.1.5" liSelected="liSelected"><p>Value Range</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="12.051205120512051%" headers="mcps1.3.4.6.1.4.2.6.1.1 "><p><em>name</em></p>
+</td>
+<td class="cellrowborder" valign="top" width="15.941594159415938%" headers="mcps1.3.4.6.1.4.2.6.1.2 "><p>Name of a variable.</p>
+</td>
+<td class="cellrowborder" valign="top" width="13.661366136613662%" headers="mcps1.3.4.6.1.4.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.051105110511052%" headers="mcps1.3.4.6.1.4.2.6.1.4 "><p>Customized</p>
+</td>
+<td class="cellrowborder" valign="top" width="47.294729472947296%" headers="mcps1.3.4.6.1.4.2.6.1.5 "><p>The value is a string of 2 to 16 case-sensitive characters. It starts with a letter and can contain only letters, digits, and underscores (_). The variable name must be globally unique and cannot be <strong>result</strong>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.051205120512051%" headers="mcps1.3.4.6.1.4.2.6.1.1 "><p><em>value</em></p>
+</td>
+<td class="cellrowborder" valign="top" width="15.941594159415938%" headers="mcps1.3.4.6.1.4.2.6.1.2 "><p>Value of a variable.</p>
+</td>
+<td class="cellrowborder" valign="top" width="13.661366136613662%" headers="mcps1.3.4.6.1.4.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.051105110511052%" headers="mcps1.3.4.6.1.4.2.6.1.4 "><p>Customized</p>
+</td>
+<td class="cellrowborder" valign="top" width="47.294729472947296%" headers="mcps1.3.4.6.1.4.2.6.1.5 "><p>For details about the variable types supported by the global variable <strong>define</strong>, see <a href="#EN-US_CONCEPT_0000001563990837__table4198711614">Table 3</a>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001563990837__table4198711614"></a><a name="table4198711614"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001563990837__table4198711614" frame="border" border="1" rules="all"><caption><b>Table 3 </b>Variable types supported by <strong>define</strong></caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="19.688031196880313%" id="mcps1.3.4.6.1.5.2.4.1.1" liSelected="liSelected"><p>Variable Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="26.47735226477352%" id="mcps1.3.4.6.1.5.2.4.1.2" liSelected="liSelected"><p>Usage Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="53.83461653834617%" id="mcps1.3.4.6.1.5.2.4.1.3" liSelected="liSelected"><p>Value Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="19.688031196880313%" headers="mcps1.3.4.6.1.5.2.4.1.1 "><p>Boolean type</p>
+</td>
+<td class="cellrowborder" valign="top" width="26.47735226477352%" headers="mcps1.3.4.6.1.5.2.4.1.2 "><p>"define": {"aa": <em>value</em>}</p>
+</td>
+<td class="cellrowborder" valign="top" width="53.83461653834617%" headers="mcps1.3.4.6.1.5.2.4.1.3 "><p><em>value</em>: The value can be true or false.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="19.688031196880313%" headers="mcps1.3.4.6.1.5.2.4.1.1 "><p>Integer type</p>
+</td>
+<td class="cellrowborder" valign="top" width="26.47735226477352%" headers="mcps1.3.4.6.1.5.2.4.1.2 "><p>"define": {"bb": <em>value</em>}</p>
+</td>
+<td class="cellrowborder" valign="top" width="53.83461653834617%" headers="mcps1.3.4.6.1.5.2.4.1.3 "><p><em>value</em>: The value ranges from 0 to 4294967295.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="19.688031196880313%" headers="mcps1.3.4.6.1.5.2.4.1.1 "><p>Character string type</p>
+</td>
+<td class="cellrowborder" valign="top" width="26.47735226477352%" headers="mcps1.3.4.6.1.5.2.4.1.2 "><p>"define": {"MemoryXpath": "<em>value</em>"}</p>
+</td>
+<td class="cellrowborder" valign="top" width="53.83461653834617%" headers="mcps1.3.4.6.1.5.2.4.1.3 "><p><em>value</em>: The value is a string of 1 to 256 characters. Chinese characters are supported. Each Chinese character is considered as three English characters.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="19.688031196880313%" headers="mcps1.3.4.6.1.5.2.4.1.1 "><p>String array type</p>
+</td>
+<td class="cellrowborder" valign="top" width="26.47735226477352%" headers="mcps1.3.4.6.1.5.2.4.1.2 "><p>"define": {"cc": ["<em>value1</em>", â¦â¦, "<em>valuen</em>"]}</p>
+</td>
+<td class="cellrowborder" valign="top" width="53.83461653834617%" headers="mcps1.3.4.6.1.5.2.4.1.3 "><p>The total length of array members cannot exceed 1600 characters. The members are character strings. Chinese characters are supported. Each Chinese character is considered as three English characters.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="19.688031196880313%" headers="mcps1.3.4.6.1.5.2.4.1.1 "><p>Integer array type</p>
+</td>
+<td class="cellrowborder" valign="top" width="26.47735226477352%" headers="mcps1.3.4.6.1.5.2.4.1.2 "><p>"define": {"dd": [<em>value1</em>, â¦â¦,<em> value80</em>]}</p>
+</td>
+<td class="cellrowborder" valign="top" width="53.83461653834617%" headers="mcps1.3.4.6.1.5.2.4.1.3 "><p>A maximum of 80 members are supported. The value of each member ranges from 0 to 4294967295.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="19.688031196880313%" headers="mcps1.3.4.6.1.5.2.4.1.1 "><p>Object type</p>
+</td>
+<td class="cellrowborder" valign="top" width="26.47735226477352%" headers="mcps1.3.4.6.1.5.2.4.1.2 "><p>"define": {"ee": {"<em>name</em>": "<em>value</em>"}}</p>
+</td>
+<td class="cellrowborder" valign="top" width="53.83461653834617%" headers="mcps1.3.4.6.1.5.2.4.1.3 "><p>Only one layer of object is supported. An object supports a maximum of five members.</p>
+<p><em>name</em>: specifies the variable name in the object value. The value is a string of 2 to 16 case-sensitive characters. It starts with a letter and can contain only letters, digits, and underscores (_). The variable name must be globally unique and cannot be <strong>result</strong>.</p>
+<p><em>value</em>: specifies the value of the variable in the object value. The value is a string of 1 to 256 characters. Chinese characters are supported. Each Chinese character is considered as three English characters.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>An example of a variable of the Boolean type is as follows:</p>
+<pre class="screen">"define": {"aa": false}</pre>
+<p>An example of a global variable of the integer type is as follows:</p>
+<pre class="screen">"define": {"bb": 123}</pre>
+<p>An example of a global variable of the character string type is as follows:</p>
+<pre class="screen">"define": {"MemoryXpath": "huawei-cpu-memory:cpu-memory/board-cpu-core-infos/board-cpu-core-info"}</pre>
+<p>An example of a global variable of the string array type is as follows:</p>
+<pre class="screen">"define": {"cc": ["system", "user", "diagnose"]}</pre>
+<p>An example of a global variable of the integer array type is as follows:</p>
+<pre class="screen">"define": {"dd": [1, 2, 3]}</pre>
+<p>An example of a global variable of the object type is as follows:</p>
+<pre class="screen">"define": {"ee": {"eee1": "huawei-cpu-memory:cpu-memory/board-cpu-core-infos/board-cpu-core-info",
+		  "eee2": "cde"}}</pre>
+<p>Variables defined by <strong>define</strong> can be referenced by the entire script. The reference mode of all variables is ${}. <a href="#EN-US_CONCEPT_0000001563990837__table8539113819290">Table 4</a> lists the supported variable reference formats.</p>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001563990837__table8539113819290"></a><a name="table8539113819290"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001563990837__table8539113819290" frame="border" border="1" rules="all"><caption><b>Table 4 </b>Variable reference formats in a JSON script</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="20.512051205120514%" id="mcps1.3.4.6.1.19.2.4.1.1" liSelected="liSelected"><p>Variable Reference Format</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="40.45404540454046%" id="mcps1.3.4.6.1.19.2.4.1.2" liSelected="liSelected"><p>Format Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="39.033903390339034%" id="mcps1.3.4.6.1.19.2.4.1.3" liSelected="liSelected"><p>Parameter Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="20.512051205120514%" headers="mcps1.3.4.6.1.19.2.4.1.1 "><p>${<em>value</em>1}</p>
+</td>
+<td class="cellrowborder" valign="top" width="40.45404540454046%" headers="mcps1.3.4.6.1.19.2.4.1.2 "><p>All variable types can be referenced.</p>
+</td>
+<td class="cellrowborder" valign="top" width="39.033903390339034%" headers="mcps1.3.4.6.1.19.2.4.1.3 "><p><em>value1</em> specifies the name of a variable.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="20.512051205120514%" headers="mcps1.3.4.6.1.19.2.4.1.1 "><p>${<em>value1</em>[<em>number</em>]}</p>
+</td>
+<td class="cellrowborder" valign="top" width="40.45404540454046%" headers="mcps1.3.4.6.1.19.2.4.1.2 "><p>The type of the referenced variable is string array or integer array.</p>
+</td>
+<td class="cellrowborder" valign="top" width="39.033903390339034%" headers="mcps1.3.4.6.1.19.2.4.1.3 "><p><em>value1</em> specifies the name of a variable.</p>
+<p><em>number</em> specifies the array sequence, such as 0, 1, and 2.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="20.512051205120514%" headers="mcps1.3.4.6.1.19.2.4.1.1 "><p>${<em>value1</em>[<em>value2</em>]}</p>
+</td>
+<td class="cellrowborder" valign="top" width="40.45404540454046%" headers="mcps1.3.4.6.1.19.2.4.1.2 "><p>The type of the referenced variable is string array or integer array.</p>
+</td>
+<td class="cellrowborder" valign="top" width="39.033903390339034%" headers="mcps1.3.4.6.1.19.2.4.1.3 "><p><em>value1</em> and <em>value2</em> specify variable names.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="20.512051205120514%" headers="mcps1.3.4.6.1.19.2.4.1.1 "><p>${<em>value1</em>.<em>value2</em>}</p>
+</td>
+<td class="cellrowborder" valign="top" width="40.45404540454046%" headers="mcps1.3.4.6.1.19.2.4.1.2 "><p>The type of the referenced variable is object.</p>
+</td>
+<td class="cellrowborder" valign="top" width="39.033903390339034%" headers="mcps1.3.4.6.1.19.2.4.1.3 "><p><em>value1</em> specifies the name of a variable.</p>
+<p><em>value2</em> specifies the name of the variable in the object value.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li><li id="EN-US_CONCEPT_0000001563990837__li7946141105211"><a name="EN-US_CONCEPT_0000001563990837__li7946141105211"></a><a name="li7946141105211"></a><strong>events</strong><p><strong>events</strong> describes data subscription, processing, and judgment. A single event or multiple events can be configured. A maximum of five events are supported.</p>
+<pre class="screen">"events": {"<em>name</em>1": {"trigger": "<em>Trigger-Condition</em>1"},{"<em>name</em>2": {"trigger": "<em>Trigger-Condition</em>2"}}</pre>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 5 </b>Fields in <strong>events</strong></caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="12.049999999999999%" id="mcps1.3.4.6.2.4.2.6.1.1" liSelected="liSelected"><p>Field</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="16.79%" id="mcps1.3.4.6.2.4.2.6.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="12.6%" id="mcps1.3.4.6.2.4.2.6.1.3" liSelected="liSelected"><p>Attribute</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="12.47%" id="mcps1.3.4.6.2.4.2.6.1.4" liSelected="liSelected"><p>Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="46.089999999999996%" id="mcps1.3.4.6.2.4.2.6.1.5" liSelected="liSelected"><p>Value Range</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="12.049999999999999%" headers="mcps1.3.4.6.2.4.2.6.1.1 "><p><em>name</em></p>
+</td>
+<td class="cellrowborder" valign="top" width="16.79%" headers="mcps1.3.4.6.2.4.2.6.1.2 "><p>Event name.</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.6%" headers="mcps1.3.4.6.2.4.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.47%" headers="mcps1.3.4.6.2.4.2.6.1.4 "><p>Customized</p>
+</td>
+<td class="cellrowborder" valign="top" width="46.089999999999996%" headers="mcps1.3.4.6.2.4.2.6.1.5 "><p>The value is a string of two case-sensitive characters. It starts with a letter and can contain only letters and digits.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.049999999999999%" headers="mcps1.3.4.6.2.4.2.6.1.1 "><p>trigger</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.79%" headers="mcps1.3.4.6.2.4.2.6.1.2 "><p>Trigger condition.</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.6%" headers="mcps1.3.4.6.2.4.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.47%" headers="mcps1.3.4.6.2.4.2.6.1.4 "><p>Keyword</p>
+</td>
+<td class="cellrowborder" valign="top" width="46.089999999999996%" headers="mcps1.3.4.6.2.4.2.6.1.5 "><p>-</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.049999999999999%" headers="mcps1.3.4.6.2.4.2.6.1.1 "><p><em>Trigger-Condition</em></p>
+</td>
+<td class="cellrowborder" valign="top" width="16.79%" headers="mcps1.3.4.6.2.4.2.6.1.2 "><p>Trigger condition.</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.6%" headers="mcps1.3.4.6.2.4.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.47%" headers="mcps1.3.4.6.2.4.2.6.1.4 "><p>Customized</p>
+</td>
+<td class="cellrowborder" valign="top" width="46.089999999999996%" headers="mcps1.3.4.6.2.4.2.6.1.5 "><p>For details about the value, see <a href="#EN-US_CONCEPT_0000001563990837__table87171339235">Table 6</a>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001563990837__table87171339235"></a><a name="table87171339235"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001563990837__table87171339235" frame="border" border="1" rules="all"><caption><b>Table 6 </b>Event triggering conditions</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="16.91%" id="mcps1.3.4.6.2.5.2.5.1.1" liSelected="liSelected"><p>Trigger Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="18.55%" id="mcps1.3.4.6.2.5.2.5.1.2" liSelected="liSelected"><p>Function Name</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="20.54%" id="mcps1.3.4.6.2.5.2.5.1.3" liSelected="liSelected"><p>Usage</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="44%" id="mcps1.3.4.6.2.5.2.5.1.4" liSelected="liSelected"><p>Parameter Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="16.91%" headers="mcps1.3.4.6.2.5.2.5.1.1 "><p>Triggered by KPI conditions</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.55%" headers="mcps1.3.4.6.2.5.2.5.1.2 "><p>eva.kpi</p>
+</td>
+<td class="cellrowborder" valign="top" width="20.54%" headers="mcps1.3.4.6.2.5.2.5.1.3 "><p>eva.kpi(<em>kpiXpath</em>) &gt; <em>value</em>1</p>
+</td>
+<td class="cellrowborder" valign="top" width="44%" headers="mcps1.3.4.6.2.5.2.5.1.4 "><p><em>kpiXpath</em>: specifies the sampling path. Currently, only the KPI sampling path (for example, CPU usage) queried using the <a href="cmdqueryname=display+telemetry+sensor-path"><b><span class="cmdname">display telemetry sensor-path</span></b></a> command is supported. For details about the supported comparison operators, see <a href="#EN-US_CONCEPT_0000001563990837__table6605131219326">Table 7</a>. The return value is true or false.</p>
+<p><em>value1</em>: The value is an integer.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="16.91%" headers="mcps1.3.4.6.2.5.2.5.1.1 "><p>Triggered by logs</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.55%" headers="mcps1.3.4.6.2.5.2.5.1.2 "><p>eva.logEvent</p>
+</td>
+<td class="cellrowborder" valign="top" width="20.54%" headers="mcps1.3.4.6.2.5.2.5.1.3 "><p>eva.logEvent("<em>value2</em>", "<em>value3</em>")</p>
+</td>
+<td class="cellrowborder" valign="top" width="44%" headers="mcps1.3.4.6.2.5.2.5.1.4 "><p>Only non-trap logs are supported.</p>
+<p><em>value2</em>: specifies the name of the log template to be subscribed to.</p>
+<p><em>value3</em>: specifies the digest of the log information to be subscribed to.</p>
+<p>For example, in the AAA/6/RDACCTUP, <em>value2</em> is AAA and <em>value3</em> is RDACCTUP.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="16.91%" headers="mcps1.3.4.6.2.5.2.5.1.1 "><p>Triggered by alarms</p>
+<p></p>
+</td>
+<td class="cellrowborder" valign="top" width="18.55%" headers="mcps1.3.4.6.2.5.2.5.1.2 "><p>eva.alarmEvent</p>
+</td>
+<td class="cellrowborder" valign="top" width="20.54%" headers="mcps1.3.4.6.2.5.2.5.1.3 "><p>eva.alarmEvent("<em>value5</em>")</p>
+</td>
+<td class="cellrowborder" valign="top" width="44%" headers="mcps1.3.4.6.2.5.2.5.1.4 "><p><em>value5</em>: specifies the digest of the alarm information to be subscribed to.</p>
+<p>For example, in <strong>BFD_1.3.6.1.4.1.2011.5.25.38.3.1 hwBfdSessDown</strong>, <em>value5</em> is <strong>hwBfdSessDown</strong>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="16.91%" headers="mcps1.3.4.6.2.5.2.5.1.1 "><p>Triggered at a scheduled time</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.55%" headers="mcps1.3.4.6.2.5.2.5.1.2 "><p>eva.cycle</p>
+</td>
+<td class="cellrowborder" valign="top" width="20.54%" headers="mcps1.3.4.6.2.5.2.5.1.3 "><p>eva.cycle(<em>value4</em>)</p>
+</td>
+<td class="cellrowborder" valign="top" width="44%" headers="mcps1.3.4.6.2.5.2.5.1.4 "><p><em>value4</em>: specifies the interval for triggering an event. The value is an integer in the range from 1 to 65535, in hours. Only one timer can be used in an event.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="16.91%" headers="mcps1.3.4.6.2.5.2.5.1.1 "><p>Triggered only once</p>
+</td>
+<td class="cellrowborder" valign="top" width="18.55%" headers="mcps1.3.4.6.2.5.2.5.1.2 "><p>eva.singleCollect</p>
+</td>
+<td class="cellrowborder" valign="top" width="20.54%" headers="mcps1.3.4.6.2.5.2.5.1.3 "><p>eva.singleCollect()</p>
+</td>
+<td class="cellrowborder" valign="top" width="44%" headers="mcps1.3.4.6.2.5.2.5.1.4 "><p>The event is triggered only once. The JSON script is automatically uninstalled after it is executed. This trigger condition can be used only in a single-event script.</p>
+<div class="note"><span class="notetitle"> NOTE: </span><div class="notebody"><p>In a PMI script, <strong>events</strong> can only use eva.singleCollect.</p>
+</div></div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001563990837__table6605131219326"></a><a name="table6605131219326"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001563990837__table6605131219326" frame="border" border="1" rules="all"><caption><b>Table 7 </b>Comparison operators supported in JSON scripts</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="26.162616261626166%" id="mcps1.3.4.6.2.6.2.4.1.1" liSelected="liSelected"><p><strong>Operator</strong></p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="27.422742274227424%" id="mcps1.3.4.6.2.6.2.4.1.2" liSelected="liSelected"><p>Usage Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="46.41464146414641%" id="mcps1.3.4.6.2.6.2.4.1.3" liSelected="liSelected"><p><strong>Description</strong></p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="26.162616261626166%" headers="mcps1.3.4.6.2.6.2.4.1.1 "><p><strong>==</strong></p>
+</td>
+<td class="cellrowborder" valign="top" width="27.422742274227424%" headers="mcps1.3.4.6.2.6.2.4.1.2 "><p>a == b</p>
+</td>
+<td class="cellrowborder" valign="top" width="46.41464146414641%" headers="mcps1.3.4.6.2.6.2.4.1.3 "><p>Whether <strong>a</strong> is equal to <strong>b</strong>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="26.162616261626166%" headers="mcps1.3.4.6.2.6.2.4.1.1 "><p><strong>!=</strong></p>
+</td>
+<td class="cellrowborder" valign="top" width="27.422742274227424%" headers="mcps1.3.4.6.2.6.2.4.1.2 "><p>a !=b</p>
+</td>
+<td class="cellrowborder" valign="top" width="46.41464146414641%" headers="mcps1.3.4.6.2.6.2.4.1.3 "><p>Whether <strong>a</strong> is not equal to <strong>b</strong>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="26.162616261626166%" headers="mcps1.3.4.6.2.6.2.4.1.1 "><p><strong>&gt;</strong><strong></strong></p>
+</td>
+<td class="cellrowborder" valign="top" width="27.422742274227424%" headers="mcps1.3.4.6.2.6.2.4.1.2 "><p>a&gt;b</p>
+</td>
+<td class="cellrowborder" valign="top" width="46.41464146414641%" headers="mcps1.3.4.6.2.6.2.4.1.3 "><p>Whether <strong>a</strong> is greater than <strong>b</strong>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="26.162616261626166%" headers="mcps1.3.4.6.2.6.2.4.1.1 "><p><strong>&lt;</strong><strong></strong></p>
+</td>
+<td class="cellrowborder" valign="top" width="27.422742274227424%" headers="mcps1.3.4.6.2.6.2.4.1.2 "><p>a&lt;b</p>
+</td>
+<td class="cellrowborder" valign="top" width="46.41464146414641%" headers="mcps1.3.4.6.2.6.2.4.1.3 "><p>Whether <strong>a</strong> is less than <strong>b</strong>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="26.162616261626166%" headers="mcps1.3.4.6.2.6.2.4.1.1 "><p><strong>&gt;=</strong></p>
+</td>
+<td class="cellrowborder" valign="top" width="27.422742274227424%" headers="mcps1.3.4.6.2.6.2.4.1.2 "><p>a&gt;=b</p>
+</td>
+<td class="cellrowborder" valign="top" width="46.41464146414641%" headers="mcps1.3.4.6.2.6.2.4.1.3 "><p>Whether <strong>a</strong> is greater than or equal to <strong>b</strong>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="26.162616261626166%" headers="mcps1.3.4.6.2.6.2.4.1.1 "><p><strong>&lt;=</strong></p>
+</td>
+<td class="cellrowborder" valign="top" width="27.422742274227424%" headers="mcps1.3.4.6.2.6.2.4.1.2 "><p>a&lt;=b</p>
+</td>
+<td class="cellrowborder" valign="top" width="46.41464146414641%" headers="mcps1.3.4.6.2.6.2.4.1.3 "><p>Whether <strong>a</strong> is less than or equal to <strong>b</strong>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li><li id="EN-US_CONCEPT_0000001563990837__li15817536540"><a name="EN-US_CONCEPT_0000001563990837__li15817536540"></a><a name="li15817536540"></a><strong>strategy</strong><p><strong>strategy</strong> is used to define the entry conditions of subsequent tasks. When there are multiple events, logical relationships between the events are used to make a judgment.</p>
+<pre class="screen">"<strong>strategy</strong>": "<em>event1</em> | <em>event2</em>"</pre>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 8 </b>Fields in <strong>strategy</strong></caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="12.049999999999999%" id="mcps1.3.4.6.3.4.2.6.1.1" liSelected="liSelected"><p>Field</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="19.68%" id="mcps1.3.4.6.3.4.2.6.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="12.58%" id="mcps1.3.4.6.3.4.2.6.1.3" liSelected="liSelected"><p>Attribute</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="9.6%" id="mcps1.3.4.6.3.4.2.6.1.4" liSelected="liSelected"><p>Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="46.089999999999996%" id="mcps1.3.4.6.3.4.2.6.1.5" liSelected="liSelected"><p>Value Range</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="12.049999999999999%" headers="mcps1.3.4.6.3.4.2.6.1.1 "><p><em>event1</em></p>
+</td>
+<td class="cellrowborder" valign="top" width="19.68%" headers="mcps1.3.4.6.3.4.2.6.1.2 "><p>Event name.</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.58%" headers="mcps1.3.4.6.3.4.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="9.6%" headers="mcps1.3.4.6.3.4.2.6.1.4 "><p>Customized</p>
+</td>
+<td class="cellrowborder" valign="top" width="46.089999999999996%" headers="mcps1.3.4.6.3.4.2.6.1.5 "><p>Event name defined in the event.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.049999999999999%" headers="mcps1.3.4.6.3.4.2.6.1.1 "><p>|</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.68%" headers="mcps1.3.4.6.3.4.2.6.1.2 "><p>Logical operator.</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.58%" headers="mcps1.3.4.6.3.4.2.6.1.3 "><p>Optional</p>
+</td>
+<td class="cellrowborder" valign="top" width="9.6%" headers="mcps1.3.4.6.3.4.2.6.1.4 "><p>-</p>
+</td>
+<td class="cellrowborder" valign="top" width="46.089999999999996%" headers="mcps1.3.4.6.3.4.2.6.1.5 "><p>For details, see <a href="#EN-US_CONCEPT_0000001563990837__table5668944123617">Table 9</a>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.049999999999999%" headers="mcps1.3.4.6.3.4.2.6.1.1 "><p><em>event2</em></p>
+</td>
+<td class="cellrowborder" valign="top" width="19.68%" headers="mcps1.3.4.6.3.4.2.6.1.2 "><p>Event name.</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.58%" headers="mcps1.3.4.6.3.4.2.6.1.3 "><p>Optional</p>
+</td>
+<td class="cellrowborder" valign="top" width="9.6%" headers="mcps1.3.4.6.3.4.2.6.1.4 "><p>Customized</p>
+</td>
+<td class="cellrowborder" valign="top" width="46.089999999999996%" headers="mcps1.3.4.6.3.4.2.6.1.5 "><p>Event name defined in the event.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001563990837__table5668944123617"></a><a name="table5668944123617"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001563990837__table5668944123617" frame="border" border="1" rules="all"><caption><b>Table 9 </b>Logical relationships supported by <strong>strategy</strong></caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="24.2%" id="mcps1.3.4.6.3.5.2.5.1.1" liSelected="liSelected"><p><strong>Logical Operator</strong></p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="25.36%" id="mcps1.3.4.6.3.5.2.5.1.2" liSelected="liSelected"><p>Usage Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="30.320000000000004%" id="mcps1.3.4.6.3.5.2.5.1.3" liSelected="liSelected"><p><strong>Description</strong></p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="20.119999999999997%" id="mcps1.3.4.6.3.5.2.5.1.4" liSelected="liSelected"><p>Value Range</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="24.2%" headers="mcps1.3.4.6.3.5.2.5.1.1 "><p>&amp;</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.36%" headers="mcps1.3.4.6.3.5.2.5.1.2 "><p><em>arg1</em> &amp; <em>arg2</em></p>
+</td>
+<td class="cellrowborder" valign="top" width="30.320000000000004%" headers="mcps1.3.4.6.3.5.2.5.1.3 "><p>The expression result is true only when both events <em>arg1</em> and <em>arg2</em> are true within one minute. Otherwise, false is returned.</p>
+</td>
+<td class="cellrowborder" rowspan="3" valign="top" width="20.119999999999997%" headers="mcps1.3.4.6.3.5.2.5.1.4 "><p><em>arg1</em>, <em>arg2</em>, and <em>arg3</em> specify defined event names.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.4.6.3.5.2.5.1.1 "><p>|</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.3.5.2.5.1.2 "><p><em>arg1</em> | <em>arg2</em></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.3.5.2.5.1.3 "><p>The expression result is false only when both events <em>arg1</em> and <em>arg2</em> are false within one minute. Otherwise, true is returned.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.4.6.3.5.2.5.1.1 "><p>()</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.3.5.2.5.1.2 "><p>(<em>arg1</em> | <em>arg2</em>)&amp; <em>arg3</em></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.3.5.2.5.1.3 "><p>() is a priority symbol, indicating that the | operation is performed on events <em>arg1</em> and <em>arg2</em> first, and then the &amp; operation is performed on the | operation result and <em>arg3</em>.</p>
+<p>The expression result is true only when both events <em>arg1</em> and <em>arg2</em> are true and event <em>arg3</em> is true within one minute. Otherwise, false is returned.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li><li id="EN-US_CONCEPT_0000001563990837__li1925501419555"><a name="EN-US_CONCEPT_0000001563990837__li1925501419555"></a><a name="li1925501419555"></a><strong>tasks</strong><p><strong>tasks</strong> describes the action of an event. The first task in a script must be named <strong>mainTask</strong>. The names of other tasks can be customized but cannot be defined as <strong>mainTask</strong>. A maximum of 15 tasks can be created for a script.</p>
+<pre class="screen">"tasks":{
+    "mainTask":{
+        "parameters":{},
+        "loop":"",
+        "action":"",
+        "publish":{},
+        "switch":{}
+    }
+}</pre>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 10 </b>Fields in <strong>tasks</strong></caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="12.049999999999999%" id="mcps1.3.4.6.4.4.2.6.1.1" liSelected="liSelected"><p>Field</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="23.84%" id="mcps1.3.4.6.4.4.2.6.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="12.740000000000002%" id="mcps1.3.4.6.4.4.2.6.1.3" liSelected="liSelected"><p>Attribute</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="13.96%" id="mcps1.3.4.6.4.4.2.6.1.4" liSelected="liSelected"><p>Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="37.41%" id="mcps1.3.4.6.4.4.2.6.1.5" liSelected="liSelected"><p>Value Range</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="12.049999999999999%" headers="mcps1.3.4.6.4.4.2.6.1.1 "><p>mainTask</p>
+</td>
+<td class="cellrowborder" valign="top" width="23.84%" headers="mcps1.3.4.6.4.4.2.6.1.2 "><p>Task name.</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.740000000000002%" headers="mcps1.3.4.6.4.4.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="13.96%" headers="mcps1.3.4.6.4.4.2.6.1.4 "><p>Keyword/Customized</p>
+</td>
+<td class="cellrowborder" valign="top" width="37.41%" headers="mcps1.3.4.6.4.4.2.6.1.5 "><p><strong>mainTask</strong> is a keyword and is the first task of the script.</p>
+<p>The names of other tasks can be customized. The value is a string of 1 to 32 case-sensitive characters. It starts with a letter and can contain only letters, digits, and underscores (_).</p>
+<p>A task name in a script must be unique.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.049999999999999%" headers="mcps1.3.4.6.4.4.2.6.1.1 "><p>parameters</p>
+</td>
+<td class="cellrowborder" valign="top" width="23.84%" headers="mcps1.3.4.6.4.4.2.6.1.2 "><p>Defines variables in the task.</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.740000000000002%" headers="mcps1.3.4.6.4.4.2.6.1.3 "><p>Optional</p>
+</td>
+<td class="cellrowborder" valign="top" width="13.96%" headers="mcps1.3.4.6.4.4.2.6.1.4 "><p>Keyword</p>
+</td>
+<td class="cellrowborder" valign="top" width="37.41%" headers="mcps1.3.4.6.4.4.2.6.1.5 "><p>For details, see <a href="#EN-US_CONCEPT_0000001563990837__li1495135155417">âª parameters</a>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.049999999999999%" headers="mcps1.3.4.6.4.4.2.6.1.1 "><p>loop</p>
+</td>
+<td class="cellrowborder" valign="top" width="23.84%" headers="mcps1.3.4.6.4.4.2.6.1.2 "><p>Defines the cyclic execution of the task.</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.740000000000002%" headers="mcps1.3.4.6.4.4.2.6.1.3 "><p>Optional</p>
+</td>
+<td class="cellrowborder" valign="top" width="13.96%" headers="mcps1.3.4.6.4.4.2.6.1.4 "><p>Keyword</p>
+</td>
+<td class="cellrowborder" valign="top" width="37.41%" headers="mcps1.3.4.6.4.4.2.6.1.5 "><p>For details, see <a href="#EN-US_CONCEPT_0000001563990837__li7514181154613">âª loop</a>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.049999999999999%" headers="mcps1.3.4.6.4.4.2.6.1.1 "><p>action</p>
+</td>
+<td class="cellrowborder" valign="top" width="23.84%" headers="mcps1.3.4.6.4.4.2.6.1.2 "><p>Defines the action to be executed.</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.740000000000002%" headers="mcps1.3.4.6.4.4.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="13.96%" headers="mcps1.3.4.6.4.4.2.6.1.4 "><p>Keyword</p>
+</td>
+<td class="cellrowborder" valign="top" width="37.41%" headers="mcps1.3.4.6.4.4.2.6.1.5 "><p>For details, see <a href="#EN-US_CONCEPT_0000001563990837__li10676174694520">âª action</a>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.049999999999999%" headers="mcps1.3.4.6.4.4.2.6.1.1 "><p>publish</p>
+</td>
+<td class="cellrowborder" valign="top" width="23.84%" headers="mcps1.3.4.6.4.4.2.6.1.2 "><p>Defines the parameters to be published to scripts.</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.740000000000002%" headers="mcps1.3.4.6.4.4.2.6.1.3 "><p>Optional</p>
+</td>
+<td class="cellrowborder" valign="top" width="13.96%" headers="mcps1.3.4.6.4.4.2.6.1.4 "><p>Keyword</p>
+</td>
+<td class="cellrowborder" valign="top" width="37.41%" headers="mcps1.3.4.6.4.4.2.6.1.5 "><p>For details, see <a href="#EN-US_CONCEPT_0000001563990837__li1698584819450">âª publish</a>.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.049999999999999%" headers="mcps1.3.4.6.4.4.2.6.1.1 "><p>switch</p>
+</td>
+<td class="cellrowborder" valign="top" width="23.84%" headers="mcps1.3.4.6.4.4.2.6.1.2 "><p>Defines the conditions for switching from the current task to a lower-level task.</p>
+</td>
+<td class="cellrowborder" valign="top" width="12.740000000000002%" headers="mcps1.3.4.6.4.4.2.6.1.3 "><p>Optional</p>
+</td>
+<td class="cellrowborder" valign="top" width="13.96%" headers="mcps1.3.4.6.4.4.2.6.1.4 "><p>Keyword</p>
+</td>
+<td class="cellrowborder" valign="top" width="37.41%" headers="mcps1.3.4.6.4.4.2.6.1.5 "><p>For details, see <a href="#EN-US_CONCEPT_0000001563990837__li1192831504615">âª switch</a>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul><li id="EN-US_CONCEPT_0000001563990837__li1495135155417"><a name="EN-US_CONCEPT_0000001563990837__li1495135155417"></a><a name="li1495135155417"></a><strong>parameters</strong><p><strong>parameters</strong> is used to define variables used in a task. A variable applies to the current task. Each task supports a maximum of five variables.</p>
+<p>If the input parameter of a function is of the array or object type, you must define a variable and then reference the variable in the input parameter of the function.</p>
+<pre class="screen">"parameters":{"<em>name</em>":"<em>value</em>"}</pre>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 11 </b>Fields in <strong>parameters</strong></caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="12.051205120512051%" id="mcps1.3.4.6.4.5.1.5.2.6.1.1" liSelected="liSelected"><p>Field</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="15.941594159415938%" id="mcps1.3.4.6.4.5.1.5.2.6.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="13.661366136613662%" id="mcps1.3.4.6.4.5.1.5.2.6.1.3" liSelected="liSelected"><p>Attribute</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="11.051105110511052%" id="mcps1.3.4.6.4.5.1.5.2.6.1.4" liSelected="liSelected"><p>Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="47.294729472947296%" id="mcps1.3.4.6.4.5.1.5.2.6.1.5" liSelected="liSelected"><p>Value Range</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="12.051205120512051%" headers="mcps1.3.4.6.4.5.1.5.2.6.1.1 "><p><em>name</em></p>
+</td>
+<td class="cellrowborder" valign="top" width="15.941594159415938%" headers="mcps1.3.4.6.4.5.1.5.2.6.1.2 "><p>Name of a variable.</p>
+</td>
+<td class="cellrowborder" valign="top" width="13.661366136613662%" headers="mcps1.3.4.6.4.5.1.5.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.051105110511052%" headers="mcps1.3.4.6.4.5.1.5.2.6.1.4 "><p>Customized</p>
+</td>
+<td class="cellrowborder" valign="top" width="47.294729472947296%" headers="mcps1.3.4.6.4.5.1.5.2.6.1.5 "><p>The value is a string of 2 to 16 case-sensitive characters. It starts with a letter and can contain only letters, digits, and underscores (_).</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.051205120512051%" headers="mcps1.3.4.6.4.5.1.5.2.6.1.1 "><p><em>value</em></p>
+</td>
+<td class="cellrowborder" valign="top" width="15.941594159415938%" headers="mcps1.3.4.6.4.5.1.5.2.6.1.2 "><p>Value of a variable.</p>
+</td>
+<td class="cellrowborder" valign="top" width="13.661366136613662%" headers="mcps1.3.4.6.4.5.1.5.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.051105110511052%" headers="mcps1.3.4.6.4.5.1.5.2.6.1.4 "><p>Customized</p>
+</td>
+<td class="cellrowborder" valign="top" width="47.294729472947296%" headers="mcps1.3.4.6.4.5.1.5.2.6.1.5 "><p>For details about the variable types supported by <strong>parameters</strong>, see <a href="#EN-US_CONCEPT_0000001563990837__table2097173723618">Table 12</a>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001563990837__table2097173723618"></a><a name="table2097173723618"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001563990837__table2097173723618" frame="border" border="1" rules="all"><caption><b>Table 12 </b>Variable type supported by <strong>parameters</strong></caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="19.688031196880313%" id="mcps1.3.4.6.4.5.1.6.2.4.1.1" liSelected="liSelected"><p>Variable Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="26.47735226477352%" id="mcps1.3.4.6.4.5.1.6.2.4.1.2" liSelected="liSelected"><p>Usage Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="53.83461653834617%" id="mcps1.3.4.6.4.5.1.6.2.4.1.3" liSelected="liSelected"><p>Value Range</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="19.688031196880313%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.1 "><p>Boolean type</p>
+</td>
+<td class="cellrowborder" valign="top" width="26.47735226477352%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.2 "><p>"parameters": {"aa": <em>value</em>}</p>
+</td>
+<td class="cellrowborder" valign="top" width="53.83461653834617%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.3 "><p><em>value</em>: The value can be true or false.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="19.688031196880313%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.1 "><p>Integer type</p>
+</td>
+<td class="cellrowborder" valign="top" width="26.47735226477352%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.2 "><p>"parameters": {"bb": <em>value</em>}</p>
+</td>
+<td class="cellrowborder" valign="top" width="53.83461653834617%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.3 "><p><em>value</em>: The value ranges from 0 to 4294967295.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="19.688031196880313%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.1 "><p>Character string type</p>
+</td>
+<td class="cellrowborder" valign="top" width="26.47735226477352%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.2 "><p>"parameters": {"MemoryXpath": "<em>value</em>"}</p>
+</td>
+<td class="cellrowborder" valign="top" width="53.83461653834617%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.3 "><p><em>value</em>: The value is a string of 1 to 256 characters. Chinese characters are supported. Each Chinese character is considered as three English characters.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="19.688031196880313%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.1 "><p>String array type</p>
+</td>
+<td class="cellrowborder" valign="top" width="26.47735226477352%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.2 "><p>"parameters": {"cc": ["<em>value1</em>", â¦â¦, "<em>value80</em>"]}</p>
+</td>
+<td class="cellrowborder" valign="top" width="53.83461653834617%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.3 "><p>The total length of array members cannot exceed 1600 characters. The members are character strings. Chinese characters are supported. Each Chinese character is considered as three English characters.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="19.688031196880313%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.1 "><p>Integer array type</p>
+</td>
+<td class="cellrowborder" valign="top" width="26.47735226477352%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.2 "><p>"parameters": {"dd": [<em>value1</em>, â¦â¦,<em> value80</em>]}</p>
+</td>
+<td class="cellrowborder" valign="top" width="53.83461653834617%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.3 "><p>The number of members supported ranges from 1 to 80. The value of each member ranges from 0 to 4294967295.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="19.688031196880313%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.1 "><p>Object type</p>
+</td>
+<td class="cellrowborder" valign="top" width="26.47735226477352%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.2 "><p>"parameters": {"ee": {"name": "<em>value</em>"}</p>
+</td>
+<td class="cellrowborder" valign="top" width="53.83461653834617%" headers="mcps1.3.4.6.4.5.1.6.2.4.1.3 "><p>Only one layer of object is supported. An object supports one to five members.</p>
+<p><em>name</em>: specifies the variable name in the object value. The value is a string of 2 to 16 case-sensitive characters. It starts with a letter and can contain only letters, digits, and underscores (_). The variable name must be globally unique and cannot be <strong>result</strong>.</p>
+<p><em>value</em>: specifies the value of the variable in the object value. The value is a string of 1 to 256 characters. Chinese characters are supported. Each Chinese character is considered as three English characters.</p>
+<div class="note"><span class="notetitle"> NOTE: </span><div class="notebody"><p>When a variable of the object type is defined in <strong>parameters</strong>, the variable cannot be referenced in the object.</p>
+</div></div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Variables defined by <strong>parameters</strong> can be referenced by <strong>action</strong>, <strong>switch</strong>, and <strong>publish</strong>. The reference mode of all variables is ${}. <a href="#EN-US_CONCEPT_0000001563990837__table8539113819290">Table 4</a> lists the supported variable reference formats.</p>
+<p><strong>parameters</strong> definition and reference example:</p>
+<pre class="screen">"parameters":{
+    "cmd":"display memory slot ${slot-id} cpu ${cpu-id}",
+    "view":"system"
+},
+"action":"eva.cli(${view}, &amp;{cmd})"</pre>
+</li><li id="EN-US_CONCEPT_0000001563990837__li7514181154613"><a name="EN-US_CONCEPT_0000001563990837__li7514181154613"></a><a name="li7514181154613"></a>loop<p><a name="EN-US_CONCEPT_0000001563990837__li7514181154613"></a><a name="li7514181154613"></a><strong>loop</strong> indicates that the task and all its lower-level tasks are executed cyclically. The entire script supports a maximum of three layers of loops.</p>
+<pre class="screen">"loop":"<em>index</em> in ${<em>value</em>}"</pre>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 13 </b>Fields in <strong>loop</strong></caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="12.051205120512051%" id="mcps1.3.4.6.4.5.2.3.2.6.1.1" liSelected="liSelected"><p>Field</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="15.921592159215923%" id="mcps1.3.4.6.4.5.2.3.2.6.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="13.681368136813681%" id="mcps1.3.4.6.4.5.2.3.2.6.1.3" liSelected="liSelected"><p>Attribute</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="11.051105110511052%" id="mcps1.3.4.6.4.5.2.3.2.6.1.4" liSelected="liSelected"><p>Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="47.294729472947296%" id="mcps1.3.4.6.4.5.2.3.2.6.1.5" liSelected="liSelected"><p>Value Range</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="12.051205120512051%" headers="mcps1.3.4.6.4.5.2.3.2.6.1.1 "><p><em>index</em></p>
+</td>
+<td class="cellrowborder" valign="top" width="15.921592159215923%" headers="mcps1.3.4.6.4.5.2.3.2.6.1.2 "><p>Name of a variable, which is used to indicate the subscript of an array. The usage method is the same as that of <strong>parameters</strong>.</p>
+</td>
+<td class="cellrowborder" valign="top" width="13.681368136813681%" headers="mcps1.3.4.6.4.5.2.3.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.051105110511052%" headers="mcps1.3.4.6.4.5.2.3.2.6.1.4 "><p>Customized</p>
+</td>
+<td class="cellrowborder" valign="top" width="47.294729472947296%" headers="mcps1.3.4.6.4.5.2.3.2.6.1.5 "><p>It does not need to be defined. The value starts from 0 and is incremented by 1 for each cycle.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.051205120512051%" headers="mcps1.3.4.6.4.5.2.3.2.6.1.1 "><p>in</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.921592159215923%" headers="mcps1.3.4.6.4.5.2.3.2.6.1.2 "><p>Fixed field.</p>
+</td>
+<td class="cellrowborder" valign="top" width="13.681368136813681%" headers="mcps1.3.4.6.4.5.2.3.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.051105110511052%" headers="mcps1.3.4.6.4.5.2.3.2.6.1.4 "><p>Keyword</p>
+</td>
+<td class="cellrowborder" valign="top" width="47.294729472947296%" headers="mcps1.3.4.6.4.5.2.3.2.6.1.5 "><p>-</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.051205120512051%" headers="mcps1.3.4.6.4.5.2.3.2.6.1.1 "><p><em>value</em></p>
+</td>
+<td class="cellrowborder" valign="top" width="15.921592159215923%" headers="mcps1.3.4.6.4.5.2.3.2.6.1.2 "><p>Name of a variable of the array type.</p>
+</td>
+<td class="cellrowborder" valign="top" width="13.681368136813681%" headers="mcps1.3.4.6.4.5.2.3.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.051105110511052%" headers="mcps1.3.4.6.4.5.2.3.2.6.1.4 "><p>Customized</p>
+</td>
+<td class="cellrowborder" valign="top" width="47.294729472947296%" headers="mcps1.3.4.6.4.5.2.3.2.6.1.5 "><p>The value must be a defined variable name of the array type.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>In the following example, when <strong>loop</strong> is executed for the first time, index is 0 and ${cmd[index]} is device. When <strong>loop</strong> is executed for the second time, index is 1 and ${cmd[index]} is clock.</p>
+<pre class="screen">"Task1":{
+  "define":{ "cmd": ["device", "clock"]}, 
+  "events":{ "e1": {"trigger": "eva.singleCollect()"},
+  "tasks": {
+     "mainTask": {
+	"loop": "index in ${cmd}",
+        "action": "eva.cli(\"user\", \"display ${cmd[index]}\")"
+         }
+      }
+}</pre>
+</li><li id="EN-US_CONCEPT_0000001563990837__li10676174694520"><a name="EN-US_CONCEPT_0000001563990837__li10676174694520"></a><a name="li10676174694520"></a>action<p><a name="EN-US_CONCEPT_0000001563990837__li10676174694520"></a><a name="li10676174694520"></a><strong>action</strong> is used to define the actions allowed in a task, including command delivery, NETCONF operation delivery, character string regular expression parsing functions, character string operation functions, array operation functions, and other functions for data judgment. Only one action can be used in a task, and only one function can be used in an action.</p>
+<p>The standard output result of <strong>action</strong> is <strong>result</strong>. You can only use <strong>publish</strong> to publish <strong>result</strong> to other tasks. <a href="#EN-US_CONCEPT_0000001563990837__table861543851718">Table 14</a> describes the usage of <strong>result</strong>.</p>
+
+<div class="tableBorder"><a name="EN-US_CONCEPT_0000001563990837__table861543851718"></a><a name="table861543851718"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_CONCEPT_0000001563990837__table861543851718" frame="border" border="1" rules="all"><caption><b>Table 14 </b>Usage description of <strong>result</strong></caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="20.31%" id="mcps1.3.4.6.4.5.3.3.2.3.1.1" liSelected="liSelected"><p>Usage Mode</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="79.69000000000001%" id="mcps1.3.4.6.4.5.3.3.2.3.1.2" liSelected="liSelected"><p>Usage Description</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="20.31%" headers="mcps1.3.4.6.4.5.3.3.2.3.1.1 "><p>${result}</p>
+</td>
+<td class="cellrowborder" valign="top" width="79.69000000000001%" headers="mcps1.3.4.6.4.5.3.3.2.3.1.2 "><p>Obtains the return result of <strong>action</strong> in the task.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="20.31%" headers="mcps1.3.4.6.4.5.3.3.2.3.1.1 "><p>${result[<em>number</em>]}</p>
+</td>
+<td class="cellrowborder" valign="top" width="79.69000000000001%" headers="mcps1.3.4.6.4.5.3.3.2.3.1.2 "><p>Used when the return result of <strong>action</strong> is of the array type (for example, the result returned by eva.cliArray).</p>
+<p><em>number</em>: specifies the value of the array subscript. The value must be an integer and cannot be a variable.</p>
+<p>Example:</p>
+<p>The return result of <strong>action</strong> is ["slotA","slotB","slotC"]. ${result[0]} is slotA.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="20.31%" headers="mcps1.3.4.6.4.5.3.3.2.3.1.1 "><p>${result[<em>number</em>].<em>info</em>}</p>
+</td>
+<td class="cellrowborder" valign="top" width="79.69000000000001%" headers="mcps1.3.4.6.4.5.3.3.2.3.1.2 "><p>Used when the return result of <strong>action</strong> is of the object array type (for example, the result returned by eva.netconfGet).</p>
+<p><em>number</em>: specifies the value of the array subscript. The value must be an integer and cannot be a variable.</p>
+<p><em>info</em>: specifies the element name in the information obtained using NETCONF, that is, the name of a leaf node or another node in the YANG file.</p>
+<p>Example:</p>
+<p>The return result of <strong>action</strong> is as follows:</p>
+<p>[</p>
+<p>{slotid: 1,</p>
+<p>portid: 1,</p>
+<p>state: "up"},</p>
+<p>{slotid: 1,</p>
+<p>portid: 2</p>
+<p>state: "up"}</p>
+<p>]</p>
+<p>${result[1].portid} is 2.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="20.31%" headers="mcps1.3.4.6.4.5.3.3.2.3.1.1 "><p>${result.<em>info</em>}</p>
+</td>
+<td class="cellrowborder" valign="top" width="79.69000000000001%" headers="mcps1.3.4.6.4.5.3.3.2.3.1.2 "><p>Used when the return result of <strong>action</strong> is of the object type (for example, the result returned by eva.netconfGet).</p>
+<p><em>info</em>: specifies the element name in the information obtained using NETCONF, that is, the name of a leaf node or another node in the YANG file.</p>
+<p>Example:</p>
+<p>The return result of <strong>action</strong> is as follows:</p>
+<p>portinfo: {</p>
+<p>slotid: 1,</p>
+<p>portid: 2,</p>
+<p>state: "up"}</p>
+<p>${result.slotid} is 1.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="20.31%" headers="mcps1.3.4.6.4.5.3.3.2.3.1.1 "><p>${result.<em>info</em>[<em>number</em>]}</p>
+</td>
+<td class="cellrowborder" valign="top" width="79.69000000000001%" headers="mcps1.3.4.6.4.5.3.3.2.3.1.2 "><p>The return result of <strong>action</strong> is of the object type and an object in the result is an array (for example, the result returned by eva.netconfGet).</p>
+<p><em>info</em>: specifies the element name in the information obtained using NETCONF, that is, the name of a leaf node or another node in the YANG file.</p>
+<p><em>number</em>: specifies the value of the array subscript. The value must be an integer and cannot be a variable.</p>
+<p>Example:</p>
+<p>The return result of <strong>action</strong> is as follows:</p>
+<p>slotinfo: {</p>
+<p>portinfo: [1,3,4,7],</p>
+<p>slotState: "up"}</p>
+<p>${result.portinfo[2]} is 4.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 15 </b>Command line delivery function</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="13.15%" id="mcps1.3.4.6.4.5.3.4.2.6.1.1" liSelected="liSelected"><p>Function Name</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="19.6%" id="mcps1.3.4.6.4.5.3.4.2.6.1.2" liSelected="liSelected"><p>Function Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="19.06%" id="mcps1.3.4.6.4.5.3.4.2.6.1.3" liSelected="liSelected"><p>Usage</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="30.259999999999998%" id="mcps1.3.4.6.4.5.3.4.2.6.1.4" liSelected="liSelected"><p>Parameter Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="17.93%" id="mcps1.3.4.6.4.5.3.4.2.6.1.5" liSelected="liSelected"><p>Function Return Value</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="13.15%" headers="mcps1.3.4.6.4.5.3.4.2.6.1.1 "><p>eva.cliRegexp</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.6%" headers="mcps1.3.4.6.4.5.3.4.2.6.1.2 "><p>Indicates that a single command is delivered and the command output is parsed.</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.06%" headers="mcps1.3.4.6.4.5.3.4.2.6.1.3 "><p>eva.cliRegexp(<em>view</em>, <em>cmd</em>,<em> clirule</em>)</p>
+</td>
+<td class="cellrowborder" rowspan="3" valign="top" width="30.259999999999998%" headers="mcps1.3.4.6.4.5.3.4.2.6.1.4 "><p><em>view</em>: specifies the command view. Currently, only the user, system, and diagnostic views are supported.</p>
+<p><em>cmd</em>: specifies the command. Currently, only commands starting with display, and search fes table are supported. The value can be a string literal or a string variable. When an array variable is used, the variable must be an array variable with a subscript.</p>
+<p><em>c</em><em>lirule</em>: indicates that the command output is matched using a regular expression. If multiple regular expressions are defined, the command output is matched based on each regular expression, and one result is displayed for each regular expression. A maximum of five regular expressions are supported.</p>
+<p><em>cmdArray</em>: indicates a command line array consisting of multiple command lines. The type of the variable is string array.</p>
+<div class="note"><span class="notetitle"> NOTE: </span><div class="notebody"><p>Ensure that the values of the <em>view</em>, <em>cmd</em>, and <em>cmdArray</em> parameters are correct. Otherwise, the delivery fails and the function return value is empty.</p>
+</div></div>
+</td>
+<td class="cellrowborder" valign="top" width="17.93%" headers="mcps1.3.4.6.4.5.3.4.2.6.1.5 "><p>Indicates the display command output filtered by the regular expression. The value is a character string.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.4.2.6.1.1 "><p>eva.cli</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.4.2.6.1.2 "><p>Indicates that a single command is delivered and the command output is not parsed.</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.4.2.6.1.3 "><p>eva.cli(<em>view</em>, <em>cmd</em>)</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.4.2.6.1.4 "><p>Indicates the display command output. The value is a character string.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.4.2.6.1.1 "><p>eva.cliArray</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.4.2.6.1.2 "><p>Indicates that multiple commands are delivered and the command outputs are not parsed.</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.4.2.6.1.3 "><p>eva.cliArray(<em>view</em>, <em>cmdArray</em>)</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.4.2.6.1.4 "><p>Indicates the display command output. The value is a string array.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The following is an example of using the eva.cliRegexp function:</p>
+<pre class="screen">"parameter": {
+  "cmd": "display interface brief",
+  "clirule": {
+    "EthTrunk": "\\s*Eth-Trunk(\\d+)\\s*(?:down|up)\\s*(?:down|up)"
+                         }
+},
+"action": "eva.cliRegexp(\"user\",${cmd},${clirule})"</pre>
+<p>The following is an example of using the eva.cli function:</p>
+<pre class="screen">"action": "eva.cli(\"user\",\"display interface brief\")"</pre>
+<p>The following is an example of using the eva.cliArray function:</p>
+<pre class="screen">"parameter": {
+  "cli-view": "user",
+  "cli-array": ["display version","display device"]
+},
+"action": "eva.cliArray(${cli-view},${cli-array})"</pre>
+<p></p>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 16 </b>NETCONF operation delivery function</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="13.15%" id="mcps1.3.4.6.4.5.3.12.2.6.1.1" liSelected="liSelected"><p>Function Name</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="19.66%" id="mcps1.3.4.6.4.5.3.12.2.6.1.2" liSelected="liSelected"><p>Function Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="19%" id="mcps1.3.4.6.4.5.3.12.2.6.1.3" liSelected="liSelected"><p>Usage</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="30.3%" id="mcps1.3.4.6.4.5.3.12.2.6.1.4" liSelected="liSelected"><p>Parameter Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="17.89%" id="mcps1.3.4.6.4.5.3.12.2.6.1.5" liSelected="liSelected"><p>Function Return Value</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="13.15%" headers="mcps1.3.4.6.4.5.3.12.2.6.1.1 "><p>eva.netconfGet</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.66%" headers="mcps1.3.4.6.4.5.3.12.2.6.1.2 "><p>Queries information using NETCONF. It is equivalent to the GET operation of NETCONF.</p>
+</td>
+<td class="cellrowborder" valign="top" width="19%" headers="mcps1.3.4.6.4.5.3.12.2.6.1.3 "><p>eva.netconfGet (<em>xpath</em>)</p>
+</td>
+<td class="cellrowborder" valign="top" width="30.3%" headers="mcps1.3.4.6.4.5.3.12.2.6.1.4 "><p><em>xpath</em>: specifies the XPath. For details, see the YANG API Reference.</p>
+<div class="note"><span class="notetitle"> NOTE: </span><div class="notebody"><p>Ensure that the value of the <em>xpath</em> parameter is correct. Otherwise, the delivery fails and the function return value is empty.</p>
+</div></div>
+</td>
+<td class="cellrowborder" valign="top" width="17.89%" headers="mcps1.3.4.6.4.5.3.12.2.6.1.5 "><p>The value is an integer, character string, object, or object array.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 17 </b>String regular expression parsing function</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="13.15%" id="mcps1.3.4.6.4.5.3.13.2.6.1.1" liSelected="liSelected"><p>Function Name</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="19.66%" id="mcps1.3.4.6.4.5.3.13.2.6.1.2" liSelected="liSelected"><p>Function Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="19%" id="mcps1.3.4.6.4.5.3.13.2.6.1.3" liSelected="liSelected"><p>Usage</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="30.259999999999998%" id="mcps1.3.4.6.4.5.3.13.2.6.1.4" liSelected="liSelected"><p>Parameter Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="17.93%" id="mcps1.3.4.6.4.5.3.13.2.6.1.5" liSelected="liSelected"><p>Function Return Value</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="13.15%" headers="mcps1.3.4.6.4.5.3.13.2.6.1.1 "><p>eva.regexp</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.66%" headers="mcps1.3.4.6.4.5.3.13.2.6.1.2 "><p>Indicates regular expression matching for character strings.</p>
+</td>
+<td class="cellrowborder" valign="top" width="19%" headers="mcps1.3.4.6.4.5.3.13.2.6.1.3 "><p>eva.regexp(<em>str</em>, <em>regexp</em>)</p>
+</td>
+<td class="cellrowborder" valign="top" width="30.259999999999998%" headers="mcps1.3.4.6.4.5.3.13.2.6.1.4 "><p><em>str</em>: specifies the character string to be matched.</p>
+<p><em>regexp</em>: specifies the name of a variable of the object type. This variable specifies a regular expression. Multiple regular expressions are supported.</p>
+</td>
+<td class="cellrowborder" valign="top" width="17.93%" headers="mcps1.3.4.6.4.5.3.13.2.6.1.5 "><p>The value is an object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 18 </b>Character string operation functions</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="25%" id="mcps1.3.4.6.4.5.3.14.2.5.1.1" liSelected="liSelected"><p>Function Name</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="25%" id="mcps1.3.4.6.4.5.3.14.2.5.1.2" liSelected="liSelected"><p>Function Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="25%" id="mcps1.3.4.6.4.5.3.14.2.5.1.3" liSelected="liSelected"><p>Parameter Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="25%" id="mcps1.3.4.6.4.5.3.14.2.5.1.4" liSelected="liSelected"><p>Function Return Value</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.4.6.4.5.3.14.2.5.1.1 "><p>eva.strContains(<em>str1</em>, <em>str2</em>)</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.4.6.4.5.3.14.2.5.1.2 "><p>Indicates whether the character string <em>str1</em> contains the character string <em>str2</em>. The characters are case sensitive.</p>
+</td>
+<td class="cellrowborder" rowspan="4" valign="top" width="25%" headers="mcps1.3.4.6.4.5.3.14.2.5.1.3 "><p><em>str1</em> and <em>str2</em>: can be string literals or string variables. When the value is a string literal, the value is a string of 1 to 256 characters. Chinese characters are supported. Each Chinese character is considered as three English characters.</p>
+</td>
+<td class="cellrowborder" rowspan="4" valign="top" width="25%" headers="mcps1.3.4.6.4.5.3.14.2.5.1.4 "><p>The value is of the Boolean type and can be true or false.</p>
+<p></p>
+<p></p>
+<p></p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.14.2.5.1.1 "><p>eva.strContainsIgnoreCase(<em>str1</em>, <em>str2</em>)</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.14.2.5.1.2 "><p>Indicates whether the character string <em>str1</em> contains the character string <em>str2</em>. The characters are case insensitive.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.14.2.5.1.1 "><p>eva.strEquals(<em>str1</em>, <em>str2</em>)</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.14.2.5.1.2 "><p>Indicates whether the character strings <em>str1</em> and <em>str2</em> are the same. The characters are case sensitive.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.14.2.5.1.1 "><p>eva.strEqualsIgnoreCase(<em>str1</em>, <em>str2</em>)</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.14.2.5.1.2 "><p>Indicates whether the character strings <em>str1</em> and <em>str2</em> are the same. The characters are case insensitive.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.4.6.4.5.3.14.2.5.1.1 "><p>eva.strcat(<em>str1</em>, <em>str2</em>)</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.4.6.4.5.3.14.2.5.1.2 "><p>The character strings <em>str1</em> and <em>str2</em> are concatenated and the concatenated character string is saved in <em>str1</em>. A maximum of 2048 characters can be saved.</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.4.6.4.5.3.14.2.5.1.3 "><p><em>str1</em>: The value must be a string variable. <em>str2</em>: The value can be a string literal or a string variable. When <em>str2</em> is a string literal, the value is a string of 1 to 256 characters. Chinese characters are supported. Each Chinese character is considered as three English characters.</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.4.6.4.5.3.14.2.5.1.4 "><p>No result is returned.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 19 </b>Array operation functions</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="24.97%" id="mcps1.3.4.6.4.5.3.15.2.5.1.1" liSelected="liSelected"><p>Function Name</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="25%" id="mcps1.3.4.6.4.5.3.15.2.5.1.2" liSelected="liSelected"><p>Function Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="25.03%" id="mcps1.3.4.6.4.5.3.15.2.5.1.3" liSelected="liSelected"><p>Parameter Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="25%" id="mcps1.3.4.6.4.5.3.15.2.5.1.4" liSelected="liSelected"><p>Function Return Value</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="24.97%" headers="mcps1.3.4.6.4.5.3.15.2.5.1.1 "><p>eva.arrayCount(<em>array</em>)</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.4.6.4.5.3.15.2.5.1.2 "><p>Indicates the number of members in the array <em>array</em>.</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.03%" headers="mcps1.3.4.6.4.5.3.15.2.5.1.3 "><p><em>array</em>: can be an integer array or a string array.</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.4.6.4.5.3.15.2.5.1.4 "><p>The value is an integer. The actual number of members in the array is returned.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="24.97%" headers="mcps1.3.4.6.4.5.3.15.2.5.1.1 "><p>eva.arrayNumAdd(<em>array1</em>, <em>array2</em>)</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.4.6.4.5.3.15.2.5.1.2 "><p>Indicates that the integer arrays <em>array1</em> and <em>array2</em> are combined.</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.03%" headers="mcps1.3.4.6.4.5.3.15.2.5.1.3 "><p><em>array1</em> and <em>array2</em>: must be integer arrays.</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.4.6.4.5.3.15.2.5.1.4 "><p>The value is an integer array. A new array after combination is returned.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="24.97%" headers="mcps1.3.4.6.4.5.3.15.2.5.1.1 "><p>eva.arrayStrAdd(<em>array1</em>, <em>array2</em>)</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.4.6.4.5.3.15.2.5.1.2 "><p>Indicates that the string arrays <em>array1</em> and <em>array2</em> are combined.</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.03%" headers="mcps1.3.4.6.4.5.3.15.2.5.1.3 "><p><em>array1</em> and <em>array2</em>: must be string arrays.</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.4.6.4.5.3.15.2.5.1.4 "><p>The value is a string array. A new array after combination is returned.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="24.97%" headers="mcps1.3.4.6.4.5.3.15.2.5.1.1 "><p>eva.sum(<em>array</em>)</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.4.6.4.5.3.15.2.5.1.2 "><p>Indicates that all members in the integer array <em>array</em> are summed up.</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.03%" headers="mcps1.3.4.6.4.5.3.15.2.5.1.3 "><p><em>array</em>: must be an integer array.</p>
+</td>
+<td class="cellrowborder" valign="top" width="25%" headers="mcps1.3.4.6.4.5.3.15.2.5.1.4 "><p>The value is an integer. The sum result is returned.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 20 </b>Other functions</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="21.2%" id="mcps1.3.4.6.4.5.3.16.2.5.1.1" liSelected="liSelected"><p>Function Name</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="24.52%" id="mcps1.3.4.6.4.5.3.16.2.5.1.2" liSelected="liSelected"><p>Function Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="32.190000000000005%" id="mcps1.3.4.6.4.5.3.16.2.5.1.3" liSelected="liSelected"><p>Parameter Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="22.09%" id="mcps1.3.4.6.4.5.3.16.2.5.1.4" liSelected="liSelected"><p>Function Return Value</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="21.2%" headers="mcps1.3.4.6.4.5.3.16.2.5.1.1 "><p>eva.pass()</p>
+</td>
+<td class="cellrowborder" valign="top" width="24.52%" headers="mcps1.3.4.6.4.5.3.16.2.5.1.2 "><p>Indicates that the result of the script meets the pass conditions.</p>
+</td>
+<td class="cellrowborder" valign="top" width="32.190000000000005%" headers="mcps1.3.4.6.4.5.3.16.2.5.1.3 "><p>-</p>
+</td>
+<td class="cellrowborder" rowspan="4" valign="top" width="22.09%" headers="mcps1.3.4.6.4.5.3.16.2.5.1.4 "><p>No result is returned. When this function is used as an action function, result cannot be used.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.16.2.5.1.1 "><p>eva.norelated()</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.16.2.5.1.2 "><p>Indicates that the result of the script is irrelevant to the check scenario.</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.16.2.5.1.3 "><p>-</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.16.2.5.1.1 "><p>eva.fail(<em>value</em>)</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.16.2.5.1.2 "><p>Indicates that the result of the script does not meet the pass conditions. This function saves the information collected during the running.</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.16.2.5.1.3 "><p><em>value</em>: You can enter a string of 1 to 256 characters, or reference a string variable.</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.16.2.5.1.1 "><p>eva.noop()</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.16.2.5.1.2 "><p>Unconditional execution.</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.4.6.4.5.3.16.2.5.1.3 "><p>-</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li><li id="EN-US_CONCEPT_0000001563990837__li1698584819450"><a name="EN-US_CONCEPT_0000001563990837__li1698584819450"></a><a name="li1698584819450"></a>publish<p><a name="EN-US_CONCEPT_0000001563990837__li1698584819450"></a><a name="li1698584819450"></a><strong>publish</strong> is used to publish specified parameters. The published parameters can be used by the current task and its lower-level tasks. A maximum of five <strong>publish</strong> variables can be configured for each task.</p>
+<pre class="screen">"publish":{"<em>name</em>":"<em>value</em>"}</pre>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 21 </b>Fields in <strong>publish</strong></caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="12.051205120512051%" id="mcps1.3.4.6.4.5.4.3.2.6.1.1" liSelected="liSelected"><p>Field</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="15.941594159415938%" id="mcps1.3.4.6.4.5.4.3.2.6.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="13.661366136613662%" id="mcps1.3.4.6.4.5.4.3.2.6.1.3" liSelected="liSelected"><p>Attribute</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="11.051105110511052%" id="mcps1.3.4.6.4.5.4.3.2.6.1.4" liSelected="liSelected"><p>Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="47.294729472947296%" id="mcps1.3.4.6.4.5.4.3.2.6.1.5" liSelected="liSelected"><p>Value Range</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="12.051205120512051%" headers="mcps1.3.4.6.4.5.4.3.2.6.1.1 "><p><em>name</em></p>
+</td>
+<td class="cellrowborder" valign="top" width="15.941594159415938%" headers="mcps1.3.4.6.4.5.4.3.2.6.1.2 "><p>Parameter name.</p>
+</td>
+<td class="cellrowborder" valign="top" width="13.661366136613662%" headers="mcps1.3.4.6.4.5.4.3.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.051105110511052%" headers="mcps1.3.4.6.4.5.4.3.2.6.1.4 "><p>Customized</p>
+</td>
+<td class="cellrowborder" valign="top" width="47.294729472947296%" headers="mcps1.3.4.6.4.5.4.3.2.6.1.5 "><p>The value is a string of 2 to 16 case-sensitive characters. It starts with a letter and can contain only letters, digits, and underscores (_).</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.051205120512051%" headers="mcps1.3.4.6.4.5.4.3.2.6.1.1 "><p><em>value</em></p>
+</td>
+<td class="cellrowborder" valign="top" width="15.941594159415938%" headers="mcps1.3.4.6.4.5.4.3.2.6.1.2 "><p>Parameter value.</p>
+</td>
+<td class="cellrowborder" valign="top" width="13.661366136613662%" headers="mcps1.3.4.6.4.5.4.3.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.051105110511052%" headers="mcps1.3.4.6.4.5.4.3.2.6.1.4 "><p>Customized</p>
+</td>
+<td class="cellrowborder" valign="top" width="47.294729472947296%" headers="mcps1.3.4.6.4.5.4.3.2.6.1.5 "><p><em>value</em> can be one of the following:</p>
+<ul><li>Reference the variables defined by <strong>define</strong> or the variables defined by <strong>parameter</strong> in the same task.</li><li>Result of <strong>action</strong>.</li><li>Parameter value type, which is similar to that in <strong>parameter</strong>. For details, see <a href="#EN-US_CONCEPT_0000001563990837__table2097173723618">Table 12</a>.</li></ul>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The following is an example of using <strong>publish</strong>:</p>
+<pre class="screen">"publish":{
+   "memoryinfos": "${result}",
+   "memory": "${memoryinfomation}
+}</pre>
+</li><li id="EN-US_CONCEPT_0000001563990837__li1192831504615"><a name="EN-US_CONCEPT_0000001563990837__li1192831504615"></a><a name="li1192831504615"></a>switch<p><a name="EN-US_CONCEPT_0000001563990837__li1192831504615"></a><a name="li1192831504615"></a><strong>switch</strong> is used to define the conditions for switching from the current task to a lower-level task. A maximum of 14 lower-level tasks are supported. A lower-level task cannot be switched to an upper-level task. When the conditions of multiple lower-level tasks are met, the first lower-level task that meets the conditions is executed first, and then the second lower-level task that meets the conditions is executed.</p>
+<pre class="screen">"switch": {"name": "j<em>ump</em><em>-condition</em>"}</pre>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 22 </b>Fields in <strong>switch</strong></caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="12.051205120512051%" id="mcps1.3.4.6.4.5.5.3.2.6.1.1" liSelected="liSelected"><p>Field</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="15.941594159415938%" id="mcps1.3.4.6.4.5.5.3.2.6.1.2" liSelected="liSelected"><p>Description</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="13.661366136613662%" id="mcps1.3.4.6.4.5.5.3.2.6.1.3" liSelected="liSelected"><p>Attribute</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="11.051105110511052%" id="mcps1.3.4.6.4.5.5.3.2.6.1.4" liSelected="liSelected"><p>Type</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="47.294729472947296%" id="mcps1.3.4.6.4.5.5.3.2.6.1.5" liSelected="liSelected"><p>Value Range</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="12.051205120512051%" headers="mcps1.3.4.6.4.5.5.3.2.6.1.1 "><p><em>name</em></p>
+</td>
+<td class="cellrowborder" valign="top" width="15.941594159415938%" headers="mcps1.3.4.6.4.5.5.3.2.6.1.2 "><p>Name of a lower-level task.</p>
+</td>
+<td class="cellrowborder" valign="top" width="13.661366136613662%" headers="mcps1.3.4.6.4.5.5.3.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.051105110511052%" headers="mcps1.3.4.6.4.5.5.3.2.6.1.4 "><p>Customized</p>
+</td>
+<td class="cellrowborder" valign="top" width="47.294729472947296%" headers="mcps1.3.4.6.4.5.5.3.2.6.1.5 "><p>The value must be a defined lower-level task name, eva.pass(), eva.norelated(), or eva.fail(<em>value</em>). The value is a string of 2 to 16 case-sensitive characters. It starts with a letter and can contain only letters, digits, and underscores (_).</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="12.051205120512051%" headers="mcps1.3.4.6.4.5.5.3.2.6.1.1 "><p><em>jump</em><em>-condition</em></p>
+</td>
+<td class="cellrowborder" valign="top" width="15.941594159415938%" headers="mcps1.3.4.6.4.5.5.3.2.6.1.2 "><p>Jump condition.</p>
+</td>
+<td class="cellrowborder" valign="top" width="13.661366136613662%" headers="mcps1.3.4.6.4.5.5.3.2.6.1.3 "><p>Mandatory</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.051105110511052%" headers="mcps1.3.4.6.4.5.5.3.2.6.1.4 "><p>Customized</p>
+</td>
+<td class="cellrowborder" valign="top" width="47.294729472947296%" headers="mcps1.3.4.6.4.5.5.3.2.6.1.5 "><p>It can be integer comparison, Boolean comparison, or unconditional jump. The operation result is true or false. If a function is used in a jump condition, the function must be on the left of the operator.</p>
+<div class="note"><span class="notetitle"> NOTE: </span><div class="notebody"><p>If a function is used in a jump condition, the following functions are supported:</p>
+<ul><li>eva.strContains(str1, str2)</li><li>eva.strContainsIgnoreCase(str1, str2)</li><li>eva.strEquals(str1, str2)</li><li>eva.strEqualsIgnoreCase(str1, str2)</li><li>eva.arrayCount(array)</li></ul>
+</div></div>
+<ul><li>For details about the operators in integer comparison, see <a href="#EN-US_CONCEPT_0000001563990837__table6605131219326">Table 7</a>. Example: "task1": "a &gt; b"</li><li>For Boolean comparison, the operators are == and != and the value on the right of the operator must be of Boolean type, for example, "task2": "eva.strContains(<em>str1</em>, <em>str2</em>) == true".</li><li>Example of unconditional jump: "task3": "noop"</li></ul>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li></ul>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../toctopics/en-us_topic_0000001513030598.html">Understanding EVA
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../toctopics/en-us_concept_0000001584547617.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

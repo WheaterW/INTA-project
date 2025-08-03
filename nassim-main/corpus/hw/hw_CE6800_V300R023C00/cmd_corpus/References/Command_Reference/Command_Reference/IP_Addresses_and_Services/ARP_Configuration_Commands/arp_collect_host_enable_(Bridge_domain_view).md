@@ -1,0 +1,80 @@
+arp collect host enable (Bridge domain view)
+============================================
+
+arp collect host enable (Bridge domain view)
+
+Function
+--------
+
+
+
+The **arp collect host enable** command enables BGP EVPN to collect host information by BD.
+
+The **undo arp collect host enable** command disables BGP EVPN from collecting host information by BD.
+
+
+
+By default, BGP EVPN or EVPN MPLS is disabled from collecting host information by BD.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**arp collect host enable**
+
+**undo arp collect host enable**
+
+
+Parameters
+----------
+
+None
+
+Views
+-----
+
+Bridge domain view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+
+
+Layer 2 proxy ARP is a method that helps release the pressure on processing ARP packets. The basic principles lie in ARP BD isolation. Received ARP request packets are preferentially responded by the local Layer 2 gateway in the BD. After receiving an ARP request packet, the device with Layer 2 proxy ARP enabled checks whether the user information in the request matches an ARP snooping binding entry. If a matching entry exists, the device sends an ARP reply packet. If no matching entry exists, the device broadcasts the ARP request packet.If a VXLAN tunnel is established in BGP EVPN mode, to maximize the function of Layer 2 proxy ARP, run the **arp collect host enable** command to enable BGP EVPN to collect host information by BD. This configuration allows VXLAN Layer 2 gateways to synchronize the locally listened user ARP information with each other through BGP EVPN routes. In this way, when a Layer 2 gateway receives an ARP packet, it searches for the locally listened ARP information and the ARP information synchronized with the other Layer 2 gateway. If the search succeeds, the gateway sends an ARP reply packet.
+
+
+
+**Prerequisites**
+
+
+
+Layer 2 proxy ARP has been enabled by running the **arp l2-proxy enable** command.
+
+
+
+
+Example
+-------
+
+# Enable BGP EVPN to collect host information by BD.
+```
+<HUAWEI> system-view
+[~HUAWEI] bridge-domain 10
+[*HUAWEI-bd10] arp l2-proxy enable
+[*HUAWEI-bd10] arp collect host enable
+
+```

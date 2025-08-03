@@ -1,0 +1,768 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Establishing VXLAN Tunnels in BGP EVPN Mode (Distributed Gateway: M-LAG+ Static Bypass VXLAN)">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_vrp_vxlan_cfg_1066.html">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_vrp_vxlan_cfg_1053.html">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_cfg_vxlan_cfgcase_0010.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001176743957">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Example for Establishing VXLAN Tunnels in BGP EVPN Mode (Distributed Gateway: M-LAG+ Static Bypass VXLAN)</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001176743957"></a><a name="EN-US_TASK_0000001176743957"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Establishing VXLAN Tunnels in BGP EVPN Mode (Distributed Gateway: M-LAG+ Static Bypass VXLAN)</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001176743957__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>Distributed VXLAN gateways can address issues with centralized gateway networking. Such issues include sub-optimal forwarding paths and bottlenecks on Layer 3 gateways in terms of ARP entry specifications.</p>
+<p>On the network shown in <a href="#EN-US_TASK_0000001176743957__fig_dc_cfg_vxlan_cfgcase_000401">Figure 1</a>, an enterprise has VMs deployed in different data centers. VM1 on Server1 (Server1 VM1 for short) belongs to VLAN 10, and Server2 VM1 belongs to VLAN 20. The two VMs belong to different network segments. Server1 connects to the VXLAN through Device2 and Device4. Server1 VM1 and Server2 VM1 need to communicate with each other through a distributed VXLAN gateway. Device1 is deployed in AS 100, Device2 and Device4 in AS 200, and Device3 in AS 300. All the devices use AS number 100 as the BGP EVPN process ID.</p>
+<div class="fignone" id="EN-US_TASK_0000001176743957__fig_dc_cfg_vxlan_cfgcase_000401"><a name="EN-US_TASK_0000001176743957__fig_dc_cfg_vxlan_cfgcase_000401"></a><a name="fig_dc_cfg_vxlan_cfgcase_000401"></a><span class="figcap"><b>Figure 1 </b>Network for configuring VXLAN in distributed gateway mode</span><div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interfaces 1 through 4 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, <span>100GE</span><span>1/0/3</span>, and <span>100GE</span><span>1/0/4</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001130784370.png" width="NaN" height="NaN"></span></div>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Interface IP addresses</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="33.16331633163316%" id="mcps1.3.1.5.2.4.1.1" liSelected="liSelected"><p>Device</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="33.613361336133615%" id="mcps1.3.1.5.2.4.1.2" liSelected="liSelected"><p>Interface</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="33.223322332233224%" id="mcps1.3.1.5.2.4.1.3" liSelected="liSelected"><p>IP Address</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" rowspan="4" valign="middle" width="33.16331633163316%" headers="mcps1.3.1.5.2.4.1.1 "><p>Device1</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.613361336133615%" headers="mcps1.3.1.5.2.4.1.2 "><p><span>100GE</span><span>1/0/1</span></p>
+</td>
+<td class="cellrowborder" valign="top" width="33.223322332233224%" headers="mcps1.3.1.5.2.4.1.3 "><p>192.168.3.2/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.1 "><p><span>100GE</span><span>1/0/2</span></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.2 "><p>192.168.2.2/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.1 "><p><span>100GE</span><span>1/0/3</span></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.2 "><p>192.168.4.2/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.1 "><p>LoopBack0</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.2 "><p>1.1.1.1/32</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="5" valign="top" width="33.16331633163316%" headers="mcps1.3.1.5.2.4.1.1 "><p>Device2</p>
+<p></p>
+</td>
+<td class="cellrowborder" valign="top" width="33.613361336133615%" headers="mcps1.3.1.5.2.4.1.2 "><p>Management interface</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.223322332233224%" headers="mcps1.3.1.5.2.4.1.3 "><p>10.10.1.1/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.1 "><p><span>100GE</span><span>1/0/1</span></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.2 "><p>192.168.2.1/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.1 "><p>LoopBack0</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.2 "><p>2.2.2.2/32</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.1 "><p>LoopBack1</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.2 "><p>2.2.2.3/32</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.1 "><p>Vlanif 100</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.2 "><p>10.10.10.1/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="2" valign="middle" width="33.16331633163316%" headers="mcps1.3.1.5.2.4.1.1 "><p>Device3</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.613361336133615%" headers="mcps1.3.1.5.2.4.1.2 "><p><span>100GE</span><span>1/0/1</span></p>
+</td>
+<td class="cellrowborder" valign="top" width="33.223322332233224%" headers="mcps1.3.1.5.2.4.1.3 "><p>192.168.3.1/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.1 "><p>LoopBack0</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.2 "><p>3.3.3.3/32</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="5" valign="top" width="33.16331633163316%" headers="mcps1.3.1.5.2.4.1.1 "><p>Device4</p>
+<p></p>
+</td>
+<td class="cellrowborder" valign="top" width="33.613361336133615%" headers="mcps1.3.1.5.2.4.1.2 "><p>Management interface</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.223322332233224%" headers="mcps1.3.1.5.2.4.1.3 "><p>10.10.1.2/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.1 "><p><span>100GE</span><span>1/0/1</span></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.2 "><p>192.168.4.1/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.1 "><p>LoopBack0</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.2 "><p>4.4.4.4/32</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.1 "><p>LoopBack1</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.2 "><p>2.2.2.3/32</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.1 "><p>Vlanif 100</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.1.5.2.4.1.2 "><p>10.10.10.2/24</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176743957__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Precautions</h4><p>In a scenario where a device is dual-homed to a VXLAN network through an M-LAG and the physical peer-link is used, running the <a href="cmdqueryname=port+vlan+exclude"><b><span class="cmdname">port vlan exclude</span></b></a> command on a peer-link interface is mutually exclusive with binding a BD to a VNI (by running the <a href="cmdqueryname=vxlan+vni"><b><span class="cmdname">vxlan vni</span></b></a> <i><span class="varname">vni-id</span></i> command in the BD view). In this case, you are advised to configure a static bypass VXLAN tunnel and then bind the BD to a VNI.</p>
+<p><a href="#EN-US_TASK_0000001176743957__table1011135203114">Table 2</a> lists the RDs and RTs of EVPN and VPN instances.</p>
+
+<div class="tableBorder"><a name="EN-US_TASK_0000001176743957__table1011135203114"></a><a name="table1011135203114"></a><table cellpadding="4" cellspacing="0" summary="" id="EN-US_TASK_0000001176743957__table1011135203114" frame="border" border="1" rules="all"><caption><b>Table 2 </b>RDs and RTs of devices</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="33.33333333333333%" id="mcps1.3.2.4.2.4.1.1" liSelected="liSelected"><p>Device</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="33.33333333333333%" id="mcps1.3.2.4.2.4.1.2" liSelected="liSelected"><p>RD</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="33.33333333333333%" id="mcps1.3.2.4.2.4.1.3" liSelected="liSelected"><p>RT</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.2.4.2.4.1.1 "><p>Device2</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.2.4.2.4.1.2 "><p>EVPN instance: 10:2</p>
+<p>VPN instance: 20:2</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.2.4.2.4.1.3 "><div class="p">EVPN instance:<ul><li>ERT/IRT: 100:10</li><li>ERT: 100:5010</li></ul>
+</div>
+<div class="p">VPN instance:<ul><li>ERT/IRT (EVPN): 100:5010</li></ul>
+</div>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.2.4.2.4.1.1 "><p>Device3</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.2.4.2.4.1.2 "><p>EVPN instance: 10:3</p>
+<p>VPN instance: 20:3</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.2.4.2.4.1.3 "><div class="p">EVPN instance:<ul><li>ERT/IRT: 100:20</li><li>ERT: 100:5010</li></ul>
+</div>
+<div class="p">VPN instance:<ul><li>ERT/IRT (EVPN): 100:5010</li></ul>
+</div>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.2.4.2.4.1.1 "><p>Device4</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.2.4.2.4.1.2 "><p>EVPN instance: 10:4</p>
+<p>VPN instance: 20:4</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.2.4.2.4.1.3 "><div class="p">EVPN instance:<ul><li>ERT/IRT: 100:10</li><li>ERT: 100:5010</li></ul>
+</div>
+<div class="p">VPN instance:<ul><li>ERT/IRT (EVPN): 100:5010</li></ul>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="fignone"><span class="figcap"><b>Figure 2 </b>Configuring RTs</span><br><span><img class="vsd" src="figure/en-us_image_0000001130624582.png" width="NaN" height="NaN"></span></div>
+<div class="p">The RT configuration guidelines for VPN and EVPN instances are as follows:<ul><li>For VPN instances, specify the <strong>evpn</strong> keyword during the configuration of an ERT (such as ERT Y) and an IRT (such as IRT Y) to enable route leaking into peer EVPN instances for host route generation. If route leaking into common L3VPN instances is required, configure common RTs on demand.</li><li>For EVPN instances, in addition to ERTs (such as ERT A and ERT B) and IRTs (such as IRT A and IRT B) for different BDs, configure ERT Y. This ERT is used for route leaking into a peer VPN instance. Note that IRT Y does not typically need to be configured, because doing so would cause MAC addresses to be advertised in EVPN instances of different BDs.</li><li>The ERT/IRT Y value of a VPN instance cannot be the same as the ERT/IRT A or ERT/IRT B value of an EVPN instance. It is recommended that the VPN and EVPN instances use different RT ranges for differentiation.</li></ul>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176743957__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><div class="p">The configuration roadmap is as follows:<ol><li>Configure EBGP to run between Device1 and Device2, Device3, and Device4.</li><li>Configure V-STP-based M-LAG on Device2 and Device4.</li><li>Configure a static bypass VXLAN tunnel between Device2 and Device4 in an M-LAG.</li><li>Configure service access points on Device2, Device3, and Device4 to distinguish service traffic.</li><li>Enable EVPN to function as the VXLAN control plane protocol.</li><li>Configure Device1 to establish BGP EVPN peer relationships with Device2, Device3, and Device4, and configure Device1 as the RR.</li><li>Configure Device2, Device3, and Device4 to establish IBGP EVPN peer relationships with Device1.</li><li>Configure a VPN instance and an EVPN instance on Device2, Device3, and Device4.</li><li>Enable ingress replication on Device2, Device3, and Device4.</li><li>Configure Device2, Device3, and Device4 as a Layer 3 VXLAN gateway.</li><li>Configure BGP to advertise IRB routes between Device1 and Device2, Device3, and Device4.</li><li>Configure BGP to advertise IP prefix routes to peers between Device2 and Device3 and between Device2 and Device4.</li></ol>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001176743957__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure EBGP.</span><p><p># Configure Device1. The configurations of Device2, Device3, and Device4 are similar to the configuration of Device1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname Device1</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>interface loopback 0</strong>
+[<span class="keyword">*</span>Device1-LoopBack0] <strong>ip address 1.1.1.1 32</strong>
+[<span class="keyword">*</span>Device1-LoopBack0] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword">*</span>Device1-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>Device1-<span>100GE</span><span>1/0/1</span>] <strong>ip address 192.168.3.2 24</strong>
+[<span class="keyword">*</span>Device1-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>Device1-<span>100GE</span><span>1/0/2</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>Device1-<span>100GE</span><span>1/0/2</span>] <strong>ip address 192.168.2.2 24</strong>
+[<span class="keyword">*</span>Device1-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>interface <span>100ge</span> <span>1/0/3</span></strong>
+[<span class="keyword">*</span>Device1-<span>100GE</span><span>1/0/3</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>Device1-<span>100GE</span><span>1/0/3</span>] <strong>ip address 192.168.4.2 24</strong>
+[<span class="keyword">*</span>Device1-<span>100GE</span><span>1/0/3</span>] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>bgp 100</strong>
+[<span class="keyword">*</span>Device1-bgp] <strong>peer 192.168.2.1 as-number 200</strong>
+[<span class="keyword">*</span>Device1-bgp] <strong>peer 192.168.3.1 as-number 300</strong>
+[<span class="keyword">*</span>Device1-bgp] <strong>peer 192.168.4.1 as-number 200</strong>
+[<span class="keyword">*</span>Device1-bgp] <strong>network 1.1.1.1 32</strong>
+[<span class="keyword">*</span>Device1-bgp] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+<p>Device2 and Device4 both belong to AS 200. To enable them to advertise BGP routes to each other, run the <a href="cmdqueryname=peer+192.168.2.2+allow-as-loop"><b><span class="cmdname">peer 192.168.2.2 allow-as-loop</span></b></a> command on Device2 and run the <a href="cmdqueryname=peer+192.168.4.2+allow-as-loop"><b><span class="cmdname">peer 192.168.4.2 allow-as-loop</span></b></a> command on Device4.</p>
+<p>On Device2 and Device3, run the <strong>advertise lowest-priority all-address-family peer-up</strong> command in the BGP view to adjust the priority of BGP routes to the lowest level when the peer relationship goes up from down, and delay route advertisement to reduce packet loss during traffic switchback.</p>
+</p></li><li><span>Configure V-STP-based M-LAG on Device2 and Device4.</span><p><div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If the uplink connecting Device2 to the VXLAN fails, no upstream interface is available, and so Device2 will discard all received user traffic. In this case, configure a monitor-link group to associate the upstream and downstream interfaces of Device2. If the upstream interface of Device2 is down, the downstream interface will also go down. As a result, user-side traffic is not forwarded through Device2, preventing traffic from being discarded.</p>
+</div></div>
+</p><ol type="a"><li class="substepexpand"><span>Configure V-STP on Device2 and Device4.</span><p><p># Configure Device2. The configuration of Device4 is similar to the configuration of Device2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device2] <strong>stp mode rstp</strong>
+[<span class="keyword">*</span>Device2] <strong>stp v-stp enable</strong>
+[<span class="keyword">*</span>Device2] <strong>commit</strong></pre>
+</p></li><li class="substepexpand"><span>On each of Device2 and Device4, configure a DFS group and bind the DFS group to the IP address of the management interface.</span><p><p>Ensure that Device2 and Device4 can communicate at Layer 3 through their management interfaces.</p>
+<p># Configure Device2. The configuration of Device4 is similar to the configuration of Device2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device2] <strong>interface meth 0/0/0</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device2-MEth0/0/0] <strong>ip address 10.10.1.1 24</strong>
+[<span class="keyword">*</span>Device2-MEth0/0/0] <strong>quit</strong>
+[<span class="keyword">*</span>Device2] <strong>dfs-group 1</strong>
+[<span class="keyword">*</span>Device2-dfs-group-1] <strong>dual-active detection source ip 10.10.1.1 </strong><strong>peer 10.10.1.2</strong>
+[<span class="keyword">*</span>Device2-dfs-group-1] <strong>authentication-mode hmac-sha256 password </strong><strong>YsHsjx_202206</strong>
+[<span class="keyword">*</span>Device2-dfs-group-1] <strong>quit</strong>
+[<span class="keyword">*</span>Device2] <strong>commit</strong></pre>
+</p></li><li class="substepexpand"><span>Configure the links between Device2 and Device4 as peer-links.</span><p><p># Configure Device2. The configuration of Device4 is similar to the configuration of Device2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device2] <strong>interface eth-trunk 1</strong>
+[<span class="keyword">*</span>Device2-Eth-Trunk1] <strong>mode lacp-static</strong>
+[<span class="keyword">*</span>Device2-Eth-Trunk1] <strong>trunkport <span>100ge</span> <span>1/0/3</span> to <span>1/0/4</span></strong>
+[<span class="keyword">*</span>Device2-Eth-Trunk1] <strong>peer-link 1</strong>
+[<span class="keyword">*</span>Device2-Eth-Trunk1] <strong>port vlan exclude 1</strong>
+[<span class="keyword">*</span>Device2-Eth-Trunk1] <strong>quit</strong>
+[<span class="keyword">*</span>Device2] <strong>commit</strong></pre>
+</p></li><li class="substepexpand"><span>Bind the user-side Eth-Trunk interface to the DFS group on Device2 and Device4.</span><p><p># Configure Device2. The configuration of Device4 is similar to the configuration of Device2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device2] <strong>interface eth-trunk 10</strong>
+[<span class="keyword">*</span>Device2-Eth-Trunk10] <strong>mode lacp-static</strong>
+[<span class="keyword">*</span>Device2-Eth-Trunk10] <strong>trunkport <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>Device2-Eth-Trunk10] <strong>dfs-group 1 m-lag 1</strong>
+[<span class="keyword">*</span>Device2-Eth-Trunk10] <strong>stp edged-port enable</strong>
+[<span class="keyword">*</span>Device2-Eth-Trunk10] <strong>quit</strong>
+[<span class="keyword">*</span>Device2] <strong>commit</strong></pre>
+</p></li></ol>
+</li><li><span>Configure a static bypass VXLAN tunnel on Device2 and Device4.</span><p><p># Configure Device2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device2] <strong>vlan 100</strong>
+[<span class="keyword">*</span>Device2-vlan100] <strong>quit</strong>
+[<span class="keyword">*</span>Device2] <strong>interface vlanif 100</strong>
+[<span class="keyword">*</span>Device2-Vlanif100] <strong>ip address 10.10.10.1 24</strong>
+[<span class="keyword">*</span>Device2-Vlanif100] <strong>quit</strong>
+[<span class="keyword">*</span>Device2] <strong>interface nve 1</strong>
+[<span class="keyword">*</span>Device2-Nve1] <strong>pip-source 10.10.10.1 peer 10.10.10.2 bypass</strong>
+[<span class="keyword">*</span>Device2-Nve1] <strong>quit</strong>
+[<span class="keyword">*</span>Device2] <strong>commit</strong></pre>
+</p><p><p># Configure Device4.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device4] <strong>vlan 100</strong>
+[<span class="keyword">*</span>Device4-vlan100] <strong>quit</strong>
+[<span class="keyword">*</span>Device4] <strong>interface vlanif 100</strong>
+[<span class="keyword">*</span>Device4-Vlanif100] <strong>ip address 10.10.10.2 24</strong>
+[<span class="keyword">*</span>Device4-Vlanif100] <strong>quit</strong>
+[<span class="keyword">*</span>Device4] <strong>interface nve 1</strong>
+[<span class="keyword">*</span>Device4-Nve1] <strong>pip-source 10.10.10.2 peer 10.10.10.1 bypass</strong>
+[<span class="keyword">*</span>Device4-Nve1] <strong>quit</strong>
+[<span class="keyword">*</span>Device4] <strong>commit</strong></pre>
+</p></li><li><span>Configure service access points on Device2, Device3, and Device4.</span><p><p># Configure Device2. The configurations of Device3 and Device4 are similar to the configuration of Device2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device2] <strong>bridge-domain 10</strong>
+[<span class="keyword">*</span>Device2-bd10] <strong>quit</strong>
+[<span class="keyword">*</span>Device2] <strong>interface eth-trunk 10.1 mode l2</strong>
+[<span class="keyword">*</span>Device2-Eth-Trunk10.1] <strong>encapsulation dot1q vid 10</strong>
+[<span class="keyword">*</span>Device2-Eth-Trunk10.1] <strong>bridge-domain 10</strong>
+[<span class="keyword">*</span>Device2-Eth-Trunk10.1] <strong>quit</strong>
+[<span class="keyword">*</span>Device2] <strong>commit</strong></pre>
+</p></li><li><span>Enable EVPN to function as the VXLAN control plane protocol.</span><p><p># Configure Device1. The configurations of Device2, Device3, and Device4 are similar to the configuration of Device1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>evpn-overlay enable</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+</p></li><li><span>Configure Device1 to establish BGP EVPN peer relationships with Device2, Device3, and Device4. Configure Device1 as the RR, and Device2, Device3, and Device4 as its clients.</span><p><div class="p"># Configure BGP EVPN peer relationships on Device1.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>bgp 100 instance evpn1</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1] <strong>peer 2.2.2.2 as-number 100</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1] <strong>peer 2.2.2.2 connect-interface LoopBack0</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1] <strong>peer 3.3.3.3 as-number 100</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1] <strong>peer 3.3.3.3 connect-interface LoopBack0</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1] <strong>peer 4.4.4.4 as-number 100</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1] <strong>peer 4.4.4.4 connect-interface LoopBack0</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1] <strong>l2vpn-family evpn</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1-af-evpn] <strong>peer 2.2.2.2 enable</strong>
+Warning: This operation will reset the peer session. Continue? [Y/N]: <strong>y</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1-af-evpn] <strong>peer 2.2.2.2 reflect-client</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1-af-evpn] <strong>peer 3.3.3.3 enable</strong>
+Warning: This operation will reset the peer session. Continue? [Y/N]: <strong>y</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1-af-evpn] <strong>peer 3.3.3.3 reflect-client</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1-af-evpn] <strong>peer 4.4.4.4 enable</strong>
+Warning: This operation will reset the peer session. Continue? [Y/N]: <strong>y</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1-af-evpn] <strong>peer 4.4.4.4 reflect-client</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1-af-evpn] <strong>undo policy vpn-target</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1-af-evpn] <strong>quit</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+</div>
+</p></li><li><span>Configure Device2, Device3, and Device4 to establish IBGP EVPN peer relationships with Device1.</span><p><div class="p"># Configure a BGP EVPN peer relationship on Device2. The configurations of Device3 and Device4 are similar to the configuration of Device2.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device2] <strong>bgp 100 instance evpn1</strong>
+[<span class="keyword">*</span>Device2-bgp-instance-evpn1] <strong>peer 1.1.1.1 as-number 100</strong>
+[<span class="keyword">*</span>Device2-bgp-instance-evpn1] <strong>peer 1.1.1.1 connect-interface LoopBack0</strong>
+[<span class="keyword">*</span>Device2-bgp-instance-evpn1] <strong>l2vpn-family evpn</strong>
+[<span class="keyword">*</span>Device2-bgp-instance-evpn1-af-evpn] <strong>peer 1.1.1.1 enable</strong>
+Warning: This operation will reset the peer session. Continue? [Y/N]: <strong>y</strong>
+[<span class="keyword">*</span>Device2-bgp-instance-evpn1-af-evpn] <strong>quit</strong>
+[<span class="keyword">*</span>Device2-bgp-instance-evpn1] <strong>quit</strong>
+[<span class="keyword">*</span>Device2] <strong>commit</strong></pre>
+</div>
+</p></li><li><span>Configure a VPN instance and an EVPN instance on Device2, Device3, and Device4.</span><p><p># Configure Device2. The configurations of Device3 and Device4 are similar to the configuration of Device2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device2] <strong>ip vpn-instance vpn1</strong>
+[<span class="keyword">*</span>Device2-vpn-instance-vpn1] <strong>vxlan vni 5010</strong>
+[<span class="keyword">*</span>Device2-vpn-instance-vpn1] <strong>ipv4-family</strong>
+[<span class="keyword">*</span>Device2-vpn-instance-vpn1-af-ipv4] <strong>route-distinguisher 20:2</strong>
+[<span class="keyword">*</span>Device2-vpn-instance-vpn1-af-ipv4] <strong>vpn-target 100:5010 evpn</strong>
+[<span class="keyword">*</span>Device2-vpn-instance-vpn1-af-ipv4] <strong>quit</strong>
+[<span class="keyword">*</span>Device2-vpn-instance-vpn1] <strong>quit</strong>
+[<span class="keyword">*</span>Device2] <strong>bridge-domain 10</strong>
+[<span class="keyword">*</span>Device2-bd10] <strong>vxlan vni 10</strong>
+[<span class="keyword">*</span>Device2-bd10] <strong>evpn</strong>
+[<span class="keyword">*</span>Device2-bd10-evpn] <strong>route-distinguisher 10:2</strong>
+[<span class="keyword">*</span>Device2-bd10-evpn] <strong>vpn-target 100:10</strong>
+[<span class="keyword">*</span>Device2-bd10-evpn] <strong>vpn-target 100:5010 export-extcommunity</strong>
+[<span class="keyword">*</span>Device2-bd10-evpn] <strong>quit</strong>
+[<span class="keyword">*</span>Device2-bd10] <strong>quit</strong>
+[<span class="keyword">*</span>Device2] <strong>commit</strong></pre>
+</p></li><li><span>Enable ingress replication on Device2, Device3, and Device4.</span><p><p># Configure Device2. The configurations of Device3 and Device4 are similar to the configuration of Device2. However, on Device3, you do not need to configure a MAC address for the NVE interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device2] <strong>interface nve 1</strong>
+[<span class="keyword">*</span>Device2-Nve1] <strong>source 2.2.2.3</strong>
+[<span class="keyword">*</span>Device2-Nve1] <strong>mac-address 00e0-fc12-3456</strong>
+[<span class="keyword">*</span>Device2-Nve1] <strong>vni 10 head-end peer-list protocol bgp</strong>
+[<span class="keyword">*</span>Device2-Nve1] <strong>quit</strong>
+[<span class="keyword">*</span>Device2] <strong>commit</strong></pre>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Because Device2 and Device4 work as active-active gateways, ensure that their NVE interfaces have the same IP and MAC addresses.</p>
+</div></div>
+</p></li><li><span>Configure Device2, Device3, and Device4 as a Layer 3 VXLAN gateway.</span><p><div class="p"># Configure Device2 as a Layer 3 VXLAN gateway. The configurations of Device3 and Device4 are similar to the configuration of Device2. Keep in mind that: The IP addresses of the VBDIF interfaces on Device2 and Device3 must be on different network segments. The IP and MAC addresses of the VBDIF interfaces on Device2 and Device4 must be the same. You do not need to configure a MAC address for the VBDIF interface on Device3.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device2] <strong>interface vbdif10</strong>
+[<span class="keyword">*</span>Device2-Vbdif10] <strong>ip binding vpn-instance vpn1</strong>
+[<span class="keyword">*</span>Device2-Vbdif10] <strong>ip address 10.1.1.1 255.255.255.0</strong>
+[<span class="keyword">*</span>Device2-Vbdif10] <strong>mac-address 00e0-fc12-3457</strong>
+[<span class="keyword">*</span>Device2-Vbdif10] <strong>vxlan anycast-gateway enable</strong>
+[<span class="keyword">*</span>Device2-Vbdif10] <strong>arp collect host enable</strong>
+[<span class="keyword">*</span>Device2-Vbdif10] <strong>arp broadcast-detect enable</strong>
+[<span class="keyword">*</span>Device2-Vbdif10] <strong>quit</strong>
+[<span class="keyword">*</span>Device2] <strong>commit</strong></pre>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Because Device2 and Device4 work as dual-active gateways, ensure that their VBDIF interfaces have the same IP and MAC addresses.</p>
+</div></div>
+</div>
+</p></li><li><span>Configure BGP to advertise IRB routes between Device1 and Device2, Device3, and Device4.</span><p><p># Configure Device1. The configurations of Device2, Device3, and Device4 are similar to the configuration of Device1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>bgp 100 instance evpn1</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-bgp-instance-evpn1] <strong>l2vpn-family evpn</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-bgp-instance-evpn1-af-evpn] <strong>peer 2.2.2.2 advertise irb</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1-af-evpn] <strong>peer 3.3.3.3 advertise irb</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1-af-evpn] <strong>peer 4.4.4.4 advertise irb</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1-af-evpn] <strong>quit</strong>
+[<span class="keyword">*</span>Device1-bgp-instance-evpn1]<strong> quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+</p></li><li><span>Configure BGP to advertise IP prefix routes to peers between Device2 and Device3 and between Device2 and Device4.</span><p><p># Configure Device2. The configurations of Device3 and Device4 are similar to the configuration of Device2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device2] <strong>bgp 100 instance evpn1</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device2-bgp-instance-evpn1] <strong>ipv4-family vpn-instance vpn1</strong>
+[<span class="keyword">*</span>Device2-bgp-instance-evpn1-vpn1] <strong>import-route direct</strong>
+[<span class="keyword">*</span>Device2-bgp-instance-evpn1-vpn1]<strong> advertise l2vpn evpn</strong>
+[<span class="keyword">*</span>Device2-bgp-instance-evpn1-vpn1]<strong> quit</strong>
+[<span class="keyword">*</span>Device2-bgp-instance-evpn1]<strong> quit</strong>
+[<span class="keyword">*</span>Device2] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001176743957__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>After completing the configurations, run the <a href="cmdqueryname=display+vxlan+tunnel"><b><span class="cmdname">display vxlan tunnel</span></b></a> command on Device2, Device3, and Device4 to check VXLAN tunnel information. The following example uses the command output on Device2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device2] <strong>display vxlan tunnel</strong>
+Number of vxlan tunnel : 2
+Tunnel ID   Source                Destination           State  Type          Uptime
+-----------------------------------------------------------------------------------
+4026531841  2.2.2.3             3.3.3.3               up     dynamic       03:12:45
+4026531844  10.10.10.1            10.10.10.2            up     static        03:12:33</pre>
+<p>VM1s on different servers can communicate.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The tunnel goes up only after a Layer 2 sub-interface on Device2, Device3, or Device4 is connected to a server. When there is no access server, the VXLAN tunnel state is not displayed because no IRB route is advertised.</p>
+</div></div>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001176743957__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>Device1</p>
+<pre class="screen">#
+sysname Device1
+#
+evpn-overlay enable
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.3.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.2.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 192.168.4.2 255.255.255.0
+#
+interface LoopBack0
+ ip address 1.1.1.1 255.255.255.255
+#
+bgp 100
+ private-4-byte-as enable
+ peer 192.168.2.1 as-number 200
+ peer 192.168.3.1 as-number 300
+ peer 192.168.4.1 as-number 200
+ #
+ ipv4-family unicast
+  network 1.1.1.1 255.255.255.255
+  peer 192.168.2.1 enable
+  peer 192.168.3.1 enable
+  peer 192.168.4.1 enable
+#
+bgp 100 instance evpn1
+ private-4-byte-as enable
+ peer 2.2.2.2 as-number 100
+ peer 2.2.2.2 connect-interface LoopBack0
+ peer 3.3.3.3 as-number 100
+ peer 3.3.3.3 connect-interface LoopBack0
+ peer 4.4.4.4 as-number 100
+ peer 4.4.4.4 connect-interface LoopBack0 
+ #
+ l2vpn-family evpn
+  undo policy vpn-target
+  peer 2.2.2.2 enable
+  peer 2.2.2.2 advertise irb
+  peer 2.2.2.2 reflect-client
+  peer 3.3.3.3 enable
+  peer 3.3.3.3 advertise irb
+  peer 3.3.3.3 reflect-client
+  peer 4.4.4.4 enable
+  peer 4.4.4.4 advertise irb
+  peer 4.4.4.4 reflect-client
+#
+return</pre>
+</li><li><p>Device2</p>
+<pre class="screen">#
+sysname Device2
+#
+dfs-group 1
+ dual-active detection source ip 10.10.1.1 peer 10.10.1.2
+ authentication-mode hmac-sha256 password %+%##!!!!!!!!!"!!!!"!!!!*!!!!C+tR0CW9x*eB&amp;pWp`t),Azgwh\o8#4LZPD!!!!!!!!!!!!!!!9!!!!&gt;fwJ)I0E{=:%,*,XRhbH&amp;t0MCy_8=7!!!!!!!!!!%+%# 
+#
+stp mode rstp
+stp v-stp enable
+#
+evpn-overlay enable
+#
+ip vpn-instance vpn1
+ ipv4-family
+  route-distinguisher 20:2
+  vpn-target 100:5010 export-extcommunity evpn
+  vpn-target 100:5010 import-extcommunity evpn
+ vxlan vni 5010
+#
+vlan 100
+#
+bridge-domain 10
+ vxlan vni 10
+ #
+ evpn
+  route-distinguisher 10:2
+  vpn-target 100:10 export-extcommunity
+  vpn-target 100:5010 export-extcommunity
+  vpn-target 100:10 import-extcommunity
+#
+interface Vbdif10
+ ip binding vpn-instance vpn1
+ ip address 10.1.1.1 255.255.255.0
+ mac-address 00e0-fc12-3457
+ vxlan anycast-gateway enable
+ arp broadcast-detect enable
+ arp collect host enable
+#
+interface vlanif100
+ ip address 10.10.10.1 255.255.255.0
+#
+interface Eth-Trunk1
+ mode lacp-static
+ peer-link 1
+ port vlan exclude 1
+#
+interface Eth-Trunk10
+ stp edged-port enable
+ mode lacp-static
+ dfs-group 1 m-lag 1
+#
+interface Eth-Trunk10.1 mode l2
+ encapsulation dot1q vid 10
+ bridge-domain 10
+#
+interface MEth0/0/0
+ ip address 10.10.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.2.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ eth-trunk 10
+#
+interface <span>100GE</span><span>1/0/3</span>
+ eth-trunk 1
+#
+interface <span>100GE</span><span>1/0/4</span>
+ eth-trunk 1
+#
+interface LoopBack0
+ ip address 2.2.2.2 255.255.255.255
+#
+interface LoopBack1
+ ip address 2.2.2.3 255.255.255.255
+#
+interface Nve1
+ source 2.2.2.3
+ vni 10 head-end peer-list protocol bgp
+ mac-address 00e0-fc12-3456
+ pip-source 10.10.10.1 peer 10.10.10.2 bypass
+#
+bgp 200
+ advertise lowest-priority all-address-family peer-up  //Adjust the priority of BGP routes to the lowest level when the peer relationship goes up from down, and delay route advertisement to reduce packet loss during traffic switchback.
+ private-4-byte-as enable
+ peer 192.168.2.2 as-number 100
+ #
+ ipv4-family unicast
+  network 2.2.2.2 255.255.255.255
+  network 2.2.2.3 255.255.255.255
+  peer 192.168.2.2 enable
+  peer 192.168.2.2 allow-as-loop
+#
+bgp 100 instance evpn1
+ private-4-byte-as enable
+ peer 1.1.1.1 as-number 100
+ peer 1.1.1.1 connect-interface LoopBack0
+ #                                                                              
+ ipv4-family vpn-instance vpn1                                                  
+  import-route direct                                                           
+  advertise l2vpn evpn 
+ #
+ l2vpn-family evpn
+  policy vpn-target
+  peer 1.1.1.1 enable
+  peer 1.1.1.1 advertise irb
+#
+return</pre>
+</li><li><p>Device3</p>
+<pre class="screen">#
+sysname Device3
+#
+evpn-overlay enable
+#
+ip vpn-instance vpn1
+ ipv4-family
+  route-distinguisher 20:3
+  vpn-target 100:5010 export-extcommunity evpn
+  vpn-target 100:5010 import-extcommunity evpn
+ vxlan vni 5010
+#
+bridge-domain 20
+ vxlan vni 20
+ #
+ evpn
+  route-distinguisher 10:3
+  vpn-target 100:20 export-extcommunity
+  vpn-target 100:5010 export-extcommunity
+  vpn-target 100:20 import-extcommunity
+#
+interface Vbdif20
+ ip binding vpn-instance vpn1
+ ip address 10.20.1.1 255.255.255.0
+ vxlan anycast-gateway enable
+ arp collect host enable
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.3.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>.1 mode l2
+ encapsulation dot1q vid 20
+ bridge-domain 20
+#
+interface LoopBack0
+ ip address 3.3.3.3 255.255.255.255
+#
+interface Nve1
+ source 3.3.3.3
+ vni 20 head-end peer-list protocol bgp
+#
+bgp 300
+ advertise lowest-priority all-address-family peer-up  //Adjust the priority of BGP routes to the lowest level when the peer relationship goes up from down, and delay route advertisement to reduce packet loss during traffic switchback.
+ private-4-byte-as enable
+ peer 192.168.3.2 as-number 100
+ #
+ ipv4-family unicast
+  network 3.3.3.3 255.255.255.255
+  peer 192.168.3.2 enable
+#
+bgp 100 instance evpn1
+ private-4-byte-as enable
+ peer 1.1.1.1 as-number 100
+ peer 1.1.1.1 connect-interface LoopBack0
+ #                                                                              
+ ipv4-family vpn-instance vpn1                                                  
+  import-route direct                                                           
+  advertise l2vpn evpn 
+ #
+ l2vpn-family evpn
+  policy vpn-target
+  peer 1.1.1.1 enable
+  peer 1.1.1.1 advertise irb
+#
+return</pre>
+</li><li><p>Device4</p>
+<pre class="screen">#
+sysname Device4
+#
+dfs-group 1
+ dual-active detection source ip 10.10.1.2 peer 10.10.1.1
+ authentication-mode hmac-sha256 password %+%##!!!!!!!!!"!!!!"!!!!*!!!!=I9f8&gt;C{!P_bhB31@7r-=jrS8c|_"(Bn<font style="font-size:8pt" Face="Courier New" >~</font>#=!!!!!!!!!!!!!!!9!!!!kx-6@.tGA(wAt/IQXl6&gt;[g{6YlOi9$!!!!!!!!!!%+%#
+#
+stp mode rstp
+stp v-stp enable
+#
+evpn-overlay enable
+#
+ip vpn-instance vpn1
+ ipv4-family
+  route-distinguisher 20:4
+  vpn-target 100:5010 export-extcommunity evpn
+  vpn-target 100:5010 import-extcommunity evpn
+ vxlan vni 5010
+#
+vlan 100
+#
+bridge-domain 10
+ vxlan vni 10
+ #
+ evpn
+  route-distinguisher 10:4
+  vpn-target 100:10 export-extcommunity
+  vpn-target 100:5010 export-extcommunity
+  vpn-target 100:10 import-extcommunity
+#
+interface Vbdif10
+ ip binding vpn-instance vpn1
+ ip address 10.1.1.1 255.255.255.0
+ mac-address 00e0-fc12-3457
+ vxlan anycast-gateway enable
+ arp broadcast-detect enable
+ arp collect host enable
+#
+interface vlanif100
+ ip address 10.10.10.2 255.255.255.0
+#
+interface Eth-Trunk1
+ mode lacp-static
+ peer-link 1
+ port vlan exclude 1
+#
+interface Eth-Trunk10
+ stp edged-port enable
+ mode lacp-static
+ dfs-group 1 m-lag 1
+#
+interface Eth-Trunk10.1 mode l2
+ encapsulation dot1q vid 10
+ bridge-domain 10
+#
+interface MEth0/0/0 
+ ip address 10.10.1.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.4.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ eth-trunk 10
+#
+interface <span>100GE</span><span>1/0/3</span>
+ eth-trunk 1
+#
+interface <span>100GE</span><span>1/0/4</span>
+ eth-trunk 1
+#
+interface LoopBack0
+ ip address 4.4.4.4 255.255.255.255
+#
+interface LoopBack1
+ ip address 2.2.2.3 255.255.255.255
+#
+interface Nve1
+ source 2.2.2.3
+ vni 10 head-end peer-list protocol bgp
+ mac-address 00e0-fc12-3456
+ pip-source 10.10.10.2 peer 10.10.10.1 bypass
+#
+bgp 200
+ private-4-byte-as enable
+ peer 192.168.4.2 as-number 100
+ #
+ ipv4-family unicast
+  network 2.2.2.3 255.255.255.255
+  network 4.4.4.4 255.255.255.255
+  peer 192.168.4.2 enable
+  peer 192.168.4.2 allow-as-loop
+#
+bgp 100 instance evpn1
+ private-4-byte-as enable
+ peer 1.1.1.1 as-number 100
+ peer 1.1.1.1 connect-interface LoopBack0
+ #                                                                              
+ ipv4-family vpn-instance vpn1                                                  
+  import-route direct                                                           
+  advertise l2vpn evpn
+ #
+ l2vpn-family evpn
+  policy vpn-target
+  peer 1.1.1.1 enable
+  peer 1.1.1.1 advertise irb
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../dc/dc_vrp_vxlan_cfg_1066.html">Establishing VXLAN Tunnels in BGP EVPN Mode (Distributed VXLAN Gateway)
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../dc/dc_vrp_vxlan_cfg_1053.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../dc/dc_cfg_vxlan_cfgcase_0010.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

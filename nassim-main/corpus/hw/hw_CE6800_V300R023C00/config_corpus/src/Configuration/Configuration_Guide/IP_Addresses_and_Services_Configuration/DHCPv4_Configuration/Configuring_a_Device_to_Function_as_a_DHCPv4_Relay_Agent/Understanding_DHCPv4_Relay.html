@@ -1,0 +1,85 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding DHCPv4 Relay">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_dhcpv4_cfg_0022.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_dhcpv4_cfg_0024.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="DHCPv4">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="DHCPv4">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featurename" content="DHCPv4">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001564006397">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding DHCPv4 Relay</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001564006397"></a><a name="EN-US_CONCEPT_0000001564006397"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding DHCPv4 Relay</h1>
+<div><p>Only a DHCPv4 server on the same network segment as a DHCPv4 client can receive DHCPDISCOVER messages broadcast by the client. If a DHCPv4 client and server are on different network segments, a DHCPv4 relay agent must be deployed to forward DHCPv4 messages between them.</p>
+<div class="section"><h4 class="sectiontitle">Client Accessing the Network for the First Time When a DHCPv4 Relay Agent Exists</h4><p>The working principles for a DHCPv4 client to access the network for the first time when a DHCPv4 relay agent exists are the same as <a href="galaxy_dhcpv4_cfg_0006.html">those when no DHCPv4 relay agent exists</a>. The difference is that the DHCPv4 relay agent forwards DHCPv4 messages between the DHCPv4 server and client. The following describes the working principles of the DHCPv4 relay agent.</p>
+<p><a href="#EN-US_CONCEPT_0000001564006397__fig_dc_fd_dhcp_101002">Figure 1</a> shows the message exchange between the DHCPv4 client that accesses the network for the first time and the DHCPv4 server when the DHCPv4 relay agent is deployed.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001564006397__fig_dc_fd_dhcp_101002"><a name="EN-US_CONCEPT_0000001564006397__fig_dc_fd_dhcp_101002"></a><a name="fig_dc_fd_dhcp_101002"></a><span class="figcap"><b>Figure 1 </b>Message exchange between the DHCPv4 client that accesses the network for the first time and the DHCPv4 server when the DHCPv4 relay agent is deployed</span><br><span><img class="vsd" src="figure/en-us_image_0000001513166174.png" width="NaN" height="NaN"></span></div>
+<p><strong>Step 1: Discovery Stage</strong></p>
+<div class="p">After receiving a DHCPDISCOVER message broadcast by the DHCPv4 client, the DHCPv4 relay agent performs the following operations:<ol><li><p>Checks whether the value of the hops field in the message is greater than 16. If so, the DHCPv4 relay agent discards the message. If not, the DHCPv4 relay agent increases the value by 1 and proceeds to the following operations.</p>
+</li><li><p>Checks whether the value of the giaddr field in the message is 0. If so, the DHCPv4 relay agent sets the giaddr field to the IPv4 address of the interface that receives the DHCPDISCOVER message. If not, the DHCPv4 relay agent does not change the field and proceeds to the following operations.</p>
+</li><li><p>Changes the destination IPv4 address of the DHCPDISCOVER message to the IPv4 address of the DHCPv4 server or next-hop relay agent, changes the source IPv4 address to the IPv4 address of the interface connecting the DHCPv4 relay agent to the client, and unicasts the message to the DHCPv4 server or next-hop relay agent.</p>
+</li></ol>
+</div>
+<p>If multiple DHCPv4 relay agents exist between the DHCPv4 client and server, each one processes the DHCPDISCOVER message using the same method.</p>
+<p><strong>Step 2: Offer Stage</strong></p>
+<p>After receiving the DHCPDISCOVER message, the DHCPv4 server selects an address pool on the same network segment as the address specified by the giaddr field in the message, allocates parameters such as an IPv4 address to the client, and unicasts a DHCPOFFER message to the DHCPv4 relay agent identified by the giaddr field.</p>
+<div class="p">After receiving the DHCPOFFER message, the DHCPv4 relay agent performs the following operations:<ol><li><p>Checks whether the value of the giaddr field in the message is the IPv4 address of the interface that receives the message. If so, the DHCPv4 relay agent proceeds to the following operations. If not, the DHCPv4 relay agent discards the message.</p>
+</li><li>Checks whether the value of the flags field is 1. If so, the DHCPv4 relay agent broadcasts the DHCPOFFER message to the DHCPv4 client. If not, the DHCPv4 relay agent unicasts the DHCPOFFER message the DHCPv4 client.</li></ol>
+</div>
+<p><strong>Step 3: Request Stage</strong></p>
+<p>If multiple DHCPv4 relay agents send DHCPOFFER messages to the DHCPv4 client, the client accepts only the first received DHCPOFFER message. The client then broadcasts a DHCPREQUEST message carrying the selected DHCPv4 server identifier (<a href="galaxy_dhcpv4_cfg_0005.html#EN-US_CONCEPT_0000001564006389__op54">Option 54</a>) and IPv4 address (<a href="galaxy_dhcpv4_cfg_0005.html#EN-US_CONCEPT_0000001564006389__op50">Option 50</a>, with the IPv4 address specified in the yiaddr field of the accepted DHCPOFFER message).</p>
+<p><strong>Step 4: Acknowledgement Stage</strong></p>
+<p>After receiving a DHCPREQUEST message from the DHCPv4 client, the DHCPv4 server replies with a DHCPACK message. After receiving the DHCPACK message from the server, the relay agent forwards the message to the DHCPv4 client.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Client Renewing the Address Lease Through a DHCPv4 Relay Agent</h4><p><a href="#EN-US_CONCEPT_0000001564006397__fig1025545975513">Figure 2</a> shows how a DHCPv4 client renews its address lease through a DHCPv4 relay agent.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001564006397__fig1025545975513"><a name="EN-US_CONCEPT_0000001564006397__fig1025545975513"></a><a name="fig1025545975513"></a><span class="figcap"><b>Figure 2 </b>Client renewing the address lease through a DHCPv4 relay agent</span><br><span><img class="vsd" src="figure/en-us_image_0000001563766529.png" width="NaN" height="NaN"></span></div>
+<ol><li>When the lease reaches 50% (T1) of its validity period, the DHCPv4 client unicasts a DHCPREQUEST message to the DHCPv4 server through the DHCPv4 relay agent to request IPv4 address lease renewal. If the DHCPv4 client receives a DHCPACK message, the IPv4 address lease is successfully renewed (counted from 0). If the DHCPv4 client receives a DHCPNAK message, the DHCPv4 client must send a DHCPDISCOVER message to apply for a new IPv4 address.</li><li>If no response is received from the DHCPv4 server when the lease reaches 87.5% (T2) of its validity period, the DHCPv4 client broadcasts a DHCPREQUEST message to the DHCPv4 server through the DHCPv4 relay agent to request IPv4 address lease renewal. If the DHCPv4 client receives a DHCPACK message, the IPv4 address lease is successfully renewed (counted from 0). If the DHCPv4 client receives a DHCPNAK message, the DHCPv4 client must send a DHCPDISCOVER message to apply for a new IPv4 address.</li><li><p>If no response is received when the lease expires, the DHCPv4 client stops using the current IPv4 address and sends a DHCPDISCOVER message to apply for a new one.</p>
+</li></ol>
+<p>If a DHCPv4 client does not need to use the allocated IPv4 address before the lease expires, it sends a DHCPRELEASE message to the DHCPv4 relay agent, which then instructs the DHCPv4 server to release the IPv4 address. The DHCPv4 server saves the configuration of this DHCPv4 client and records the IPv4 address in the allocated IPv4 address list. The IPv4 address can then be allocated to this DHCPv4 client or other clients. A DHCPv4 client can send a DHCPINFORM message to the DHCPv4 server to request configuration update.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_dhcpv4_cfg_0022.html">Configuring a Device to Function as a DHCPv4 Relay Agent
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_dhcpv4_cfg_0024.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

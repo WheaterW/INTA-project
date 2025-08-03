@@ -1,0 +1,138 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="MLD Snooping Fundamentals">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_l2mc6_cfg_0003.html">
+<meta name="DC.Relation" scheme="URI" content="../vrp/vrp_l2mc6_cfg_0004.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="MLD Snooping">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="MLD Snooping">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featurename" content="MLD Snooping">
+<meta name="featuretype" content="IP Multicast">
+<meta name="featuretype" content="IP Multicast">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001321790810">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/imagePopup.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/customQuery.js"></script>
+<script language="javascript" type="text/javascript" src="../public_sys-resources/imagePopup.js"></script>
+<title>MLD Snooping Fundamentals</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001321790810"></a><a name="EN-US_CONCEPT_0000001321790810"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">MLD Snooping Fundamentals</h1>
+<div><div class="section"><h4 class="sectiontitle">Working Process of MLD Snooping</h4><p>This section uses an example to describe the working process of MLD snooping, using <a href="#EN-US_CONCEPT_0000001321790810__fig206970134364">Figure 1</a> as the networking. In this example, <span class="keyword">Device</span>A is a last-hop multicast router, and MLDv2 is enabled on its interface connected to <span class="keyword">Device</span>B. MLD snooping is enabled on <span class="keyword">Device</span>B, and all interfaces on this device belong to VLAN10. Initially, the Layer 2 multicast forwarding table on <span class="keyword">Device</span>B is empty. At this stage, it does not forward the multicast traffic received from <span class="keyword">Device</span>A to any interface.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001321790810__fig206970134364"><a name="EN-US_CONCEPT_0000001321790810__fig206970134364"></a><a name="fig206970134364"></a><span class="figcap"><b>Figure 1 </b>Initial state of MLD snooping</span><br><span><img src="figure/en-us_image_0000001494694657.png"></span></div>
+<ol><li>After MLD is enabled on an interface of <span class="keyword">Device</span>A, the interface periodically sends MLD General Query messages.</li><li>In <a href="#EN-US_CONCEPT_0000001321790810__fig423014298388">Figure 2</a>, <span class="keyword">Device</span>B receives the MLD General Query message through interface10 from <span class="keyword">Device</span>A. At this stage, the MLD snooping router port list on <span class="keyword">Device</span>B is empty. <span class="keyword">Device</span>B therefore directly adds interface10 to the list, classifying this interface as a dynamic router port. At the same time, <span class="keyword">Device</span>B starts an aging timer for the interface, and resets the timer when it receives an MLD General Query message through the interface again. <span class="keyword">Device</span>B then floods the MLD General Query message through all the interfaces in VLAN10, except interface10.<div class="fignone" id="EN-US_CONCEPT_0000001321790810__fig423014298388"><a name="EN-US_CONCEPT_0000001321790810__fig423014298388"></a><a name="fig423014298388"></a><span class="figcap"><b>Figure 2 </b>MLD General Query message</span><br><span><img src="figure/en-us_image_0000001366540648.png" width="361.095" height="356.1075" title="Click to enlarge" class="imgResize"></span></div>
+</li><li>UserA, UserB, and UserC receive the MLD General Query message flooded by <span class="keyword">Device</span>B. As UserC is not a member of any multicast group, it discards the message and does not respond. Being members of multicast group FF02::1, UserA and UserB respond with MLD Report messages.<div class="fignone" id="EN-US_CONCEPT_0000001321790810__fig7459231154119"><a name="EN-US_CONCEPT_0000001321790810__fig7459231154119"></a><a name="fig7459231154119"></a><span class="figcap"><b>Figure 3 </b>MLD Report message</span><br><span><img src="figure/en-us_image_0000001417141565.png" width="351.12" height="361.095" title="Click to enlarge" class="imgResize"></span></div>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>When UserA and UserB join multicast group FF02::1 for the first time, they can proactively send MLD Report messages without waiting for an MLD General Query message.</p>
+</div></div>
+</li><li>In <a href="#EN-US_CONCEPT_0000001321790810__fig7459231154119">Figure 3</a>, <span class="keyword">Device</span>B receives MLD Report messages through interface1 and interface2. <span class="keyword">Device</span>B then parses the received Report messages because MLD snooping is activated. It finds that users connected to interface1 and interface2 need to join multicast group FF02::1. Therefore, it creates entries for FF02::1 in its Layer 2 multicast forwarding table, specifies interface1 and interface2 as dynamic member ports for the entries, and starts the aging timer for the two interfaces. <span class="keyword">Device</span>B resets the timer of either interface when it receives MLD Report messages through the interface again. <span class="keyword">Device</span>B then forwards the received MLD Report messages through interface10.</li><li><span class="keyword">Device</span>A receives the MLD Report messages from <span class="keyword">Device</span>B, and maintains the corresponding multicast entries. <span class="keyword">Device</span>A then forwards the traffic destined for multicast group FF02::1 to <span class="keyword">Device</span>B. After receiving the traffic destined for FF02::1 through interface10, <span class="keyword">Device</span>B searches its Layer 2 multicast forwarding table and finds the matching entry. In this example, the matching entry contains two member ports (interface1 and interface2). As such, <span class="keyword">Device</span>B forwards the multicast traffic through the two interfaces. In this way, UserC will not receive the multicast traffic.</li><li>When UserA wants to leave multicast group FF02::1, it sends an MLD Done message, which <span class="keyword">Device</span>B receives through interface1. <span class="keyword">Device</span>B searches its Layer 2 multicast forwarding table and finds that the interface is a member port of multicast group FF02::1. <span class="keyword">Device</span>B then forwards the message through all its router ports (interface10 in this example). <a href="#EN-US_CONCEPT_0000001321790810__fig18381839422">Figure 4</a> shows the networking.<div class="fignone" id="EN-US_CONCEPT_0000001321790810__fig18381839422"><a name="EN-US_CONCEPT_0000001321790810__fig18381839422"></a><a name="fig18381839422"></a><span class="figcap"><b>Figure 4 </b>MLD Done message</span><br><span><img src="figure/en-us_image_0000001416982609.png" width="351.12" height="366.08250000000004" title="Click to enlarge" class="imgResize"></span></div>
+</li><li><span class="keyword">Device</span>A sends an MLD Group-Specific Query message immediately after it receives the MLD Done message of UserA.</li><li><span class="keyword">Device</span>B receives the MLD Group-Specific Query message through interface10 and forwards the message through all the interfaces in VLAN10, except interface10.</li><li>After receiving the MLD Group-Specific Query message, UserB determines that the multicast group it joins is being queried and responds with an MLD Report message immediately.</li><li><span class="keyword">Device</span>B receives the MLD Report message through interface2. When searching its Layer 2 multicast forwarding table, <span class="keyword">Device</span>B determines that interface2 is already a member port of multicast group FF02::1. As such, <span class="keyword">Device</span>B resets the aging timer of the interface, and then forwards the MLD Report message through interface10.</li><li>After receiving UserB's MLD Report message, <span class="keyword">Device</span>A learns that a user is still requesting the traffic of multicast group FF02::1. As a result, <span class="keyword">Device</span>A continues to forward the traffic of this group to the subnet where the user resides.</li><li>Because UserA has left multicast group FF02::1, it no longer sends MLD Report messages. After the aging timer of interface1 expires, <span class="keyword">Device</span>B deletes interface1 from the member port list of multicast group FF02::1. <span class="keyword">Device</span>B then stops forwarding the traffic of this group to interface1.</li></ol>
+</div>
+<div class="section"><h4 class="sectiontitle">MLD Message Processing by MLD Snooping</h4><p>After MLD snooping is enabled on a Layer 2 multicast device, the device processes received MLD messages differently (by message type) and creates Layer 2 multicast forwarding entries during message processing.</p>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><caption><b>Table 1 </b>MLD message processing by MLD snooping</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="33.33333333333333%" id="mcps1.3.2.3.2.4.1.1" liSelected="liSelected"><p>MLD Working Phase</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="33.33333333333333%" id="mcps1.3.2.3.2.4.1.2" liSelected="liSelected"><p>Type of Message Received by a Layer 2 Multicast Device</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="33.33333333333333%" id="mcps1.3.2.3.2.4.1.3" liSelected="liSelected"><p>Processing Method</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.2.3.2.4.1.1 "><p>General query</p>
+<p>An MLD querier periodically sends an MLD General Query message (with the destination address being FF02::1) to all hosts and routers on the local subnet to check which multicast groups have members.</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.2.3.2.4.1.2 "><p>MLD General Query</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.2.3.2.4.1.3 "><div class="p">The device forwards this message to all interfaces in the corresponding VLAN, except the interface that received the message. It then performs either of the following operations on the interface that received the message:<ul><li>If the interface is not in the router port list, the device adds it to the list and starts an aging timer for the interface.</li><li>If the interface is already in the router port list, the device resets its aging timer.</li></ul>
+<div class="note"><span class="notetitle"> NOTE: </span><div class="notebody"><p>When the device receives an MLD General Query message, it sets the aging timer of the dynamic router port to 180 seconds by default. The timer can be set using a command.</p>
+</div></div>
+</div>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.2.3.2.4.1.1 "><p>Membership report</p>
+<div class="p">There are two cases:<ul><li>Upon receiving an MLD General Query message, a member responds with an MLD Report message.</li><li>Upon joining a multicast group, a member proactively sends an MLD Report message to the MLD querier.</li></ul>
+</div>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.2.3.2.4.1.2 "><p>MLD Report</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.2.3.2.4.1.3 "><div class="p">The device forwards this message to all the router ports in the corresponding VLAN, and parses the message to obtain the multicast group address. It then performs the following operations on the interface that received the message:<ul><li>If no forwarding entry is created for the group, the device creates an entry for it, adds the interface to the outbound interface list as a dynamic member port, and starts an aging timer for the interface.</li><li>If a forwarding entry is already created for the group but the interface is not in the outbound interface list, the device adds the interface to the list as a dynamic member port, and starts an aging timer for the interface.</li><li>If a forwarding entry is already created for the group and the interface is already in the outbound interface list as a dynamic member port, the device resets the aging timer for the interface.</li></ul>
+</div>
+<div class="note"><span class="notetitle"> NOTE: </span><div class="notebody"><p>After an MLD Report message is received, the aging time of a dynamic member port is calculated as follows: Robustness variable x General Query interval + Maximum response time.</p>
+</div></div>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="2" valign="top" width="33.33333333333333%" headers="mcps1.3.2.3.2.4.1.1 "><p>Leave of group members</p>
+<div class="p">Two phases are involved:<ol><li>An MLDv1 or MLDv2 member sends an MLD Done message to notify an MLD querier that it leaves the multicast group.</li><li>Upon receiving the MLD Done message, the MLD querier learns the multicast group address and sends an MLD Group-Specific/Group-Source-Specific Query message to the multicast group through the interface that received the MLD Done message.</li></ol>
+</div>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.2.3.2.4.1.2 "><p>MLD Done</p>
+</td>
+<td class="cellrowborder" valign="top" width="33.33333333333333%" headers="mcps1.3.2.3.2.4.1.3 "><div class="p">The device checks whether a forwarding entry is created for the multicast group and whether the interface that received the message is added to the outbound interface list.<ul><li>If a forwarding entry is not created for the group or the interface that received the message is not added to the outbound interface list, the Layer 2 multicast device drops the message, instead of forwarding it.</li><li>If a forwarding entry is created for the group and the interface that received the message is added to the outbound interface list, the Layer 2 device forwards the message to all the router ports in the corresponding VLAN.</li></ul>
+</div>
+<div class="p">Within the aging time of the interface that received the MLD Done message (assuming that the interface is a dynamic member port), the Layer 2 multicast device performs the following operations:<ul><li>If the interface receives MLD Group-Specific/Group-Source-Specific Query messages of hosts (indicating that some users still require the traffic of the multicast group), the device resets the aging timer of the interface.</li><li>If the interface does not receive MLD Group-Specific/Group-Source-Specific Query messages of hosts (indicating that no users require the traffic of the multicast group), the device waits for the aging timer to expire and then deletes the interface from the outbound interface list when the timer expires.</li></ul>
+</div>
+<div class="note"><span class="notetitle"> NOTE: </span><div class="notebody"><p>After an MLD Done message is received, the aging time of a dynamic member port is calculated as follows: Robustness variable x Group-Specific Query interval.</p>
+</div></div>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.2.3.2.4.1.1 "><p>MLD Group-Specific/Group-Source-Specific Query message</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.2.3.2.4.1.2 "><p>The device forwards this message to all interfaces in the corresponding VLAN, except the interface that received the message.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p">Upon receiving a PIM Hello message, a Layer 2 multicast device forwards it to all the interfaces in the corresponding VLAN, except the interface that received the message. The device then performs the following operations:<ul><li>If the interface is already in the router port list, the device resets its aging timer.</li><li>If the interface is not in the router port list, the device adds it to the list and starts an aging timer for the interface.</li></ul>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>When a device receives an IPv6 PIM Hello message, it sets the aging time of the router port to the Holdtime value contained in the Hello message.</p>
+</div></div>
+</div>
+<p>If a static router port is configured, the Layer 2 multicast device forwards received MLD Report and Done messages also to this port. If a static member port is configured, the port is added to a forwarding entry as an outbound interface.</p>
+<p>If Layer 2 multicast forwarding entries have been created on a Layer 2 multicast device, the device searches for a forwarding entry for a received multicast data packet based on the VLAN and destination address (IPv6 multicast group address) information in the packet to determine whether an outbound interface exists. If such an interface exists, the device sends the packet to the corresponding multicast group member port and router port. Otherwise, the device discards the packet or broadcasts it in the VLAN.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../vrp/vrp_l2mc6_cfg_0003.html">Understanding MLD Snooping
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../vrp/vrp_l2mc6_cfg_0004.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+
+<script language="JavaScript">
+<!--
+initImageViewer('.imgResize');
+var msg_imageMax = "view original image";
+var msg_imageClose = "close";
+//--></script></body>
+</html>

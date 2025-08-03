@@ -1,0 +1,204 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring PM">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_pm_cfg_0006.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_pm_cfg_0009.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Performance Management">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Performance Management">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="Performance Management">
+<meta name="featuretype" content="System Management">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001563994333">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring PM</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001563994333"></a><a name="EN-US_TASK_0000001563994333"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring PM</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001563994333__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>To monitor the operating status of interfaces and collect performance statistics, configure the PM function. This configuration enables a device to periodically collect performance statistics, save the performance statistics to files, and send the files to a PM server.</p>
+<div class="fignone"><span class="figcap"><b>Figure 1 </b>Networking diagram for PM</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 represents <span>100GE</span><span>1/0/1</span>.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001512834542.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001563994333__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Enable the data statistics function.</p>
+</li><li><p>Configure basic data statistics functions.</p>
+</li><li><p>Configure the device to upload statistics files to the PM server.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001563994333__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enable the data statistics function.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+<span>[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></span>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> pm</strong>
+[<span class="keyword">*</span>DeviceA-pm]<strong> </strong><strong>statistics enable</strong>
+[<span class="keyword">*</span>DeviceA-pm] <strong>commit</strong></pre>
+</p></li><li><span>Configure basic data statistics functions.</span><p><p># Create a statistics task named <strong>test</strong> to collect traffic statistics on <span>100GE</span><span>1/0/1</span>, with the statistics indicator <strong>in-all-pkts</strong> being excluded.</p>
+</p><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-pm]<strong> statistics-task test</strong>
+[<span class="keyword">*</span>DeviceA-pm-statistics-test]<strong> binding instance-type interface instance <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword">*</span>DeviceA-pm-statistics-test]<strong> measure disable instance-type interface measure in-all-pkts</strong>
+[<span class="keyword">*</span>DeviceA-pm-statistics-test] <strong>commit</strong></pre>
+<p># Set the performance statistics collection interval to 5 minutes and the number of performance statistics collection intervals to 3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-pm-statistics-test]<strong> statistics-cycle 5</strong>
+Warning: All data of the statistics task will be deleted. Continue? [Y/N]:<strong>Y</strong>
+[<span class="keyword">*</span>DeviceA-pm-statistics-test]<strong> record-interval 3</strong>
+Warning: This operation will cause some data to be lost. Continue? [Y/N]:<strong>Y</strong>
+[<span class="keyword">*</span>DeviceA-pm-statistics-test]<strong> quit</strong></pre>
+</p></li><li><span>Configure the device to upload statistics files to the PM server.</span><p><p># Create a PM server process and configure required parameters.</p>
+</p><p><pre class="screen">[<span class="keyword">*</span>DeviceA-pm]<strong> pm-server abc</strong>
+[<span class="keyword">*</span>DeviceA-pm-server-abc]<strong> protocol sftp ip-address 192.168.2.1 port 22</strong>
+[<span class="keyword">*</span>DeviceA-pm-server-abc]<strong> username user1 password YsHsjx_202206</strong>
+[<span class="keyword">*</span>DeviceA-pm-server-abc]<strong> path /pmserver</strong>
+[<span class="keyword">*</span>DeviceA-pm-server-abc]<strong> retry 2</strong>
+[<span class="keyword">*</span>DeviceA-pm-server-abc]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA-pm]<strong> commit</strong></pre>
+<p># Enable the device to upload statistics files to the PM server.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-pm]<strong> upload-config req1 server abc</strong>
+[<span class="keyword">*</span>DeviceA-pm]<strong> upload req1 file a120130525150004.txt </strong>
+[<span class="keyword">*</span>DeviceA-pm]<strong> commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001563994333__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>After configuring PM functions, run the <strong>display pm statistics-task</strong> [ <em>task-name</em> ] command to check the PM configurations. The following example uses the command output for a performance statistics task named <strong>huawei</strong>. The command output shows the performance statistics task name, performance statistics collection interval, and performance statistics instance type. </p>
+<pre class="screen">&lt;DeviceA&gt;<strong> display pm statistics-task test</strong>
+Task Name                : test
+Task State               : running
+Record-file Status       : enable
+Task Cycle               : 5 minutes
+Sample Interval          : 1 minutes
+Instance Type            : interface
+Record Interval(cycle)   : 3
+File Format              : text
+File Name Prefix         : test
+File Transfer Mode       : passive
+Current File Name        : a120130525150004.txt</pre>
+<p>In addition, the performance statistics file <strong>a120130525150004.txt</strong> has been uploaded to the /pmserver path of the PM server.</p>
+<pre class="screen">2020-02-21 14:08:25.371                                                         
+FileFormatVersion=1.0                                                           
+SysName=<span class="keyword">HUAWEI</span>                                                                  
+Release_Number=<span class="keyword">V300R023C00</span>                                                      
+Start_Time=2020-02-21 13:00,2020-02-21 13:05,2020-02-21 13:10                   
+Statics_Interval=5                                                              
+Resource_type=6                                                                 
+Total_rows=3                                                                    
+Index List:                                                                     
+Index_rows=1                                                                    
+<span>100GE</span><span>1/0/1</span>                                                                       
+Indicator List:                                                                 
+Indicator_rows=41                                                               
+393217                                                                          
+393218                                                                          
+393219                                                                          
+393220                                                                          
+393221                                                                          
+393222                                                                          
+393223                                                                          
+393224                                                                          
+393225                                                                          
+393226                                                                          
+393227                                                                          
+393228                                                                          
+393229                                                                          
+393230                                                                          
+393232                                                                          
+393233                                                                          
+393234                                                                          
+393235                                                                          
+393236                                                                          
+393237                                                                          
+393238                                                                          
+393239                                                                          
+393240                                                                          
+393241                                                                          
+393242                                                                          
+393243                                                                          
+393244                                                                          
+393245                                                                          
+393246                                                                          
+393247                                                                          
+393248                                                                          
+393249                                                                          
+393250                                                                          
+393251                                                                          
+393256                                                                          
+393257                                                                          
+393258                                                                          
+393252                                                                          
+393253                                                                          
+393254                                                                          
+393255                                                                          
+Value:                                                                          
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1410065408,2,1,0,0,0,0,0,0,0,0,0,0
+,0,E3,E3,E3,E3                                                                  
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1410065408,2,1,0,0,0,0,0,0,0,0,0,0
+,0,E3,E3,E3,E3                                                                  
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1410065408,2,1,0,0,0,0,0,0,0,0,0,0
+,0,E3,E3,E3,E3   </pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001563994333__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><pre class="screen">#
+sysname DeviceA
+#
+pm
+ statistics enable
+ pm-server abc
+  protocol sftp ip-address 192.168.2.1 
+  username user1 password %^%#Nx^aS;(8+&amp;;-3#WIJy#3PyDSPFO(DOTwdEEmPPB)%^%#
+  retry 2
+  path /pmserver
+  upload-config req1 server abc
+  statistics-task test
+  statistics-cycle 5
+  record-interval 3  
+  binding instance-type interface instance <span>100GE</span><span>1/0/1</span>
+  measure disable instance-type interface measure in-all-pkts
+#
+return</pre>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_pm_cfg_0006.html">Configuring PM
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_pm_cfg_0009.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,67 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Microsegmentation Application Scenarios">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_cfg_micro-segmentation_0001.html">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_cfg_micro-segmentation_0003.html">
+<meta name="DC.Relation" scheme="URI" content="../spec/Microsegmentation_limitation_CE_v6r23c00.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Microsegmentation">
+<meta name="featuretype" content="Security">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Microsegmentation">
+<meta name="featuretype" content="Security">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001563994777">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Microsegmentation Application Scenarios</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001563994777"></a><a name="EN-US_CONCEPT_0000001563994777"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Microsegmentation Application Scenarios</h1>
+<div><div class="section"><h4 class="sectiontitle">Local Forwarding of Layer 3 Packets on the VXLAN Network</h4><p>On the distributed VXLAN network shown in <a href="#EN-US_CONCEPT_0000001563994777__fig16392644171811">Figure 1</a>, Leaf1 is VTEP1 and connected to Host1 and Host2. Access traffic between Host1 and Host2 only needs to be forwarded on Leaf1. Host1 belongs to EPG1 and Host2 belongs to EPG2.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001563994777__fig16392644171811"><a name="EN-US_CONCEPT_0000001563994777__fig16392644171811"></a><a name="fig16392644171811"></a><span class="figcap"><b>Figure 1 </b>Local forwarding of Layer 3 packets on the VXLAN network</span><br><span><img class="vsd" src="figure/en-us_image_0000001563994789.png" width="NaN" height="NaN"></span></div>
+<div class="p">Host1's access to Host2 exemplifies microsegmentation when Layer 3 packets are locally forwarded on the VXLAN network.<ol><li>After VTEP1 receives packets sent from Host1 to Host2, it obtains the source IP address of 192.168.10.1 and destination IP address of 192.168.20.2 from the packets.</li><li>According to the source IP address, VTEP1 searches for TCAM entries based on the longest match principle and obtains the ID of the EPG (EPG1) that Host1 belongs to.</li><li>According to the destination IP address, VTEP1 searches for the routing table and finds that Host2 is also connected to VTEP1. That is, packets only need to be forwarded locally. According to the destination IP address, VTEP1 searches for TCAM entries based on the longest match principle and obtains the ID of the EPG (EPG2) that Host2 belongs to.</li><li>VTEP1 searches for TCAM entries based on EPG1 and EPG2 that Host1 and Host2 belong to, respectively. It obtains GBPs between EPG1 and EPG2 and performs traffic control based on GBPs.</li></ol>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Inter-device Forwarding of Layer 3 Packets on the VXLAN Network</h4><p>On the distributed VXLAN network shown in <a href="#EN-US_CONCEPT_0000001563994777__fig5812241171916">Figure 2</a>, Leaf1 and Leaf2 are VTEP1 and VTEP2 and are connected to Host1 and Host3, respectively. Access traffic between Host1 and Host3 needs to be forwarded over the VXLAN tunnel across devices. Host1 belongs to EPG1 and Host3 belongs to EPG3.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001563994777__fig5812241171916"><a name="EN-US_CONCEPT_0000001563994777__fig5812241171916"></a><a name="fig5812241171916"></a><span class="figcap"><b>Figure 2 </b>Inter-device forwarding of Layer 3 packets on the VXLAN network</span><br><span><img class="vsd" src="figure/en-us_image_0000001513034550.png" width="NaN" height="NaN"></span></div>
+<div class="p">Host1's access to Host3 exemplifies microsegmentation when Layer 3 packets are forwarded across devices on the VXLAN network.<ol><li>After VTEP1 receives packets sent from Host1 to Host3, it obtains the source IP address of 192.168.10.1 and destination IP address of 192.168.30.3 from the packets.</li><li>According to the source IP address, VTEP1 searches for TCAM entries based on the longest match principle and obtains the ID of the EPG (EPG1) that Host1 belongs to.</li><li>According to the destination IP address, VTEP1 searches for the routing table and finds that Host3 is connected to VTEP2. After packets are encapsulated with the VXLAN header, the packets are forwarded over the VXLAN tunnel across devices. During VXLAN encapsulation, VTEP1 resets the <strong>G flag bit</strong> in the VXLAN packet header, encapsulates EPG1 that Host1 belongs to into the <strong>Group Policy ID</strong> field of the VXLAN packet header, and sends the packets to VTEP2.</li><li>After receiving VXLAN packets sent by VTEP1, VTEP2 decapsulates the VXLAN packets. VTEP2 finds that the <strong>G</strong> flag bit is 1 and obtains EPG1 of Host1 from the <strong>Group Policy ID</strong> field.</li><li>According to the inner destination IP address, VTEP2 searches for TCAM entries based on the longest match principle and obtains the ID of the EPG (EPG3) that Host3 belongs to.</li><li>VTEP2 searches for TCAM entries based on EPG1 and EPG3 that Host1 and Host3 belong to, respectively. It obtains GBPs between EPG1 and EPG3 and performs traffic control based on GBPs.</li></ol>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../dc/dc_cfg_micro-segmentation_0001.html">Microsegmentation Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../dc/dc_cfg_micro-segmentation_0003.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../spec/Microsegmentation_limitation_CE_v6r23c00.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

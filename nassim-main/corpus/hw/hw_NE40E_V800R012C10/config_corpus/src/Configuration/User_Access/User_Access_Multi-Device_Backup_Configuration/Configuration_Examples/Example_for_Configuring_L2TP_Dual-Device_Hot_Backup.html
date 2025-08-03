@@ -1,0 +1,598 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring L2TP Dual-Device Hot Backup">
+<meta name="abstract" content="This section provides an example for configuring L2TP dual-device hot backup on the LACs, including networking requirements, configuration roadmap, configuration procedure, and configuration files.">
+<meta name="description" content="This section provides an example for configuring L2TP dual-device hot backup on the LACs, including networking requirements, configuration roadmap, configuration procedure, and configuration files.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_rui_0050.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_rui_00532_01.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_rui_edsg_cfg_001.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z50024784,w00800033,z00588052,l00593348,w00606909,w00447999">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="UP Multi-Device Backup">
+<meta name="featurename" content="User Access Multi-Device Backup">
+<meta name="featuretype" content="User Access">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="UP Multi-Device Backup">
+<meta name="featurename" content="User Access Multi-Device Backup">
+<meta name="featuretype" content="User Access">
+<meta name="featurename" content="UP Multi-Device Backup">
+<meta name="featurename" content="User Access Multi-Device Backup">
+<meta name="featuretype" content="User Access">
+<meta name="featurename" content="User Access Multi-Device Backup">
+<meta name="featuretype" content="User Access">
+<meta name="OWNER" content="l00593348">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="z00588052">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172374410">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring L2TP Dual-Device Hot Backup</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172374410"></a><a name="EN-US_TASK_0172374410"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring L2TP Dual-Device Hot Backup</h1>
+<div class="taskbody"><p>This section provides an example for configuring L2TP dual-device hot backup on the LACs, including networking requirements, configuration roadmap, configuration procedure, and configuration files.</p>
+<div class="context"><a name="EN-US_TASK_0172374410__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>L2TP tunnels can be used to provide enterprise user access services and wholesale services. As these services are the major services that operators provide and have high user experience requirements, L2TP tunnels must support high reliability. In addition to BRAS user information backup, L2TP dual-device hot backup must be configured on the master and backup <span class="keyword">Router</span>s for high reliability.</p>
+<p>On the network shown in <a href="#EN-US_TASK_0172374410__fig_dc_ne_cfg_rui_001201">Figure 1</a>, users log in to LAC1 and LAC2 through a LAN switch (LSW). The two LACs run VRRP to determine the master/backup status. Basic user access functions are configured on the LACs so that the users go online through the master device. Each of LACs sets up an L2TP tunnel with the LNS. To allow rapid service restoration without the need of re-dialing up if a fault occurs on the access or network side, L2TP dual-device hot backup needs to be configured on LAC1 and LAC2.</p>
+<div class="fignone" id="EN-US_TASK_0172374410__fig_dc_ne_cfg_rui_001201"><a name="EN-US_TASK_0172374410__fig_dc_ne_cfg_rui_001201"></a><a name="fig_dc_ne_cfg_rui_001201"></a><span class="figcap"><b>Figure 1 </b>L2TP dual-device hot backup</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 and 2 in this example represent GE <span>0/1/0</span> and GE <span>0/2/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/dc_ne_cfg_rui_l2tp_sl_fig01.png" width="NaN" height="NaN"></span><br><div class="tableBorder"><table cellpadding="4" cellspacing="0" summary=""><tr><td valign="top"><p>Device Name</p>
+</td>
+<td valign="top"><p>Interface Name</p>
+</td>
+<td valign="top"><p>IP Address</p>
+</td>
+</tr>
+<tr><td valign="top"><p>LAC1</p>
+</td>
+<td valign="top"><p>GE<span>0/1/0</span>.2</p>
+</td>
+<td valign="top"><p>10.0.1.1/24 (IP address of the interface running VRRP)</p>
+</td>
+</tr>
+<tr><td valign="top"><p>LAC1</p>
+</td>
+<td valign="top"><p>GE<span>0/2/0</span></p>
+</td>
+<td valign="top"><p>10.0.2.1/24</p>
+</td>
+</tr>
+<tr><td valign="top"><p>LAC1</p>
+</td>
+<td valign="top"><p>Loopback1</p>
+</td>
+<td valign="top"><p>7.7.7.7/32 (source IP address for LAC1 to establish a tunnel)</p>
+</td>
+</tr>
+<tr><td valign="top"><p>LAC1</p>
+</td>
+<td valign="top"><p>Loopback2</p>
+</td>
+<td valign="top"><p>8.8.8.8/32 (source IP address for LAC2 to establish a tunnel)</p>
+</td>
+</tr>
+<tr><td valign="top"><p>LAC1</p>
+</td>
+<td valign="top"><p>Loopback3</p>
+</td>
+<td valign="top"><p>10.0.0.1/32 (IP address of the data backup channel between LACs)</p>
+</td>
+</tr>
+<tr><td valign="top"><p>LAC2</p>
+</td>
+<td valign="top"><p>GE<span>0/1/0</span>.2</p>
+</td>
+<td valign="top"><p>10.0.1.2/24 (IP address of the interface running VRRP)</p>
+</td>
+</tr>
+<tr><td valign="top"><p>LAC2</p>
+</td>
+<td valign="top"><p>GE<span>0/2/0</span></p>
+</td>
+<td valign="top"><p>10.0.3.1/24</p>
+</td>
+</tr>
+<tr><td valign="top"><p>LAC2</p>
+</td>
+<td valign="top"><p>Loopback1</p>
+</td>
+<td valign="top"><p>7.7.7.7/32 (source IP address for LAC1 to establish a tunnel)</p>
+</td>
+</tr>
+<tr><td valign="top"><p>LAC2</p>
+</td>
+<td valign="top"><p>Loopback2</p>
+</td>
+<td valign="top"><p>8.8.8.8/32 (source IP address for LAC2 to establish a tunnel)</p>
+</td>
+</tr>
+<tr><td valign="top"><p>LAC2</p>
+</td>
+<td valign="top"><p>Loopback3</p>
+</td>
+<td valign="top"><p>10.0.0.2/32 (IP address of the data backup channel between LACs)</p>
+</td>
+</tr>
+</table></div>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172374410__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure routes to ensure IP connectivity between devices and a routing policy on LAC1 and LAC2. For details, see <em><span class="keyword">HUAWEI NE40E-M2 series</span><span class="keyword">Universal Service Router</span> Configuration Guide - IP Routing</em>.</p>
+</li><li><p>Configure basic user access functions and ensure that the two LACs have the same configuration. For details, see <em><span class="keyword">HUAWEI NE40E-M2 series</span><span class="keyword">Universal Service Router</span> Configuration Guide - User Access</em>.</p>
+</li><li><p>Configure each of LACs to set up an L2TP tunnel with the LNS.</p>
+</li><li><p>Establish a multi-node backup platform. Configure an RBS on the network side of LAC1 and LAC2. LAC1 is the master, and LAC2 is the backup device.</p>
+</li><li>Configure a VRRP group on the access side of LAC1 and LAC2 to determine the master/backup status. Create a BFD session, and configure the VRRP group to track the BFD session.</li><li><p>Configure an RBP for backing up BRAS user information and L2TP services.</p>
+</li><li><p>Bind the RBP to the interface from which users go online.</p>
+</li><li>Enable automatic route advertisement.</li></ol>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>This example provides the configuration of LAC1. The configuration of LAC2 is similar to the configuration of LAC1. For configuration details, see Configuration Files in this section.</p>
+</div></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172374410__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>VRRP parameters such as a VRID and a preemption delay</p>
+</li><li><p>BFD parameters such as the local and remote discriminators and expected minimum interval at which BFD packets are sent and received</p>
+</li><li><p>Interface IP addresses of LAC1 and LAC2</p>
+</li><li><p>Backup ID, which is used together with an RBS to identify the RBP to which the users belong</p>
+</li><li><p>User access parameters</p>
+</li><li><p>L2TP group parameters such as an authentication password and an interval at which Hello packets are sent</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172374410__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each loopback interface and configure a VT interface and a BAS interface.</span><p><pre class="screen">&lt;<span class="keyword">Device</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>] <strong>sysname LAC1</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>] <strong>commit</strong></pre>
+<p># Assign an IP address to a loopback interface directly connecting LAC1 to the LNS so that the route to the loopback interface can be advertised.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1] <strong>interface loopback1</strong>
+[<span class="keyword">*</span>LAC1-loopback1] <strong>ip address 7.7.7.7 32</strong>
+[<span class="keyword">*</span>LAC1-loopback1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-loopback1] <strong>quit</strong></pre>
+<p># Assign an IP address to a loopback interface directly connecting LAC1 to the LAC2 so that the route to the loopback interface can be advertised.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1] <strong>interface loopback2</strong>
+[<span class="keyword">*</span>LAC1-loopback2] <strong>ip address 8.8.8.8 32</strong>
+[<span class="keyword">*</span>LAC1-loopback2] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-loopback2] <strong>quit</strong></pre>
+<p># Configure VT interface 1 on LAC1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1] <strong>interface virtual-template 1</strong>
+[<span class="keyword">*</span>LAC1-Virtual-Template1] <strong>ppp authentication-mode chap</strong>
+[<span class="keyword">*</span>LAC1-Virtual-Template1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-Virtual-Template1] <strong>quit</strong></pre>
+<p># Bind VT interface 1 to GE <span>0/1/0</span>.1 and configure a user-side VLAN.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1] <strong>interface gigabitethernet <span>0/1/0</span>.1</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.1] <strong>pppoe-server bind virtual-template 1</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.1] <strong>user-vlan 1 100</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.1] <strong>commit</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.1-vlan-1-100] <strong>quit</strong></pre>
+<p># Configure a BAS interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-GigabitEthernet<span>0/1/0</span>.1] <strong>bas</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.1-bas] <strong>access-type layer2-subscriber</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.1-bas] <strong>authentication-method ppp</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.1-bas] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-GigabitEthernet<span>0/1/0</span>.1-bas] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+</p></li><li><span>Set up an L2TP tunnel between LAC1 and the LNS.</span><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In the dual-device hot backup scenario, run the <a href="cmdqueryname=set+l2tp+tunnel+base-id"><b><span class="cmdname">set l2tp tunnel base-id</span></b></a> <i><span class="varname">base-id</span></i> command on one of the LACs to set a base value for generating an L2TP tunnel ID. The other LAC uses the default base value 0. The settings ensure to a certain extent that tunnel IDs are unique on the devices that back up each other.</p>
+</div></div>
+<p># Assign an IP address to a loopback interface directly connecting LAC1 to the LNS so that the route to the loopback interface can be advertised.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1] <strong>interface gigabitethernet <span>0/2/0</span></strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/2/0</span>] <strong>ip address 10.0.2.1 255.255.255.0</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/2/0</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<p># Configure an L2TP group and its attributes.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1] <strong>l2tp enable</strong>
+[<span class="keyword">*</span>LAC1] <strong>l2tp-group lac1</strong>
+[<span class="keyword">*</span>LAC1-l2tp-lac1] <strong>tunnel name lac1</strong>
+[<span class="keyword">*</span>LAC1-l2tp-lac1] <strong>start l2tp ip 3.3.3.3</strong>
+[<span class="keyword">*</span>LAC1-l2tp-lac1] <strong>tunnel authentication</strong>
+[<span class="keyword">*</span>LAC1-l2tp-lac1] <strong>tunnel password cipher YsHsjx_202206</strong>
+[<span class="keyword">*</span>LAC1-l2tp-lac1] <strong>tunnel source loopback1 rui</strong>
+[<span class="keyword">*</span>LAC1-l2tp-lac1] <strong>tunnel timer hello 200</strong>
+[<span class="keyword">*</span>LAC1-l2tp-lac1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-l2tp-lac1] <strong>quit</strong></pre>
+<p># Configure a RADIUS server group.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1] <strong>radius-server group radius1</strong>
+[<span class="keyword">*</span>LAC1-radius-radius1] <strong>radius-server authentication 10.1.20.1 1812</strong>
+[<span class="keyword">*</span>LAC1-radius-radius1] <strong>radius-server accounting 10.1.20.1 1813</strong>
+[<span class="keyword">*</span>LAC1-radius-radius1] <strong>radius-server shared-key itellin</strong>
+[<span class="keyword">*</span>LAC1-radius-radius1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-radius-radius1] <strong>quit</strong></pre>
+<p># Configure a domain to which the users belong.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1] <strong>aaa</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-aaa] <strong>domain domain1</strong>
+[<span class="keyword">*</span>LAC1-aaa-domain-domain1] <strong>l2tp-group lac1</strong>
+[<span class="keyword">*</span>LAC1-aaa-domain-domain1] <strong>radius-server group radius1</strong>
+[<span class="keyword">*</span>LAC1-aaa-domain-domain1] <strong>authentication-scheme default1</strong>
+[<span class="keyword">*</span>LAC1-aaa-domain-domain1] <strong>accounting-scheme default1</strong>
+[<span class="keyword">*</span>LAC1-aaa-domain-domain1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-aaa-domain-domain1] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-aaa] <strong>quit</strong></pre>
+</p></li><li><span>Configure a VRRP group on the access side of LAC1 and LAC2 to determine the master/backup status. Create a BFD session, and configure the VRRP group to track the BFD session.</span><p><p># Configure a VRRP-link-BFD session to rapidly detect faults in interfaces or links for triggering a master/backup VRRP switchover.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1] <strong>bfd</strong>
+[<span class="keyword">*</span>LAC1-bfd] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-bfd]<strong> bfd bfd-acc bind peer-ip 10.0.1.2</strong>
+[<span class="keyword">*</span>LAC1-bfd-session-bfd-acc] <strong>discriminator local 1</strong>
+[<span class="keyword">*</span>LAC1-bfd-session-bfd-acc] <strong>discriminator remote 1</strong>
+[<span class="keyword">*</span>LAC1-bfd-session-bfd-acc] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-bfd-session-bfd-acc] <strong>quit</strong></pre>
+<p># Configure the interface (GE <span>0/1/0</span>.2 in this example) bound to the VRRP group. Set the preemption delay of the master device in the VRRP group to 30 minutes.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1] <strong>interface gigabitethernet <span>0/1/0</span>.2</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.2] <strong>vlan-type dot1q 200</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.2] <strong>ip address 10.0.1.1 255.255.255.0</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.2] <strong>vrrp vrid 1 virtual-ip 10.0.1.100</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.2] <strong>admin-vrrp vrid 1</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.2] <strong>vrrp vrid 1 priority 120</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.2] <strong>vrrp vrid 1 preempt-mode timer delay 1800</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.2] <strong>vrrp vrid 1 track interface gigabitethernet <span>0/2/0</span> reduced 50</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.2] <strong>vrrp recover-delay</strong><strong> 20</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.2] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-GigabitEthernet<span>0/1/0</span>.2] <strong>quit</strong></pre>
+</p></li><li><span>Configure an RBS and an RBP.</span><p><p># Configure an IP address for the backup channel. The route needs to be advertised.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1] <strong>interface loopback3</strong>
+[<span class="keyword">*</span>LAC1-loopback3] <strong>ip address 10.0.0.1 32</strong>
+[<span class="keyword">*</span>LAC1-loopback3] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-loopback3] <strong>quit</strong></pre>
+<p># Configure an RBS.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1] <strong>remote-backup-service s1</strong>
+[<span class="keyword">*</span>LAC1-rm-backup-srv-s1] <strong>peer 10.0.0.2 source 10.0.0.1 port 4500</strong>
+[<span class="keyword">*</span>LAC1-rm-backup-srv-s1] <strong>l2tp-tunnel source loopback1</strong>
+[<span class="keyword">*</span>LAC1-rm-backup-srv-s1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-rm-backup-srv-s1] <strong>quit</strong></pre>
+<p># Configure an RBP for backing up BRAS user information and L2TP services.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1] <strong>remote-backup-profile p1</strong>
+[<span class="keyword">*</span>LAC1-rm-backup-prf-p1] <strong>peer-backup hot</strong>
+[<span class="keyword">*</span>LAC1-rm-backup-prf-p1] <strong>vrrp-id 1 interface gigabitethernet <span>0/1/0</span>.2</strong>
+[<span class="keyword">*</span>LAC1-rm-backup-prf-p1] <strong>backup-id 10 remote-backup-service s1</strong>
+[<span class="keyword">*</span>LAC1-rm-backup-prf-p1] <strong>service-type bras</strong>
+[<span class="keyword">*</span>LAC1-rm-backup-prf-p1] <strong>service-type l2tp</strong>
+[<span class="keyword">*</span>LAC1-rm-backup-prf-p1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-rm-backup-prf-p1] <strong>quit</strong></pre>
+<p># Bind the RBP to the interface from which users go online.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1] <strong>interface gigabitethernet <span>0/1/0</span>.1</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.1] <strong>remote-backup-profile p1</strong>
+[<span class="keyword">*</span>LAC1-GigabitEthernet<span>0/1/0</span>.1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+</p></li><li><span>Configure a policy to filter OSPF routes to be advertised.</span><p><p># Configure a policy to filter OSPF routes to be advertised on LAC1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1] <strong>system-view</strong>
+[<span class="keyword">*</span>LAC1-ospf-1] <strong>ospf 1</strong>
+[<span class="keyword">*</span>LAC1-ospf-1] <strong>preference 100</strong>
+[<span class="keyword">*</span>LAC1-ospf-1] <strong>default cost inherit-metric</strong>
+[<span class="keyword">*</span>LAC1-ospf-1] <strong>import-route direct</strong>
+[<span class="keyword">*</span>LAC1-ospf-1] <strong>area 0.0.0.0</strong>
+[<span class="keyword">*</span>LAC1-ospf-1-area-0.0.0.0] <strong>network 10.0.0.0 0.0.0.255</strong>
+[<span class="keyword">*</span>LAC1-ospf-1-area-0.0.0.0] <strong>network 10.0.2.0 0.0.0.255</strong>
+[<span class="keyword">*</span>LAC1-ospf-1-area-0.0.0.0] <strong>network 10.0.3.0 0.0.0.255</strong>
+[<span class="keyword">*</span>LAC1-ospf-1-area-0.0.0.0] <strong>commit</strong></pre>
+</p><p><p># Configure automatic route advertisement.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LAC1] <strong>peer-backup route-cost auto-advertising</strong>
+[<span class="keyword">*</span>LAC1] <strong>commit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p>Run the <strong>display vrrp</strong> command to check the VRRP state of the devices. The command output shows that LAC1 is in the <strong>Master</strong> state, its BFD session is <strong>UP</strong>, the preemption delay is <strong>1800</strong>, and LAC2 is in the <strong>Backup</strong> state.</p>
+<pre class="screen">&lt;lac1&gt; <strong>display vrrp</strong></pre>
+<pre class="screen">  Eth-Trunk1.2 | Virtual Router 1
+    State : <strong>Master</strong>
+    Virtual IP : 10.0.1.100
+    Master IP : <strong>10.0.1.1</strong>
+    Local IP : 10.0.1.1
+    PriorityRun : 120
+    PriorityConfig : 120
+    MasterPriority : 120
+    Preempt : YES   <strong>Delay Time : 1800</strong><strong>s</strong>
+    Hold Multiplier : 4
+    TimerRun : 5 s
+    TimerConfig : 5 s
+    Auth Type : NONE
+    Virtual Mac : 00e0-fc12-3456
+    Check TTL : YES
+    Config type : admin-vrrp
+    Track IF : GigabitEthernet<span>0/2/0</span>   Priority reduced : 100
+    IF State : UP
+    Create time : 2000-05-11 17:38:16
+    Last change time : 2000-05-13 12:58:20    </pre>
+<pre class="screen">&lt;lac2&gt; <strong>display vrrp</strong></pre>
+<pre class="screen">Eth-Trunk1.2 | Virtual Router 1
+    State : <strong>Backup</strong>
+    Virtual IP : 10.0.1.100
+    Master IP : 10.0.1.1
+    Local IP : 10.0.1.1
+    PriorityRun : 100
+    PriorityConfig : 100
+    MasterPriority : 120
+    Preempt : YES   Delay Time : 0s
+    Hold Multiplier : 4
+    TimerRun : 5 s
+    TimerConfig : 5 s
+    Auth Type : NONE
+    Virtual Mac : 00e0-fc12-3456
+    Check TTL : YES
+    Config type : admin-vrrp
+    Config track link-bfd down-number : 0
+    Track BFD : 1  type: peer
+    BFD-session state : UP
+    Create time : 2011-08-02 16:13:43
+    Last change time : 2011-08-04 12:01:58
+</pre>
+<p>After successfully configuring L2TP dual-device hot backup, run the <strong>display remote-backup-profile</strong> command. The command output shows that the RBS type is <strong>bras l2tp</strong>, LAC1 is in the <strong>Master</strong> state, LAC2 is in the <strong>Slave</strong> state.</p>
+<pre class="screen">&lt;lac1&gt; <strong>display remote-backup-profile p1</strong></pre>
+<pre class="screen"> -----------------------------------------------
+ Profile-Index : 0x800
+ Profile-Name : p1
+ Service: <strong>bras l2tp</strong>
+ Remote-backup-service : s1
+ Backup-ID    : 10
+ track protocol : VRRP
+ VRRP-ID: 1
+ VRRP-Interface : Gigabitethernet <span>0/1/0</span>.2
+ Interface    :
+Gigabitethernet <span>0/1/0</span>.1
+ State : Master
+ Peer State    : Slave
+ Backup mode : hot
+ Slot-Number  : --
+ Card-Number  : --
+ Port-Number  : --
+ Traffic threshold : --
+ Traffic interval : 1(minutes)  </pre>
+<pre class="screen">&lt;lac2&gt; <strong>display remote-backup-profile p1</strong></pre>
+<pre class="screen"> -----------------------------------------------
+ Profile-Index: 0x800
+ Profile-Name : p1
+ Service: <strong>bras l2tp</strong>
+ Remote-backup-service: s1
+ Backup-ID    : 10
+ track protocol : VRRP
+ VRRP-ID: 1
+ VRRP-Interface : Gigabitethernet <span>0/1/0</span>.2
+ Interface    :
+ Gigabitethernet <span>0/1/0</span>.1
+ State : <strong>Slave</strong>
+ Peer State   : Master
+ Backup mode  : hot
+ Slot-Number  : --
+ Card-Number  : --
+ Port-Number  : --
+ Traffic threshold    : --
+ Traffic interval     : 1(minutes)</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172374410__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>LAC1 configuration file</p>
+<pre class="screen">#
+sysname LAC1
+#
+bfd
+#
+radius-server group radius1
+ radius-server authentication 10.1.20.1 1812
+ radius-server accounting 10.1.20.1 1813
+ radius-server shared-key itellin
+# 
+aaa 
+ local-user a password cipher %^%#knf^-3(!.J6L])YX0t&gt;<font style="font-size:8pt" Face="Courier New" >~</font>M0[B*y7=d!y/iuOS@9-X%^%#   
+ local-user a service-type ftp    
+ local-user a ftp-directory cfcard: 
+ local-user b password cipher %^%#s3=!HY9:#;&lt;oNUWE%MO@SYnaFYKQ(.gD=[&amp;&gt;s*l"%^%#   
+ local-user b service-type ftp    
+ local-user c password cipher %^%#pAX[0k.N/"7!&amp;E.8/W^OD-x//CRf'DHjM`9T%g:5%^%#   
+ local-user c service-type ftp 
+ authentication-scheme default1   
+  authentication-mode radius local   
+ #
+ domain domain1    
+  l2tp-group lac1
+  radius-server group radius1
+  authentication-scheme default1
+  accounting-scheme default1
+ # 
+remote-backup-service s1
+ peer 10.0.0.2 source 10.0.0.1 port 4500
+<strong> </strong>l2tp-tunnel source loopback1
+#
+remote-backup-profile p1
+ service-type bras
+ service-type l2tp
+ peer-backup hot
+ vrrp-id 1 interface gigabitethernet <span>0/1/0</span>.2
+ backup-id 10 remote-backup-service s1
+#
+interface virtual-template 1
+ ppp authentication-mode chap      
+#   
+interface <span>GigabitEthernet</span> <span>0/1/0</span>.1
+ pppoe-server bind virtual-template 1
+ user-vlan 1 100
+ remote-backup-profile p1
+ #
+ bas
+  access-type layer2-subscriber
+ #
+#
+interface gigabitethernet <span>0/1/0</span>.2
+ vlan-type dot1q 200
+ ip address 10.0.1.1 255.255.255.0
+ vrrp vrid 1 virtual-ip 10.0.1.100
+ admin-vrrp vrid 1
+ vrrp vrid 1 priority 120
+ vrrp vrid 1 preempt-mode timer delay 1800
+ vrrp vrid 1 track bfd-session 1 link
+ vrrp vrid 1 track interface gigabitethernet <span>0/2/0</span> reduced 50
+ vrrp recover-delay 20
+#  
+interface gigabitethernet <span>0/2/0</span>
+ ip address 10.0.2.1 255.255.255.0
+ quit
+#
+interface LoopBack1
+ ip address 7.7.7.7 255.255.255.255 
+#     
+interface LoopBack2 
+ ip address 8.8.8.8 255.255.255.255 
+#
+interface LoopBack3
+ ip address 10.0.0.1 255.255.255.255
+# 
+l2tp enable
+l2tp-group lac1
+ tunnel name lac1
+ start l2tp ip 3.3.3.3
+ tunnel authentication
+ tunnel password cipher %^%#pAX[0k.N/"7!&amp;E.8/W^OD-x//CRf'DHjM`9T%g:5%^%#
+ tunnel source loopback1 rui
+ tunnel timer hello 200
+#
+bfd bfd-acc bind peer-ip 10.0.1.2
+ discriminator local 1
+ discriminator remote 1
+ commit   
+#   
+ospf 1
+ preference 100    
+ default cost inherit-metric
+ import-route direct
+ area 0.0.0.0
+  network 10.0.0.0 0.0.0.255  
+  network 10.0.2.0 0.0.0.255 
+  network 10.0.3.0 0.0.0.255    
+#   
+peer-backup route-cost auto-advertising
+#</pre>
+</li><li><p>LAC2 configuration file</p>
+<pre class="screen">#
+sysname LAC2
+#
+bfd
+#
+radius-server group radius1
+ radius-server authentication 10.1.20.1 1812
+ radius-server accounting 10.1.20.1 1813
+ radius-server shared-key itellin
+#
+aaa 
+ local-user a password cipher %^%#knf^-3(!.J6L])YX0t&gt;<font style="font-size:8pt" Face="Courier New" >~</font>M0[B*y7=d!y/iuOS@9-X%^%#   
+ local-user a service-type ftp    
+ local-user a ftp-directory cfcard: 
+ local-user b password cipher %^%#s3=!HY9:#;&lt;oNUWE%MO@SYnaFYKQ(.gD=[&amp;&gt;s*l"%^%#   
+ local-user b service-type ftp    
+ local-user c password cipher %^%#pAX[0k.N/"7!&amp;E.8/W^OD-x//CRf'DHjM`9T%g:5%^%#   
+ local-user c service-type ftp 
+ authentication-scheme default1   
+  authentication-mode radius local   
+ #
+ domain domain1    
+  l2tp-group lac1
+  radius-server group radius1
+  authentication-scheme default1
+  accounting-scheme default1
+ # 
+remote-backup-service s1
+ peer 10.0.0.1 source 10.0.0.2 port 4500
+<strong> </strong>l2tp-tunnel source loopback2
+#
+remote-backup-profile p1
+ service-type bras
+ service-type l2tp
+ peer-backup hot
+ vrrp-id 1 interface gigabitethernet <span>0/1/0</span>.2
+ backup-id 10 remote-backup-service s1
+#
+interface virtual-template 1
+ ppp authentication-mode chap      
+#   
+interface <span>GigabitEthernet</span> <span>0/1/0</span>.1
+ pppoe-server bind virtual-template 1
+ user-vlan 1 100
+ remote-backup-profile p1
+ #
+ bas
+  access-type layer2-subscriber
+ #
+#
+interface gigabitethernet <span>0/1/0</span>.2
+ vlan-type dot1q 200
+ ip address 10.0.1.2 255.255.255.0
+ vrrp vrid 1 virtual-ip 10.0.1.100
+ admin-vrrp vrid 1
+ vrrp vrid 1 preempt-mode timer delay 300
+ vrrp vrid 1 track bfd-session 1 peer
+#  
+interface gigabitethernet <span>0/2/0</span>
+ ip address 10.0.2.2 255.255.255.0
+ quit
+#
+interface LoopBack1
+ ip address 7.7.7.7 255.255.255.255 
+#     
+interface LoopBack2 
+ ip address 8.8.8.8 255.255.255.255 
+#
+interface LoopBack3
+ ip address 10.0.0.2 255.255.255.255
+# 
+l2tp enable
+l2tp-group lac1
+ tunnel name lac1
+ start l2tp ip 3.3.3.3
+ tunnel authentication
+ tunnel password cipher %^%#pAX[0k.N/"7!&amp;E.8/W^OD-x//CRf'DHjM`9T%g:5%^%#
+ tunnel source loopback2 rui
+ tunnel timer hello 0
+#
+bfd bfd-acc bind peer-ip 10.0.1.1
+ discriminator local 1
+ discriminator remote 1
+ commit  
+#    
+ospf 1
+  default cost inherit-metric
+  import-route direct
+ preference 100    
+ area 0.0.0.0
+  network 10.0.0.0 0.0.0.255  
+  network 10.0.2.0 0.0.0.255 
+  network 10.0.3.0 0.0.0.255    
+#   
+peer-backup route-cost auto-advertising
+#</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_rui_0050.html">Configuration Examples
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_rui_00532_01.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_rui_edsg_cfg_001.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,81 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding LSP Fragment Extension">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv6_cfg_0048.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_isis_ipv6_cfg_0050.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IS-ISv6">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IS-ISv6">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="IS-ISv6">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001176662183">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding LSP Fragment Extension</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001176662183"></a><a name="EN-US_CONCEPT_0000001176662183"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding LSP Fragment Extension</h1>
+<div><p>If the LSP capacity is insufficient, newly imported routes and new TLVs fail to be added to LSP fragments. In this case, you can use LSP fragment extension to increase the LSP capacity. After the LSP capacity is increased, the system automatically attempts to re-add these routes and TLVs to LSP fragments. IS-IS LSP fragment extension allows an IS-IS device to generate more LSP fragments and carry more IS-IS information. </p>
+<div class="section"><h4 class="sectiontitle">Related Concepts</h4><p>Originating system: process that runs IS-IS.</p>
+<p>Normal system ID: system ID of the originating system.</p>
+<p>Additional system ID: system ID of a virtual system. Both additional and normal system IDs must be unique in the entire routing domain.</p>
+<p>Virtual system: Each virtual system, identified by an additional system ID, is used to generate extended LSP fragments. These fragments carry additional system IDs in their LSP IDs.</p>
+<p>TLV 24 (IS Alias ID TLV): describes the relationship between the originating system and virtual system.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">LSP Fragment Extension Fundamentals</h4><p>Each IS-IS LSP fragment is identified by the 1-byte <strong>LSP Number</strong> field in the LSP ID, meaning that each IS-IS process can generate a maximum of 256 fragments. LSP fragment extension enables more information to be carried. Specifically, adding additional system IDs allows an IS-IS process to generate more LSP fragments, as each additional system ID allows 256 extended LSP fragments to be generated. After a virtual system and LSP fragment extension are configured, an IS-IS device encapsulates the excess routing information (that it cannot fit in its own LSPs) into the virtual system's LSPs. The device then notifies other devices of the relationship between the virtual system and itself through the IS Alias ID TLV in the LSPs of the virtual system.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Operation Modes</h4><p>IS-IS devices use LSP fragment extension in either mode 1 or mode 2.</p>
+<p>Mode 1 is used if some devices on the network do not support LSP fragment extension.</p>
+<p>In this mode, virtual systems participate in SPF calculation. The LSPs advertised by the originating system contain information about the links to each virtual system. Similarly, the LSPs advertised by each virtual system contain information about the links to the originating system. In this manner, the virtual systems function the same as real devices connected to the originating system. Mode 1 is a transitional mode for compatibility with earlier versions that do not support LSP fragment extension. In the earlier versions, IS-IS cannot identify the IS Alias ID TLV, and therefore, the LSPs sent by virtual systems must appear as common IS-IS LSPs. The area address, OL bit, and TLVs of other features (if any) in the LSPs of virtual systems must be the same as those in the LSPs of the corresponding originating system. The LSPs sent by virtual systems carry information of the neighbor (the originating system), and the carried cost is the maximum value minus 1. Those sent by the originating system carry information of the neighbor (a virtual system), and the carried cost is 0. This mechanism ensures that each virtual system is a node downstream of the originating system when other devices calculate routes.</p>
+<p>In <a href="#EN-US_CONCEPT_0000001176662183__fig_dc_vrp_isis_feature_000701">Figure 1</a>, DeviceB does not support LSP fragment extension, DeviceA is configured with LSP fragment extension in mode 1, and DeviceA1 and DeviceA2 are virtual systems of DeviceA. DeviceA adds some routing information to the LSPs sent by DeviceA1 and DeviceA2. After receiving LSPs from DeviceA, DeviceA1, and DeviceA2, DeviceB considers them as three devices and calculates routes normally. Because the cost of the route from DeviceA to DeviceA1 or DeviceA2 is 0, the cost of the route from DeviceB to DeviceA equals that of the route from DeviceB to DeviceA1 or DeviceA2.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001176662183__fig_dc_vrp_isis_feature_000701"><a name="EN-US_CONCEPT_0000001176662183__fig_dc_vrp_isis_feature_000701"></a><a name="fig_dc_vrp_isis_feature_000701"></a><span class="figcap"><b>Figure 1 </b>Network diagram of IS-IS LSP fragment extension</span><br><span><img class="vsd" src="figure/en-us_image_0000001176662223.png" width="NaN" height="NaN"></span></div>
+<p>Mode 2 is used if all devices on the network support LSP fragment extension. In this mode, virtual systems do not participate in SPF calculation. All the devices on the network know that the LSPs generated by the virtual systems belong to the originating system.</p>
+<p>In mode 2, IS-IS can identify the IS Alias ID TLV, based on which SPTs and routes are calculated.</p>
+<p>In <a href="#EN-US_CONCEPT_0000001176662183__fig_dc_vrp_isis_feature_000701">Figure 1</a>, DeviceB supports LSP fragment extension, and DeviceA is configured with LSP fragment extension in mode 2. DeviceA adds some routing information to the LSPs sent by DeviceA1 and DeviceA2. After receiving the LSPs from DeviceA1 and DeviceA2, DeviceB obtains the IS Alias ID TLV and learns that the originating system of DeviceA1 and DeviceA2 is Device A. Device B then considers the routing information advertised by DeviceA1 and DeviceA2 to belong to DeviceA.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Devices that do not support LSP fragment extension can only parse packets in mode 1. Devices that support LSP fragment extension can parse packets in either mode 1 or 2.</p>
+<p>The IS Alias ID TLV is mandatory in the LSPs with fragment number 0 of the originating system or virtual systems.</p>
+</div></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Process</h4><p>After LSP fragment extension is configured, if routing information is lost because LSPs overflow, the system restarts the IS-IS process. After the IS-IS process is restarted, the originating system loads as much routing information as possible in the LSPs it generates, and encapsulates the excess routing information into the LSPs of virtual systems for transmission. If one of the virtual systems whose LSPs carry the routing information of the originating system is deleted, the system automatically restarts the IS-IS process.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_isis_ipv6_cfg_0048.html">Configuring LSP Fragment Extension
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_isis_ipv6_cfg_0050.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,355 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring an Outbound LDP Policy">
+<meta name="abstract" content="This section provides an example for configuring an outbound Label Distribution Protocol (LDP) policy that uses routes matching a specified IP prefix list to establish LDP label switched paths (LSPs).">
+<meta name="description" content="This section provides an example for configuring an outbound Label Distribution Protocol (LDP) policy that uses routes matching a specified IP prefix list to establish LDP label switched paths (LSPs).">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_0038.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_2048.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_0110.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="ldp-p2pvrp,w00800033,z00545680,w00556928,w00606909,z00809835,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="MPLS LDP">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="MPLS LDP">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="featurename" content="MPLS LDP">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="featurename" content="MPLS LDP">
+<meta name="featuretype" content="MPLS">
+<meta name="OWNER" content="z00809835">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="b00896120">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172368572">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring an Outbound LDP Policy</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172368572"></a><a name="EN-US_TASK_0172368572"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring an Outbound LDP Policy</h1>
+<div class="taskbody"><p>This section provides an example for configuring an outbound Label Distribution Protocol (LDP) policy that uses routes matching a specified IP prefix list to establish LDP label switched paths (LSPs).</p>
+<div class="context"><a name="EN-US_TASK_0172368572__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>An IP metro or bearer network uses L2VPN or L3VPN to transmit high speed Internet (HSI) or voice over IP (VoIP) services over end-to-end public network LDP LSPs. Generally, user-side DSLAMs have low performance, and are easily overloaded if a large number of LDP LSPs are established. To prevent this issue, configure an outbound LDP policy to minimize LDP LSPs to be established, reduce DSLAM memory consumption, and relieve the burden of the DSLAMs.</p>
+<div class="fignone" id="EN-US_TASK_0172368572__fig_dc_vrp_ldp-p2p_cfg_004801"><a name="EN-US_TASK_0172368572__fig_dc_vrp_ldp-p2p_cfg_004801"></a><a name="fig_dc_vrp_ldp-p2p_cfg_004801"></a><span class="figcap"><b>Figure 1 </b>Networking diagram for configuring an outbound LDP policy</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 and 2 in this example represent GE<span>0/1/1</span> and GE<span>0/1/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0279158611.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368572__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Assign an IP address to each interface, including the loopback interface on each node.</p>
+</li><li><p>Configure OSPF to advertise the route to each network segment to which each interface is connected and advertise the host route to each LSR ID.</p>
+</li><li><p>Enable MPLS and MPLS LDP globally on each node.</p>
+</li><li><p>Configure an outbound LDP policy on LSRA to send the DSLAM the Label Mapping messages destined for LSRC only. This allows the DSLAM to establish an LSP to LSRC only, reducing memory usage.</p>
+</li><li><p>Configure MPLS and MPLS LDP on each interface.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368572__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>IP address of each interface on each LSR (as shown in <a href="#EN-US_TASK_0172368572__fig_dc_vrp_ldp-p2p_cfg_004801">Figure 1</a>), OSPF process ID (1), and area ID (0.0.0.0)</p>
+</li><li><p>LSR ID (loopback interface IP address as shown in <a href="#EN-US_TASK_0172368572__fig_dc_vrp_ldp-p2p_cfg_004801">Figure 1</a>) of each node</p>
+</li><li><p>Name of an IP prefix list (prefix1) to be specified in an outbound LDP policy on LSRA</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172368572__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface and configure an IGP.</span><p><p>Assign an IP address and mask to each interface (as shown in <a href="#EN-US_TASK_0172368572__fig_dc_vrp_ldp-p2p_cfg_004801">Figure 1</a>), including the loopback interfaces. Configure OSPF to advertise the route to the network segment to which each interface is connected and the host route to each LSR ID.</p>
+</p></li><li><span>Enable MPLS and MPLS LDP globally on each node.</span><p><p># Configure LSRA.</p>
+<pre class="screen">&lt;LSRA&gt; <strong>system-view </strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA]<strong> mpls lsr-id 3.3.3.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-mpls]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-mpls-ldp] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA-mpls-ldp] <strong>quit</strong></pre>
+<p># Configure LSRB.</p>
+<pre class="screen">&lt;LSRB&gt; <strong>system-view </strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRB]<strong> mpls lsr-id 2.2.2.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB-mpls]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB-mpls-ldp] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRB-mpls-ldp] <strong>quit</strong></pre>
+<p># Configure LSRC.</p>
+<pre class="screen">&lt;LSRC&gt; <strong>system-view </strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRC]<strong> mpls lsr-id 1.1.1.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRC] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRC-mpls]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRC]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRC-mpls-ldp]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRC-mpls-ldp]<strong> quit</strong></pre>
+<p># Configure the DSLAM.</p>
+<pre class="screen">&lt;DSLAM&gt; <strong>system-view </strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DSLAM]<strong> mpls lsr-id 4.4.4.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>DSLAM] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>DSLAM-mpls]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>DSLAM]<strong> mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>DSLAM-mpls-ldp]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DSLAM-mpls-ldp]<strong> quit</strong></pre>
+</p></li><li><span>Configure an outbound LDP policy.</span><p><p># Configure an IP prefix list on LSRA to permit only the routes to LSRC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA] <strong>ip ip-prefix prefix1 permit 1.1.1.9 32</strong></pre>
+<p># Configure an outbound policy on LSRA to send the DSLAM the Label Mapping messages destined for LSRC only.</p>
+<pre class="screen">[<span class="keyword">*</span>LSRA] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-mpls-ldp] <strong>ipv4-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-mpls-ldp<span>-ipv4</span>] <strong>outbound peer 4.4.4.9 fec ip-prefix prefix1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-mpls-ldp<span>-ipv4</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA-mpls-ldp-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA-mpls-ldp] <strong>quit</strong></pre>
+</p></li><li><span>Enable MPLS and MPLS LDP on each interface.</span><p><p># Configure LSRA.</p>
+<pre class="screen">&lt;LSRA&gt; <strong>system-view </strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA]<strong> interface gigabitethernet<span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA-GigabitEthernet<span>0/1/1</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-GigabitEthernet<span>0/1/1</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-GigabitEthernet<span>0/1/1</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA]<strong> interface gigabitethernet<span>0/1/3</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA-GigabitEthernet<span>0/1/3</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-GigabitEthernet<span>0/1/3</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-GigabitEthernet<span>0/1/3</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA-GigabitEthernet<span>0/1/3</span>] <strong>quit</strong></pre>
+<p># Configure LSRB.</p>
+<pre class="screen">&lt;LSRB&gt; <strong>system-view </strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRB]<strong> interface gigabitethernet<span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRB-GigabitEthernet<span>0/1/1</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB-GigabitEthernet<span>0/1/1</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB]<strong> interface gigabitethernet<span>0/1/3</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB-GigabitEthernet<span>0/1/3</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB-GigabitEthernet<span>0/1/3</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB-GigabitEthernet<span>0/1/3</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRB-GigabitEthernet<span>0/1/3</span>] <strong>quit</strong></pre>
+<p># Configure LSRC.</p>
+<pre class="screen">&lt;LSRC&gt; <strong>system-view </strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRC]<strong> interface gigabitethernet<span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRC-GigabitEthernet<span>0/1/1</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRC-GigabitEthernet<span>0/1/1</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRC-GigabitEthernet<span>0/1/1</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRC-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+<p># Configure the DSLAM.</p>
+<pre class="screen">&lt;DSLAM&gt; <strong>system-view </strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DSLAM]<strong> interface gigabitethernet<span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DSLAM-GigabitEthernet<span>0/1/1</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>DSLAM-GigabitEthernet<span>0/1/1</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>DSLAM-GigabitEthernet<span>0/1/1</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DSLAM-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p>After completing the preceding configuration, run the <strong>display mpls ldp lsp</strong> command on the DSLAM. The command output shows that only an LSP to LSRC is established.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DSLAM] <strong>display mpls ldp lsp</strong></pre>
+<pre class="screen"> LDP LSP Information
+ -------------------------------------------------------------------------------
+ Flag after Out IF: (I) - RLFA Iterated LSP, (I*) - Normal and RLFA Iterated LSP
+ -------------------------------------------------------------------------------
+ DestAddress/Mask   In/OutLabel    UpstreamPeer    NextHop         OutInterface
+ -------------------------------------------------------------------------------
+ 1.1.1.9/32         NULL/1025      -               10.1.3.1        GE<span>0/1/1</span>
+ 1.1.1.9/32         1024/1025      3.3.3.9         10.1.3.1        GE<span>0/1/1</span>
+ 4.4.4.9/32         3/NULL         3.3.3.9         127.0.0.1       LoopBack0
+ -------------------------------------------------------------------------------
+ TOTAL: 3 Normal LSP(s) Found.
+ TOTAL: 0 Liberal LSP(s) Found.
+ TOTAL: 0 Frr LSP(s) Found.
+<span> An asterisk (*) before an LSP means the LSP is not established
+ An asterisk (*) before a Label means the USCB or DSCB is stale
+ An asterisk (*) before an UpstreamPeer means the session is stale
+ An asterisk (*) before a DS means the session is stale
+ An asterisk (*) before a NextHop means the LSP is FRR LSP</span>
+</pre>
+<p>If no outbound LDP policy is configured on LSRA, the LDP LSPs established on the DSLAM are as follows:</p>
+<pre class="screen"> LDP LSP Information
+ -------------------------------------------------------------------------------
+ Flag after Out IF: (I) - RLFA Iterated LSP, (I*) - Normal and RLFA Iterated LSP
+ -------------------------------------------------------------------------------
+ DestAddress/Mask   In/OutLabel    UpstreamPeer    NextHop         OutInterface
+ -------------------------------------------------------------------------------
+ 1.1.1.9/32         NULL/1025      -               10.1.3.1        GE<span>0/1/1</span>
+ 1.1.1.9/32         1024/1025      3.3.3.9         10.1.3.1        GE<span>0/1/1</span>
+ 2.2.2.9/32         NULL/1024      -               10.1.3.1        GE<span>0/1/1</span>
+ 2.2.2.9/32         1027/1024      3.3.3.9         10.1.3.1        GE<span>0/1/1</span>
+ 3.3.3.9/32         NULL/3         -               10.1.3.1        GE<span>0/1/1</span>
+ 3.3.3.9/32         1028/3         3.3.3.9         10.1.3.1        GE<span>0/1/1</span>
+ 4.4.4.9/32         3/NULL         3.3.3.9         127.0.0.1       LoopBack0
+*4.4.4.9/32         Liberal/1026                   DS/3.3.3.9
+ -------------------------------------------------------------------------------
+ TOTAL: 7 Normal LSP(s) Found.
+ TOTAL: 1 Liberal LSP(s) Found.
+ TOTAL: 0 Frr LSP(s) Found.
+<span> An asterisk (*) before an LSP means the LSP is not established
+ An asterisk (*) before a Label means the USCB or DSCB is stale
+ An asterisk (*) before an UpstreamPeer means the session is stale
+ An asterisk (*) before a DS means the session is stale
+ An asterisk (*) before a NextHop means the LSP is FRR LSP</span>
+</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172368572__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>LSRA configuration file</p>
+<pre class="screen">#
+sysname LSRA
+#
+mpls lsr-id 3.3.3.9
+#
+mpls
+#
+mpls ldp
+ #
+ ipv4-family
+  outbound peer 4.4.4.9 fec ip-prefix prefix1
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.1.2.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/3</span>
+ undo shutdown
+ ip address 10.1.3.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack0
+ ip address 3.3.3.9 255.255.255.255
+#
+ospf 1
+ area 0.0.0.0
+  network 3.3.3.9 0.0.0.0
+  network 10.1.2.0 0.0.0.255
+  network 10.1.3.0 0.0.0.255
+#
+ip ip-prefix prefix1 index 10 permit 1.1.1.9 32
+#
+return</pre>
+</li><li><p>LSRB configuration file</p>
+<pre class="screen">#
+sysname LSRB
+#
+mpls lsr-id 2.2.2.9
+#
+mpls
+#
+mpls ldp
+ #
+ ipv4-family
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.1.2.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/3</span>
+ undo shutdown
+ ip address 10.1.1.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack0
+ ip address 2.2.2.9 255.255.255.255
+#
+ospf 1
+ area 0.0.0.0
+  network 2.2.2.9 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+  network 10.1.2.0 0.0.0.255
+#
+return </pre>
+</li><li><p>LSRC configuration file</p>
+<pre class="screen">#
+sysname LSRC
+#
+mpls lsr-id 1.1.1.9
+#
+mpls
+#
+mpls ldp
+ #
+ ipv4-family
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.1.1.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack0
+ ip address 1.1.1.9 255.255.255.255
+#
+ospf 1
+ area 0.0.0.0
+  network 1.1.1.9 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+#
+return
+</pre>
+</li><li><p>DSLAM configuration file</p>
+<pre class="screen">#
+sysname DSLAM
+#
+mpls lsr-id 4.4.4.9
+#
+mpls
+#
+mpls ldp
+ #
+ ipv4-family
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.1.3.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack0
+ ip address 4.4.4.9 255.255.255.255
+#
+ospf 1
+ area 0.0.0.0
+  network 4.4.4.9 0.0.0.0
+  network 10.1.3.0 0.0.0.255
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_0038.html">Configuration Examples for MPLS LDP
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_2048.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ldp-p2p_cfg_0110.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

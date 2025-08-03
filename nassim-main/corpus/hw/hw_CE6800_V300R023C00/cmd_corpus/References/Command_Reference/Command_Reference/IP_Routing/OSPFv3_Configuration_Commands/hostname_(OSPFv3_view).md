@@ -1,0 +1,75 @@
+hostname (OSPFv3 view)
+======================
+
+hostname (OSPFv3 view)
+
+Function
+--------
+
+
+
+The **hostname** command enables the OSPFv3 dynamic hostname function.
+
+The **undo hostname** command disables the OSPFv3 dynamic hostname function.
+
+
+
+By default, the OSPFv3 dynamic hostname function is disabled.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**hostname** [ *host-name* ]
+
+**undo hostname**
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| *host-name* | Specifies an OSPFv3 hostname. | The value is a string of 1 to 255 characters. |
+
+
+
+Views
+-----
+
+OSPFv3 view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+To facilitate network management, configure dynamic hostnames to identify routers. To enable the OSPFv3 dynamic hostname function, run the **hostname** command.
+
+**Precautions**
+
+If you specify host-name in this command, host-name is advertised as the dynamic hostname. If no host-name is specified in this command, the hostname specified in the **sysname** command is advertised as the dynamic hostname.
+
+
+Example
+-------
+
+# Configure OSPFv3 hostname BLR and enable the OSPFv3 dynamic hostname function.
+```
+<HUAWEI> system-view
+[~HUAWEI] ospfv3 100
+[*HUAWEI-ospfv3-100] hostname BLR
+
+```

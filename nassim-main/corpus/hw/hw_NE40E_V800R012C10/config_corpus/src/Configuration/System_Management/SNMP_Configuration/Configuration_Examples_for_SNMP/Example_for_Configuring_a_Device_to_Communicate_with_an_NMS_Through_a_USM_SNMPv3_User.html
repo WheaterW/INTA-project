@@ -1,0 +1,247 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring a Device to Communicate with an NMS Through a USM SNMPv3 User">
+<meta name="abstract" content="This section provides an example to describe how to configure a device to communicate with an NMS through SNMPv3 and how to specify the MIB objects that can be managed by the NMS.">
+<meta name="description" content="This section provides an example to describe how to configure a device to communicate with an NMS through SNMPv3 and how to specify the MIB objects that can be managed by the NMS.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_snmp_cfg_0022.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_snmp_cfg_0024.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_snmp_cfg_0038.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,jwx1168690,w00556928,w00437000,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="SNMP">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="SNMP">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="SNMP">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="SNMP">
+<meta name="OWNER" content="j00655225">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="j00655225">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172361041">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring a Device to Communicate with an NMS Through a USM SNMPv3 User</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172361041"></a><a name="EN-US_TASK_0172361041"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring a Device to Communicate with an NMS Through a <span>USM </span>SNMPv3 User</h1>
+<div class="taskbody"><p>This section provides an example to describe how to configure a device to communicate with an NMS through SNMPv3 and how to specify the MIB objects that can be managed by the NMS.</p>
+<div class="context"><a name="EN-US_TASK_0172361041__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0172361041__fig_dc_vrp_snmp_cfg_002501">Figure 1</a>, two NMSs (NMS1 and NMS2) and the <span class="keyword">Router</span> are connected across a public network. According to the network planning, NMS2 can manage every MIB object on the <span class="keyword">Router</span>, and NMS1 does not manage the <span class="keyword">Router</span>.</p>
+<p>On the <span class="keyword">Router</span>, only the modules that are enabled by default are allowed to send alarms to NMS2. This prevents an excess of unwanted alarms from being sent to NMS2. Excessive alarms make fault location difficult.</p>
+<p>The data transmitted between NMS2 and the <span class="keyword">Router</span> needs to be encrypted and the NMS administrator needs to be authenticated because the data has to travel across the public network.</p>
+<p>Contact information of the device administrator needs to be configured on the <span class="keyword">Router</span>. This helps the NMS administrator contact the device administrator if a fault occurs.</p>
+<div class="fignone" id="EN-US_TASK_0172361041__fig_dc_vrp_snmp_cfg_002501"><a name="EN-US_TASK_0172361041__fig_dc_vrp_snmp_cfg_002501"></a><a name="fig_dc_vrp_snmp_cfg_002501"></a><span class="figcap"><b>Figure 1 </b>Networking diagram for configuring a device to communicate with an NMS through SNMPv3</span><br><span><img class="vsd" src="images/fig_dc_vrp_snmp_cfg_002501.png"></span><br></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172361041__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Enable the SNMP agent.</p>
+</li><li><p>Configure the <span class="keyword">Router</span> to run SNMPv3.</p>
+</li><li>Configure a source interface for SNMP to receive and respond to NMS request packets.</li><li><p>Configure an ACL to allow NMS2 to manage every MIB object on the <span class="keyword">Router</span>.</p>
+</li><li><p>Configure the trap function to allow the <span class="keyword">Router</span> to send alarms to NMS2.</p>
+</li><li><p>Configure the contact information of the device administrator.</p>
+</li><li><p>Configure NMS2.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172361041__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>SNMP version</p>
+</li><li><p>User group name</p>
+</li><li><p>User name and password</p>
+</li><li><p>Authentication and encryption algorithms. SHA2-256 and a higher-complexity algorithm are recommended for authentication, and AES128 and a higher-complexity algorithm are recommended for encryption.</p>
+</li><li><p>ACL number</p>
+</li><li><p>IP address of the NMS</p>
+</li><li><p>Contact information of the device administrator</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172361041__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure available routes between the <span class="keyword">Router</span> and the NMSs. Details for the configuration procedure are not provided here.</span></li><li><span>Enable the SNMP agent.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt;<strong> system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname <span class="keyword">Device</span>A</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>snmp-agent password min-length 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>snmp-agent</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+</p></li><li><span>Configure the <span class="keyword">Router</span> to run SNMPv3.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>snmp-agent sys-info version v3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+<p># Check the configured SNMP version.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>display snmp-agent sys-info version</strong></pre>
+<pre class="screen">SNMP version running in the system:</pre>
+<pre class="screen">           SNMPv3</pre>
+</p></li><li><span>Configure a source interface for SNMP to receive and respond to NMS request packets.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>snmp-agent protocol source-interface</strong> <strong>Loopback0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</p></li><li><span>Configure access permissions of the NMSs.</span><p><div class="p"># Configure an ACL to allow NMS2 to manage and disallow NMS1 from managing the <span class="keyword">Router</span>.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> acl 2001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl4-basic-2001]<strong> rule 5 permit source 1.1.1.2 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl4-basic-2001]<strong> rule 6 deny source 1.1.1.1 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-acl4-basic-2001]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-acl4-basic-2001] <strong>quit</strong></pre>
+</div>
+<p># Configure a MIB view.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>snmp-agent mib-view included iso iso</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+<p># Configure a user group and a user in this group and enable user data authentication and encryption.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this command, the authentication algorithms MD5, SHA, and SHA2-224 and the encryption algorithms DES56 and 3DES168 are weak security algorithms and are not recommended. To configure a weak security algorithm, run the <a href="cmdqueryname=undo+crypto+weak-algorithm+disable"><b><span class="cmdname">undo crypto weak-algorithm disable</span></b></a> command to enable the weak security algorithm function first.</p>
+</div></div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>snmp-agent group v3 admin privacy write-view iso notify-view iso read-view iso</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>snmp-agent usm-user v3 nms2-admin group admin<span> acl 2001</span></strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>snmp-agent usm-user v3 nms2-admin authentication-mode sha2-256</strong>
+Please configure the authentication password (10-255)
+Enter Password:
+Confirm Password:
+[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>snmp-agent usm-user v3 nms2-admin privacy-mode aes128</strong>
+Please configure the privacy password (10-255)
+Enter Password:
+Confirm Password:</pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</p></li><li><span>Configure the trap function.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>snmp-agent target-host trap address udp-domain 1.1.1.2 params securityname nms2-admin v3 privacy</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>snmp-agent trap enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</p></li><li><span>Configure the contact information of the device administrator.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>snmp-agent sys-info contact call Operator at 010-12345678</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A] <strong>commit</strong></pre>
+</p></li><li><span>Configure the NMS.</span><p><p>For details on how to configure NMS2, see the relevant NMS configuration guide.</p>
+</p></li><li><span>Verify the configuration.</span><p><p>After the configuration is complete, run the following commands to verify that the configuration has taken effect.</p>
+<p># Check the configured SNMP version.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>display snmp-agent sys-info version</strong></pre>
+<pre class="screen">SNMP version running in the system:</pre>
+<pre class="screen">           SNMPv3</pre>
+<p># Check the user group information.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>display snmp-agent group admin</strong></pre>
+<pre class="screen">   Group name: admin
+       Security model: v3
+       Readview: iso
+       Writeview: iso
+       Notifyview: iso
+       Storage-type: nonVolatile
+</pre>
+<p># Check the user information.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>display snmp-agent usm-user</strong></pre>
+<pre class="screen">   User name: nms2-admin,
+       Engine ID: 800007DB0300259E0370C3 active
+       Authentication Protocol: sha2-256
+       Privacy Protocol: aes128
+       Group-name: admin
+       State: Active
+<span>       Acl: 2001</span></pre>
+<div class="p"># Check the configured ACL.<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>display acl 2001</strong></pre>
+<pre class="screen">Basic ACL 2001, 2 rules
+ACL's step is 5
+ rule 5 permit ip source 1.1.1.1 0 (4 times matched)
+ rule 6 deny source 1.1.1.1 0 (0 times matched)</pre>
+</div>
+<p># Check the MIB view.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>display snmp-agent mib-view viewname iso</strong></pre>
+<pre class="screen">View name: iso
+       MIB Subtree: iso
+       Subtree mask: FF80(Hex)
+       Storage-type: nonVolatile
+       View Type: included
+       View status: active 
+</pre>
+<p># Check the target host.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>display snmp-agent target-host</strong>
+Target-host NO. 1
+---------------------------------------------------------------------------
+  Host-name                        : -
+  IP-address                       : 1.1.1.2
+  Source interface                 : -
+  VPN instance                     : -
+  Security name                    : nms2-admin
+  Port                             : 162
+  Type                             : trap
+  Version                          : v3
+  Level                            : Privacy
+  NMS type                         : NMS
+  With ext-vb                      : No
+<span>  Notification filter profile name : -</span>
+---------------------------------------------------------------------------</pre>
+<p># Check the contact information of the device administrator.</p>
+<pre class="screen">&lt;<span class="keyword">Device</span>A&gt; <strong>display snmp-agent sys-info contact</strong>
+The contact person for this managed node:
+           call Operator at 010-12345678 </pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172361041__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><pre class="screen">#
+sysname <span class="keyword">Device</span>A
+#
+<span># </span>
+<span>acl number 2001</span>
+ <span>rule 5 permit source 1.1.1.2 0.0.0.0</span>
+ <span>rule 6 deny source 1.1.1.1 0.0.0.0</span>
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 1.1.2.1 255.255.255.0
+#
+interface loopback0
+ ip address 1.1.3.1 255.255.255.255
+#
+ospf 1
+ area 0.0.0.0
+  network 1.1.2.0 0.0.0.255
+  network 1.1.3.1 0.0.0.0
+#
+snmp-agent
+snmp-agent password min-length 10
+snmp-agent local-engineid 800007DB03360102101100
+#
+snmp-agent protocol source-interface Loopback0
+#
+snmp-agent sys-info contact call Operator at 010-12345678
+snmp-agent sys-info version v3
+snmp-agent group v3 admin privacy write-view iso notify-view iso read-view iso
+snmp-agent target-host trap address udp-domain 1.1.1.2 params securityname nms2-admin v3 privacy
+#
+snmp-agent mib-view included iso iso
+snmp-agent usm-user v3 nms2-admin
+snmp-agent usm-user v3 nms2-admin group admin
+snmp-agent usm-user v3 nms2-admin authentication-mode sha2-256 cipher <span>%#%#n}=%C*UimYlx9-:$&gt;T=*_y4PX*e<font style="font-size:8pt" Face="Courier New" >~</font>u6I_Aa9s=I1$%#%#</span>
+snmp-agent usm-user v3 nms2-admin privacy-mode aes128 cipher <span>%#%#at{pQGh!uMyq..8WSJ(&lt;bU`<font style="font-size:8pt" Face="Courier New" >~</font>K_)[f-}s&amp;*Gmw!iE%#%#</span>
+snmp-agent usm-user v3 nms2-admin acl 2001
+#
+snmp-agent trap enable
+#
+return</pre>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_snmp_cfg_0022.html">Configuration Examples for SNMP
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_snmp_cfg_0024.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_snmp_cfg_0038.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

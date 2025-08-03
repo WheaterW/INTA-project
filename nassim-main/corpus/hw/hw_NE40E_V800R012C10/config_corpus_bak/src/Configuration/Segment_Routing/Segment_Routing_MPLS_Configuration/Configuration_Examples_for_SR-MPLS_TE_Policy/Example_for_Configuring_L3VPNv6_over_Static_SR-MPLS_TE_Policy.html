@@ -1,0 +1,905 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring L3VPNv6 over Static SR-MPLS TE Policy">
+<meta name="abstract" content="Configure L3VPNv6 to ensure secure communication between users in the same VPN instance.">
+<meta name="description" content="Configure L3VPNv6 to ensure secure communication between users in the same VPN instance.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr_all_cfg_0099.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr_all_cfg_0409.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr_all_cfg_0080.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="segment_routing_vrp,w00604599,l00455378,l00587852,w00606909,w00800033">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="Segment Routing MPLS">
+<meta name="featuretype" content="Segment Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Segment Routing MPLS">
+<meta name="featuretype" content="Segment Routing">
+<meta name="featurename" content="Segment Routing MPLS">
+<meta name="featuretype" content="Segment Routing">
+<meta name="featurename" content="Segment Routing MPLS">
+<meta name="featuretype" content="Segment Routing">
+<meta name="OWNER" content="l00468467">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00468467">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172368906">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring L3VPNv6 over Static SR-MPLS TE Policy</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172368906"></a><a name="EN-US_TASK_0172368906"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring L3VPNv6 over Static SR-MPLS TE Policy</h1>
+<div class="taskbody"><p>Configure L3VPNv6 to ensure secure communication between users in the same VPN instance.</p>
+<div class="context"><a name="EN-US_TASK_0172368906__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><div class="p">On the network shown in <a href="#EN-US_TASK_0172368906__fig_dc_vrp_sr_all_cfg_007801">Figure 1</a>:<ul><li><p>CE1 and CE2 belong to a VPN instance named <strong>vpna</strong>.</p>
+</li><li><p>The VPN target used by <strong>vpna</strong> is 111:1.</p>
+</li></ul>
+</div>
+<p>To ensure secure communication between users in the same VPN, configure L3VPNv6 routes to recurse to SR-MPLS TE Policies. Because multiple links exist between PEs on the public network, other links must be able to provide protection for the primary link.</p>
+<div class="fignone" id="EN-US_TASK_0172368906__fig_dc_vrp_sr_all_cfg_007801"><a name="EN-US_TASK_0172368906__fig_dc_vrp_sr_all_cfg_007801"></a><a name="fig_dc_vrp_sr_all_cfg_007801"></a><span class="figcap"><b>Figure 1 </b>L3VPNv6 route recursion to manually configured SR-MPLS TE Policies</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 through 3 in this example represent GE <span>0/1/0</span>, GE <span>0/2/0</span>, and GE <span>0/3/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_sr_all_cfg_007801.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368906__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>If an interface connecting a PE to a CE is bound to a VPN instance, Layer 3 configurations, such as the IPv6 address and routing protocol configuration, on the interface will be deleted. Reconfigure them if needed.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368906__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure IS-IS on the backbone network to ensure that PEs can interwork with each other.</p>
+</li><li><p>Enable MPLS and SR for each device on the backbone network, and configure static adjacency SIDs.</p>
+</li><li><p>Configure an SR-MPLS TE Policy with primary and backup paths on each PE.</p>
+</li><li><p>Configure SBFD and HSB on each PE to enhance SR-MPLS TE Policy reliability.</p>
+</li><li><p>Apply an import or export route-policy to a specified VPNv4 peer on each PE, and set the Color Extended Community. In this example, an import route-policy with the Color Extended Community is applied.</p>
+</li><li><p>Establish an MP-IBGP peer relationship between PEs for them to exchange routing information.</p>
+</li><li><p>Create a VPN instance and enable the IPv6 address family on each PE. Then, bind each PE's interface connecting the PE to a CE to the corresponding VPN instance.</p>
+</li><li><p>Configure a tunnel selection policy on each PE.</p>
+</li><li><p>Establish an EBGP peer relationship between each CE-PE pair for the CE and PE to exchange routing information.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368906__1.4.4"></a><a name="1.4.4"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>MPLS LSR IDs of PEs and Ps</p>
+</li><li><p>VPN target and RD of <strong>vpna</strong></p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172368906__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure interface IP addresses.</span><p><p># Configure PE1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname PE1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>ip address 1.1.1.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>ip address 10.13.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet<span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/3/0</span>] <strong>ip address 10.11.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/3/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure P1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname P1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-LoopBack1] <strong>ip address 2.2.2.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/0</span>] <strong>ip address 10.11.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1]<strong> interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/2/0</span>] <strong>ip address 10.12.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname PE2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>ip address 3.3.3.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>]<strong> ip address 10.14.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> interface gigabitethernet<span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/3/0</span>]<strong> ip address 10.12.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/3/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> commit</strong></pre>
+<p># Configure P2.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname P2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-LoopBack1] <strong>ip address 4.4.4.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/1/0</span>] <strong>ip address 10.13.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2]<strong> interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/2/0</span>] <strong>ip address 10.14.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>commit</strong></pre>
+</p></li><li><span>Configure an IGP for each device on the backbone network to implement interworking between PEs and Ps. IS-IS is used as an example.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>is-level level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>network-entity 10.0000.0000.0001.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet<span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/3/0</span>] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/3/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure P1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-isis-1] <strong>is-level level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-isis-1] <strong>network-entity 10.0000.0000.0002.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-LoopBack1] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/0</span>] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1]<strong> interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/2/0</span>] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-isis-1] <strong>is-level level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-isis-1] <strong>network-entity 10.0000.0000.0003.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> interface gigabitethernet<span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/3/0</span>]<strong> isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/3/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>]<strong> isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> commit</strong></pre>
+<p># Configure P2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-isis-1] <strong>is-level level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-isis-1] <strong>network-entity 10.0000.0000.0004.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-LoopBack1] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/1/0</span>] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2]<strong> interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/2/0</span>] <strong>isis enable 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>commit</strong></pre>
+</p></li><li><span>Configure basic MPLS functions for each device on the backbone network.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>mpls lsr-id 1.1.1.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-mpls] <strong>quit</strong></pre>
+<p># Configure P1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>mpls lsr-id 2.2.2.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-mpls] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1-mpls] <strong>quit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>mpls lsr-id 3.3.3.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-mpls]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-mpls]<strong> quit</strong></pre>
+<p># Configure P2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2] <strong>mpls lsr-id 4.4.4.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-mpls] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2-mpls] <strong>quit</strong></pre>
+</p></li><li><span>Configure Segment Routing on the backbone network.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing] <strong>ipv4 adjacency local-ip-addr 10.11.1.1 remote-ip-addr 10.11.1.2 sid <span>330</span>000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing] <strong>ipv4 adjacency local-ip-addr 10.13.1.1 remote-ip-addr 10.13.1.2 sid <span>330</span>001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>cost-style wide</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>traffic-eng level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>segment-routing mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure P1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P1] <strong>segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-segment-routing] <strong>ipv4 adjacency local-ip-addr 10.11.1.2 remote-ip-addr 10.11.1.1 sid <span>330</span>003</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-segment-routing] <strong>ipv4 adjacency local-ip-addr 10.12.1.1 remote-ip-addr 10.12.1.2 sid <span>330</span>002</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-segment-routing] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-isis-1] <strong>cost-style wide</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-isis-1] <strong>traffic-eng level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-isis-1] <strong>segment-routing mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing] <strong>ipv4 adjacency local-ip-addr 10.12.1.2 remote-ip-addr 10.12.1.1 sid <span>330</span>000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing] <strong>ipv4 adjacency local-ip-addr 10.14.1.2 remote-ip-addr 10.14.1.1 sid <span>330</span>001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-isis-1] <strong>cost-style wide</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-isis-1] <strong>traffic-eng level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-isis-1] <strong>segment-routing mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure P2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P2] <strong>segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-segment-routing] <strong>ipv4 adjacency local-ip-addr 10.13.1.2 remote-ip-addr 10.13.1.1 sid <span>330</span>002</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-segment-routing] <strong>ipv4 adjacency local-ip-addr 10.14.1.1 remote-ip-addr 10.14.1.2 sid <span>330</span>003</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-segment-routing] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>isis 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-isis-1] <strong>cost-style wide</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-isis-1] <strong>traffic-eng level-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-isis-1] <strong>segment-routing mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2-isis-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P2] <strong>commit</strong></pre>
+</p></li><li><span>Configure SR-MPLS TE Policies.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-segment-routing] <strong>segment-list pe1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing-segment-list<span>-pe1</span>] <strong>index 10 sid label <span>330</span>000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing-segment-list<span>-pe1</span>] <strong>index 20 sid label <span>330</span>002</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing-segment-list<span>-pe1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing] <strong>segment-list pe1backup</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing-segment-list<span>-pe1backup</span>] <strong>index 10 sid label <span>330</span>001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing-segment-list<span>-pe1backup</span>] <strong>index 20 sid label <span>330</span>003</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing-segment-list<span>-pe1backup</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing] <strong>sr-te policy policy100</strong> <strong>endpoint 3.3.3.9 color 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing-te-policy<span>-policy100</span>] <strong>binding-sid 115</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing-te-policy<span>-policy100</span>] <strong>mtu 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing-te-policy<span>-policy100</span>] <strong>candidate-path preference 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing-te-policy<span>-policy100</span>-path] <strong>segment-list pe1backup</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing-te-policy<span>-policy100</span>-path] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing-te-policy<span>-policy100</span>] <strong>candidate-path preference 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing-te-policy<span>-policy100</span>-path] <strong>segment-list pe1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing-te-policy<span>-policy100</span>-path] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing-te-policy<span>-policy100</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-segment-routing] <strong>segment-list pe2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing-segment-list<span>-pe2</span>] <strong>index 10 sid label <span>330</span>000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing-segment-list<span>-pe2</span>] <strong>index 20 sid label <span>330</span>003</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing-segment-list<span>-pe2</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing] <strong>segment-list pe2backup</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing-segment-list<span>-pe2backup</span>] <strong>index 10 sid label <span>330</span>001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing-segment-list<span>-pe2backup</span>] <strong>index 20 sid label <span>330</span>002</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing-segment-list<span>-pe2backup</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing] <strong>sr-te policy policy200</strong> <strong>endpoint 1.1.1.9 color 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing-te-policy<span>-policy200</span>] <strong>binding-sid 115</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing-te-policy<span>-policy200</span>] <strong>mtu 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing-te-policy<span>-policy200</span>] <strong>candidate-path preference 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing-te-policy<span>-policy200</span>-path] <strong>segment-list pe2backup</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing-te-policy<span>-policy200</span>-path] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing-te-policy<span>-policy200</span>] <strong>candidate-path preference 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing-te-policy<span>-policy200</span>-path] <strong>segment-list pe2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing-te-policy<span>-policy200</span>-path] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing-te-policy<span>-policy200</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p>After the configuration is complete, run the <a href="cmdqueryname=display+sr-te+policy"><b><span class="cmdname">display sr-te policy</span></b></a> command to check SR-MPLS TE Policy information. The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display sr-te policy</strong>
+PolicyName : policy100
+Endpoint             : 3.3.3.9              Color                : 100
+TunnelId             : 1                    TunnelType           : SR-TE Policy
+Binding SID          : 115                  MTU                  : 1000
+Policy State         : Up                   State Change Time    : 2019-12-20 09:17:45
+Admin State          : Up                   Traffic Statistics   : Disable
+BFD                  : Disable              Backup Hot-Standby   : Disable
+DiffServ-Mode        : -
+Active IGP Metric    : -
+Candidate-path Count : 2                    
+
+Candidate-path Preference: 200
+Path State           : Active               Path Type            : Primary
+Protocol-Origin      : Configuration(30)    Originator           : 0, 0.0.0.0
+Discriminator        : 200                  Binding SID          : -
+GroupId              : 2                    Policy Name          : policy100
+Template ID          : -
+Active IGP Metric    : -                              ODN Color            : -
+Metric               :
+ IGP Metric          : -                              TE Metric            : -
+ Delay Metric        : -                              Hop Counts           : -
+Segment-List Count   : 1
+ Segment-List        : pe1
+  Segment-List ID    : 129                  XcIndex              : 68
+  List State         : Up                   BFD State            : -
+  EXP                : -                    TTL                  : -
+  DeleteTimerRemain  : -<span>                    Weight               : 1</span>
+  Label : <span>330</span>000, <span>330</span>002
+
+Candidate-path Preference: 100
+Path State           : Inactive (Valid)     Path Type            : -
+Protocol-Origin      : Configuration(30)    Originator           : 0, 0.0.0.0
+Discriminator        : 100                  Binding SID          : -
+GroupId              : 1                    Policy Name          : policy100
+Template ID          : -
+Active IGP Metric    : -                              ODN Color            : -
+Metric               :
+ IGP Metric          : -                              TE Metric            : -
+ Delay Metric        : -                              Hop Counts           : -
+Segment-List Count   : 1
+ Segment-List        : pe1backup
+  Segment-List ID    : 194                  XcIndex              : -
+  List State         : Up                   BFD State            : -
+  EXP                : -                    TTL                  : -
+  DeleteTimerRemain  : -<span>                    Weight               : 1</span>
+  Label : <span>330</span>001, <span>330</span>003</pre>
+</p></li><li><span>Configure SBFD and HSB.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>bfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bfd] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>sbfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-sbfd] <strong>reflector discriminator 1.1.1.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-sbfd] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing] <strong>sr-te-policy seamless-bfd enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing] <strong>sr-te-policy backup hot-standby enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-segment-routing] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-segment-routing] <strong>quit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>bfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bfd] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>sbfd</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-sbfd] <strong>reflector discriminator 3.3.3.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-sbfd] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>segment-routing</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing] <strong>sr-te-policy seamless-bfd enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing] <strong>sr-te-policy backup hot-standby enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-segment-routing] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-segment-routing] <strong>quit</strong></pre>
+</p></li><li><span>Configure route-policies.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>route-policy color100 permit node 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-route-policy] <strong>apply extcommunity color 0:100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-route-policy] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>route-policy color200 permit node 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-route-policy] <strong>apply extcommunity color 0:200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-route-policy] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+</p></li><li><span>Establish an MP-IBGP peer relationship between the PEs, apply import route-policies to the VPNv6 peers, and set the color extended community for routes.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>peer 3.3.3.9 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>peer 3.3.3.9 connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>ipv6-family vpnv6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-vpnv6] <strong>peer 3.3.3.9 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-vpnv6] <strong>peer 3.3.3.9 route-policy color100 import</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-af-vpnv6] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bgp-af-vpnv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bgp] <strong>quit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>peer 1.1.1.9 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>peer 1.1.1.9 connect-interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>ipv6-family vpnv6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-vpnv6] <strong>peer 1.1.1.9 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-vpnv6] <strong>peer 1.1.1.9 route-policy color200 import</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-af-vpnv6] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-bgp-af-vpnv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-bgp] <strong>quit</strong></pre>
+<p>After the configuration is complete, run the <strong>display bgp peer</strong> or <strong>display bgp vpnv6 all peer</strong> command on each PE to check whether a BGP peer relationship has been established between the PEs. If the <strong>Established</strong> state is displayed in the command output, the BGP peer relationship has been established successfully. The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display bgp peer</strong></pre>
+<pre class="screen"> BGP local router ID : 1.1.1.9
+ Local AS number : 100
+ Total number of peers : 1          Peers in established state : 1
+  Peer            V    AS  MsgRcvd  MsgSent     OutQ  Up/Down    State        PrefRcv
+  3.3.3.9         4   100        2        6     0     00:00:12   <strong>Established</strong>   0</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display bgp vpnv6 all peer</strong></pre>
+<pre class="screen"> BGP local router ID : 1.1.1.9
+ Local AS number : 100
+ Total number of peers : 1                 Peers in established state : 1
+  Peer            V    AS  MsgRcvd  MsgSent    OutQ  Up/Down    State        PrefRcv
+  3.3.3.9         4   100   12      18         0     00:09:38   <strong>Established</strong>   0</pre>
+</p></li><li><span>Create a VPN instance and enable the IPv6 address family on each PE. Then, bind each PE's interface connecting the PE to a CE to the corresponding VPN instance.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>ip vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna] <strong>ipv6-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna-af-ipv6] <strong>route-distinguisher 100:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna-af-ipv6] <strong>vpn-target 111:1 both</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna-af-ipv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>ip binding vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>ipv6 address 2001:db8::1:2 96</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>ip vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna] <strong>ipv6-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna-af-ipv6] <strong>route-distinguisher 200:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna-af-ipv6] <strong>vpn-target 111:1 both</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna-af-ipv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong>ip binding vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong>ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong>ipv6 address 2001:db8::2:2 96</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+</p></li><li><span>Configure a tunnel policy on each PE to preferentially select an SR-MPLS TE Policy.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>tunnel-policy p1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-tunnel-policy-p1] <strong>tunnel select-seq sr-te-policy load-balance-number 1 unmix</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-tunnel-policy-p1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>ip vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna] <strong>ipv6-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna-af-ipv6] <strong>tnl-policy p1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna-af-ipv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpna] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong>tunnel-policy p1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-tunnel-policy-p1] <strong>tunnel select-seq sr-te-policy load-balance-number 1 unmix</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-tunnel-policy-p1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>ip vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna] <strong>ipv6-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna-af-ipv6] <strong>tnl-policy p1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna-af-ipv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpna] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+</p></li><li><span>Establish an EBGP peer relationship between each CE-PE pair.</span><p><p># Configure CE1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname CE1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-LoopBack1] <strong>ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-LoopBack1] <strong>ipv6 address 2001:db8:1::11:1 128</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1]<strong> interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>] <strong>ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>] <strong>ipv6 address 2001:db8::1:1 96</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>bgp 65410</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp] <strong>router-id 10.10.10.10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp] <strong>peer 2001:db8::1:2 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp] <strong>ipv6-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp-af-ipv6] <strong>network 2001:db8:1::11:1 128</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp-af-ipv6] <strong>peer 2001:db8::1:2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp-af-ipv6] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>commit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The configuration of CE2 is similar to the configuration of CE1. For detailed configurations, see Configuration Files.</p>
+</div></div>
+<p>After completing the configuration, run the <strong>display ip vpn-instance verbose</strong> command on each PE to check VPN instance configurations. The command output shows that each PE can ping its connected CE.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If a PE has multiple interfaces bound to the same VPN instance, use the <strong>-a</strong> <em>source-ipv6-address</em> parameter to specify a source IP address when running the <strong>ping ipv6 vpn-instance</strong> <em>vpn-instance-name</em> <strong>-a</strong> <em>source-ipv6-address dest-ipv6-address</em> command to ping the CE that is connected to the remote PE. If the source IP address is not specified, the ping operation may fail.</p>
+</div></div>
+<p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bgp] <strong>ipv6-family vpn-instance vpna</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-6-vpna] <strong>peer 2001:db8::1:1 as-number 65410</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-6-vpna] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bgp-6-vpna] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bgp] <strong>quit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The configuration of PE2 is similar to the configuration of PE1. For detailed configurations, see Configuration Files.</p>
+</div></div>
+<p>After completing the configuration, run the <strong>display bgp vpnv6 vpn-instance peer</strong> command on each PE. The following example uses the peer relationship between PE1 and CE1. The command output shows that a BGP peer relationship has been established between the PE and CE and is in the Established state.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display bgp vpnv6 vpn-instance vpna peer</strong></pre>
+<pre class="screen"> BGP local router ID : 1.1.1.9
+ Local AS number : 100
+ Total number of peers : 1                 Peers in established state : 1
+
+  VPN-Instance vpna, Router ID 1.1.1.9:
+  Peer            V          AS  MsgRcvd  MsgSent  OutQ  Up/Down       State  PrefRcv
+  2001:DB8::1:1   4       65410        7        8     0 00:02:38 <strong>Established</strong>        1</pre>
+</p></li><li><span>Verify the configuration.</span><p><p>After completing the configuration, run the <strong>display ipv6 routing-table vpn-instance</strong> command on each PE to check information about the loopback interface route toward a CE.</p>
+<p>The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display ipv6 routing-table vpn-instance vpna</strong>
+Routing Table : vpna                                                                                                                
+         Destinations : 5        Routes : 5                                                                                         
+
+Destination  : 2001:DB8::                              PrefixLength : 96                                                            
+NextHop      : 2001:DB8::1:2                           Preference   : 0                                                             
+Cost         : 0                                       Protocol     : Direct                                                        
+RelayNextHop : ::                                      TunnelID     : 0x0                                                           
+Interface    : GigabitEthernet<span>0/2/0</span>                    Flags        : D                                                             
+
+Destination  : 2001:DB8::1:2                           PrefixLength : 128                                                           
+NextHop      : ::1                                     Preference   : 0                                                             
+Cost         : 0                                       Protocol     : Direct                                                        
+RelayNextHop : ::                                      TunnelID     : 0x0                                                           
+Interface    : GigabitEthernet<span>0/2/0</span>                    Flags        : D                                                             
+
+Destination  : 2001:DB8:1::11:1                        PrefixLength : 128                                                           
+NextHop      : 2001:DB8::1:1                           Preference   : 255                                                           
+Cost         : 0                                       Protocol     : EBGP                                                          
+RelayNextHop : 2001:DB8::1:1                           TunnelID     : 0x0                                                           
+Interface    : GigabitEthernet<span>0/2/0</span>                    Flags        : RD                                                            
+
+Destination  : 2001:DB8:2::22:2                        PrefixLength : 128                                                           
+NextHop      : ::FFFF:3.3.3.9                          Preference   : 255 
+Cost         : 0                                       Protocol     : IBGP                                                          
+RelayNextHop : ::                                      TunnelID     : 0x000000003200000001                                          
+Interface    : policy100                               Flags        : RD                                                            
+
+Destination  : FE80::                                  PrefixLength : 10                                                            
+NextHop      : ::                                      Preference   : 0                                                             
+Cost         : 0                                       Protocol     : Direct                                                        
+RelayNextHop : ::                                      TunnelID     : 0x0                                                           
+Interface    : NULL0                                   Flags        : DB</pre>
+<p>Run the <strong>display ipv6 routing-table vpn-instance vpna verbose</strong> command on each PE to check details about the loopback interface route toward a CE.</p>
+<p>The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display ipv6 routing-table vpn-instance vpna 2001:db8:2::22:2 verbose</strong>
+Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route 
+------------------------------------------------------------------------------
+Routing Table : vpna 
+Summary Count : 1                 
+
+Destination  : 2001:DB8:2::22:2                        PrefixLength : 128
+NextHop      : ::FFFF:3.3.3.9                          Preference   : 255
+Neighbour    : ::3.3.3.9                               ProcessID    : 0
+Label        : 48061                                   Protocol     : IBGP
+State        : Active Adv Relied                       Cost         : 0 
+Entry ID     : 0                                       EntryFlags   : 0x00000000
+Reference Cnt: 0                                       Tag          : 0
+Priority     : low                                     Age          : 00h10m57s
+IndirectID   : 0x10000FD                               Instance     : 
+RelayNextHop : 0.0.0.0                                 TunnelID     : 0x000000003200000001 
+Interface    : policy100                               Flags        : RD 
+RouteColor   : 0                                       QoSInfo      : 0x0 </pre>
+<p>The command output shows that the VPN route has successfully recursed to the specified SR-MPLS TE Policy.</p>
+<p>Check that CEs in the same VPN can ping each other. For example, CE1 can ping CE2 at 2001:db8:2::22:2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>ping ipv6 -a 2001:db8:1::11:1 2001:db8:2::22:2</strong>
+  PING 2001:DB8:2::22:2 : 56  data bytes, press CTRL_C to break
+    Reply from 2001:DB8:2::22:2                
+    bytes=56 Sequence=1 hop limit=61 time=4 ms 
+    Reply from 2001:DB8:2::22:2                
+    bytes=56 Sequence=2 hop limit=61 time=3 ms 
+    Reply from 2001:DB8:2::22:2                
+    bytes=56 Sequence=3 hop limit=61 time=3 ms 
+    Reply from 2001:DB8:2::22:2                
+    bytes=56 Sequence=4 hop limit=61 time=3 ms 
+    Reply from 2001:DB8:2::22:2                
+    bytes=56 Sequence=5 hop limit=61 time=3 ms 
+
+  --- 2001:DB8:2::22:2 ping statistics---      
+    5 packet(s) transmitted                    
+    5 packet(s) received                       
+    0.00% packet loss                          
+    round-trip min/avg/max=3/3/4 ms</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172368906__1.4.6"></a><a name="1.4.6"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>PE1 configuration file</p>
+<pre class="screen">#
+sysname PE1
+#
+ip vpn-instance vpna
+ ipv6-family
+  route-distinguisher 100:1
+  tnl-policy p1
+  vpn-target 111:1 export-extcommunity
+  vpn-target 111:1 import-extcommunity
+#
+bfd
+#
+sbfd
+ reflector discriminator 1.1.1.9
+#
+mpls lsr-id 1.1.1.9
+#               
+mpls            
+#               
+segment-routing 
+ ipv4 adjacency local-ip-addr 10.11.1.1 remote-ip-addr 10.11.1.2 sid <span>330</span>000
+ ipv4 adjacency local-ip-addr 10.13.1.1 remote-ip-addr 10.13.1.2 sid <span>330</span>001
+ sr-te-policy backup hot-standby enable
+ sr-te-policy seamless-bfd enable
+ segment-list pe1
+  index 10 sid label <span>330</span>000
+  index 20 sid label <span>330</span>002
+ segment-list pe1backup
+  index 10 sid label <span>330</span>001
+  index 20 sid label <span>330</span>003
+ sr-te policy policy100 endpoint 3.3.3.9 color 100
+  binding-sid 115
+  mtu 1000  
+  candidate-path preference 200
+   segment-list pe1
+  candidate-path preference 100
+   segment-list pe1backup
+#               
+isis 1          
+ is-level level-1
+ cost-style wide
+ network-entity 10.0000.0000.0001.00
+ traffic-eng level-1
+ segment-routing mpls
+#               
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown  
+ ip address 10.13.1.1 255.255.255.0
+ isis enable 1  
+#               
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown  
+ ip binding vpn-instance vpna
+ ipv6 enable
+ ipv6 address 2001:DB8::1:2/96
+#               
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown  
+ ip address 10.11.1.1 255.255.255.0
+ isis enable 1  
+#               
+interface LoopBack1
+ ip address 1.1.1.9 255.255.255.255
+ isis enable 1  
+#               
+bgp 100         
+ peer 3.3.3.9 as-number 100
+ peer 3.3.3.9 connect-interface LoopBack1
+ #              
+ ipv4-family unicast
+  undo synchronization
+  peer 3.3.3.9 enable
+ #              
+ ipv6-family vpnv6
+  policy vpn-target
+  peer 3.3.3.9 enable
+  peer 3.3.3.9 route-policy color100 import
+ #              
+ ipv6-family vpn-instance vpna
+  peer 2001:DB8::1:1 as-number 65410
+#
+route-policy color100 permit node 1
+ apply extcommunity color 0:100
+#               
+tunnel-policy p1
+ tunnel select-seq sr-te-policy load-balance-number 1 unmix
+#
+return</pre>
+</li><li><p>P1 configuration file</p>
+<pre class="screen">#
+sysname P1
+#
+mpls lsr-id 2.2.2.9
+#               
+mpls            
+#               
+segment-routing 
+ ipv4 adjacency local-ip-addr 10.12.1.1 remote-ip-addr 10.12.1.2 sid <span>330</span>002
+ ipv4 adjacency local-ip-addr 10.11.1.2 remote-ip-addr 10.11.1.1 sid <span>330</span>003
+#               
+isis 1          
+ is-level level-1
+ cost-style wide
+ network-entity 10.0000.0000.0002.00
+ traffic-eng level-1
+ segment-routing mpls
+#               
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown  
+ ip address 10.11.1.2 255.255.255.0
+ isis enable 1  
+#               
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown  
+ ip address 10.12.1.1 255.255.255.0
+ isis enable 1  
+#               
+interface LoopBack1
+ ip address 2.2.2.9 255.255.255.255
+ isis enable 1  
+#
+return</pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#
+sysname PE2
+#
+ip vpn-instance vpna
+ ipv6-family
+  route-distinguisher 200:1
+  tnl-policy p1
+  vpn-target 111:1 export-extcommunity
+  vpn-target 111:1 import-extcommunity
+#
+bfd
+#
+sbfd
+ reflector discriminator 3.3.3.9
+#
+mpls lsr-id 3.3.3.9
+#               
+mpls            
+#               
+segment-routing 
+ ipv4 adjacency local-ip-addr 10.12.1.2 remote-ip-addr 10.12.1.1 sid <span>330</span>000
+ ipv4 adjacency local-ip-addr 10.14.1.2 remote-ip-addr 10.14.1.1 sid <span>330</span>001
+ sr-te-policy backup hot-standby enable
+ sr-te-policy seamless-bfd enable
+ segment-list pe2
+  index 10 sid label <span>330</span>000
+  index 20 sid label <span>330</span>003
+ segment-list pe2backup
+  index 10 sid label <span>330</span>001
+  index 20 sid label <span>330</span>002
+ sr-te policy policy200 endpoint 1.1.1.9 color 200
+  binding-sid 115
+  mtu 1000     
+  candidate-path preference 200
+   segment-list pe2
+  candidate-path preference 100
+   segment-list pe2backup
+#               
+isis 1          
+ is-level level-1
+ cost-style wide
+ network-entity 10.0000.0000.0003.00
+ traffic-eng level-1
+ segment-routing mpls
+#               
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown  
+ ip address 10.14.1.2 255.255.255.0
+ isis enable 1  
+#               
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown  
+ ip binding vpn-instance vpna
+ ipv6 enable
+ ipv6 address 2001:DB8::2:2/96
+#               
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown  
+ ip address 10.12.1.2 255.255.255.0
+ isis enable 1  
+#               
+interface LoopBack1
+ ip address 3.3.3.9 255.255.255.255
+ isis enable 1  
+#               
+bgp 100         
+ peer 1.1.1.9 as-number 100
+ peer 1.1.1.9 connect-interface LoopBack1
+ #              
+ ipv4-family unicast
+  undo synchronization
+  peer 1.1.1.9 enable
+ #              
+ ipv6-family vpnv6
+  policy vpn-target
+  peer 1.1.1.9 enable
+  peer 1.1.1.9 route-policy color200 import
+ #              
+ ipv6-family vpn-instance vpna
+  peer 2001:DB8::2:1 as-number 65420
+#
+route-policy color200 permit node 1
+ apply extcommunity color 0:200
+#               
+tunnel-policy p1
+ tunnel select-seq sr-te-policy load-balance-number 1 unmix
+#
+return</pre>
+</li><li><p>P2 configuration file</p>
+<pre class="screen">#
+sysname P2
+#
+mpls lsr-id 4.4.4.9
+#               
+mpls            
+#               
+segment-routing 
+ ipv4 adjacency local-ip-addr 10.13.1.2 remote-ip-addr 10.13.1.1 sid <span>330</span>002
+ ipv4 adjacency local-ip-addr 10.14.1.1 remote-ip-addr 10.14.1.2 sid <span>330</span>003
+#               
+isis 1          
+ is-level level-1
+ cost-style wide
+ network-entity 10.0000.0000.0004.00
+ traffic-eng level-1
+ segment-routing mpls
+#               
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown  
+ ip address 10.13.1.2 255.255.255.0
+ isis enable 1  
+#               
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown  
+ ip address 10.14.1.1 255.255.255.0
+ isis enable 1  
+#               
+interface LoopBack1
+ ip address 4.4.4.9 255.255.255.255
+ isis enable 1  
+#
+return</pre>
+</li><li><p>CE1 configuration file</p>
+<pre class="screen">#
+sysname CE1
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ipv6 enable
+ ipv6 address 2001:DB8::1:1/96
+#
+interface LoopBack1
+ ipv6 enable
+ ipv6 address 2001:DB8:1::11:1/128
+#
+bgp 65410
+ router-id 10.10.10.10
+ peer 2001:DB8::1:2 as-number 100
+ #
+ ipv6-family unicast
+  undo synchronization
+  network 2001:DB8:1::11:1 128
+  peer 2001:DB8::1:2 enable
+#
+return</pre>
+</li><li><p>CE2 configuration file</p>
+<pre class="screen">#
+sysname CE2
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ipv6 enable
+ ipv6 address 2001:DB8::2:1/96
+#
+interface LoopBack1
+ ipv6 enable
+ ipv6 address 2001:DB8:2::22:2/128
+#
+bgp 65420
+ router-id 10.20.20.20
+ peer 2001:DB8::2:2 as-number 100
+ #
+ ipv6-family unicast
+  undo synchronization
+  network 2001:DB8:2::22:2 128
+  peer 2001:DB8::2:2 enable
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr_all_cfg_0099.html">Configuration Examples for SR-MPLS TE Policy
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr_all_cfg_0409.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sr_all_cfg_0080.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

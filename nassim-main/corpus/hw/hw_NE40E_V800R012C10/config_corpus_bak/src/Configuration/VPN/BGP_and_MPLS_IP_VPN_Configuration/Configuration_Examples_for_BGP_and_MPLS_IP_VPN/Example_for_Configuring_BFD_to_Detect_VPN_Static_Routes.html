@@ -1,0 +1,935 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring BFD to Detect VPN Static Routes">
+<meta name="abstract" content="In CE dual-homing networking, after a static route on a CE is bound to a BFD session, the static route can detect link faults or refresh itself based on the BFD session status. This implementation ensures quick VPN traffic convergence.">
+<meta name="description" content="In CE dual-homing networking, after a static route on a CE is bound to a BFD session, the static route can detect link faults or refresh itself based on the BFD session status. This implementation ensures quick VPN traffic convergence.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mpls-l3vpn-v4_cfg_0101.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mpls-l3vpn-v4_cfg_2015.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,l3vpnvrp,w00556928,l00468467,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="BGP/MPLS IP VPN">
+<meta name="featuretype" content="VPN">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP/MPLS IP VPN">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="BGP/MPLS IP VPN">
+<meta name="featuretype" content="VPN">
+<meta name="featurename" content="BGP/MPLS IP VPN">
+<meta name="featuretype" content="VPN">
+<meta name="OWNER" content="h00847023">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00415692">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172369567">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/thickbox.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/jquery.min.js"></script>
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/imageResize.js"></script>
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/jquery-migrate-1.2.1.min.js"></script>
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/jquery-ui.min.js"></script>
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/jquery.mousewheel.min.js"></script>
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/thickbox.js"></script>
+<title>Example for Configuring BFD to Detect VPN Static Routes</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172369567"></a><a name="EN-US_TASK_0172369567"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring BFD to Detect VPN Static Routes</h1>
+<div class="taskbody" id="taskbody1985948681214051"><p id="shortdesc1440658225214051">In CE dual-homing networking, after a static route on a CE is bound to a BFD session, the static route can detect link faults or refresh itself based on the BFD session status. This implementation ensures quick VPN traffic convergence.</p>
+<div class="context"><a name="EN-US_TASK_0172369567__1.4.1"></a><a name="1.4.1"></a>
+<div class="p" id="EN-US_TASK_0172369567__context1856668057214051"><h4 class="sectiontitle">Networking Requirements</h4><p id="EN-US_TASK_0172369567__p384959316214051">On the network shown in <a href="#EN-US_TASK_0172369567__fig_dc_vrp_mpls-l3vpn-v4_cfg_012801">Figure 1</a>, CE1 and CE2 belong to VPNA. Two default routes with the next hops as PE1 and PE2 respectively are configured on CE1. The two routes work in load-balancing mode. The static routes bound to VPNA are configured on PE1 and PE2 separately and are imported into BGP.</p>
+<p id="EN-US_TASK_0172369567__p147233201214051">BFD sessions are established between PE1 and CE1, and between PE2 and CE1. BFD for VPN static route is configured on PE1 and PE2. In normal situations, the traffic from CE1 to the public network can be forwarded through PE1 and PE2 in load balancing mode. If the link between CE1 and PE1 or PE2 fails, CE1 detects the link fault by tracking BFD session status and updates the route. Then, CE1 switches traffic to the other link for transmission.</p>
+<div class="fignone" id="EN-US_TASK_0172369567__fig_dc_vrp_mpls-l3vpn-v4_cfg_012801"><a name="EN-US_TASK_0172369567__fig_dc_vrp_mpls-l3vpn-v4_cfg_012801"></a><a name="fig_dc_vrp_mpls-l3vpn-v4_cfg_012801"></a><span class="figcap"><b>Figure 1 </b>Configuring BFD for VPN static route</span><div class="note" id="EN-US_TASK_0172369567__note934317081214051"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p id="EN-US_TASK_0172369567__p666753503214051">In this example, interfaces 1 through 3 represent GE<span>0/1/0</span>, GE<span>0/2/0</span>, and GE<span>0/3/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="imgResize" id="EN-US_TASK_0172369567__image358352343214051" src="images/fig_dc_vrp_mpls-l3vpn-v4_cfg_012801.png" width="525.3633000000001" title="Click to enlarge"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172369567__1.4.2"></a><a name="1.4.2"></a>
+<div class="p" id="EN-US_TASK_0172369567__context1271009800214051"><h4 class="sectiontitle">Precautions</h4><p id="EN-US_TASK_0172369567__p949283857214051">During the configuration process, note the following:</p>
+<ul id="EN-US_TASK_0172369567__ul1867867787214051"><li id="EN-US_TASK_0172369567__li527960504214051"><p id="EN-US_TASK_0172369567__p29761324214051"><a name="EN-US_TASK_0172369567__li527960504214051"></a><a name="li527960504214051"></a>VPN instances with different RDs need to be configured on the PEs to which a CE is dual-homed.</p>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172369567__1.4.3"></a><a name="1.4.3"></a>
+<div class="p" id="EN-US_TASK_0172369567__context384005547214051"><h4 class="sectiontitle">Configuration Roadmap</h4><p id="EN-US_TASK_0172369567__p140907086214051">The configuration roadmap is as follows:</p>
+<ol id="EN-US_TASK_0172369567__ol915126332214051"><li id="EN-US_TASK_0172369567__li1251658297214051"><p id="EN-US_TASK_0172369567__p2018675314214051"><a name="EN-US_TASK_0172369567__li1251658297214051"></a><a name="li1251658297214051"></a>Configure OSPF for PEs on the MPLS backbone network to communicate.</p>
+</li><li id="EN-US_TASK_0172369567__li90473205214051"><p id="EN-US_TASK_0172369567__p164734359214051"><a name="EN-US_TASK_0172369567__li90473205214051"></a><a name="li90473205214051"></a>Establish MPLS LSPs between PEs.</p>
+</li><li id="EN-US_TASK_0172369567__li877863981214051"><p id="EN-US_TASK_0172369567__p1047273777214051"><a name="EN-US_TASK_0172369567__li877863981214051"></a><a name="li877863981214051"></a>Configure VPN instances on PEs and bind each interface that connects a PE to a CE to a VPN instance.</p>
+</li><li id="EN-US_TASK_0172369567__li1495710288214051"><p id="EN-US_TASK_0172369567__p2106722281214051"><a name="EN-US_TASK_0172369567__li1495710288214051"></a><a name="li1495710288214051"></a>Enable Multi-protocol Extensions for Interior Border Gateway Protocol (MP-IBGP) on PEs to exchange VPN routing information.</p>
+</li><li id="EN-US_TASK_0172369567__li1955198664214051"><p id="EN-US_TASK_0172369567__p229179454214051"><a name="EN-US_TASK_0172369567__li1955198664214051"></a><a name="li1955198664214051"></a>Configure two default routes with the next hops being PE1 and PE2 respectively on CE1 to implement load balancing of VPN data between PE1 and PE2.</p>
+</li><li id="EN-US_TASK_0172369567__li386873037214051"><p id="EN-US_TASK_0172369567__p1742133390214051"><a name="EN-US_TASK_0172369567__li386873037214051"></a><a name="li386873037214051"></a>Configure a static route bound to VPNA on PE1 and PE2 and import the static route into BGP.</p>
+</li><li id="EN-US_TASK_0172369567__li982850603214051"><p id="EN-US_TASK_0172369567__p325871897214051"><a name="EN-US_TASK_0172369567__li982850603214051"></a><a name="li982850603214051"></a>Configure an MP-EBGP peer relationship between PE3 and CE2.</p>
+</li><li id="EN-US_TASK_0172369567__li1561202748214051"><p id="EN-US_TASK_0172369567__p1179386590214051"><a name="EN-US_TASK_0172369567__li1561202748214051"></a><a name="li1561202748214051"></a>Configure static BFD sessions with automatically negotiated discriminators between PE1 and CE1, and between PE2 and CE1.</p>
+</li><li id="EN-US_TASK_0172369567__li707491822214051"><p id="EN-US_TASK_0172369567__p198098915214051"><a name="EN-US_TASK_0172369567__li707491822214051"></a><a name="li707491822214051"></a>Configure BFD for VPN static route on PE1 and PE2.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172369567__1.4.4"></a><a name="1.4.4"></a>
+<div class="p" id="EN-US_TASK_0172369567__context1070825899214051"><h4 class="sectiontitle">Data Preparation</h4><p id="EN-US_TASK_0172369567__p920585671214051">To complete the configuration, you need the following data:</p>
+<ul id="EN-US_TASK_0172369567__ul2060795185214051"><li id="EN-US_TASK_0172369567__li968487385214051">MPLS LSR IDs of the PEs</li><li id="EN-US_TASK_0172369567__li1255741471214051">Names, RDs, and VPN targets of the VPN instances on the PEs</li><li id="EN-US_TASK_0172369567__li1693548497214051">Local and peer IP addresses of the BFD session</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172369567__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Procedure</h4>
+<ol id="EN-US_TASK_0172369567__steps1219361099214051"><li id="EN-US_TASK_0172369567__step1954812184214051"><span id="EN-US_TASK_0172369567__cmd176061035214051">Configure IGP on the MPLS backbone network to implement connectivity between the devices on the backbone network.</span><p><p id="EN-US_TASK_0172369567__p1995718878214051"># Configure PE1.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen2078080060214051">&lt;<span class="keyword" id="EN-US_TASK_0172369567__keyword1453456002214051">HUAWEI</span>&gt; <strong id="EN-US_TASK_0172369567__b1476426916214051">system-view</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1206025223214051"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0172369567__keyword1715262575214051">HUAWEI</span>] <strong id="EN-US_TASK_0172369567__b430037460214051">sysname PE1</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1115045909214051">*</span><span class="keyword" id="EN-US_TASK_0172369567__keyword1634288841214051">HUAWEI</span>] <strong id="EN-US_TASK_0172369567__b713391276214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword2046779280214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong id="EN-US_TASK_0172369567__b662417827214051">interface loopback 1</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1284342926214051">*</span>PE1-LoopBack1] <strong id="EN-US_TASK_0172369567__b1510458905214051">ip address 2.2.2.2 32</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1898495958214051">*</span>PE1-LoopBack1] <strong id="EN-US_TASK_0172369567__b244945069214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1678966378214051">*</span>PE1] <strong id="EN-US_TASK_0172369567__b1565221741214051">interface gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword2145552999214051">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b86118940214051">ip address 11.11.11.1 24</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword910435093214051">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b1099914969214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1156172949214051">*</span>PE1] <strong id="EN-US_TASK_0172369567__b907143797214051">interface gigabitethernet <span>0/2/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword359893992214051">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b1952614114214051">ip address 33.33.33.1 24</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1867437446214051">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b2075949258214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword2043610205214051">*</span>PE1] <strong id="EN-US_TASK_0172369567__b413396043214051">ospf</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword569441389214051">*</span>PE1-ospf-1] <strong id="EN-US_TASK_0172369567__b1688421041214051">area 0</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1472483165214051">*</span>PE1-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0172369567__b1293104919214051">network 11.11.11.0 0.0.0.255</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword2046503261214051">*</span>PE1-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0172369567__b815435725214051">network 33.33.33.0 0.0.0.255</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1541819194214051">*</span>PE1-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0172369567__b1063947864214051">network 2.2.2.2 0.0.0.0</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1237889876214051">*</span>PE1-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0172369567__b545156612214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword981427337214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0172369567__b283935606214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword116548253214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-ospf-1] <strong id="EN-US_TASK_0172369567__b883840144214051">quit</strong></pre>
+<p id="EN-US_TASK_0172369567__p1318334937214051">Configure PE2.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1384784246214051">&lt;<span class="keyword" id="EN-US_TASK_0172369567__keyword1662887222214051">HUAWEI</span>&gt; <strong id="EN-US_TASK_0172369567__b329238761214051">system-view</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword181459233214051"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0172369567__keyword358550291214051">HUAWEI</span>] <strong id="EN-US_TASK_0172369567__b464347395214051">sysname PE2</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword20184974214051">*</span><span class="keyword" id="EN-US_TASK_0172369567__keyword2093925439214051">HUAWEI</span>] <strong id="EN-US_TASK_0172369567__b1680982271214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1037435733214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong id="EN-US_TASK_0172369567__b1416274870214051">interface loopback 1</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword994454147214051">*</span>PE2-LoopBack1] <strong id="EN-US_TASK_0172369567__b1946004797214051">ip address 3.3.3.3 32</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1159202001214051">*</span>PE2-LoopBack1] <strong id="EN-US_TASK_0172369567__b478185300214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1450471921214051">*</span>PE2] <strong id="EN-US_TASK_0172369567__b541400733214051">interface gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1318344815214051">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b687936389214051">ip address 22.22.22.1 24</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1411939816214051">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b1881991774214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1635678502214051">*</span>PE2] <strong id="EN-US_TASK_0172369567__b572105794214051">interface gigabitethernet <span>0/2/0</span></strong> 
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1916134593214051">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b1852279393214051">ip address 33.33.33.2 24</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword2007227954214051">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b1938179577214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1612584580214051">*</span>PE2] <strong id="EN-US_TASK_0172369567__b1818868644214051">ospf</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1675172943214051">*</span>PE2-ospf-1] <strong id="EN-US_TASK_0172369567__b1459211486214051">area 0</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword63830123214051">*</span>PE2-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0172369567__b421607396214051">network 22.22.22.0 0.0.0.255</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword632195484214051">*</span>PE2-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0172369567__b1373226551214051">network 33.33.33.0 0.0.0.255</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1106231593214051">*</span>PE2-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0172369567__b1969911025214051">network 3.3.3.3 0.0.0.0</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1590583487214051">*</span>PE2-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0172369567__b1582748312214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword520560720214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0172369567__b1509711245214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1502572288214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-ospf-1] <strong id="EN-US_TASK_0172369567__b620057067214051">quit</strong></pre>
+<div class="p" id="EN-US_TASK_0172369567__p248504738214051">Configure PE3.<pre class="screen" id="EN-US_TASK_0172369567__screen1244718101214051">&lt;<span class="keyword" id="EN-US_TASK_0172369567__keyword1862517294214051">HUAWEI</span>&gt; <strong id="EN-US_TASK_0172369567__b57319402214051">system-view</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword464364631214051"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword" id="EN-US_TASK_0172369567__keyword620780019214051">HUAWEI</span>] <strong id="EN-US_TASK_0172369567__b1337308321214051">sysname PE3</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1639182685214051">*</span><span class="keyword" id="EN-US_TASK_0172369567__keyword1823163079214051">HUAWEI</span>] <strong id="EN-US_TASK_0172369567__b1795177485214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword2041600738214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong id="EN-US_TASK_0172369567__b747272447214051">interface loopback 1</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword178039045214051">*</span>PE3-LoopBack1] <strong id="EN-US_TASK_0172369567__b391747491214051">ip address 4.4.4.4 32</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1804623507214051">*</span>PE3-LoopBack1] <strong id="EN-US_TASK_0172369567__b1163815195214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword844928350214051">*</span>PE3] <strong id="EN-US_TASK_0172369567__b640927268214051">interface gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword46248072214051">*</span>PE3-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b695795828214051">ip address 11.11.11.2 24</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword981112253214051">*</span>PE3-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b580169666214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword871265929214051">*</span>PE3] <strong id="EN-US_TASK_0172369567__b397630050214051">interface gigabitethernet <span>0/2/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1909602022214051">*</span>PE3-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b669124783214051">ip address 22.22.22.2 24</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword360880040214051">*</span>PE3-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b2049858301214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword2107257846214051">*</span>PE3] <strong id="EN-US_TASK_0172369567__b236594362214051">ospf</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword276033953214051">*</span>PE3-ospf-1] <strong id="EN-US_TASK_0172369567__b1352989232214051">area 0</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1227867928214051">*</span>PE3-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0172369567__b818304015214051">network 11.11.11.0 0.0.0.255</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1948979499214051">*</span>PE3-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0172369567__b933803807214051">network 22.22.22.0 0.0.0.255</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword977499389214051">*</span>PE3-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0172369567__b1160406632214051">network 4.4.4.4 0.0.0.0</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword106543867214051">*</span>PE3-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0172369567__b1300085915214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1470595903214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-ospf-1-area-0.0.0.0] <strong id="EN-US_TASK_0172369567__b715159843214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1269086338214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-ospf-1] <strong id="EN-US_TASK_0172369567__b1853773739214051">quit</strong></pre>
+</div>
+<p id="EN-US_TASK_0172369567__p742915852214051">After the configurations are complete, OSPF neighbor relationships can be set up between PE1, PE2, and PE3. Run the <strong id="EN-US_TASK_0172369567__b2037051119214051">display ip routing-table</strong> command. The command output shows that the PEs have learned the routes to each other's Loopback1 interface.</p>
+<p id="EN-US_TASK_0172369567__p214207138214051">The following example uses the command output on PE1.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen294200911214051">&lt;PE1&gt;<strong id="EN-US_TASK_0172369567__b1379004396214051"> display ip routing-table</strong></pre>
+<pre class="screen" id="EN-US_TASK_0172369567__screen192291968214051"><span class="keyword" id="EN-US_TASK_0172369567__keyword2035701088214051">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table: _public_
+         Destinations : 14       Routes : 15
+
+Destination/Mask    Proto  Pre  Cost     Flags NextHop         Interface
+
+        2.2.2.2/32  Direct 0    0           D  127.0.0.1       LoopBack1
+        <strong id="EN-US_TASK_0172369567__b1219575820214051">3.3.3.3/32</strong> OSPF   10   2           D  33.33.33.2      GigabitEthernet<span>0/2/0</span>
+        <strong id="EN-US_TASK_0172369567__b936476720214051">4.4.4.4/32</strong> OSPF   10   2           D  11.11.11.2      GigabitEthernet<span>0/1/0</span>
+     11.11.11.0/24  Direct 0    0           D  11.11.11.1      GigabitEthernet<span>0/1/0</span>
+     11.11.11.1/32  Direct 0    0           D  127.0.0.1       GigabitEthernet<span>0/1/0</span>
+   11.11.11.255/32  Direct 0    0           D  127.0.0.1       GigabitEthernet<span>0/1/0</span>
+     22.22.22.0/24  OSPF   10   2           D  11.11.11.2      GigabitEthernet<span>0/1/0</span>
+                    OSPF   10   2           D  33.33.33.2      GigabitEthernet<span>0/2/0</span>
+     33.33.33.0/24  Direct 0    0           D  33.33.33.1      GigabitEthernet<span>0/2/0</span>
+     33.33.33.1/32  Direct 0    0           D  127.0.0.1       GigabitEthernet<span>0/2/0</span>
+   33.33.33.255/32  Direct 0    0           D  127.0.0.1       GigabitEthernet<span>0/2/0</span>
+      127.0.0.0/8   Direct 0    0           D  127.0.0.1       InLoopBack0
+      127.0.0.1/32  Direct 0    0           D  127.0.0.1       InLoopBack0
+127.255.255.255/32  Direct 0    0           D  127.0.0.1       InLoopBack0
+255.255.255.255/32  Direct 0    0           D  127.0.0.1       InLoopBack0</pre>
+</p></li><li id="EN-US_TASK_0172369567__step1612777988214051"><span id="EN-US_TASK_0172369567__cmd421051882214051">Configure MPLS and MPLS LDP both globally and per interface on each node of the MPLS backbone network and establish LDP LSPs.</span><p><p id="EN-US_TASK_0172369567__p485152209214051"># Configure PE1.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1040737385214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword1419063294214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong id="EN-US_TASK_0172369567__b1992683644214051"> mpls lsr-id 2.2.2.2</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1841237210214051">*</span>PE1] <strong id="EN-US_TASK_0172369567__b108006600214051">mpls</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1701215233214051">*</span>PE1-mpls] <strong id="EN-US_TASK_0172369567__b1941929081214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1994818557214051">*</span>PE1] <strong id="EN-US_TASK_0172369567__b1577804753214051">mpls ldp</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1613661773214051">*</span>PE1-mpls-ldp] <strong id="EN-US_TASK_0172369567__b926853977214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1973178662214051">*</span>PE1] <strong id="EN-US_TASK_0172369567__b1741120106214051">interface gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword668876746214051">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b1703872539214051">mpls</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1740244121214051">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b1450962453214051">mpls ldp</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1700722772214051">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b1595611195214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword7139155614377"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b636326428214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword15739559153711"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong id="EN-US_TASK_0172369567__b296167209214051">interface gigabitethernet<span>0/2/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword766181423813"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b1038233706214051">mpls</strong> 
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword2009772827214051">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b514781082214051">mpls ldp</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword696896711214051">*</span>PE1-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b938810942214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword666004798214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b997184448214051">quit</strong></pre>
+<p id="EN-US_TASK_0172369567__p1418808460214051"># Configure PE2.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1346927418214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword758289191214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong id="EN-US_TASK_0172369567__b2055165305214051"> mpls lsr-id 3.3.3.3</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword963315491214051">*</span>PE2] <strong id="EN-US_TASK_0172369567__b2083463223214051">mpls</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1925041626214051">*</span>PE2-mpls] <strong id="EN-US_TASK_0172369567__b1218834975214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword2120533304214051">*</span>PE2] <strong id="EN-US_TASK_0172369567__b1056734476214051">mpls ldp</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword456511230214051">*</span>PE2-mpls-ldp] <strong id="EN-US_TASK_0172369567__b980790651214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1835521678214051">*</span>PE2] <strong id="EN-US_TASK_0172369567__b1316306555214051">interface gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword220011965214051">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b1657830118214051">mpls</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword979295394214051">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b1396135485214051">mpls ldp</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword2085945311214051">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b161599114214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword53656348378"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b641519920214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword675716381375"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong id="EN-US_TASK_0172369567__b1123726235214051">interface gigabitethernet <span>0/2/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1233184513711"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b774762806214051">mpls</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1400928185214051">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b1858708018214051">mpls ldp</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1733838824214051">*</span>PE2-GigabitEthernet<span>0/2/0</span>0] <strong id="EN-US_TASK_0172369567__b776526157214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword113507302214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b78543783214051">quit</strong></pre>
+<p id="EN-US_TASK_0172369567__p1048437642214051">Configure PE3.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen933547162214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword1754086322214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3]<strong id="EN-US_TASK_0172369567__b17312333214051"> mpls lsr-id 4.4.4.4</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword2049585679214051">*</span>PE3] <strong id="EN-US_TASK_0172369567__b1772897069214051">mpls</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword86704770214051">*</span>PE3-mpls] <strong id="EN-US_TASK_0172369567__b1432934139214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1682247480214051">*</span>PE3] <strong id="EN-US_TASK_0172369567__b1349941056214051">mpls ldp</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1209427126214051">*</span>PE3-mpls-ldp] <strong id="EN-US_TASK_0172369567__b159743631214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1654334424214051">*</span>PE3] <strong id="EN-US_TASK_0172369567__b2108955546214051">interface gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword845228135214051">*</span>PE3-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b1338228065214051">mpls</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword482670289214051">*</span>PE3-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b1557740385214051">mpls ldp</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1082632630214051">*</span>PE3-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b1232936634214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword193769163714"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b1639196486214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword3391136373"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong id="EN-US_TASK_0172369567__b906142579214051">interface gigabitethernet <span>0/2/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword14644205378"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b719757787214051">mpls</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1177935793214051">*</span>PE3-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b1839970112214051">mpls ldp</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword659258953214051">*</span>PE3-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b1643179439214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword923093584214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b170273154214051">quit</strong></pre>
+<p id="EN-US_TASK_0172369567__p123095308214051">After the configurations are complete, LDP sessions can be set up between PEs. Run the <strong id="EN-US_TASK_0172369567__b1170640144214051">display mpls ldp session</strong> command. The command output shows that the <strong id="EN-US_TASK_0172369567__b721143111597">Status</strong> field is <strong id="EN-US_TASK_0172369567__b031143313595">Operational</strong>.</p>
+<p id="EN-US_TASK_0172369567__p389897331214051">The following example uses the command output on PE1.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1122412315214051">&lt;PE1&gt; <strong id="EN-US_TASK_0172369567__b644132274214051">display mpls ldp session</strong>
+
+               LDP Session(s) in Public Network
+ Codes: LAM(Label Advertisement Mode), SsnAge Unit(DDDD:HH:MM)
+<span> An asterisk (*) before a session means the session is being deleted.</span>
+
+ ------------------------------------------------------------------------------
+ Peer-ID            Status      LAM  SsnRole  SsnAge      KA-Sent/Rcv
+ ------------------------------------------------------------------------------
+ 3.3.3.3:0          <strong id="EN-US_TASK_0172369567__b1749676141214051">Operational</strong> DU   Passive  0000:02:22   572/572
+ 4.4.4.4:0          <strong id="EN-US_TASK_0172369567__b552477505214051">Operational</strong> DU   Passive  0000:02:21   566/566
+ ------------------------------------------------------------------------------
+ TOTAL: 2 session(s) Found.</pre>
+</p></li><li id="EN-US_TASK_0172369567__step407725196214051"><span id="EN-US_TASK_0172369567__cmd17051595214051">Configure VPN instances on PEs and connect CEs to PEs.</span><p><p id="EN-US_TASK_0172369567__p636203258214051"># Configure PE1.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen787688699214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword454897688214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong id="EN-US_TASK_0172369567__b1526775267214051">ip vpn-instance VPNA</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1161665992214051">*</span>PE1-vpn-instance-VPNA] <strong id="EN-US_TASK_0172369567__b319582183214051">ipv4-family</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword759150653214051">*</span>PE1-vpn-instance-VPNA-af-ipv4] <strong id="EN-US_TASK_0172369567__b1638659538214051">route-distinguisher 100:1</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword383227678214051">*</span>PE1-vpn-instance-VPNA-af-ipv4] <strong id="EN-US_TASK_0172369567__b256326935214051">vpn-target 111:1 both</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword661296843214051">*</span>PE1-vpn-instance-VPNA-af-ipv4] <strong id="EN-US_TASK_0172369567__b73612879214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword331784066214051">*</span>PE1-vpn-instance-VPNA] <strong id="EN-US_TASK_0172369567__b392530560214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword558768420214051">*</span>PE1] <strong id="EN-US_TASK_0172369567__b109632766214051">interface gigabitethernet <span>0/3/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1264937974214051">*</span>PE1-GigabitEthernet<span>0/3/0</span>] <strong id="EN-US_TASK_0172369567__b1396037596214051">ip binding vpn-instance VPNA</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1120899769214051">*</span>PE1-GigabitEthernet<span>0/3/0</span>] <strong id="EN-US_TASK_0172369567__b1986022580214051">ip address 10.1.1.2 24</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword961022883214051">*</span>PE1-GigabitEthernet<span>0/3/0</span>] <strong id="EN-US_TASK_0172369567__b149043030214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1511987408214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-GigabitEthernet<span>0/3/0</span>] <strong id="EN-US_TASK_0172369567__b313090536214051">quit</strong></pre>
+<p id="EN-US_TASK_0172369567__p1275601772214051"># Configure PE2.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1375212983214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword20585089214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong id="EN-US_TASK_0172369567__b162758262214051">ip vpn-instance VPNA</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword2144076950214051">*</span>PE2-vpn-instance-VPNA] <strong id="EN-US_TASK_0172369567__b1313714617214051">ipv4-family</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword967676909214051">*</span>PE2-vpn-instance-VPNA-af-ipv4] <strong id="EN-US_TASK_0172369567__b530591581214051">route-distinguisher 100:2</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1106978579214051">*</span>PE2-vpn-instance-VPNA-af-ipv4] <strong id="EN-US_TASK_0172369567__b1725557260214051">vpn-target 111:1 both</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword876771877214051">*</span>PE2-vpn-instance-VPNA-af-ipv4] <strong id="EN-US_TASK_0172369567__b873407822214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1610553100214051">*</span>PE2-vpn-instance-VPNA] <strong id="EN-US_TASK_0172369567__b990246876214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1702106525214051">*</span>PE2] <strong id="EN-US_TASK_0172369567__b1036270156214051">interface gigabitethernet <span>0/3/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1627220027214051">*</span>PE2-GigabitEthernet<span>0/3/0</span>] <strong id="EN-US_TASK_0172369567__b111730806214051">ip binding vpn-instance VPNA</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1431814861214051">*</span>PE2-GigabitEthernet<span>0/3/0</span>] <strong id="EN-US_TASK_0172369567__b1906117660214051">ip address 10.2.1.2 24</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1344201924214051">*</span>PE2-GigabitEthernet<span>0/3/0</span>] <strong id="EN-US_TASK_0172369567__b1662913309214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1351527095214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-GigabitEthernet<span>0/3/0</span>] <strong id="EN-US_TASK_0172369567__b901655750214051">quit</strong></pre>
+<p id="EN-US_TASK_0172369567__p46316209214051"># Configure PE3.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1475399884214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword790368577214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong id="EN-US_TASK_0172369567__b937251575214051">ip vpn-instance VPNA</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword656437109214051">*</span>PE3-vpn-instance-VPNA] <strong id="EN-US_TASK_0172369567__b800913746214051">ipv4-family</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword207792675214051">*</span>PE3-vpn-instance-VPNA-af-ipv4] <strong id="EN-US_TASK_0172369567__b1850812639214051">route-distinguisher 100:3</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword889562287214051">*</span>PE3-vpn-instance-VPNA-af-ipv4] <strong id="EN-US_TASK_0172369567__b1390616878214051">vpn-target 111:1 both</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword324358536214051">*</span>PE3-vpn-instance-VPNA-af-ipv4] <strong id="EN-US_TASK_0172369567__b839227076214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword334525633214051">*</span>PE3-vpn-instance-VPNA] <strong id="EN-US_TASK_0172369567__b1808208250214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword723631531214051">*</span>PE3] <strong id="EN-US_TASK_0172369567__b39498742214051">interface gigabitethernet <span>0/3/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword492010595214051">*</span>PE3-GigabitEthernet<span>0/3/0</span>] <strong id="EN-US_TASK_0172369567__b653876082214051">ip binding vpn-instance VPNA</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1321209177214051">*</span>PE3-GigabitEthernet<span>0/3/0</span>] <strong id="EN-US_TASK_0172369567__b707642805214051">ip address 10.3.1.1 24</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1441008922214051">*</span>PE3-GigabitEthernet<span>0/3/0</span>] <strong id="EN-US_TASK_0172369567__b382611672214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1497097551214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-GigabitEthernet<span>0/3/0</span>] <strong id="EN-US_TASK_0172369567__b576433675214051">quit</strong></pre>
+<p id="EN-US_TASK_0172369567__p1333022005214051">Configure CE1.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen180106643214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword966605744214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong id="EN-US_TASK_0172369567__b1228875149214051">interface gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword443022439214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b198423762214051">ip address 10.1.1.1 24</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1325342276214051">*</span>CE1-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b1570077985214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword84071835203813"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b496366588214051">quit </strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword2208114312389"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong id="EN-US_TASK_0172369567__b1787703655214051">interface gigabitethernet <span>0/2/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword534732911390"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b1279973145214051">ip address 10.2.1.1 24</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword15701458153817">*</span>CE1-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b12701458203812">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1350155145214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-GigabitEthernet<span>0/2/0</span>] <strong id="EN-US_TASK_0172369567__b797519165214051">quit</strong></pre>
+<p id="EN-US_TASK_0172369567__p2074221903214051"># Configure CE2.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen512666880214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword965203771214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2] <strong id="EN-US_TASK_0172369567__b310919436214051">interface gigabitethernet <span>0/1/0</span></strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword727920608214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b1909107410214051">ip address 10.3.1.2 24</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1370041737214051">*</span>CE2-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b892669465214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1535435639214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2-GigabitEthernet<span>0/1/0</span>] <strong id="EN-US_TASK_0172369567__b831754036214051">quit</strong></pre>
+<p id="EN-US_TASK_0172369567__p374932322214051">After the configurations are complete, run the <strong id="EN-US_TASK_0172369567__b18445125115597">display ip vpn-instance verbose</strong> command on each PE to check VPN instance configurations. Each PE can successfully ping its connected CE.</p>
+<p id="EN-US_TASK_0172369567__p877182381214051">The following example uses the command output on PE1.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen418536259214051">&lt;PE1&gt; <strong id="EN-US_TASK_0172369567__b996978188214051">display ip vpn-instance verbose</strong>
+ Total VPN-Instances configured : 1
+ Total IPv4 VPN-Instances configured : 1 
+<span> Total IPv6 VPN-Instances configured : 0</span>
+ VPN-Instance Name and ID : VPNA, 1
+  Interfaces : GigabitEthernet<span>0/3/0</span>
+ Address family ipv4
+  Create date : 2008/09/21 12:18:46
+  Up time : 0 days, 02 hours, 35 minutes and 58 seconds
+  Vrf Status : UP
+  Route Distinguisher : 100:1
+  Export VPN Targets :  111:1
+  Import VPN Targets :  111:1
+  Label policy : label per instance
+  The diffserv-mode Information is : uniform
+  The ttl-mode Information is : pipe
+</pre>
+<pre class="screen" id="EN-US_TASK_0172369567__screen234084816214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword2006909478214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong id="EN-US_TASK_0172369567__b1588442871214051">ping -vpn-instance VPNA 10.1.1.1</strong>
+PING 10.1.1.1: 56  data bytes, press CTRL_C to break
+    Reply from 10.1.1.1: bytes=56 Sequence=1 ttl=255 time=130 ms
+    Reply from 10.1.1.1: bytes=56 Sequence=2 ttl=255 time=60 ms
+    Reply from 10.1.1.1: bytes=56 Sequence=3 ttl=255 time=40 ms
+    Reply from 10.1.1.1: bytes=56 Sequence=4 ttl=255 time=30 ms
+    Reply from 10.1.1.1: bytes=56 Sequence=5 ttl=255 time=30 ms
+
+  --- 10.1.1.1 ping statistics ---
+    5 packet(s) transmitted
+    5 packet(s) received
+    0.00% packet loss
+round-trip min/avg/max = 30/58/130 ms
+</pre>
+</p></li><li id="EN-US_TASK_0172369567__step282506790214051"><span id="EN-US_TASK_0172369567__cmd5276013214051">Import the VPN routes between PE1, PE2, and CE1.</span><p><p id="EN-US_TASK_0172369567__p125584486214051">Configure two default routes with the next hops being PE1 and PE2 respectively on CE1 to implement load balancing between PE1 and PE2. Configure the static routes to be bound to the VPN instances on PE1 and PE2 and import the static routes into BGP.</p>
+<p id="EN-US_TASK_0172369567__p1102811079214051"># Configure CE1.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen153413161214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword1868292420214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong id="EN-US_TASK_0172369567__b1141265936214051">load-balance packet all</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword604508423214051">*</span>CE1] <strong id="EN-US_TASK_0172369567__b1879764427214051">ip route-static 0.0.0.0 0 10.1.1.2 </strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1104014936214051">*</span>CE1] <strong id="EN-US_TASK_0172369567__b1628778810214051">ip route-static 0.0.0.0 0 10.2.1.2</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1104864891214051">*</span>CE1] <strong id="EN-US_TASK_0172369567__b2059824358214051">commit</strong></pre>
+<p id="EN-US_TASK_0172369567__p31648362214051"># Configure PE1.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1150695253214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword872868521214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong id="EN-US_TASK_0172369567__b1271604211214051">ip route-static vpn-instance VPNA 1.1.1.1 32 10.1.1.1</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1196612280214051">*</span>PE1] <strong id="EN-US_TASK_0172369567__b1237275116214051">bgp 100</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1436832154214051">*</span>PE1-bgp] <strong id="EN-US_TASK_0172369567__b1009620565214051">ipv4-family vpn-instance VPNA</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword669062461214051">*</span>PE1-bgp-VPNA] <strong id="EN-US_TASK_0172369567__b535933377214051">import-route direct</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword6780057214051">*</span>PE1-bgp-VPNA] <strong id="EN-US_TASK_0172369567__b1505954242214051">import-route static</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword509784786214051">*</span>PE1-bgp-VPNA] <strong id="EN-US_TASK_0172369567__b385424653214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword240462076214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bgp-VPNA] <strong id="EN-US_TASK_0172369567__b1308577621214051">quit</strong></pre>
+<p id="EN-US_TASK_0172369567__p1889756594214051"># Configure PE2.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1081737812214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword303457035214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong id="EN-US_TASK_0172369567__b387370366214051">ip route-static vpn-instance VPNA 1.1.1.1 32 10.2.1.1</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword451482548214051">*</span>PE2] <strong id="EN-US_TASK_0172369567__b1608810747214051">bgp 100</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1799091117214051">*</span>PE2-bgp] <strong id="EN-US_TASK_0172369567__b425627631214051">ipv4-family vpn-instance VPNA</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword551610622214051">*</span>PE2-bgp-VPNA] <strong id="EN-US_TASK_0172369567__b288098151214051">import-route direct</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword451290111214051">*</span>PE2-bgp-VPNA] <strong id="EN-US_TASK_0172369567__b25391798214051">import-route static</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1522353735214051">*</span>PE2-bgp-VPNA] <strong id="EN-US_TASK_0172369567__b157599194214051">commit</strong></pre>
+</p></li><li id="EN-US_TASK_0172369567__step100817860214051"><span id="EN-US_TASK_0172369567__cmd81175537214051">Set up an EBGP peer relationship between PE3 and CE2, and import VPN routes into EBGP.</span><p><p id="EN-US_TASK_0172369567__p1619217356214051"># Configure CE2.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1140884601214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword2023227557214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2] <strong id="EN-US_TASK_0172369567__b1627968274214051">bgp 65410</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword427482678214051">*</span>CE2-bgp] <strong id="EN-US_TASK_0172369567__b2004970947214051">peer 10.3.1.1 as-number 100</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword858168585214051">*</span>CE2-bgp] <strong id="EN-US_TASK_0172369567__b1127108406214051">import-route direct</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword567709468214051">*</span>CE2-bgp] <strong id="EN-US_TASK_0172369567__b1564771723214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1973735652214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2-bgp] <strong id="EN-US_TASK_0172369567__b93179514214051">quit</strong></pre>
+<p id="EN-US_TASK_0172369567__p368970317214051"># Configure PE3. # Specify the number of routes for load balancing as 2 on PE3.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen834647200214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword1219527838214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong id="EN-US_TASK_0172369567__b836525544214051">bgp 100</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword426265721214051">*</span>PE3-bgp] <strong id="EN-US_TASK_0172369567__b218167179214051">ipv4-family vpn-instance VPNA</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1246993260214051">*</span>PE3-bgp-VPNA] <strong id="EN-US_TASK_0172369567__b536519195214051">peer 10.3.1.2 as-number 65410</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword433351162214051">*</span>PE3-bgp-VPNA] <strong id="EN-US_TASK_0172369567__b727462047214051">import-route direct</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword876373913214051">*</span>PE3-bgp-VPNA] <strong id="EN-US_TASK_0172369567__b219884295214051">maximum load-balancing 2</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1222138814214051">*</span>PE3-bgp-VPNA] <strong id="EN-US_TASK_0172369567__b853565594214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1436591227214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-bgp-VPNA] <strong id="EN-US_TASK_0172369567__b999561819214051">quit</strong></pre>
+</p></li><li id="EN-US_TASK_0172369567__step322107382214051"><span id="EN-US_TASK_0172369567__cmd1999978834214051">Establish an MP-IBGP peer relationship between the PEs.</span><p><p id="EN-US_TASK_0172369567__p124997040214051"># Configure PE1.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen356574362214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword1902757844214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong id="EN-US_TASK_0172369567__b368980130214051">bgp 100</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword26232040214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bgp] <strong id="EN-US_TASK_0172369567__b1116869872214051">peer 3.3.3.3 as-number 100</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1036129763214051">*</span>PE1-bgp] <strong id="EN-US_TASK_0172369567__b546154588214051">peer 3.3.3.3 connect-interface loopback 1</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword932084413214051">*</span>PE1-bgp] <strong id="EN-US_TASK_0172369567__b104671503214051">peer 4.4.4.4 as-number 100</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1608365151214051">*</span>PE1-bgp] <strong id="EN-US_TASK_0172369567__b1050311881214051">peer 4.4.4.4 connect-interface loopback 1</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword533169504214051">*</span>PE1-bgp] <strong id="EN-US_TASK_0172369567__b561672257214051">ipv4-family vpnv4</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1542959499214051">*</span>PE1-bgp-af-vpnv4] <strong id="EN-US_TASK_0172369567__b1488094338214051">peer 3.3.3.3 enable</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1548539027214051">*</span>PE1-bgp-af-vpnv4] <strong id="EN-US_TASK_0172369567__b998474217214051">peer 4.4.4.4 enable</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword944288337214051">*</span>PE1-bgp-af-vpnv4] <strong id="EN-US_TASK_0172369567__b468943360214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1340075874214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bgp-af-vpnv4] <strong id="EN-US_TASK_0172369567__b880426074214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword673618733214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bgp] <strong id="EN-US_TASK_0172369567__b409357771214051">quit</strong></pre>
+<p id="EN-US_TASK_0172369567__p1624693274214051"># Configure PE2.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1445340553214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword977622044214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong id="EN-US_TASK_0172369567__b660912029214051">bgp 100</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1320956155214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-bgp] <strong id="EN-US_TASK_0172369567__b1852852045214051">peer 2.2.2.2 as-number 100</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword949082983214051">*</span>PE2-bgp] <strong id="EN-US_TASK_0172369567__b747621195214051">peer 2.2.2.2 connect-interface loopback 1</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1992458444214051">*</span>PE2-bgp] <strong id="EN-US_TASK_0172369567__b1483770884214051">peer 4.4.4.4 as-number 100</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1864937660214051">*</span>PE2-bgp] <strong id="EN-US_TASK_0172369567__b1763711562214051">peer 4.4.4.4 connect-interface loopback 1</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword137686605214051">*</span>PE2-bgp] <strong id="EN-US_TASK_0172369567__b1027875468214051">ipv4-family vpnv4</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword374758586214051">*</span>PE2-bgp-af-vpnv4] <strong id="EN-US_TASK_0172369567__b1052482909214051">peer 2.2.2.2 enable</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1201969868214051">*</span>PE2-bgp-af-vpnv4] <strong id="EN-US_TASK_0172369567__b1828482453214051">peer 4.4.4.4 enable</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword58045838214051">*</span>PE2-bgp-af-vpnv4] <strong id="EN-US_TASK_0172369567__b303732675214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1620350100214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-bgp-af-vpnv4] <strong id="EN-US_TASK_0172369567__b368418504214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword896643438214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-bgp] <strong id="EN-US_TASK_0172369567__b1261870444214051">quit</strong></pre>
+<p id="EN-US_TASK_0172369567__p272719947214051"># Configure PE3.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1311901037214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword1438182893214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3] <strong id="EN-US_TASK_0172369567__b1482966145214051">bgp 100</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1711654768214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-bgp] <strong id="EN-US_TASK_0172369567__b531339778214051">peer 2.2.2.2 as-number 100</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword323684686214051">*</span>PE3-bgp] <strong id="EN-US_TASK_0172369567__b1400707565214051">peer 2.2.2.2 connect-interface loopback 1</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword2046220015214051">*</span>PE3-bgp] <strong id="EN-US_TASK_0172369567__b1776777397214051">peer 3.3.3.3 as-number 100</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1136099302214051">*</span>PE3-bgp] <strong id="EN-US_TASK_0172369567__b635816315214051">peer 3.3.3.3 connect-interface loopback 1</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1186342418214051">*</span>PE3-bgp] <strong id="EN-US_TASK_0172369567__b1383270603214051">ipv4-family vpnv4</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1423208056214051">*</span>PE3-bgp-af-vpnv4] <strong id="EN-US_TASK_0172369567__b1618720511214051">peer 2.2.2.2 enable</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword553758352214051">*</span>PE3-bgp-af-vpnv4] <strong id="EN-US_TASK_0172369567__b1691969892214051">peer 3.3.3.3 enable</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword835275731214051">*</span>PE3-bgp-af-vpnv4] <strong id="EN-US_TASK_0172369567__b312257685214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1465228509214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-bgp-af-vpnv4] <strong id="EN-US_TASK_0172369567__b425565442214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1970277002214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE3-bgp] <strong id="EN-US_TASK_0172369567__b1873526432214051">quit</strong></pre>
+<p id="EN-US_TASK_0172369567__p1917784834214051">After completing the configurations, run the <strong id="EN-US_TASK_0172369567__b14429184313119">display bgp vpnv4 all peer</strong> command on the PEs to check whether a BGP peer relationship has been established between the PEs. If the <strong id="EN-US_TASK_0172369567__b124291431115">Established</strong> state is displayed in the command output, the BGP peer relationship has been established successfully.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen2064022851214051">&lt;PE1&gt; <strong id="EN-US_TASK_0172369567__b607435886214051">display bgp vpnv4 all peer</strong>
+
+ BGP local router ID : 2.2.2.2
+ Local AS number : 100
+ Total number of peers : 2                 Peers in established state : 2
+
+Peer            V    AS  MsgRcvd  MsgSent    OutQ  Up/Down  State PrefRcv
+
+4.4.4.4         4   100      205      202       0 03:05:25 <strong id="EN-US_TASK_0172369567__b1909614094214051">Established</strong>       0
+3.3.3.3         4   100      197      254       0 03:06:54 <strong id="EN-US_TASK_0172369567__b1642924778214051">Established</strong>       0  
+</pre>
+</p></li><li id="EN-US_TASK_0172369567__step539150275214051"><span id="EN-US_TASK_0172369567__cmd1265165232214051">Configure static BFD sessions with automatically negotiated discriminators.</span><p><p id="EN-US_TASK_0172369567__p1206373256214051">Set up BFD sessions between CE1 and PE1, and between CE1 and PE2.</p>
+<p id="EN-US_TASK_0172369567__p1652079901214051"># Configure PE1.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen28606757214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword1163354250214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong id="EN-US_TASK_0172369567__b1872502782214051">bfd</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1941767737214051">*</span>PE1-bfd] <strong id="EN-US_TASK_0172369567__b456858562214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword2013415306214051">*</span>PE1] <strong id="EN-US_TASK_0172369567__b2071970029214051">bfd pe1_to_ce1 bind peer-ip 10.1.1.1 vpn-instance VPNA interface gigabitethernet <span>0/3/0</span> source-ip 10.1.1.2 auto</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword754072014214051">*</span>PE1-bfd-session-pe1_to_ce1] <strong id="EN-US_TASK_0172369567__b1765709778214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1521729659214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1-bfd-session-pe1_to_ce1] <strong id="EN-US_TASK_0172369567__b1066686500214051">quit</strong></pre>
+<p id="EN-US_TASK_0172369567__p1830032946214051"># Configure PE2.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen2031438759214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword230121224214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong id="EN-US_TASK_0172369567__b1738942284214051">bfd</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1675868264214051">*</span>PE2-bfd] <strong id="EN-US_TASK_0172369567__b1429983148214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword597017385214051">*</span>PE2] <strong id="EN-US_TASK_0172369567__b656952003214051">bfd pe2_to_ce1 bind peer-ip 10.2.1.1 vpn-instance VPNA interface gigabitethernet <span>0/3/0</span> source-ip 10.2.1.2 auto</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1612118349214051">*</span>PE2-bfd-session-pe2_to_ce1] <strong id="EN-US_TASK_0172369567__b1830671694214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword382675737214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2-bfd-session-pe2_to_ce1] <strong id="EN-US_TASK_0172369567__b45174473214051">quit</strong></pre>
+<p id="EN-US_TASK_0172369567__p556097727214051"># Configure CE1.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen2195368214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword1827251501214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong id="EN-US_TASK_0172369567__b1766993609214051">bfd</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword526154032214051">*</span>CE1-bfd] <strong id="EN-US_TASK_0172369567__b1271071329214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword175909150214051">*</span>CE1] <strong id="EN-US_TASK_0172369567__b1084789450214051">bfd ce1_to_pe1 bind peer-ip 10.1.1.2 interface gigabitethernet <span>0/1/0</span> source-ip 10.1.1.1 auto</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1087824226214051">*</span>CE1-bfd-session-ce1_to_pe1] <strong id="EN-US_TASK_0172369567__b1238221450214051">quit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1451808951214051">*</span>CE1] <strong id="EN-US_TASK_0172369567__b474573313214051">bfd ce1_to_pe2 bind peer-ip 10.2.1.2 interface gigabitethernet <span>0/2/0</span> source</strong><strong id="EN-US_TASK_0172369567__b1968277626214051">-ip 10.2.1.1 auto</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword1638540995214051">*</span>CE1-bfd-session-ce1_to_pe2] <strong id="EN-US_TASK_0172369567__b567371229214051">commit</strong>
+[<span class="keyword" id="EN-US_TASK_0172369567__keyword628647877214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-bfd-session-ce1_to_pe2] <strong id="EN-US_TASK_0172369567__b561518076214051">quit</strong></pre>
+<p id="EN-US_TASK_0172369567__p1544999209214051">After completing the configurations, run the <strong id="EN-US_TASK_0172369567__b1363225675214051">display bfd session all verbose</strong> command on each PE and CE. The command output shows that a one-hop auto-negotiation static BFD session has been established, and the session status is <strong id="EN-US_TASK_0172369567__b33597241631">Up</strong>. The local and remote IDs of the BFD session are obtained through auto-negotiation. The following uses PE1 and CE1 as an example.</p>
+<p id="EN-US_TASK_0172369567__p822307250214051"># The following example uses the command output on PE1.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1801931278214051">&lt;PE1&gt; <strong id="EN-US_TASK_0172369567__b2118792184214051">display bfd session all verbose</strong></pre>
+<pre class="screen" id="EN-US_TASK_0172369567__screen898482477214051"><span>(w): State in WTR 
+(*): State is invalid</span>
+--------------------------------------------------------------------------------
+  (One Hop) State : Up                      Name : pe1_to_ce1
+------------------------------------------------------------------------------
+  Local Discriminator    : 8192             Remote Discriminator   : ce1_to_pe1
+  Session Detect Mode    : Asynchronous Mode Without Echo Function
+  BFD Bind Type          : Interface(GigabitEthernet<span>0/3/0</span>)
+  Bind Session Type      : <strong id="EN-US_TASK_0172369567__b715705972214051">Static_Auto</strong>
+  Bind Peer IP Address   : 10.1.1.1
+  Bind Interface         : GigabitEthernet<span>0/3/0</span>
+  Vpn Instance Name      : vpna
+  Bind Source IP Address : 10.1.1.2
+  FSM Board Id           : 3                TOS-EXP                : 6
+  Min Tx Interval (ms)   : 10               Min Rx Interval (ms)   : 10
+  Actual Tx Interval (ms): -                Actual Rx Interval (ms): -
+  Local Detect Multi     : 3                Detect Interval (ms)   : -
+  Echo Passive           : Disable          Acl Number             : -
+  Destination Port       : 3784             TTL                    : 254  
+  Proc Interface Status  : Disable          Process PST            : Disable
+  WTR Interval (ms)      : -                Config PST             : Enable
+  Active Multi           : 3
+  Last Local Diagnostic  : No Diagnostic
+  Bind Application       : AUTO
+  Session TX TmrID       : -                Session Detect TmrID   : -
+  Session Init TmrID     : -                Session WTR TmrID      : -
+  Session Echo Tx TmrID  : -
+  Session Not Up Reason  : In negotiation 
+  Session Description    : - 
+<span>  Track Group Name       : -</span>
+------------------------------------------------------------------------------
+
+     Total UP/DOWN Session Number : 1/0
+</pre>
+<p id="EN-US_TASK_0172369567__p1863238483214051"># The following example uses the command output on CE1.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1797547871214051">&lt;CE1&gt; <strong id="EN-US_TASK_0172369567__b749034419214051">display bfd session all verbose</strong></pre>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1542669821214051"><span>(w): State in WTR 
+(*): State is invalid</span>
+--------------------------------------------------------------------------------
+  (One Hop) State : Up                      Name : ce1_to_pe1
+--------------------------------------------------------------------------------
+  Local Discriminator    : 8192             Remote Discriminator   : 8192
+  Session Detect Mode    : Asynchronous Mode Without Echo Function
+  BFD Bind Type          : Interface(GigabitEthernet<span>0/1/0</span>)
+  Bind Session Type      : Static_Auto
+  Bind Peer IP Address   : 10.1.1.2
+  Bind Interface         : GigabitEthernet<span>0/1/0</span>
+  FSM Board Id           : 3                TOS-EXP                : 6
+  Min Tx Interval (ms)   : 10               Min Rx Interval (ms)   : 10
+  Actual Tx Interval (ms): -                Actual Rx Interval (ms): -
+  Local Detect Multi     : 3                Detect Interval (ms)   : -
+  Echo Passive           : Disable          Acl Number             : -
+  Destination Port       : 3784             TTL                    : 255
+  Proc Interface Status  : Disable          Process PST            : Disable
+  WTR Interval (ms)      : -                Config PST             : Enable
+  Active Multi           : 3
+  Last Local Diagnostic  : No Diagnostic
+  Bind Application       : AUTO
+  Session TX TmrID       : -                Session Detect TmrID   : -
+  Session Init TmrID     : -                Session WTR TmrID      : -
+  Session Echo Tx TmrID  : -
+  PDT Index              : FSM-5020000 | RCV-0 | IF-5020000 | TOKEN-0
+  Session Description    : -
+<span>  Track Group Name       : -</span>
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+  (One Hop) State : Up                      Name : ce1_to_pe2                   
+--------------------------------------------------------------------------------
+  Local Discriminator    : 8193             Remote Discriminator   : 8193
+  Session Detect Mode    : Asynchronous Mode Without Echo Function
+  BFD Bind Type          : Interface(GigabitEthernet<span>0/2/0</span>)
+  Bind Session Type      : Static_Auto
+  Bind Peer IP Address   : 10.2.1.2
+  Bind Interface         : GigabitEthernet<span>0/2/0</span>
+  FSM Board Id           : 3                TOS-EXP                : 6
+  Min Tx Interval (ms)   : 10               Min Rx Interval (ms)   : 10
+  Actual Tx Interval (ms): -                Actual Rx Interval (ms): -
+  Local Detect Multi     : 3                Detect Interval (ms)   : -
+  Echo Passive           : Disable          Acl Number             : -
+  Destination Port       : 3784             TTL                    : 255
+  Proc Interface Status  : Disable          Process PST            : Disable
+  WTR Interval (ms)      : -                Config PST             : Enable
+  Active Multi           : 3
+  Last Local Diagnostic  : No Diagnostic
+  Bind Application       : AUTO
+  Session TX TmrID       : -                Session Detect TmrID   : -
+  Session Init TmrID     : -                Session WTR TmrID      : -
+  Session Echo Tx TmrID  : -
+  PDT Index              : FSM-5020000 | RCV-0 | IF-5020000 | TOKEN-0
+  Session Description    : -
+<span>  Track Group Name       : -</span>
+--------------------------------------------------------------------------------
+
+     Total UP/DOWN Session Number : 2/0</pre>
+</p></li><li id="EN-US_TASK_0172369567__step867903813214051"><span id="EN-US_TASK_0172369567__cmd1150454667214051">Configure BFD for VPN static route on the PEs.</span><p><p id="EN-US_TASK_0172369567__p1699728838214051"># Configure PE1.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1704402225214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword1681031219214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong id="EN-US_TASK_0172369567__b744898715214051">ip route-static vpn-instance VPNA 1.1.1.1 255.255.255.255 10.1.1.1 track bfd-session pe1_to_ce1</strong></pre>
+<pre class="screen" id="EN-US_TASK_0172369567__screen776931172214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword1942093699214051">*</span>PE1] <strong id="EN-US_TASK_0172369567__b1145124328214051">commit</strong></pre>
+<p id="EN-US_TASK_0172369567__p545567385214051"># Configure PE2.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen227528496214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword222009539214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2] <strong id="EN-US_TASK_0172369567__b1517721190214051">ip route-static vpn-instance VPNA 1.1.1.1 255.255.255.255 10.2.1.1 track bfd-session pe2_to_ce1</strong></pre>
+<pre class="screen" id="EN-US_TASK_0172369567__screen752938174214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword35464492214051">*</span>PE2] <strong id="EN-US_TASK_0172369567__b1793795268214051">commit</strong></pre>
+</p></li><li id="EN-US_TASK_0172369567__step669712252214051"><span id="EN-US_TASK_0172369567__cmd892025437214051">Verify the configuration.</span><p><p id="EN-US_TASK_0172369567__p771209698214051"># After completing the configurations, check the VPN routing table information on each PE. The command output shows that a static route exists in the routing table.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1867192403214051">&lt;PE1&gt; <strong id="EN-US_TASK_0172369567__b565431904214051">display ip routing-table vpn-instance VPNA</strong>
+<span class="keyword" id="EN-US_TASK_0172369567__keyword2729660214051">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table: VPNA
+         Destinations : 8        Routes : 8
+
+Destination/Mask    Proto  Pre  Cost     Flags NextHop         Interface
+
+        <strong id="EN-US_TASK_0172369567__b1973765454214051">1.1.1.1/32</strong> <strong id="EN-US_TASK_0172369567__b1733225535214051">Static</strong> <strong id="EN-US_TASK_0172369567__b1740178669214051">60</strong>  <strong id="EN-US_TASK_0172369567__b1861157676214051">0</strong>         <strong id="EN-US_TASK_0172369567__b922858033214051">RD</strong> <strong id="EN-US_TASK_0172369567__b784346082214051">10.1.1.1</strong>       <strong id="EN-US_TASK_0172369567__b4342108214051">GigabitEthernet<span>0/3/0</span></strong>
+       10.1.1.0/24  Direct 0    0         D  10.1.1.2        GigabitEthernet<span>0/3/0</span>
+       10.1.1.2/32  Direct 0    0         D  127.0.0.1       GigabitEthernet<span>0/3/0</span>
+     10.1.1.255/32  Direct 0    0         D  127.0.0.1       GigabitEthernet<span>0/3/0</span>
+       10.2.1.0/24  IBGP   255  0         RD 3.3.3.3         GigabitEthernet<span>0/2/0</span>
+       10.3.1.0/24  IBGP   255  0         RD 4.4.4.4         GigabitEthernet<span>0/1/0</span>
+      127.0.0.0/8   Direct 0    0         D  127.0.0.1       InLoopBack0
+255.255.255.255/32  Direct 0    0         D  127.0.0.1       InLoopBack0</pre>
+<p id="EN-US_TASK_0172369567__p1798943131214051"># On CE1, run the <strong id="EN-US_TASK_0172369567__b106867562411">tracert</strong> command to ping the gateway through which the packets destined for CE2 pass. The command output shows that load balancing is implemented between PE1 and PE2 at the first hop.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen960101619214051">&lt;CE1&gt; <strong id="EN-US_TASK_0172369567__b407122181214051">tracert 10.3.1.2</strong>
+ traceroute to  10.3.1.2(10.3.1.2), max hops: 30 ,packet length: 40
+ 1 10.1.1.2 20 ms 10.2.1.2 1 ms 10.1.1.2 40 ms
+ 2 10.3.1.1 40 ms  30 ms  50 ms
+ 3 10.3.1.2 80 ms  80 ms  60 ms
+</pre>
+<p id="EN-US_TASK_0172369567__p1418600057214051"># Check the routing table information on PE3. The command output shows that there are two routes with next hop addresses 3.3.3.3 and 2.2.2.2 to CE1 (1.1.1.1). The two BGP routes are used to load-balance traffic.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1626825282214051">&lt;PE3&gt;<strong id="EN-US_TASK_0172369567__b441742946214051"> display ip routing-table vpn-instance VPNA</strong>
+<span class="keyword" id="EN-US_TASK_0172369567__keyword95962724214051">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table: VPNA
+         Destinations : 7        Routes : 8
+
+Destination/Mask    Proto  Pre  Cost     Flags NextHop         Interface
+
+        <strong id="EN-US_TASK_0172369567__b47960940214051">1.1.1.1/32</strong>  IBGP   255  0          RD  3.3.3.3         GigabitEthernet<span>0/2/0</span>
+                    IBGP   255  0          RD  2.2.2.2         GigabitEthernet<span>0/1/0</span>
+       10.1.1.0/24  IBGP   255  0          RD  2.2.2.2         GigabitEthernet<span>0/1/0</span>
+       10.2.1.0/24  IBGP   255  0          RD  3.3.3.3         GigabitEthernet<span>0/2/0</span>
+       10.3.1.0/24  Direct 0    0           D  10.3.1.1        GigabitEthernet<span>0/3/0</span>
+       10.3.1.1/32  Direct 0    0           D  127.0.0.1       GigabitEthernet<span>0/3/0</span>
+     10.3.1.255/32  Direct 0    0           D  127.0.0.1       GigabitEthernet<span>0/3/0</span>
+255.255.255.255/32  Direct 0    0           D  127.0.0.1       InLoopBack0</pre>
+<p id="EN-US_TASK_0172369567__p731788495214051"># Run the <strong id="EN-US_TASK_0172369567__b1249518521359">tracert</strong> command on CE2 to check the traffic destined for CE1. The command output shows that load balancing is performed when the traffic leaves PE3.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen44917775214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword1657454527214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2]<strong id="EN-US_TASK_0172369567__b922253629214051"> tracert 1.1.1.1</strong>
+ traceroute to  1.1.1.1(1.1.1.1), max hops: 30 ,packet length: 40
+ 1 10.3.1.1 9 ms  2 ms  2 ms
+ 2 10.2.1.2 &lt; AS=100 &gt; 6 ms  5 ms  2 ms
+ 3 10.2.1.1 &lt; AS=100 &gt; 6 ms  6 ms  5 ms
+</pre>
+<p id="EN-US_TASK_0172369567__p218367587214051"># Run the <strong id="EN-US_TASK_0172369567__b1257040912214051">shutdown</strong> command on GE<span>0/1/0</span> of CE1 to simulate a link fault.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen695996035214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword673702214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-GigabitEthernet<span>0/1/0</span>]<strong id="EN-US_TASK_0172369567__b1097744445214051"> shutdown</strong></pre>
+<p id="EN-US_TASK_0172369567__p519149033214051"># Check the BFD session status on PE1. The command output shows that the BFD session status is <strong id="EN-US_TASK_0172369567__b734744412612">Down</strong>.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1111287612214051">&lt;PE1&gt;<strong id="EN-US_TASK_0172369567__b1822558473214051"> display bfd session all verbose</strong></pre>
+<pre class="screen" id="EN-US_TASK_0172369567__screen644259207214051"><span>(w): State in WTR 
+(*): State is invalid</span>
+--------------------------------------------------------------------------------
+  (One Hop) State : <strong id="EN-US_TASK_0172369567__b1912860051214051">Down</strong>                   Name : pe1_to_ce1
+------------------------------------------------------------------------------
+  Local Discriminator    : 8192             Remote Discriminator   : 8192
+  Session Detect Mode    : Asynchronous Mode Without Echo Function
+  BFD Bind Type          : Interface(GigabitEthernet<span>0/3/0</span>)
+  Bind Session Type      : <strong id="EN-US_TASK_0172369567__b2085888142214051">Static_Auto</strong>
+  Bind Peer IP Address   : 10.1.1.1
+  Bind Interface         : GigabitEthernet<span>0/3/0</span>
+  FSM Board Id           : 3                TOS-EXP                : 7
+  Min Tx Interval (ms)   : 10               Min Rx Interval (ms)   : 10
+  Actual Tx Interval (ms): -                Actual Rx Interval (ms): -
+  Local Detect Multi     : 3                Detect Interval (ms)   : -
+  Echo Passive           : Disable          Acl Number             : -
+  Destination Port       : 3784             TTL                    : 255  
+  Proc Interface Status  : Disable          Process PST            : Disable
+  WTR Interval (ms)      : -                Config PST             : Enable
+  Active Multi           : 3
+  Last Local Diagnostic  : No Diagnostic
+  Bind Application       : AUTO
+  Session TX TmrID       : -                Session Detect TmrID   : -
+  Session Init TmrID     : -                Session WTR TmrID      : -
+  Session Echo Tx TmrID  : -
+  Session Not Up Reason  : In negotiation 
+  Session Description    : - 
+<span>  Track Group Name       : -</span>
+------------------------------------------------------------------------------
+
+     Total UP/DOWN Session Number : 1/0</pre>
+<p id="EN-US_TASK_0172369567__p715985003214051"># Check the VPN routing table on PE1. The command output shows that the next hop of the route destined for CE1 is only PE2.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1370735046214051">&lt;PE1&gt;<strong id="EN-US_TASK_0172369567__b1460278845214051"> display ip routing-table vpn-instance VPNA</strong>
+<span class="keyword" id="EN-US_TASK_0172369567__keyword737784102214051">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table: VPNA
+         Destinations : 4        Routes : 4
+
+Destination/Mask    Proto  Pre  Cost     Flags NextHop         Interface
+
+<strong id="EN-US_TASK_0172369567__b1531850691214051">    1.1.1.1/32  EBGP   255  0           RD  3.3.3.3         GigabitEthernet<span>0/2/0</span></strong>
+       10.2.1.0/24  IBGP   255  0          RD  3.3.3.3         GigabitEthernet<span>0/2/0</span>
+       10.3.1.0/24  IBGP   255  0          RD  4.4.4.4         GigabitEthernet<span>0/1/0</span>
+255.255.255.255/32  Direct 0    0           D  127.0.0.1       InLoopBack0</pre>
+<p id="EN-US_TASK_0172369567__p1353459603214051"># On CE1, check the gateway through which the packets destined for CE2 pass. The command output shows that load balancing is not carried out between PE1 and PE2 at the first hop, and the traffic flows only through PE2.</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1116150093214051">&lt;CE3&gt;<strong id="EN-US_TASK_0172369567__b860754805214051"> tracert 10.3.1.2</strong>
+ traceroute to  10.3.1.2(10.3.1.2), max hops: 30 ,packet length: 40
+ 1 10.2.1.2 50 ms  30 ms  10 ms
+ 2 10.3.1.1 110 ms  70 ms  90 ms
+ 3 10.3.1.2 60 ms  70 ms  80 ms
+</pre>
+<p id="EN-US_TASK_0172369567__p1179184177214051"># Check the routing table on PE3. The command output shows that there is only one route to CE1 (1.1.1.1), with the next hop being PE2 (3.3.3.3).</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen979252207214051">&lt;PE3&gt;<strong id="EN-US_TASK_0172369567__b1990457215214051"> display ip routing-table vpn-instance VPNA</strong>
+<span class="keyword" id="EN-US_TASK_0172369567__keyword976475202214051">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table: VPNA
+         Destinations : 6        Routes : 6
+
+Destination/Mask    Proto  Pre  Cost     Flags NextHop         Interface
+
+        1.1.1.1/32  IBGP   255  0          RD  3.3.3.3         GigabitEthernet<span>0/2/0</span>
+       10.2.1.0/24  IBGP   255  0          RD  3.3.3.3         GigabitEthernet<span>0/2/0</span>
+       10.3.1.0/24  Direct 0    0           D  10.3.1.1        GigabitEthernet<span>0/3/0</span>
+       10.3.1.1/32  Direct 0    0           D  127.0.0.1       GigabitEthernet<span>0/3/0</span>
+     10.3.1.255/32  Direct 0    0           D  127.0.0.1       GigabitEthernet<span>0/3/0</span>
+255.255.255.255/32  Direct 0    0           D  127.0.0.1       InLoopBack0</pre>
+<p id="EN-US_TASK_0172369567__p1311831708214051"># Check traffic from CE2 to CE1. The command output shows that traffic going out of PE3 is sent through GE<span>0/2/0</span> (10.2.1.2).</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen2009107969214051">[<span class="keyword" id="EN-US_TASK_0172369567__keyword822634435214051"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2]<strong id="EN-US_TASK_0172369567__b65075757214051"> tracert 1.1.1.1</strong>
+ traceroute to  1.1.1.1(1.1.1.1), max hops: 30 ,packet length: 40
+ 1 10.3.1.1 9 ms  2 ms  2 ms
+ 2 10.2.1.2 &lt; AS=100 &gt; 6 ms  5 ms  5 ms
+ 3 10.2.1.1 &lt; AS=100 &gt; 6 ms  5 ms  5 ms
+</pre>
+<p id="EN-US_TASK_0172369567__p1311072694214051">Use a tester to generate traffic and forward the traffic in load-balancing mode. After a link between CE1 and PE1 or a link between CE1 and PE2 fails, you can find that the traffic is switched in less than 50 ms.</p>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0172369567__example491581101214051"><a name="EN-US_TASK_0172369567__1.4.6"></a><a name="1.4.6"></a><h4 class="sectiontitle">Configuration Files</h4><ul id="EN-US_TASK_0172369567__ul442583861214051"><li id="EN-US_TASK_0172369567__li308813595214051"><p id="EN-US_TASK_0172369567__p1909600013214051"><a name="EN-US_TASK_0172369567__li308813595214051"></a><a name="li308813595214051"></a>PE1 configuration file</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen2036204270214051">#
+sysname PE1
+#
+ip vpn-instance VPNA
+ ipv4-family
+  route-distinguisher 100:1
+  apply-label per-instance
+  vpn-target 111:1 export-extcommunity
+  vpn-target 111:1 import-extcommunity
+#
+bfd
+#
+mpls lsr-id 2.2.2.2
+#
+mpls
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 11.11.11.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 33.33.33.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown
+ ip binding vpn-instance VPNA
+ ip address 10.1.1.2 255.255.255.0
+#
+interface LoopBack1
+ ip address 2.2.2.2 255.255.255.255
+#
+bgp 100
+ peer 3.3.3.3 as-number 100
+ peer 3.3.3.3 connect-interface LoopBack1
+ peer 4.4.4.4 as-number 100
+ peer 4.4.4.4 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 3.3.3.3 enable
+  peer 4.4.4.4 enable
+ #
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 3.3.3.3 enable
+  peer 4.4.4.4 enable
+ #
+ ipv4-family vpn-instance VPNA
+  import-route direct
+  import-route static
+#
+ospf 1
+ area 0.0.0.0
+  network 11.11.11.0 0.0.0.255
+  network 33.33.33.0 0.0.0.255
+  network 2.2.2.2 0.0.0.0
+#
+ip route-static vpn-instance VPNA 1.1.1.1 255.255.255.255 10.1.1.1 track bfd-session pe1_to_ce1
+#
+bfd pe1_to_ce1 bind peer-ip 10.1.1.1 vpn-instance VPNA interface GigabitEthernet<span>0/3/0</span> source-ip 10.1.1.2 auto
+#
+return</pre>
+</li><li id="EN-US_TASK_0172369567__li1759056239214051"><p id="EN-US_TASK_0172369567__p50840624214051"><a name="EN-US_TASK_0172369567__li1759056239214051"></a><a name="li1759056239214051"></a>PE2 configuration file</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen491297815214051">#
+sysname PE2
+#
+ip vpn-instance VPNA
+ ipv4-family
+  route-distinguisher 100:2
+  apply-label per-instance
+  vpn-target 111:1 export-extcommunity
+  vpn-target 111:1 import-extcommunity
+#
+bfd
+#
+mpls lsr-id 3.3.3.3
+#
+mpls
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 22.22.22.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 33.33.33.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown
+ ip binding vpn-instance VPNA
+ ip address 10.2.1.2 255.255.255.0
+#
+interface LoopBack1
+ ip address 3.3.3.3 255.255.255.255
+#
+bgp 100
+ peer 2.2.2.2 as-number 100
+ peer 2.2.2.2 connect-interface LoopBack1
+ peer 4.4.4.4 as-number 100
+ peer 4.4.4.4 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 2.2.2.2 enable
+  peer 4.4.4.4 enable
+ #
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 2.2.2.2 enable
+  peer 4.4.4.4 enable
+ #
+ ipv4-family vpn-instance VPNA
+  import-route direct
+  import-route static
+#
+ospf 1
+ area 0.0.0.0
+  network 33.33.33.0 0.0.0.255
+  network 22.22.22.0 0.0.0.255
+  network 3.3.3.3 0.0.0.0
+#
+ip route-static vpn-instance VPNA 1.1.1.1 255.255.255.255 10.2.1.1 track bfd-session pe2_to_ce1
+#
+bfd pe2_to_ce1 bind peer-ip 10.2.1.1 vpn-instance VPNA interface GigabitEthernet<span>0/3/0</span> source-ip 10.2.1.2 auto
+#
+return</pre>
+</li><li id="EN-US_TASK_0172369567__li1599066904214051"><p id="EN-US_TASK_0172369567__p1907096970214051"><a name="EN-US_TASK_0172369567__li1599066904214051"></a><a name="li1599066904214051"></a>PE3 configuration file</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen447394431214051">#
+sysname PE3
+#
+ip vpn-instance VPNA
+ ipv4-family
+  route-distinguisher 100:3
+  apply-label per-instance
+  vpn-target 111:1 export-extcommunity
+  vpn-target 111:1 import-extcommunity
+#
+mpls lsr-id 4.4.4.4
+#
+mpls
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 11.11.11.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 22.22.22.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown
+ ip binding vpn-instance VPNA
+ ip address 10.3.1.1 255.255.255.0
+#
+interface LoopBack1
+ ip address 4.4.4.4 255.255.255.255
+#
+bgp 100
+ peer 2.2.2.2 as-number 100
+ peer 2.2.2.2 connect-interface LoopBack1
+ peer 3.3.3.3 as-number 100
+ peer 3.3.3.3 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 2.2.2.2 enable
+  peer 3.3.3.3 enable
+ #
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 2.2.2.2 enable
+  peer 3.3.3.3 enable
+ #
+ ipv4-family vpn-instance VPNA
+  peer 10.3.1.2 as-number 65410
+  import-route direct
+  maximum load-balancing 2
+#
+ospf 1
+ area 0.0.0.0
+  network 11.11.11.0 0.0.0.255
+  network 22.22.22.0 0.0.0.255
+  network 4.4.4.4 0.0.0.0
+#
+return</pre>
+</li><li id="EN-US_TASK_0172369567__li431069820214051"><p id="EN-US_TASK_0172369567__p1528123409214051"><a name="EN-US_TASK_0172369567__li431069820214051"></a><a name="li431069820214051"></a>CE1 configuration file</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen493180310214051">#
+sysname CE1
+#
+bfd
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.1.1.1 255.255.255.0
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.2.1.1 255.255.255.0
+#
+interface LoopBack1
+ ip address 1.1.1.1 255.255.255.255
+#
+load-balance packet all
+#
+ip route-static 0.0.0.0 0.0.0.0 10.1.1.2
+ip route-static 0.0.0.0 0.0.0.0 10.2.1.2
+#
+bfd ce1_to_pe1 bind peer-ip 10.1.1.2 interface GigabitEthernet<span>0/1/0</span> source-ip 10.1.1.1 auto
+#
+bfd ce1_to_pe2 bind peer-ip 10.2.1.2 interface GigabitEthernet<span>0/2/0</span> source-ip 10.2.1.1 auto
+#
+return</pre>
+</li><li id="EN-US_TASK_0172369567__li652305216214051"><p id="EN-US_TASK_0172369567__p389747377214051"><a name="EN-US_TASK_0172369567__li652305216214051"></a><a name="li652305216214051"></a>CE2 configuration file</p>
+<pre class="screen" id="EN-US_TASK_0172369567__screen1943860844214051">#
+sysname CE2
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ip address 10.3.1.2 255.255.255.0
+#
+bgp 65410
+ peer 10.3.1.1 as-number 100
+ #
+ ipv4-family unicast
+  undo synchronization
+  import-route direct
+  peer 10.3.1.1 enable
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mpls-l3vpn-v4_cfg_0101.html">Configuration Examples for BGP/MPLS IP VPN
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mpls-l3vpn-v4_cfg_2015.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+
+<script language="JavaScript">
+<!--
+image_size('.imgResize');
+var msg_imageMax = "view original image";
+var msg_imageClose = "close";
+//--></script></body>
+</html>

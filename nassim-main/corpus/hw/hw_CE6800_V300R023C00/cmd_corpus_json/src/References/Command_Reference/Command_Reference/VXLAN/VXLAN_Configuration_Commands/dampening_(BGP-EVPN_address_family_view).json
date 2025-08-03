@@ -1,0 +1,53 @@
+{
+    "PageTitle": "dampening (BGP-EVPN address family view)",
+    "FuncDef": "The dampening command enables EVPN route dampening or modifies EVPN route damping parameters.\nThe undo dampening command disables EVPN route dampening. The dampening command enables EVPN route dampening or modifies EVPN route damping parameters. The undo dampening command disables EVPN route dampening. By default, BGP route flapping suppression is disabled. This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.",
+    "CLIs": [
+        "dampening [ <half-life-reach> <reuse> <suppress> <ceiling> | [ route-policy <route-policy-name> ] ] [ update-standard ]",
+        "dampening ibgp [ <half-life-reach> <reuse> <suppress> <ceiling> | [ route-policy <route-policy-name> ] ] [ update-standard ]",
+        "undo dampening",
+        "undo dampening ibgp"
+    ],
+    "ParentView": [
+        "BGP-EVPN address family view,bgp-muli-instance-af-evpn view"
+    ],
+    "ParaDef": [
+        {
+            "Parameters": "<half-life-reach>",
+            "Info": "Specifies the half life of a reachable route.\nThe value is an integer ranging from 1 to 45, in minutes. The default value is 15."
+        },
+        {
+            "Parameters": "<reuse>",
+            "Info": "Specifies a Reuse value. If the penalty value of a route falls below the Reuse value, the route is reused.\nThe value is an integer ranging from 1 to 20000. The default value is 750."
+        },
+        {
+            "Parameters": "<suppress>",
+            "Info": "Specifies a Suppress value. If the penalty value of a route exceeds the Suppress value, the route is dampened.\nThe value is an integer ranging from 1 to 20000 and must be greater than the value of reuse. The default value is 2000."
+        },
+        {
+            "Parameters": "<ceiling>",
+            "Info": "Specifies a penalty ceiling.\nThe value is an integer ranging from 1001 to 20000. The configured value must be greater than that of suppress. The default value is 16000."
+        },
+        {
+            "Parameters": "route-policy <route-policy-name>",
+            "Info": "Specifies the name of a route-policy.\nThe name is a string of 1 to 200 case-sensitive characters, with spaces not supported. When double quotation marks are used around the string, spaces are allowed in the string."
+        },
+        {
+            "Parameters": "update-standard",
+            "Info": "Enables BGP to add the standard penalty value to the route carried in each received Update message (excluding Withdraw message).\n-"
+        },
+        {
+            "Parameters": "ibgp",
+            "Info": "Enables IBGP route flap damping.\n-"
+        }
+    ],
+    "Examples": [
+        [
+            "<HUAWEI> system-view",
+            "[~HUAWEI] evpn-overlay enable",
+            "[*HUAWEI] bgp 100",
+            "[*HUAWEI-bgp] l2vpn-family evpn",
+            "[*HUAWEI-bgp-af-evpn] dampening 10 1000 2000 5000"
+        ]
+    ],
+    "ExtraInfo": "If a policy is configured for route dampening, routes are preferentially matched against the dampening parameters defined by route-policy in the command.\nThe four parameters of the command are mutually dependent. If you configure one of the parameters, the other parameters also need to be configured in the command.\nEVPN dampening measures route stability using a penalty value. The greater the penalty value, the less stable a route. Each time route flapping occurs (the device receives a Withdraw), EVPN adds a penalty value to the route carried in the message. If a route changes from active to inactive, the penalty value increases by 1000.\nIf the penalty value of a route exceeds the Suppress value, the route is dampened. The device does not add the route to the IP routing table or advertise any Update message to other EVPN peers. EVPN removes the best flag of the route. If the route is carried in an Update message, EVPN adds a d flag to the route; if the route is carried in a Withdraw message, EVPN adds an h flag to the route. If a route carries both a d flag and an h flag, the route is considered a deleted one. After the penalty value reaches the penalty ceiling, it does not increase any more.\nThe penalty value of a dampened route reduces by half after a half-life period. If the route is carried in an Update message and its penalty value decreases to the Reuse value, the route becomes reusable, and EVPN removes the d flag from it, adds it to the IP routing table if it is an optimal route, and advertises an Update message carrying the route to EVPN peers. If the route is carried in a Withdraw message and its penalty value decreases to 0, EVPN deletes this route from the EVPN routing table.\nAfter EVPN route dampening is configured, any parameter in the command can be used to dampen flapping routes. You can adjust the parameters as required. To increase the dampening time of flapping routes, perform any of the following operations (to reduce the dampening time, perform otherwise):"
+}

@@ -1,0 +1,482 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring IPoE Dual-Stack Access (Web+MAC Authentication)">
+<meta name="abstract" content="This section provides an example for configuring IPoE dual-stack user access through web+MAC authentication. When an IPoE dual-stack user connects to a BRAS and web+MAC authentication is used, the BRAS implements RADIUS authentication and accounting, assigns an IPv4 address from the local address pool to the user, and assigns an IPv6 address to the user through ND. This allows the user to access the Internet.">
+<meta name="description" content="This section provides an example for configuring IPoE dual-stack user access through web+MAC authentication. When an IPoE dual-stack user connects to a BRAS and web+MAC authentication is used, the BRAS implements RADIUS authentication and accounting, assigns an IPv4 address from the local address pool to the user, and assigns an IPv6 address to the user through ND. This allows the user to access the Internet.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_ipox_cfg_0083.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_ipox_cfg_0072.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_014578.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z50024784,z00603461,w00800033,z00588052,ipoxne,c00549182,w00556928,l00593348,w00606909,w00447999,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+<meta name="OWNER" content="c00549182">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="z00588052">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172374034">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring IPoE Dual-Stack Access (Web+MAC Authentication)</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172374034"></a><a name="EN-US_TASK_0172374034"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring IPoE Dual-Stack Access (Web+MAC Authentication)</h1>
+<div class="taskbody"><p>This section provides an example for configuring IPoE dual-stack user access through web+MAC authentication. When an IPoE dual-stack user connects to a BRAS and web+MAC authentication is used, the BRAS implements RADIUS authentication and accounting, assigns an IPv4 address from the local address pool to the user, and assigns an IPv6 address to the user through ND. This allows the user to access the Internet.</p>
+<div class="context"><a name="EN-US_TASK_0172374034__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0172374034__fig_dc_ne_cfg_bras_000901">Figure 1</a>, an IPv4/IPv6 dual-stack user accesses the network through web authentication. The BRAS performs RADIUS authentication and accounting for the user. When the user accesses the network for the first time, the user enters a MAC authentication domain, and the username and password need to be entered during web authentication. The RADIUS server automatically records the association between the terminal's MAC address and the entered username and password. After that, the user can automatically access the network without needing to repeatedly entering the username and password. This process is called MAC authentication. If the authentication fails, the user will be redirected to a web authentication domain. Users in a web authentication domain can access only limited network resources, such as the web server. (In this example, the web server and web authentication server are deployed on the same device.) If the user accesses unauthorized network resources, the user will be forcibly redirected to the specified web server. After the user re-enters the correct username and password and the authentication succeeds, the user becomes a post-authentication domain user and can access network resources normally. When the user logs in to the network next time, the BRAS performs MAC authentication based on the terminal's MAC address.</p>
+<div class="fignone" id="EN-US_TASK_0172374034__fig_dc_ne_cfg_bras_000901"><a name="EN-US_TASK_0172374034__fig_dc_ne_cfg_bras_000901"></a><a name="fig_dc_ne_cfg_bras_000901"></a><span class="figcap"><b>Figure 1 </b>Configuring IPoE dual-stack access (web+MAC authentication)</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interface1 in this example represents GE <span>0/1/0</span>.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_ipv4_ipv6_simultaneous_authentication_web_mac.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172374034__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Create a MAC authentication domain named <strong>mac-domain</strong>, a web authentication domain named <strong>web-domain</strong>, and a post-authentication domain named <strong>after-domain</strong>.</p>
+</li><li><p>Configure AAA schemes and a RADIUS server group named <strong>group1</strong>. In the RADIUS server group view, configure the BRAS to carry the Hw-Auth-Type attribute in authentication request packets(This attribute is optional and can be configured based on the configuration requirements of the RADIUS server.).</p>
+</li><li><p>Configure address pools.</p>
+</li><li><p>Enable MAC authentication in the MAC authentication domain <strong>mac-domain</strong>, and bind it to the RADIUS server group <strong>group1</strong> and the authentication scheme <strong>portal-mac-auth</strong>.</p>
+</li><li><p>Configure a web authentication domain named <strong>web-domain</strong> in which users can access only limited network resources. Bind the none authentication scheme and none accounting scheme to the web authentication domain <strong>web-domain</strong>.</p>
+</li><li><p>Configure ACL rules for the web authentication domain <strong>web-domain</strong>.</p>
+</li><li><p>Configure a post-authentication domain named <strong>after-domain</strong> and bind it to the RADIUS accounting scheme and RADIUS authentication scheme.</p>
+</li><li><p>In the AAA view, configure the MAC address carried in user access request packets as the pure username.</p>
+</li><li><p>Configure a DUID for the device.</p>
+</li><li><p>On a BAS interface, enable IPv6 and configure a MAC authentication domain, post-authentication domain, and authentication method.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172374034__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Create a MAC authentication domain named <strong>mac-domain</strong>, a web authentication domain named <strong>web-domain</strong>, and a post-authentication domain named <strong>after-domain</strong>.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt;<strong> system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname <span class="keyword">Device</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>] <strong>aaa</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa] <strong>domain mac-domain</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-domain-mac-domain] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa] <strong>domain web-domain</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-domain-web-domain] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa] <strong>domain after-domain</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-domain-after-domain] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa] <strong>quit</strong> </pre>
+</p></li><li><span>Configure AAA schemes and a RADIUS server group.</span><p><p># Create a RADIUS server group named <strong>group1</strong>. In the RADIUS server group view, configure the BRAS to carry the Hw-Auth-Type attribute in authentication request packets.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>] <strong>radius-server group group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-radius-group1]<strong> radius-server authentication 10.1.2.10 1812</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-radius-group1]<strong> radius-server accounting 10.1.2.10 1813</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-radius-group1]<strong> radius-server shared-key-cipher Root_1234</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-radius-group1]<strong> commit </strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-radius-group1] <strong>radius-attribute include hw-auth-type</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-radius-group1] <strong>radius-server attribute translate</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-radius-group1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-radius-group1] <strong>quit</strong></pre>
+<p># Create an authentication scheme named <strong>portal-mac-auth</strong>, and configure the BRAS to redirect the dual-stack user to the web authentication domain <strong>web-domain</strong> when web authentication fails.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>] <strong>aaa</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa] <strong>authentication-scheme portal-mac-auth</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-authen-portal-mac-auth] <strong>commit</strong> </pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-authen-portal-mac-auth] <strong>authening authen-fail online authen-domain web-domain</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-authen-portal-mac-auth] <strong>quit</strong></pre>
+<p># Configure an authentication scheme named <strong>radius</strong>, with RADIUS authentication specified.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa]<strong> authentication-scheme radius</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-authen-radius]<strong> authentication-mode radius local</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-authen-radius] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-authen-radius]<strong> quit</strong></pre>
+<p># Configure an authentication scheme named <strong>none</strong>, with none authentication specified.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In insecure network environments, you are advised to use a secure authentication mode. For details, see <a href="dc_ne_ipox_cfg_0148.html">Example for Configuring Layer 3 IPoE Access (Web Authentication)</a>.</p>
+</div></div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa]<strong> authentication-scheme none</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-authen-none]<strong> authentication-mode none</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-authen-none] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-authen-none]<strong> quit</strong></pre>
+<p># Configure an accounting scheme named <strong>radius</strong>, with RADIUS accounting specified.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa]<strong> accounting-scheme radius</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-accounting-radius] <strong>accounting-mode radius</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-accounting-radius]<strong> accounting interim interval 10 hash</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-accounting-radius] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-accounting-radius]<strong> quit</strong></pre>
+<p># Configure an accounting scheme named <strong>none</strong>, with none accounting specified.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa]<strong> accounting-scheme none</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-accounting-none]<strong> accounting-mode none</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-accounting-none] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-accounting-none]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa]<strong> quit</strong></pre>
+</p></li><li><span>Configure address pools.</span><p><div class="p"># Configure an IPv4 address pool.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> ip pool pool1 bas local</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-ip-pool-pool1]<strong> gateway 10.10.17.1 255.255.240.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-ip-pool-pool1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-ip-pool-pool1]<strong> section 0 10.10.17.2 10.10.19.254</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-ip-pool-pool1]<strong> dns-server 10.1.6.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-ip-pool-pool1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-ip-pool-pool1]<strong> quit</strong></pre>
+</div>
+<div class="p"># Configure an IPv6 prefix pool.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> ipv6 prefix prefix1 delegation</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-ipv6-prefix-prefix1]<strong> prefix 2001:db8:2::/64</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-ipv6-prefix-prefix1] <strong>slaac-unshare-only</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-ipv6-prefix-prefix1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-ipv6-prefix-prefix1]<strong> quit</strong></pre>
+</div>
+<div class="p"># Configure an IPv6 address pool.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> ipv6 pool pool1 bas delegation</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-ip-pool-pool1]<strong> prefix prefix1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-ip-pool-pool1]<strong> dns-server 2001:db8:1::1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-ip-pool-pool1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-ip-pool-pool1]<strong> quit</strong></pre>
+</div>
+</p></li><li><span>Enable MAC authentication in the MAC authentication domain <strong>mac-domain</strong>, and bind it to the RADIUS server group <strong>group1</strong> and the authentication scheme <strong>portal-mac-auth</strong>.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> user-group mac-group</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> aaa</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa] <strong>domain mac-domain</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-mac-domain] <strong>radius-server group group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-domain-mac-domain] <strong>authentication-scheme portal-mac-auth</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-domain-mac-domain] <strong>accounting-scheme radius</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-domain-mac-domain] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-mac-domain] <strong>prefix-assign-mode unshared</strong> </pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-mac-domain] <strong>ip-pool pool1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-mac-domain] <strong>ipv6-pool pool1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-mac-domain] <strong>mac-authentication enable</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-mac-domain] <strong>user-group mac-group</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-mac-domain] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa] <strong>quit</strong></pre>
+</p></li><li><span>Configure a web authentication domain named <strong>web-domain</strong> in which users can access only limited network resources. Bind the none authentication scheme and none accounting scheme to this domain.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> user-group web-group</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> aaa</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa] <strong>domain web-domain</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-web-domain]<strong> authentication-scheme none</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-domain-web-domain]<strong> accounting-scheme none</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-domain-web-domain] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-web-domain]<strong> </strong><strong>prefix-assign-mode unshared</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-web-domain]<strong> ip-pool pool1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-web-domain]<strong> ipv6-pool pool1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-web-domain]<strong> user-group web-group</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-web-domain]<strong> web-server 10.1.1.10</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-web-domain]<strong> web-server 2001:db8:1::2</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-web-domain]<strong> web-server url http://www.isp1.com</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-web-domain]<strong> </strong><strong>web-server identical-url</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-web-domain]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa]<strong> quit</strong></pre>
+<p># Configure an IP address used by the device to receive portal packets from the web authentication server.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>] <strong>interface</strong> <strong>LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-LoopBack0] <strong>ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-LoopBack0] <strong>ip address </strong><strong>10.1.1.1</strong><strong> 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-LoopBack0] <strong>ipv6 address </strong><strong>2001:db8:1::3</strong><strong> 128</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-LoopBack0] <strong>ipv6 address auto link-local</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-LoopBack0] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-LoopBack0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> web-auth-server source-ip 10.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>] <strong>web-auth-server source-ipv6 2001:db8:1::3</strong></pre>
+<p># Configure a web authentication server.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> web-auth-server enable</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> </strong><strong>web-auth-server source interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> web-auth-server 10.1.1.10 key cipher Root_123</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>] <strong>web-auth-server 2001:db8:1::2 key cipher Root_123</strong></pre>
+</p></li><li><span>Configure ACL rules for the web authentication domain <strong>web-domain</strong>.</span><p><p># Configure IPv4 ACL rules.</p>
+<ul><li>Configure ACL 6000 to permit the traffic between user group <strong>web-group</strong> and web authentication server and between user group <strong>web-group</strong> and the DNS server.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> acl number 6000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl-ucl-6000] <strong>rule 5 permit ip source ip-address 10.1.1.10 0 destination user-group web-group</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl-ucl-6000] <strong>rule 10 permit ip source user-group web-group destination ip-address 10.1.1.10 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl-ucl-6000] <strong>rule 15 permit ip source ip-address 10.1.6.2 0 destination user-group web-group</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl-ucl-6000] <strong>rule 20 permit ip source user-group web-group destination ip-address 10.1.6.2 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl-ucl-6000] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-acl-ucl-6000] <strong>quit</strong></pre>
+</li><li>Configure an ACL numbered 6001 to allow HTTP redirect for the TCP packets originating from the user group <strong>web-group</strong> and carrying destination port <strong>www</strong> or 8080.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> acl number 6001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl-ucl-6001] <strong>rule 5 permit tcp source user-group web-group destination-port eq www</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl-ucl-6001] <strong>rule 10 permit tcp source user-group web-group destination-port eq 8080</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl-ucl-6001] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-acl-ucl-6001] <strong>quit</strong></pre>
+</li><li>Configure an ACL numbered 6002 to deny all the traffic originating from the user group <strong>web-group</strong>.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> acl number 6002</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl-ucl-6002] <strong>rule 5 permit ip source ip-address any destination user-group web-group</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl-ucl-6002] <strong>rule 10 permit ip source user-group web-group destination ip-address any</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl-ucl-6002]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-acl-ucl-6002] <strong>quit</strong></pre>
+</li></ul>
+<p># Configure IPv6 ACL rules.</p>
+<ul><li>Configure ACL 6000 to permit the traffic between user group <strong>web-group</strong> and web authentication server and between user group <strong>web-group</strong> and the DNS server.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> acl ipv6 number 6000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl6-ucl-6000] <strong>rule 5 permit ipv6 source user-group web-group destination ipv6-address 2001:db8:1::1/128</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl6-ucl-6000] <strong>rule 10 permit ipv6 source ipv6-address 2001:db8:1::1/128 destination user-group web-group</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl6-ucl-6000] <strong>rule 15 permit ipv6 source ipv6-address 2001:db8:1::2/128 destination user-group web-group</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl6-ucl-6000] <strong>rule 20 permit ipv6 source user-group web-group destination ipv6-address 2001:db8:1::2/128</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl6-ucl-6000] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-acl6-ucl-6000] <strong>quit</strong></pre>
+</li><li>Configure an ACL numbered 6001 to allow HTTP redirect for the TCP packets originating from the user group <strong>web-group</strong> and carrying destination port <strong>www</strong> or 8080.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> acl ipv6 number 6001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl6-ucl-6001] <strong>rule 5 permit tcp source user-group web-group destination-port eq www</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl6-ucl-6001] <strong>rule 10 permit tcp source user-group web-group destination-port eq 8080</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl6-ucl-6001] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-acl6-ucl-6001] <strong>quit</strong></pre>
+</li><li>Configure an ACL numbered 6002 to deny all the traffic originating from the user group <strong>web-group</strong>.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> acl ipv6 number 6002</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl6-ucl-6002] <strong>rule 5 permit ipv6 source ipv6-address any destination user-group web-group</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl6-ucl-6002] <strong>rule 10 permit ipv6 source user-group web-group destination ipv6-address any</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-acl6-ucl-6002] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-acl6-ucl-6002] <strong>quit</strong></pre>
+</li></ul>
+<div class="p"># Configure a traffic policy.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> traffic classifier 6000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-classifier-6000]<strong> if-match acl 6000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-classifier-6000]<strong> if-match ipv6 acl 6000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-classifier-6000]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>]<strong> traffic classifier 6001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-classifier-6001]<strong> if-match acl 6001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-classifier-6001]<strong> if-match ipv6 acl 6001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-classifier-6001]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>]<strong> traffic classifier 6002</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-classifier-6002]<strong> if-match acl 6002</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-classifier-6002]<strong> if-match ipv6 acl 6002</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-classifier-6002]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>]<strong> traffic behavior permit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-behavior-permit]<strong> permit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-behavior-permit]<strong> </strong><strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>]<strong> traffic behavior in-deny</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-behavior-in-deny]<strong> deny</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-behavior-in-deny]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>]<strong> traffic behavior redirect</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-behavior-redirect]<strong> http-redirect</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-behavior-redirect]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>]<strong> traffic policy before-auth-in</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-trafficpolicy-before-auth-in]<strong> share-mode</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-trafficpolicy-before-auth-in]<strong> classifier 6000 behavior permit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-trafficpolicy-before-auth-in]<strong> classifier 6001 behavior redirect</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-trafficpolicy-before-auth-in]<strong> classifier 6002 behavior in-deny</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-trafficpolicy-before-auth-in]<strong> quit</strong></pre>
+</div>
+<p># Apply the traffic policy globally.</p>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>]<strong> traffic-policy before-auth-in inbound</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>] <strong>commit</strong></pre>
+</p></li><li><span>Configure a post-authentication domain named <strong>after-domain</strong> and bind it to the RADIUS accounting scheme and RADIUS authentication scheme.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>]<strong> aaa</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa]<strong> domain after-domain</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-after-domain]<strong> authentication-scheme radius</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-domain-after-domain]<strong> accounting-scheme radius</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-domain-after-domain]<strong> radius-server group group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa-domain-after-domain] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa-domain-after-domain]<strong> quit</strong></pre>
+</p></li><li><span>In the AAA view, configure the MAC address carried in user access request packets as the pure username.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa] <strong>default-user-name include mac-address -</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa] <strong>default-password cipher YsHsjx_202206</strong> </pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-aaa] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-aaa] <strong>quit</strong></pre>
+</p></li><li><span>Configure a DUID for the device.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>] <strong>dhcpv6 duid 12345678</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>] <strong>commit</strong></pre>
+</p></li><li><span>On a BAS interface, enable IPv6 and configure a MAC authentication domain, post-authentication domain, and authentication method.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>] <strong>interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-GigabitEthernet<span>0/1/0</span>] <strong>ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-GigabitEthernet<span>0/1/0</span>]<strong> ipv6 address auto link-local</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-GigabitEthernet<span>0/1/0</span>] <strong>bas</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-GigabitEthernet<span>0/1/0</span>-bas] <strong>access-type layer2-subscriber default-domain pre-authentication mac-domain authentication after-domain</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>-GigabitEthernet<span>0/1/0</span>-bas] <strong>authentication-method web</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>-GigabitEthernet<span>0/1/0</span>-bas] <strong>authentication-method-ipv6 web</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>-GigabitEthernet<span>0/1/0</span>-bas] <strong>ip-trigger</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>-GigabitEthernet<span>0/1/0</span>-bas] <strong>arp-trigger</strong>
+[<span class="keyword">*</span><span class="keyword">Device</span>-GigabitEthernet<span>0/1/0</span>-bas] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-GigabitEthernet<span>0/1/0</span>-bas] <strong>ipv6-trigger</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-GigabitEthernet<span>0/1/0</span>-bas] <strong>nd-trigger</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-GigabitEthernet<span>0/1/0</span>-bas] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><ol type="a"><li><p>A user logs in to a PC and obtains an IP address.</p>
+</li><li><p>Run the <a href="cmdqueryname=display+access-user+domain+web-domain"><b><span class="cmdname">display access-user domain web-domain</span></b></a> command to check online user information.</p>
+</li><li><p>The user enters another website in the address bar and is automatically redirected to the address of the web server.</p>
+</li><li><p>The user enters the username and password, and accesses the Internet after the authentication succeeds.</p>
+</li><li><p>Run the <a href="cmdqueryname=display+domain+mac-domain"><b><span class="cmdname">display domain mac-domain</span></b></a> command to check configurations of the MAC authentication domain <strong>mac-domain</strong>. The command output shows that an IPv4 address pool and an IPv6 address pool are bound to the domain.</p>
+</li></ol>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172374034__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Configuration Files</h4><pre class="screen">#
+sysname <span class="keyword">Device</span>
+#
+radius-server group group1
+ radius-server shared-key-cipher %^%#W)&lt;2!w*fb2&lt;lJf5$6S|($o\aAaq`_C!FAt*Yk-&lt;!%^%#
+ radius-server authentication 10.1.2.10 1812 weight 0
+ radius-server accounting 10.1.2.10 1813 weight 0 
+ radius-server attribute translate
+ radius-attribute include HW-Auth-Type
+#
+ip pool pool1 bas local
+ gateway 10.10.17.1 255.255.240.0
+ section 0 10.10.17.2 10.10.19.254
+ dns-server 10.1.6.2
+#
+ipv6 prefix prefix1 delegation
+ prefix 2001:DB8:2::/64
+ slaac-unshare-only
+#
+ipv6 pool pool1 bas delegation
+ dns-server 2001:DB8:1::1
+ prefix prefix1
+#
+user-group mac-group
+user-group web-group
+#
+acl number 6000
+ rule 5 permit ip source ip-address 10.1.1.10 0 destination user-group web-group
+ rule 10 permit ip source user-group web-group destination ip-address 10.1.1.10 0
+ rule 15 permit ip source ip-address 10.1.6.2 0 destination user-group web-group
+ rule 20 permit ip source user-group web-group destination ip-address 10.1.6.2 0
+#
+acl number 6001
+ rule 5 permit tcp source user-group web-group destination-port eq www
+ rule 10 permit tcp source user-group web-group destination-port eq 8080
+#
+acl number 6002
+ rule 5 permit ip source ip-address any destination user-group web-group
+ rule 10 permit ip source user-group web-group destination ip-address any
+#
+acl ipv6 number 6000
+ rule 5 permit ipv6 source user-group web-group destination ipv6-address 2001:DB8:1::1/128
+ rule 10 permit ipv6 source ipv6-address 2001:DB8:1::1/128 destination user-group web-group
+ rule 15 permit ipv6 source ipv6-address 2001:DB8:1::2/128 destination user-group web-group
+ rule 20 permit ipv6 source user-group web-group destination ipv6-address 2001:DB8:1::2/128
+#
+acl ipv6 number 6001
+ rule 5 permit tcp source user-group web-group destination-port eq www
+ rule 10 permit tcp source user-group web-group destination-port eq 8080
+#
+acl ipv6 number 6002
+ rule 5 permit ipv6 source ipv6-address any destination user-group web-group
+ rule 10 permit ipv6 source user-group web-group destination ipv6-address any
+#
+dhcpv6 duid 12345678
+#
+traffic classifier 6000 operator or
+ if-match acl 6000 precedence 1
+ if-match ipv6 acl 6000 precedence 2
+#
+traffic classifier 6001 operator or
+ if-match acl 6001 precedence 3
+ if-match ipv6 acl 6001 precedence 4
+#
+traffic classifier 6002 operator or
+ if-match acl 6002 precedence 5
+ if-match ipv6 acl 6002 precedence 6
+#
+traffic behavior in-deny
+ deny
+#
+traffic behavior permit
+#
+traffic behavior redirect
+ http-redirect
+#
+traffic policy before-auth-in
+ share-mode
+ classifier 6000 behavior permit precedence 1
+ classifier 6001 behavior redirect precedence 2
+ classifier 6002 behavior in-deny precedence 3
+#
+aaa
+ default-password cipher %^%#`E)v.Q@BHVzxxZ;ij{&gt;&amp;_M0!TGP7YRA@8a7mq&lt;\/%^%#
+ default-user-name include mac-address -
+ #
+ authentication-scheme none
+  authentication-mode none
+ #
+ authentication-scheme radius
+  authentication-mode radius local
+ #
+ authentication-scheme portal-mac-auth
+  authening authen-fail online authen-domain web-domain
+ #
+ accounting-scheme radius
+  accounting interim interval 10 hash
+ #
+ accounting-scheme none
+  accounting-mode none
+ #
+ domain mac-domain
+  authentication-scheme portal-mac-auth
+  accounting-scheme radius
+  radius-server group group1
+ <strong> </strong>prefix-assign-mode unshared
+  ip-pool pool1
+  ipv6-pool pool1
+  mac-authentication enable
+  user-group mac-group
+ #
+ domain web-domain
+  authentication-scheme none
+  accounting-scheme none
+  prefix-assign-mode unshared
+  ip-pool pool1
+  ipv6-pool pool1
+  user-group web-group
+  web-server 10.1.1.10 2001:DB8:1::2
+  web-server url http://www.isp1.com
+  web-server identical-url
+ #
+ domain after-domain
+  authentication-scheme radius
+  accounting-scheme radius
+  radius-server group group1
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ ipv6 enable
+<strong> </strong>ipv6 address auto link-local
+ bas
+ #
+  access-type layer2-subscriber default-domain pre-authentication mac-domain authentication after-domain
+  authentication-method web
+  authentication-method-ipv6 web
+  ip-trigger
+  arp-trigger
+  ipv6-trigger 
+  nd-trigger
+ #
+#
+interface LoopBack 0
+ ipv6 enable
+ ip address 10.1.1.1 32
+ ipv6 address 2001:DB8:1::3 128
+ ipv6 address auto link-local
+#
+web-auth-server enable
+web-auth-server source interface LoopBack0
+web-auth-server 2001:DB8:1::2 key cipher %^%#\39J9tmKl#+;)]1yEd@V#i(1Jeq"vO=9ka=-\qN&lt;%^%#
+web-auth-server 10.1.1.10 key cipher %^%#4*RHO=w*}.d\&gt;j09'Z:%=:co<font style="font-size:8pt" Face="Courier New" >~</font>p\w9'G-^|-zR'N4%^%#
+<span>#</span>
+<span>undo web-auth-server source-ip all</span>
+<span>web-auth-server source-ip 10.1.1.1</span>
+<span>#</span>
+<span>undo web-auth-server source-ipv6 all</span>
+<span>web-auth-server source-ipv6 2001:DB8:1::3</span>
+#
+traffic-policy before-auth-in inbound
+#
+return</pre>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_ipox_cfg_0083.html">Configuration Examples for IPoE Access Authentication
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_ipox_cfg_0072.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_014578.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+digest-length
+=============
+
+digest-length
+
+Function
+--------
+
+
+
+The **digest-length** command sets the digest length of the encryption algorithm.
+
+The **undo digest-length** command restores the default digest length of the encryption algorithm.
+
+
+
+By default, the digest length of the HMAC-SHA-256 and SHA-256 encryption algorithms is 32 bytes, and the digest length of the HMAC-SHA1-20 encryption algorithm is 20 bytes.
+
+
+Format
+------
+
+**digest-length hmac-sha1-20** *length*
+
+**digest-length hmac-sha-256** *length*
+
+**digest-length sha-256** *length*
+
+**undo digest-length hmac-sha1-20** *length*
+
+**undo digest-length hmac-sha-256** *length*
+
+**undo digest-length sha-256** *length*
+
+**undo digest-length hmac-sha1-20**
+
+**undo digest-length hmac-sha-256**
+
+**undo digest-length sha-256**
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| *length* | Specifies the digest length of the encryption algorithm.  Setting the digest length of the encryption algorithm to 16 bytes will reduce algorithm security. | HMAC-SHA-256 and SHA-256: 16 and 32  HMAC-SHA1-20: 16 and 20 |
+| **hmac-sha-256** | Indicates the HMAC-SHA-256 encryption algorithm. | - |
+| **sha-256** | Indicates the SHA-256 encryption algorithm. | - |
+| **hmac-sha1-20** | Indicates the HMAC-SHA1-20 encryption algorithm. | - |
+
+
+
+Views
+-----
+
+Keychain view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+
+
+After the algorithm command is run to configure the authentication algorithm for Key-id, the Keychain automatically generates digest information of a specific length to authenticate and encrypt Keychain protocol packets for security hardening.The HMAC-SHA1-20 algorithm uses a 20-byte digest for encryption and decryption by default. You can run the **digest-length hmac-sha1-20 16** command to allow for interconnection with an earlier version. By default, the HMAC-SHA-256 and SHA-256 algorithms use a 32-byte digest for encryption and decryption. You can run the digest-length hmac-sha-256 16 or digest-length sha-256 16 command to allow for interconnection with an earlier version.
+
+
+
+
+Example
+-------
+
+# Set the digest length of the HMAC-SHA-256 encryption algorithm to 16 bytes.
+```
+<HUAWEI> system-view
+[~HUAWEI] keychain huawei mode absolute
+[*HUAWEI-keychain-huawei] digest-length hmac-sha-256 16
+
+```

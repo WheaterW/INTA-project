@@ -1,0 +1,530 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Distributed DS-Lite Inter-Board Hot Backup">
+<meta name="abstract" content="">
+<meta name="description" content="">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0042.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0031.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0033.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="c00549182">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="OWNER" content="c00549182">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="m00390128">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172362464">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Distributed DS-Lite Inter-Board Hot Backup</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172362464"></a><a name="EN-US_TASK_0172362464"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Distributed DS-Lite Inter-Board Hot Backup</h1>
+<div class="taskbody"><p></p>
+<div class="context"><a name="EN-US_TASK_0172362464__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>As shown in <a href="#EN-US_TASK_0172362464__fig_01">Figure 1</a>, a terminal user assigned a private IPv4 address accesses an IPv6 metropolitan area network (MAN) through a customer premises equipment (CPE). The CPE establishes a Dual-Stack Lite (DS-Lite) tunnel to a DS-Lite device. The CPE transmits traffic with the private IPv4 address along the DS-Lite tunnel to the DS-Lite device. The DS-Lite device decapsulates traffic, uses a Network Address Translation (NAT) technique to translate the private IPv4 address to a public IPv4 address, and forwards traffic to the IPv4 Internet. The DS-Lite device is equipped with DS-Lite boards in slots 1 and 2, respectively. The DS-Lite device's GE <span>0/1/1</span> is connected to an IPv6 MAN, and GE <span>0/1/2</span> is connected to the Internet. IPv4 residential users need to access the IPv4 Internet through the IPv6 MAN. The broadband remote access server (BRAS) performs DS-Lite translation for user packets. The users log in to the BRAS using IPv6. The CGN boards on the BRAS perform 1:1 inter-board hot backup.</p>
+<div class="fignone" id="EN-US_TASK_0172362464__fig_01"><a name="EN-US_TASK_0172362464__fig_01"></a><a name="fig_01"></a><span class="figcap"><b>Figure 1 </b>Distributed DS-Lite networking</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 and 2 represent GE <span>0/1/1</span> and GE <span>0/1/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_ne_ds-lite_0008.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172362464__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Load a GTL license that enables DS-Lite and configure DS-Lite sessions on service boards.</p>
+</li><li>Enable HA hot backup.</li><li><p>Configure a RADIUS server group named <strong>rad-ser</strong>.</p>
+</li><li><p>Enable IPv6 and set a DUID for a DHCPv6 server.</p>
+</li><li><p>Create an IPv6 ND address pool and an IPv6 PD address pool.</p>
+</li><li><p>Create a DS-Lite instance and bind it to the service-instance group.</p>
+</li><li><p>Configure basic DS-Lite functions.</p>
+</li><li><p>Configure user information and RADIUS authentication on the BRAS.</p>
+</li><li><p>Configure a distributed DS-Lite traffic diversion policy.</p>
+</li><li><p>Enable the DS-Lite device to advertise public routes.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172362464__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Load a GTL license that enables DS-Lite and configure DS-Lite sessions on service boards.</span><p><pre class="screen">&lt;BRAS&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>vsm on-board-mode disable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>display license</strong></pre>
+<pre class="screen"> Item name Item type Value Description
+ -------------------------------------------------------------
+ LME0CONN01 Resource 64 Concurrent Users(1k)
+ LME0NATDS01 Resource 32 2M NAT Session
+ </pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>License</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-license] <strong>active nat session-table size 16 slot <span>1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-license] <strong>active nat session-table size 16 slot <span>2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-license]<strong> active nat bandwidth-enhance 40 slot</strong> <strong><span>1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-license]<strong> active nat bandwidth-enhance 40 slot</strong> <strong><span>2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-license] <strong>active ds-lite vsuf slot <span>1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-license] <strong>active ds-lite vsuf slot <span>2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-license] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-license] <strong>quit</strong></pre>
+</p></li><li><span>Enable HA hot backup.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>service-ha hot-backup enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS] <strong>commit</strong></pre>
+</p></li><li><span>Configure a RADIUS server group named <strong>rad-ser</strong>.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>radius-server group rad-ser</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-radius-rad-ser] <strong>radius-server authentication 192.168.10.10 1824 weight 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-radius-rad-ser] <strong>radius-server accounting 192.168.10.10 1825 weight 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-radius-rad-ser] <strong>radius-server shared-key-cipher YsHsjx_2022063</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-radius-rad-ser] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-radius-rad-ser] <strong>quit</strong></pre>
+</p></li><li><span>Enable IPv6 and set a DUID for a DHCPv6 server.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>ipv6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS] <strong>dhcpv6 duid llt</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>quit</strong></pre>
+</p></li><li><span>Create an IPv6 ND address pool and an IPv6 PD address pool.</span><p><ol type="a"><li><p>Create an IPv6 ND prefix pool.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>ipv6 prefix ipv6-pppoe-nd-1 delegation</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ipv6-prefix-ipv6-pppoe-nd-1] <strong>prefix 2001:db8:D000::/41</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ipv6-prefix-ipv6-pppoe-nd-1] <strong>slaac-unshare-only</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ipv6-prefix-ipv6-pppoe-nd-1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-ipv6-prefix-ipv6-pppoe-nd-1] <strong>quit</strong></pre>
+</li><li>Create an IPv6 ND address pool.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>ipv6 pool ipv6-pppoe-nd-1 bas delegation</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ipv6-pool-ipv6-pppoe-nd-1] <strong>dns-server 2001:db8:1:1:1::10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ipv6-pool-ipv6-pppoe-nd-1] <strong>prefix ipv6-pppoe-nd-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ipv6-pool-ipv6-pppoe-nd-1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-ipv6-pool-ipv6-pppoe-nd-1] <strong>quit</strong></pre>
+</li><li>Create an IPv6 PD prefix pool.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>ipv6 prefix ipv6-pppoe-pd-1 delegation</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ipv6-prefix-ipv6-pppoe-pd-1] <strong>prefix 2001:db8:D080::/41 delegating-prefix-length 56</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ipv6-prefix-ipv6-pppoe-pd-1] <strong>pd-unshare-only</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ipv6-prefix-ipv6-pppoe-pd-1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-ipv6-prefix-ipv6-pppoe-pd-1] <strong>quit</strong></pre>
+</li><li>Create an IPv6 PD address pool and specify an address family transition router (AFTR) name.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>ipv6 pool ipv6-pppoe-pd-1 bas delegation</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ipv6-pool-ipv6-pppoe-pd-1] <strong>dns-server 2001:db8:1:1:1::10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ipv6-pool-ipv6-pppoe-pd-1] <strong>aftr-name zj-hz-aftr1.dualstack-lite.com</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ipv6-pool-ipv6-pppoe-pd-1] <strong>prefix ipv6-pppoe-pd-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ipv6-pool-ipv6-pppoe-pd-1] <strong>prefix ipv6-pppoe-pd-1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-ipv6-pool-ipv6-pppoe-pd-1] <strong>quit</strong></pre>
+</li></ol>
+</p></li><li><span>Create a DS-Lite instance and bind it to the HA service-instance group.</span><p><ol type="a"><li><div class="p">Create a CGN HA backup group and bind it to service boards.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>service-location 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-service-location-1] <strong>location slot 10 backup slot 11</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-service-location-1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-service-location-1] <strong>quit</strong></pre>
+</div>
+</li><li><div class="p">Create a CGN HA service-instance group and bind it to the CGN HA backup group.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>service-instance-group service-instance-group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-instance-group-service-instance-group1] <strong>service-location 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-instance-group-service-instance-group1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-instance-group-service-instance-group1] <strong>quit</strong></pre>
+</div>
+</li><li><div class="p">Create a DS-Lite instance and bind it to the service-instance group.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>ds-lite instance ds-lite-1 id 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ds-lite-instance-ds-lite-1] <strong>service-instance-group service-instance-group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ds-lite-instance-ds-lite-1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ds-lite-instance-ds-lite-1] <strong>quit</strong></pre>
+</div>
+</li></ol>
+</p></li><li><span>Configure basic DS-Lite functions.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>acl ipv6 3000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-acl6-adv-3000] <strong>rule 5 permit ipv6 source 2001:db8:D000::/41 destination 2001:db8:2:2:2::12/128</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-acl6-adv-3000] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-acl6-adv-3000] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>ds-lite instance ds-lite-1 id 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ds-lite-instance-ds-lite-1] <strong>ds-lite tunnel prefix-length 64</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ds-lite-instance-ds-lite-1] <strong>port-range 4096</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ds-lite-instance-ds-lite-1]<strong> ds-lite address-group dt-addr-group group-id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ds-lite-instance-ds-lite-1-ds-lite-address-group-dt-addr-group] <strong>section 0 11.1.1.1 mask 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ds-lite-instance-ds-lite-1-ds-lite-address-group-dt-addr-group] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ds-lite-instance-ds-lite-1] <strong>ds-lite outbound 3000 address-group dt-addr-group</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ds-lite-instance-ds-lite-1] <strong>local-ipv6 2001:db8:2:2:2::12 prefix-length 128</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ds-lite-instance-ds-lite-1] <strong>remote-ipv6 2001:db8:D000:: prefix-length 41</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ds-lite-instance-ds-lite-1] <strong>ds-lite alg all</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ds-lite-instance-ds-lite-1] <strong>ds-lite filter mode full-cone</strong></pre>
+<pre class="screen">Warning: The command will rebuild all session tables of this instance. Continue? [Y/N]: Y</pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-ds-lite-instance-ds-lite-1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-ds-lite-instance-ds-lite-1] <strong>quit</strong></pre>
+</p></li><li><span>Configure a user group of which users access the Internet.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>user-group ds-lite-1</strong></pre>
+<pre class="screen">Info: Create a new user group </pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS] <strong>commit</strong></pre>
+</p></li><li><span>Configure a domain from which users access the Internet.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>aaa</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-aaa] <strong>authentication-scheme auth1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-aaa-authen-auth1] <strong>authentication-mode radius</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-aaa-authen-auth1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-aaa-accounting-acct1] <strong>accounting-scheme acct1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-aaa-accounting-acct1] <strong>accounting-mode radius</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-aaa-accounting-acct1] <strong>accounting start-fail online</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-aaa-accounting-acct1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-aaa] <strong>domain ds-lite-domain</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-aaa-domain-ds-lite-domain] <strong>authentication-scheme auth1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-aaa-domain-ds-lite-domain] <strong>accounting-scheme acct1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-aaa-domain-ds-lite-domain] <strong>prefix-assign-mode unshared</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-aaa-domain-ds-lite-domain] <strong>ipv6-pool ipv6-pppoe-nd-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-aaa-domain-ds-lite-domain] <strong>ipv6-pool ipv6-pppoe-pd-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-aaa-domain-ds-lite-domain] <strong>radius-server group rad-ser</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-aaa-domain-ds-lite-domain] <strong>user-group ds-lite-1 bind ds-lite instance ds-lite-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-aaa-domain-ds-lite-domain] <strong>user-basic-service-ip-type ipv6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-aaa-domain-ds-lite-domain] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-aaa]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-aaa] <strong>quit</strong></pre>
+</p></li><li><span>Configure a distributed DS-Lite traffic diversion policy.</span><p><p># Configure a classifier-behavior (C-B) pair to distribute user traffic in a user group named <strong>ds-lite-1</strong> to a DS-Lite instance named <strong>ds-lite-1</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>acl ipv6 number 9001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-acl6-ucl-9001] <strong>rule 5 permit ipv6 source user-group ds-lite-1</strong> <strong>destination ipv6-address 2001:db8:2:2:2::12/128</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-acl6-ucl-9001] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-acl6-ucl-9001] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>traffic classifier ds-classifier1 operator or</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-classifier-ds-classifier1] <strong>if-match ipv6 acl 9001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-classifier-ds-classifier1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-classifier-ds-classifier1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>traffic behavior ds-behavior1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-behavior-ds-behavior1] <strong>ds-lite bind instance ds-lite-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-behavior-ds-behavior1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-behavior-ds-behavior1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>traffic policy service-control</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-trafficpolicy-service-control] <strong>share-mode</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-trafficpolicy-service-control] <strong>classifier ds-classifier1 behavior ds-behavior1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-trafficpolicy-service-control]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-trafficpolicy-service-control] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS]<strong> traffic-policy service-control inbound</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS] <strong>commit</strong></pre>
+</p></li><li><span>Enable the DS-Lite device to advertise public routes. In the following example, Intermediate System to Intermediate System (IS-IS) is used.</span><p><ol type="a"><li><p>Configure IS-IS.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS]<strong> isis 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-isis-100] <strong>network-entity 10.1000.1000.1000.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-isis-100] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-isis-100] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS]<strong> isis 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-isis-1000] <strong>network-entity 10.1000.1000.1002.00</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-isis-1000] <strong>ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-isis-1000] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-isis-1000] <strong>quit</strong></pre>
+</li><li><p>Configure the DS-Lite device's interface connected to the IPv6 network.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS]<strong> interface gigabitethernet<span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-GigabitEthernet<span>0/1/1</span>] <strong>ipv6 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-GigabitEthernet<span>0/1/1</span>] <strong>isis ipv6 enable 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-GigabitEthernet<span>0/1/1</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+</li><li><p>Configure the DS-Lite device's interface connected to the IPv4 network.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS]<strong> interface gigabitethernet<span>0/1/2</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-GigabitEthernet<span>0/1/2</span>] <strong>ip address 2.2.2.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-GigabitEthernet<span>0/1/2</span>] <strong>isis enable 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-GigabitEthernet<span>0/1/2</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-GigabitEthernet<span>0/1/2</span>] <strong>quit</strong></pre>
+</li><li><p>Enable the DS-Lite device to advertise local IP routes to the IPv6 network and address pool routes to the IPv4 network. Import local IP routes and address pool routes to the IS-IS routing table.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS]<strong> isis 1000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-isis-1000]<strong> ipv6 import-route unr</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-isis-1000] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-isis-1000] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS]<strong> isis 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-isis-100]<strong> import-route unr</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>BRAS-isis-100] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS-isis-100] <strong>quit</strong></pre>
+</li></ol>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If a public address pool is configured using a mask, run the <strong>network</strong> command to advertise a route. Do not configure a black-hole summary route, which prevents a failure to forward reverse traffic.</p>
+</div></div>
+</p></li><li><span>Verify the configuration.</span><p><p># Run the <strong>display device</strong> command to view the status of the master and slave service boards.</p>
+<pre class="screen">&lt;BRAS&gt; <strong>display device</strong></pre>
+<pre class="screen"><span class="keyword">NE40E</span>'s Device status:
+Slot #    Type       Online    Register      Status      Primary
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+1         VSU        Present   Registered    Normal      NA     
+2         VSU        Present   Registered    Normal      NA     
+17        MPU        Present   NA            Normal      Master 
+18        MPU        Present   Registered    Normal      Slave  
+19        SFU        Present   Registered    Normal      NA     
+21        SFU        Present   Registered    Normal      NA     
+23        CLK        Present   Registered    Normal      Master 
+24        CLK        Present   Registered    Normal      Slave  
+25        PWR        Present   Registered    Normal      NA     
+26        PWR        Present   Registered    Normal      NA     
+27        FAN        Present   Registered    Normal      NA     
+28        FAN        Present   Registered    Normal      NA     
+29        FAN        Present   Registered    Normal      NA     
+30        FAN        Present   Registered    Normal      NA</pre>
+<p># Verify that the public network routes are properly advertised.</p>
+<pre class="screen">&lt;BRAS&gt; <strong>display ip routing-table</strong></pre>
+<pre class="screen">Route Flags: R - relay, D - download to fib       
+----------------------------------------------------------------------
+Routing Table: Public                            
+         Destinations : 21813    Routes : 21814   
+                                                  
+Destination/Mask    Proto   Pre  Cost      Flags NextHop         Interface
+                                                  
+     11.1.1.0/24    Unr     64   10          D   127.0.0.1       InLoopBack0
+     2.2.2.0/24     Direct  15   20          D   2.2.2.2         GigabitEthernet<span>0/1/2</span>
+     2.2.2.1/32     Direct  0    0           D   127.0.0.1       GigabitEthernet<span>0/1/2</span></pre>
+<pre class="screen">&lt;BRAS&gt; <strong>display ipv6 routing-table 2001:db8:2:2:2::12:100</strong></pre>
+<pre class="screen">Routing Table :              
+Summary Count : 1            
+            
+ Destination  : 2001:db8:D000::                  PrefixLength : 128               
+ NextHop      : 2001:db8:2:2:2::12:100           Preference   : 64               
+ Cost         : 10                               Protocol     : Unr              
+ RelayNextHop : ::                               TunnelID     : 0x0              
+ Interface    : GigabitEthernet<span>0/1/1</span>              Flags        : D  </pre>
+<p># Verify that the master/backup status in the service-location is correct.</p>
+<pre class="screen">&lt;BRAS&gt; <strong>display service-location  1 </strong></pre>
+<pre class="screen">service-location 1                             
+ Location slot ID: 1                
+ Current location slot ID: 1         
+ Backup slot ID: 2                
+ Current backup slot ID: 2          
+ Bound service-instance-group number: 1           
+ Batch-backup state: finished  </pre>
+<p># Verify that user table information on the master and slave service boards is correct.</p>
+<pre class="screen">&lt;BRAS&gt; <strong>display nat user-information slot <span>1</span> verbose</strong></pre>
+<pre class="screen">This operation will take a few minutes. Press 'Ctrl+C' to break
+Slot: <span>1</span>
+Total number: 1.
+  ---------------------------------------------------------------------------
+  User Type                             :  DS-Lite
+  CPE IP                                :  124.7.200.1
+  User ID                               :  1
+  VPN Instance                          :  -
+  Address Group                         :  test_nat_03
+  NoPAT Address Group                   :  -
+  NAT Instance                          :  test_nat_03
+  Public IP                             :  143.15.31.142
+  NoPAT Public IP                       :  -
+  Start Port                            :  1024
+  Port Range                            :  64512
+  Port Total                            :  64512
+  Radius Specific PCP Port              :  NO
+  PCP authentication                    :  True
+  Extend Port Alloc Times               :  0
+  Extend Port Alloc Number              :  0
+  First/Second/Third Extend Port Start  :  0/0/0
+  Total/TCP/UDP/ICMP Session Limit      :  0/0/0/0
+  Total/TCP/UDP/ICMP Session Current    :  0/0/0/0
+  Total/TCP/UDP/ICMP Rev Session Limit  :  8192/10240/10240/512
+  Total/TCP/UDP/ICMP Rev Session Current:  0/0/0/0
+  Total/TCP/UDP/ICMP Port Limit         :  0/0/0/0
+  Total/TCP/UDP/ICMP Port Current       :  0/0/0/0
+  Nat ALG Enable                        :  ALL
+  Port Reuse                            :  False
+  Token/TB/TP                           :  0/0/0
+  Token/TB/TP                           :  0/0/0
+  Port Forwarding Flag                  :  Non Port Forwarding
+  Port Forwarding Ports                 :  0 0 0 0 0
+  Create Time                           :  2023-10-25 10:27:41
+  Aging Time(s)                         :  -
+  Left Time(s)                          :  -
+  Port Limit Discard Count              :  0
+  Session Limit Discard Count           :  0
+  Fib Miss Discard Count                :  0
+  --&gt;Transmit Packets                   :  0
+  --&gt;Transmit Bytes                     :  0
+  --&gt;Drop Packets                       :  0
+  &lt;--Transmit Packets                   :  0
+  &lt;--Transmit Bytes                     :  0
+  &lt;--Drop Packets                       :  0
+  Fast-forwarding Statistics ID         :  -
+  --&gt;Hit Fast-fwd session Packets       :  -
+  --&gt;NP transmit to multi-core Packets  :  -
+  &lt;--Hit Fast-fwd session Packets       :  -
+  &lt;--NP transmit to multi-core Packets  :  -
+  Is UP-Escape User                     :  False
+  ---------------------------------------------------------------------------</pre>
+<p># Verify that session table information on the master and backup service boards is correct.</p>
+<pre class="screen">&lt;BRAS&gt; <strong>display nat session table slot <span>1</span> verbose</strong></pre>
+<pre class="screen">This operation will take a few minutes. Press 'Ctrl+C' to break ...
+Slot: <span>1</span> 
+Current total sessions: 1.
+udp: 192.168.1.2:1024[11.1.1.1:1024]--&gt; *:* 
+*:* --&gt;11.1.1.1:1024[192.168.1.2:1024] 
+DS-Lite Instance: ds-lite-1
+VPN:---&gt;-
+Tag:0x2,FixedTag:0x1, Status:hit, NPFlag:0x6, Create:2015-9-30 11:37:04,TTL:00:04:00 ,Left:00:04:00 , Master
+AppProID: 0x0, CPEIP:2001:db8:2:2:2::12, FwdType:DSLITE
+Dest-ip:1.1.1.2,Dest-port:1024</pre>
+<pre class="screen">&lt;BRAS&gt; <strong>display nat session table slot <span>2</span> verbose</strong></pre>
+<pre class="screen">This operation will take a few minutes. Press 'Ctrl+C' to break ...
+Slot: <span>2</span> 
+Current total sessions: 1.
+udp: 192.168.1.2:1024[11.1.1.1:1024]--&gt; *:* 
+*:* --&gt;11.1.1.1:1024[192.168.1.2:1024] 
+DS-Lite Instance: ds-lite-1
+VPN:---&gt;-
+Tag:0x2,FixedTag:0x1, Status:hit, NPFlag:0x6, Create:2015-9-30 11:37:04,TTL:00:04:00 ,Left:00:04:00 , Master
+AppProID: 0x0, CPEIP:2001:db8:2001:db8:2:2:2::12:200, FwdType:DSLITE
+Dest-ip:1.1.1.2,Dest-port:1024</pre>
+<p># Run the<strong> display nat statistics</strong> command to view the number of sent and received packets on the master service board.</p>
+<pre class="screen">&lt;BRAS&gt; <strong>display nat statistics received slot <span>1</span> </strong></pre>
+<pre class="screen">This operation will take a few minutes. Press 'Ctrl+C' to break 
+Slot: <span>1</span>                                  
+---------------------------------------------------------------------------
+ Packets received from interface                :632014772      
+ Packets received from mainboard                :29450          
+ Packets received by nat entry                  :255587842      
+ receive hrp packets from peer device           :0
+ receive boardhrp packets from peer board       :0
+---------------------------------------------------------------------------</pre>
+<pre class="screen">&lt;BRAS&gt; <strong>display nat statistics transmitted slot <span>1</span></strong></pre>
+<pre class="screen">This operation will take a few minutes. Press 'Ctrl+C' to break 
+Slot: <span>1</span>                                  
+--------------------------------------------------------------------------
+ Packets transmitted to interface               :159142427      
+ Packets transmitted to mainboard               :22219          
+ Seclog packets transmitted                     :0
+ Syslog packets transmitted                     :0
+ Userinfo log msg transmitted to cp             :0
+ Transparent packet with nat                    :65080312       
+ Transparent packet without nat                 :0
+ sessions sent by hrp                           :0
+ UserTbl sent by hrp                            :0
+ UserTbl sent by Boardhrp                       :0
+ sessions sent by Boardhrp                      :0
+---------------------------------------------------------------------------</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172362464__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>BRAS configuration file</p>
+<pre class="screen">#
+sysname BRAS
+#
+vsm on-board-mode disable
+#
+license
+ active nat session-table size 16 slot <span>1</span> 
+ active nat session-table size 16 slot <span>2</span> 
+ active nat bandwidth-enhance 40 slot <span>1</span>
+ active nat bandwidth-enhance 40 slot <span>2</span>
+ active ds-lite vsuf slot <span>1</span>
+ active ds-lite vsuf slot <span>2</span>
+#
+service-ha hot-backup enable
+#
+radius-server group rad-ser
+ radius-server authentication 192.168.10.10 1824 weight 0
+ radius-server accounting 192.168.10.10 1825 weight 0
+ radius-server shared-key-cipher %^%#x*CgITP4C<font style="font-size:8pt" Face="Courier New" >~</font>;q,*+DEW'JBWe#)"Q&amp;|7bX]b:Y&lt;{w'%^%#
+#
+ipv6
+dhcpv6 duid llt
+#
+ipv6 prefix ipv6-pppoe-nd-1 delegation
+ prefix 2001:db8:D000::/41
+ slaac-unshare-only
+#
+ipv6 pool ipv6-pppoe-nd-1 bas delegation
+ dns-server 2001:db8:1:1:1::10
+ prefix ipv6-pppoe-nd-1
+#
+ipv6 prefix ipv6-pppoe-pd-1 delegation
+ prefix 2001:db8:D080::/41 delegating-prefix-length 56
+ pd-unshare-only
+#
+ipv6 pool ipv6-pppoe-pd-1 bas delegation
+ dns-server 2001:db8:1:1:1::10
+ aftr-name zj-hz-aftr1.dualstack-lite.com
+ prefix ipv6-pppoe-pd-1
+#
+acl ipv6 3000
+ rule 5 permit ipv6 source 2001:db8:D000::/41 destination 2001:db8:2:2:2::12/128
+#
+acl ipv6 number 9001
+ rule 5 permit ipv6 source user-group ds-lite-1 destination ipv6-address 2001:db8:2:2:2::12/128
+#
+traffic classifier ds-classifier1 operator or
+ if-match ipv6 acl 9001 precedence 1
+#
+traffic behavior ds-behavior1
+ ds-lite bind instance ds-lite-1
+#
+traffic policy service-control
+ share-mode
+ classifier ds-classifier1 behavior ds-behavior1 precedence 1
+#
+traffic-policy service-control inbound
+#
+isis 100
+ network-entity 10.1000.1000.1000.00
+ import-route unr
+#
+isis 1000
+ network-entity 10.1000.1000.1002.00
+ ipv6 import-route unr
+ ipv6 enable
+#
+service-location 1
+ location slot 10 backup slot 11
+#
+service-instance-group service-instance-group1
+ service-location 1
+#
+ds-lite instance ds-lite-1 id 100
+ service-instance-group service-instance-group1
+ ds-lite tunnel prefix-length 64
+ port-range 4096
+ ds-lite address-group dt-addr-group group-id 1
+  section 0 11.1.1.1 mask 24
+ ds-lite outbound 3000 address-group dt-addr-group
+ local-ipv6 2001:db8:2:2:2::12 prefix-length 128
+ remote-ipv6 2001:db8:D000:: prefix-length 41
+ ds-lite alg all
+ ds-lite filter mode full-cone
+#
+user-group ds-lite-1
+#
+aaa
+ authentication-scheme auth1
+ accounting-scheme acct1
+  accounting start-fail online
+#
+ domain ds-lite-domain
+  authentication-scheme auth1
+  accounting-scheme acct1
+  prefix-assign-mode unshared
+  ipv6-pool ipv6-pppoe-nd-1 
+  ipv6-pool ipv6-pppoe-pd-1
+<strong>  </strong>radius-server group rad-ser
+  user-group ds-lite-1 bind ds-lite instance ds-lite-1
+  user-basic-service-ip-type ipv6
+#
+interface gigabitethernet<span>0/1/1</span>
+ ipv6 enable
+ isis ipv6 enable 1000
+#
+interface gigabitethernet<span>0/1/2</span>
+ ip address 2.2.2.1 24
+ isis enable 100
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0042.html">Inter-Board Hot Backup
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0031.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0033.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1080 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring E-STP Using Inter-AS Option A in LDP Mode">
+<meta name="abstract" content="To implement E-STP for LDP VPLS using inter-AS Option A, configure service VSIs in each AS and bind Layer 3 sub-interfaces to VSIs for inter-AS communication; configure mVSIs on the NPEs in the same AS and enable STP for the mPWs; and enable STP on Layer 3 interfaces that connect inter-AS NPEs.">
+<meta name="description" content="To implement E-STP for LDP VPLS using inter-AS Option A, configure service VSIs in each AS and bind Layer 3 sub-interfaces to VSIs for inter-AS communication; configure mVSIs on the NPEs in the same AS and enable STP for the mPWs; and enable STP on Layer 3 interfaces that connect inter-AS NPEs.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mstp_cfg_0045.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mstp_cfg_0049.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mstp_cfg_0052.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="wwx1238417">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="MSTP">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="MSTP">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="featurename" content="MSTP">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="featurename" content="MSTP">
+<meta name="featuretype" content="LAN Access and MAN Access">
+<meta name="OWNER" content="l00425560,w00437000">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="wWX1238417">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172363673">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/jquery.min.idp.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/RowOrColfreezeSupport.js"></script>
+
+<script type="text/javascript">
+setTimeout(function(){
+	jQueryHW(document).ready(function(){
+		jQueryHW("table[rowfreeze='yes']").rowfreeze();
+		jQueryHW("table[colfreeze='yes']").colfreeze();
+	});
+},500);
+</script>
+<title>Example for Configuring E-STP Using Inter-AS Option A in LDP Mode</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172363673"></a><a name="EN-US_TASK_0172363673"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring E-STP Using Inter-AS Option A in LDP Mode</h1>
+<div class="taskbody"><p>To implement E-STP for LDP VPLS using inter-AS Option A, configure service VSIs in each AS and bind Layer 3 sub-interfaces to VSIs for inter-AS communication; configure mVSIs on the NPEs in the same AS and enable STP for the mPWs; and enable STP on Layer 3 interfaces that connect inter-AS NPEs.</p>
+<div class="context"><a name="EN-US_TASK_0172363673__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0172363673__fig_dc_vrp_mstp_cfg_005101">Figure 1</a>, inter-AS Option A in LDP mode is used.</p>
+<ul><li>UPE1 is dual-homed to NPE1 and NPE2, and UPE2 is dual-homed to NPE3 and NPE4. Inter-AS redundant links are available.</li><li>LDP VPLS is configured on each UPE and its directly connected NPEs. Each NPE considers its inter-AS remote NPE a CE.</li></ul>
+<p>However, the following problems occur:</p>
+<ul><li>A UPE receives two copies of traffic from the remote UPE.</li><li>Data loops may occur among NPE1, NPE3, NPE4, and NPE2.</li></ul>
+<p>To prevent these problems, configure an mPW between NPE1 and NPE3 and between NPE2 and NPE4 and enable STP for the mPWs and inter-AS Layer 3 interfaces; configure STP priorities and set the path costs of interfaces to allow NPE3 to function as the root bridge and NPE4 as the backup root bridge so that the inter-AS interface on NPE2 will be blocked, and accordingly VPLS services on Layer 3 sub-interfaces will be blocked as well. As a result, the traffic from CE1 will travel along the path UPE1 -&gt; NPE1 -&gt; NPE3 -&gt; UPE2 to reach CE2, without any duplicate traffic or loops.</p>
+<div class="fignone" id="EN-US_TASK_0172363673__fig_dc_vrp_mstp_cfg_005101"><a name="EN-US_TASK_0172363673__fig_dc_vrp_mstp_cfg_005101"></a><a name="fig_dc_vrp_mstp_cfg_005101"></a><span class="figcap"><b>Figure 1 </b>Configuring E-STP using inter-AS Option A in LDP mode</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interfaces 1 through 3, subinterface1.1, and subinterface3.1 represent GE<span>0/1/0</span>, GE<span>0/2/0</span>, GE<span>0/3/0</span>, GE<span>0/1/0</span>.1, and GE<span>0/3/0</span>.1, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_mstp_cfg_005101.png" width="NaN" height="NaN"></span><br></div>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" rowfreeze="yes" frame="border" border="1" rules="all"><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="16.666666666666664%" id="mcps1.4.1.8.1.7.1.1" liSelected="liSelected"><p>Device</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="16.666666666666664%" id="mcps1.4.1.8.1.7.1.2" liSelected="liSelected"><p>Interface</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="16.666666666666664%" id="mcps1.4.1.8.1.7.1.3" liSelected="liSelected"><p>IP Address</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="16.666666666666664%" id="mcps1.4.1.8.1.7.1.4" liSelected="liSelected"><p>Device</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="16.666666666666664%" id="mcps1.4.1.8.1.7.1.5" liSelected="liSelected"><p>Interface</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="16.666666666666664%" id="mcps1.4.1.8.1.7.1.6" liSelected="liSelected"><p>IP Address</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" rowspan="3" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.1 "><p>UPE1</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.2 "><p>GE <span>0/1/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.3 "><p>10.1.1.1/24</p>
+</td>
+<td class="cellrowborder" rowspan="3" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.4 "><p>UPE2</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.5 "><p>GE <span>0/1/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.6 "><p>10.5.1.2/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.2 "><p>GE <span>0/2/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.3 "><p>10.1.2.1/24</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.5 "><p>GE <span>0/2/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.6 "><p>10.5.2.2/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.2 "><p>Loopback1</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.3 "><p>1.1.1.1/32</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.5 "><p>Loopback1</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.6 "><p>6.6.6.6/32</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="4" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.1 "><p>NPE1</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.2 "><p>GE <span>0/1/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.3 "><p>-</p>
+</td>
+<td class="cellrowborder" rowspan="4" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.4 "><p>NPE2</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.5 "><p>GE <span>0/1/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.6 "><p>-</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.2 "><p>GE <span>0/2/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.3 "><p>10.8.1.1/24</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.5 "><p>GE <span>0/2/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.6 "><p>10.8.1.2/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.2 "><p>GE <span>0/3/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.3 "><p>10.1.1.2/24</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.5 "><p>GE <span>0/3/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.6 "><p>10.1.2.2/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.2 "><p>Loopback1</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.3 "><p>2.2.2.2/32</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.5 "><p>Loopback1</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.6 "><p>3.3.3.3/32</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="4" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.1 "><p>NPE3</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.2 "><p>GE <span>0/1/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.3 "><p>-</p>
+</td>
+<td class="cellrowborder" rowspan="4" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.4 "><p>NPE4</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.5 "><p>GE <span>0/1/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.6 "><p>-</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.2 "><p>GE <span>0/2/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.3 "><p>10.9.1.1/24</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.5 "><p>GE <span>0/2/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.6 "><p>10.9.1.2/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.2 "><p>GE <span>0/3/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.3 "><p>10.5.1.1/24</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.5 "><p>GE <span>0/3/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.6 "><p>10.5.2.1/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.2 "><p>Loopback1</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.3 "><p>4.4.4.4/32</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.5 "><p>Loopback1</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.8.1.7.1.6 "><p>5.5.5.5/32</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.1 "><p>CE1</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.2 "><p>GE <span>0/1/0</span>.1</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.3 "><p>192.168.1.1/24</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.4 "><p>CE2</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.5 "><p>GE <span>0/1/0</span>.1</p>
+</td>
+<td class="cellrowborder" valign="top" width="16.666666666666664%" headers="mcps1.4.1.8.1.7.1.6 "><p>192.168.1.2/24</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172363673__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure an IGP on the VPLS backbone network to allow intra-AS devices to communicate.</p>
+</li><li><div class="p">Configure basic MPLS functions on the VPLS backbone network.<ul><li>Establish a dynamic LDP LSP between the UPE and NPEs in the same AS.</li><li>Establish a dynamic LDP LSP between the NPEs in the same AS.</li></ul>
+</div>
+<p>Establish remote LDP sessions if the UPE and an NPE or the NPEs are indirectly connected.</p>
+</li><li><div class="p">Establish VPLS connections between the UPE and NPEs in the same AS.<ul><li>Create service VSIs on the UPE and NPEs in the same AS to exchange service packets.</li><li>Create mVSIs on the NPEs in the same AS to transmit STP packets over the mPW.</li></ul>
+</div>
+</li><li><p>Configure STP.</p>
+<ul><li>Enable STP for the mPWs.</li><li>Enable STP for inter-AS physical links.</li></ul>
+<p>Configure STP priorities to allow NPE3 to function as the root bridge and NPE4 as the backup root bridge.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172363673__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Data needed for configuring OSPF</p>
+</li><li><p>Peer IP addresses</p>
+</li><li><p>MPLS LSR IDs of the UPEs and NPEs</p>
+</li><li><p>VSI IDs</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172363673__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure IP addresses for interfaces on the backbone network. For configuration details, see Configuration Files.</span></li><li><span>Configure an IGP on the VPLS backbone network. This example uses OSPF as the IGP.</span><p><p>When configuring OSPF, advertise the 32-bit IP addresses of loopback interfaces, which are used as LSR IDs, on the UPEs and NPEs.</p>
+<p>For configuration details, see <a href="#EN-US_TASK_0172363673__example_01">Configuration Files</a>.</p>
+</p></li><li><span>Configure MPLS and establish LDP LSPs.</span><p><p>Configure basic MPLS functions on the backbone network and set up a dynamic LDP LSP between the UPE and NPEs in the same AS.</p>
+<p>After the configuration is complete, the UPE and NPEs in the same AS have established LDP LSPs. The following example uses the command output on NPE1.</p>
+<pre class="screen">&lt;NPE1&gt; <strong>display mpls ldp session</strong></pre>
+<pre class="screen"> LDP Session(s) in Public Network
+ Codes: LAM(Label Advertisement Mode), SsnAge Unit(DDDD:HH:MM)
+<span> An asterisk (*) before a session means the session is being deleted.</span>
+
+ ------------------------------------------------------------------------------
+ PeerID             Status      LAM  SsnRole  SsnAge      KASent/Rcv
+ ------------------------------------------------------------------------------
+ 1.1.1.1:0          Operational DU   Active   000:00:00   125/125
+ 3.3.3.3:0          Operational DU   Passive  000:00:00   124/124
+ ------------------------------------------------------------------------------
+ TOTAL: 2 session(s) Found.</pre>
+</p></li><li><span>Enable MPLS L2VPN on the UPEs and NPEs.</span><p><p># Configure UPE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1] <strong>mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-l2vpn] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1-l2vpn] <strong>quit</strong></pre>
+<p># Configure NPE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1] <strong>mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-l2vpn] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1-l2vpn] <strong>quit</strong></pre>
+<p># Configure NPE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2] <strong>mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-l2vpn] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2-l2vpn] <strong>quit</strong></pre>
+<p>Repeat this step for UPE2, NPE3, and NPE4. For configuration details, see <a href="#EN-US_TASK_0172363673__example_01">Configuration Files</a>.</p>
+</p></li><li><span>Configure VPLS.</span><p><ol type="a"><li><p>Configure mVSIs on the NPEs. Establish LDP peer relationships between NPE1 and NPE2 and between NPE3 and NPE4.</p>
+<div class="p"># Configure NPE1.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1] <strong>vsi m1 static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-m1] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-m1-ldp] <strong>vsi-id 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-m1-ldp] <strong>peer 3.3.3.3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-m1-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-m1] <strong>admin-vsi</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-m1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1] <strong>commit</strong></pre>
+</div>
+<div class="p"># Configure NPE2.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2] <strong>vsi m1 static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-m1] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-m1-ldp] <strong>vsi-id 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-m1-ldp] <strong>peer 2.2.2.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-m1-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-m1] <strong>admin-vsi</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-m1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2] <strong>commit</strong></pre>
+</div>
+<div class="p"># Configure NPE3.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE3] <strong>vsi m1 static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi-m1] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi-m1-ldp] <strong>vsi-id 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi-m1-ldp] <strong>peer 5.5.5.5</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi-m1-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi-m1] <strong>admin-vsi</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi-m1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3] <strong>commit</strong></pre>
+</div>
+<div class="p"># Configure NPE4.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE4] <strong>vsi m1 static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-vsi-m1] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-vsi-m1-ldp] <strong>vsi-id 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-vsi-m1-ldp] <strong>peer 4.4.4.4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-vsi-m1-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-vsi-m1] <strong>admin-vsi</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-m1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4] <strong>commit</strong></pre>
+</div>
+</li><li><p>Configure service VSIs on the UPEs and NPEs and bind the service VSIs to Layer 3 sub-interfaces.</p>
+<p># Configure UPE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1] <strong>vsi s1 static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-vsi-s1] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-vsi-s1-ldp] <strong>vsi-id 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-vsi-s1-ldp] <strong>peer 2.2.2.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-vsi-s1-ldp] <strong>peer 3.3.3.3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-vsi-s1-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-vsi-s1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1] <strong>interface gigabitethernet <span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/3/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/3/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1] <strong>interface gigabitethernet <span>0/3/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/3/0</span>.1] <strong>shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/3/0</span>.1] <strong>vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/3/0</span>.1] <strong>l2 binding vsi s1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/3/0</span>.1] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/3/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1] <strong>commit</strong></pre>
+<p># Configure NPE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1] <strong>vsi s1 static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-s1] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-s1-ldp] <strong>vsi-id 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-s1-ldp]<strong> peer 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-s1-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-s1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>] <strong>portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1] <strong>interface gigabitethernet <span>0/1/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>.1] <strong>shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>.1] <strong>vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>.1] <strong>l2 binding vsi s1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>.1] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1] <strong>commit</strong></pre>
+<p># Configure NPE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2] <strong>vsi s1 static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-s1] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-s1-ldp] <strong>vsi-id 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-s1-ldp]<strong> peer 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-s1-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-s1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>] <strong>portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2] <strong>interface gigabitethernet <span>0/1/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>.1] <strong>shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>.1] <strong>vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>.1] <strong>l2 binding vsi s1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>.1] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2] <strong>commit</strong></pre>
+<p># Configure UPE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2] <strong>vsi s1 static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-vsi-s1] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-vsi-s1-ldp] <strong>vsi-id 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-vsi-s1-ldp] <strong>peer 4.4.4.4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-vsi-s1-ldp] <strong>peer 5.5.5.5</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-vsi-s1-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-vsi-s1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2] <strong>interface gigabitethernet <span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/3/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/3/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2] <strong>interface gigabitethernet <span>0/3/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/3/0</span>.1] <strong>shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/3/0</span>.1] <strong>vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/3/0</span>.1] <strong>l2 binding vsi s1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/3/0</span>.1] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/3/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2] <strong>commit</strong></pre>
+<p># Configure NPE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE3] <strong>vsi s1 static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi-s1] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi-s1-ldp] <strong>vsi-id 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi-s1-ldp]<strong> peer 6.6.6.6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi-s1-ldp]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi-s1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-GigabitEthernet<span>0/1/0</span>] <strong>portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3] <strong>interface gigabitethernet <span>0/1/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-GigabitEthernet<span>0/1/0</span>.1] <strong>shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-GigabitEthernet<span>0/1/0</span>.1] <strong>vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-GigabitEthernet<span>0/1/0</span>.1] <strong>l2 binding vsi s1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-GigabitEthernet<span>0/1/0</span>.1] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3] <strong>commit</strong></pre>
+<p># Configure NPE4.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE4] <strong>vsi s1 static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-vsi-s1] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-vsi-s1-ldp] <strong>vsi-id 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-vsi-s1-ldp] <strong>peer 6.6.6.6</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-vsi-s1-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-vsi-s1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-GigabitEthernet<span>0/1/0</span>] <strong>portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4] <strong>interface gigabitethernet <span>0/1/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-GigabitEthernet<span>0/1/0</span>.1] <strong>shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-GigabitEthernet<span>0/1/0</span>.1] <strong>vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-GigabitEthernet<span>0/1/0</span>.1] <strong>l2 binding vsi s1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-GigabitEthernet<span>0/1/0</span>.1] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4] <strong>commit</strong></pre>
+</li></ol>
+</p></li><li><span>Enable STP globally on the NPEs.</span><p><p># Configure an MST region. This example uses the configuration of NPE1. The configurations of NPE2, NPE3, and NPE4 are the same as the configuration of NPE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1] <strong>stp region-configuration</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-mst-region] <strong>region-name RG1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-mst-region] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1-mst-region] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1] <strong>stp enable</strong></pre>
+<p># Configure the STP priority 0 for NPE3 in MSTI0.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE3] <strong>stp instance 0 priority 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3] <strong>commit</strong></pre>
+<p># Configure the STP priority 4096 for NPE4 in MSTI0.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE4] <strong>stp instance 0 priority 4096</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4] <strong>commit</strong></pre>
+<p>NPE1 and NPE2 use the default STP priority 32768. Therefore, NPE3 functions as the root bridge, and NPE4 functions as the backup root bridge. </p>
+</p></li><li><span>Configure E-STP.</span><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>If service VSIs are bound to an mVSI, configure STP for the mVSI but not for the service VSIs. The mVSI status determines the service VSI status.</p>
+</div></div>
+<p># Configure NPE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1] <strong>vsi m1 static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-m1] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-m1-ldp] <strong>peer 3.3.3.3 pw pw1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-m1-ldp-pw-pw1] <strong>stp enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-m1-ldp-pw-pw1] <strong>stp cost 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-m1-ldp-pw-pw1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi-m1-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-vsi] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>] <strong>stp enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>] <strong>stp vpls-subinterface enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>] <strong>stp instance 0 cost 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE1] <strong>commit</strong></pre>
+<p># Configure NPE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2] <strong>vsi m1 static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-m1] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-m1-ldp] <strong>peer 2.2.2.2 pw pw1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-m1-ldp-pw-pw1] <strong>stp enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-m1-ldp-pw-pw1] <strong>stp cost 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-m1-ldp-pw-pw1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi-m1-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-vsi] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>] <strong>stp enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>] <strong>stp vpls-subinterface enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>] <strong>stp instance 0 cost 5</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE2] <strong>commit</strong></pre>
+<p># Configure NPE3.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE3] <strong>vsi m1 static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi-m1] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi-m1-ldp] <strong>peer 5.5.5.5 pw pw1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi-m1-ldp-pw-pw1] <strong>stp enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi-m1-ldp-pw-pw1] <strong>stp cost 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi-m1-ldp-pw-pw1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi-m1-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-vsi] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-GigabitEthernet<span>0/1/0</span>] <strong>stp enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-GigabitEthernet<span>0/1/0</span>] <strong>stp vpls-subinterface enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-GigabitEthernet<span>0/1/0</span>] <strong>stp instance 0 cost 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE3] <strong>commit</strong></pre>
+<p># Configure NPE4.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE4] <strong>vsi m1 static</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-vsi-m1] <strong>pwsignal ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-vsi-m1-ldp] <strong>peer 4.4.4.4 pw pw1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-vsi-m1-ldp-pw-pw1] <strong>stp enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-vsi-m1-ldp-pw-pw1] <strong>stp cost 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-vsi-m1-ldp-pw-pw1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-vsi-m1-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-vsi] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-GigabitEthernet<span>0/1/0</span>] <strong>stp enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-GigabitEthernet<span>0/1/0</span>] <strong>stp vpls-subinterface enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-GigabitEthernet<span>0/1/0</span>] <strong>stp instance 0 cost 5</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>NPE4] <strong>commit</strong></pre>
+</p></li><li><span>Configure CEs.</span><p><p># Configure CE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>interface gigabitethernet <span>0/1/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>.1] <strong>shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>.1] <strong>vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>.1] <strong>ip address 192.168.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>.1] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>commit</strong></pre>
+<p># Configure CE2.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2] <strong>interface gigabitethernet <span>0/1/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>.1] <strong>shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>.1] <strong>vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>.1] <strong>ip address 192.168.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>.1] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2] <strong>commit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><ul><li><p>Run the <a href="cmdqueryname=display+stp+brief"><b><span class="cmdname">display stp brief</span></b></a> command on the NPEs to check STP information. The command outputs show that only the status of GE <span>0/1/0</span> on NPE2 is <strong>DISCARDING</strong>, meaning that GE <span>0/1/0</span> is blocked.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1] <strong>display stp brief</strong></pre>
+<pre class="screen"> MSTID   Port                        Role  STP State     Protection
+    0    GigabitEthernet<span>0/1/0</span>        ROOT  FORWARDING      NONE
+    0    m1-pw1                      DESI  <strong>FORWARDING</strong>      NONE                  </pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2] <strong>display stp brief</strong></pre>
+<pre class="screen"> MSTID  Port                        Role  STP State     Protection
+    0    GigabitEthernet<span>0/1/0</span>        ALTE  <strong>DISCARDING</strong>      NONE
+    0    m1-pw1                      ROOT  <strong>FORWARDING</strong>      NONE</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE3] <strong>display stp brief</strong></pre>
+<pre class="screen"> MSTID  Port                        Role  STP State     Protection
+    0    GigabitEthernet<span>0/1/0</span>        DESI  FORWARDING      NONE
+    0    m1-pw1                      DEST  <strong>FORWARDING</strong>      NONE</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE4] <strong>display stp brief</strong></pre>
+<pre class="screen"> MSTID  Port                        Role  STP State     Protection
+    0    GigabitEthernet<span>0/1/0</span>        DESI  FORWARDING      NONE
+    0    m1-pw1                      ROOT  <strong>FORWARDING</strong>      NONE</pre>
+</li><li><p>Run the <a href="cmdqueryname=display+vsi+name+s1+verbose"><b><span class="cmdname">display vsi name s1 verbose</span></b></a> command on NPE1. The command output shows that the VSI named <strong>s1</strong> has established a PW with UPE1 and the VSI status is Up.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE1] <strong>display vsi name s1 verbose</strong></pre>
+<pre class="screen"> ***VSI Name               : s1
+    Administrator VSI      : no
+    Isolate Spoken         : disable
+    VSI Index              : 2
+    PW Signaling           : ldp
+    Member Discovery Style : static
+    Bridge-domain Mode     : disable
+    PW MAC Learn Style     : unqualify
+    Encapsulation Type     : vlan
+    MTU                    : 1500
+    Diffserv Mode          : uniform
+    Service Class          : --
+    Color                  : --
+    DomainId               : 255
+    Domain Name            :
+    Ignore AcState         : disable
+    P2P VSI                : disable
+    Multicast Fast Switch  : disable
+    Create Time            : 0 days, 1 hours, 19 minutes, 38 seconds
+    VSI State              : <strong>up</strong>
+    Resource Status        : Valid
+
+    VSI ID                 : 10
+   *Peer Router ID         : 1.1.1.1
+    primary or secondary   : primary
+    ignore-standby-state   : no
+    VC Label               : 32891
+    Peer Type              : dynamic
+    Session                : <strong>up</strong>
+    Tunnel ID              : 0x0000000001004c4b41 
+    Broadcast Tunnel ID    : --
+    Broad BackupTunnel ID  : -- 
+    CKey                   : 2
+    NKey                   : 1862271177
+    Stp Enable             : 0
+    PwIndex                : 2
+<span>    Control Word           : disable</span>
+
+    Interface Name         : GigabitEthernet<span>0/1/0</span>.1
+    State                  : <strong>up</strong>
+    Access Port            : false
+    Last Up Time           : 2013/12/26 17:35:12
+    Total Up Time          : 0 days, 1 hours, 19 minutes, 38 seconds
+
+  **PW Information:
+
+   *Peer Ip Address        : 1.1.1.1
+    PW State               : <strong>up</strong>
+    Local VC Label         : 32891
+    Remote VC Label        : 32890
+<span>    Remote Control Word    : disable</span>
+    PW Type                : label
+    Tunnel ID              : 0x0000000001004c4b41 
+    Broadcast Tunnel ID    : --
+    Broad BackupTunnel ID  : --
+    Ckey                   : 2
+    Nkey                   : 1862271177
+    Main PW Token          : 0x0
+    Slave PW Token         : 0x0
+    Tnl Type               : ldp
+    OutInterface           : LDP LSP
+    Backup OutInterface    : --
+    Stp Enable             : 0
+    Mac Flapping           : 0
+    PW Last Up Time        : 2013/12/26 17:35:12
+    PW Total Up Time       : 0 days, 1 hours, 19 minutes, 38 seconds</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>NPE2] <strong>display vsi name s1 verbose</strong></pre>
+<pre class="screen"> ***VSI Name               : s1
+    Administrator VSI      : no
+    Isolate Spoken         : disable
+    VSI Index              : 2
+    PW Signaling           : ldp
+    Member Discovery Style : static
+    Bridge-domain Mode     : disable
+    PW MAC Learn Style     : unqualify
+    Encapsulation Type     : vlan
+    MTU                    : 1500
+    Diffserv Mode          : uniform
+    Service Class          : --
+    Color                  : --
+    DomainId               : 255
+    Domain Name            :
+    Ignore AcState         : disable
+    P2P VSI                : disable
+    Multicast Fast Switch  : disable
+    Create Time            : 0 days, 1 hours, 23 minutes, 17 seconds
+    VSI State              : <strong>up</strong>
+    Resource Status        : Valid
+
+    VSI ID                 : 10
+   *Peer Router ID         : 1.1.1.1
+    primary or secondary   : primary
+    ignore-standby-state   : no
+    VC Label               : 32891
+    Peer Type              : dynamic
+    Session                : <strong>up</strong>
+    Tunnel ID              : 0x0000000001004c4b41 
+    Broadcast Tunnel ID    : --
+    Broad BackupTunnel ID  : -- 
+    CKey                   : 2
+    NKey                   : 1493172425
+    Stp Enable             : 0
+    PwIndex                : 2
+<span>    Control Word           : disable</span>
+ 
+    Interface Name         : GigabitEthernet<span>0/1/0</span>.1
+    State                  : <strong>up</strong>
+    Access Port            : false
+    Last Up Time           : 2013/12/26 17:36:16
+    Total Up Time          : 0 days, 1 hours, 23 minutes, 17 seconds
+
+  **PW Information:
+
+   *Peer Ip Address        : 1.1.1.1
+    PW State               : <strong>up</strong>
+    Local VC Label         : 32891
+    Remote VC Label        : 32891
+<span>    Remote Control Word    : disable</span>
+    PW Type                : label
+    Tunnel ID              : 0x0000000001004c4b41 
+    Broadcast Tunnel ID    : --
+    Broad BackupTunnel ID  : --
+    Ckey                   : 2
+    Nkey                   : 1493172425
+    Main PW Token          : 0x0
+    Slave PW Token         : 0x0
+    Tnl Type               : ldp
+    OutInterface           : LDP LSP
+    Backup OutInterface    : --
+    Stp Enable             : 0
+    Mac Flapping           : 0
+    PW Last Up Time        : 2013/12/26 17:36:16
+    PW Total Up Time       : 0 days, 1 hours, 23 minutes, 17 seconds</pre>
+</li><li><p>CE1 and CE2 can ping each other successfully. The following example uses the command output on CE1:</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>ping 192.168.1.2</strong></pre>
+<pre class="screen">  PING 192.168.1.2: 56  data bytes, press CTRL_C to break
+    Reply from 192.168.1.2: bytes=56 Sequence=1 ttl=255 time=172 ms
+    Reply from 192.168.1.2: bytes=56 Sequence=2 ttl=255 time=156 ms
+    Reply from 192.168.1.2: bytes=56 Sequence=3 ttl=255 time=156 ms
+    Reply from 192.168.1.2: bytes=56 Sequence=4 ttl=255 time=156 ms
+    Reply from 192.168.1.2: bytes=56 Sequence=5 ttl=255 time=156 ms
+
+  --- 192.168.1.2 ping statistics ---
+    5 packet(s) transmitted
+    5 packet(s) received
+    0.00% packet loss
+    round-trip min/avg/max = 156/159/172 ms
+</pre>
+</li></ul>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0172363673__example_01"><a name="EN-US_TASK_0172363673__example_01"></a><a name="example_01"></a><a name="EN-US_TASK_0172363673__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>UPE1 configuration file</p>
+<pre class="screen">#
+sysname UPE1
+#
+mpls lsr-id 1.1.1.1
+#
+mpls
+#
+mpls l2vpn
+#
+vsi s1 static
+ pwsignal ldp
+  vsi-id 10
+  peer 2.2.2.2
+  peer 3.3.3.3
+#
+mpls ldp
+#
+interface GigabitEthernetl/0/0
+ undo shutdown
+ ip address 10.1.1.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.1.2.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown
+#
+interface GigabitEthernet<span>0/3/0</span>.1
+ vlan-type dot1q 10
+ l2 binding vsi s1
+#
+interface LoopBack1
+ ip address 1.1.1.1 255.255.255.255
+#
+ospf 1
+ area 0.0.0.0
+  network 1.1.1.1 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+  network 10.1.2.0 0.0.0.255
+#
+return</pre>
+</li><li><p>UPE2 configuration file</p>
+<pre class="screen">#
+sysname UPE2
+#
+mpls lsr-id 6.6.6.6
+#
+mpls
+#
+mpls l2vpn
+#
+vsi s1 static
+ pwsignal ldp
+  vsi-id 10
+  peer 4.4.4.4
+  peer 5.5.5.5
+#
+mpls ldp
+#
+interface GigabitEthernetl/0/0
+ undo shutdown
+ ip address 10.5.1.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.5.2.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown
+#
+interface GigabitEthernet<span>0/3/0</span>.1
+ vlan-type dot1q 10
+ undo shutdown
+ l2 binding vsi s1
+#
+interface LoopBack1
+ ip address 6.6.6.6 255.255.255.255
+#
+ospf 1
+ area 0.0.0.0
+  network 6.6.6.6 0.0.0.0
+  network 10.5.1.0 0.0.0.255
+  network 10.5.2.0 0.0.0.255
+#
+return
+</pre>
+</li><li><p>NPE1 configuration file</p>
+<pre class="screen">#
+sysname NPE1
+#
+stp enable
+#
+stp region-configuration
+ region-name RG1
+#
+mpls lsr-id 2.2.2.2
+#
+mpls
+#
+mpls l2vpn
+#
+vsi m1 static
+ pwsignal ldp
+  vsi-id 100
+  peer 3.3.3.3
+  peer 3.3.3.3 pw pw1
+    stp enable
+    stp cost 2
+ admin-vsi
+#
+vsi s1 static
+ pwsignal ldp
+  vsi-id 10
+  peer 1.1.1.1
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ portswitch
+ stp enable
+ stp vpls-subinterface enable
+ stp instance 0 cost 2
+#
+interface GigabitEthernet<span>0/1/0</span>.1
+ vlan-type dot1q 10
+ l2 binding vsi s1
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.8.1.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown
+ ip address 10.1.1.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 2.2.2.2 255.255.255.255
+#
+ospf 1
+ area 0.0.0.0
+  network 2.2.2.2 0.0.0.0
+  network 10.1.1.0 0.0.0.255
+  network 10.8.1.0 0.0.0.255
+#
+return
+</pre>
+</li><li><p>NPE2 configuration file</p>
+<pre class="screen">#
+sysname NPE2
+#
+stp enable
+#
+stp region-configuration
+ region-name RG1
+#
+mpls lsr-id 3.3.3.3
+#
+mpls
+#
+mpls l2vpn
+#
+vsi m1 static
+ pwsignal ldp
+  vsi-id 100
+  peer 2.2.2.2
+  peer 2.2.2.2 pw pw1
+    stp enable
+    stp cost 2
+ admin-vsi
+#
+vsi s1 static
+ pwsignal ldp
+  vsi-id 10
+  peer 1.1.1.1
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ portswitch
+ stp enable
+ stp vpls-subinterface enable
+ stp instance 0 cost 5
+#
+interface GigabitEthernet<span>0/1/0</span>.1
+ vlan-type dot1q 10
+ l2 binding vsi s1
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.8.1.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown
+ ip address 10.1.2.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 3.3.3.3 255.255.255.255
+#
+ospf 1
+ area 0.0.0.0
+  network 3.3.3.3 0.0.0.0
+  network 10.1.2.0 0.0.0.255
+  network 10.8.1.0 0.0.0.255
+#
+return
+</pre>
+</li><li><p>NPE3 configuration file</p>
+<pre class="screen">#
+sysname NPE3
+#
+stp instance 0 priority 0
+stp enable
+#
+stp region-configuration
+ region-name RG1
+#
+mpls lsr-id 4.4.4.4
+#
+mpls
+#
+mpls l2vpn
+#
+vsi m1 static
+ pwsignal ldp
+  vsi-id 100
+  peer 5.5.5.5
+  peer 5.5.5.5 pw pw1
+    stp enable
+    stp cost 2
+ admin-vsi
+#
+vsi s1 static
+ pwsignal ldp
+  vsi-id 10
+  peer 6.6.6.6
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ portswitch
+ stp enable
+ stp vpls-subinterface enable
+ stp instance 0 cost 2
+#
+interface GigabitEthernet<span>0/1/0</span>.1
+ vlan-type dot1q 10
+ l2 binding vsi s1
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.9.1.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown
+ ip address 10.5.1.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 4.4.4.4 255.255.255.255
+#
+ospf 1
+ area 0.0.0.0
+  network 4.4.4.4 0.0.0.0
+  network 10.5.1.0 0.0.0.255
+  network 10.9.1.0 0.0.0.255
+#
+return
+</pre>
+</li><li><p>NPE4 configuration file</p>
+<pre class="screen">#
+sysname NPE4
+#
+stp instance 0 priority 4096
+stp enable
+#
+stp region-configuration
+ region-name RG1
+#
+mpls lsr-id 5.5.5.5
+#
+mpls
+#
+mpls l2vpn
+#
+vsi m1 static
+ pwsignal ldp
+  vsi-id 100
+  peer 4.4.4.4
+  peer 4.4.4.4 pw pw1
+    stp enable
+    stp cost 2
+ admin-vsi
+#
+vsi s1 static
+ pwsignal ldp
+  vsi-id 10
+  peer 6.6.6.6
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+ portswitch
+ stp enable
+ stp vpls-subinterface enable
+ stp instance 0 cost 5
+#
+interface GigabitEthernet<span>0/1/0</span>.1
+ vlan-type dot1q 10
+ l2 binding vsi s1
+#
+interface GigabitEthernet<span>0/2/0</span>
+ undo shutdown
+ ip address 10.9.1.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/3/0</span>
+ ip address 10.5.2.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 5.5.5.5 255.255.255.255
+#
+ospf 1
+ area 0.0.0.0
+  network 5.5.5.5 0.0.0.0
+  network 10.5.2.0 0.0.0.255
+  network 10.9.1.0 0.0.0.255
+#
+return
+</pre>
+</li><li><p>CE1 configuration file</p>
+<pre class="screen">#
+sysname CE1
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+#
+interface GigabitEthernet<span>0/1/0</span>.1
+ vlan-type dot1q 10
+ ip address 192.168.1.1 255.255.255.0
+#
+return</pre>
+</li><li><p>CE2 configuration file</p>
+<pre class="screen">#
+sysname CE2
+#
+interface GigabitEthernet<span>0/1/0</span>
+ undo shutdown
+#
+interface GigabitEthernet<span>0/1/0</span>.1
+ vlan-type dot1q 10
+ ip address 192.168.1.2 255.255.255.0
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mstp_cfg_0045.html">Configuration Examples for MSTP
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mstp_cfg_0049.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_mstp_cfg_0052.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

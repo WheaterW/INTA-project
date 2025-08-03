@@ -1,0 +1,83 @@
+ipv6 nd miss anti-attack rate-limit source-ip (interface view)
+==============================================================
+
+ipv6 nd miss anti-attack rate-limit source-ip (interface view)
+
+Function
+--------
+
+
+
+The **ipv6 nd miss anti-attack rate-limit source-ip** command configures a rate limit for receiving ND Miss messages based on a specified source IPv6 address, that is, the number of ND Miss messages that can be processed per second based on a specified source IPv6 address.
+
+The **undo ipv6 nd miss anti-attack rate-limit source-ip** command restores the default configuration.
+
+
+
+By default, no rate limit for receiving ND Miss messages based on a specified source IPv6 address is configured.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**ipv6 nd miss anti-attack rate-limit source-ip** *ipv6-address* **maximum** *max-value*
+
+**undo ipv6 nd miss anti-attack rate-limit source-ip** *ipv6-address* **maximum** *max-value*
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| **maximum** *max-value* | Specifies a rate limit for receiving ND Miss messages based on a specified source IPv6 address. | The value is an integer that ranges from 0 to 5000, in packets per second. |
+| **miss** | Sets a rate limit for receiving ND Miss messages. | - |
+| **source-ip** *ipv6-address* | Specifies a source IPv6 address for limiting the rate of ND Miss messages. | The value is a 32-digit hexadecimal number in the format X:X:X:X:X:X:X:X. |
+
+
+
+Views
+-----
+
+100ge sub-interface view,10GE sub-interface view,10GE interface view,200GE sub-interface view,200GE interface view,25GE sub-interface view,25GE interface view,400GE sub-interface view,400GE interface view,50GE sub-interface view,50GE interface view,Eth-Trunk sub-interface view,Eth-Trunk interface view,VBDIF interface view,VLANIF interface view,Management interface view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+When a device is attacked, it receives a large number of ND Miss messages within a short period of time. As a result, the device consumes a lot of CPU resources to learn and respond to neighbor entries, affecting the processing of other services. After a rate limit for receiving ND Miss messages based on a specified source IPv6 address is configured, the device counts the number of ND Miss messages received in a specified period based on the source IPv6 address. If the number of ND Miss messages exceeds the configured rate limit, the device ignores the excess ND Miss messages.
+
+**Configuration Impact**
+
+After a rate limit for receiving ND Miss messages based on a specified source IPv6 address is configured, the device counts the number of ND Miss messages received per period based on the specified source IPv6 address. If the number of ND Miss messages exceeds the configured limit, the device does not process excess ND Miss messages. As a result, the device may fail to process valid ND Miss messages, causing user service interruptions.
+
+**Precautions**
+
+If STelnet login fails because the configured rate at which ND Miss messages are received based on source IPv6 addresses is low, you can log in to the device through the console port and adjust the rate to a proper range.
+
+
+Example
+-------
+
+# Set a rate limit for receiving ND Miss messages based on a specified source IPv6 address to 550 messages per second.
+```
+<HUAWEI> system-view
+[~HUAWEI] interface 100GE 1/0/1
+[~HUAWEI-100GE1/0/1] undo portswitch
+[*HUAWEI-100GE1/0/1] ipv6 enable
+[*HUAWEI-100GE1/0/1] ipv6 nd miss anti-attack rate-limit source-ip 2001:db8:1::1 maximum 550
+
+```

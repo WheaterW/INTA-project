@@ -1,0 +1,195 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring a VXLAN Tunnel">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_vrp_vxlan_cfg_1072.html">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_vrp_vxlan_cfg_1040a.html">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_vrp_vxlan_cfg_1042a.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="featurename" content="VXLAN">
+<meta name="featuretype" content="VXLAN">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130624514">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Configuring a VXLAN Tunnel</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130624514"></a><a name="EN-US_TASK_0000001130624514"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring a VXLAN Tunnel</h1>
+<div class="taskbody"><div class="prereq" style="margin-left:0"><a name="EN-US_TASK_0000001130624514__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Prerequisites</h4>
+<div class="p"><div class="p">Before configuring a VXLAN tunnel, you have completed the following task:<ul><li>Configure IP routes to enable Layer 3 communication between nodes on the current network.</li><li>If the simplified mode is used for configuration, complete <a href="../vrp/dc_vrp_vxlan_cfg_bdprofile01.html">Configuring a BD Profile in Simplified Mode</a>.</li></ul>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130624514__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><div class="p">In centralized VXLAN gateway scenarios, perform the following steps on the Layer 2 and Layer 3 VXLAN gateways to establish VXLAN tunnels using EVPN:<ol><li><p>Enable EVPN to function as the VXLAN control plane. EVPN must be enabled before other EVPN configurations can be performed.</p>
+</li><li><p>Configure a BGP EVPN peer relationship. Configure VXLAN gateways to establish BGP EVPN peer relationships so that they can exchange EVPN routes. If an RR has been deployed, each VXLAN gateway must establish a BGP EVPN peer relationship with the RR only.</p>
+</li><li><p>(Optional) Configure an RR. In this case, each VXLAN gateway must establish a BGP EVPN peer relationship with the RR only. This reduces the number of BGP EVPN peer relationships as well as the overall configuration workload. An existing device can be configured to function as an RR, or a standalone RR can be deployed. Layer 3 VXLAN gateways are generally used as RRs, and Layer 2 VXLAN gateways as RR clients.</p>
+</li><li><p>Configure EVPN instances. EVPN instances can be used to manage routes received from BGP EVPN peers and EVPN routes advertised to BGP EVPN peers.</p>
+</li><li><p>Configure ingress replication. After ingress replication is configured for a VNI, the system uses BGP EVPN to construct a list of remote VTEPs. After a VXLAN gateway receives a BUM packet, it sends a copy to every VXLAN gateway in the list.</p>
+</li><li><p>Configure subscription to the status of the exact route to a VXLAN tunnel destination. After this function is configured, a VXLAN tunnel is considered up only if its source IP address and destination IP address are reachable.</p>
+</li></ol>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130624514__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enable EVPN to function as the VXLAN control plane.</span><ol type="a"><li class="substepexpand"><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Enable EVPN to function as the VXLAN control plane. </span><p><pre class="screen"><a href="cmdqueryname=evpn-overlay+enable"><b><span class="cmdname">evpn-overlay enable</span></b></a></pre>
+<p>By default, EVPN is not enabled to function as the VXLAN control plane.</p>
+</p></li></ol>
+</li><li><span>Configure a BGP EVPN peer relationship.</span><ol type="a"><li class="substepexpand"><span>Enable BGP and enter the BGP<span> or BGP multi-instance</span> view.</span><p><pre class="screen"><a href="cmdqueryname=bgp"><b><span class="cmdname">bgp</span></b></a> <i><span class="varname">as-number</span></i><span> [ <strong><span>instance</span></strong> <i><span class="varname">instance-name</span></i> ]</span></pre>
+<p>By default, BGP is disabled. If an RR has been deployed, each VXLAN gateway must establish a BGP EVPN peer relationship with the RR only.</p>
+</p></li><li class="substepexpand"><span>(Optional) Configure a BGP router ID.</span><p><pre class="screen"><a href="cmdqueryname=router-id"><b><span class="cmdname">router-id</span></b></a> <i><span class="varname">ipv4-address</span></i></pre>
+<p>By default, no BGP router ID is configured.</p>
+</p></li><li class="substepexpand"><span>Configure a peer device.</span><p><pre class="screen"><a href="cmdqueryname=peer+as-number"><b><span class="cmdname">peer</span></b></a> <i><span class="varname">ipv4-address</span></i> <strong><span>as-number</span></strong> <i><span class="varname">as-number</span></i></pre>
+<p>By default, no BGP peer is configured, and no AS number is specified for a peer.</p>
+</p></li><li class="substepexpand"><span>(Optional) Specify the source interface and source address used to establish a TCP connection with the BGP peer.</span><p><pre class="screen"><a href="cmdqueryname=peer+connect-interface"><b><span class="cmdname">peer</span></b></a> <i><span class="varname">ipv4-address</span></i> <strong><span>connect-interface</span></strong> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i> [ <i><span class="varname">ipv4-source-address</span></i> ]</pre>
+<p>By default, the outbound interface of a BGP message serves as the source interface.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>When loopback interfaces are used to establish a BGP connection, running the <a href="cmdqueryname=peer+connect-interface"><b><span class="cmdname">peer connect-interface</span></b></a> command on both ends is recommended to ensure connectivity. If this command is run on one end only, the BGP connection may fail to be established.</p>
+</div></div>
+</p></li><li class="substepexpand"><span>(Optional) Set the maximum number of hops allowed by an EBGP EVPN connection.</span><p><pre class="screen"><a href="cmdqueryname=peer+ebgp-max-hop"><b><span class="cmdname">peer</span></b></a> <i><span class="varname">ipv4-address</span></i> <a href="cmdqueryname=ebgp-max-hop"><b><span class="cmdname">ebgp-max-hop</span></b></a> [ <i><span class="varname">hop-count</span></i> ]</pre>
+<p>The default value of <i><span class="varname">hop-count</span></i> is 255. In most cases, a directly connected physical link must be available between EBGP EVPN peers. If you want to establish EBGP EVPN peer relationships between indirectly connected peers, you must run the <a href="cmdqueryname=peer+ebgp-max-hop"><b><span class="cmdname">peer ebgp-max-hop</span></b></a> command to configure the maximum number of hops for a TCP connection.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>When a loopback interface is used to establish an EBGP EVPN peer relationship, you must run the <a href="cmdqueryname=peer+ebgp-max-hop"><b><span class="cmdname">peer ebgp-max-hop</span></b></a> (where the value of <i><span class="varname">hop-count</span></i> is not less than 2) command. Otherwise, the peer relationship fails to be established.</p>
+</div></div>
+</p></li><li class="substepexpand"><span>Enter the BGP-EVPN address family view or BGP multi-instance EVPN address family view.</span><p><pre class="screen"><a href="cmdqueryname=l2vpn-family+evpn"><b><span class="cmdname">l2vpn-family evpn</span></b></a></pre>
+<p>By default, the BGP-EVPN address family view or BGP multi-instance EVPN address family view is disabled.</p>
+</p></li><li class="substepexpand"><span>Enable the ability to exchange EVPN routes with a specified peer or peer group.</span><p><pre class="screen"><a href="cmdqueryname=peer+enable"><b><span class="cmdname">peer</span></b></a> { <i><span class="varname">group-name</span></i> | <i><span class="varname">ipv4-address</span></i> } <strong><span>enable</span></strong></pre>
+<p>By default, the ability to exchange EVPN routes with a peer or peer group is enabled only in the BGP-IPv4 unicast address family.</p>
+</p></li><li class="substepexpand"><span>(Optional) Specify a route-policy for routes received from or to be advertised to a BGP EVPN peer or peer group.</span><p><pre class="screen"><a href="cmdqueryname=peer+route-policy"><b><span class="cmdname">peer</span></b></a> { <i><span class="varname">group-name</span></i> | <i><span class="varname">ipv4-address</span></i> } <strong><span>route-policy</span></strong> <i><span class="varname">route-policy-name</span></i> { <strong><span>import</span></strong> | <strong><span>export</span></strong> }</pre>
+<p>The route-policy helps the device to import or advertise desired routes only. This not only facilitates route management, but also reduces the routing table size and system resource consumption.</p>
+</p></li><li class="substepexpand"><span>(Optional) Set the maximum number of MAC advertisement routes that can be received from a peer.</span><p><pre class="screen"><a href="cmdqueryname=peer+mac-limit"><b><span class="cmdname">peer</span></b></a> { <i><span class="varname">group-name</span></i> | <i><span class="varname">ipv4-address</span></i> } <a href="cmdqueryname=mac-limit"><b><span class="cmdname">mac-limit</span></b></a> <i><span class="varname">number</span></i> [ <i><span class="varname">percentage</span></i> ] [ <strong><span>alert-only</span></strong> | <strong><span>idle-forever</span></strong> | <strong><span>idle-timeout</span></strong> <i><span class="varname">times</span></i> ]</pre>
+<p>If a large proportion of MAC advertisement routes imported from a peer or peer group to an EVPN instance are inapplicable, you are advised to run this command to limit the maximum number of such routes that can be imported. If the number of imported MAC advertisement routes exceed the specified maximum, the device displays an alarm, prompting you to check the validity of such routes imported to the EVPN instance.</p>
+</p></li><li class="substepexpand"><span>(Optional) Set the maximum hold-off time for re-establishing BGP peer relationships.</span><p><pre class="screen"><a href="cmdqueryname=peer+graceful-restart+static-timer"><b><span class="cmdname">peer</span></b></a> <i><span class="varname">ipv4-address</span></i> <strong><span>graceful-restart</span></strong> <strong><span>static-timer</span></strong> <i><span class="varname">restart-time</span></i></pre>
+<div class="p">Graceful restart (GR) prevents traffic interruption caused by the re-establishment of BGP peer relationships. To set the maximum hold-off time, run either of the following commands:<ul><li><p>To set the maximum hold-off time for re-establishing all BGP peer relationships, run the <a href="cmdqueryname=graceful-restart+timer+restart"><b><span class="cmdname">graceful-restart timer restart</span></b></a> command in the BGP view. The maximum hold-off time supported by this command is 3600s.</p>
+</li><li><p>To set the maximum hold-off time for re-establishing a specified BGP EVPN peer relationship, run the <a href="cmdqueryname=peer+graceful-restart+static-timer"><b><span class="cmdname">peer graceful-restart static-timer</span></b></a> command in the BGP EVPN view. This command allows you to set a hold-off time greater than 3600s.</p>
+</li></ul>
+</div>
+<p>If both the <a href="cmdqueryname=graceful-restart+timer+restart"><b><span class="cmdname">graceful-restart timer restart</span></b></a> <i><span class="varname">time</span></i> and <a href="cmdqueryname=peer+graceful-restart+static-timer"><b><span class="cmdname">peer graceful-restart static-timer</span></b></a> commands are run, the <a href="cmdqueryname=peer+graceful-restart+static-timer"><b><span class="cmdname">peer graceful-restart static-timer</span></b></a> command configuration takes precedence.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>This step can be performed only after GR is enabled using the <a href="cmdqueryname=graceful-restart"><b><span class="cmdname">graceful-restart</span></b></a> command in the BGP view.</p>
+</div></div>
+</p></li><li class="substepexpand"><span>(Optional) Enable next hop recursion of EVPN routes to default routes.</span><p><pre class="screen"><a href="cmdqueryname=nexthop+recursive-lookup+default-route"><b><span class="cmdname">nexthop recursive-lookup default-route</span></b></a></pre>
+<p>If a configuration error or fault occurs, the next hop of the EVPN route from the local VTEP to the remote VTEP may be unreachable, preventing the VXLAN tunnel from being established. To prevent this situation, perform this step and configure the remote VTEP to send a default route to the local VTEP. When the next hop of the EVPN route from the local VTEP to the remote VTEP is unreachable, the EVPN route can recurse its next hop to the default route, allowing the VXLAN tunnel to be successfully established.</p>
+</p></li><li class="substepexpand"><span>(Optional) Perform the following operations to enable the function to advertise the routes carrying the Large-Community attribute to BGP EVPN peers:</span><p><p>The Large-Community attribute can completely represent a 2-byte or 4-byte AS number, and has two 4-byte LocalData IDs. This enables the administrator to apply policies more flexibly. Before enabling the function to advertise the routes carrying the Large-Community attribute to BGP EVPN peers, configure the route-policy related to the Large-Community attribute and use the route-policy to set the Large-Community attribute.</p>
+<pre class="screen"><a href="cmdqueryname=+peer+route-policy+export"><b><span class="cmdname">peer</span></b></a> { <i><span class="varname">ipv4-address</span></i> | <i><span class="varname">group-name</span></i> } <strong><span>route-policy</span></strong> <i><span class="varname">route-policy-name</span></i> <strong><span>export</span></strong>
+<a href="cmdqueryname=peer+advertise-large-community"><b><span class="cmdname">peer</span></b></a> { <i><span class="varname">ipv4-address</span></i> | <i><span class="varname">group-name</span></i> } <strong><span>advertise-large-community</span></strong></pre>
+<p>If the routes carrying the Large-Community attribute do not need to be advertised to a BGP EVPN peer in the peer group, run the <a href="cmdqueryname=peer"><b><span class="cmdname">peer</span></b></a> <i><span class="varname">ipv4-address</span></i> <strong><span>advertise-large-community</span></strong> <strong><span>disable</span></strong> command.</p>
+</p></li><li class="substepexpand"><span>(Optional) Configure BGP to ignore the IGP metric when selecting the optimal route.</span><p><pre class="screen"><a href="cmdqueryname=bestroute+igp-metric-ignore"><b><span class="cmdname">bestroute igp-metric-ignore</span></b></a></pre>
+<p>By default, BGP uses the IGP metric as one of the conditions for selecting the optimal route. To exclude the IGP metric of next-hop routes as a condition for selecting the optimal BGP EVPN route on a VTEP, perform this step.</p>
+</p></li><li class="substepexpand"><span>(Optional) Enable BGP to advertise locally suppressed specific routes to a specified BGP EVPN peer or peer group.</span><p><pre class="screen"><a href="cmdqueryname=peer+advertise+suppressed-detail-route"><b><span class="cmdname">peer</span></b></a> { <i><span class="varname">peerIpv4Addr</span></i> | <i><span class="varname">group-name</span></i> } <strong><span>advertise suppressed-detail-route</span></strong></pre>
+<p>By default, BGP does not advertise locally suppressed specific routes to a BGP EVPN peer or peer group. Route summarization is usually configured for BGP to control the size of a BGP routing table, but this prevents locally suppressed specific routes from being sent to BGP EVPN peers by default. To advertise all specific routes to a specified BGP EVPN peer, perform this step.</p>
+</p></li><li class="substepexpand"><span>(Optional) Set the maximum number of routes that can be received from a peer.</span><p><pre class="screen"><a href="cmdqueryname=peer+route-limit"><b><span class="cmdname">peer</span></b></a> { <i><span class="varname">peerIpv4Addr</span></i> | <i><span class="varname">group-name</span></i> } <strong><span>route-limit</span></strong> <i><span class="varname">limit</span></i> [ <i><span class="varname">percentage</span></i> ] [ <strong><span>alert-only</span></strong> | <strong><span>idle-forever</span></strong> | <strong><span>idle-timeout</span></strong> <i><span class="varname">times</span></i> ]</pre>
+<p>By default, there is no limit on the number of routes that can be received from a peer. If a VTEP receives many routes from its peers, excessive system resources are consumed. To prevent the VTEP from receiving too many routes, perform this step.</p>
+</p></li><li class="substepexpand"><span>(Optional) Set a specified peer as an independent update peer-group.</span><p><ul><li>To set a specified peer as an independent update peer-group, run the <a href="cmdqueryname=peer+update-group-independent"><b><span class="cmdname">peer</span></b></a> <i><span class="varname">peerIpv4Addr</span></i> <strong><span>update-group-independent enable</span></strong> command.</li><li>To set each peer in a peer group as an independent update peer-group, run the <a href="cmdqueryname=peer+update-group-independent"><b><span class="cmdname">peer</span></b></a> <i><span class="varname">peerGroupName</span></i> <strong><span>update-group-independent</span></strong> command.</li></ul>
+<p>By default, no peer is set as an independent update peer-group. The configuration of a peer takes precedence over that of the peer group to which the peer belongs. </p>
+</p></li></ol>
+</li><li><span>(Optional) Configure a Layer 3 VXLAN gateway as an RR. In this case, each VXLAN gateway needs to establish a BGP EVPN peer relationship with the RR only, reducing the number of BGP EVPN peer relationships to be established and simplifying configuration.</span><ol type="a"><li class="substepexpand"><span>Specify an RR and its clients.</span><p><pre class="screen"><a href="cmdqueryname=peer+reflect-client"><b><span class="cmdname">peer</span></b></a> { <i><span class="varname">ipv4-address</span></i> | <i><span class="varname">group-name</span></i> } <a href="cmdqueryname=reflect-client"><b><span class="cmdname">reflect-client</span></b></a></pre>
+<p>By default, the RR and its clients are not configured.</p>
+</p></li><li class="substepexpand"><span>(Optional) Configure the RR not to change the next hops of routes to be advertised to an EBGP EVPN peer.</span><p><pre class="screen"><a href="cmdqueryname=peer+next-hop-invariable"><b><span class="cmdname">peer</span></b></a> { <i><span class="varname">group-name</span></i> | <i><span class="varname">ipv4-address</span></i> } <strong><span>next-hop-invariable</span></strong></pre>
+<p>By default, a BGP EVPN speaker changes the next hops of routes to the interface that it uses to establish EBGP EVPN peer relationships before advertising these routes to EBGP EVPN peers.</p>
+</p></li><li class="substepexpand"><span>Disable the function to filter received EVPN routes based on VPN targets. If you do not perform this step, the RR will fail to receive and reflect the routes sent by clients.</span><p><pre class="screen"><a href="cmdqueryname=undo+policy+vpn-target"><b><span class="cmdname">undo policy vpn-target</span></b></a></pre>
+<p>By default, VPN-Target filtering is enabled.</p>
+</p></li><li class="substepexpand"><span>(Optional) Configure a reflection policy for the RR.</span><p><pre class="screen"><a href="cmdqueryname=rr-filter"><b><span class="cmdname">rr-filter</span></b></a><strong> </strong><i><span class="varname">extended-list-number</span></i></pre>
+<p>By default, no reflection policy is configured for an RR. Perform this step if you want the RR to reflect only the IBGP routes whose extended community attributes match those in the reflection policy.</p>
+</p></li><li class="substepexpand"><span>Exit the BGP-EVPN address family view or BGP multi-instance EVPN address family view.</span><p><pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Exit the BGP view or BGP multi-instance view.</span><p><pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</p></li></ol>
+</li><li><span>(Optional) Configure EVPN instances in batches.</span><p><p>If the simplified mode is used for configuration, perform this step to configure EVPN instances in batches by binding a BD range to a BD profile. After this step is performed, you do not need to perform Step 5.</p>
+</p><ol type="a"><li class="substepexpand"><span>Enter the BD range view.</span><p><pre class="screen"><a href="cmdqueryname=bridge-domain+range"><b><span class="cmdname">bridge-domain range</span></b></a> { <i><span class="varname">bdIdBgn</span></i> [ to <i><span class="varname">bdIdEnd</span></i> ] } &amp;&lt;1-10&gt;</pre>
+</p></li><li class="substepexpand"><span>Bind the BD range to a BD profile.</span><p><pre class="screen"><a href="cmdqueryname=binding+bridge-domain+profile"><b><span class="cmdname">binding bridge-domain profile</span></b></a> <i><span class="varname">profileId</span></i></pre>
+</p></li><li class="substepexpand"><span>Return to the system view.</span><p><pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</p></li></ol>
+</li><li><span>Configure an EVPN instance (one at a time).</span><ol type="a"><li class="substepexpand"><span>Enter the BD view.</span><p><pre class="screen"><a href="cmdqueryname=bridge-domain"><b><span class="cmdname">bridge-domain</span></b></a> <i><span class="varname">bd-id</span></i></pre>
+</p></li><li class="substepexpand"><span>(Optional) Bind the BD to a BD profile.</span><p><pre class="screen"><a href="cmdqueryname=binding+bridge-domain+profile"><b><span class="cmdname">binding bridge-domain profile</span></b></a> <i><span class="varname">profileId</span></i></pre>
+<p>When the simplified mode is used for configuration, perform this step. Steps c to g are then not required.</p>
+</p></li><li class="substepexpand"><span>Create a VNI and associate the VNI with the BD.</span><p><pre class="screen"><a href="cmdqueryname=vxlan+vni"><b><span class="cmdname">vxlan vni</span></b></a> <i><span class="varname">vni-id</span></i></pre>
+<p>By default, no VNI is created.</p>
+</p></li><li class="substepexpand"><span>(Optional) Configure the source VTEP IP address of the VXLAN tunnel.</span><p><pre class="screen"><a href="cmdqueryname=vtep-src"><b><span class="cmdname">vtep-src</span></b></a> <i><span class="varname">ip-address</span></i></pre>
+<p>By default, no source VTEP IP address is configured for a VXLAN tunnel in a BD, meaning that a VXLAN tunnel uses the source IP address configured on an NVE interface as the source VTEP IP address. Perform this step if you want to establish VXLAN tunnels over different physical paths between VTEPs to carry service data for traffic optimization. After this step is performed, services in the specified BD will use the VXLAN tunnel whose source VTEP IP address is configured in this step. Services in other BDs will continue to use the VXLAN tunnel whose source VTEP IP address is the source IP address configured on an NVE interface.</p>
+</p></li><li class="substepexpand"><span>Create an EVPN instance in a BD.</span><p><pre class="screen"><a href="cmdqueryname=evpn"><b><span class="cmdname">evpn</span></b></a></pre>
+<p>By default, no EVPN instance is created for VXLANs.</p>
+</p></li><li class="substepexpand"><span>Configure an RD for the EVPN instance.</span><p><pre class="screen"><a href="cmdqueryname=route-distinguisher"><b><span class="cmdname">route-distinguisher</span></b></a> { <i><span class="varname">route-distinguisher</span></i> | <strong><span>auto</span></strong> }</pre>
+<p>By default, no RD is configured for BD EVPN instances.</p>
+</p></li><li class="substepexpand"><span>Configure VPN targets for the EVPN instance.</span><p><pre class="screen"><a href="cmdqueryname=vpn-target"><b><span class="cmdname">vpn-target</span></b></a> { <i><span class="varname">vpn-target</span></i> &amp;&lt;1-8&gt; | <strong><span>auto</span></strong> } [ <strong><span>both</span></strong> | <strong><span>export-extcommunity</span></strong> | <strong><span>import-extcommunity</span></strong> ]</pre>
+<p>By default, no VPN target is configured for BD EVPN instances. The import and export VPN targets of the local end must be the same as the export and import VPN targets of the remote end, respectively.</p>
+</p></li><li class="substepexpand"><span>(Optional) Associate the EVPN instance with an import route-policy.</span><p><pre class="screen"><a href="cmdqueryname=import+route-policy"><b><span class="cmdname">import route-policy</span></b></a> <i><span class="varname">policy-name</span></i></pre>
+<p>By default, an EVPN instance matches the export VPN targets of received routes against its import VPN targets to determine whether to import these routes. Perform this step to associate the EVPN instance with an import route-policy and set attributes for eligible routes. This enables you to control the routes to be imported into the EVPN instance more precisely.</p>
+</p></li><li class="substepexpand"><span>(Optional) Associate the EVPN instance with an export route-policy.</span><p><pre class="screen"><a href="cmdqueryname=export+route-policy"><b><span class="cmdname">export route-policy</span></b></a> <i><span class="varname">policy-name</span></i></pre>
+<p>By default, an EVPN instance adds all VPN targets in the export VPN target list to EVPN routes to be advertised to its peers. Perform this step to associate the EVPN instance with an export route-policy and set attributes for eligible routes. This enables you to control the routes to be advertised more precisely.</p>
+</p></li><li class="substepexpand"><span>(Optional) Disable the device from sending local MAC routes with the current VNI to the EVPN peer.</span><p><pre class="screen"><a href="cmdqueryname=mac-route+no-advertise"><b><span class="cmdname">mac-route no-advertise</span></b></a></pre>
+<p>Local MAC routes can be advertised by default. In Layer 3 gateway scenarios where Layer 2 traffic forwarding is not involved, perform this step to disable local MAC routes carrying the current VNI from being advertised to the EVPN peer gateway. This configuration prevents an EVPN peer gateway from receiving unnecessary MAC routes, thereby conserving device resources.</p>
+</p></li><li class="substepexpand"><span>(Optional) Disable the device from delivering a MAC address entry for the MAC route carrying the current VNI received from the EVPN peer.</span><p><pre class="screen"><a href="cmdqueryname=mac+rib-only"><b><span class="cmdname">mac rib-only</span></b></a></pre>
+<p>By default, a device delivers MAC entries for remote MAC routes.</p>
+<p>If Layer 3 VXLAN gateways do not exchange Layer 2 traffic, perform this step to conserve forwarding entry resources.</p>
+</p></li><li class="substepexpand"><span>(Optional) Disable the device from generating an EVPN MAC route when the local MAC address exists in both a MAC address entry and an ARP/ND entry.</span><p><pre class="screen"><a href="cmdqueryname=local+mac-only-route+no-generate"><b><span class="cmdname">local mac-only-route no-generate</span></b></a></pre>
+<p>If a MAC address entry and an ARP/ND entry on the local gateway both contain the local MAC address, the gateway generates both an EVPN MAC/IP route and an EVPN MAC route by default. To optimize memory utilization, perform this step so that the gateway generates only an EVPN MAC/IP route. To ensure normal Layer 2 traffic forwarding, run the <strong>mac-ip route generate-mac</strong> command on the peer gateway to enable the function to generate MAC address entries based on MAC/IP routes.</p>
+</p></li><li class="substepexpand"><span>(Optional) Enable the function to generate MAC address entries based on MAC/IP routes.</span><p><pre class="screen"><a href="cmdqueryname=mac-ip+route+generate-mac"><b><span class="cmdname">mac-ip route generate-mac</span></b></a></pre>
+</p><p><p>By default, the function is not enabled.</p>
+<p>If the peer gateway is configured not to advertise MAC routes (using the <strong>mac-route no-advertise</strong> command) or not to generate MAC routes (using the <strong>local mac-only-route no-generate</strong> command), the local gateway cannot generate MAC entries by default. To ensure normal Layer 2 traffic forwarding, perform this step on the local gateway to enable the function to generate MAC entries based on MAC/IP routes.</p>
+</p></li><li class="substepexpand"><span>Exit the EVPN instance view.</span><p><pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</p></li><li class="substepexpand"><span>Exit the BD view and return to the system view.</span><p><pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</p></li></ol>
+</li><li><span>Configure ingress replication.</span><ol type="a"><li class="substepexpand"><span>Create an NVE interface and enter its view.</span><p><pre class="screen"><a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> <strong><span>nve</span></strong> <i><span class="varname">nve-number</span></i></pre>
+</p></li><li class="substepexpand"><span>Configure an IP address for the source VTEP.</span><p><pre class="screen"><a href="cmdqueryname=source"><b><span class="cmdname">source</span></b></a> <i><span class="varname">ip-address</span></i></pre>
+<p>By default, no IP address is configured for a VTEP.</p>
+</p></li><li class="substepexpand"><span>Configure ingress replication.</span><p><pre class="screen"><a href="cmdqueryname=vni"><b><span class="cmdname">vni</span></b></a> <i><span class="varname">vni-id</span></i> <strong><span>head-end peer-list protocol bgp</span></strong></pre>
+<p>By default, no ingress replication is configured for a VNI.</p>
+<p>After receiving a BUM packet, the ingress of a VXLAN tunnel replicates the packet and sends a copy to each VTEP in the ingress replication list. The ingress replication list is a collection of remote VTEP IP addresses to which the ingress of a VXLAN tunnel should send replicated BUM packets.</p>
+</p></li></ol>
+</li><li><span>(Optional) Enable subscription to the status of the exact route to the VXLAN tunnel destination. The VXLAN tunnel can go up only when the exact route to its destination IP address is reachable.</span><p><pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a>
+<a href="cmdqueryname=vxlan+tunnel-status+track+exact-route"><b><span class="cmdname">vxlan tunnel-status track exact-route</span></b></a></pre>
+<p>By default, subscription to the status of the exact route to a VXLAN tunnel destination is disabled. A VXLAN tunnel is considered up if the exact route of its source IP address and the route of the network segment where its destination IP address resides are reachable.</p>
+</p></li><li><span>(Optional) Enable the device to use the extension mode when encapsulating the outer UDP source port number into VXLAN packets.</span><p><pre class="screen"><a href="cmdqueryname=assign+forward+nvo3+udp+src-port+extend+enable"><b><span class="cmdname">assign forward nvo3 udp src-port extend enable</span></b></a></pre>
+<p>By default, the device does not use the extension mode when encapsulating the outer UDP source port number into VXLAN packets.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>This command is supported only by the following: <span>CE6866, CE6860-SAN, CE6866K, CE6860-HAM, CE8851-32CQ8DQ-P, CE8850-SAN, CE8851K, CE8850-HAM</span>, CE6863H, CE6863H-K, CE6881H, CE6881H-K.</p>
+</div></div>
+</p></li><li><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001130624514__en-us_task_0234857734_screen163801330213"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001130624514__en-us_task_0234857734_en-us_concept_0141113565_cmdname1667501373175340">commit</span></b></a></pre>
+</p></li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../dc/dc_vrp_vxlan_cfg_1072.html">Establishing VXLAN Tunnels in BGP EVPN Mode (Centralized VXLAN Gateway)
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../dc/dc_vrp_vxlan_cfg_1040a.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../dc/dc_vrp_vxlan_cfg_1042a.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

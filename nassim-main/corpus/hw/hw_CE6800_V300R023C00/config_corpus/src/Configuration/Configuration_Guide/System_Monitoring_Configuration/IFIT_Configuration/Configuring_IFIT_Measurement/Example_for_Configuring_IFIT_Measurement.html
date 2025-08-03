@@ -1,0 +1,330 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="topic">
+<meta name="DC.Title" content="Example for Configuring IFIT Measurement">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ifit_cfg_ce_0015.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ifit_cfg_ce_0011.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="IFIT">
+<meta name="featurename" content="sFlow">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IFIT">
+<meta name="featurename" content="sFlow">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TOPIC_0000001563885161">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring IFIT Measurement</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TOPIC_0000001563885161"></a><a name="EN-US_TOPIC_0000001563885161"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring IFIT Measurement</h1>
+<div><div class="section"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TOPIC_0000001563885161__fig_dc_vrp_feature_new_ipfpm_000702">Figure 1</a>, users want to use the NMS to monitor network traffic in real time to quickly detect abnormal traffic and locate faults. You can configure IFIT measurement on devices so that the devices can periodically send packet loss and delay measurement information to the NMS for summary, analysis, and display.</p>
+<div class="fignone" id="EN-US_TOPIC_0000001563885161__fig_dc_vrp_feature_new_ipfpm_000702"><a name="EN-US_TOPIC_0000001563885161__fig_dc_vrp_feature_new_ipfpm_000702"></a><a name="fig_dc_vrp_feature_new_ipfpm_000702"></a><span class="figcap"><b>Figure 1 </b>Network diagram of IFIT measurement</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 and interface2 represent <span>100GE</span><span>1/0/1</span> and <span>100GE</span><span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img src="figure/en-us_image_0000001679310761.png"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Configure packet loss and delay measurement on the link between DeviceA and DeviceC to periodically collect packet loss and delay measurement data.<ul><li>Configure the IFIT NE ID, NE role, conversion period, and aging time of measurement flows.</li><li>Configure an IFIT traffic classifier and a traffic behavior and bind them to an IFIT traffic policy, and then apply the policy.</li></ul>
+</li><li>Configure the devices to send measurement data to the NMS through telemetry.</li></ol>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Before performing IFIT measurement, ensure that:</p>
+<ul><li>Static routes or dynamic routing protocols have been configured on the devices to ensure network connectivity between the devices.</li><li>1588v2 has been configured on the devices to implement clock synchronization between the devices. For details, see <em>1588v2 (PTP) Configuration</em>. (Before enabling delay measurement, you must configure 1588v2. Delay measurement is unavailable in scenarios where NTP or high-precision NTP is configured due to inaccurate timestamp information.)</li><li>The devices have been connected to the NMS.</li></ul>
+<p>Only IFIT-related configurations are listed here.</p>
+</div></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Procedure</h4><ol><li>Configure packet loss and delay measurement on the link between DeviceA and DeviceC to periodically collect packet loss and delay measurement data.<p>DeviceA and DeviceC need to be configured as both ingress and egress nodes. DeviceB retains the default role (transit node) and the IFIT traffic policy does not need to be applied. interface2 on DeviceA and interface1 on DeviceC are configured as transit ports. The following example describes the configuration of DeviceA. The configurations of other devices are similar. For details, see <a href="#EN-US_TOPIC_0000001563885161__section374261012444">Configuration Scripts</a>.</p>
+<p># Configure IP addresses for interfaces.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[*<span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>interface <span>100ge</span><span>1/0/1</span></strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>ip address 10.1.1.1 24</strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[*DeviceA] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>interface <span>100ge</span><span>1/0/2</span></strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>undo portswitch</strong>
+[*DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>ip address 10.1.2.1 24</strong>
+[*DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[*DeviceA] <strong>commit</strong></pre>
+<p># Configure an ACL rule.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>acl number 3001</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA-acl4-advance-3001] <strong>rule permit tcp source 192.168.1.0 32 destination 192.168.100.0 32 source-port eq 200 </strong>
+[*DeviceA-acl4-advance-3001] <strong>quit</strong>
+[*DeviceA] <strong>commit</strong></pre>
+<div class="p"># Configure IFIT measurement.<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>ifit</strong>
+[*DeviceA-ifit] <strong>dcn-instance</strong>
+[*DeviceA-ifit-dcn-instance] <strong>node-id 10</strong>
+[*DeviceA-ifit-dcn-instance] <strong>role ingress-egress</strong>
+[*DeviceA-ifit-dcn-instance] <strong>transit-port interface</strong> <strong><span>100ge</span><span>1/0/2</span></strong>
+[*DeviceA-ifit-dcn-instance] <strong>interval 60</strong>
+[*DeviceA-ifit-dcn-instance] <strong>aging-time 120</strong>
+[*DeviceA-ifit-dcn-instance] <strong>traffic classifier c1</strong>
+[*DeviceA-ifit-dcn-instance-classifier-c1] <strong>if-match acl 3001</strong>
+[*DeviceA-ifit-dcn-instance-classifier-c1] <strong>quit</strong>
+[*DeviceA-ifit-dcn-instance] <strong>traffic behavior b1</strong>
+[*DeviceA-ifit-dcn-instance-behavior-b1] <strong>delay-measure per-packet enable</strong>    
+[*DeviceA-ifit-dcn-instance-behavior-b1] <strong>quit</strong>
+[*DeviceA-ifit-dcn-instance] <strong>traffic policy</strong><strong> p1</strong>
+[*DeviceA-ifit-dcn-instance-policy-p1] <strong>classifier c1 behavior b1 precedence 1 cache-number 512 </strong>
+[*DeviceA-ifit-dcn-instance-policy-p1] <strong>quit</strong>
+[*DeviceA-ifit-dcn-instance] <strong>quit</strong>
+[*DeviceA-ifit] <strong>quit</strong>
+[*DeviceA] <strong>ifit traffic-policy p1 global</strong> 
+[*DeviceA] <strong>commit</strong></pre>
+</div>
+</li><li>Configure the devices to send measurement data to the NMS through telemetry. The following example describes the configuration of DeviceA. The configurations of DeviceB and DeviceC are similar to the configuration of DeviceA.<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA]<strong> </strong><strong>telemetry</strong>
+[*DeviceA-telemetry] <strong>destination-group ifit</strong>
+[*DeviceA-telemetry-destination-group-ifit] <strong>ipv4-address 10.10.10.10 port 10001 protocol udp</strong>
+[*DeviceA-telemetry-destination-group-ifit] <strong>quit</strong>
+[*DeviceA-telemetry] <strong>sensor-group ifit</strong>
+[*DeviceA-telemetry-sensor-group-ifit] <strong>sensor-path </strong><strong>huawei-ifit:ifit/huawei-ifit-statistics:flow-hop-statistics/flow-hop-statistic </strong>
+[*DeviceA-telemetry-sensor-group-ipas-path] <strong>quit</strong>
+[*DeviceA-telemetry-sensor-group-ifit]<strong> sensor-path huawei-ifit:ifit/huawei-ifit-statistics:flow-statistics/flow-statistic </strong>
+[*DeviceA-telemetry-sensor-group-ipas-path] <strong>quit</strong>
+[*DeviceA-telemetry-sensor-group-ifit] <strong>quit</strong>
+[*DeviceA-telemetry] <strong>subscription ifit</strong>
+[*DeviceA-telemetry-subscription-ifit] <strong>sensor-group ifit</strong>
+[*DeviceA-telemetry-subscription-ifit] <strong>destination-group ifit</strong> 
+[*DeviceA-telemetry-subscription-ifit] <strong>quit</strong>
+[*DeviceA-telemetry] <strong>quit</strong>
+[*DeviceA-telemetry-subscription-ifit] <strong>commit</strong></pre>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>You are advised to configure devices to send data using the secure TLS encryption mode. For details, see <em>Telemetry Configuration</em>.</p>
+</div></div>
+</li></ol>
+<p></p>
+</div>
+<div class="section"><h4 class="sectiontitle">Verifying the Configuration</h4><p># Display the ACL delivery status of IFIT policies on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display ifit policy name p1 acl applied-record slot 1</strong>
+Slot          : 1
+TotalRecords  : 1
+PolicyName    : p1
+Interface     : -
+----------------------------------------------------------------------------------------------
+Protocol     AclNumber       AclName        RuleId     State     
+----------------------------------------------------------------------------------------------
+IPv4              3001       -                   5     Success   
+----------------------------------------------------------------------------------------------
+Fail reason:
+   1 -- Insufficient resources
+   2 -- Unsupported information
+   3 -- Reaches the upper limit (256)
+   4 -- The sub-interface configuration is incomplete</pre>
+<p>After the preceding configurations are complete and IFIT measurement is performed on traffic passing through DeviceA, you can view IFIT flow table information on DeviceA.</p>
+<p># Display detailed information about IFIT flow tables on DeviceA.</p>
+<div class="p"><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display ifit flow-cache slot 1</strong>
+FlowID             : 1056910
+StreamStatus       : Active 
+PacketType         : IPv4
+SrcAddress         : 192.168.1.0
+DstAddress         : 192.168.100.0
+Protocol           : UDP
+AggretionType      : SourcePort
+L4SrcPort          : -
+L4DstPort          : 123
+Direction          : Inbound
+InterfaceName      : <span>100GE</span><span>1/0/1</span>
+FlowStartTime      : 2021-11-13 17:39:32
+FlowUpdateTime     : 2021-11-13 17:45:40
+TTL                : 254
+TunnelType         : Native
+VNI                : 0
+OuterTTL           : 253
+VLAN               : 100
+DQP                : -
+-----------------------------------------------------------------------------------------------------------------------
+Loss    PeriodID   PacketCounter   ByteCounter   TimeStamp(s)  TimeStamp(ns)  MeanDelay(ns)  MaxDelay(ns)  WarningInfo
+-----------------------------------------------------------------------------------------------------------------------
+   0    28213076           14109       1551880     1692895125      591623218           1024          1024  0x100000004
+   1    28213077           14109       1551880     1692895145      591623218           1024          1024  0x100000004
+-----------------------------------------------------------------------------------------------------------------------</pre>
+</div>
+<p># Display statistics in IFIT flow tables on DeviceA.</p>
+<div class="p"><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> display ifit flow-cache statistics slot 1</strong>
+-------------------------------------------------------------------------------
+StreamType    Current         Aged        Created        Cleared       Exported
+-------------------------------------------------------------------------------
+IPv4              2              0              2              0              0
+-------------------------------------------------------------------------------
+IPv6              0              0              0              0              0
+-------------------------------------------------------------------------------
+Tunnel-IPv4       0              0              0              0              0
+-------------------------------------------------------------------------------
+Tunnel-IPv6       0              0              0              0              0
+-------------------------------------------------------------------------------</pre>
+</div>
+</div>
+<div class="section" id="EN-US_TOPIC_0000001563885161__section374261012444"><a name="EN-US_TOPIC_0000001563885161__section374261012444"></a><a name="section374261012444"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.2.1 255.255.255.0
+#
+acl number 3001
+ #
+  rule permit tcp source 192.168.1.0 32 destination 192.168.100.0 32 source-port eq 200
+#
+ifit
+ #
+ dcn-instance
+  interval 60
+  aging-time 120
+  node-id 10
+  role ingress-egress
+  transit-port interface <span>100GE</span><span>1/0/2</span>
+  #
+  traffic classifier c1
+   if-match acl 3001
+  #
+  traffic behavior b1
+   delay-measure per-packet enable  
+  #
+  traffic policy p1
+   classifier c1 behavior b1 precedence 2 cache-number 512
+#
+ifit traffic-policy p1 global
+#
+telemetry
+ #
+ sensor-group ifit
+  sensor-path huawei-ifit:ifit/huawei-ifit-statistics:flow-hop-statistics/flow-hop-statistic
+  sensor-path huawei-ifit:ifit/huawei-ifit-statistics:flow-statistics/flow-statistic
+ #
+ destination-group ifit
+  ipv4-address 10.10.10.10 port 10001 protocol udp
+ #
+ subscription ifit
+  sensor-group ifit
+  destination-group ifit </pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.2.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.3.2 255.255.255.0
+#
+ifit
+ #
+ dcn-instance
+  interval 60
+  aging-time 120
+  node-id 20
+#
+telemetry
+ #
+ sensor-group ifit
+  sensor-path huawei-ifit:ifit/huawei-ifit-statistics:flow-hop-statistics/flow-hop-statistic
+  sensor-path huawei-ifit:ifit/huawei-ifit-statistics:flow-statistics/flow-statistic
+ #
+ destination-group ifit
+  ipv4-address 10.10.10.10 port 10001 protocol udp
+ #
+ subscription ifit
+  sensor-group ifit
+  destination-group ifit</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.3.3 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.4.3 255.255.255.0
+#
+acl number 3001
+ #
+  rule permit tcp source 192.168.1.0 32 destination 192.168.100.0 32 source-port eq 200
+#
+ifit
+ #
+ dcn-instance
+  interval 60
+  aging-time 120
+  node-id 30
+  role ingress-egress
+  transit-port interface <span>100GE</span><span>1/0/1</span>
+  #
+  traffic classifier c1
+   if-match acl 3001
+  #
+  traffic behavior b1
+   delay-measure per-packet enable  
+  #
+  traffic policy p1
+   classifier c1 behavior b1 precedence 2 cache-number 512
+#
+ifit traffic-policy p1 global
+#
+telemetry
+ #
+ sensor-group ifit
+  sensor-path huawei-ifit:ifit/huawei-ifit-statistics:flow-hop-statistics/flow-hop-statistic
+  sensor-path huawei-ifit:ifit/huawei-ifit-statistics:flow-statistics/flow-statistic
+ #
+ destination-group ifit
+  ipv4-address 10.10.10.10 port 10001 protocol udp
+ #
+ subscription ifit
+  sensor-group ifit
+  destination-group ifit</pre>
+</li></ul>
+<p></p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_ifit_cfg_ce_0015.html">Configuring IFIT Measurement
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_ifit_cfg_ce_0011.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

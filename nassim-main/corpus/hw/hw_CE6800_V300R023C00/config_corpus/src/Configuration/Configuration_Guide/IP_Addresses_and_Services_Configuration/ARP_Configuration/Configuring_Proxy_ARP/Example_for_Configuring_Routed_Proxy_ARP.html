@@ -1,0 +1,179 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Routed Proxy ARP">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_arp_cfg_0011.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_arp_cfg_0035.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="ARP">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="ARP">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featurename" content="ARP">
+<meta name="featurename" content="IP Address Conflict Detection">
+<meta name="featurename" content="Dynamic ARP">
+<meta name="featurename" content="Static ARP">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001176743505">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Routed Proxy ARP</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001176743505"></a><a name="EN-US_TASK_0000001176743505"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Routed Proxy ARP</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001176743505__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>Two hosts on the same network segment but on different physical networks need to communicate with each other.</p>
+<p>As shown in <a href="#EN-US_TASK_0000001176743505__fig_dc_vrp_arp_cfg_206201">Figure 1</a>, two devices are connected using a serial link. No default gateways are set for HostA and HostB. To enable HostA and HostB to communicate with each other, configure routed proxy ARP on the two devices.</p>
+<div class="fignone" id="EN-US_TASK_0000001176743505__fig_dc_vrp_arp_cfg_206201"><a name="EN-US_TASK_0000001176743505__fig_dc_vrp_arp_cfg_206201"></a><a name="fig_dc_vrp_arp_cfg_206201"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring routed proxy ARP</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 and interface 2 represent <span>100GE</span> <span>1/0/1</span> and <span>100GE</span> <span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001130783864.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176743505__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure IP addresses for the interfaces to which hosts are connected, ensuring that the links between the hosts and interfaces are working properly.</p>
+</li><li><p>Configure routed proxy ARP on the interfaces. After receiving an ARP request (for the destination host's MAC address) sent by the host, the device that has routed proxy ARP enabled responds to the request with its own MAC address. The host then forwards data to the device.</p>
+</li><li><p>Configure a default route between two devices so that data can be transmitted along the route.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176743505__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>IP address of the interface that connects DeviceA to HostA: 172.16.1.1/24; IP address of the interface that connects DeviceB to HostB: 172.16.2.1/24</p>
+</li><li><p>Default route on each device</p>
+</li><li><p>IP address of HostA: 172.16.1.2/16; IP address of HostB: 172.16.2.2/16</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001176743505__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure DeviceA.</span><p><p># Configure an IP address for <span>100GE</span> <span>1/0/1</span>.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname DeviceA</strong>
+<span>[<span class="keyword">*</span>DeviceA] <strong>commit</strong></span>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span><span class="keyword">*</span></span>DeviceA-<span>100GE</span><span>1/0/1</span>]<strong> </strong><strong>undo portswitch</strong>
+[<span><span class="keyword">*</span></span>DeviceA-<span>100GE</span><span>1/0/1</span>]<strong> ip address 172.16.1.1 255.255.255.0</strong>
+<span>[<span class="keyword">*</span>DeviceA] <strong>commit</strong></span></pre>
+<p># Enable routed proxy ARP.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>]<strong> arp proxy enable</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>]<strong> quit</strong>
+<span>[<span class="keyword">*</span>DeviceA] <strong>commit</strong></span></pre>
+<p># Configure a static route.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> ip route-static 0.0.0.0 0 <span>100ge</span> <span>1/0/2</span> 172.17.3.2</strong>
+<span>[<span class="keyword">*</span>DeviceA] <strong>commit</strong></span></pre>
+<p># Configure an IP address for <span>100GE</span> <span>1/0/2</span>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>undo portswitch</strong>
+[<span><span class="keyword">*</span></span>DeviceA-<span>100GE</span><span>1/0/2</span>]<strong> ip address 172.17.3.1 255.255.255.0</strong>
+[<span><span class="keyword">*</span></span>DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>undo shutdown</strong>
+[<span><span class="keyword">*</span></span>DeviceA-<span>100GE</span><span>1/0/2</span>]<strong> quit</strong>
+<span>[<span class="keyword">*</span>DeviceA] <strong>commit</strong></span></pre>
+</p></li><li><span>Configure DeviceB.</span><p><p># Configure an IP address for <span>100GE</span> <span>1/0/1</span>.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname DeviceB</strong>
+<span>[<span class="keyword">*</span>DeviceB] <strong>commit</strong></span>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span><span class="keyword">*</span></span>DeviceB-<span>100GE</span><span>1/0/1</span>]<strong> </strong><strong>undo portswitch</strong>
+[<span><span class="keyword">*</span></span>DeviceB-<span>100GE</span><span>1/0/1</span>]<strong> ip address 172.16.2.1 255.255.255.0</strong>
+<span>[<span class="keyword">*</span>DeviceB] <strong>commit</strong></span></pre>
+<p># Enable routed proxy ARP.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>]<strong> arp proxy enable</strong>
+[<span><span class="keyword">*</span></span>DeviceB-<span>100GE</span><span>1/0/1</span>]<strong> quit</strong>
+<span>[<span class="keyword">*</span>DeviceB] <strong>commit</strong></span></pre>
+<p># Configure a static route.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> ip route-static 0.0.0.0 0 <span>100ge</span> <span>1/0/2</span> 172.17.3.1</strong>
+<span>[<span class="keyword">*</span>DeviceB] <strong>commit</strong></span></pre>
+<p># Configure an IP address for <span>100GE</span> <span>1/0/2</span>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/2</span>]<strong> undo portswitch</strong>
+[<span><span class="keyword">*</span></span>DeviceB-<span>100GE</span><span>1/0/2</span>]<strong> ip address 172.17.3.2 255.255.255.0</strong>
+[<span><span class="keyword">*</span></span>DeviceB-<span>100GE</span><span>1/0/2</span>]<strong> undo shutdown</strong>
+[<span><span class="keyword">*</span></span>DeviceB-<span>100GE</span><span>1/0/2</span>]<strong> quit</strong>
+<span>[<span class="keyword">*</span>DeviceB] <strong>commit</strong></span></pre>
+</p></li><li><span>Configure hosts.</span><p><p># Configure IP address 172.16.1.2/16 for HostA.</p>
+<p># Configure IP address 172.16.2.2/16 for HostB.</p>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001176743505__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Ping HostB from HostA. The ping is successful.</p>
+<p># Check ARP entries on HostA. The command output shows that the MAC address of HostB is the MAC address of <span>100GE</span> <span>1/0/1</span> on DeviceA.</p>
+<pre class="screen">C:\Documents and Settings\Administrator&gt;<strong>arp -a</strong>
+Interface: 172.16.1.2 --- 0x2
+  Internet Address      Physical Address      Type
+  172.16.2.2            00e0-fc39-80aa        dynamic</pre>
+<h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+ip route-static 0.0.0.0 0.0.0.0 <span>100GE</span><span>1/0/2</span> 172.17.3.2
+#
+interface <span>100ge</span> <span>1/0/1</span>
+ undo portswitch
+ ip address 172.16.1.1 255.255.255.0
+ arp proxy enable
+#
+interface <span>100ge</span> <span>1/0/2</span>
+ undo portswitch
+ ip address 172.17.3.1 255.255.255.0
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+ip route-static 0.0.0.0 0.0.0.0 <span>100GE</span><span>1/0/2</span> 172.17.3.1
+#
+interface <span>100ge</span> <span>1/0/2</span>
+ undo portswitch
+ ip address 172.16.2.1 255.255.255.0
+ arp proxy enable
+#
+interface <span>100ge</span> <span>1/0/2</span>
+ undo portswitch
+ ip address 172.17.3.2 255.255.255.0
+
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_arp_cfg_0011.html">Configuring Proxy ARP
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_arp_cfg_0035.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

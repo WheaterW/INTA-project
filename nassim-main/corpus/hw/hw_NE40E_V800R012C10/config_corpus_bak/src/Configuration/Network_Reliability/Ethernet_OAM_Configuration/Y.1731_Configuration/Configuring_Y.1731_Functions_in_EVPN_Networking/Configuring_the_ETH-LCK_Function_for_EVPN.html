@@ -1,0 +1,118 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring the ETH-LCK Function for EVPN">
+<meta name="abstract" content="The ETH-LCK function notifies the server-layer (sub-layer) MEP of an administrative lock event. Then the data sent to the MEP is interrupted.">
+<meta name="description" content="The ETH-LCK function notifies the server-layer (sub-layer) MEP of an administrative lock event. Then the data sent to the MEP is interrupted.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfg_011560.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfg_011556.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z50024784,c00376497,z00603461,w00800033,jwx1168690,w00556928,w00437000,eoam-vrp,w00606909,m00390128,l00455378,wwx1270540">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="Ethernet OAM">
+<meta name="featuretype" content="Network Reliability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Ethernet OAM">
+<meta name="featuretype" content="Network Reliability">
+<meta name="featurename" content="Ethernet OAM">
+<meta name="featuretype" content="Network Reliability">
+<meta name="featurename" content="Ethernet OAM">
+<meta name="featuretype" content="Network Reliability">
+<meta name="featurename" content="Ethernet OAM">
+<meta name="featuretype" content="Network Reliability">
+<meta name="OWNER" content="z00545680">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="z00545680">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172362137">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Configuring the ETH-LCK Function for EVPN</title>
+</head>
+<body><a name="EN-US_TASK_0172362137"></a><a name="EN-US_TASK_0172362137"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring the ETH-LCK Function for EVPN</h1>
+<div class="taskbody"><p>The ETH-LCK function notifies the server-layer (sub-layer) MEP of an administrative lock event. Then the data sent to the MEP is interrupted.</p>
+<div class="context"><a name="EN-US_TASK_0172362137__1.4.1"></a><a name="1.4.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>On the network shown in <a href="#EN-US_TASK_0172362137__fig_dc_vrp_cfg_01154401">Figure 1</a>, PE1 and PE2 are connected through an EVPN. The MEPs configured on the access interfaces of CE1 and CE2 reside in level-6 MD1. The MEPs configured on PE1 and PE2 reside in level-3 MD2. If the link between PE1 and PE2 fails and the CC is Down, the MEP in level-3 MD2 detects the fault and sends an alarm to the NMS. After a certain period, a MEP in level-6 MD1 also detects the fault and sends the same alarm to the NMS. In this case, you need to configure the ETH-LCK function to prevent the MEP in the high-level MD from sending alarms to the NMS.</p>
+<p>To suppress CC alarms from being generated in the outer MD, ETH-LCK is implemented with out-of-service ETH-Test. A MEP in the inner MD with a lower level initiates ETH-Test by sending an ETH-LCK frame to a MEP in the outer MD. Upon receipt of the ETH-LCK frame, the MEP in the outer MD suppresses all CC alarms immediately and reports an ETH-LCK alarm indicating administrative locking. Before out-of-service ETH-Test is complete, the MEP in the inner MD sends ETH-LCK frames to the MEP in the outer MD. After out-of-service ETH-Test is complete, the MEP in the inner MD stops sending ETH-LCK frames. If the MEP in the outer MD does not receive ETH-LCK frames for a period 3.5 times as long as the specified interval, it releases the alarm suppression and reports a clear ETH-LCK alarm.</p>
+<div class="fignone" id="EN-US_TASK_0172362137__fig_dc_vrp_cfg_01154401"><a name="EN-US_TASK_0172362137__fig_dc_vrp_cfg_01154401"></a><a name="fig_dc_vrp_cfg_01154401"></a><span class="figcap"><b>Figure 1 </b>Networking diagram for configuring the ETH-LCK function of the EVPN</span><br><span><img class="vsd" src="images/fig_dc_vrp_cfg_01155701.png" width="NaN" height="NaN"></span><br></div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172362137__1.4.2"></a><a name="1.4.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Perform the following steps on the PE.</span><p><ol type="a"><li><p>Run <a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></p>
+<p>The system view is displayed.</p>
+</li><li><p>Run <a href="cmdqueryname=cfm+md"><b><span class="cmdname">cfm md</span></b></a> <i><span class="varname">md-name</span></i> [ <strong><span>level</span></strong> <i><span class="varname">level</span></i> ]</p>
+<p>The MD view is displayed.</p>
+</li><li><p>Run <a href="cmdqueryname=ma"><b><span class="cmdname">ma</span></b></a> <i><span class="varname">ma-name</span></i></p>
+<p>The MA view is displayed.</p>
+</li><li><p>Run <a href="cmdqueryname=map"><b><span class="cmdname">map</span></b></a> <strong><span>evpn</span></strong> <strong><span>vpn-instance</span></strong> <i><span class="varname">evpn-instance-name</span></i></p>
+<p>The MA is bound to a specified BD.</p>
+</li><li><p>Run <a href="cmdqueryname=mep+mep-id"><b><span class="cmdname">mep mep-id</span></b></a> <i><span class="varname">mep-id</span></i> <strong><span>interface</span></strong> <i><span class="varname">interface-type interface-number</span></i> <strong><span>inward</span></strong></p>
+<p>A MEP is configured.</p>
+</li><li><p>Run <a href="cmdqueryname=mep+ccm-send+enable"><b><span class="cmdname">mep ccm-send enable</span></b></a></p>
+<p>The MEP is enabled to send CCMs.</p>
+</li><li><p>Run <a href="cmdqueryname=mep+mep-id"><b><span class="cmdname">mep mep-id</span></b></a> <i><span class="varname">mep-id</span></i> <strong><span>lck</span></strong> <strong><span>enable</span></strong> <strong><span>level</span></strong> <i><span class="varname">level</span></i></p>
+<p>The ETH-LCK function is enabled.</p>
+</li><li><p>Run <a href="cmdqueryname=remote-mep+mep-id"><b><span class="cmdname">remote-mep mep-id</span></b></a> <i><span class="varname">mep-id</span></i></p>
+<p>An RMEP is configured.</p>
+</li><li><p>Run <a href="cmdqueryname=remote-mep+ccm-receive"><b><span class="cmdname">remote-mep ccm-receive</span></b></a> [ <strong><span>mep-id</span></strong> <i><span class="varname">mep-id</span></i> ] <strong><span>enable</span></strong></p>
+<p>The RMEP is enabled to receive CCMs.</p>
+</li><li><p>Run <a href="cmdqueryname=eth-test+enable"><b><span class="cmdname">eth-test enable</span></b></a> <strong><span>mep</span></strong> <i><span class="varname">mep-id</span></i></p>
+<p>The ETH-test function is enabled.</p>
+</li><li><p>Run <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></p>
+<p>The configuration is committed.</p>
+</li></ol>
+</p></li><li><span>Perform the following steps on the CE.</span><p><ol type="a"><li><p>Run <a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></p>
+<p>The system view is displayed.</p>
+</li><li><p>Run <a href="cmdqueryname=cfm+md"><b><span class="cmdname">cfm md</span></b></a> <i><span class="varname">md-name</span></i> [ <strong><span>level</span></strong> <i><span class="varname">level</span></i> ]</p>
+<p>The MD view is displayed.</p>
+</li><li><p>Run <a href="cmdqueryname=ma"><b><span class="cmdname">ma</span></b></a> <i><span class="varname">ma-name</span></i></p>
+<p>The MA view is displayed.</p>
+</li><li><p>Run <a href="cmdqueryname=map+vlan"><b><span class="cmdname">map vlan</span></b></a> <i><span class="varname">vlan-id</span></i></p>
+<p>The MA is bound to the VLAN.</p>
+</li><li><p>Run <a href="cmdqueryname=mep+mep-id"><b><span class="cmdname">mep mep-id</span></b></a> <i><span class="varname">mep-id</span></i> <strong><span>interface</span></strong> <i><span class="varname">interface-type interface-number</span></i> <strong><span>inward</span></strong></p>
+<p>A MEP is configured.</p>
+</li><li><p>Run <a href="cmdqueryname=mep+ccm-send+enable"><b><span class="cmdname">mep ccm-send enable</span></b></a></p>
+<p>The MEP is enabled to send CCMs.</p>
+</li><li><p>Run <a href="cmdqueryname=remote-mep+mep-id"><b><span class="cmdname">remote-mep mep-id</span></b></a> <i><span class="varname">mep-id</span></i></p>
+<p>An RMEP is configured.</p>
+</li><li><p>Run <a href="cmdqueryname=remote-mep+ccm-receive"><b><span class="cmdname">remote-mep ccm-receive</span></b></a> [ <strong><span>mep-id</span></strong> <i><span class="varname">mep-id</span></i> ] <strong><span>enable</span></strong></p>
+<p>The RMEP is enabled to receive CCMs.</p>
+</li><li><p>Run <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></p>
+<p>The configuration is committed.</p>
+</li></ol>
+</p></li></ol></div>
+<div class="postreq"><a name="EN-US_TASK_0172362137__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Verifying the Configuration</h4><div class="p"><ul><li>After the configuration is complete, if the link between the PEs is shut down and the CC is Down, the CE reports an LCK alarm. Run the <a href="cmdqueryname=display+alarm+active"><b><span class="cmdname">display alarm active</span></b></a> command on the CE to check the task execution result.</li></ul>
+</div>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfg_011560.html">Configuring Y.1731 Functions in EVPN Networking
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfg_011556.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

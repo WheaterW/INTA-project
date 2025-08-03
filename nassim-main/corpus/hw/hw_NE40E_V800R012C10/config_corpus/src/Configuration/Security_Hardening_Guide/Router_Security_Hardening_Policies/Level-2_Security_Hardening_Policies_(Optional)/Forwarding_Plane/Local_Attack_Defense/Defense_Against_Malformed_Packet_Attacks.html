@@ -1,0 +1,107 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Defense Against Malformed Packet Attacks">
+<meta name="abstract" content="">
+<meta name="description" content="">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_maintenance_0030.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_maintenance_0032.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z00588052,w00845984,w00606909">
+<meta name="DC.Publisher" content="20240229">
+<meta name="OWNER" content="z00588052,w00843073">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="z00485179">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001180623041">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Defense Against Malformed Packet Attacks</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001180623041"></a><a name="EN-US_CONCEPT_0000001180623041"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Defense Against Malformed Packet Attacks</h1>
+<div><p></p>
+<div class="section"><h4 class="sectiontitle">Security Policy</h4><p>A malformed packet attack sends malformed IP packets to a target. The target may encounter errors or crash when handling these packets.</p>
+<p>Malformed packet attacks are as follows:</p>
+<ul><li><p>Flood attacks using IP packets with null payload</p>
+</li><li><p>Attacks using IGMP packets with null payload</p>
+</li><li><p>LAND attacks</p>
+</li><li><p>Smurf attacks</p>
+</li><li><p>TCP flag invalid attacks</p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Attack Methods</h4><ul><li><p>Flood attacks using IP packets with null payload</p>
+<p>Flood attackers send massive IP packets without any upper layer data. These massive IP packets form flood attacks. The IP packets without upper layer data are useless, and therefore must be discarded.</p>
+</li><li><p>Attacks using IGMP packets with null payload</p>
+<p>An IGMP packet consists of a 20-byte IP packet header and an 8-byte IGMP body. If an IGMP packet is shorter than 28 bytes, the device considers it malformed and discards it.</p>
+</li><li><p>LAND attacks</p>
+<p>LAND attacks were invented by the Hacker organization RootShell and issued on Nov 20, 1997. LAND attacks use the design flaws of the TCP three-way handshake mechanism so that the target hosts that have received connection requests repeatedly reply to themselves, exhausting their resources and paralyzing the network. A LAND attack sends a spoofed SYN packet with the source and destination IP addresses set to address the same device and the source and destination ports set to the same port. After a device receives a SYN packet, it sends to its IP address a SYN+ACK packet. Consequently, it replies to itself a SYN+ACK packet and creates a null connection that persists until expiration.</p>
+<div class="fignone"><span class="figcap"><b>Figure 1 </b>LAND attack</span><br><span><img class="vsd" src="figure/en-us_image_0000001134623516.png" width="NaN" height="NaN"></span></div>
+<p>If the destination host receives a SYN+ACK packet, it interprets the packet as a connection request (ignoring the ACK packet) and replies with a SYN+ACK packet. The ACK packet is used to acknowledge the last SYN packet. Consequently, the destination host determines that it is receiving a connection request again. The cycle continues.</p>
+<p>Even though the destination host does not consider the SYN+ACK packet as a connection request, it considers the SYN+ACK packet as a half connection as a result of sending of the SYN+ACK packet. If there are excessive packets, it becomes a SYN flood attack. As a result, an excess of half connections is set up, and the system fails.</p>
+<p>The device considers LAND attacks malformed packet attacks. If a received TCP SYN packet carries the same source and destination IP addresses, the device considers it an attack packet and discards it.</p>
+</li></ul>
+<ul><li><p>Smurf attacks</p>
+<p>The principle of a Smurf attack is that an attacker sends ICMP Echo Request packets with the destination IP address set to a broadcast IP address and the source IP address set to the target's IP address. All the hosts on the network send reply with packets to the target. The target receives too many packets, leading to high CPU usage. The target interprets packets with their destination set to a broadcast address or a subnet broadcast address as malformed and discards them to defend against Smurf attacks.</p>
+</li><li><p>TCP flag invalid attacks</p>
+<p>A TCP packet contains six flag bits, including URG, ACK, PSH, RST, SYN, and FIN. Replies to combinations of these flag bits vary according t systems.</p>
+<p>If the six flag bits are all 1s, the attack is a Christmas tree attack.</p>
+<p>If the six flag bits are all 0s and the TCP port is disabled, the receiver responds with an RST|ACK packet. If the six flag bits are all 0s and the TCP port is enabled, a device running Linux or UNIX does not respond, whereas, but a device running Windows responds with an RST|ACK packet. This helps identify the operating system.</p>
+<p>If ACK is used with another flag bit (except RST) as a combination, the receiver that does not send any request, but still sends an RST response packet, regardless of whether the TCP port is enabled. This helps determine whether a host exists.</p>
+<p>The reception of an SYN+FIN+URG packet triggers the receiver to respond with an RST+ACK packet, regardless of whether the TCP port is enabled. This helps determine whether a host exists.</p>
+<p>Upon receipt of an SYN, SYN+FIN, SYN+PUSH, SYN+FIN+PUSH, SYN+URG, SYN+URG+PUSH, or SYN+FIN+URG+PUSH packet, the receiver responds with an RST+ACK packet if the TCP port is disabled or to respond with an SYN+ACK packet if the TCP port is enabled. This assists in host detection and port detection.</p>
+<p>Upon receipt of a FIN, URG, PUSH, URG+FIN, URG+PUSH, FIN+PUSH, or URG+FIN+PUSH packet, the receiver responds with an RST+ACK reply if the TCP port is disabled. If the six flag bits are all 0s and the TCP port is enabled, a device running Linux or UNIX does not respond, whereas, but a device running Windows responds with an RST|ACK packet. This helps identify the operating system.</p>
+<p>The device checks the flag bit in each TCP packet and discards packets the packet if the packet meets any of the following conditions:</p>
+<ul><li><p>The six flag bits are all 1s.</p>
+</li><li>The six flag bits are all 0s.</li><li>Both SYN and FIN are 1s.</li></ul>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration and Maintenance Methods</h4><ul><li><p>Enable or disable the defense against malformed packet attacks.</p>
+<p><a href="cmdqueryname=abnormal-packet-defend+enable"><b><span class="cmdname">abnormal-packet-defend enable</span></b></a></p>
+<p><a href="cmdqueryname=undo+abnormal-packet-defend+enable"><b><span class="cmdname">undo abnormal-packet-defend enable</span></b></a></p>
+<p><a href="cmdqueryname=ipv6-abnormal-packet-defend+enable"><b><span class="cmdname">ipv6-abnormal-packet-defend enable</span></b></a></p>
+<p><a href="cmdqueryname=undo+ipv6-abnormal-packet-defend+enable"><b><span class="cmdname">undo ipv6-abnormal-packet-defend enable</span></b></a></p>
+</li><li><p>Delete statistics about malformed packet attacks<span> on a specific or all interface boards</span>.</p>
+<p><a href="cmdqueryname=reset+cpu-defend+tcpip-defend+statistics"><b><span class="cmdname">reset cpu-defend tcpip-defend statistics</span></b></a><span> [ <strong><span>slot</span></strong> <i><span class="varname">slot-number</span></i> ]</span></p>
+<p><a href="cmdqueryname=reset+cpu-defend+tcpip-defend-v6+statistics"><b><span class="cmdname">reset cpu-defend tcpip-defend-v6 statistics</span></b></a><span> [ <strong><span>slot</span></strong> <i><span class="varname">slot-number</span></i> ]</span></p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Verifying the Security Hardening Result</h4><p>Check statistics about malformed packet attacks<span> on all interface boards or a specified interface board</span>.</p>
+<p><a href="cmdqueryname=display+cpu-defend+tcpip-defend+statistics"><b><span class="cmdname">display cpu-defend tcpip-defend statistics</span></b></a><span> [ <strong><span>slot</span></strong> <i><span class="varname">slot-number</span></i> ]</span></p>
+<p><a href="cmdqueryname=display+cpu-defend+tcpip-defend-v6+statistics"><b><span class="cmdname">display cpu-defend tcpip-defend-v6 statistics</span></b></a><span> [ <strong><span>slot</span></strong> <i><span class="varname">slot-number</span></i> ]</span></p>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration and Maintenance Suggestions</h4><p>None</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_maintenance_0030.html">Local Attack Defense
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_maintenance_0032.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

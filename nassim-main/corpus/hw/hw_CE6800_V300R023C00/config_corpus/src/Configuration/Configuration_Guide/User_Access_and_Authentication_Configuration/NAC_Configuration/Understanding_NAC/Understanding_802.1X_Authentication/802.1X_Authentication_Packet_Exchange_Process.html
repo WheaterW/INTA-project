@@ -1,0 +1,86 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="802.1X Authentication Packet Exchange Process">
+<meta name="abstract" content="">
+<meta name="description" content="">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_nac_cfg_0038.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_nac_cfg_0040.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_nac_cfg_0042.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="802.1X Authentication">
+<meta name="featurename" content="NAC">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="802.1X Authentication">
+<meta name="featurename" content="NAC">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="featurename" content="802.1X Authentication">
+<meta name="featurename" content="MAC Address Authentication">
+<meta name="featurename" content="NAC">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="featurename" content="802.1X Authentication">
+<meta name="featurename" content="MAC Address Authentication">
+<meta name="featurename" content="NAC">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001564120289">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>802.1X Authentication Packet Exchange Process</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001564120289"></a><a name="EN-US_CONCEPT_0000001564120289"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">802.1X Authentication Packet Exchange Process</h1>
+<div><p></p>
+<div class="section"><h4 class="sectiontitle">802.1X Authentication Triggering</h4><div class="p">802.1X authentication can be triggered in the following scenarios:<ul><li>A client sends an EAPoL-Start packet.</li><li>A client sends a DHCP, ARP<span>, DHCPv6, ND</span>, or any other packet.</li><li>The access device multicasts an EAP-Request/Identity packet.</li></ul>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Authentication Processes in EAP Relay and EAP Termination Modes</h4><p>In the 802.1X authentication system, the access device exchanges information with the RADIUS server in EAP relay or EAP termination mode. <a href="#EN-US_CONCEPT_0000001564120289__fig_dc_fd_nac_000403">Figure 1</a> and <a href="#EN-US_CONCEPT_0000001564120289__fig_dc_fd_nac_000404">Figure 2</a> respectively show the 802.1X authentication processes in EAP relay and EAP termination modes. In both processes, the client sends an EAPoL-Start packet to trigger authentication.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001564120289__fig_dc_fd_nac_000403"><a name="EN-US_CONCEPT_0000001564120289__fig_dc_fd_nac_000403"></a><a name="fig_dc_fd_nac_000403"></a><span class="figcap"><b>Figure 1 </b>Authentication process in EAP relay mode</span><br><span><img class="vsd" src="figure/en-us_image_0000001512840938.png"></span></div>
+<ol><li>The client sends an EAPoL-Start packet to trigger authentication.</li><li><p>The access device sends an EAP-Request/Identity packet to request the identity information of the client.</p>
+</li><li><p>The client sends an EAP-Response/Identity packet carrying its identity information to the access device.</p>
+</li><li><p>The access device encapsulates the received EAP-Response/Identity packet into a RADIUS Access-Request packet, and sends the resulting packet to the RADIUS server.</p>
+</li><li><p>The RADIUS server receives the RADIUS Access-Request packet carrying the client's identity information, and starts to negotiate the EAP authentication method with the client. The RADIUS server encapsulates a RADIUS Access-Challenge packet with an EAP authentication method for negotiation with the client, and sends the resulting packet to the access device.</p>
+</li><li><p>The access device forwards the EAP information in the received RADIUS Access-Challenge packet to the client.</p>
+</li><li><p>The client parses the received EAP information to obtain the EAP authentication method selected by the RADIUS server. If the client supports this method, it sends an EAP-Response packet encapsulated with this method to the access device. If the client does not support this method, it encapsulates an EAP-Response packet with the EAP authentication method it supports, and sends the resulting packet to the access device.</p>
+</li><li>The access device encapsulates a RADIUS packet with the EAP information carried in the received EAP-Response packet, and sends the RADIUS packet to the RADIUS server.</li><li>Upon receipt of the RADIUS packet, the RADIUS server checks whether it supports the EAP authentication method specified in the packet. If so, negotiation of the EAP authentication method succeeds, and authentication starts. The following assumes that the negotiated EAP authentication method is EAP-PEAP authentication. The server then encapsulates a RADIUS packet with its certificate and sends the packet to the access device. After receiving the RADIUS packet, the access device forwards the certificate information to the client. The client verifies the server certificate (optional), negotiates TLS parameters with the RADIUS server, and establishes a TLS tunnel with the server. This tunnel is used to transmit TLS-encrypted user information among the client, access device, and RADIUS server. If negotiation of the EAP authentication method between the client and server fails, the authentication process is terminated, and the access device is notified of the authentication failure and disconnects the client.</li><li>After authenticating the client, the RADIUS server sends a RADIUS Access-Accept packet to notify the access device of the authentication success.</li><li>The access device receives the RADIUS Access-Accept packet, sends an EAP-Success packet to the client, changes the access port state of the user to authorized, and allows the user to access the network through this port.</li><li>If the user wants to go offline, the client sends an EAPoL-Logoff packet to the access device.</li><li>The access device changes the port state from authorized to unauthorized and sends an EAP-Failure packet to the client.</li></ol>
+<div class="fignone" id="EN-US_CONCEPT_0000001564120289__fig_dc_fd_nac_000404"><a name="EN-US_CONCEPT_0000001564120289__fig_dc_fd_nac_000404"></a><a name="fig_dc_fd_nac_000404"></a><span class="figcap"><b>Figure 2 </b>Authentication process in EAP termination mode</span><br><span><img class="vsd" src="figure/en-us_image_0000001563760845.png"></span></div>
+<p>In EAP termination mode, the access device negotiates the EAP authentication method with the client, and sends user information to the RADIUS server for authentication. In contrast, such negotiation in EAP relay mode is performed between the client and server; the access device is only responsible for encapsulating RADIUS packets with EAP packets and transparently transmitting the RADIUS packets to the authentication server.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_nac_cfg_0038.html">Understanding 802.1X Authentication
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_nac_cfg_0040.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="galaxy_nac_cfg_0042.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

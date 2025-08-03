@@ -1,0 +1,90 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="MSTP">
+<meta name="abstract" content="">
+<meta name="description" content="">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_hardening_control_level2.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0050.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0110.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="wwx1277053,z00588052">
+<meta name="DC.Publisher" content="20240229">
+<meta name="OWNER" content="wwx1277053,z00588052">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="x60031980">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001180503137">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>MSTP</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001180503137"></a><a name="EN-US_CONCEPT_0000001180503137"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">MSTP</h1>
+<div><p></p>
+<div class="section"><h4 class="sectiontitle">Security Policy Introduction</h4><ul><li><p>Root protection</p>
+<p>To address this issue, the root protection function can be configured to protect the root bridge by preserving the role of the designated port. With this function, when the designated port receives RST BPDUs with a higher priority, the port enters the Discarding state and does not forward the BPDUs. If the port does not receive any RST BPDUs with a higher priority for a certain period (double the Forward Delay), the port transitions to the Forwarding state.</p>
+</li><li><p>BPDU protection</p>
+<p>After BPDU protection is enabled on the <span class="keyword" id="EN-US_CONCEPT_0000001180503137__en-us_task_0172363635_keyword192491473198">device</span>, the <span class="keyword" id="EN-US_CONCEPT_0000001180503137__en-us_task_0172363635_keyword1761851861918">device</span> shuts down the edge port if the edge port receives an RST BPDU, and notifies the NMS of the shutdown event. The attributes of the edge port are not changed.</p>
+</li><li><p>TC protection</p>
+<p>TC protection is used to suppress TC-BPDUs. The number of times that TC-BPDUs are processed by a <span class="keyword" id="EN-US_CONCEPT_0000001180503137__en-us_task_0172363635_keyword16357838121917">device</span> within a given time period is configurable. If the number of TC-BPDUs that the <span class="keyword" id="EN-US_CONCEPT_0000001180503137__en-us_task_0172363635_keyword97018435190">device</span> receives within the given time exceeds the specified threshold, the <span class="keyword" id="EN-US_CONCEPT_0000001180503137__en-us_task_0172363635_keyword720185713197">device</span> handles TC-BPDUs only for the specified number of times. Excessive TC-BPDUs are processed by the <span class="keyword" id="EN-US_CONCEPT_0000001180503137__en-us_task_0172363635_keyword178518815209">device</span> as a whole for once after the timeout period expires. This protects the device from frequently deleting MAC entries and ARP entries, thus avoiding over-burden.</p>
+</li><li><p>Loop prevention</p>
+<p>The loop protection function can be used to prevent such network loops. If the root port or alternate port cannot receive RST BPDUs from the upstream device, the root port is blocked and the device notifies the NMS that the port enters the Discarding state. The blocked port remains in the Blocked state and no longer forwards packets. This prevents loops on the network. The root port restores the Forwarding state after new RST BPDUs are received.</p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Attack Methods</h4><ul><li><p>Root bridge change attack</p>
+<p>Due to incorrect configurations or malicious attacks on the network, a root bridge may receive BPDUs with a higher priority. Consequently, the legitimate root bridge is no longer able to serve as the root bridge, and the network topology is illegitimately changed, triggering spanning tree recalculation. This may transfer traffic from high-speed links to low-speed links, causing traffic congestion.</p>
+</li><li><p>BPDU attack</p>
+<p>An edge port changes to be a non-edge port after receiving a BPDU, which triggers spanning tree recalculation. If an attacker keeps sending bogus BPDUs to a <span class="keyword" id="EN-US_CONCEPT_0000001180503137__en-us_task_0172363635_keyword700081560214030">device</span>, network flapping occurs.</p>
+</li><li><p>TC protection</p>
+<p>Generally, after receiving TC-BPDUs (packets for advertising network topology changes), a <span class="keyword" id="EN-US_CONCEPT_0000001180503137__en-us_task_0172363635_keyword112757302191">device</span> needs to delete MAC entries and ARP entries. Frequent deletion operations will exhaust CPU resources.</p>
+</li><li><p>Loop prevention</p>
+<p>A root port or an alternate port will age if link congestion or a one-way link failure occurs. After the root port ages, a device may re-select a root port incorrectly and after the alternate port ages, the port enters the Forwarding state. Loops may occur in such a situation.</p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Configuration and Maintenance Suggestions</h4><ul><li><p>Root protection</p>
+<p>Enable root protection on designated interfaces.</p>
+</li><li><p>BPDU protection</p>
+<p>Configure BPDU protection on devices.</p>
+</li><li><p>TC protection</p>
+<p>Configure TC protection on devices.</p>
+</li><li><p>Loop prevention</p>
+<p>Enable loop prevention on a root port or an alternate port.</p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Verifying the Security Hardening Result</h4><ul><li>Run the <strong>display stp</strong> [ <strong>instance</strong> <em>instance-id</em> ][ <strong>interface</strong> { <em>interface-type interface-number</em> } ] [ <strong>brief</strong> ] command to check spanning-tree status and statistics.</li><li>Run the <strong>display stp region-configuration</strong> command to check configurations of activated MST regions.</li><li>Run the <strong>display stp region-configuration</strong> <strong>digest</strong> command to check the digest configurations of activated MST regions.</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_sec_hardening_control_level2.html">Control Plane
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0050.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_sec_maintenance_0110.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

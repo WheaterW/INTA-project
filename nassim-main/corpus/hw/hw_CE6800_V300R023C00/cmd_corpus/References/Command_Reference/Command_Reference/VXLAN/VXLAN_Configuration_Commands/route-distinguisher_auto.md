@@ -1,0 +1,85 @@
+route-distinguisher auto
+========================
+
+route-distinguisher auto
+
+Function
+--------
+
+
+
+The route-distinguisher auto command configures a route distinguisher (RD) for an EVPN profile in the BD profile view.
+
+The undo route-distinguisher auto command deletes the RD of an EVPN profile in the BD profile view.
+
+The vpn-target auto command configures VPN targets for an EVPN profile in the BD profile view.
+
+The undo vpn-target auto command deletes the VPN targets of an EVPN profile in the BD profile view.
+
+
+
+By default, no VPN target or RD is configured for an EVPN profile in the BD profile view.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**route-distinguisher auto**
+
+**vpn-target auto**
+
+**undo route-distinguisher auto**
+
+**undo vpn-target auto**
+
+
+Parameters
+----------
+
+None
+
+Views
+-----
+
+evpn-bdprofile view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+When a PE advertises EVPN routes to other PEs, the PE attaches all the local export VPN targets to these routes. After a PE receives EVPN routes, the PE matches export VPN targets carried in these routes against the local import VPN target list and imports these routes to the local EVPN instance routing table only if at least one export VPN target matches one import VPN target.After creating an EVPN profile in the BD profile view, run the **route-distinguisher** command to configure an RD for the EVPN profile.
+
+**Prerequisites**
+
+Before running the **route-distinguisher** command, run the **evpn** command in the BD profile view.Before running the **vpn-target** command, run the **route-distinguisher** command in the EVPN profile in the BD profile view to configure an RD.
+
+**Precautions**
+
+If the **undo route-distinguisher** command is run in the EVPN profile view, configurations of the EVPN profile are deleted.
+
+
+Example
+-------
+
+# Configure an RD for the BD-EVPN instance.
+```
+<HUAWEI> system-view
+[~HUAWEI] bridge-domain profile 1
+[*HUAWEI-bd-profile1] evpn
+[*HUAWEI-bd-profile1-evpn] route-distinguisher auto
+[*HUAWEI-bd-profile1-evpn] vpn-target auto
+
+```

@@ -1,0 +1,183 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Proxy ND Anyway">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_nd_cfg_0047.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_nd_cfg_0054.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="ND">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="ND">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="featurename" content="ND">
+<meta name="featuretype" content="IP Addresses and Services">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130782314">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Proxy ND Anyway</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130782314"></a><a name="EN-US_TASK_0000001130782314"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Proxy ND Anyway</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130782314__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In scenarios where servers are partitioned into VMs, the flexible deployment and migration of VMs on multiple servers or gateways can be achieved by configuring Layer 2 interconnection between multiple gateways. However, this approach may lead to larger Layer 2 domains on the network and the risk of broadcast storms. To resolve this issue, enable proxy ND anyway on a VM gateway. In this way, the gateway sends its interface MAC address to a source VM and communication between VMs is implemented through route forwarding.</p>
+<p>As shown in <a href="#EN-US_TASK_0000001130782314__fig12417825103810">Figure 1</a>, there is a reachable route between DeviceA and DeviceB. If DeviceA or DeviceB is not required to determine whether a route to a destination VM exists and the other VMs in the same subnet do not respond to an NS message from a source VM, you can configure proxy ND anyway on the devices to allow the two VMs in different subnets to communicate.</p>
+<div class="fignone" id="EN-US_TASK_0000001130782314__fig12417825103810"><a name="EN-US_TASK_0000001130782314__fig12417825103810"></a><a name="fig12417825103810"></a><span class="figcap"><b>Figure 1 </b>Typical network diagram of proxy ND anyway</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 represents  <span>1/0/1</span>.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001176662215.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130782314__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Create a VLAN so that the VMs that need to communicate are in the VLAN.</p>
+</li><li><p>Configure interface attributes and associate the interface with the VLAN.</p>
+</li><li><p>Assign an IPv6 address to each interface.</p>
+</li><li><p>Configure proxy ND anyway on each device's VLANIF interface.</p>
+</li><li><p>Configure each device to advertise IPv6 NDP Vlink direct routes.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130782314__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>ID of the VLAN to which the devices and VMs belong</p>
+</li><li><p>IPv6 addresses of device interfaces connected to VMs</p>
+</li><li><p>IPv6 addresses of VMs</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001130782314__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Create a VLAN.</span><p><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Configure the same VLAN ID on DeviceA and DeviceB.</p>
+</div></div>
+<p># Configure DeviceA.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname <span class="keyword">Device</span>A</strong>
+<span>[<span><span class="keyword">*</span></span><span class="keyword">HUAWEI</span>] <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>vlan 10</strong>
+<span>[<span><span class="keyword">*</span></span>DeviceA-vlan10] <strong>commit</strong></span>
+[<span><span class="keyword">*</span></span>DeviceA-vlan10] <strong>quit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname <span class="keyword">DeviceB</span></strong>
+<span>[<span><span class="keyword">*</span></span><span class="keyword">HUAWEI</span>] <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>vlan 10</strong>
+<span>[<span><span class="keyword">*</span></span>DeviceB-vlan10] <strong>commit</strong></span>
+[<span><span class="keyword">*</span></span>DeviceB-vlan10] <strong>quit</strong></pre>
+</p></li><li><span>Configure interface attributes and associate the interface with the VLAN.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword"></span>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span> <span></span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100ge</span><span>1/0/1</span><span></span>] <strong>portswitch</strong>
+[<span><span class="keyword">*</span></span>DeviceA-<span>100ge</span><span>1/0/1</span><span></span>] <strong>port link-type access</strong>
+[<span><span class="keyword">*</span></span>DeviceA-<span>100ge</span><span>1/0/1</span><span></span>] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>vlan 10</strong>
+[<span class="keyword"></span><span><span class="keyword">*</span></span>DeviceA-vlan10] <strong>port <span>100ge</span> <span>1/0/1</span> <span></span></strong>
+<span>[<span class="keyword"></span><span><span class="keyword">*</span></span>DeviceA-vlan10] <strong>commit</strong></span>
+[<span class="keyword"></span><span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-vlan10] <strong>quit</strong></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface <span>100ge</span> <span>1/0/1</span><span></span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword"></span>DeviceB-<span>100ge</span><span>1/0/1</span>] <strong>portswitch</strong>
+[<span class="keyword"></span><span><span class="keyword">*</span></span><span class="keyword"></span>DeviceB-<span>100ge</span><span>1/0/1</span>] <strong>port link-type access</strong>
+[<span class="keyword"></span><span class="keyword"></span><span><span class="keyword">*</span></span>DeviceB-<span>100ge</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword"></span><span class="keyword"></span><span><span class="keyword">*</span></span>DeviceB] <strong>vlan 10</strong>
+[<span><span class="keyword">*</span></span>DeviceB-vlan10] <strong>port <span>100ge</span></strong> <strong><span>1/0/1</span></strong>
+<span>[<span class="keyword"></span><span class="keyword"></span><span><span class="keyword">*</span></span>DeviceB-vlan10] <strong>commit</strong></span>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-vlan10] <strong>quit</strong></pre>
+</p></li><li><span>Assign an IPv6 address to each interface.</span><p><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Configure the same VLANIF interface address on DeviceA and DeviceB.</p>
+</div></div>
+<p># Configure DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword"></span>DeviceA] <strong>interface vlanif 10</strong>
+[<span class="keyword"></span><span class="keyword"></span><span><span class="keyword">*</span></span>DeviceA-Vlanif10] <strong>ipv6 enable</strong>
+[<span class="keyword"></span><span class="keyword"></span><span><span class="keyword">*</span></span>DeviceA-Vlanif10] <strong>ipv6 address 2001:db8:300:400::3 64</strong>
+<span>[<span class="keyword"></span><span><span class="keyword">*</span></span><span class="keyword"></span>DeviceA-Vlanif10] <strong>commit</strong></span></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>interface vlanif 10</strong>
+[<span><span class="keyword">*</span></span>DeviceB-Vlanif10] <strong>ipv6 enable</strong>
+[<span class="keyword"></span><span><span class="keyword">*</span></span>DeviceB-Vlanif10] <strong>ipv6 address 2001:db8:300:400::3 64</strong>
+<span>[<span><span class="keyword">*</span></span>DeviceB-Vlanif10] <strong>commit</strong></span></pre>
+</p></li><li><span>Enable proxy ND anyway and configure each device to advertise IPv6 NDP Vlink direct routes.</span><p><p># Configure DeviceA.</p>
+<pre class="screen">[<span><span class="keyword">*</span></span>DeviceA-Vlanif10] <strong>ipv6 nd proxy anyway enable</strong>
+[<span><span class="keyword">*</span></span>DeviceA-Vlanif10] <strong>quit</strong>
+[<span><span class="keyword">*</span></span>DeviceA] <strong>ipv6 nd direct-route enable</strong>
+<span>[<span class="keyword"></span><span><span class="keyword">*</span></span>DeviceA] <strong>commit</strong></span></pre>
+<p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"></span><span class="keyword"></span><span><span class="keyword">*</span></span>DeviceB-Vlanif10] <strong>ipv6 nd proxy anyway enable</strong>
+[<span class="keyword"></span><span><span class="keyword">*</span></span>DeviceB-Vlanif10] <strong>quit</strong>
+[<span class="keyword"></span><span><span class="keyword">*</span></span><span class="keyword"></span>DeviceB] <strong>ipv6 nd direct-route enable</strong>
+<span>[<span class="keyword"></span><span><span class="keyword">*</span></span>DeviceB] <strong>commit</strong></span></pre>
+</p></li><li><span>Configure VMs.</span><p><p># Set the IPv6 address of VM1 to 2001:db8:300:400::1/64.</p>
+<p># Set the IPv6 address of VM2 to 2001:db8:300:400::2/64.</p>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001130782314__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># After the configuration is complete, check that VM1 and VM2 can ping each other.</p>
+<h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+vlan batch 10
+#
+interface Vlanif10
+ ipv6 enable
+ ipv6 address 2001:DB8:300:400::3/64
+ ipv6 nd proxy anyway enable
+#
+interface <span>100GE</span> <span>1/0/1</span>
+<span> port link-type access</span>
+ port default vlan 10
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+vlan batch 10
+#
+interface Vlanif10
+ ipv6 enable
+ ipv6 address 2001:DB8:300:400::3/64
+ ipv6 nd proxy anyway enable
+#
+interface <span>100GE</span> <span>1/0/1</span>
+<span> port link-type access</span>
+ port default vlan 10
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_nd_cfg_0047.html">Configuring Proxy ND
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_nd_cfg_0054.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

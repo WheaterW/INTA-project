@@ -1,0 +1,272 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring IPv4 FRR">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_ip_routing_management_cfg_0066.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_ip_routing_management_cfg_0009.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Route Management">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Route Management">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="Route Management">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001352724596">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring IPv4 FRR</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001352724596"></a><a name="EN-US_TASK_0000001352724596"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring IPv4 FRR</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001352724596__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0000001352724596__fig_dc_vrp_ip-route_cfg_002401">Figure 1</a>, it is required that a backup outbound interface and a backup next hop be configured on DeviceT so that Link B functions as the backup of Link A. If Link A fails, traffic is rapidly switched to Link B.</p>
+<div class="fignone" id="EN-US_TASK_0000001352724596__fig_dc_vrp_ip-route_cfg_002401"><a name="EN-US_TASK_0000001352724596__fig_dc_vrp_ip-route_cfg_002401"></a><a name="fig_dc_vrp_ip-route_cfg_002401"></a><span class="figcap"><b>Figure 1 </b>Configuring public network IPv4 FRR</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, Interface1, Interface2, and Interface3 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, and <span>100GE</span><span>1/0/3</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001404424321.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001352724596__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Enable basic OSPF functions on DeviceT, DeviceA, and DeviceC.</p>
+</li><li><p>Enable basic IS-IS functions on DeviceT, DeviceB, and DeviceC.</p>
+</li><li><p>Enable public network IPv4 FRR on DeviceT, and check the backup outbound interface and backup next hop.</p>
+</li><li><p>Disable IPv4 FRR, and check the backup outbound interface and backup next hop.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001352724596__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface. For detailed configurations, see <a href="#EN-US_TASK_0000001352724596__postreq1748752215419">Configuration Scripts</a>.</span></li><li><span>Configure OSPF on DeviceT, DeviceA, and DeviceC. For details, see <a href="#EN-US_TASK_0000001352724596__postreq1748752215419">Configuration Scripts</a>.</span></li><li><span>Configure IS-IS on DeviceT, DeviceB, and DeviceC. For details, see <a href="#EN-US_TASK_0000001352724596__postreq1748752215419">Configuration Scripts</a>.</span></li><li><span>Check routing information.</span><p><p># Check the routes destined for 172.17.1.0 on DeviceT.</p>
+<pre class="screen">&lt;DeviceT&gt; <strong>display ip routing-table 172.17.1.0 verbose</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table : _public_
+Summary Count : 2
+
+Destination: 172.17.1.0/24
+     <strong>Protocol: OSPF</strong>            Process ID: 1
+   <strong>Preference: 10</strong>                    Cost: 3
+      <strong>NextHop: 192.168.10.2</strong>     Neighbour: 0.0.0.0
+        <strong>State: Active Adv</strong>             Age: 00h00m07s
+          Tag: 0                 Priority: low
+        Label: NULL               QoSInfo: 0xa98ac7
+   IndirectID: 0x40000041
+ RelayNextHop: 0.0.0.0          <strong>Interface: <span>100GE</span><span>1/0/2</span></strong>
+     TunnelID: 0x0                  Flags: D
+   RouteColor: 0
+
+Destination: 172.17.1.0/24
+     <strong>Protocol: ISIS</strong>            Process ID: 1
+   <strong>Preference: 15</strong>                    Cost: 30
+      <strong>NextHop: 192.168.20.2</strong>     Neighbour: 0.0.0.0
+        <strong>State: Inactive Adv</strong>           Age: 00h01m26s
+          Tag: 0                 Priority: high
+        Label: NULL               QoSInfo: 0xa98ac7
+   IndirectID: 0x80000081
+ RelayNextHop: 0.0.0.0          <strong>Interface: <span>100GE</span><span>1/0/3</span></strong>
+     TunnelID: 0x0                  Flags: 0
+   RouteColor: 0</pre>
+</p><p><p>The command output shows that there are two routes to 172.17.1.0/24. The route with the next hop 192.168.10.2 is the optimal route because the priority of OSPF routes is higher than that of IS-IS routes.</p>
+</p></li><li><span>Enable public network IPv4 FRR.</span><p><p># Enable IPv4 FRR on DeviceT.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceT]<strong> ip frr</strong>
+[<span class="keyword">*</span>DeviceT] <strong>commit</strong></pre>
+<p># Check the backup outbound interface and the backup next hop on DeviceT.</p>
+<pre class="screen">&lt;DeviceT&gt; <strong>display ip routing-table 172.17.1.0 verbose</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table : _public_
+Summary Count : 2
+
+Destination: 172.17.1.0/24
+     Protocol: OSPF            Process ID: 1
+   Preference: 10                    Cost: 3
+      NextHop: 192.168.10.2     Neighbour: 0.0.0.0
+        State: Active Adv             Age: 00h01m36s
+          Tag: 0                 Priority: low
+        Label: NULL               QoSInfo: 0xa98ac7
+   IndirectID: 0x40000041
+ RelayNextHop: 0.0.0.0          Interface: <span>100GE</span><span>1/0/2</span>
+     TunnelID: 0x0                  Flags: D
+   RouteColor: 0
+    <strong>BkNextHop: 192.168.20.2</strong>   <strong>BkInterface: <span>100GE</span><span>1/0/3</span></strong>
+      BkLabel: NULL           SecTunnelID: 0x0
+ BkPETunnelID: 0x0        BkPESecTunnelID: 0x0
+ BkIndirectID: 0x80000081
+
+Destination: 172.17.1.0/24
+     Protocol: ISIS            Process ID: 1
+   Preference: 15                    Cost: 30
+      <strong>NextHop: 192.168.20.2</strong>     Neighbour: 0.0.0.0
+        State: Inactive Adv           Age: 00h02m55s
+          Tag: 0                 Priority: high
+        Label: NULL               QoSInfo: 0xa98ac7
+   IndirectID: 0x80000081
+ RelayNextHop: 0.0.0.0          <strong>Interface: <span>100GE</span><span>1/0/3</span></strong>
+     TunnelID: 0x0                  Flags: 0
+   RouteColor: 0</pre>
+<p>In the routing table, you can view that the route to 172.17.1.0/24 has a backup outbound interface and a backup next hop. The IS-IS route becomes a backup route.</p>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001352724596__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Simulate a link fault on DeviceT.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceT]<strong> interface <span>100GE</span><span>1/0/2</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceT-<span>100GE</span><span>1/0/2</span>]<strong> shutdown</strong>
+[<span class="keyword">*</span>DeviceT-<span>100GE</span><span>1/0/2</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceT-<span>100GE</span><span>1/0/2</span>]<strong> quit</strong></pre>
+<p># On DeviceT, check the routes to 172.17.1.0/24.</p>
+<pre class="screen">&lt;DeviceT&gt;<strong> display ip routing-table 172.17.1.0 verbose</strong>
+<span class="keyword">Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route</span>
+------------------------------------------------------------------------------
+Routing Table : _public_
+Summary Count : 1
+
+Destination: 172.17.1.0/24
+     <strong>Protocol: ISIS</strong>            Process ID: 1
+   Preference: 15                    Cost: 30
+      <strong>NextHop: 192.168.20.2</strong>     Neighbour: 0.0.0.0
+        State: Active Adv             Age: 00h57m30s
+          Tag: 0                 Priority: high
+        Label: NULL               QoSInfo: 0xa98ac7
+   IndirectID: 0x80000081
+ RelayNextHop: 0.0.0.0          <strong>Interface: <span>100GE</span><span>1/0/3</span></strong>
+     TunnelID: 0x0                  Flags: D
+   RouteColor: 0
+</pre>
+<p>The preceding command output shows that traffic is switched to Link B after Link A fails.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001352724596__postreq1748752215419"></a><a name="postreq1748752215419"></a><a name="EN-US_TASK_0000001352724596__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceT</p>
+<pre class="screen">#
+sysname DeviceT
+#
+ip frr
+#
+isis 1
+ network-entity 10.0000.0000.0001.00
+# 
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 172.16.1.1 255.255.255.0 
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.10.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 192.168.20.1 255.255.255.0
+ isis enable 1
+#
+ospf 1
+ area 0.0.0.0
+  network 192.168.10.0 0.0.0.255
+ area 0.0.0.1
+  network 172.16.1.0 0.0.0.255
+#
+return</pre>
+</li><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.10.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.11.2 255.255.255.0
+#
+ospf 1
+ area 0.0.0.0
+  network 192.168.10.0 0.0.0.255
+  network 192.168.11.0 0.0.0.255
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+isis 1
+ network-entity 10.0000.0000.0002.00 
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 192.168.20.2 255.255.255.0
+ isis enable 1
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.21.2 255.255.255.0
+ isis enable 1
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+isis 1
+ network-entity 10.0000.0000.0003.00 
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 172.17.1.1 255.255.255.0
+ isis enable 1
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 192.168.11.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 192.168.21.1 255.255.255.0
+ isis enable 1
+#
+ospf 1
+ area 0.0.0.0
+  network 192.168.11.0 0.0.0.255
+  network 192.168.21.0 0.0.0.255
+ area 0.0.0.2
+  network 172.17.1.0 0.0.0.255
+#
+return</pre>
+</li></ul>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_ip_routing_management_cfg_0066.html">Configuring IPv4 FRR
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_ip_routing_management_cfg_0009.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

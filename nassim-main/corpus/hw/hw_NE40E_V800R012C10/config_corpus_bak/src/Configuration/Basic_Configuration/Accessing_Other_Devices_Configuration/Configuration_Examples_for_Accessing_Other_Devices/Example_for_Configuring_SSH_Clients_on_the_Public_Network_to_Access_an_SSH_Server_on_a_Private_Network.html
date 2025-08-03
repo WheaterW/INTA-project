@@ -1,0 +1,583 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring SSH Clients on the Public Network to Access an SSH Server on a Private Network">
+<meta name="abstract" content="This example shows how to configure an SSH client on the public network to access an SSH server on a private network. You can configure SSH-related attributes for public users to allow them to access devices on private networks in STelnet or SFTP mode.">
+<meta name="description" content="This example shows how to configure an SSH client on the public network to access an SSH server on a private network. You can configure SSH-related attributes for public users to allow them to access devices on private networks in STelnet or SFTP mode.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_basic_cfg_0108.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_basic_cfg_0114.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_basic_cfg_0129.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="basicvrp,w00800033,w00556928,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="Accessing Other Devices">
+<meta name="featuretype" content="Basic Configurations">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Accessing Other Devices">
+<meta name="featuretype" content="Basic Configurations">
+<meta name="featurename" content="Accessing Other Devices">
+<meta name="featuretype" content="Basic Configurations">
+<meta name="featurename" content="Accessing Other Devices">
+<meta name="featuretype" content="Basic Configurations">
+<meta name="OWNER" content="lwx1238418">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00799643">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172360147">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring SSH Clients on the Public Network to Access an SSH Server on a Private Network</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172360147"></a><a name="EN-US_TASK_0172360147"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring SSH Clients on the Public Network to Access an SSH Server on a Private Network</h1>
+<div class="taskbody"><p>This example shows how to configure an SSH client on the public network to access an SSH server on a private network. You can configure SSH-related attributes for public users to allow them to access devices on private networks in STelnet or SFTP mode.</p>
+<div class="context"><a name="EN-US_TASK_0172360147__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>As shown in <a href="#EN-US_TASK_0172360147__fig_dc_vrp_basic_cfg_011501">Figure 1</a>, PE1 is an SSH client located on the MPLS backbone network, and CE1 functions as an SSH server located on the private network with the AS number of 65410. Public network users need to securely access and manage CE1 after logging in to PE1.</p>
+<div class="fignone" id="EN-US_TASK_0172360147__fig_dc_vrp_basic_cfg_011501"><a name="EN-US_TASK_0172360147__fig_dc_vrp_basic_cfg_011501"></a><a name="fig_dc_vrp_basic_cfg_011501"></a><span class="figcap"><b>Figure 1 </b>Configuring an SSH client on the public network to access an SSH server on a private network</span><br><span><img class="vsd" src="images/fig_dc_vrp_basic_cfg_011501.png" width="NaN" height="NaN"></span></div>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1, interface 2, and interface 3 represent GE <span>0/1/1</span>, GE <span>0/2/1</span> and GE <span>0/1/2</span>, respectively.</p>
+</div></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172360147__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure a VPN instance on PE1 to allow CE1 to access PE1.</p>
+</li><li><p>Set up EBGP peer relationships between PEs and CEs and import VPN routes.</p>
+</li><li><p>Configure client002 and the SSH server to generate local key pairs, and bind client002 to the RSA public key of the SSH server to authenticate the client when the client attempts to log in to the server.</p>
+</li><li><p>Enable the STelnet and SFTP server functions on the SSH server.</p>
+</li><li><p>Connect client001 and client002 to CE1 using STelnet and SFTP, respectively.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172360147__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Name of the VPN instance on the PEs: vpn1</p>
+</li><li><p>VPN target on the PEs: 111:1</p>
+</li><li><p>IP address of PE1: 10.1.1.2; IP address of PE2: 10.1.2.2</p>
+</li><li><p>Password authentication for client001</p>
+</li><li><p>RSA authentication (public key: RsaKey001) for client002</p>
+</li><li><p>IP address of CE1: 10.3.3.3</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172360147__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure the MPLS backbone network.</span><p><p>Configure an IGP to allow PEs and the P on the MPLS backbone network to communicate with each other. Configure basic MPLS functions, enable MPLS LDP, and establish LDP LSPs on the MPLS backbone network.</p>
+<p>For configuration details, see Configuration Files in this section.</p>
+</p></li><li><span>Configure VPN instances on PEs and connect CEs to PEs.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>ip vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpn1] <strong>route-distinguisher 100:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpn1-af-ipv4] <strong>vpn-target 111:1 both</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpn1-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-vpn-instance-vpn1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet <span>0/2/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/1</span>] <strong>ip binding vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/1</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/1</span>] <strong>ip address 10.1.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>ip vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpn1] <strong>route-distinguisher 200:1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpn1-af-ipv4] <strong>vpn-target 111:1 both</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpn1-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-vpn-instance-vpn1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> interface gigabitethernet <span>0/2/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/1</span>] <strong>ip binding vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/1</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/1</span>] <strong>ip address 10.1.2.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>commit</strong></pre>
+<p># Configure IP addresses for interfaces on CEs according to <a href="#EN-US_TASK_0172360147__fig_dc_vrp_basic_cfg_011501">Figure 1</a>. For configuration details, see Configuration Files in this section.</p>
+<p>After the configuration is complete, run the <a href="cmdqueryname=display+ip+vpn-instance"><b><span class="cmdname">display ip vpn-instance</span></b></a><strong> </strong><strong><span>verbose</span></strong> command on PEs. You can view the configurations of VPN instances. Each PE can successfully ping its connected CE.</p>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>When there are multiple interfaces on a PE bound to the same VPN instance, specify the source address in the <a href="cmdqueryname=ping"><b><span class="cmdname">ping</span></b></a><strong> </strong><strong><span>-vpn-instance</span></strong> <i><span class="varname">vpn-instance-name</span></i><em> </em><strong><span>-a</span></strong><strong> </strong><i><span class="varname">source-ip-address</span></i><em> </em><i><span class="varname">dest-ip-address</span></i> command to ping the CE connected to the peer PE. Otherwise, the ping may fail.</p>
+</div></div>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>ping -vpn-instance vpn1 10.3.3.3</strong></pre>
+<pre class="screen">  PING 10.3.3.3: 56  data bytes, press CTRL_C to break</pre>
+<pre class="screen">    Reply from 10.3.3.3: bytes=56 Sequence=1 ttl=255 time=260 ms</pre>
+<pre class="screen">    Reply from 10.3.3.3: bytes=56 Sequence=2 ttl=255 time=70 ms</pre>
+<pre class="screen">    Reply from 10.3.3.3: bytes=56 Sequence=3 ttl=255 time=60 ms</pre>
+<pre class="screen">    Reply from 10.3.3.3: bytes=56 Sequence=4 ttl=255 time=60 ms</pre>
+<pre class="screen">    Reply from 10.3.3.3: bytes=56 Sequence=5 ttl=255 time=90 ms</pre>
+<pre class="screen">  --- 10.3.3.3 ping statistics ---</pre>
+<pre class="screen">    5 packet(s) transmitted</pre>
+<pre class="screen">    5 packet(s) received</pre>
+<pre class="screen">    0.00% packet loss</pre>
+<pre class="screen">    round-trip min/avg/max = 60/108/260 ms</pre>
+</p></li><li><span>Establish EBGP peer relationships between the PEs and the CEs to import VPN routes.</span><p><p># Configure CE1.</p>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>bgp 65410</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp] <strong>peer 10.1.1.2 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp] <strong>import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>commit</strong></pre>
+<p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>ipv4-family vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-vpn1] <strong>peer 10.3.3.3 as-number 65410</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-vpn1] <strong>import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp-vpn1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Configure CE2.</p>
+<pre class="screen">[<span class="keyword">*</span>CE2] <strong>bgp 65420</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-bgp] <strong>peer 10.1.2.2 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-bgp] <strong>import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-bgp] <strong>commit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>ipv4-family vpn-instance vpn1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-vpn1] <strong>peer 10.1.2.1 as-number 65420</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-vpn1] <strong>import-route direct</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp-vpn1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-bgp] <strong>commit</strong></pre>
+<p>After the configuration is complete, run the <strong>display bgp vpnv4 vpn-instance peer</strong> command on PEs. The command output shows that the EBGP peer relationships between PEs and the CEs are in the Established state.</p>
+<p>The following example uses the command output on PE1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display bgp vpnv4 vpn-instance vpn1 peer</strong></pre>
+<pre class="screen"> BGP local router ID : 1.1.1.9</pre>
+<pre class="screen"> Local AS number : 100</pre>
+<pre class="screen"> Total number of peers : 1                 Peers in established state : 1</pre>
+<pre class="screen">  Peer          V      AS  MsgRcvd  MsgSent  OutQ   Up/Down        State   PrefRcv</pre>
+<pre class="screen">  10.3.3.3      4   65410        3        3     0  00:00:37  <strong>Established</strong>         1</pre>
+<p># Set up an MP-IBGP peer relationship between PEs.</p>
+<p>For configuration details, see Configuration Files in this section.</p>
+</p></li><li><span>Configure the server to generate a local key pair.</span><p><pre class="screen">[<span class="keyword">*</span>CE1] <strong>rsa local-key-pair create</strong></pre>
+<pre class="screen">The key name will be: CE1_Host  
+The range of public key size is (2048, 3072).  
+NOTE: Key pair generation will take a short while.  
+Please input the modulus [default = 3072]:3072</pre>
+<pre class="screen">Generating keys...</pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>commit</strong></pre>
+</p></li><li><span>Configure the RSA public key on the server.</span><p><p># Configure the client to generate a local key pair.</p>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>rsa local-key-pair create</strong></pre>
+<pre class="screen">The key name will be: PE1_Host  
+The range of public key size is (2048, 3072).  
+NOTE: Key pair generation will take a short while.  
+Please input the modulus [default = 3072]:3072</pre>
+<pre class="screen">Generating keys...</pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Check the RSA public key generated on the client.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>display rsa local-key-pair public</strong></pre>
+<pre class="screen">=====================================================</pre>
+<pre class="screen">Time of Key pair created: 12:02:09  2007/6/8</pre>
+<pre class="screen">Key name: PE1_Host</pre>
+<pre class="screen">Key type: RSA encryption Key</pre>
+<pre class="screen">=====================================================</pre>
+<pre class="screen">Key code:</pre>
+<pre class="screen">3047</pre>
+<pre class="screen">  0240</pre>
+<pre class="screen">    BC011055 8BCCB887 384E5A14 1EF982A8 CA44A376</pre>
+<pre class="screen">    87787138 3BDB1FF0 D21F05D8 41BECF56 B2FA0695</pre>
+<pre class="screen">    8F76F1B2 5D3E2F35 A8051CE1 E0234274 9D8BB20D</pre>
+<pre class="screen">    E2EE8EB5</pre>
+<pre class="screen">  0203</pre>
+<pre class="screen">    010001</pre>
+<pre class="screen"> Host public key for PEM format code:</pre>
+<pre class="screen">---- BEGIN SSH2 PUBLIC KEY ----</pre>
+<pre class="screen">AAAAB3NzaC1yc2EAAAADAQABAAAAQQC8ARBVi8y4hzhOWhQe+YKoykSjdod4cTg7</pre>
+<pre class="screen">2x/w0h8F2EG+z1ay+gaVj3bxsl0+LzWoBRzh4CNCdJ2Lsg3i7o61</pre>
+<pre class="screen">---- END SSH2 PUBLIC KEY ----</pre>
+<pre class="screen">Public key code for pasting into OpenSSH authorized_keys file:</pre>
+<pre class="screen">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAQQC8ARBVi8y4hzhOWhQe+YKoykSjdod4cTg72x/w0h8F</pre>
+<pre class="screen">2EG+z1ay+gaVj3bxsl0+LzWoBRzh4CNCdJ2Lsg3i7o61 rsa-key</pre>
+<pre class="screen">=====================================================</pre>
+<pre class="screen">Time of Key pair created: 12:02:09  2007/6/8</pre>
+<pre class="screen">Key name: PE1_Server</pre>
+<pre class="screen">Key type: RSA encryption Key</pre>
+<pre class="screen">=====================================================</pre>
+<pre class="screen">Key code:</pre>
+<pre class="screen">3067</pre>
+<pre class="screen">  0260</pre>
+<pre class="screen">    9E6EDDE7 AEFF3F9F 5090ECA5 11DE117E 6660707F</pre>
+<pre class="screen">    23AC8DE2 BDB58E1E D46856B5 419CAEDF 3A33DD40</pre>
+<pre class="screen">    278C6403 24ADC2E6 B110A8ED B6CC644F 055C5437</pre>
+<pre class="screen">    D720D3D8 9A3F9DE5 4FE062DF F2DC443E 9092A0F4</pre>
+<pre class="screen">    970B8CC9 C8684678 CF0682F3 6301F5F3</pre>
+<pre class="screen">  0203</pre>
+<pre class="screen">    010001  </pre>
+<p># Copy the RSA public key generated on the client to the server.</p>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>rsa peer-public-key rsakey001</strong></pre>
+<pre class="screen">Enter "RSA public key" view, return system view with "peer-public-key end".</pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-rsa-public-key] <strong>public-key-code begin</strong></pre>
+<pre class="screen">Enter "RSA key code" view, return last view with "public-key-code end".</pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-rsa-key-code] <strong>3067</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-rsa-key-code] <strong>0240</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-rsa-key-code] <strong>BC011055 8BCCB887 384E5A14 1EF982A8 CA44A376</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-rsa-key-code] <strong>87787138 3BDB1FF0 D21F05D8 41BECF56 B2FA0695</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-rsa-key-code] <strong>8F76F1B2 5D3E2F35 A8051CE1 E0234274 9D8BB20D</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-rsa-key-code] <strong>E2EE8EB5</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-rsa-key-code] <strong>0203</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-rsa-key-code] <strong>010001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-rsa-key-code] <strong>public-key-code end</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-rsa-public-key] <strong>peer-public-key end</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-rsa-public-key] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>commit</strong></pre>
+</p></li><li><span>Create SSH users on the server.</span><p><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>There are several authentication modes for SSH users: password, RSA, password-RSA, DSA, password-DSA, ECC, password-ECC<span>, SM2, password-SM2</span> and All.</p>
+<ul><li><p>If the authentication mode is password, password-ECC, password-DSA<span>, password-sm2</span> or password-RSA, configure a local user on the server with the same user name.</p>
+</li><li><p>If the authentication mode is RSA, password-RSA, DSA, password-DSA<span>, SM2, password-SM2</span><span>, ECC, password-ECC</span>, or All, save the RSA, DSA<span>, SM2</span><span>, or ECC</span> public key generated on the SSH client to the server.</p>
+</li></ul>
+</div></div>
+<p># Configure VTY user interfaces.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>user-interface vty 0 4</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-ui-vty0-4]<strong> authentication-mode aaa</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-ui-vty0-4] <strong>protocol inbound ssh</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-ui-vty0-4] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-ui-vty0-4] <strong>quit</strong></pre>
+<ul><li><p>Create an SSH user named client001.</p>
+<p># Create an SSH user named client001 and configure password authentication for the user.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>ssh user client001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>ssh user client001 authentication-type password</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh server cipher aes256_gcm aes128_gcm aes256_ctr aes192_ctr aes128_ctr</strong> </pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh server hmac sha2_512 sha2_256</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh server key-exchange dh_group_exchange_sha256</strong> </pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh server publickey rsa_sha2_256 rsa_sha2_512</strong> </pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh server dh-exchange min-len 3072</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh client publickey rsa_sha2_256 rsa_sha2_512</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh client cipher aes256_gcm aes128_gcm aes256_ctr aes192_ctr aes128_ctr </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh client hmac sha2_512 sha2_256 </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh client key-exchange dh_group_exchange_sha256</strong> </pre>
+<p># Set a password for <strong>client001</strong>.</p>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>aaa</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-aaa] <strong>local-user client001 password</strong></pre>
+<pre class="screen">Please configure the password (<span>8-128</span>)
+Enter Password:
+Confirm Password:</pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p id="EN-US_TASK_0172360147__en-us_task_0172360129_en-us_task_0172359668_p1613320501544">The password must meet the following requirements:</p>
+<ul id="EN-US_TASK_0172360147__en-us_task_0172360129_en-us_task_0172359668_ul813517501544"><li id="EN-US_TASK_0172360147__en-us_task_0172360129_en-us_task_0172359668_li141338508412"><p id="EN-US_TASK_0172360147__en-us_task_0172360129_en-us_task_0172359668_p_1"><a name="EN-US_TASK_0172360147__en-us_task_0172360129_en-us_task_0172359668_li141338508412"></a><a name="en-us_task_0172360129_en-us_task_0172359668_li141338508412"></a>The password is entered in man-machine interaction mode. The system does not display the entered password.</p>
+</li><li id="EN-US_TASK_0172360147__en-us_task_0172360129_en-us_task_0172359668_li1713412501143"><p id="EN-US_TASK_0172360147__en-us_task_0172360129_en-us_task_0172359668_p_2"><a name="EN-US_TASK_0172360147__en-us_task_0172360129_en-us_task_0172359668_li1713412501143"></a><a name="en-us_task_0172360129_en-us_task_0172359668_li1713412501143"></a>A password is a string of 8 to 16 case-sensitive characters and must contain at least two types of the following characters: uppercase letters, lowercase letters, digits, and special characters.</p>
+</li><li id="EN-US_TASK_0172360147__en-us_task_0172360129_en-us_task_0172359668_p_3">Special characters exclude question marks (?) and spaces. However, spaces are allowed in the password if the password is enclosed in quotation marks.<ul id="EN-US_TASK_0172360147__en-us_task_0172360129_en-us_task_0172359668_ul7134165012419"><li id="EN-US_TASK_0172360147__en-us_task_0172360129_en-us_task_0172359668_li14134115012414">Double quotation marks cannot contain double quotation marks if spaces are used in a password.</li><li id="EN-US_TASK_0172360147__en-us_task_0172360129_en-us_task_0172359668_li81341508418">Double quotation marks can contain double quotation marks if no space is used in a password.</li></ul>
+<p id="EN-US_TASK_0172360147__en-us_task_0172360129_en-us_task_0172359668_p_4">For example, the password "Aa123"45"" is valid, but the password "Aa 123"45"" is invalid.</p>
+</li></ul>
+<p id="EN-US_TASK_0172360147__en-us_task_0172360129_en-us_task_0172359668_p2135950540">The configured password is displayed in ciphertext in the configuration file.</p>
+</div></div>
+<pre class="screen">[<span class="keyword">*</span>CE1-aaa] <strong>local-user client001 service-type ssh</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-aaa] <strong>quit</strong></pre>
+<p># Set the service type of client001 to STelnet.</p>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>ssh user client001 service-type stelnet</strong></pre>
+</li><li><p># Create an SSH user named client002, configure RSA authentication for the user, and bind the RSA public key to client002.</p>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>ssh user client002</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>ssh user client002 authentication-type rsa</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>ssh user client002 assign rsa-key rsakey001</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh server cipher aes256_gcm aes128_gcm aes256_ctr aes192_ctr aes128_ctr</strong> </pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh server hmac sha2_512 sha2_256</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh server key-exchange dh_group_exchange_sha256</strong> </pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh server publickey rsa_sha2_256 rsa_sha2_512</strong> </pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh server dh-exchange min-len 3072</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh client publickey rsa_sha2_256 rsa_sha2_512</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh client cipher aes256_gcm aes128_gcm aes256_ctr aes192_ctr aes128_ctr </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh client hmac sha2_512 sha2_256 </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>SSH Server]<strong> </strong><strong>ssh client key-exchange dh_group_exchange_sha256</strong> </pre>
+<p># Set the service type of client002 to SFTP and configure the authorized directory for the user.</p>
+<pre class="screen">[<span class="keyword">*</span>CE1]<strong> ssh user client002 service-type sftp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1]<strong> ssh user client002 sftp-directory cfcard:</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>commit</strong></pre>
+</li></ul>
+</p></li><li><span>Enable the STelnet and SFTP server functions on the SSH server.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>interface LoopBack 0</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1-LoopBack0] <strong>ip address 10.1.1.1 255.255.255.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-LoopBack0] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>stelnet server enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>sftp server enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1] <strong>ssh server-source</strong> <strong>-i loopback 0</strong></pre>
+</p><p><pre class="screen">[<span class="keyword">*</span>CE1] <strong>commit</strong></pre>
+</p></li><li><span>Configure PE1 (the SSH client) to log in to CE1 (the SSH server).</span><p><p># If the client logs in to the server for the first time, enable first authentication on the client.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>ssh client first-time enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>commit</strong></pre>
+<p># Use STelnet to log in to the SSH server.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>stelnet 10.1.1.1 -vpn-instance vpn1</strong></pre>
+<pre class="screen">Please input the username:client001</pre>
+<pre class="screen">Trying 10.1.1.1 ...</pre>
+<pre class="screen">Press CTRL+K to abort</pre>
+<pre class="screen">Connected to 10.1.1.1 ...</pre>
+<pre class="screen">The server is not authenticated. Do you continue to access it?(Y/N):y</pre>
+<pre class="screen">Do you want to save the server's public key?(Y/N):y</pre>
+<pre class="screen">The server's public key will be saved with the name:10.1.1.1. Please wait...</pre>
+<pre class="screen">Enter password:</pre>
+<p>The following information indicates that the login is successful:</p>
+<pre class="screen">Info: The max number of VTY users is 10, and the current number</pre>
+<pre class="screen">      of VTY users on line is 1.</pre>
+<pre class="screen">&lt;CE1&gt;</pre>
+<p># Use SFTP to log in to the SSH server.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1] <strong>sftp 10.1.1.1 -vpn-instance vpn1</strong></pre>
+<pre class="screen">Please input the username:client002</pre>
+<pre class="screen">Trying 10.1.1.1 ...</pre>
+<pre class="screen">Press CTRL+K to abort</pre>
+<pre class="screen">The server is not authenticated. Do you continue to access it?(Y/N):y</pre>
+<pre class="screen">Do you want to save the server's public key?(Y/N):y</pre>
+<pre class="screen">The server's public key will be saved with the name:10.1.1.1. Please wait...</pre>
+<p>After the login succeeds, the following information is displayed.</p>
+<pre class="screen">&lt;sftp-client&gt;</pre>
+</p></li><li><span>Verify the configuration.</span><p><p># Check the status of the SSH server.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>display ssh server status</strong></pre>
+<pre class="screen">SSH Version                                : <span>2.0</span>
+SSH authentication timeout (Seconds)       : 60
+SSH authentication retries (Times)         : 3
+SSH server key generating interval (Hours) : 0
+SSH version 1.x compatibility              : Enable
+SSH server keepalive                       : Disable
+SFTP IPv4 server                           : Enable
+<span>SFTP IPv6 server                           : Enable</span>
+STELNET IPv4 server                        : Enable
+<span>STELNET IPv6 server                        : Enable</span>
+SNETCONF IPv4 server                       : Enable
+<span>SNETCONF IPv6 server                       : Enable</span>
+SNETCONF IPv4 server port(830)             : Disable
+<span>SNETCONF IPv6 server port(830)             : Disable</span>
+SCP IPv4 server                            : Enable
+<span>SCP IPv6 server                            : Enable</span>
+SSH port forwarding                        : Disable
+SSH IPv4 server port                       : 22
+<span>SSH IPv6 server port                       : 22</span>
+ACL name                                   :
+ACL number                                 :
+<span>ACL6 name                                  : </span>
+<span>ACL6 number                                :</span>
+SSH server ip-block                        : Enable</pre>
+</p><p><p></p>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172360147__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>CE1 configuration file</p>
+<pre class="screen">#
+ sysname CE1
+#
+rsa peer-public-key rsakey001
+public-key-code begin
+3067
+  0260
+    9E6EDDE7 AEFF3F9F 5090ECA5 11DE117E 6660707F 23AC8DE2 BDB58E1E D46856B5
+    419CAEDF 3A33DD40 278C6403 24ADC2E6 B110A8ED B6CC644F 055C5437 D720D3D8
+    9A3F9DE5 4FE062DF F2DC443E 9092A0F4 970B8CC9 C8684678 CF0682F3 6301F5F3
+    E2EE8EB5
+  0203
+    010001
+public-key-code end
+peer-public-key end
+#
+interface loopback 0
+ ip address 10.1.1.1 255.255.255.255
+<span>stelnet server enable</span>
+<span>sftp server enable</span>
+ssh server-source -i loopback 0
+ssh user client001
+ssh user client001 authentication-type password
+ssh user client001 service-type stelnet
+ssh user client002
+ssh user client002 assign rsa-key rsakey001
+ssh user client002 authentication-type rsa
+ssh user client002 sftp-directory cfcard:
+ssh user client002 service-type sftp
+#
+ssh server cipher aes256_gcm aes128_gcm aes256_ctr aes192_ctr aes128_ctr 
+ssh server hmac sha2_512 sha2_256 
+ssh server key-exchange dh_group_exchange_sha256
+#
+ssh server publickey rsa_sha2_256 rsa_sha2_512
+#
+ssh server dh-exchange min-len 3072
+#
+ssh client publickey dsa ecc rsa rsa_sha2_256 rsa_sha2_512
+#
+ssh client cipher aes256_gcm aes128_gcm aes256_ctr aes192_ctr aes128_ctr
+ssh client hmac sha2_512 sha2_256
+ssh client key-exchange dh_group_exchange_sha256
+#
+aaa
+ local-user client001 password cipher @%@%UyQs4,KTtSwJo(4QmW#K,LC:@%@%
+ local-user client001 service-type ssh
+ #
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.3.3.3 255.255.255.0
+#
+bgp 65410
+ peer 10.1.1.2 as-number 100
+ #
+ ipv4-family unicast
+  undo synchronization
+  import-route direct
+  peer 10.1.1.2 enable
+#
+user-interface vty 0 4
+ authentication-mode aaa
+ protocol inbound ssh
+#
+return</pre>
+</li><li><p>PE1 configuration file</p>
+<pre class="screen">#
+ sysname PE1
+#
+ip vpn-instance vpn1
+ ipv4-family
+  route-distinguisher 100:1
+  apply-label per-instance
+  vpn-target 111:1 export-extcommunity
+  vpn-target 111:1 import-extcommunity
+#
+mpls lsr-id 1.1.1.9
+#
+mpls
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.2.1.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/2/1</span>
+ undo shutdown
+ ip binding vpn-instance vpn1
+ ip address 10.1.1.2 255.255.255.0
+#
+interface LoopBack1
+ ip address 1.1.1.9 255.255.255.255
+#
+bgp 100
+ peer 3.3.3.9 as-number 100
+ peer 3.3.3.9 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 3.3.3.9 enable
+ #
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 3.3.3.9 enable
+ #
+ ipv4-family vpn-instance vpn1
+  import-route direct
+  peer 10.3.3.3 as-number 65410
+#
+ssh client first-time enable
+#
+return</pre>
+</li><li><p>P configuration file</p>
+<pre class="screen">#
+ sysname P
+#
+mpls lsr-id 2.2.2.9
+#
+mpls
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.2.1.2 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/1/2</span>
+ undo shutdown
+ ip address 10.3.1.1 255.255.255.0
+ mpls
+ mpls ldp
+#
+interface LoopBack1
+ ip address 2.2.2.9 255.255.255.255
+#
+return</pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#
+ sysname PE2
+#
+ip vpn-instance vpn1
+ ipv4-family
+  route-distinguisher 200:1
+  apply-label per-instance
+  vpn-target 111:1 export-extcommunity
+  vpn-target 111:1 import-extcommunity
+#
+mpls lsr-id 3.3.3.9
+#
+mpls
+#
+mpls ldp
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.3.1.2 255.255.255.255
+ mpls
+ mpls ldp
+#
+interface GigabitEthernet<span>0/2/1</span>
+ undo shutdown
+ ip binding vpn-instance vpn1
+ ip address 10.1.2.2 255.255.255.0
+#
+interface LoopBack1
+ ip address 3.3.3.9 255.255.255.255
+#
+bgp 100
+ peer 1.1.1.9 as-number 100
+ peer 1.1.1.9 connect-interface LoopBack1
+ #
+ ipv4-family unicast
+  undo synchronization
+  peer 1.1.1.9 enable
+ #
+ ipv4-family vpnv4
+  policy vpn-target
+  peer 1.1.1.9 enable
+ #
+ ipv4-family vpn-instance vpn1
+  import-route direct
+  peer 10.1.2.1 as-number 65420
+#
+return</pre>
+</li><li><p>CE2 configuration file</p>
+<pre class="screen">#
+ sysname CE2
+#
+interface GigabitEthernet<span>0/1/1</span>
+ undo shutdown
+ ip address 10.1.2.1 255.255.255.0
+#
+bgp 65420
+ peer 10.1.2.2 as-number 100
+ #
+ ipv4-family unicast
+  undo synchronization
+<span></span>  import-route direct
+  peer 10.1.2.2 enable
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_basic_cfg_0108.html">Configuration Examples for Accessing Other Devices
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_basic_cfg_0114.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_basic_cfg_0129.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,79 @@
+vrrp6 recover-delay
+===================
+
+vrrp6 recover-delay
+
+Function
+--------
+
+
+
+The **vrrp6 recover-delay** command sets a status recovery delay for all Virtual Router Redundancy Protocol for IPv6 (VRRP6) backup groups.
+
+The **undo vrrp6 recover-delay** command restores the default status recovery delay for all VRRP6 groups.
+
+
+
+By default, the status recovery delay for all VRRP6 groups is 0 seconds, indicating that VRRP6 group flapping is not suppressed.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**vrrp6 recover-delay** *delay-value*
+
+**undo vrrp6 recover-delay**
+
+
+Parameters
+----------
+
+| Parameter | Description | Value |
+| --- | --- | --- |
+| *delay-value* | Specifies a status recovery delay for all VRRP6 backup groups. | The value is an integer ranging from 0 to 3600, in seconds. |
+
+
+
+Views
+-----
+
+100GE interface view,10GE interface view,200GE interface view,25GE interface view,400GE interface view,50GE interface view,Eth-Trunk interface view,VLANIF interface view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+If the status of the interface on which a VRRP6 group resides frequently changes, the VRRP6 group frequently flaps. To prevent this situation, run the **vrrp6 recover-delay** command to set a status recovery delay to suppress VRRP6 group flapping.When a device or board is restarted and a large number of services are configured, the backup device may not immediately receive protocol packets from the master device after the restart. As a result, the backup device becomes the master device because it does not receive protocol packets within a specified period, causing VRRP6 status flapping or the configured preemption delay to fail to take effect. To prevent this problem, run the **vrrp6 recover-delay** command to set a status recovery delay for the VRRP6 group.
+
+**Configuration Impact**
+
+After a status recovery delay is set for a VRRP6 backup group, the VRRP6 backup group responds to a received interface Up event only after the configured status recovery delay elapses, which prevents interface flapping from causing VRRP6 backup group flapping.
+
+
+Example
+-------
+
+# Set the status recovery delay for all VRRP6 backup groups to 5 seconds in the interface view.
+```
+<HUAWEI> system-view
+[~HUAWEI] interface 100GE 1/0/1
+[~HUAWEI-100GE1/0/1] undo portswitch
+[*HUAWEI-100GE1/0/1] ipv6 enable
+[*HUAWEI-100GE1/0/1] ipv6 address 2001:db8::1 127
+[*HUAWEI-100GE1/0/1] vrrp6 vrid 10
+[*HUAWEI-100GE1/0/1] vrrp6 recover-delay 5
+
+```

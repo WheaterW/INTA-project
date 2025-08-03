@@ -1,0 +1,634 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Roaming User Access in a Dual-Device Hot Backup Scenario (Dual-Stack User Access)">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_ipox_cfg_0083.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_013600.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_014455.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z00588052,w00606909,w00447999">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+<meta name="featurename" content="IPoE">
+<meta name="featuretype" content="User Access">
+<meta name="OWNER" content="c00549182">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="z00588052">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001509875365">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/jquery.min.idp.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/RowOrColfreezeSupport.js"></script>
+
+<script type="text/javascript">
+setTimeout(function(){
+	jQueryHW(document).ready(function(){
+		jQueryHW("table[rowfreeze='yes']").rowfreeze();
+		jQueryHW("table[colfreeze='yes']").colfreeze();
+	});
+},500);
+</script>
+<title>Example for Configuring Roaming User Access in a Dual-Device Hot Backup Scenario (Dual-Stack User Access)</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001509875365"></a><a name="EN-US_TASK_0000001509875365"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Roaming User Access in a Dual-Device Hot Backup Scenario (Dual-Stack User Access)</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001509875365__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>WLAN roaming allows a STA to move between different APs in the same ESS without interrupting existing services. When a WLAN user roams between different APs, the user needs to be re-authenticated for login after being logged out, causing services to be interrupted. WLAN user roaming switching ensures service continuity when a user roams between different APs. On the network shown in <a href="#EN-US_TASK_0000001509875365__fig624412481872">Figure 1</a>, when a user roams from AP1 to AP2, the user is switched from Device1's interface1 to interface2 for login, ensuring service continuity. To ensure network reliability, dual-device hot backup is deployed. If a device fault occurs, the user can switch from Device2's interface4 to interface3 for login, without affecting roaming services.</p>
+<div class="fignone" id="EN-US_TASK_0000001509875365__fig624412481872"><a name="EN-US_TASK_0000001509875365__fig624412481872"></a><a name="fig624412481872"></a><span class="figcap"><b>Figure 1 </b>Configuring roaming user access in a dual-device hot backup scenario</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interfaces 1 through 5 represent GE<span>0/1/0</span>.1, GE<span>0/1/0</span>.2, GE<span>0/2/0</span>.1, GE<span>0/2/0</span>.2, and GE<span>0/3/0</span>, respectively.</p>
+</div></div>
+<br><span><img src="figure/en-us_image_0000002132210158.png"></span></div>
+<h4 class="sectiontitle">Configuration Roadmap</h4><ol><li>Configure IP addresses for interfaces.</li><li>Configure routing protocols.</li><li>Configure an AAA scheme and adopt RADIUS authentication and accounting.</li><li>Configure a RADIUS server.</li><li>Configure a username generation mode and a password.</li><li>Configure a local IPv4 address pool, a local IPv6 prefix pool, and a local IPv6 address pool, and bind the prefix pool to the address pool.</li><li>Configure a DUID for the device.</li><li>Configure a domain.</li><li>Configure the IPv6 function on the user-side interface of the device.</li><li>Configure user VLANs.</li><li>Configure a BAS interface.</li><li>Deploy VRRP.</li><li>Configure a remote backup service (RBS) and a remote backup profile (RBP).</li><li>Configure roaming with logging out users.</li></ol>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The configuration of Device2 is similar to the configuration of Device1. The configuration procedure on Device1 is used as an example. For details about the configuration on Device2, see Configuration Files.</p>
+</div></div>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001509875365__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li>Authentication scheme name and authentication mode</li><li>Accounting scheme name and accounting mode</li><li>Local prefix pool name</li><li>IPv6 prefix to be assigned/Prefix length</li><li>Local address pool names</li><li>Domain name</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001509875365__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure IP addresses for the protection tunnel.</span><p><pre class="screen">&lt;HUAWEI&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>HUAWEI] <strong>sysname</strong> <strong>Device1</strong>
+[<span class="keyword">*</span>HUAWEI] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>interface loopback2</strong>
+[<span class="keyword">*</span>Device1-Loopback2] <strong>ipv6 enable</strong>
+[<span class="keyword">*</span>Device1-Loopback2] <strong>ip address 10.3.3.3 32</strong>
+[<span class="keyword">*</span>Device1-Loopback2] <strong>ipv6 address</strong> <strong>2001:db8:9::7 128</strong>
+[<span class="keyword">*</span>Device1-Loopback2] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+</p></li><li><span>Configure IP addresses for the network-side interface.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>interface gigabitEthernet<span>0/3/0</span></strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/3/0</span>] <strong>ipv6 enable</strong> 
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/3/0</span>] <strong>ipv6 address 2001:db8:8::7 64</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/3/0</span>] <strong>ipv6 address auto link-local</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/3/0</span>] <strong>ip address 10.2.1.1 24</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/3/0</span>] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+</p></li><li><span>Configure routing protocols.</span><p><p># Enable the function to automatically control a route's cost preference.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>peer-backup route-cost auto-advertising</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+<p># Configure OSPF to import UNRs.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>ospf 1</strong>
+[<span class="keyword">*</span>Device1-ospf-1] <strong>default cost inherit-metric</strong>
+[<span class="keyword">*</span>Device1-ospf-1] <strong>import-route unr</strong>
+[<span class="keyword">*</span>Device1-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>Device1-ospf-1-area-0.0.0.0] <strong>network 10.2.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>Device1-ospf-1-area-0.0.0.0] <strong>network 10.3.3.3 0.0.0.0</strong>
+[<span class="keyword">*</span>Device1-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>Device1-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+<p># Configure basic OSPFv3 functions to implement intra-AS IPv6 route reachability.</p>
+<pre class="screen">[<span class="keyword">*</span>Device1] <strong>ospfv3</strong>
+[<span class="keyword">*</span>Device1-ospfv3-1] <strong>router-id 1.1.1.1</strong>
+[<span class="keyword">*</span>Device1-ospfv3-1] <strong>area 0.0.0.0</strong>
+[<span class="keyword">*</span>Device1-ospfv3-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>Device1-ospfv3-1] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>interface gigabitEthernet<span>0/3/0</span></strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/3/0</span>] <strong>ospfv3 1 area 0.0.0.0</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/3/0</span>] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>interface Loopback2</strong>
+[<span class="keyword">*</span>Device1-Loopback2] <strong>ospfv3 1 area 0.0.0.0</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong> </pre>
+</p></li><li><span>Configure AAA schemes.</span><p><p># Configure an authentication scheme and set the authentication mode to RADIUS.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1]<strong> aaa</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-aaa]<strong> authentication-scheme auth1</strong>
+[<span class="keyword">*</span>Device1-aaa-authen-auth1]<strong> authentication-mode radius</strong>
+[<span class="keyword">*</span>Device1-aaa-authen-auth1]<strong> quit</strong>
+[<span class="keyword">*</span>Device1-aaa] <strong>commit</strong></pre>
+<p># Configure an accounting scheme and set the accounting mode to RADIUS.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-aaa]<strong> accounting-scheme acct1</strong>
+[<span class="keyword">*</span>Device1-aaa-accounting-acct1]<strong> accounting-mode radius</strong>
+[<span class="keyword">*</span>Device1-aaa-accounting-acct1]<strong> quit</strong>
+[<span class="keyword">*</span>Device1-aaa] <strong>commit</strong>
+[<span class="keyword">*</span>Device1-aaa] <strong>quit</strong></pre>
+</p></li><li><span>Configure RADIUS.</span><p><p># Configure a RADIUS server group.</p>
+</p><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1]<strong> radius-server group rd1</strong>
+[<span class="keyword">*</span>Device1-radius-rd1]<strong> radius-server authentication 192.168.7.249 1812 weight 0</strong>
+[<span class="keyword">*</span>Device1-radius-rd1]<strong> radius-server accounting 192.168.7.249 1813 weight </strong><strong>0</strong>
+[<span class="keyword">*</span>Device1-radius-rd1]<strong> radius-server shared-key-cipher YsHsjx_202206 </strong>
+[<span class="keyword">*</span>Device1-radius-rd1] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+</p></li><li><span>Configure a username generation mode and password.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1]<strong> aaa</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-aaa]<strong> default-user-name include sysname</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-aaa] <strong>default-password cipher YsHsjx_202206</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-aaa]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-aaa]<strong> quit</strong></pre>
+</p></li><li><span>Configure address pools.</span><p><p># Configure a user-side local IPv4 address pool.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>ip pool pool2</strong> <strong>bas local</strong>
+[<span class="keyword">*</span>Device1-ip-pool-pool_v4] <strong>gateway 10.0.0.1 255.255.255.0</strong>
+[<span class="keyword">*</span>Device1-ip-pool-pool_v4] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-ip-pool-pool_v4] <strong>section 0 10.0.0.2 10.0.0.100</strong> 
+[<span class="keyword">*</span>Device1-ip-pool-pool_v4] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+<p># Configure a user-side local IPv6 address pool.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>ipv6 prefix </strong><strong>pre1 local</strong>
+[<span class="keyword">*</span>Device1-ipv6-prefix-pre_nd] <strong>prefix 2001:db8:1::/48</strong>
+[<span class="keyword">*</span>Device1-ipv6-prefix-pre_nd] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commi</strong><strong>t</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>ipv6 pool pool1 bas local</strong>
+[<span class="keyword">*</span>Device1-ipv6-pool-pool_nd] <strong>prefix pre1</strong>
+[<span class="keyword">*</span>Device1-ipv6-pool-pool_nd] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commi</strong><strong>t</strong></pre>
+</p></li><li><span>Configure the DHCPv6 device to generate a DUID in DUID-LLT mode. (This step is not required if a DUID has been configured on Device1.)</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>dhcpv6 duid llt</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+</p></li><li><span>Configure a domain.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>aaa</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-aaa]<strong> domain huawei</strong>
+[<span class="keyword">*</span>Device1-aaa-domain-huawei]<strong> authentication-scheme auth1</strong>
+[<span class="keyword">*</span>Device1-aaa-domain-huawei]<strong> accounting-scheme acct1</strong>
+[<span class="keyword">*</span>Device1-aaa-domain-huawei]<strong> radius-server group rd1</strong>
+[<span class="keyword">*</span>Device1-aaa-domain-huawei]<strong> commit</strong><strong> </strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-aaa-domain-huawei]<strong> ip-pool pool2</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-aaa-domain-huawei] <strong>ipv6-pool </strong><strong>pool1</strong>
+[<span class="keyword">*</span>Device1-aaa-domain-huawei] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-aaa-domain-huawei]<strong> quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-aaa]<strong> quit</strong></pre>
+</p></li><li><span>Enable IPv6 and configure stateful address autoconfiguration on the interface.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>interface gigabitethernet <span>0/1/0</span>.1</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1]<strong> ipv6 enable</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1] <strong>ipv6 address auto link-local</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong>
+[<span class="keyword">*</span>Device1]<strong> </strong><strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>interface gigabitethernet <span>0/1/0</span>.2</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2] <strong>ipv6 enable</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2] <strong>ipv6 address auto link-local</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+</p></li><li><span>Configure user VLANs.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>interface gigabitethernet <span>0/1/0</span>.1 </strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1]<strong> user-vlan 100 200 qinq 300 400</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1-vlan-100-200-QinQ-300-400]<strong> quit</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1]<strong> </strong><strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>interface gigabitethernet <span>0/1/0</span>.2</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2] <strong>user-vlan 500 600 qinq 700 800</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2-vlan-500-600-QinQ-700-800] <strong>quit</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+</p></li><li><span>Configure a BAS interface for IPoE user access.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>interface gigabitethernet <span>0/1/0</span>.1</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-GigabitEthernet<span>0/1/0</span>.1] <strong>bas</strong>
+[<strong><span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span></strong>Device1-GigabitEthernet<span>0/1/0</span>.1-bas]<strong> access-type layer2-subscriber default-domain authentication huawei</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1-bas]<strong> </strong><strong>authentication-method bind</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1-bas]<strong> authentication-method</strong><strong>-ipv6</strong> <strong>bind</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1-bas]<strong> </strong><strong>quit</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1]<strong> interface gigabitethernet <span>0/1/0</span>.2</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2] <strong>bas</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2-bas]<strong> access-type layer2-subscriber default-domain authentication huawei</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2-bas]<strong> </strong><strong>authentication-method bind</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2-bas]<strong> authentication-method</strong><strong>-ipv6</strong> <strong>bind</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2-bas]<strong> </strong><strong>quit</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2] <strong>quit</strong>
+[<span class="keyword">*</span>Device1]<strong> </strong><strong>commit</strong></pre>
+</p></li><li><span>Deploy VRRP on the master and backup devices. Device1 is the master, and Device2 is the backup.</span><p><p># Configure a VRRP group on an interface (Gigabitethernet <span>0/1/0</span>.100 is used as an example).</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>interface </strong><strong>gigabitethernet <span>0/1/0</span>.100 </strong>
+[<span class="keyword">*</span>Device1-Eth-trunk100.1] <strong>vlan-type dot1q 1001</strong>
+[<span class="keyword">*</span>Device1-Eth-trunk100.1] <strong>ip address 10.1.10.1 255.255.255.0</strong>
+[<span class="keyword">*</span>Device1-Eth-trunk100.1] <strong>vrrp vrid 1 virtual-ip 10.1.10.10</strong>
+[<span class="keyword">*</span>Device1-Eth-trunk100.1] <strong>vrrp vrid 1 priority 150</strong> 
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-Eth-trunk100.1] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+</p></li><li><span>Configure an RBS and an RBP.</span><p><p># Configure an RBS.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>peer-backup route-cost auto-advertising</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>remote-backup-service s1</strong>
+[<span class="keyword">*</span>Device1-rm-backup-srv-s1] <strong>peer 10.13.13.13 source 10.3.3.3 port 6001</strong>
+[<span class="keyword">*</span>Device1-rm-backup-srv-s1] <strong>protect lsp-tunnel for-all-instance peer-ip 10.13.13.13</strong>
+[<span class="keyword">*</span>Device1-rm-backup-srv-s1] <strong>ip-pool pool2</strong><strong> metric 20</strong>
+[<span class="keyword">*</span>Device1-rm-backup-srv-s1] <strong>ipv6-pool pool1 metric 20</strong>
+[<span class="keyword">*</span>Device1-rm-backup-srv-s1] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+<p># Configure an RBP.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>remote-backup-profile p1</strong>
+[<span class="keyword">*</span>Device1-rm-backup-prf-p1] <strong>service-type bras</strong>
+[<span class="keyword">*</span>Device1-rm-backup-prf-p1] <strong>peer-backup hot</strong>
+[<span class="keyword">*</span>Device1-rm-backup-prf-p1] <strong>backup-id 1 remote-backup-service s1</strong>
+[<span class="keyword">*</span>Device1-rm-backup-prf-p1] <strong>vrrp-id 1 interface gigabitethernet <span>0/1/0</span>.100</strong>
+[<span class="keyword">*</span>Device1-rm-backup-prf-p1] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+<p># Bind the RBP to the interface through which the user goes online.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>interface </strong><strong>gigabitethernet <span>0/1/0</span>.1</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1] <strong>remote-backup-profile p1</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>interface </strong><strong>gigabitethernet <span>0/1/0</span>.2</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2] <strong>remote-backup-profile p1</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+</p></li><li><span>Configure roaming with logging out users.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>interface gigabitethernet</strong> <strong><span>0/1/0</span>.1</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1] <strong>bas</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1-bas] <strong>ip-trigger</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1-bas] <strong>arp-trigger</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1-bas] <strong>ipv6-trigger</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1-bas] <strong>nd-trigger</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1-bas] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-GigabitEthernet<span>0/1/0</span>.1-bas] <strong>dhcp session-mismatch action offline</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1-bas] <strong>quit</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>interface gigabitethernet</strong> <strong><span>0/1/0</span>.2</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2] <strong>bas</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2-bas] <strong>ip-trigger</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2-bas] <strong>arp-trigger</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2-bas] <strong>ipv6-trigger</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2-bas]<strong> nd-trigger</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2-bas] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1-GigabitEthernet<span>0/1/0</span>.2-bas] <strong>dhcp session-mismatch action offline</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2-bas] <strong>quit</strong>
+[<span class="keyword">*</span>Device1-GigabitEthernet<span>0/1/0</span>.2] <strong>quit</strong>
+[<span class="keyword">*</span>Device1] <strong>commit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p>The user goes online through GE<span>0/1/0</span>.1.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>display access-user domain huawei</strong></pre>
+<pre class="screen">------------------------------------------------------------------------------ 
+UserID     Username                Interface      IP address       MAC             
+           Vlan          IPv6 address             Access type 
+------------------------------------------------------------------------------ 
+508928     Device1@huawei           GE<span>0/1/0</span>.1      10.0.0.98       00-e0-fc-12-34-56  
+           300/100       2001:DB8:1:2                  IPOE                             
+------------------------------------------------------------------------------ 
+Normal users                       : 0 
+RUI Local users                    : 1 
+RUI Remote users                   : 0 
+Total users                        : 1</pre>
+<p>The terminal user successfully roams to GE<span>0/1/0</span>.2 by resending DHCPv4 Discover or Request messages and DHCPv6 Solicit messages.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>Device1] <strong>display access-user domain huawei</strong></pre>
+<pre class="screen"> ------------------------------------------------------------------------------ 
+UserID     Username                Interface      IP address     MAC            
+           Vlan          IPv6 address             Access type 
+------------------------------------------------------------------------------ 
+510976      Device1@huawei           GE<span>0/1/0</span>.2      10.0.0.97     00-e0-fc-12-34-56  
+           700/500      2001:DB8:1:3                  IPOE                              
+------------------------------------------------------------------------------ 
+Normal users                       : 0 
+RUI Local users                    : 1 
+RUI Remote users                   : 0 
+Total users                        : 1</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001509875365__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Configuration Files</h4><p>The configurations of Device1 and Device2 are as follows:</p>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" rowfreeze="yes" frame="border" border="1" rules="all"><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="8.97089708970897%" id="mcps1.3.4.3.1.4.1.1" liSelected="liSelected"><p>Item</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="40.54405440544054%" id="mcps1.3.4.3.1.4.1.2" liSelected="liSelected"><p>Device1</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="50.48504850485048%" id="mcps1.3.4.3.1.4.1.3" liSelected="liSelected"><p>Device2</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" valign="top" width="8.97089708970897%" headers="mcps1.3.4.3.1.4.1.1 "><p>Configure a device name.</p>
+</td>
+<td class="cellrowborder" valign="top" width="40.54405440544054%" headers="mcps1.3.4.3.1.4.1.2 "><pre class="screen">#
+sysname Device1
+#</pre>
+</td>
+<td class="cellrowborder" valign="top" width="50.48504850485048%" headers="mcps1.3.4.3.1.4.1.3 "><pre class="screen">#
+sysname Device2
+#</pre>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="8.97089708970897%" headers="mcps1.3.4.3.1.4.1.1 "><p>Configure a RADIUS server group.</p>
+</td>
+<td class="cellrowborder" valign="top" width="40.54405440544054%" headers="mcps1.3.4.3.1.4.1.2 "><pre class="screen">radius-server group rd1 
+ radius-server shared-key-cipher %^%#e,yC%f9z4M2)b)2<font style="font-size:8pt" Face="Courier New" >~</font>r+lA{$g*Fzc+5/bu7VHAN&lt;%(%^% 
+ radius-server authentication 192.168.7.249 1812 weight 0
+ radius-server accounting 192.168.7.249 1813 weight 0
+#</pre>
+</td>
+<td class="cellrowborder" valign="top" width="50.48504850485048%" headers="mcps1.3.4.3.1.4.1.3 "><pre class="screen">radius-server group rd1                                                       
+ radius-server shared-key-cipher %^%#e,yC%f9z4M2)b)2<font style="font-size:8pt" Face="Courier New" >~</font>r+lA{$g*Fzc+5/bu7VHAN&lt;%(%^%
+ radius-server authentication 192.168.7.249 1812 weight 0
+ radius-server accounting 192.168.7.249 1813 weight 0
+# </pre>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="8.97089708970897%" headers="mcps1.3.4.3.1.4.1.1 "><p>Configure address pools.</p>
+</td>
+<td class="cellrowborder" valign="top" width="40.54405440544054%" headers="mcps1.3.4.3.1.4.1.2 "><pre class="screen">ip pool pool2 bas local
+ gateway 10.0.0.1 255.255.255.0
+ section 0 10.0.0.2 10.0.0.100
+#
+ipv6 prefix pre1 local
+ prefix 2001:DB8:1::/48
+#
+ipv6 pool pool1 bas local
+ prefix pre1
+#</pre>
+</td>
+<td class="cellrowborder" valign="top" width="50.48504850485048%" headers="mcps1.3.4.3.1.4.1.3 "><pre class="screen">ip pool pool2 bas local rui-slave
+ gateway 10.0.0.1 255.255.255.0
+ section 0 10.0.0.2 10.0.0.100
+#
+ipv6 prefix pre1 local
+ prefix 2001:DB8:1::/48
+#
+ipv6 pool pool1 bas local rui-slave
+ prefix pre1
+#</pre>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="8.97089708970897%" headers="mcps1.3.4.3.1.4.1.1 "><p>Configure dual-device backup.</p>
+</td>
+<td class="cellrowborder" valign="top" width="40.54405440544054%" headers="mcps1.3.4.3.1.4.1.2 "><pre class="screen">peer-backup route-cost auto-advertising
+remote-backup-service s1
+ peer 10.13.13.13 source 10.3.3.3 port 6001
+ protect lsp-tunnel for-all-instance peer-ip 10.13.13.13
+ ip-pool pool2 metric 20
+ ipv6-pool pool1 metric 20
+#
+remote-backup-profile p1
+ service-type bras
+ backup-id 1 remote-backup-service s1
+ peer-backup hot
+ vrrp-id 1 interface GigabitEthernet<span>0/1/0</span>.100
+#</pre>
+</td>
+<td class="cellrowborder" valign="top" width="50.48504850485048%" headers="mcps1.3.4.3.1.4.1.3 "><pre class="screen">peer-backup route-cost auto-advertising
+remote-backup-service s1
+ peer 10.3.3.3 source 10.13.13.13 port 6001
+ protect lsp-tunnel for-all-instance peer-ip 10.3.3.3
+ ip-pool pool2 metric 10
+ ipv6-pool pool1 metric 10
+#
+remote-backup-profile p1
+ service-type bras
+ backup-id 1 remote-backup-service s1
+ peer-backup hot
+ vrrp-id 1 interface GigabitEthernet<span>0/2/0</span>.100
+#</pre>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="8.97089708970897%" headers="mcps1.3.4.3.1.4.1.1 "><p>Configure a DUID.</p>
+</td>
+<td class="cellrowborder" valign="top" width="40.54405440544054%" headers="mcps1.3.4.3.1.4.1.2 "><pre class="screen">dhcpv6 duid llt
+#</pre>
+</td>
+<td class="cellrowborder" valign="top" width="50.48504850485048%" headers="mcps1.3.4.3.1.4.1.3 "><pre class="screen">dhcpv6 duid llt
+#</pre>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="8.97089708970897%" headers="mcps1.3.4.3.1.4.1.1 "><p>Configure an authentication mode and an accounting scheme, and bind them to a domain.</p>
+</td>
+<td class="cellrowborder" valign="top" width="40.54405440544054%" headers="mcps1.3.4.3.1.4.1.2 "><pre class="screen">aaa
+ default-password cipher %^%#4*RHO=w*}.d\&gt;j09'Z:%=:co<font style="font-size:8pt" Face="Courier New" >~</font>p\w9'G-^|-zR'N4%^%# 
+ default-user-name include sysname
+ #
+ authentication-scheme default0
+ #
+ authentication-scheme default1
+ #
+ authentication-scheme auth1
+ #
+ authentication-scheme default
+ #
+ accounting-scheme acct1
+ #
+ domain default0
+ #
+ domain default1
+ #
+ domain default_admin
+ #
+ domain huawei
+  authentication-scheme auth1
+  accounting-scheme acct1
+  radius-server group rd1
+  ip-pool pool2
+  ipv6-pool pool1                 
+#  </pre>
+</td>
+<td class="cellrowborder" valign="top" width="50.48504850485048%" headers="mcps1.3.4.3.1.4.1.3 "><pre class="screen">aaa
+ default-password cipher %^%#4*RHO=w*}.d\&gt;j09'Z:%=:co<font style="font-size:8pt" Face="Courier New" >~</font>p\w9'G-^|-zR'N4%^%# 
+ default-user-name include sysname
+ #
+ authentication-scheme default0
+ #
+ authentication-scheme default1
+ #
+ authentication-scheme auth1
+ #
+ authentication-scheme default
+ #
+ accounting-scheme acct1
+ #
+ domain default0
+ #
+ domain default1
+ #
+ domain default_admin
+ #
+ domain huawei
+  authentication-scheme auth1
+  accounting-scheme acct1
+  radius-server group rd1
+  ip-pool pool2
+  ipv6-pool pool1
+# </pre>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="8.97089708970897%" headers="mcps1.3.4.3.1.4.1.1 "><p>Configure interface information and roaming </p>
+</td>
+<td class="cellrowborder" valign="top" width="40.54405440544054%" headers="mcps1.3.4.3.1.4.1.2 "><pre class="screen">interface LoopBack2
+ ipv6 enable
+ ip address 10.3.3.3 255.255.255.255
+ ipv6 address 2001:DB8:9::7 128
+ ospfv3 area 0.0.0.0
+#
+interface GigabitEthernet<span>0/1/0</span>.100 
+ vlan-type dot1q 1001
+ ip address 10.1.10.1 255.255.255.0
+ vrrp vrid 1 virtual-ip 10.1.10.10
+ vrrp vrid 1 priority 150 
+# 
+interface GigabitEthernet<span>0/1/0</span>.1
+ undo shutdown 
+ ipv6 enable
+ ipv6 address auto link-local
+ user-vlan 100 200 qinq 300 400
+ ipv6 nd autoconfig managed-address-flag 
+ ipv6 address auto link-local
+ remote-backup-profile p1
+ bas
+  #
+  access-type layer2-subscriber default-domain authentication huawei
+  dhcp session-mismatch action offline
+  authentication-method bind
+  authentication-method-ipv6 bind
+  ip-trigger
+  arp-trigger
+  ipv6-trigger
+  nd-trigger
+  #
+#
+interface GigabitEthernet<span>0/1/1</span>.2
+ undo shutdown 
+ ipv6 enable
+ ipv6 address auto link-local
+ user-vlan 500 600 qinq 700 800
+ ipv6 nd autoconfig managed-address-flag 
+ ipv6 address auto link-local
+ remote-backup-profile p1
+ bas
+  #
+  access-type layer2-subscriber default-domain authentication huawei
+  dhcp session-mismatch action offline
+  authentication-method bind
+  authentication-method-ipv6 bind
+  ip-trigger
+  arp-trigger
+  ipv6-trigger
+  nd-trigger
+  #
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown 
+ ipv6 enable
+ ip address 10.2.1.1 255.255.255.0
+ ipv6 address 2001:DB8:8::7 64
+ ipv6 address auto link-local 
+ ospfv3 area 0.0.0.0</pre>
+</td>
+<td class="cellrowborder" valign="top" width="50.48504850485048%" headers="mcps1.3.4.3.1.4.1.3 "><pre class="screen">interface LoopBack2
+ ipv6 enable
+ ip address 10.13.13.13 255.255.255.255
+ ipv6 address 2001:DB8:19::7 128
+ ospfv3 area 0.0.0.0
+#
+interface GigabitEthernet<span>0/2/0</span>.100 
+ vlan-type dot1q 1001
+ ip address 10.1.10.2 255.255.255.0
+ vrrp vrid 1 virtual-ip 10.1.10.10
+# 
+interface GigabitEthernet<span>0/2/0</span>.1
+ undo shutdown 
+ ipv6 enable
+ ipv6 address auto link-local
+ user-vlan 100 200 qinq 300 400
+ ipv6 nd autoconfig managed-address-flag
+ ipv6 address auto link-local
+ remote-backup-profile p1
+ bas
+  #
+  access-type layer2-subscriber default-domain authentication huawei
+  dhcp session-mismatch action offline
+  authentication-method bind
+  authentication-method-ipv6 bind
+  ip-trigger
+  arp-trigger
+  ipv6-trigger
+  nd-trigger
+  #
+#
+interface GigabitEthernet<span>0/2/0</span>.2
+ undo shutdown 
+ ipv6 enable
+ ipv6 address auto link-local
+ user-vlan 500 600 qinq 700 800
+ ipv6 nd autoconfig managed-address-flag 
+ ipv6 address auto link-local
+ remote-backup-profile p1
+ bas
+  #
+  access-type layer2-subscriber default-domain authentication huawei
+  dhcp session-mismatch action offline
+  authentication-method bind
+  authentication-method-ipv6 bind
+  ip-trigger
+  arp-trigger
+  ipv6-trigger
+  nd-trigger
+  #
+#
+interface GigabitEthernet<span>0/3/0</span>
+ undo shutdown 
+ ipv6 enable
+ ip address 10.4.1.1 255.255.255.0
+ ipv6 address 2001:DB8:18::7 64
+ ipv6 address auto link-local
+ ospfv3 area 0.0.0.0</pre>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="8.97089708970897%" headers="mcps1.3.4.3.1.4.1.1 "><p>Import UNRs.</p>
+</td>
+<td class="cellrowborder" valign="top" width="40.54405440544054%" headers="mcps1.3.4.3.1.4.1.2 "><pre class="screen">#
+ospf
+ default cost inherit-metric
+ import-route unr
+ area 0.0.0.0
+ network 10.2.1.0 0.0.0.255
+ network 10.3.3.3 0.0.0.0
+#</pre>
+</td>
+<td class="cellrowborder" valign="top" width="50.48504850485048%" headers="mcps1.3.4.3.1.4.1.3 "><pre class="screen">#
+ospf
+ default cost inherit-metric
+ import-route unr
+ area 0.0.0.0
+ network 10.4.1.0 0.0.0.255
+ network 10.13.13.13 0.0.0.0
+#</pre>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="8.97089708970897%" headers="mcps1.3.4.3.1.4.1.1 "><p>Configure OSPFv3 routes.</p>
+</td>
+<td class="cellrowborder" valign="top" width="40.54405440544054%" headers="mcps1.3.4.3.1.4.1.2 "><pre class="screen">#
+ospfv3 1
+ router-id 1.1.1.1
+ area 0.0.0.0
+#
+return</pre>
+</td>
+<td class="cellrowborder" valign="top" width="50.48504850485048%" headers="mcps1.3.4.3.1.4.1.3 "><pre class="screen">#
+ospfv3 1
+ router-id 2.2.2.2
+ area 0.0.0.0
+#
+return</pre>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_ipox_cfg_0083.html">Configuration Examples for IPoE Access Authentication
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_013600.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_014455.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

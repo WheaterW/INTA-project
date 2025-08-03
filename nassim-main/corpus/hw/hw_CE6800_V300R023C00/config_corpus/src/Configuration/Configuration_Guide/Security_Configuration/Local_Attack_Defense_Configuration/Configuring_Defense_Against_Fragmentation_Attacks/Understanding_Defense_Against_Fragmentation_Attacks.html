@@ -1,0 +1,104 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding Defense Against Fragmentation Attacks">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_localattackdefense_cfg_0040.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_localattackdefense_cfg_0042.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Local Attack Defense">
+<meta name="featuretype" content="Security">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Local Attack Defense">
+<meta name="featuretype" content="Security">
+<meta name="featurename" content="Local Attack Defense">
+<meta name="featuretype" content="Security">
+<meta name="featuretype" content="Security">
+<meta name="featuretype" content="Security Protection">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001513156502">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding Defense Against Fragmentation Attacks</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001513156502"></a><a name="EN-US_CONCEPT_0000001513156502"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding Defense Against Fragmentation Attacks</h1>
+<div><p>A fragmentation attack is an attack in which error fragments are sent to a target device, which then crashes, restarts, or consumes a large amount of CPU resources when processing such fragments, ultimately impacting services. Fragmentation attack defense enables a device to detect packet fragments in real time and discard or rate-limit them to protect the device.</p>
+<p>Fragmentation attacks are classified into the following types.</p>
+<div class="section"><h4 class="sectiontitle">Excess-Fragment Attack</h4><p>The offset of IP packets is measured in units of 8-byte blocks. Normally, an IP header has 20 bytes and the maximum payload of an IP packet is 65515 bytes. Therefore, an IP packet can be fragmented into up to 8189 (65515/8) fragments, above which the device would consume a large amount of CPU resources when reassembling packets.</p>
+<p>The device considers a packet with over 8189 fragments malicious and discards all of its fragments.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Excess-Offset Attack</h4><p>An attacker sends a fragment with a large offset value to a target device, which then allocates memory space to store all fragments, consuming a large amount of resources.</p>
+<p>The offset field is 13 bits long and measured in units of 8-byte blocks, so its theoretical maximum value is 8191. In most cases, however, the value should be smaller than 8190, since an offset of 8190 will lead to the payload (8190 x 8 = 65520) exceeding the maximum (65515). Therefore, the maximum offset is 8189, and the last fragment has a maximum of 3-byte IP payload (8189 x 8 - 65515).</p>
+<p>The device considers packets with an offset value larger than 8189 malicious and discards them.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Repeated Fragment Attack</h4><p>A repeated fragment attack is an attack in which fragments are sent to a target host multiple times. Such an attack is carried out in one of two ways:</p>
+<ul><li><p>The same fragments are sent multiple times, causing high CPU usage or a memory error on the target host.</p>
+</li><li><p>Different fragments with the same offset are sent. In this case, the target host cannot determine which fragment will be reserved and which fragment will be discarded, or whether all fragments need to be discarded. As a result, the target host may experience high CPU usage or a memory error.</p>
+</li></ul>
+<p>With defense against packet fragment attacks enabled, the device applies the committed access rate (CAR) limit to packet fragments, reserves the first fragment, and discards all the remaining repeated fragments to protect the CPU.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Syndrop Attack</h4><p>A Syndrop attack exploits the mechanism of IP fragmentation to put the second fragment into the first. The offset of the second fragment is smaller than that of the first fragment, and the offset plus the data field of the second fragment does not exceed the tail of the first fragment. A Syndrop attack uses TCP packets that carry a SYN flag and also IP payload.</p>
+<p>As shown in <a href="#EN-US_CONCEPT_0000001513156502__fig_dc_feature_attackdefence_000502">Figure 1</a>:</p>
+<ul><li><p>The IP payload in the first fragment is 28 bytes, and the IP header is 20 bytes.</p>
+</li><li><p>The IP payload in the second fragment is 4 bytes, the IP header is 20 bytes, and the offset is 24 (should be 28).</p>
+</li></ul>
+<div class="fignone" id="EN-US_CONCEPT_0000001513156502__fig_dc_feature_attackdefence_000502"><a name="EN-US_CONCEPT_0000001513156502__fig_dc_feature_attackdefence_000502"></a><a name="fig_dc_feature_attackdefence_000502"></a><span class="figcap"><b>Figure 1 </b>Syndrop attack</span><br><span><img class="vsd" src="figure/en-us_image_0000001563756969.png"></span><br></div>
+<p>Syndrop attacks cause the system to restart or even crash. With defense against fragmentation attacks enabled, the device discards all fragments in a Syndrop attack.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">NewTear Attack</h4><div class="p">A NewTear attack uses error fragments. As shown in <a href="#EN-US_CONCEPT_0000001513156502__fig695314344574">Figure 2</a>, the protocol is UDP.<ul><li><p>The IP payload in the first fragment is 28 bytes including the UDP header. The UDP checksum is 0.</p>
+</li><li><p>The IP payload in the second fragment is 4 bytes, and the offset is 24 (should be 28).</p>
+</li></ul>
+</div>
+<div class="fignone" id="EN-US_CONCEPT_0000001513156502__fig695314344574"><a name="EN-US_CONCEPT_0000001513156502__fig695314344574"></a><a name="fig695314344574"></a><span class="figcap"><b>Figure 2 </b>NewTear attack</span><br><span><img class="vsd" src="figure/en-us_image_0000001563996873.png"></span></div>
+<p>NewTear attacks cause the system to restart or even crash. With defense against fragmentation attacks enabled, the device discards all fragments in a NewTear attack.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Bonk Attack</h4><div class="p">A Bonk attack uses error fragments. As shown in <a href="#EN-US_CONCEPT_0000001513156502__fig_dc_feature_attackdefence_000504">Figure 3</a>, the protocol is UDP.<ul><li><p>The IP payload in the first fragment is 36 bytes including the UDP header. The UDP checksum is 0.</p>
+</li><li><p>The IP payload in the second fragment is 4 bytes, and the offset is 32 (should be 36).</p>
+</li></ul>
+</div>
+<div class="fignone" id="EN-US_CONCEPT_0000001513156502__fig_dc_feature_attackdefence_000504"><a name="EN-US_CONCEPT_0000001513156502__fig_dc_feature_attackdefence_000504"></a><a name="fig_dc_feature_attackdefence_000504"></a><span class="figcap"><b>Figure 3 </b>Bonk attack</span><br><span><img class="vsd" src="figure/en-us_image_0000001513156598.png"></span></div>
+<p>Bonk attacks cause the system to restart or even crash. With defense against fragmentation attacks enabled, the device discards all fragments in a Bonk attack.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Nesta Attack</h4><div class="p">A Nesta attack uses error fragments. As shown in <a href="#EN-US_CONCEPT_0000001513156502__fig_dc_feature_attackdefence_000505">Figure 4</a>:<ul><li><p>The IP payload in the first fragment is 18 bytes, the protocol used is UDP, and the checksum is 0.</p>
+</li><li><p>The offset in the second fragment is 48 and the IP payload is 116 bytes.</p>
+</li><li><p>The offset in the third fragment is 0, the More Frag field is 1 (meaning there are more fragments), the IP option (all EOLs) is 40 bytes, and the IP payload is 224 bytes.</p>
+</li></ul>
+</div>
+<div class="fignone" id="EN-US_CONCEPT_0000001513156502__fig_dc_feature_attackdefence_000505"><a name="EN-US_CONCEPT_0000001513156502__fig_dc_feature_attackdefence_000505"></a><a name="fig_dc_feature_attackdefence_000505"></a><span class="figcap"><b>Figure 4 </b>Nesta attack</span><br><span><img class="vsd" src="figure/en-us_image_0000001563756981.png"></span></div>
+<p>Nesta attacks cause the system to restart or even crash. With defense against fragmentation attacks enabled, the device discards all fragments in a Nesta attack.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_localattackdefense_cfg_0040.html">Configuring Defense Against Fragmentation Attacks
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_localattackdefense_cfg_0042.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

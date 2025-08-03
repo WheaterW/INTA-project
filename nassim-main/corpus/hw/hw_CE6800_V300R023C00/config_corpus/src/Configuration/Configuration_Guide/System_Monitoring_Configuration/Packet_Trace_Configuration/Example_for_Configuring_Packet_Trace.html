@@ -1,0 +1,108 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Packet Trace">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_packet_trace_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_packet_trace_cfg_0009.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Packet Trace">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Packet Trace">
+<meta name="featuretype" content="System Monitoring">
+<meta name="featuretype" content="System Monitoring">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001564116393">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Packet Trace</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001564116393"></a><a name="EN-US_TASK_0000001564116393"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Packet Trace</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001564116393__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In <a href="#EN-US_TASK_0000001564116393__fig_01">Figure 1</a>, Host1 and Host2 are connected to DeviceB through DeviceA, and DeviceB is connected to an external network. Traffic sent from Host1 and Host2 is forwarded to the external network through DeviceB. However, as some packets sent from Host1 and Host2 are lost, the network administrator has determined that packet loss occurs on DeviceB. In this scenario, the network administrator can configure packet trace on DeviceB to locate the packet loss cause.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 represents <span>100GE</span> <span>1/0/1</span>.</p>
+</div></div>
+<div class="fignone" id="EN-US_TASK_0000001564116393__fig_01"><a name="EN-US_TASK_0000001564116393__fig_01"></a><a name="fig_01"></a><span class="figcap"><b>Figure 1 </b>Network diagram of packet trace</span><br><span><img class="vsd" src="figure/en-us_image_0000001563996565.png"></span></div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001564116393__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Use a packet obtaining tool to obtain the content (hexadecimal character string) of the packet discarded by DeviceB.</span></li><li><span>Configure a packet trace profile on DeviceB.</span><p><p># Configure a packet trace profile on DeviceB by specifying the detection packet content, which is the packet content obtained in step 1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceB</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>detector packet-trace profile test packet 286ed489a46300005e00010b0800450000343ba44000fd0677fd0a87002c0a87b4e81a6805d67407d364ebadef9a50189f96d84300000a8001aec0cf84cf6b7f6d84</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+</p></li><li><span>Specify an interface for receiving the detection packet to simulate packet forwarding inside DeviceB.</span><p><p># On DeviceB, specify <span>100GE</span> <span>1/0/1</span> as the interface for receiving detection packets and display the cause of any discarded service packets. If the cause is displayed as <strong>VLAN not valid</strong>, check the VLAN configuration.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display detector packet-trace profile test interface <span>100ge</span> <span>1/0/1</span> result</strong>
+Packet trace result:
+--------------------------------------------------------------------------------
+Packet Profile                  : test
+Packet Inbound Interface        : <span>100GE</span> <span>1/0/1</span>
+Packet Outbound VLAN            : -
+Packet drop cause               : VLAN not valid
+--------------------------------------------------------------------------------</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001564116393__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>Display information about the packet trace profile configured on DeviceB.</p>
+<pre class="screen">&lt;DeviceB&gt; <strong>display detector packet-trace profile</strong>
+Packet trace profile Maximum: 16
+Total: 1
+Packet trace profile: test
+-------------------------------------------------------------------------------
+Packet             : 286ed489a46300005e00010b0800450000343ba44000fd0677fd0a8700
+                     2c0a87b4e81a6805d67407d364ebadef9a50189f96d84300000a8001ae
+                     c0cf84cf6b7f6d84
+-------------------------------------------------------------------------------</pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001564116393__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Configuration Scripts</h4><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+detector packet-trace profile test packet 286ed489a46300005e00010b0800450000343ba44000fd0677fd0a87002c0a87b4e81a6805d67407d364ebadef9a50189f96d84300000a8001aec0cf84cf6b7f6d84
+#
+return</pre>
+<p></p>
+<p></p>
+<p></p>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_packet_trace_cfg_0001.html">Packet Trace Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_packet_trace_cfg_0009.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

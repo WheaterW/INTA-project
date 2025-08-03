@@ -1,0 +1,367 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Association Between VRRP and an NQA Test Instance">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_vrrp_cfg_0019.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_vrrp_cfg_0020.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="featurename" content="VRRP">
+<meta name="featuretype" content="High Availability">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001130784056">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Association Between VRRP and an NQA Test Instance</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001130784056"></a><a name="EN-US_TASK_0000001130784056"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Association Between VRRP and an NQA Test Instance</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001130784056__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>VRRP can detect an uplink VRRP-disabled interface fault on a VRRP-enabled device. However, if a cross-device uplink fails, VRRP is unable to detect the fault. As a result, user traffic is lost.</p>
+<p>To address this problem, you can associate a VRRP group with an NQA test instance to track the master device's cross-device uplink. If the uplink fails and hosts on the LAN cannot access the external network through the master device, NQA instructs VRRP to reduce the master's priority by a specified value. This allows the backup device with a higher priority to preempt the master role, thereby ensuring uninterrupted communication between hosts on the LAN and the external network. After the uplink recovers, NQA instructs VRRP to restore the original master's priority.</p>
+<p>As shown in <a href="#EN-US_TASK_0000001130784056__fig_dc_vrp_vrrp_cfg_014101">Figure 1</a>, a VRRP group is configured on DeviceA and DeviceB, of which DeviceA is the master. The VRRP group is required to track an NQA test instance whose destination IP address is the IP address of DeviceC's uplink interface so that the VRRP group can perform a master/backup switchover when the uplink interface goes down. When the uplink interface goes up, traffic is switched back to the original master device.</p>
+<div class="fignone" id="EN-US_TASK_0000001130784056__fig_dc_vrp_vrrp_cfg_014101"><a name="EN-US_TASK_0000001130784056__fig_dc_vrp_vrrp_cfg_014101"></a><a name="fig_dc_vrp_vrrp_cfg_014101"></a><span class="figcap"><b>Figure 1 </b>Network diagram of associating a VRRP group with an NQA test instance</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 and interface 2 represent <span>100GE</span><span>1/0/1</span> and <span>100GE</span><span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001130784086.png"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130784056__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><div class="p"><h4 class="sectiontitle">Precautions</h4><p>To improve security, you are advised to configure a VRRP security policy. For details, see <a href="vrp_vrrp_cfg_0121.html">Example for Configuring VRRP in Master/Backup Mode</a>.</p>
+<h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Assign an IP address to each interface of the devices and configure a routing protocol to ensure link connectivity.</p>
+</li><li><p>Configure a VRRP group on DeviceA (master) and DeviceB (backup).</p>
+</li><li><p>On DeviceA, create an NQA test instance whose destination IP address is the IP address of DeviceC's uplink interface.</p>
+</li><li><p>Associate the VRRP group on DeviceA with the NQA test instance.</p>
+</li></ol>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130784056__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Procedure</h4><ol><li>Assign an IP address to each interface on DeviceA. The configurations of DeviceB, DeviceC, and DeviceD are similar to the configuration of DeviceA. For details, see <a href="#EN-US_TASK_0000001130784056__section_05">Configuration Scripts</a>.<p># Assign IP addresses to <span>100GE</span> <span>1/0/1</span> and <span>100GE</span> <span>1/0/2</span>.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>]<strong> undo portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>]<strong> ip address 10.1.1.1 24</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA]<strong> interface <span>100ge</span> <span>1/0/2</span></strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>]<strong> undo portswitch</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>]<strong> ip address 10.1.2.1 24</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/2</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA]<strong> ip route-static 10.2.1.0 255.255.255.0 10.1.2.2</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</li><li>Configure basic VRRP group functions.<p># Configure VRRP group 1 on DeviceA, and set its priority to 120 so that it functions as the master.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>]<strong> vrrp vrid 1 virtual-ip 10.1.1.10</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>]<strong> vrrp vrid 1 priority 120</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>]<strong> vrrp vrid 1 preempt timer delay 20</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p># Configure VRRP group 1 on DeviceB.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname DeviceB</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB-<span>100GE</span><span>1/0/1</span>]<strong> vrrp vrid 1 virtual-ip 10.1.1.10</strong>
+[<span class="keyword">*</span>DeviceB-<span>100GE</span><span>1/0/1</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<div class="p">After completing the configurations, run the <a href="cmdqueryname=display+vrrp+verbose"><b><span class="cmdname">display vrrp verbose</span></b></a> command on DeviceA or DeviceB to view the VRRP status. The command outputs show that DeviceA is in the <strong>Master</strong> state and DeviceB is in the <strong>Backup</strong> state.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display vrrp verbose</strong>
+<span>100GE</span><span>1/0/1</span> | Virtual Router 1
+State          : <strong>Master</strong>
+Virtual IP     : 10.1.1.10
+Master IP      : 10.1.1.1
+PriorityRun    : 120
+PriorityConfig : 120
+MasterPriority : 120
+Preempt        : YES   Delay Time : 20s   Remain : --
+Hold Multiplier: 4
+TimerRun       : 1s
+TimerConfig    : 1s
+Auth Type      : NONE
+Virtual MAC    : 00-e0-fc-12-78-90
+Check TTL      : YES
+Config Type    : Normal
+Create Time       : 2020-09-24 15:08:16
+Last Change Time  : 2020-09-24 15:08:22</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display vrrp verbose</strong>
+<span>100GE</span><span>1/0/1</span> | Virtual Router 1
+State          : <strong>Backup</strong>
+Virtual IP     : 10.1.1.10
+Master IP      : 10.1.1.1
+PriorityRun    : 100
+PriorityConfig : 100
+MasterPriority : 120
+Preempt        : YES   Delay Time : 0s   Remain : --
+Hold Multiplier: 4
+TimerRun       : 1s
+TimerConfig    : 1s
+Auth Type      : NONE
+Virtual MAC    : 00-e0-fc-12-78-90
+Check TTL      : YES
+Config Type    : Normal
+Create Time       : 2020-09-24 15:21:13
+Last Change Time  : 2020-09-24 15:21:19</pre>
+</div>
+</li><li>Create an NQA test instance whose destination IP address is 10.2.1.1/24 on DeviceA.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> nqa test-instance admin test1</strong>
+[<span class="keyword">*</span>DeviceA-nqa-admin-test1]<strong> test-type icmp</strong>
+[<span class="keyword">*</span>DeviceA-nqa-admin-test1]<strong> destination-address ipv4 10.2.1.1</strong>
+[<span class="keyword">*</span>DeviceA-nqa-admin-test1]<strong> ttl 10</strong>
+[<span class="keyword">*</span>DeviceA-nqa-admin-test1]<strong> frequency 20</strong>
+[<span class="keyword">*</span>DeviceA-nqa-admin-test1]<strong> start now</strong>
+[<span class="keyword">*</span>DeviceA-nqa-admin-test1]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+<p>After completing the configurations, run the <a href="cmdqueryname=display+nqa+results+test-instance+admin+test1"><b><span class="cmdname">display nqa results test-instance admin test1</span></b></a> command. The command output shows that the status of the NQA test instance is <strong>success</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display nqa results test-instance admin test1</strong>
+NQA entry(admin, test1) :testflag is active ,testtype is icmp
+  1 .Test 1 result   The test is finished
+   Send operation times: 3              Receive response times: 3
+   Completion:<strong>success</strong>                  RTD OverThresholds number: 0
+   Attempts number:1                    Drop operation number:0
+   Disconnect operation number:0        Operation timeout number:0
+   System busy operation number:0       Connection fail number:0
+   Operation sequence errors number:0   RTT Stats errors number:0
+   Destination ip address:10.2.1.1
+   Min/Max/Average Completion Time: 60/90/80
+   Sum/Square-Sum  Completion Time: 240/19800
+   Last Good Probe Time: 2020-09-24 15:30:38.7
+   Lost packet ratio: 0 %        </pre>
+</li><li>Associate the VRRP group with the NQA test instance.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-<span>100GE</span><span>1/0/1</span>]<strong> vrrp vrid 1 track nqa admin test1 reduce 40</strong>
+[<span class="keyword">*</span>DeviceA-<span>100GE</span><span>1/0/1</span>]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001130784056__1.3.4"></a><a name="1.3.4"></a>
+<div class="p"><h4 class="sectiontitle">Verifying the Configuration</h4><p># Run the <a href="cmdqueryname=shutdown"><b><span class="cmdname">shutdown</span></b></a> command on DeviceA's <span>100GE</span><span>1/0/2</span> to simulate a link fault. Run the <a href="cmdqueryname=display+nqa+results+test-instance+admin+test1"><b><span class="cmdname">display nqa results test-instance admin test1</span></b></a> command on DeviceA to check the status of the NQA test instance.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display nqa results test-instance admin test1</strong>
+NQA entry(admin, test1) :testflag is active ,testtype is icmp
+  1 .Test 1 result   The test is finished
+   Send operation times: 3              Receive response times: 0               
+   Completion:<strong>failed</strong>                   RTD OverThresholds number: 0            
+   Attempts number:1                    Drop operation number:3                 
+   Disconnect operation number:0        Operation timeout number:0              
+   System busy operation number:0       Connection fail number:0                
+   Operation sequence errors number:0   RTT Stats errors number:0               
+   Destination ip address:10.2.1.1                                              
+   Min/Max/Average Completion Time: 0/0/0                                       
+   Sum/Square-Sum  Completion Time: 0/0                                         
+   Last Good Probe Time: 2020-09-24 15:40:26.7                                  
+   Lost packet ratio: 100 %    </pre>
+<p>The command output shows that the status of the NQA test instance changes to <strong>failed</strong>.</p>
+<div class="p">After 20 seconds, run the <a href="cmdqueryname=display+vrrp+verbose"><b><span class="cmdname">display vrrp verbose</span></b></a> command on DeviceA and DeviceB to check the VRRP status.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display vrrp verbose</strong>
+<span>100GE</span><span>1/0/1</span> | Virtual Router 1
+State          : <strong>Backup</strong>
+Virtual IP     : 10.1.1.10
+Master IP      : 10.1.1.2
+Local IP       : 10.1.1.1
+PriorityRun    : 80
+PriorityConfig : 120
+MasterPriority : 100
+Preempt        : YES   Delay Time : 20s   Remain : --
+Hold Multiplier: 4
+TimerRun       : 1s
+TimerConfig    : 1s
+Auth Type      : NONE
+Virtual MAC    : 00-e0-fc-12-78-90
+Check TTL      : YES
+Config Type    : Normal
+Track NQA         : admin  test1   
+Priority Reduced : 40
+NQA State         : <strong>failed</strong>
+Create Time       : 2020-09-24 15:08:16
+Last Change Time  : 2020-09-24 15:40:48</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display vrrp verbose</strong>
+<span>100GE</span><span>1/0/1</span> | Virtual Router 1
+State          : <strong>Master</strong>
+Virtual IP     : 10.1.1.10
+Master IP      : 10.1.1.2
+Local IP       : 10.1.1.2
+PriorityRun    : 100
+PriorityConfig : 100
+MasterPriority : 100
+Preempt        : YES   Delay Time : 0s   Remain : --
+Hold Multiplier: 4
+TimerRun       : 1s
+TimerConfig    : 1s
+Auth Type      : NONE
+Virtual MAC    : 00-e0-fc-12-78-90
+Check TTL      : YES
+Config Type    : Normal
+Create Time       : 2020-09-24 15:21:13
+Last Change Time  : 2020-09-24 15:40:48</pre>
+</div>
+<p>The command outputs show that DeviceB is in the <strong>Master</strong> state and DeviceA is in the <strong>Backup</strong> state, indicating that a master/backup VRRP switchover has been performed.</p>
+<div class="p">Run the <a href="cmdqueryname=undo+shutdown"><b><span class="cmdname">undo shutdown</span></b></a> command on DeviceC's interface <span>100GE</span><span>1/0/2</span>. After the interface goes up, wait for 20 seconds, and then run the <a href="cmdqueryname=display+vrrp+verbose"><b><span class="cmdname">display vrrp verbose</span></b></a> command on DeviceA and DeviceB to check the VRRP status.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display vrrp verbose</strong>
+<span>100GE</span><span>1/0/2</span> | Virtual Router 1
+State           : <strong>Master</strong>
+Virtual IP      : 10.1.1.10
+Master IP       : 10.1.1.1
+Local IP        : 10.1.1.1
+PriorityRun     : 120
+PriorityConfig  : 120
+MasterPriority  : 120
+Preempt         : YES   Delay Time : 20s   Remain : --
+Hold Multiplier : 4
+TimerRun        : 1s
+TimerConfig     : 1s
+Auth Type       : NONE
+Virtual Mac     :  00-e0-fc-12-78-90
+Check TTL       : YES
+Config type     : Normal
+Track NQA       : admin  test1   Priority reduced : 40
+NQA state       : <strong>success</strong>
+Create Time       : 2020-09-24 15:08:16
+Last Change Time  : 2020-09-24 15:58:45</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB] <strong>display vrrp verbose</strong>
+<span>100GE</span><span>1/0/2</span> | Virtual Router 1
+State          : <strong>Backup</strong>
+Virtual IP     : 10.1.1.10
+Master IP      : 10.1.1.1
+Local IP       : 10.1.1.2
+PriorityRun    : 100
+PriorityConfig : 100
+MasterPriority : 120
+Preempt        : YES   Delay Time : 0s   Remain : --
+Hold Multiplier: 4
+TimerRun       : 1s
+TimerConfig    : 1s
+Auth Type      : NONE
+Virtual Mac    :  00-e0-fc-12-78-90
+Check TTL      : YES
+Config type    : Normal
+Backup-forward    : disabled
+Create Time       : 2020-09-24 15:21:13
+Last Change Time  : 2020-09-24 15:58:45</pre>
+</div>
+<p>The command outputs show that DeviceA and DeviceB switch to the <strong>Master</strong> and <strong>Backup</strong> states, respectively.</p>
+</div></div>
+<div class="example" id="EN-US_TASK_0000001130784056__section_05"><a name="EN-US_TASK_0000001130784056__section_05"></a><a name="section_05"></a><a name="EN-US_TASK_0000001130784056__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.0
+ vrrp vrid 1 virtual-ip 10.1.1.10
+ vrrp vrid 1 priority 120
+<span> vrrp vrid 1 preempt timer delay 20</span>
+<span> vrrp vrid 1 track nqa admin test1 reduce 40</span>
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.2.1 255.255.255.0
+#
+ ip route-static 10.2.1.0 255.255.255.0 10.1.1.2
+#
+nqa test-instance admin test1
+ test-type icmp
+ destination-address ipv4 10.2.1.1
+ frequency 20
+ ttl 10
+ start now
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.2 255.255.255.0
+ vrrp vrid 1 virtual-ip 10.1.1.10
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.2.1 255.255.255.0
+#
+ ip route-static 10.2.1.0 255.255.255.0 10.1.2.2
+#
+return </pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.2.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.2.1.1 255.255.255.0
+#
+return </pre>
+</li><li><p>DeviceD</p>
+<pre class="screen">#
+sysname DeviceD
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.2.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.2.1.2 255.255.255.0
+#
+return </pre>
+</li><li><p>DeviceE</p>
+<pre class="screen">#
+sysname DeviceE
+#
+ vlan batch 100
+#
+interface <span>100GE</span><span>1/0/1</span>
+ port default vlan 100
+#
+interface <span>100GE</span><span>1/0/2</span>
+ port default vlan 200
+#
+return    </pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_vrrp_cfg_0019.html">Configuring Association Between VRRP and an NQA Test Instance
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_vrrp_cfg_0020.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

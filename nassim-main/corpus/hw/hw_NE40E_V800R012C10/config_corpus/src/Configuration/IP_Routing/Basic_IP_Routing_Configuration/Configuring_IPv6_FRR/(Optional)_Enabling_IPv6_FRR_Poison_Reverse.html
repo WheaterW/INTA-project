@@ -1,0 +1,79 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="(Optional) Enabling IPv6 FRR Poison Reverse">
+<meta name="abstract" content="To configure IPv6 FRR on an IP ring network, you need to enable IPv6 FRR poison reverse to prevent instantaneous traffic storms during route convergence.">
+<meta name="description" content="To configure IPv6 FRR on an IP ring network, you need to enable IPv6 FRR poison reverse to prevent instantaneous traffic storms during route convergence.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ip-route_cfg_0027.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ip-route_cfg_0073.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ip-route_cfg_0075.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="IP Routing Basis">
+<meta name="featuretype" content="IP Route">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="IP Routing Basis">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="IP Routing Basis">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="IP Routing Basis">
+<meta name="featuretype" content="IP Routing Basis">
+<meta name="OWNER" content="h00414125">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="s00826690">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001171365900">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>(Optional) Enabling IPv6 FRR Poison Reverse</title>
+</head>
+<body><a name="EN-US_TASK_0000001171365900"></a><a name="EN-US_TASK_0000001171365900"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">(Optional) Enabling IPv6 FRR Poison Reverse</h1>
+<div class="taskbody"><p>To configure IPv6 FRR on an IP ring network, you need to enable IPv6 FRR poison reverse to prevent instantaneous traffic storms during route convergence.</p>
+<div class="context"><a name="EN-US_TASK_0000001171365900__1.4.1"></a><a name="1.4.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>In <a href="#EN-US_TASK_0000001171365900__fig20345859153119">Figure 1</a>, IPv6 FRR is deployed on the IP ring network, and traffic enters the ring network from Device D and leaves the ring network from Device A. The primary and backup next hops of Device D are Device C and Device E, respectively. The primary and backup next hops of Device C are Device B and Device D, respectively. If the link between Device B and Device C fails and the traffic reaches Device C, Device C determines that the primary link fails and forwards the traffic to Device D. However, before the route convergence is complete, Device D cannot detect the link failure between Device B and Device C, and continues forwarding the traffic to Device C. As a result, an instantaneous traffic storm is generated between Device C and Device D. After Device D detects the link failure between Device B and Device C through route convergence, Device D forwards the traffic to its backup next hop (Device E). To prevent instantaneous traffic storms during route convergence and enable Device D to detect the link failure quickly, you can enable the IPv6 FRR poison reverse function. After the function is enabled, Device D searches its FIB based on the destination IP address to obtain the next hop and outbound interface+VLAN information. If the outbound interface is the primary interface and is up, Device D checks whether the outbound interface+VLAN is the same as the inbound interface+VLAN. If they are the same, Device D forwards the traffic through the backup interface. If the link between Device B and Device C fails, the traffic forwarded from Device D to Device C goes back to Device D. Device D does not send the traffic back to Device C; instead, it forwards the traffic to its backup next hop (Device E). Finally, the traffic leaves the ring network from Device A, as shown in <a href="#EN-US_TASK_0000001171365900__fig8430154133319">Figure 2</a>.</p>
+<div class="fignone" id="EN-US_TASK_0000001171365900__fig20345859153119"><a name="EN-US_TASK_0000001171365900__fig20345859153119"></a><a name="fig20345859153119"></a><span class="figcap"><b>Figure 1 </b>IP ring network</span><br><span><img class="vsd" src="figure/en-us_image_0000001216287933.png"></span></div>
+<div class="fignone" id="EN-US_TASK_0000001171365900__fig8430154133319"><a name="EN-US_TASK_0000001171365900__fig8430154133319"></a><a name="fig8430154133319"></a><span class="figcap"><b>Figure 2 </b>IP ring network with IPv6 FRR poison reverse enabled</span><br><span><img class="vsd" src="figure/en-us_image_0000001216606497.png"></span></div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001171365900__1.4.2"></a><a name="1.4.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Run <a href="cmdqueryname=interface"><b><span class="cmdname">interface</span></b></a> <i><span class="varname">interface-type</span></i> <i><span class="varname">interface-number</span></i></span><p><p>The interface view or sub-interface view is displayed.</p>
+</p></li><li><span>Run <a href="cmdqueryname=poison-reverse+enable"><b><span class="cmdname">poison-reverse enable</span></b></a></span><p><p>IPv6 FRR poison reverse is enabled.</p>
+</p><p><p>This command is used to prevent instantaneous traffic storms during route convergence in a scenario where IPv6 FRR is configured on an IP ring network.</p>
+<p>Poison reverse does not support load balancing.</p>
+</p></li><li><span>Run <a href="cmdqueryname=commit"><b><span class="cmdname">commit</span></b></a></span><p><p>The configuration is committed.</p>
+</p></li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ip-route_cfg_0027.html">Configuring IPv6 FRR
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ip-route_cfg_0073.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_ip-route_cfg_0075.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

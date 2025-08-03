@@ -1,0 +1,108 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring Certificate Revocation Status Check">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="security_pki_cfg_0022.html">
+<meta name="DC.Relation" scheme="URI" content="security_pki_cfg_0024.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="PKI">
+<meta name="featuretype" content="Security">
+<meta name="featuretype" content="Security Protection">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="PKI">
+<meta name="featuretype" content="Security">
+<meta name="featuretype" content="Security Protection">
+<meta name="featurename" content="PKI">
+<meta name="featuretype" content="Security">
+<meta name="featuretype" content="Security Protection">
+<meta name="featuretype" content="Security">
+<meta name="featuretype" content="Security Protection">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001563886001">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Configuring Certificate Revocation Status Check</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001563886001"></a><a name="EN-US_TASK_0000001563886001"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring Certificate Revocation Status Check</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001563886001__1.3.1"></a><a name="1.3.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>During an attempt to establish a secure connection between two PKI entities, the two entities must check each other's local certificate. If the certificate is invalid, a secure connection cannot be established. However, the CA sometimes needs to unbind a public key from related PKI entities due to factors such as user name change, private key leak, or service interruption. A PKI entity must obtain the certificate status of the peer entity in a timely manner to ensure communication security.</p>
+<p>The device provides the following certificate status check modes: CRL and None.</p>
+<p>If multiple methods are configured, the system checks the certificate revocation status in the configured sequence. The latter mode is used only when the current mode is unavailable (for example, the server cannot be connected). When the configured CRL mode is unavailable and None is configured, the certificate is considered valid. For example, if the <a href="cmdqueryname=certificate-check"><b><span class="cmdname">certificate-check</span></b></a> <strong><span>crl</span></strong> <strong><span>ocsp</span></strong> <strong><span>none</span></strong> command is configured, the device checks whether a certificate is valid using the CRL mode. If the CRL mode is unavailable, the device considers the certificate valid.</p>
+<p>You can select a mode for checking the certificate revocation status as required.</p>
+<ul><li><p>CRL</p>
+<p>The status of a certificate is determined by checking whether the certificate is included in the CRL that is saved in the CRL database. After a certificate is revoked, the SN of the certificate is recorded in the CRL. When a PKI entity authenticates the local certificate of the peer entity, it searches for the certificate in the CRL stored in local memory. If the certificate is included in the CRL, it indicates that the certificate has been revoked. If no CRL is available in local memory, the CRL needs to be downloaded and installed into the local memory.</p>
+<div class="fignone"><span class="figcap"><b>Figure 1 </b>Certificate status check in the CRL mode</span><br><span><img class="vsd" src="figure/en-us_image_0000001563886049.png" width="NaN" height="NaN"></span></div>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>A PKI entity can download a CRL using an LDAPv3 template. A PKI entity must frequently download the CRL to keep it up to date. By default, the device allocates about 5 KB memory space for processing and caching the CRL. If the reserved memory space is insufficient, new certificate revocation data cannot be imported. If you want to import new certificate revocation data, delete the old data first.</p>
+</div></div>
+</li><li><p>None</p>
+<p>If no CRL is available for the PKI entity, or the local certificate status of the PKI entity does not need to be checked, you can use the None mode, which does not check whether the certificate is revoked.</p>
+</li></ul>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The global certificate revocation status can be checked in CRL mode or None mode.</p>
+<p>The certificate revocation status in a PKI realm can be checked in CRL or None mode.</p>
+</div></div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001563886001__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enter the system view.</span><p><pre class="screen"><span><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></span></pre>
+</p></li><li><span>Create a PKI realm and enter its view, or enter the view of an existing PKI realm.</span><p><pre class="screen"><a href="cmdqueryname=pki+realm"><b><span class="cmdname">pki realm</span></b></a> <i><span class="varname">realm-name</span></i></pre>
+<p><span>By default, the  system has a PKI realm named <strong>default</strong>. This realm can be modified but cannot be deleted.</span></p>
+</p></li><li><span>Configure the mode of checking certificate revocation status in the PKI realm.</span><p><pre class="screen"><a href="cmdqueryname=certificate-check"><b><span class="cmdname">certificate-check</span></b></a> { { <strong><span>crl</span></strong> | <strong><span>ocsp</span></strong> } <sup>*</sup> [ <strong><span>none</span></strong> ] | <strong><span>none</span></strong> }</pre>
+<p>By default, the mode of checking certificate revocation status is not configured in a PKI realm.</p>
+<p>If this command is not configured, the global certificate revocation status check mode is used. That is, the configuration of the <a href="cmdqueryname=pki+certificate-check+crl"><b><span class="cmdname">pki certificate-check crl</span></b></a> [ <strong><span>none</span></strong> ], <a href="cmdqueryname=pki+certificate-check+none"><b><span class="cmdname">pki certificate-check none</span></b></a>, or <a href="cmdqueryname=undo+pki+certificate-check"><b><span class="cmdname">undo pki certificate-check</span></b></a> command in the system view takes effect.</p>
+</p></li><li><span>Select a mode to check peer certificate status according to the service types provided by the CA:</span><p><ul><li>Manual CRL update<ol type="a"><li><p>Return to the system view.</p>
+<pre class="screen"><a href="cmdqueryname=quit"><b><span class="cmdname">quit</span></b></a></pre>
+</li><li>Configure the file format in which the device saves the CRL.<pre class="screen"><a href="cmdqueryname=pki+file-format"><b><span class="cmdname">pki file-format</span></b></a> { <strong><span>der</span></strong> | <strong><span>pem</span></strong> }</pre>
+</li><li>Configure CRL download through LDAP.<pre class="screen"><a href="cmdqueryname=pki+ldap-server-template"><b><span class="cmdname">pki ldap-server-template </span></b></a><i><span class="varname">template-name</span></i> <strong><span>attribute</span></strong> <i><span class="varname">attr-value</span></i> <i><span class="varname">save-name</span></i> <strong><span>dn</span></strong> <i><span class="varname">dn-value</span></i></pre>
+</li><li>Import the CRL to the device memory.<pre class="screen"><a href="cmdqueryname=pki+import-crl"><b><span class="cmdname">pki import-crl</span></b></a> [ <strong><span>realm</span></strong> <i><span class="varname">realm-name</span></i> ] <strong><span>filename</span></strong> <i><span class="varname">file-name</span></i></pre>
+</li></ol>
+</li></ul>
+</p></li><li><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001563886001__en-us_task_0228023023_en-us_task_0228023023_screen163801330213"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001563886001__en-us_task_0228023023_en-us_task_0228023023_en-us_concept_0141113565_cmdname1667501373175340">commit</span></b></a></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001563886001__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Verifying the Configuration</h4><ul><li>Run the <a href="cmdqueryname=display+pki+crl"><b><span class="cmdname">display pki crl</span></b></a> [ <strong><span>realm</span></strong> <i><span class="varname">realm-name</span></i> | <strong><span>filename</span></strong> <i><span class="varname">file-name</span></i> ] command to check the CRL content on the device.</li><li>Run the <a href="cmdqueryname=display+pki+certificate"><b><span class="cmdname">display pki certificate</span></b></a> <strong><span>ocsp</span></strong> [ <strong><span>realm</span></strong> <i><span class="varname">realm-name</span></i> | <strong><span>filename</span></strong> <i><span class="varname">file-name</span></i> ] command to check the OCSP server certificate loaded on the device.</li></ul>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001563886001__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Follow-up Procedure</h4>
+<div class="p"><p>If a CRL expires or is not used, run the <a href="cmdqueryname=pki+delete-crl"><b><span class="cmdname">pki delete-crl</span></b></a> { <strong><span>realm</span></strong> <i><span class="varname">realm-name</span></i> | <strong><span>filename</span></strong> <i><span class="varname">filename</span></i> } command to delete the CRL from the device memory.</p>
+</div></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="security_pki_cfg_0022.html">Authenticating the Peer Entity's Certificate
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="security_pki_cfg_0024.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

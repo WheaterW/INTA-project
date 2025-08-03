@@ -1,0 +1,351 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Overview of Intelligent Lossless Network Technologies">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_cfg_intelligent_lossless_network.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_ai_pfcdeadlock_cfg_0001.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="AI ECN">
+<meta name="featurename" content="ECN Overlay">
+<meta name="featurename" content="iNOF">
+<meta name="featurename" content="iQCN">
+<meta name="featurename" content="NPCC">
+<meta name="featurename" content="PFC Deadlock Prevention">
+<meta name="featurename" content="Differentiated Flow Scheduling">
+<meta name="featurename" content="TCP FlexBuffer">
+<meta name="featurename" content="Antilocking PFC">
+<meta name="featurename" content="Buffer Optimization">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001513168134">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Overview of Intelligent Lossless Network Technologies</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001513168134"></a><a name="EN-US_CONCEPT_0000001513168134"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Overview of Intelligent Lossless Network Technologies</h1>
+<div><div class="section"><h4 class="sectiontitle">Overview</h4><p>As a growing number of enterprises around the world undergo digital transformation, the focus of networks is shifting from fast service provisioning to efficient data processing. Specifically, popular applications such as distributed storage, artificial intelligence (AI), and high-performance computing (HPC) require networks with zero packet loss, low delay, and high throughput in order to improve data processing efficiency. However, such high requirements cannot be met by traditional TCP/IP-based networks as the delay is high and large amounts of resources are consumed in key phases such as data copying. Remote Direct Memory Access (RDMA) uses related hardware and network technologies to enable the NICs of hosts to directly read memory data, achieving high bandwidth, low delay, and low resource consumption. However, the dedicated InfiniBand network architecture for RDMA is closed and incompatible with large-scale live IP networks, resulting in high usage and maintenance costs.</p>
+<p>RDMA over Converged Ethernet (RoCE) technology effectively solves these problems. RoCE is available in two versions: RoCEv1 and RoCEv2. RoCEv1 is a link layer protocol which cannot be used in different broadcast domains, whereas RoCEv2 is a network layer protocol capable of implementing routing functions.</p>
+<p>RoCEv2 is used by applications including distributed storage, AI, and HPC to reduce the CPU processing workload and delay and to improve application performance. However, because RDMA was used on lossless InfiniBand networks, RoCEv2 lacks a complete packet loss protection mechanism and is therefore sensitive to packet loss on networks. In addition, these distributed high-performance applications use the many-to-one incast traffic model. For Ethernet devices, incast traffic may cause instantaneous burst and congestion or even packet loss in the internal queue buffer on the devices, increasing the application delay and decreasing the throughput. This will ultimately cause the performance of distributed applications to deteriorate.</p>
+<p>To avoid packet loss caused by network congestion, you need to ensure that the device buffer or link is not overloaded by preventing too much data from entering the network. On live networks, flow control and congestion control must be used together to solve network congestion. The difference between flow control and congestion control is as follows: Flow control is an end-to-end process in which the transmission rate of the sender is suppressed, enabling the receiver to receive all packets. In contrast, congestion control is a global process involving all hosts, network devices, and factors related to network transmission performance degradation.</p>
+<p>The iLossless algorithm provided by intelligent lossless network technologies is a collection of a series of technologies. They cooperate with each other to solve the packet loss problem caused by congestion on traditional Ethernet networks and provide a network environment with zero packet loss, low delay, and high throughput for RoCEv2 traffic to meet high-performance requirements of RoCEv2 applications. Intelligent lossless network technologies are classified into the following types:</p>
+<ul><li>Flow Control</li><li>Congestion Control</li><li>Intelligent Lossless NVMe Over Fabrics (iNOF)</li><li>Network Scale Load Balance (NSLB)</li><li>Adaptive Routing</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Flow Control Technologies</h4><p>Flow control, also known as link-level flow control, is used to suppress the data transmission rate of the traffic sender so that the traffic receiver can receive all packets, thereby preventing packet loss when the traffic receiving interface is congested.</p>
+<p>Priority-based Flow Control (PFC) is the most widely used flow control technology. When a PFC-enabled queue on a device is congested, the upstream device stops sending traffic in the queue, implementing zero packet loss. The system does not perform PFC for a PFC-disabled queue, and instead discards packets from the queue when it is congested.</p>
+<p>Services can be categorized as lossless or lossy services, depending on whether packets need to be transmitted with no loss.</p>
+<ul><li>Lossless services require zero packet loss during transmission. A queue that requires zero packet loss during transmission is a lossless queue.</li><li>Lossy services allow packet loss during transmission. A queue that allows packet loss during transmission is a lossy queue.</li></ul>
+<p>PFC effectively prevents packet loss, but some traffic is stopped due to PFC. Therefore, PFC should be used as a last resort. Otherwise, a PFC deadlock may occur if PFC is triggered frequently. If congestion occurs on multiple network devices simultaneously due to a loop or other causes, the interface buffer usage of each device exceeds the threshold, and these devices wait for each other to release resources. As a result, data flows on these devices are permanently blocked. This network state is known as the PFC deadlock state.</p>
+<p>To solve the PFC deadlock problem, the device provides the PFC deadlock prevention function to prevent PFC deadlocks in advance.</p>
+<p>The device also provides buffer optimization, which optimizes the buffer space based on actual service scenarios to fully ensure lossless packet forwarding of lossless queues.</p>
+<p>In a long-distance Data Center Interconnect (DCI) scenario, to ensure lossless packet forwarding of lossless queues across data centers, the intelligent lossless network feature provides the antilocking PFC function, which optimizes the flow control mechanism to support long-distance lossless transmission scenarios.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Congestion Control Technologies</h4><p>Congestion control is a global process that enables the network to bear existing traffic load. To mitigate and relieve congestion, the forwarding device, traffic sender, and traffic receiver need to collaborate with each other, and congestion feedback mechanisms need to be used to adjust traffic on the entire network.</p>
+<p>Data Center Quantized Congestion Notification (DCQCN) is the most widely used congestion control algorithm on RDMA networks. For DCQCN to work, network devices are only required to support Explicit Congestion Notification (ECN), with other DCQCN functions implemented on the NICs of hosts. When congestion occurs on a forwarding device, the forwarding device sends ECN-marked packets to the traffic receiver. The traffic receiver sends Congestion Notification Packets (CNPs) to the traffic sender. The traffic sender then reduces its packet sending rate to relieve network congestion.</p>
+<p>However, DCQCN has problems that cannot be ignored. For example, to use the traditional static ECN function, you must manually configure parameters such as ECN thresholds. However, traffic models on live networks are complex and devices with static ECN configurations cannot cope with traffic changes. In addition, the DCQCN control loop delay, which is already too long due to the long congestion feedback path, becomes even longer on a larger network. As a result, the sender cannot reduce the packet sending rate in a timely manner, and even the congestion is exacerbated.</p>
+<p>To solve these DCQCN problems, the device provides Artificial Intelligence Explicit Congestion Notification (AI ECN), Intelligent Quantized Congestion Notification (iQCN), and Network-based Proactive Congestion Control (NPCC). In addition, the device provides ECN Overlay to apply DCQCN functions to VXLAN networks and extend DCQCN application scenarios.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">iNOF</h4><p>A storage system consists of compute and storage nodes, and requires a network with zero packet loss, low delay, and high throughput. Intelligent lossless network technologies enable Ethernet networks to meet network performance requirements of storage systems. A storage system that stores large amounts of data usually needs to manage a large number of hosts, and a growing number of new hosts are connected to network devices in the system. The device provides the iNOF function to quickly manage and control hosts so that intelligent lossless network technologies can be better applied to storage systems. In this way, Ethernet networks can replace conventional Fibre Channel (FC) networks to implement network convergence.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">NSLB</h4><p>NSLB technology combines Flow Matrix and Rail Group to fully utilize network resources and improve network-wide throughput.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Adaptive Routing</h4><p>Building a large supercomputing center requires interconnection between a large number of compute nodes. However, expanding the cluster scale increases the network latency and deployment costs, failing to meet requirements regarding computing power and deployment. A direct topology features large-scale access and a small network diameter. In such a topology, adaptive routing can be deployed to dynamically determine routes based on the network topology and traffic load changes. By proactively detecting the link congestion status, adaptive routing preferentially selects a short and non-congested packet forwarding path. In this way, unequal-cost paths are fully utilized to improve bandwidth utilization, meeting the requirements of high throughput, low latency, and low costs while supporting large-scale networking.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Recommended Feature Configuration</h4><p>This section describes specific intelligent lossless network features used on devices of different roles in different scenarios, as listed in the following table.</p>
+<ul><li>Y: The feature is recommended on the device of the corresponding role in the corresponding scenario.</li><li>N/A: The feature is not required on the device of the corresponding role in the corresponding scenario.</li></ul>
+
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all"><thead align="left"><tr><th align="left" class="cellrowborder" colspan="3" valign="top" id="mcps1.3.7.4.1.8.1.1" liSelected="liSelected"><p>Intelligent Lossless Network Feature</p>
+</th>
+<th align="left" class="cellrowborder" colspan="4" valign="top" id="mcps1.3.7.4.1.8.1.2" liSelected="liSelected"><p>Scenario Classification</p>
+</th>
+</tr>
+<tr><th align="left" class="cellrowborder" valign="top" width="10.952190438087616%" id="mcps1.3.7.4.1.8.2.1" liSelected="liSelected"><p>Feature Category</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="11.98239647929586%" id="mcps1.3.7.4.1.8.2.2" liSelected="liSelected"><p>Feature Name</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="15.413082616523303%" id="mcps1.3.7.4.1.8.2.3" liSelected="liSelected"><p>Device Role</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="15.413082616523303%" id="mcps1.3.7.4.1.8.2.4" liSelected="liSelected"><p>Distributed Storage</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="15.413082616523303%" id="mcps1.3.7.4.1.8.2.5" liSelected="liSelected"><p>Centralized Storage</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="15.413082616523303%" id="mcps1.3.7.4.1.8.2.6" liSelected="liSelected"><p>AI GPU</p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="15.413082616523303%" id="mcps1.3.7.4.1.8.2.7" liSelected="liSelected"><p>HPC</p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" rowspan="7" valign="top" width="10.952190438087616%" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.1 "><p>Flow Control</p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+</td>
+<td class="cellrowborder" rowspan="2" valign="top" width="11.98239647929586%" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.2 "><p>PFC</p>
+<p></p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.3 "><p>Leaf</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.4 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.5 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.6 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.7 "><p>Y</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.1 "><p>Spine</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.2 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.3 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.4 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.5 "><p>Y</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="2" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.1 "><p>PFC Deadlock Prevention</p>
+<p></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.2 "><p>Leaf</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.3 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.4 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.5 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.6 "><p>Y</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.1 "><p>Spine</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.2 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.3 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.4 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.5 "><p>N/A</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="3" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.1 "><p>Antilocking PFC</p>
+<p></p>
+<p></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.2 "><p>Leaf</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.3 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.4 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.5 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.6 "><p>N/A</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.1 "><p>Spine</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.2 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.3 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.4 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.5 "><p>N/A</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.1 "><p>DCI Leaf</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.2 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.3 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.4 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.5 "><p>N/A</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="7" valign="top" width="10.952190438087616%" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.1 "><p>Congestion Control</p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+</td>
+<td class="cellrowborder" rowspan="2" valign="top" width="11.98239647929586%" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.2 "><p>AI ECN</p>
+<p></p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.3 "><p>Leaf</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.4 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.5 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.6 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.7 "><p>Y</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.1 "><p>Spine</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.2 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.3 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.4 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.5 "><p>Y</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="2" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.1 "><p>ECN Overlay</p>
+<p></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.2 "><p>Leaf</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.3 "><p>Y (VXLAN scenario)</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.4 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.5 "><p>Y (VXLAN scenario)</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.6 "><p>Y (VXLAN scenario)</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.1 "><p>Spine</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.2 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.3 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.4 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.5 "><p>N/A</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="3" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.1 "><p>NPCC</p>
+<p></p>
+<p></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.2 "><p>Leaf</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.3 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.4 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.5 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.6 "><p>N/A</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.1 "><p>Spine</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.2 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.3 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.4 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.5 "><p>N/A</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.1 "><p>DCI Leaf</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.2 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.3 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.4 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.5 "><p>N/A</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="2" valign="top" width="10.952190438087616%" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.1 "><p>iNOF</p>
+<p></p>
+</td>
+<td class="cellrowborder" rowspan="2" valign="top" width="11.98239647929586%" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.2 "><p>iNOF</p>
+<p></p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.3 "><p>Leaf</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.4 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.5 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.6 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.7 "><p>N/A</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.1 "><p>Spine</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.2 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.3 "><p>Y</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.4 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.5 "><p>N/A</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" width="10.952190438087616%" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.1 "><p>Adaptive Routing</p>
+</td>
+<td class="cellrowborder" valign="top" width="11.98239647929586%" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.2 "><p>Adaptive Routing</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.1 mcps1.3.7.4.1.8.2.3 "><p>Leaf</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.4 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.5 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.6 "><p>N/A</p>
+</td>
+<td class="cellrowborder" valign="top" width="15.413082616523303%" headers="mcps1.3.7.4.1.8.1.2 mcps1.3.7.4.1.8.2.7 "><p>Y</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_cfg_intelligent_lossless_network.html">Intelligent Lossless Network Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_ai_pfcdeadlock_cfg_0001.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

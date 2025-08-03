@@ -1,0 +1,108 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding a BGP RR">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0073.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0075.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001130783916">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding a BGP RR</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001130783916"></a><a name="EN-US_CONCEPT_0000001130783916"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding a BGP RR</h1>
+<div><p>A full mesh of IBGP connections is needed to implement connectivity between IBGP peers within an AS. If there are <em>n</em> BGP devices in an AS, the number of IBGP connections need to be established is <em>n</em> x (<em>n</em> â 1)/2. If large numbers of IBGP peers exist, the full mesh of connections consumes a great number of network resources and CPU resources. To solve this problem, route reflection is used.</p>
+<p>In the AS shown in <a href="#EN-US_CONCEPT_0000001130783916__fig_dc_vrp_bgp_feature_000901">Figure 1</a>, one BGP device functions as an RR and the other BGP devices function as its clients. Each client establishes an IBGP connection to the RR. The RR and its clients form a cluster. The RR reflects routes between clients, and therefore, the clients do not need to establish BGP connections to each other.</p>
+<p>A BGP peer that functions as neither an RR nor a client is called a non-client. A non-client must establish full meshed connections with the RR and other non-clients.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130783916__fig_dc_vrp_bgp_feature_000901"><a name="EN-US_CONCEPT_0000001130783916__fig_dc_vrp_bgp_feature_000901"></a><a name="fig_dc_vrp_bgp_feature_000901"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring a BGP RR</span><br><span><img class="vsd" src="figure/en-us_image_0000001176663749.png"></span></div>
+<div class="section"><h4 class="sectiontitle">Applications</h4><p>After the RR receives routes from its peers, it selects the optimal route based on BGP route selection rules and advertises learned routes to IBGP peers based on the following rules:</p>
+<ul><li><p>If the optimal route is from a non-client IBGP peer, the RR advertises the route to all clients.</p>
+</li><li><p>After learning the optimal route from a client, the RR advertises the route to all non-clients and clients.</p>
+</li><li><p>After learning a route learned from an EBGP peer, the RR advertises the route to all clients and non-clients.</p>
+</li></ul>
+<p>The RR is easy to configure, and you only need to configure a BGP device as an RR. The clients do not need to be specified, because they do not need to know that they are clients of the RR.</p>
+<p>On some networks, if a full mesh of connections has already been established among clients of an RR, the clients can exchange routes with one another. In this case, the RR does not need to be configured to perform route reflection among the clients, since route reflection is unnecessary and leads to bandwidth resource consumption. Route reflection for clients through the RR can be disabled, but after that, the routes between clients and non-clients are still exchanged. By default, route reflection between clients through an RR is enabled.</p>
+<p>BGP route attributes, such as the AS_Path, MED, local preference, and community attributes, can be modified on the RR.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Originator_ID</h4><p>The Originator_ID and Cluster_List attributes are used to detect and prevent routing loops.</p>
+<p>The Originator_ID attribute is 4 bytes long and is generated by the RR. This attribute carries the router ID of the originator of the route in a local AS.</p>
+<ul><li><p>When a route is reflected by an RR for the first time, the RR adds the Originator_ID attribute to this route. If a route already carries an Originator_ID, the RR does not create another one.</p>
+</li><li><p>After receiving the route, a BGP speaker checks whether the Originator_ID is the same as the local router ID. If the received Originator_ID is the same as the local router ID, the BGP speaker discards this route.</p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Cluster_List</h4><p>To prevent routing loops between ASs, a BGP device uses the AS_Path attribute to record the ASs through which a route passes and discards routes carrying the local AS number. To prevent routing loops within an AS, routes learned from an IBGP peer within the local AS are not advertised to other IBGP peers.</p>
+<p>With the RR deployed, IBGP peers can advertise routes learned from the local AS to each other. In this case, the Cluster_List attribute must be used to prevent routing loops within the AS.</p>
+<p>The RR and its clients form a cluster. In an AS, each RR uses a single Cluster_ID to uniquely identify a cluster.</p>
+<p>To prevent routing loops, the RR uses the Cluster_List attribute to record the Cluster_IDs of all RRs through which a route passes.</p>
+<p>Similar to an AS_Path, a Cluster_List is composed of a series of Cluster_IDs and records all RRs through which a route passes. The Cluster_List is generated by the RR.</p>
+<ul><li><p>Before an RR reflects a route between its clients or between its clients and non-clients, the RR adds the local Cluster_ID to the top of the Cluster_List. If the Cluster_List is empty, the RR creates one.</p>
+</li><li><p>After the RR receives an updated route, it checks the Cluster_List of the route. If the RR finds that its cluster ID is included in the Cluster_List, the RR discards the route. If its cluster ID is not included in the Cluster_List, the RR adds its cluster ID to the Cluster_List and then reflects the route.</p>
+</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Backup RR</h4><p>To enhance network reliability and prevent single points of failure, more than one RR needs to be configured in a cluster. RRs in the same cluster must use the same Cluster_ID to prevent routing loops.</p>
+<p>In an RR redundancy scenario, clients can receive multiple routes to the same destination from different RRs. The clients then use route selection rules to select the optimal route.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130783916__fig_dc_vrp_bgp_feature_000902"><a name="EN-US_CONCEPT_0000001130783916__fig_dc_vrp_bgp_feature_000902"></a><a name="fig_dc_vrp_bgp_feature_000902"></a><span class="figcap"><b>Figure 2 </b>Backup RR</span><br><span><img class="vsd" src="figure/en-us_image_0000001176663751.png"></span></div>
+<p>On the network shown in <a href="#EN-US_CONCEPT_0000001130783916__fig_dc_vrp_bgp_feature_000902">Figure 2</a>, RR1 and RR2 are in the same cluster. RR1 and RR2 establish an IBGP connection and are non-clients for each other.</p>
+<ul><li><p>If Client 1 receives an updated route from an external peer, Client 1 advertises the route to RR1 and RR2 through IBGP. </p>
+</li><li><p>After receiving the updated route, RR1 adds the local Cluster_ID to the top of the Cluster_List of the route and then reflects the route to other clients (Client 1, Client 2, and Client 3) and the non-client (RR2).</p>
+</li><li><p>After receiving the reflected route, RR2 checks the Cluster_List and finds that its Cluster_ID is contained in the Cluster_List; therefore, it discards the updated route.</p>
+</li></ul>
+<p>If RR1 and RR2 are assigned different Cluster_IDs, each RR receives both the route from Client 1 and the updated route reflected from the other RR. Therefore, setting the same Cluster_ID for RR1 and RR2 reduces the number of routes that each RR receives and memory consumption.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>The application of the Cluster_List ensures that routing loops do not occur between RRs in the same AS.</p>
+</div></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Multiple Clusters in an AS</h4><p>Multiple clusters may exist in an AS. RRs are IBGP peers of each other. An RR can be configured as a client or non-client of another RR. Therefore, the relationship between clusters in an AS can be configured flexibly.</p>
+<p>For example, the backbone network shown in <a href="#EN-US_CONCEPT_0000001130783916__fig_dc_vrp_bgp_feature_000903">Figure 3</a> is divided into multiple clusters. Each RR is configured as a non-client of the other RRs, and these RRs are fully meshed. Each client establishes IBGP connections only to the RR in the same cluster. In this manner, all BGP peers in the AS can receive reflected routes. <a href="#EN-US_CONCEPT_0000001130783916__fig_dc_vrp_bgp_feature_000903">Figure 3</a> shows the network diagram of multiple clusters in an AS.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001130783916__fig_dc_vrp_bgp_feature_000903"><a name="EN-US_CONCEPT_0000001130783916__fig_dc_vrp_bgp_feature_000903"></a><a name="fig_dc_vrp_bgp_feature_000903"></a><span class="figcap"><b>Figure 3 </b>Network diagram of multiple clusters in an AS</span><br><span><img class="vsd" src="figure/en-us_image_0000001176663747.png"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Hierarchical RRs</h4><p>Hierarchical reflectors are deployed on live networks. As shown in <a href="#EN-US_CONCEPT_0000001130783916__fig_dc_vrp_bgp_feature_000904">Figure 4</a>, the ISP provides Internet routes for AS 100, and two EBGP connections are established between the ISP and AS 100. AS 100 is divided into two clusters. The four BGP devices in Cluster 1 are core devices.</p>
+<ul><li><p>Two Level-1 RRs (RR-1s) are deployed in Cluster 1, which ensures the reliability of key devices of AS 100. The other two BGP devices at the core layer function as clients of RR-1s.</p>
+</li><li><p>One Level-2 RR (RR-2) is deployed in Cluster 2. RR-2 is a client of RR-1s.</p>
+</li></ul>
+<div class="fignone" id="EN-US_CONCEPT_0000001130783916__fig_dc_vrp_bgp_feature_000904"><a name="EN-US_CONCEPT_0000001130783916__fig_dc_vrp_bgp_feature_000904"></a><a name="fig_dc_vrp_bgp_feature_000904"></a><span class="figcap"><b>Figure 4 </b>Hierarchical RRs</span><br><span><img class="vsd" src="figure/en-us_image_0000001176663745.png"></span></div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bgp_cfg_0073.html">Configuring a BGP RR
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bgp_cfg_0075.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

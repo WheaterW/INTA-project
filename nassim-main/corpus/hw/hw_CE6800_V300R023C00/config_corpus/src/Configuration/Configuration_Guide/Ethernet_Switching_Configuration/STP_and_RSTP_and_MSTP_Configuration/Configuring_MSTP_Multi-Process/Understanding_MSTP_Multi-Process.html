@@ -1,0 +1,114 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding MSTP Multi-Process">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_stp_cfg_1088.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_stp_cfg_1090.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="MSTP">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="MSTP">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="featurename" content="MSTP">
+<meta name="featurename" content="RSTP">
+<meta name="featurename" content="STP">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001345318765">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<link rel="stylesheet" type="text/css" href="public_sys-resources/imagePopup.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/customQuery.js"></script>
+<script language="javascript" type="text/javascript" src="public_sys-resources/imagePopup.js"></script>
+<title>Understanding MSTP Multi-Process</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001345318765"></a><a name="EN-US_CONCEPT_0000001345318765"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding MSTP Multi-Process</h1>
+<div><p>MSTP multi-process is an enhancement to MSTP. The MSTP multi-process mechanism allows ports on devices to be bound to different processes, based on which MSTP calculation is performed. In this manner, only ports that are bound to a process participate in the MSTP calculation for this process. With the MSTP multi-process mechanism, spanning trees of different processes are calculated independently and do not affect each other.</p>
+<div class="section"><h4 class="sectiontitle">Context</h4><p>On the network shown in <a href="#EN-US_CONCEPT_0000001345318765__fig151220144355">Figure 1</a>:</p>
+<ul><li><p>User-facing Provider Edges (UPEs) are deployed at the aggregation layer, running MSTP.</p>
+</li><li><p>UPE1 and UPE2 are connected by a Layer 2 link.</p>
+</li><li><p>Multiple rings are connected to UPE1 and UPE2 through different ports.</p>
+</li><li><p>Devices on the rings are access devices running STP or RSTP. Because UPE1 and UPE2 are provided by different carriers, they reside on different spanning trees so that their topology changes do not affect each other.</p>
+</li></ul>
+<p>UPE1 and UPE2 are connected to multiple independent access rings. Neither STP nor RSTP can calculate a single spanning tree for all devices. Instead, one of them must be enabled on each ring to calculate a separate spanning tree.</p>
+<p>MSTP supports MSTIs, but these MSTIs must belong to one MST region and devices in the region must have the same configurations. If devices belong to different regions, MSTP calculates a spanning tree based on only one instance. If this is the case, the status change of any device on the network affects the stability of the entire network. On the network shown in <a href="#EN-US_CONCEPT_0000001345318765__fig151220144355">Figure 1</a>, access devices connected to UPEs support STP or RSTP only, not MSTP. When MSTP-enabled UPEs receive BPDUs from the access devices, the UPEs consider that both they and the access devices belong to different regions. As a result, only one spanning tree is calculated for the rings formed by the UPEs and access devices, and in this case, the access rings are not independent of each other.</p>
+<p>MSTP multi-process can prevent this problem. This is a mechanism that allows ports on devices to be added to different processes, based on which MSTP calculation is performed. In this manner, only ports added to the same process participate in the MSTP calculation in this process. The network shown in <a href="#EN-US_CONCEPT_0000001345318765__fig151220144355">Figure 1</a> can be divided into multiple MSTP processes by using MSTP multi-process; ports on each of the rings are added to the same process. The MSTP processes have the same functions and support MSTIs, and the calculation for one process does not affect that of another process.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>MSTP multi-process is applicable to MSTP, RSTP, and STP.</p>
+</div></div>
+<div class="fignone" id="EN-US_CONCEPT_0000001345318765__fig151220144355"><a name="EN-US_CONCEPT_0000001345318765__fig151220144355"></a><a name="fig151220144355"></a><span class="figcap"><b>Figure 1 </b>Application of both MSTP and STP/RSTP</span><br><span><img class="vsd" src="figure/en-us_image_0000001345158177.png"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Purpose</h4><div class="p">MSTP multi-process provides the following benefits:<ul><li><p>Greatly improves the applicability of spanning tree protocols to different networking conditions.</p>
+<p>On a network running different spanning tree protocols, ports on devices that run different spanning tree protocols can be added to different processes, allowing every process to calculate a separate, independent spanning tree.</p>
+</li><li><p>Improves networking reliability.</p>
+<p>A network topology is calculated for each process so that, if a device fails, only the topology corresponding to the process that the device belongs to is affected.</p>
+</li><li><p>Reduces the network administrator workload during network expansion.</p>
+<p>To expand a network, a network administrator must not only configure new MSTP processes, but also add the ports that connect new devices to existing devices to the new MSTP processes, and keep the existing MSTP processes unchanged. If device expansion is performed in a process, then only this process needs to be modified.</p>
+</li><li><p>Implements separate Layer 2 port management</p>
+<p>An MSTP process manages separate ports on a device. Layer 2 ports on a device are separately managed by multiple MSTP processes.</p>
+</li></ul>
+</div>
+</div>
+<div class="section"><h4 class="sectiontitle">Fundamentals</h4><p><strong>Shared Link Status</strong></p>
+<p>In <a href="#EN-US_CONCEPT_0000001345318765__fig151220144355">Figure 1</a>, ports on the shared link between UPE1 and UPE2 need to participate in the calculation of multiple access rings and MSTP processes. The UPEs must identify the process from which MSTP BPDUs are sent.</p>
+<p>In addition, a port on the shared link participates in the calculation for multiple MSTP processes, and obtains a different status, and so cannot determine its own status.</p>
+<p>To prevent this, the port always adopts its status in MSTP process 0 when participating in the calculation for multiple MSTP processes.</p>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>By default, MSTP process 0 is created when a device starts, and MSTP configurations in the system view and interface view belong to this process.</p>
+</div></div>
+<p><strong>Reliability</strong></p>
+<p>On the network shown in <a href="#EN-US_CONCEPT_0000001345318765__fig1825411534322">Figure 2</a>, after the topology of access devices changes, the MSTP multi-process mechanism helps UPEs flood a TC BPDU to all devices on the ring and not to devices on other rings. UPE1 and UPE2 update MAC address and ARP entries on the ports corresponding to the changed spanning tree.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001345318765__fig1825411534322"><a name="EN-US_CONCEPT_0000001345318765__fig1825411534322"></a><a name="fig1825411534322"></a><span class="figcap"><b>Figure 2 </b>MSTP multi-process topology change</span><br><span><img class="imgResize" src="figure/en-us_image_0000001292078976.png" width="NaN" height="NaN" title="Click to enlarge"></span></div>
+<p><strong>Shared Link Faults and Solutions</strong></p>
+<p>On the network shown in <a href="#EN-US_CONCEPT_0000001345318765__fig1981142310155">Figure 3</a>, if the shared link between UPE1 and UPE2 fails, multiple devices may unblock their blocked ports on the access ring. Assume that UPE1 is configured with the highest priority, UPE2 with the second highest priority, and all other access devices with default or lower priorities. After the shared link between UPE1 and UPE2 fails, the blocked ports (backup ports for the root ports) on access devices no longer receive BPDUs with higher priorities, triggering spanning tree calculation. If this calculation changes the blocked ports to designated ports, a permanent loop forms.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001345318765__fig1981142310155"><a name="EN-US_CONCEPT_0000001345318765__fig1981142310155"></a><a name="fig1981142310155"></a><span class="figcap"><b>Figure 3 </b>Loop between access rings</span><br><span><img class="imgResize" src="figure/en-us_image_0000001292238804.png" width="NaN" height="NaN" title="Click to enlarge"></span></div>
+<p>To prevent a loop between access rings, use either of the following solutions:</p>
+<ul><li>Configure an Eth-Trunk between UPE1 and UPE2 as a shared link to improve link reliability, as shown in <a href="#EN-US_CONCEPT_0000001345318765__fig88171142185818">Figure 4</a>.<div class="fignone" id="EN-US_CONCEPT_0000001345318765__fig88171142185818"><a name="EN-US_CONCEPT_0000001345318765__fig88171142185818"></a><a name="fig88171142185818"></a><span class="figcap"><b>Figure 4 </b>Eth-Trunk as a shared link</span><br><span><img class="vsd" src="figure/en-us_image_0000001345318845.png"></span></div>
+</li><li>Configure root protection between UPE1 and UPE2.<p>On the network shown in <a href="#EN-US_CONCEPT_0000001345318765__fig72061423191717">Figure 5</a>, UPE1 is configured with the highest priority, UPE2 with the second highest priority, and devices on access rings with default or lower priorities. Root protection is enabled on UPE1 and UPE2.</p>
+<p>For example, if BP 1 on DeviceB is blocked on the yellow ring, when the shared link between UPE1 and UPE2 fails, DeviceB starts to calculate the spanning tree because BP 1 no longer receives higher-priority BPDUs. After calculation, BP 1 becomes a designated port and performs P/A negotiation with the downstream device.</p>
+<p>After DeviceB sends higher-priority BPDUs to the UPE2 port enabled with root protection, the port is blocked, and remains so because it continues to receive BPDUs of higher priorities. This prevents a network loop.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001345318765__fig72061423191717"><a name="EN-US_CONCEPT_0000001345318765__fig72061423191717"></a><a name="fig72061423191717"></a><span class="figcap"><b>Figure 5 </b>MSTP multi-process with root protection</span><br><span><img class="vsd" src="figure/en-us_image_0000001345158189.png"></span></div>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_stp_cfg_1088.html">Configuring MSTP Multi-Process
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_stp_cfg_1090.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+
+<script language="JavaScript">
+<!--
+initImageViewer('.imgResize');
+var msg_imageMax = "view original image";
+var msg_imageClose = "close";
+//--></script></body>
+</html>

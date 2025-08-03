@@ -1,0 +1,82 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="STP/RSTP/MSTP Timers">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_stp_cfg_1065.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_stp_cfg_1067.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_stp_cfg_1069.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="MSTP">
+<meta name="featurename" content="RSTP">
+<meta name="featurename" content="STP">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="MSTP">
+<meta name="featurename" content="RSTP">
+<meta name="featurename" content="STP">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="featurename" content="MSTP">
+<meta name="featurename" content="RSTP">
+<meta name="featurename" content="STP">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="featuretype" content="Ethernet Switching">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001292398344">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>STP/RSTP/MSTP Timers</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001292398344"></a><a name="EN-US_CONCEPT_0000001292398344"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">STP/RSTP/MSTP Timers</h1>
+<div><p>Hello Time, Forward Delay, Max Age, and Message Age are four time-related fields carried in BPDUs, of which Hello Time, Forward Delay, and Max Age are timers with default values of <span>2 seconds</span>, <span>15 seconds</span>, and <span>20 seconds</span>, respectively. These timers can be manually configured for devices.</p>
+<div class="section" id="EN-US_CONCEPT_0000001292398344__section4282551598"><a name="EN-US_CONCEPT_0000001292398344__section4282551598"></a><a name="section4282551598"></a><h4 class="sectiontitle">Hello Time Timer and Timeout Period</h4><p>Hello Time specifies the interval at which BPDUs are sent. A device sends BPDUs at the specified interval to detect link failures. A device recalculates the spanning tree if it does not receive any BPDUs from upstream devices within the timeout period, which is calculated according to the formula below. Note that the default value of Timer Factor is 3, and this value can be manually configured for a device to adjust the timeout period.</p>
+<p>Timeout period = Hello Time Ã 3 Ã Timer Factor</p>
+<p>After the network topology becomes stable, the new value of the Timer Factor takes effect only when a new root bridge is elected. The new root bridge adds the new timeout period value in BPDUs it sends to non-root bridges. When the network topology changes, TCN BPDUs are transmitted immediately, without waiting for the time period to expire.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Forward Delay Timer</h4><p>Forward Delay specifies the time during which a port waits before transitioning between states after a link fails. When a link fails, spanning tree calculation is triggered and the spanning tree structure changes. However, because it takes some time for the new configuration BPDUs to spread throughout the entire network, if the new root port and designated port start to forward data immediately, transient loops may occur. Therefore, spanning tree protocols define the Forward Delay to provide a port state transition delay mechanism. The newly selected root port and designated port must wait for two Forward Delay intervals before transitioning to the Forwarding state. This provides enough time to transmit new configuration BPDUs over the network, preventing transient loops.</p>
+<p>The Forward Delay value is 15s by default. This means that the port stays in the Listening state for 15s and then in the Learning state for another 15s before finally transitioning to the Forwarding state. The port does not forward user traffic when it is in the Listening or Learning state, which is key to preventing transient loops.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Max Age Timer and Message Age</h4><p>Max Age specifies the aging time of BPDUs. This parameter can be configured on the root bridge using commands.</p>
+<p>BPDUs are sent to ensure that the entire network uses the same Max Age value. Specifically, after a non-root bridge receives a configuration BPDU, it compares the Message Age value with the Max Age value before deciding whether to forward or discard the configuration BPDU. The details are as follows:</p>
+<ul><li>If the Message Age value is less than or equal to the Max Age value, the non-root bridge forwards the configuration BPDU.</li><li>If the Message Age value is larger than the Max Age value, the configuration BPDU is aged out and the non-root bridge discards the configuration BPDU. In this case, the network diameter is considered too large and the non-root bridge disconnects from the root bridge.</li></ul>
+<p>The following uses configuration BPDUs as an example (RST BPDUs and MST BPDUs work in a similar way). If the configuration BPDU is sent from the root bridge, the Message Age value is 0. Otherwise, the value of Message Age is the total time spent to transmit the BPDU from the root bridge to the local bridge, including the transmission delay. In real-world situations, the Message Age value of a configuration BPDU is incremented by 1 each time the configuration BPDU passes through a bridge.</p>
+<p>As shown in <a href="#EN-US_CONCEPT_0000001292398344__fig617513574117">Figure 1</a>:</p>
+<ul><li>DeviceB and DeviceC receive a configuration BPDU from DeviceA with a Message Age value of 0. The aging time of the BPDU is set to (Max Age - 0) on the ports connecting DeviceB and DeviceC to DeviceA.</li><li>DeviceD and DeviceE receive a configuration BPDU from DeviceB with a Message Age value of 1. The aging time of the BPDU is set to (Max Age - 1) on the ports connecting DeviceD and DeviceE to DeviceA.</li><li>DeviceF receives a configuration BPDU from DeviceE with a Message Age value of 2. The aging time of the BPDU is set to (Max Age - 2) on the port connecting DeviceF to DeviceA.</li></ul>
+<div class="fignone" id="EN-US_CONCEPT_0000001292398344__fig617513574117"><a name="EN-US_CONCEPT_0000001292398344__fig617513574117"></a><a name="fig617513574117"></a><span class="figcap"><b>Figure 1 </b>Message Age</span><br><span><img class="vsd" src="figure/en-us_image_0000001345478669.png"></span></div>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_stp_cfg_1065.html">Understanding STP/RSTP/MSTP
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_stp_cfg_1067.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="vrp_stp_cfg_1069.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,734 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring MPLS TE Auto FRR">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0093.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0105.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0213.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,te-p2pvrp,w00556928,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="featurename" content="MPLS TE">
+<meta name="featuretype" content="MPLS">
+<meta name="OWNER" content="l00468467">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="w00845984">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172368342">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring MPLS TE Auto FRR</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172368342"></a><a name="EN-US_TASK_0172368342"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring MPLS TE Auto FRR</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0172368342__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0172368342__fig_dc_vrp_te-p2p_cfg_010601">Figure 1</a>, a primary CR-LSP is established over an explicit path LSRA -&gt; LSRB -&gt; LSRC. Bypass CR-LSPs need to be established on the ingress LSRA and the transit node LSRB respectively. These bypass CR-LSPs are required to provide bandwidth protection. A node protection tunnel is a bypass tunnel that originates from LSRA's inbound interface, terminates at LSRC's outbound interface, and passes through the intermediate LSRB. A link protection tunnel is a bypass tunnel that originates from LSRB's outbound interface, terminates at LSRC's inbound interface, and passes through the intermediate LSRD or is a direct link between LSRB's outbound interface and LSRC's inbound interface.</p>
+<div class="fignone" id="EN-US_TASK_0172368342__fig_dc_vrp_te-p2p_cfg_010601"><a name="EN-US_TASK_0172368342__fig_dc_vrp_te-p2p_cfg_010601"></a><a name="fig_dc_vrp_te-p2p_cfg_010601"></a><span class="figcap"><b>Figure 1 </b>Networking diagram for MPLS TE Auto FRR</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 through 3 in this example represent GE <span>0/1/0</span>, GE <span>0/2/0</span>, and GE <span>0/3/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_te-p2p_cfg_010601.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368342__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>None.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368342__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure a primary CR-LSP, and enable TE FRR in the tunnel interface view and MPLS auto FRR in the MPLS view.</p>
+</li><li><p>Set the protected bandwidth and priorities for the bypass CR-LSP in the tunnel interface view.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172368342__1.3.4"></a><a name="1.3.4"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>OSPF process ID and OSPF area ID for every node</p>
+</li><li><p>Path for the primary CR-LSP</p>
+</li><li><p>Tunnel interface number, source and destination IP addresses of the primary tunnel, tunnel ID, RSVP-TE signaling protocol, and tunnel bandwidth</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172368342__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface.</span><p><p>Assign an IP address and its mask to every physical interface and configure a loopback interface address as an LSR ID on every node according to <a href="#EN-US_TASK_0172368342__fig_dc_vrp_te-p2p_cfg_010601">Figure 1</a>. For configuration details, see <a href="#EN-US_TASK_0172368342__section_dc_vrp_te-p2p_cfg_010605">Configuration Files</a> in this section.</p>
+</p></li><li><span>Configure OSPF to advertise every network segment route and host route.</span><p><p>Configure OSPF on all nodes to advertise host routes. For configuration details, see <a href="#EN-US_TASK_0172368342__section_dc_vrp_te-p2p_cfg_010605">Configuration Files</a> in this section.</p>
+<p>After completing the configurations, run the <strong>display ip routing-table</strong> command on every node. All nodes have learned routes from one another.</p>
+</p></li><li><span>Configure basic MPLS functions and enable MPLS TE, RSVP-TE, and CSPF.</span><p><p># Configure LSRA.</p>
+<pre class="screen">[<span class="keyword">*</span>LSRA]<strong> mpls lsr-id 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-mpls] <strong>mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-mpls]<strong> mpls rsvp-te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-mpls] <strong>mpls te cspf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA]<strong> interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-GigabitEthernet<span>0/2/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-GigabitEthernet<span>0/2/0</span>] <strong>mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-GigabitEthernet<span>0/2/0</span>] <strong>mpls rsvp-te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-GigabitEthernet<span>0/2/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-GigabitEthernet<span>0/1/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-GigabitEthernet<span>0/1/0</span>] <strong>mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-GigabitEthernet<span>0/1/0</span>] <strong>mpls rsvp-te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Repeat this step for LSRB, LSRC, and LSRD. For configuration details, see <a href="#EN-US_TASK_0172368342__section_dc_vrp_te-p2p_cfg_010605">Configuration Files</a> in this section.</p>
+</div></div>
+</p></li><li><span>Configure MPLS TE bandwidth attributes for links.</span><p><p># Set the maximum<span> reservable</span> bandwidth and <span>BC0</span> bandwidth for a link on every interface along the TE tunnel.</p>
+<p># Configure LSRA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA-GigabitEthernet<span>0/1/0</span>] <strong>mpls te <span>bandwidth max-reservable-bandwidth</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-GigabitEthernet<span>0/1/0</span>] <strong>mpls te <span>bandwidth bc0</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA]<strong> interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA-GigabitEthernet<span>0/2/0</span>] <strong>mpls te <span>bandwidth max-reservable-bandwidth</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-GigabitEthernet<span>0/2/0</span>] <strong>mpls te <span>bandwidth bc0</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA] <strong>commit</strong></pre>
+<p># Configure LSRB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRB]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRB-GigabitEthernet<span>0/1/0</span>] <strong>mpls te <span>bandwidth max-reservable-bandwidth</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB-GigabitEthernet<span>0/1/0</span>] <strong>mpls te <span>bandwidth bc0</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRB]<strong> interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRB-GigabitEthernet<span>0/2/0</span>] <strong>mpls te <span>bandwidth max-reservable-bandwidth</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB-GigabitEthernet<span>0/2/0</span>] <strong>mpls te <span>bandwidth bc0</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB]<strong> interface gigabitethernet <span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB-GigabitEthernet<span>0/3/0</span>] <strong>mpls te <span>bandwidth max-reservable-bandwidth</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB-GigabitEthernet<span>0/3/0</span>] <strong>mpls te <span>bandwidth bc0</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB-GigabitEthernet<span>0/3/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB-GigabitEthernet<span>0/2/0</span>] <strong>commit</strong></pre>
+<p># Configure LSRC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRC]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRC-GigabitEthernet<span>0/1/0</span>] <strong>mpls te <span>bandwidth max-reservable-bandwidth</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRC-GigabitEthernet<span>0/1/0</span>] <strong>mpls te <span>bandwidth bc0</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRC-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRC]<strong> interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRC-GigabitEthernet<span>0/2/0</span>] <strong>mpls te <span>bandwidth max-reservable-bandwidth</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRC-GigabitEthernet<span>0/2/0</span>] <strong>mpls te <span>bandwidth bc0</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRC-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRC]<strong> interface gigabitethernet <span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRC-GigabitEthernet<span>0/3/0</span>] <strong>mpls te <span>bandwidth max-reservable-bandwidth</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRC-GigabitEthernet<span>0/3/0</span>] <strong>mpls te <span>bandwidth bc0</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRC-GigabitEthernet<span>0/3/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRC-GigabitEthernet<span>0/3/0</span>] <strong>commit</strong></pre>
+<p># Configure LSRD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRD]<strong> interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRD-GigabitEthernet<span>0/2/0</span>] <strong>mpls te <span>bandwidth max-reservable-bandwidth</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRD-GigabitEthernet<span>0/2/0</span>] <strong>mpls te <span>bandwidth bc0</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRD-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRD]<strong> interface gigabitethernet <span>0/3/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRD-GigabitEthernet<span>0/3/0</span>] <strong>mpls te <span>bandwidth max-reservable-bandwidth</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRD-GigabitEthernet<span>0/3/0</span>] <strong>mpls te <span>bandwidth bc0</span> 100000</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRD-GigabitEthernet<span>0/3/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRD-GigabitEthernet<span>0/3/0</span>] <strong>commit</strong></pre>
+</p></li><li><span>Configure OSPF TE.</span><p><p># Configure LSRA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA] <strong>ospf</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA-ospf-1]<strong> opaque-capability enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-ospf-1] <strong>area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-ospf-1-area-0.0.0.0]<strong> mpls-te enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-ospf-1-area-0.0.0.0]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA-ospf-1-area-0.0.0.0]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA-ospf-1] <strong>quit</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Repeat this step for LSRB, LSRC, and LSRD. For configuration details, see <a href="#EN-US_TASK_0172368342__section_dc_vrp_te-p2p_cfg_010605">Configuration Files</a> in this section.</p>
+</div></div>
+</p></li><li><span>Configure an explicit path for the primary CR-LSP.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA]<strong> explicit-path master</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-explicit-path-master] <strong>next hop 10.21.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-explicit-path-master] <strong>next hop 10.31.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-explicit-path-master] <strong>commit</strong></pre>
+</p></li><li><span>Configure TE Auto FRR.</span><p><p># Configure LSRA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA-mpls]<strong> mpls te auto-frr</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-mpls]<strong> commit</strong></pre>
+<p># Configure LSRB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRB]<strong> mpls</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRB-mpls]<strong> mpls te auto-frr</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRB-mpls]<strong> commit</strong></pre>
+</p></li><li><span>Configure a primary tunnel.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA]<strong> interface tunnel2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-Tunnel2]<strong> ip address unnumbered interface loopBack1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-Tunnel2]<strong> tunnel-protocol mpls te</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-Tunnel2]<strong> destination 3.3.3.3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-Tunnel2]<strong> mpls te tunnel-id 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-Tunnel2]<strong> mpls te record-route label</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-Tunnel2]<strong> mpls te path explicit-path master</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-Tunnel2]<strong> mpls te bandwidth <span>ct</span>0 400</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-Tunnel2]<strong> mpls te priority 4 3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-Tunnel2]<strong> mpls te fast-reroute bandwidth</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-Tunnel2]<strong> mpls te bypass-attributes bandwidth 200 priority 5 4</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>LSRA-Tunnel2]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA-Tunnel2]<strong> quit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p>Run the <strong>display mpls te tunnel name Tunnel2 verbose</strong> command on LSRA. Information about the primary and bypass CR-LSPs is displayed.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA] <strong>display mpls te tunnel name Tunnel2 verbose</strong></pre>
+<pre class="screen">    No                      :  1
+    Tunnel-Name             :  Tunnel2
+    Tunnel Interface Name   :  Tunnel2
+    TunnelIndex             :  - 
+    Session ID              :  200         LSP ID            :  164
+    LSR Role                :  Ingress
+    Ingress LSR ID          :  1.1.1.1
+    Egress LSR ID           :  3.3.3.3
+    In-Interface            :  -
+    Out-Interface           :  GE<span>0/2/0</span>
+    Sign-Protocol           :  RSVP TE     Resv Style        :  SE
+    IncludeAnyAff           :  0x0         ExcludeAnyAff     :  0x0
+    IncludeAllAff           :  0x0  
+    ER-Hop Table Index      :  1           AR-Hop Table Index:  674
+    C-Hop Table Index       :  579
+    PrevTunnelIndexInSession:  -           NextTunnelIndexInSession:  -
+    PSB Handle              :  -
+    Created Time            :  2015-01-28 11:10:32
+    RSVP LSP Type           :  -
+    --------------------------------
+              DS-TE Information
+    --------------------------------
+    Bandwidth Reserved Flag :  Reserved
+    CT0 Bandwidth(Kbit/sec) :  400         CT1 Bandwidth(Kbit/sec):  0
+    CT2 Bandwidth(Kbit/sec) :  0           CT3 Bandwidth(Kbit/sec):  0
+    CT4 Bandwidth(Kbit/sec) :  0           CT5 Bandwidth(Kbit/sec):  0
+    CT6 Bandwidth(Kbit/sec) :  0           CT7 Bandwidth(Kbit/sec):  0
+    Setup-Priority          :  4           Hold-Priority          :  3
+    --------------------------------
+                FRR Information
+    --------------------------------
+    Primary LSP Info
+    Bypass In Use           :  Not Used
+    Bypass Tunnel Id        :  32866
+    BypassTunnel            :  <strong>Tunnel Index[AutoTunnel32866]</strong>, InnerLabel[3]
+    Bypass LSP ID           :  165         FrrNextHop        :  10.1.1.1
+    ReferAutoBypassHandle   :  -
+    FrrPrevTunnelTableIndex :  -           FrrNextTunnelTableIndex:  -
+    Bypass Attribute
+    Setup Priority          :  5           Hold Priority     :  4
+    HopLimit                :  32          Bandwidth         :  200
+    IncludeAnyGroup         :  0           ExcludeAnyGroup   :  0
+    IncludeAllGroup         :  0    
+    Bypass Unbound Bandwidth Info(Kbit/sec)
+    CT0 Unbound Bandwidth   :  -           CT1 Unbound Bandwidth:  -
+    CT2 Unbound Bandwidth   :  -           CT3 Unbound Bandwidth:  -
+    CT4 Unbound Bandwidth   :  -           CT5 Unbound Bandwidth:  -
+    CT6 Unbound Bandwidth   :  -           CT7 Unbound Bandwidth:  -
+    --------------------------------
+               BFD Information
+    --------------------------------
+    NextSessionTunnelIndex  :  -           PrevSessionTunnelIndex:  -
+    NextLspId               :  -           PrevLspId         :  -</pre>
+<p>The primary CR-LSP has been bound to a bypass CR-LSP named <strong>AutoTunnel32866</strong>.</p>
+<p>Run the <strong>display mpls te tunnel-interface auto-bypass-tunnel</strong> command. Detailed information about the automatic bypass CR-LSP is displayed. Its bandwidth, and setup and holding priorities are the same as bypass attributes in the primary CR-LSP information.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA] <strong>display mpls te tunnel-interface auto-bypass-tunnel AutoTunnel32866</strong></pre>
+<pre class="screen">    Tunnel Name       : AutoTunnel32866
+    Signalled Tunnel Name: -
+    Tunnel State Desc : CR-LSP is Up
+    Tunnel Attributes   :     
+    Active LSP          : Primary LSP
+    Traffic Switch      : - 
+    Session ID          : 32866
+    Ingress LSR ID      : 1.1.1.1               Egress LSR ID: 3.3.3.3
+    Admin State         : UP                    Oper State   : UP
+    Signaling Protocol  : RSVP
+    FTid                : 130
+    Tie-Breaking Policy : None                  Metric Type  : None
+    Bfd Cap             : None                  
+    Reopt               : Disabled              Reopt Freq   : -  
+    Inter-area Reopt    : Disabled 
+    Auto BW             : Disabled              Threshold    : - 
+    Current Collected BW: -                     Auto BW Freq : -
+    Min BW              : -                     Max BW       : -
+    Offload             : Disabled              Offload Freq : - 
+    Low Value           : -                     High Value   : - 
+    Readjust Value      : - 
+    Offload Explicit Path Name: -
+    Tunnel Group        : Primary
+    Interfaces Protected: GigabitEthernet<span>0/2/0</span>
+    Excluded IP Address : 10.21.1.1
+                          10.21.1.2
+                          2.2.2.2
+    Referred LSP Count  : 1
+    Primary Tunnel      : -                     Pri Tunn Sum : -
+    Backup Tunnel       : -
+    Group Status        : Down                  Oam Status   : None
+    IPTN InLabel        : -                                                    
+    BackUp LSP Type     : None                  BestEffort   : Disabled
+    Secondary HopLimit  : -
+    BestEffort HopLimit  : -
+    Secondary Explicit Path Name: -
+    Secondary Affinity Prop/Mask: 0x0/0x0
+    BestEffort Affinity Prop/Mask: 0x0/0x0  
+    IsConfigLspConstraint: -
+    Hot-Standby Revertive Mode:  Revertive
+    Hot-Standby Overlap-path:  Disabled
+    Hot-Standby Switch State:  CLEAR
+<span>    Bit Error Detection:  Disabled
+    Bit Error Detection Switch Threshold:  -
+    Bit Error Detection Resume Threshold:  -</span>
+<span>    Ip-Prefix Name    : -
+    P2p-Template Name : -</span>
+<span>    PCE Delegate      : No                    LSP Control Status : Local control</span>
+    Path Verification : --
+    Entropy Label     : None 
+    Associated Tunnel Group ID: -             Associated Tunnel Group Type: -
+    Auto BW Remain Time : 200 s               Reopt Remain Time  : 100 s
+<span>    Metric Inherit IGP : None</span>
+<span>    Binding Sid       : -                     Reverse Binding Sid : - </span>
+    Self-Ping         : Disable               Self-Ping Duration : 1800 sec
+    FRR Attr Source   : -                     Is FRR degrade down : No
+    
+    Primary LSP ID      : 1.1.1.1:165
+    LSP State           : UP                   LSP Type     : Primary
+    <strong>Setup Priority    : 5                 Hold Priority: 4</strong>
+    IncludeAll          : 0x0
+    IncludeAny          : 0x0
+    ExcludeAny          : 0x0
+    Affinity Prop/Mask  : 0x0/0x0               Resv Style   :  SE
+    Configured Bandwidth Information:
+    CT0 Bandwidth(Kbit/sec): 200             CT1 Bandwidth(Kbit/sec): 0
+    CT2 Bandwidth(Kbit/sec): 0               CT3 Bandwidth(Kbit/sec): 0
+    CT4 Bandwidth(Kbit/sec): 0               CT5 Bandwidth(Kbit/sec): 0
+    CT6 Bandwidth(Kbit/sec): 0               CT7 Bandwidth(Kbit/sec): 0
+    Actual Bandwidth Information:
+    CT0 Bandwidth(Kbit/sec): 200             CT1 Bandwidth(Kbit/sec): 0
+    CT2 Bandwidth(Kbit/sec): 0               CT3 Bandwidth(Kbit/sec): 0
+    CT4 Bandwidth(Kbit/sec): 0               CT5 Bandwidth(Kbit/sec): 0
+    CT6 Bandwidth(Kbit/sec): 0               CT7 Bandwidth(Kbit/sec): 0
+    Explicit Path Name  : master                           Hop Limit: -
+    Record Route        : Enabled               Record Label : Enabled
+    Route Pinning       : Disabled
+    FRR Flag            : Disabled
+    IdleTime Remain     : -
+    BFD Status          : -
+<span>    Soft Preemption     : Disabled</span>
+    Reroute Flag        : Disabled
+    Pce Flag            : Normal<span>
+    Path Setup Type     : EXPLICIT</span>
+    Create Modify LSP Reason: -
+    Self-Ping Status    : -</pre>
+<p>The automatic bypass CR-LSP protects traffic on GE <span>0/2/0</span>, the outbound interface of the primary CR-LSP, not other three interfaces. The bandwidth is 200 kbit/s, and the setup and holding priority values are 5 and 4, respectively.</p>
+<p>Run the <strong>display mpls te tunnel path</strong> command on LSRA. The bypass CR-LSP is providing both node and bandwidth protection for the primary CR-LSP.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRA] <strong>display mpls te tunnel path</strong></pre>
+<pre class="screen"> Tunnel Interface Name : Tunnel2
+ Lsp ID : 1.1.1.1 :200 :164
+ Hop Information
+  Hop 0   10.21.1.1 Local-Protection available | bandwidth | node
+  Hop 1   10.21.1.2 Label 32846
+  Hop 2   2.2.2.2 Label 32846
+  Hop 3   10.31.1.1 Local-Protection available | bandwidth
+  Hop 4   10.31.1.2 Label 3
+  Hop 5   3.3.3.3 Label 3
+  
+ Tunnel Interface Name : AutoTunnel32866
+ Lsp ID : 1.1.1.1 :32866 :165
+ Hop Information
+  Hop 0   10.1.1.2
+  Hop 1   10.1.1.1 Label 3
+  Hop 2   3.3.3.3 Label 3</pre>
+<p>Run the <strong>display mpls te tunnel name Tunnel2 verbose</strong> command on the transit LSRB. Information about the primary and bypass CR-LSPs is displayed.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRB] <strong>display mpls te tunnel name Tunnel2 verbose</strong></pre>
+<pre class="screen">    No                      :  1
+    Tunnel-Name             :  Tunnel2
+    Tunnel Interface Name   :  -
+    TunnelIndex             :  - 
+    Session ID              :  200         LSP ID            :  164
+    LSR Role                :  Transit
+    Ingress LSR ID          :  1.1.1.1
+    Egress LSR ID           :  3.3.3.3
+    In-Interface            :  GE<span>0/3/0</span>
+    Out-Interface           :  GE<span>0/2/0</span>
+    Sign-Protocol           :  RSVP TE     Resv Style        :  SE
+    IncludeAnyAff           :  0x0         ExcludeAnyAff     :  0x0
+    IncludeAllAff           :  0x0  
+    ER-Hop Table Index      :  -           AR-Hop Table Index:  -
+    C-Hop Table Index       :  -
+    PrevTunnelIndexInSession:  -           NextTunnelIndexInSession:  -
+    PSB Handle              :  -
+    Created Time            :  2015-01-28 11:10:32
+    RSVP LSP Type           :  -
+    --------------------------------
+              DS-TE Information
+    --------------------------------
+    Bandwidth Reserved Flag :  Reserved
+    CT0 Bandwidth(Kbit/sec) :  400         CT1 Bandwidth(Kbit/sec):  0
+    CT2 Bandwidth(Kbit/sec) :  0           CT3 Bandwidth(Kbit/sec):  0
+    CT4 Bandwidth(Kbit/sec) :  0           CT5 Bandwidth(Kbit/sec):  0
+    CT6 Bandwidth(Kbit/sec) :  0           CT7 Bandwidth(Kbit/sec):  0
+    Setup-Priority          :  4           Hold-Priority          :  3
+    --------------------------------
+                FRR Information
+    --------------------------------
+    Primary LSP Info
+    Bypass In Use           :  Not Used
+    Bypass Tunnel Id        :  32865
+    BypassTunnel            :  <strong>Tunnel Index[AutoTunnel32865]</strong>, InnerLabel[3]
+    Bypass LSP ID           :  6           FrrNextHop        :  10.41.1.2
+    ReferAutoBypassHandle   :  -
+    FrrPrevTunnelTableIndex :  -           FrrNextTunnelTableIndex:  -
+    Bypass Attribute
+    Setup Priority          :  5           Hold Priority     :  4
+    HopLimit                :  32          Bandwidth         :  200
+    IncludeAnyGroup         :  0           ExcludeAnyGroup   :  0
+    IncludeAllGroup         :  0    
+    Bypass Unbound Bandwidth Info(Kbit/sec)
+    CT0 Unbound Bandwidth   :  -           CT1 Unbound Bandwidth:  -
+    CT2 Unbound Bandwidth   :  -           CT3 Unbound Bandwidth:  -
+    CT4 Unbound Bandwidth   :  -           CT5 Unbound Bandwidth:  -
+    CT6 Unbound Bandwidth   :  -           CT7 Unbound Bandwidth:  -
+    --------------------------------
+               BFD Information
+    --------------------------------
+    NextSessionTunnelIndex  :  -           PrevSessionTunnelIndex:  -
+    NextLspId               :  -           PrevLspId         :  - </pre>
+<p>The primary CR-LSP has been bound to a bypass CR-LSP named <strong>AutoTunnel32865</strong>.</p>
+<p>Run the <strong>display mpls te tunnel-interface auto-bypass-tunnel</strong> command. Detailed information about the automatic bypass CR-LSP is displayed. Its bandwidth, and setup and holding priorities are the same as bypass attributes in the primary CR-LSP information.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRB] <strong>display mpls te tunnel-interface auto-bypass-tunnel AutoTunnel32865</strong></pre>
+<pre class="screen">    Tunnel Name       : AutoTunnel32865
+    Signalled Tunnel Name: -
+    Tunnel State Desc : CR-LSP is Up
+    Tunnel Attributes   :     
+    Active LSP          : Primary LSP
+    Traffic Switch      : - 
+    Session ID          : 32865
+    Ingress LSR ID      : 2.2.2.2               Egress LSR ID: 3.3.3.3
+    Admin State         : UP                    Oper State   : UP
+    Signaling Protocol  : RSVP
+    FTid                : 97
+    Tie-Breaking Policy : None                  Metric Type  : None
+    Bfd Cap             : None                  
+    Reopt               : Disabled              Reopt Freq   : -
+    Inter-area Reopt    : Disabled 
+    Auto BW             : Disabled              Threshold    : - 
+    Current Collected BW: -                     Auto BW Freq : -
+    Min BW              : -                     Max BW       : -
+    Offload             : Disabled              Offload Freq : - 
+    Low Value           : -                     High Value   : - 
+    Readjust Value      : - 
+    Offload Explicit Path Name: -
+    Tunnel Group        : Primary
+    Interfaces Protected: GigabitEthernet<span>0/2/0</span>
+    Excluded IP Address : 10.31.1.1
+                          10.31.1.2
+    Referred LSP Count  : 1
+    Primary Tunnel      : -                     Pri Tunn Sum : -
+    Backup Tunnel       : -
+    Group Status        : Down                  Oam Status   : None
+    IPTN InLabel        : -                                                    
+    BackUp LSP Type     : None                  BestEffort   : Disabled
+    Secondary HopLimit  : -
+    BestEffort HopLimit  : -
+    Secondary Explicit Path Name: -
+    Secondary Affinity Prop/Mask: 0x0/0x0
+    BestEffort Affinity Prop/Mask: 0x0/0x0  
+    IsConfigLspConstraint: -
+    Hot-Standby Revertive Mode:  Revertive
+    Hot-Standby Overlap-path:  Disabled
+    Hot-Standby Switch State:  CLEAR
+<span>    Bit Error Detection:  Disabled
+    Bit Error Detection Switch Threshold:  -
+    Bit Error Detection Resume Threshold:  -</span>
+<span>    Ip-Prefix Name    : -
+    P2p-Template Name : -</span>
+<span>    PCE Delegate      : No                    LSP Control Status : Local control</span>
+    Path Verification : -
+    Entropy Label     : None 
+    Associated Tunnel Group ID: -             Associated Tunnel Group Type: -
+    Auto BW Remain Time : 200 s               Reopt Remain Time  : 100 s
+<span>    Metric Inherit IGP : None</span>
+<span>    Binding Sid       : -                     Reverse Binding Sid : - </span>
+    Self-Ping         : Disable               Self-Ping Duration : 1800 sec
+    FRR Attr Source   : -                     Is FRR degrade down : No
+    
+    Primary LSP ID      : 2.2.2.2:6
+    LSP State           : UP                    LSP Type     : Primary
+    Setup Priority      : 5                     Hold Priority: 4
+    IncludeAll          : 0x0
+    IncludeAny          : 0x0
+    ExcludeAny          : 0x0
+    Affinity Prop/Mask  : 0x0/0x0               Resv Style   :  SE
+    Configured Bandwidth Information:
+    CT0 Bandwidth(Kbit/sec): 200             CT1 Bandwidth(Kbit/sec): 0
+    CT2 Bandwidth(Kbit/sec): 0               CT3 Bandwidth(Kbit/sec): 0
+    CT4 Bandwidth(Kbit/sec): 0               CT5 Bandwidth(Kbit/sec): 0
+    CT6 Bandwidth(Kbit/sec): 0               CT7 Bandwidth(Kbit/sec): 0
+    Actual Bandwidth Information:
+    CT0 Bandwidth(Kbit/sec): 200             CT1 Bandwidth(Kbit/sec): 0
+    CT2 Bandwidth(Kbit/sec): 0               CT3 Bandwidth(Kbit/sec): 0
+    CT4 Bandwidth(Kbit/sec): 0               CT5 Bandwidth(Kbit/sec): 0
+    CT6 Bandwidth(Kbit/sec): 0               CT7 Bandwidth(Kbit/sec): 0
+    Explicit Path Name  : -                                Hop Limit: -
+    Record Route        : Enabled               Record Label : Enabled
+    Route Pinning       : Disabled
+    FRR Flag            : Disabled
+    IdleTime Remain     : -
+    BFD Status          : -
+<span>    Soft Preemption     : Disabled</span>
+    Reroute Flag        : Disabled
+    Pce Flag            : Normal<span>
+    Path Setup Type     : CSPF</span>
+    Create Modify LSP Reason: -
+    Self-Ping Status    : -</pre>
+<p>The automatic bypass CR-LSP protects traffic on GE <span>0/2/0</span>, the outbound interface of the primary CR-LSP. The bandwidth is 200 kbit/s, and the setup and holding priority values are 5 and 4, respectively.</p>
+<p>Run the <strong>display mpls te tunnel path</strong> command on LSRB. Information about the path of both primary CR-LSP and automatic bypass CR-LSP is displayed.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>LSRB] <strong>display mpls te tunnel path</strong></pre>
+<pre class="screen"> Tunnel Interface Name : Tunnel2
+ Lsp ID : 1.1.1.1 :200 :164
+ Hop Information
+  Hop 0   1.1.1.1
+  Hop 1   10.21.1.1 Local-Protection available | bandwidth | node
+  Hop 2   10.21.1.2 Label 32846
+  Hop 3   2.2.2.2 Label 32846
+  Hop 4   10.31.1.1 Local-Protection available | bandwidth
+  Hop 5   10.31.1.2 Label 3
+  Hop 6   3.3.3.3 Label 3
+  
+ Tunnel Interface Name : AutoTunnel32865
+ Lsp ID : 2.2.2.2 :32865 :6
+ Hop Information
+  Hop 0   10.32.1.1
+  Hop 1   10.32.1.2 Label 32839
+  Hop 2   4.4.4.4 Label 32839
+  Hop 3   10.41.1.1
+  Hop 4   10.41.1.2 Label 3
+  Hop 5   3.3.3.3 Label 3</pre>
+</p></li></ol></div>
+<div class="example" id="EN-US_TASK_0172368342__section_dc_vrp_te-p2p_cfg_010605"><a name="EN-US_TASK_0172368342__section_dc_vrp_te-p2p_cfg_010605"></a><a name="section_dc_vrp_te-p2p_cfg_010605"></a><a name="EN-US_TASK_0172368342__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>LSRA configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname LSRA</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls lsr-id 1.1.1.1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls</pre>
+<pre class="screen"> mpls te</pre>
+<pre class="screen"> mpls te auto-frr</pre>
+<pre class="screen"> mpls te cspf</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">explicit-path master</pre>
+<pre class="screen"> next hop 10.21.1.1</pre>
+<pre class="screen"> next hop 10.31.1.1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> opaque-capability enable</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  mpls-te enable</pre>
+<pre class="screen">  network 10.1.1.0 0.0.0.255</pre>
+<pre class="screen">  network 10.21.1.0 0.0.0.255</pre>
+<pre class="screen">  network 1.1.1.1 0.0.0.0</pre>
+<pre class="screen">#    </pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.1.1.2 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls te
+ mpls te bandwidth max-reservable-bandwidth 100000
+ mpls te bandwidth bc0 100000</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#    </pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.21.1.1 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls te
+ mpls te bandwidth max-reservable-bandwidth 100000
+ mpls te bandwidth bc0 100000</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 1.1.1.1 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface Tunnel2</pre>
+<pre class="screen"> ip address unnumbered interface LoopBack1</pre>
+<pre class="screen"> tunnel-protocol mpls te</pre>
+<pre class="screen"> destination 3.3.3.3</pre>
+<pre class="screen"> mpls te tunnel-id 200</pre>
+<pre class="screen"> mpls te record-route label</pre>
+<pre class="screen"> mpls te priority 4 3</pre>
+<pre class="screen"> mpls te bandwidth <span>ct</span>0 400</pre>
+<pre class="screen"> mpls te path explicit-path master</pre>
+<pre class="screen"> mpls te fast-reroute bandwidth</pre>
+<pre class="screen"> mpls te bypass-attributes bandwidth 200 priority 5 4</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>LSRB configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname LSRB</pre>
+<pre class="screen"># </pre>
+<pre class="screen">mpls lsr-id 2.2.2.2</pre>
+<pre class="screen"># </pre>
+<pre class="screen">mpls</pre>
+<pre class="screen"> mpls te</pre>
+<pre class="screen"> mpls te auto-frr</pre>
+<pre class="screen"> mpls te cspf</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> opaque-capability enable</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  mpls-te enable</pre>
+<pre class="screen">  network 10.31.1.0 0.0.0.255</pre>
+<pre class="screen">  network 10.32.1.0 0.0.0.255</pre>
+<pre class="screen">  network 10.21.1.0 0.0.0.255</pre>
+<pre class="screen">  network 2.2.2.2 0.0.0.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.32.1.1 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls te
+ mpls te bandwidth max-reservable-bandwidth 100000
+ mpls te bandwidth bc0 100000</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen"># </pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.31.1.1 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls te
+ mpls te bandwidth max-reservable-bandwidth 100000
+ mpls te bandwidth bc0 100000</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/3/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.21.1.2 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls te
+ mpls te bandwidth max-reservable-bandwidth 100000
+ mpls te bandwidth bc0 100000</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 2.2.2.2 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>LSRC configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname LSRC</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls lsr-id 3.3.3.3</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls</pre>
+<pre class="screen"> mpls te</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> opaque-capability enable</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  mpls-te enable</pre>
+<pre class="screen">  network 10.1.1.0 0.0.0.255</pre>
+<pre class="screen">  network 10.31.1.0 0.0.0.255</pre>
+<pre class="screen">  network 10.41.1.0 0.0.0.255</pre>
+<pre class="screen">  network 3.3.3.3 0.0.0.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.1.1.1 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls te 
+ mpls te bandwidth max-reservable-bandwidth 100000
+ mpls te bandwidth bc0 100000</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.41.1.2 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls te
+ mpls te bandwidth max-reservable-bandwidth 100000
+ mpls te bandwidth bc0 100000</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/3/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.31.1.2 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls te
+ mpls te bandwidth max-reservable-bandwidth 100000
+ mpls te bandwidth bc0 100000</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 3.3.3.3 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>LSRD configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname LSRD</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls lsr-id 4.4.4.4</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls</pre>
+<pre class="screen"> mpls te</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> opaque-capability enable</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  mpls-te enable</pre>
+<pre class="screen">  network 10.32.1.0 0.0.0.255</pre>
+<pre class="screen">  network 10.41.1.0 0.0.0.255</pre>
+<pre class="screen">  network 4.4.4.4 0.0.0.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> ip address 10.41.1.1 255.255.255.0</pre>
+<pre class="screen"> mpls te
+ mpls te bandwidth max-reservable-bandwidth 100000
+ mpls te bandwidth bc0 100000</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/3/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.32.1.2 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls te
+ mpls te bandwidth max-reservable-bandwidth 100000
+ mpls te bandwidth bc0 100000</pre>
+<pre class="screen"> mpls rsvp-te</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 4.4.4.4 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">Return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0093.html">Configuration Examples for MPLS TE
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0105.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_te-p2p_cfg_0213.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

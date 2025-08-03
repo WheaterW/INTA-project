@@ -1,0 +1,306 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring a Device to Communicate with ncclient Using NETCONF">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_netconf_cfg1_0068.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_netconf_cfg1_0074.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="featurename" content="NETCONF">
+<meta name="featuretype" content="System Management">
+<meta name="featuretype" content="System Management">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001512842470">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring a Device to Communicate with ncclient Using NETCONF</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001512842470"></a><a name="EN-US_TASK_0000001512842470"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring a Device to Communicate with ncclient Using NETCONF</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001512842470__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>When the NMS is used to centrally manage devices on a network that requires high security and scalability, you can use NETCONF to ensure communication between the NMS and the devices.</p>
+<p>On the network shown in <a href="#EN-US_TASK_0000001512842470__fig_dc_vrp_netconf_cfg_000901">Figure 1</a>, <span>the NMS is deployed on client001 that functions as the SSH client. The server functions as the SSH server, which receives connection requests and establishes a connection with the SSH client, implementing configuration file management using NETCONF. SSH is a secure application-layer protocol, thereby enhancing the reliability of NETCONF.</span></p>
+<div class="fignone" id="EN-US_TASK_0000001512842470__fig_dc_vrp_netconf_cfg_000901"><a name="EN-US_TASK_0000001512842470__fig_dc_vrp_netconf_cfg_000901"></a><a name="fig_dc_vrp_netconf_cfg_000901"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuration file management using NETCONF</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1 represents <span>100GE</span><span>1/0/1</span>.</p>
+</div></div>
+<br><span><img src="figure/en-us_image_0000001615334489.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001512842470__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>An SSH user named <strong>client001</strong> is used as an example. If password authentication is used to authenticate the SSH user, the server needs to generate an Elliptic Curves Cryptography (ECC) key.</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001512842470__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Configure an IP address for the server interface1 connecting to the client so that the Layer 3 route between the client and server is reachable.</li><li>Configure virtual type terminal (VTY) user interfaces on the server to support SSH so that SSH users can be managed and monitored with better connection security.</li><li><p>Deploy SSH on the server to improve NETCONF security.</p>
+<ol type="a"><li>Create an SSH user with administrative rights.</li><li>Create an ECC key pair.</li><li>Configure an authentication mode for the SSH user.</li><li>Configure a service type for the SSH user.</li></ol>
+</li><li>Enable NETCONF so that the client can log in to the server.</li><li>Deploy the NMS on the client to implement NMS-based network management on the client.</li><li><p>Log in to the server using the NMS to manage configuration files remotely.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001512842470__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure an IP address for <span>100GE</span><span>1/0/1</span>.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname netconf-agent</strong>
+[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>netconf-agent] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[<span class="keyword">*</span>netconf-agent-<span>100GE</span><span>1/0/1</span>] <strong>undo portswitch</strong>
+[<span class="keyword">*</span>netconf-agent-<span>100GE</span><span>1/0/1</span>] <strong>ip address 10.1.1.1 24</strong>
+[<span class="keyword">*</span>netconf-agent-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[<span class="keyword">*</span>netconf-agent] <strong>commit</strong></pre>
+</p></li><li><span>Configure VTY user interfaces on the server to support SSH.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>netconf-agent] <strong>user-interface vty 0 4</strong>
+[<span class="keyword">*</span>netconf-agent-ui-vty0-4] <strong>authentication-mode aaa</strong>
+[<span class="keyword">*</span>netconf-agent-ui-vty0-4] <strong>protocol inbound ssh</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>netconf-agent-ui-vty0-4] <strong>quit</strong>
+[<span class="keyword">*</span>netconf-agent] <strong>commit</strong></pre>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>After SSH is configured, the device automatically disables the Telnet function.</p>
+</div></div>
+</p></li><li><span>Deploy SSH on the server.</span><p><ol type="a"><li><p>Create an SSH user.</p>
+<p># Create the SSH user <strong>client001</strong>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>netconf-agent] <strong>ssh user client001</strong>
+[<span class="keyword">*</span>netconf-agent] <strong>aaa</strong>
+[<span class="keyword">*</span>netconf-agent-aaa] <strong>local-user client001 password irreversible-cipher YsHsjx_202206</strong>
+[<span class="keyword">*</span>netconf-agent-aaa] <strong>local-user client001 service-type ssh</strong>
+[<span class="keyword">*</span>netconf-agent-aaa] <strong>local-user client001 privilege level 3</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>netconf-agent-aaa] <strong>quit</strong>
+[<span class="keyword">*</span>netconf-agent] <strong>commit</strong></pre>
+</li><li><p>Create an ECC key pair.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>netconf-agent] <strong>ecc local-key-pair create</strong>
+Info: The key name will be: Host_ECC
+Info: The key modulus can be any one of the following: 256, 384, 521.
+Info: Key pair generation will take a short while.
+Please input the modulus [default=521]: 
+Info: Generating keys...
+Info: Succeeded in creating the ECC host keys.
+[<span class="keyword">*</span>netconf-agent] <strong>commit</strong></pre>
+<p>After the ECC key pair is created, run the <a href="cmdqueryname=display+ecc+local-key-pair+public"><b><span class="cmdname">display ecc local-key-pair public</span></b></a> command to check information about the public key in the ECC key pair.</p>
+</li><li><p>Configure an authentication mode for the SSH user.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>netconf-agent] <strong>ssh user client001 authentication-type password</strong>
+[<span class="keyword">*</span>netconf-agent] <strong>commit</strong></pre>
+</li><li><p>Configure a service type for the SSH user.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>netconf-agent] <strong>ssh user client001 service-type all</strong>
+[<span class="keyword">*</span>netconf-agent] <strong>commit</strong></pre>
+</li><li>Configure a source interface for the SSH server.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>netconf-agent] <strong>ssh server-source all-interface</strong>
+[<span class="keyword">*</span>netconf-agent] <strong>commit</strong></pre>
+</li></ol>
+</p></li><li><span>Enable NETCONF on the server.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>netconf-agent] <strong>snetconf server enable</strong>
+[<span class="keyword">*</span>netconf-agent] <strong>commit</strong></pre>
+</p></li><li><span>Set the NETCONF timeout interval.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>netconf-agent] <strong>netconf</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>netconf-agent-netconf] <strong>idle-timeout 0 0</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>netconf-agent-netconf] <strong>quit</strong>
+[<span class="keyword">*</span>netconf-agent] <strong>commit</strong></pre>
+</p></li><li><span>Deploy the NMS on the client and log in to the server through the NMS.</span><p><p>The following uses ncclient as an example to describe how to establish a NETCONF session. Before establishing a NETCONF session, ensure Layer 3 communication between ncclient and the management network interface on the server.</p>
+<p>Create an SSH connection from the ncclient to the server whose IP address is 10.1.1.1. The connection uses password authentication, with a username of <strong>client001</strong> and a password of <strong>YsHsjx_202206</strong>. When the connect function is invoked, the client connects to the device and automatically establishes a NETCONF session. The following two examples can be used as references. Run the following script on the ncclient. If a message like "No module named XXX" is displayed during script running, run the <strong>pip install </strong><em>XXX</em> command to install the required module.</p>
+<ul><li>Example 1: In this example, connection-related parameters are provided during script execution.<ol type="a"><li>Create a file named <strong>huawei-connect-1.py</strong> and copy the following content to it.<pre class="screen"># -*- coding: utf-8 -*- 
+import sys 
+from ncclient import manager 
+from ncclient import operations 
+ 
+def huawei_connect(host, port, user, password): 
+    return manager.connect(host=host, 
+                           port=port, 
+                           username=user, 
+                           password=password, 
+                           hostkey_verify = False, 
+                           device_params={'name': "huaweiyang"}, 
+                           allow_agent = False, 
+                           look_for_keys = False) 
+ 
+def <strong>test_connect</strong>(host, port, user, password): 
+    with huawei_connect(host, port=port, user=user, password=password) as m: 
+ 
+        n = m._session.id         
+        print("The session id is %s." % (n)) 
+ 
+<strong>if __name__ == '__main__':</strong>
+<strong>    test_connect</strong>(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])</pre>
+<p>Relevant parameters are as follows:</p>
+<ul><li><strong>host</strong>: IP address of the device functioning as a NETCONF server or the device that is accessed through SSH.</li></ul>
+<ul><li><strong>port</strong>: number of the port used to establish an SSH connection. The default port number is 22 if you run the <strong>snetconf server enable</strong> command to enable NETCONF, <p>or 830 if you run the <strong>protocol inbound ssh port 830</strong> command to establish a NETCONF connection.</p>
+</li></ul>
+<ul><li><strong>username</strong>: name of the configured SSH user.</li><li><strong>password</strong>: password of the SSH user.</li></ul>
+</li><li>Navigate to the path where the Python file resides and execute the file:<pre class="screen">&gt;python huawei-connect-1.py 10.1.1.1 22 client001 YsHsjx_202206</pre>
+</li></ol>
+</li><li>Example 2: In this example, connection-related parameters are provided in a script file.<ol type="a"><li>Create a file named <strong>huawei-connect-2.py</strong> and copy the following content to it.<pre class="screen"># -*- coding: utf-8 -*- 
+import sys 
+from ncclient import manager 
+from ncclient import operations 
+ 
+def huawei_connect(): 
+    return manager.connect(host="10.1.1.1", 
+                           port=22, 
+                           username="client001", 
+                           password="YsHsjx_202206", 
+                           hostkey_verify = False, 
+                           device_params={'name': "huaweiyang"}, 
+                           allow_agent = False, 
+                           look_for_keys = False) 
+ 
+def <strong>test_connect():</strong> 
+    with huawei_connect() as m: 
+ 
+        n = m._session.id         
+        print("The session id is %s." % (n)) 
+ 
+<strong>if __name__ == '__main__':</strong>
+<strong>    test_connect()</strong></pre>
+</li><li>Navigate to the path where the Python file resides and execute the file:<pre class="screen">&gt;python huawei-connect-2.py</pre>
+</li></ol>
+</li></ul>
+<p><strong>----End</strong></p>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001512842470__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p>After the preceding configuration is complete, you can log in to the remote device using NETCONF to manage its configuration files remotely.</p>
+<p>Run the following commands on the server (SSH server) to check configuration information:</p>
+<p># Run the <strong>display users</strong> command to check information about users who have logged in to the server.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>netconf-agent] <strong>display users</strong></pre>
+<pre class="screen">NOTE:
+User-Intf: The absolute number and the relative number of user interface
+Authen: Whether the authentication passes
+Author: Command line authorization flag
+--------------------------------------------------------------------------------
+  User-Intf   Delay     Type   Network Address   Authen    Author   Username
+--------------------------------------------------------------------------------
+  100 NCA 0   00:02:50  SSH    10.2.2.2          pass      yes      client001</pre>
+<p># Run the <strong>display ssh user-information</strong> command to check SSH user information.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>netconf-agent] <strong>display ssh user-information</strong></pre>
+<pre class="screen">--------------------------------------------------------------------------------
+User Name             : client001
+Authentication-Type   : password
+User-public-key-name  : -
+User-public-key-type  : -
+Sftp-directory        : -
+Service-type          : <strong>snetconf</strong>
+--------------------------------------------------------------------------------
+Total 1, 1 printed</pre>
+<p># Run the <strong>display ssh server status</strong> command to check global configurations of the SSH server.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>netconf-agent] <strong>display ssh server status</strong></pre>
+<pre class="screen">SSH Version                                : 2.0
+SSH authentication timeout (Seconds)       : 60
+SSH authentication retries (Times)         : 3
+SSH server key generating interval (Hours) : 0
+SSH version 1.x compatibility              : Enable
+SSH server keepalive                       : Disable
+SFTP IPv4 server                           : Disable
+SFTP IPv6 server                           : Disable
+STELNET IPv4 server                        : Disable
+STELNET IPv6 server                        : Disable
+SNETCONF IPv4 server                       : <strong>Enable</strong>
+SNETCONF IPv6 server                       : <strong>Enable</strong>
+SNETCONF IPv4 server port(830)             : Disable
+SNETCONF IPv6 server port(830)             : Disable
+SSH port forwarding                        : Disable
+SSH IPv4 server port                       : 22
+SSH IPv6 server port                       : 22
+ACL name                                   :
+ACL number                                 :
+ACL6 name                                  :
+ACL6 number                                :
+SSH server ip-block                        : Enable</pre>
+<p># Run the <strong>display netconf capability</strong> command to check the capabilities that the server supports.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>netconf-agent] <strong>display netconf capability</strong></pre>
+<pre class="screen">--------------------------------------------------
+Capability                                        
+--------------------------------------------------
+urn:ietf:params:netconf:base:1.0                  
+urn:ietf:params:netconf:base:1.1                  
+urn:ietf:params:netconf:capability:writable-running:1.0
+urn:ietf:params:netconf:capability:candidate:1.0  
+urn:ietf:params:netconf:capability:confirmed-commit:1.0
+urn:ietf:params:netconf:capability:confirmed-commit:1.1
+urn:ietf:params:netconf:capability:rollback-on-error:1.0
+urn:ietf:params:netconf:capability:validate:1.0   
+urn:ietf:params:netconf:capability:validate:1.1   
+urn:ietf:params:netconf:capability:startup:1.0    
+urn:ietf:params:netconf:capability:url:1.0?scheme=file,ftp,sftp
+urn:ietf:params:netconf:capability:xpath:1.0      
+urn:ietf:params:netconf:capability:notification:1.0
+urn:ietf:params:netconf:capability:interleave:1.0 
+urn:ietf:params:netconf:capability:with-defaults:1.0?basic-mode=report-all&amp;also-supported=report-all-tagged,trim
+urn:ietf:params:netconf:capability:yang-library:1.0?revision=2016-06-21&amp;module-set-id=1903662584
+<span>http://www.huawei.com/netconf/capability/sync/1.0 
+http://www.huawei.com/netconf/capability/sync/1.1 
+http://www.huawei.com/netconf/capability/sync/1.2 
+http://www.huawei.com/netconf/capability/sync/1.3 
+http://www.huawei.com/netconf/capability/exchange/1.0
+http://www.huawei.com/netconf/capability/exchange/1.2
+http://www.huawei.com/netconf/capability/active/1.0
+http://www.huawei.com/netconf/capability/action/1.0
+http://www.huawei.com/netconf/capability/discard-commit/1.0
+http://www.huawei.com/netconf/capability/execute-cli/1.0
+http://www.huawei.com/netconf/capability/update/1.0
+http://www.huawei.com/netconf/capability/commit-description/1.0
+http://www.huawei.com/netconf/capability/sync-config/1.0
+http://www.huawei.com/netconf/capability/sync-config/1.1
+http://www.huawei.com/netconf/capability/schema/1.0</span>
+--------------------------------------------------</pre>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001512842470__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><p>Server</p>
+<pre class="screen">#
+sysname netconf-agent
+#
+aaa
+ local-user client001 password irreversible-cipher $1d$v!=.5/:(q-$xL=\K+if"'S}&gt;k7vGP5$_ox0B@ys7.'DBHL<font style="font-size:8pt" Face="Courier New" >~</font>3*aN$
+ local-user client001 service-type ssh
+ local-user client001<strong> </strong>privilege level 3
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.0
+#
+<span>snetconf server enable</span>
+ssh server-source all-interface
+ssh user client001
+ssh user client001 authentication-type password
+ssh user client001 service-type all
+#
+user-interface vty 0 4
+ authentication-mode aaa
+ user privilege level 3
+ protocol inbound ssh
+#
+netconf
+ idle-timeout 0 0
+#
+return</pre>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_netconf_cfg1_0068.html">Establishing a NETCONF Session
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_netconf_cfg1_0074.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

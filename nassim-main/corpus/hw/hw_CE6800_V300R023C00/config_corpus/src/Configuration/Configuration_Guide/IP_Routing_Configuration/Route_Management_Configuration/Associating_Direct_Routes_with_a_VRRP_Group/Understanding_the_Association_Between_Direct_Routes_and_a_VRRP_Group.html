@@ -1,0 +1,85 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding the Association Between Direct Routes and a VRRP Group">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_ip_routing_management_cfg_0011.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_ip_routing_management_cfg_0013.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Route Management">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Route Management">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="Route Management">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001176662319">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<link rel="stylesheet" type="text/css" href="public_sys-resources/imagePopup.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/customQuery.js"></script>
+<script language="javascript" type="text/javascript" src="public_sys-resources/imagePopup.js"></script>
+<title>Understanding the Association Between Direct Routes and a VRRP Group</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001176662319"></a><a name="EN-US_CONCEPT_0000001176662319"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding the Association Between Direct Routes and a VRRP Group</h1>
+<div><div class="section"><h4 class="sectiontitle">Context</h4><p>On the network shown in <a href="#EN-US_CONCEPT_0000001176662319__fig157721130503">Figure 1</a>, DeviceA and DeviceB form a Virtual Router Redundancy Protocol (VRRP) group and function as user gateways. DeviceA is the master device in the VRRP group, and DeviceB is the backup device. User-to-network traffic travels through DeviceA. However, network-to-user traffic may travel through DeviceA, DeviceB, or both of them over a path determined by a dynamic routing protocol. On the network shown in <a href="#EN-US_CONCEPT_0000001176662319__fig157721130503">Figure 1</a> (a), network-to-user traffic is load-balanced. In this case, the user-to-network and network-to-user traffic paths may be different, which causes services to be interrupted because firewalls configured on VRRP devices in the VRRP group block such service. In addition, the path inconsistency complicates traffic monitoring and statistics collection, increasing costs.</p>
+<p>To address the preceding problem, a dynamic routing protocol is expected to select a path passing through the master device for both the user-to-network and network-to-user traffic, ensuring path consistency. Association between direct routes and a VRRP group can be configured so that the VRRP group status affects route selection of the dynamic routing protocol on the network shown in <a href="#EN-US_CONCEPT_0000001176662319__fig157721130503">Figure 1</a> (b). User-to-network traffic and network-to-user traffic are transmitted along the same path.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001176662319__fig157721130503"><a name="EN-US_CONCEPT_0000001176662319__fig157721130503"></a><a name="fig157721130503"></a><span class="figcap"><b>Figure 1 </b>VRRP networking diagram</span><br><span><img src="figure/en-us_image_0000001261359664.png" height="450.87" width="523.6875" title="Click to enlarge" class="imgResize"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Related Concepts</h4><p>VRRP is a widely used fault-tolerant protocol that groups multiple routing devices into a backup group, improving network reliability. A VRRP group consists of a master device and one or more backup devices. If the master device fails, the VRRP group switches services to a backup device to ensure communication continuity and reliability.</p>
+<p>A device in a VRRP group operates in one of three states:</p>
+<ul><li>Master: If a network is working properly, the master device transmits all services.</li><li>Backup: If the master device fails, the VRRP group selects a backup device as a new master device to take over traffic, ensuring service continuity.</li><li>Initialize: After receiving a message indicating that the interface goes up, a device changes from the Initialize state to the Master or Backup state.</li></ul>
+</div>
+<div class="section"><h4 class="sectiontitle">Implementation</h4><p>The association between direct routes and the VRRP group enables the adjustment of the costs of direct network segment routes based on the VRRP status and helps a dynamic routing protocol to import the direct routes. The dynamic routing protocol selects the direct route with the lowest cost. For example, on the network shown in <a href="#EN-US_CONCEPT_0000001176662319__fig157721130503">Figure 1</a>, an association between direct routes and the VRRP group is configured on VRRP interfaces on DeviceA and DeviceB. The implementation is as follows:</p>
+<ul><li><p>DeviceA in the Master state sets the cost of its route destined for the directly connected virtual IP network segment to 0 (default value).</p>
+</li><li><p>DeviceB in the Backup state increases the cost of its direct route destined for the network segment to which the VRRP virtual IP address belongs.</p>
+</li></ul>
+<p>A dynamic routing protocol selects the route with DeviceA as a next hop because this route has a smaller cost value than the other one with DeviceB as a next hop. In this way, the user-to-network and network-to-user traffic paths keep consistent.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">Application Scenario</h4><p>When a data center is used, firewalls are configured on devices in a VRRP group to improve network security. Network-to-user traffic cannot pass through a firewall if traffic travels over a path different than the one used by user-to-network traffic.</p>
+<p>On an IP radio access network (RAN), VRRP is configured to determine the master/backup status of aggregation site gateways (ASGs) and radio service gateways (RSGs) that are working in redundancy mode. Network-to-user and user-to-network traffic may pass through different paths, complicating network O&amp;M and management.</p>
+<p>The association between direct routes and a VRRP group can address the preceding problem by ensuring that the user-to-network traffic and network-to-user traffic travel along the same path.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_ip_routing_management_cfg_0011.html">Associating Direct Routes with a VRRP Group
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_ip_routing_management_cfg_0013.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+
+<script language="JavaScript">
+<!--
+initImageViewer('.imgResize');
+var msg_imageMax = "view original image";
+var msg_imageClose = "close";
+//--></script></body>
+</html>

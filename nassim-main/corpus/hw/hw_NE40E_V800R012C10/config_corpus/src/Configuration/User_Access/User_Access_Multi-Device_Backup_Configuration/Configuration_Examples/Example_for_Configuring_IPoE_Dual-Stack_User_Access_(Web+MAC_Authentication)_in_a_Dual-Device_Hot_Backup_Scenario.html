@@ -1,0 +1,1002 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring IPoE Dual-Stack User Access (Web+MAC Authentication) in a Dual-Device Hot Backup Scenario">
+<meta name="abstract" content="This section provides an example for configuring IPoE dual-stack access through web+MAC authentication in a dual-device hot backup scenario. When IPoE dual-stack users connect to BRASs and web+MAC authentication is used, the BRASs implement RADIUS authentication and accounting, assign IPv4 addresses from the local address pool, and assign IPv6 addresses through DHCPv6 ND. This allows the users to access the network.">
+<meta name="description" content="This section provides an example for configuring IPoE dual-stack access through web+MAC authentication in a dual-device hot backup scenario. When IPoE dual-stack users connect to BRASs and web+MAC authentication is used, the BRASs implement RADIUS authentication and accounting, assign IPv4 addresses from the local address pool, and assign IPv6 addresses through DHCPv6 ND. This allows the users to access the network.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_rui_0050.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_rui_0063.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_rui_1003.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z00588052,w00606909,w00447999">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="UP Multi-Device Backup">
+<meta name="featurename" content="User Access Multi-Device Backup">
+<meta name="featuretype" content="User Access">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="UP Multi-Device Backup">
+<meta name="featurename" content="User Access Multi-Device Backup">
+<meta name="featuretype" content="User Access">
+<meta name="featurename" content="UP Multi-Device Backup">
+<meta name="featurename" content="User Access Multi-Device Backup">
+<meta name="featuretype" content="User Access">
+<meta name="featurename" content="User Access Multi-Device Backup">
+<meta name="featuretype" content="User Access">
+<meta name="OWNER" content="z00603461">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="z00588052">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001206474186">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/jquery.min.idp.js"></script>
+<script type="text/javascript" src="../../../../public_sys-resources/RowOrColfreezeSupport.js"></script>
+
+<script type="text/javascript">
+setTimeout(function(){
+	jQueryHW(document).ready(function(){
+		jQueryHW("table[rowfreeze='yes']").rowfreeze();
+		jQueryHW("table[colfreeze='yes']").colfreeze();
+	});
+},500);
+</script>
+<title>Example for Configuring IPoE Dual-Stack User Access (Web+MAC Authentication) in a Dual-Device Hot Backup Scenario</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001206474186"></a><a name="EN-US_TASK_0000001206474186"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring IPoE Dual-Stack User Access (Web+MAC Authentication) in a Dual-Device Hot Backup Scenario</h1>
+<div class="taskbody"><p>This section provides an example for configuring IPoE dual-stack access through web+MAC authentication in a dual-device hot backup scenario. When IPoE dual-stack users connect to BRASs and web+MAC authentication is used, the BRASs implement RADIUS authentication and accounting, assign IPv4 addresses from the local address pool, and assign IPv6 addresses through DHCPv6 ND. This allows the users to access the network.</p>
+<div class="context"><a name="EN-US_TASK_0000001206474186__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0000001206474186__fig_dc_ne_cfg_bras_000901">Figure 1</a>, IPv4/IPv6 dual-stack users access the network through web authentication. The BRASs use RADIUS authentication and accounting. When each user accesses the network for the first time, the user enters a MAC authentication domain, and the username and password required during web authentication. The RADIUS server automatically records the association between the terminal's MAC address and the entered username and password. After that, the user can automatically access the network with no need for repeatedly entering the username and password. This process is called MAC authentication. If the authentication fails, the user will be redirected to a web authentication domain. Users in a web authentication domain can access only limited network resources, such as the web server. In this example, the web server and web authentication server are deployed on the same device. If the user accesses unauthorized network resources, the user will be forcibly redirected to the specified web server. After the user re-enters the correct username and password and the authentication succeeds, the user becomes a post-authentication domain user and can access network resources normally. When the user logs in to the network next time, the BRASs perform MAC authentication based on the terminal's MAC address. To improve network reliability, dual-device hot backup also needs to be deployed. If a fault occurs, a master/backup device switchover needs to be triggered to prevent user services from being interrupted and users from being aware of the fault.</p>
+<div class="fignone" id="EN-US_TASK_0000001206474186__fig_dc_ne_cfg_bras_000901"><a name="EN-US_TASK_0000001206474186__fig_dc_ne_cfg_bras_000901"></a><a name="fig_dc_ne_cfg_bras_000901"></a><span class="figcap"><b>Figure 1 </b>Configuring IPoE dual-stack user access (web+MAC authentication) in a dual-device hot backup scenario</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interfaces 1 and 2 in this example represent Eth-Trunk2 and GE<span>0/1/0</span>, respectively.</p>
+</div></div>
+<div class="p"><span><img class="vsd" src="figure/en-us_image_0000001206816318.png"></span>
+<div class="tableBorder"><table cellpadding="4" cellspacing="0" summary="" rowfreeze="yes" frame="border" border="1" rules="all"><caption><b>Table 1 </b>Interfaces and IP addresses</caption><thead align="left"><tr><th align="left" class="cellrowborder" valign="top" width="22.587741225877412%" id="mcps1.4.1.3.3.2.2.5.1.1" liSelected="liSelected"><p><strong>Device</strong></p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="23.227677232276772%" id="mcps1.4.1.3.3.2.2.5.1.2" liSelected="liSelected"><p><strong>Interface Name</strong></p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="23.337666233376662%" id="mcps1.4.1.3.3.2.2.5.1.3" liSelected="liSelected"><p><strong>Interface Number</strong></p>
+</th>
+<th align="left" class="cellrowborder" valign="top" width="30.846915308469153%" id="mcps1.4.1.3.3.2.2.5.1.4" liSelected="liSelected"><p><strong>IP Address</strong></p>
+</th>
+</tr>
+</thead>
+<tbody><tr><td class="cellrowborder" rowspan="5" valign="top" width="22.587741225877412%" headers="mcps1.4.1.3.3.2.2.5.1.1 "><p>BRAS1</p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+</td>
+<td class="cellrowborder" valign="top" width="23.227677232276772%" headers="mcps1.4.1.3.3.2.2.5.1.2 "><p>interface1</p>
+</td>
+<td class="cellrowborder" valign="top" width="23.337666233376662%" headers="mcps1.4.1.3.3.2.2.5.1.3 "><p>Eth-trunk2</p>
+</td>
+<td class="cellrowborder" valign="top" width="30.846915308469153%" headers="mcps1.4.1.3.3.2.2.5.1.4 "><p>-</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.2 "><p>interface1</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.3 "><p>Eth-trunk2.1</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.4 "><p>192.168.4.129/29</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.2 "><p>interface2</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.3 "><p>GE<span>0/1/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.4 "><p>10.2.1.1/24, 2001:db8:8::7/128</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.2 "><p>-</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.3 "><p>Loopback1</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.4 "><p>10.2.2.2/24, 2001:db8::2:2/64</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.2 "><p>-</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.3 "><p>Loopback2</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.4 "><p>10.3.3.3/24</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" rowspan="5" valign="top" width="22.587741225877412%" headers="mcps1.4.1.3.3.2.2.5.1.1 "><p>BRAS2</p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+</td>
+<td class="cellrowborder" valign="top" width="23.227677232276772%" headers="mcps1.4.1.3.3.2.2.5.1.2 "><p>interface1</p>
+</td>
+<td class="cellrowborder" valign="top" width="23.337666233376662%" headers="mcps1.4.1.3.3.2.2.5.1.3 "><p>Eth-trunk2</p>
+</td>
+<td class="cellrowborder" valign="top" width="30.846915308469153%" headers="mcps1.4.1.3.3.2.2.5.1.4 "><p>-</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.2 "><p>interface1</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.3 "><p>Eth-trunk2.1</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.4 "><p>192.168.4.130/29</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.2 "><p>interface2</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.3 "><p>GE<span>0/1/0</span></p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.4 "><p>10.4.1.1/24, 2001:db8:9::7/128</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.2 "><p>-</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.3 "><p>Loopback1</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.4 "><p>10.4.4.4/24, 2001:db8::3:3/64</p>
+</td>
+</tr>
+<tr><td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.2 "><p>-</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.3 "><p>Loopback2</p>
+</td>
+<td class="cellrowborder" valign="top" headers="mcps1.4.1.3.3.2.2.5.1.4 "><p>10.13.13.13/24</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001206474186__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li>Configure IP addresses for interfaces.</li><li>Configure a routing protocol.</li><li><p>Create a MAC authentication domain named <strong>mac-domain</strong>, a web authentication domain named <strong>web-domain</strong>, and a post-authentication domain named <strong>after-domain</strong>.</p>
+</li><li><p>Configure AAA schemes and a RADIUS server group.</p>
+</li><li><p>Configure address pools.</p>
+</li><li><p>Enable MAC authentication in the MAC authentication domain <strong>mac-domain</strong> and bind the RADIUS server group and authentication scheme to the domain.</p>
+</li><li><p>Configure a web authentication domain named <strong>web-domain</strong> in which users can access only limited network resources. Bind the non-authentication scheme and non-accounting scheme to this domain.</p>
+</li><li><p>Configure ACL rules for web authentication domain <strong>web-domain</strong>.</p>
+</li><li><p>Bind post-authentication domain <strong>after-domain</strong> to the RADIUS accounting scheme and RADIUS authentication scheme.</p>
+</li><li><p>In the AAA view, configure the MAC address carried in user access request packets as the pure username.</p>
+</li><li><p>Configure DUIDs for the devices.</p>
+</li><li><p>On a BAS interface, enable IPv6 and configure a MAC authentication domain, post-authentication domain, and authentication method.</p>
+</li><li>Configure a BFD session and VRRP on the access side of the master and backup BRASs.</li><li>Configure an RBS and an RBP.</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001206474186__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure IP addresses for interfaces.</span><p><p># Configure IP addresses for network-side interfaces.</p>
+</p><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>interface gigabitEthernet <span>0/1/0</span></strong>
+[<span class="keyword">*</span>BRAS1-GigabitEthernet<span>0/1/0</span>] <strong>ipv6 enable</strong> 
+[<span class="keyword">*</span>BRAS1-GigabitEthernet<span>0/1/0</span>] <strong>ipv6 address 2001:db8:8::7 128</strong>
+[<span class="keyword">*</span>BRAS1-GigabitEthernet<span>0/1/0</span>] <strong>ipv6 address auto link-local</strong>
+[<span class="keyword">*</span>BRAS1-GigabitEthernet<span>0/1/0</span>] <strong>ip address 10.2.1.1 24</strong>
+[<span class="keyword">*</span>BRAS1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1-GigabitEthernet<span>0/1/0</span>] <strong>commit</strong>
+[<span class="keyword">*</span>BRAS1] <strong>interface</strong> <strong>Loopback1</strong>
+[<span class="keyword">*</span>BRAS1-Loopback1] <strong>ipv6 enable</strong>
+[<span class="keyword">*</span>BRAS1-Loopback1] <strong>ipv6 address 2001:db8::2:2 64</strong>
+[<span class="keyword">*</span>BRAS1-Loopback1] <strong>ipv6 address auto link-local</strong>
+[<span class="keyword">*</span>BRAS1-Loopback1] <strong>ip address 10.2.2.2 24</strong>
+[<span class="keyword">*</span>BRAS1-Loopback1] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1] <strong>commit</strong></pre>
+<p># Configure an IP address for the protection tunnel.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>interface loopback2</strong>
+[<span class="keyword">*</span>BRAS1-Loopback2] <strong>ip address 10.3.3.3 24</strong>
+[<span class="keyword">*</span>BRAS1-Loopback2] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1] <strong>commit</strong></pre>
+</p></li><li><span>Configure a routing protocol.</span><p><p># Enable the function to automatically control a route's cost preference.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>peer-backup route-cost auto-advertising</strong>
+[<span class="keyword">*</span>BRAS1] <strong>commit</strong></pre>
+<p># Configure MPLS.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>mpls</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-mpls] <strong>mpls ldp</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-mpls] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>mpls lsr-id 10.3.3.3</strong>
+[<span class="keyword">*</span>BRAS1] <strong>interface GigabitEthernet</strong><strong><span>0/1/0</span></strong>
+[<span class="keyword">*</span>BRAS1-GigabitEthernet<span>0/1/0</span>] <strong>mpls</strong>
+[<span class="keyword">*</span>BRAS1-GigabitEthernet<span>0/1/0</span>] <strong>mpls ldp</strong>
+[<span class="keyword">*</span>BRAS1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1] <strong>commit</strong></pre>
+<p># Configure OSPF to import UNRs.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>ospf 1</strong>
+[<span class="keyword">*</span>BRAS1-ospf-1] <strong>default cost inherit-metric</strong>
+[<span class="keyword">*</span>BRAS1-ospf-1] <strong>import-route unr</strong>
+[<span class="keyword">*</span>BRAS1-ospf-1] <strong>area 0</strong>
+[<span class="keyword">*</span>BRAS1-ospf-1-area-0.0.0.0] <strong>network 10.2.1.0 0.0.0.255</strong>
+[<span class="keyword">*</span>BRAS1-ospf-1-area-0.0.0.0] <strong>network 10.3.3.3 0.0.0.0</strong>
+[<span class="keyword">*</span>BRAS1-ospf-1-area-0.0.0.0] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1-ospf-1] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1] <strong>commit</strong></pre>
+</p></li><li><span>Create a MAC authentication domain named <strong>mac-domain</strong>, a web authentication domain named <strong>web-domain</strong>, and a post-authentication domain named <strong>after-domain</strong>.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS]<strong> system-view</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS] <strong>web-auth-server source 10.32.1.1</strong>
+[<span class="keyword">*</span>BRAS] <strong>sysname BRAS1</strong>
+[<span class="keyword">*</span>BRAS] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>aaa</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa] <strong>domain mac-domain</strong>
+[<span class="keyword">*</span>BRAS1-aaa-domain-mac-domain] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1-aaa] <strong>domain web-domain</strong>
+[<span class="keyword">*</span>BRAS1-aaa-domain-web-domain] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1-aaa] <strong>domain after-domain</strong>
+[<span class="keyword">*</span>BRAS1-aaa-domain-after-domain] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1-aaa] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa] <strong>quit</strong> </pre>
+</p></li><li><span>Configure AAA schemes and a RADIUS server group.</span><p><p># Create UDP sockets with the local port numbers 1645, 1646, and 3799 and with any local IP address.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1]<strong> </strong><strong>radius local-ip all</strong>
+[<span class="keyword">*</span>BRAS1] <strong>commit</strong></pre>
+<p># Create a RADIUS server group.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1]<strong> radius-server group rd1</strong>
+[<span class="keyword">*</span>BRAS1-radius-rd1]<strong> radius-server authentication 192.168.7.249 1812 weight 0</strong>
+[<span class="keyword">*</span>BRAS1-radius-rd1]<strong> radius-server accounting 192.168.7.249 1813 weight </strong><strong>0</strong>
+[<span class="keyword">*</span>BRAS1-radius-rd1]<strong> radius-server shared-key-cipher YsHsjx_202206 </strong>
+[<span class="keyword">*</span>BRAS1-radius-rd1]<strong> radius-server source interface loopback1</strong>
+[<span class="keyword">*</span>BRAS1-radius-rd1]<strong> commit </strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-radius-rd1] <strong>quit</strong></pre>
+<p># Create an authentication scheme named <strong>portal-mac-auth</strong>, and configure the BRASs to redirect the dual-stack user to web authentication domain <strong>web-domain</strong> if web authentication fails.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>aaa</strong>
+[<span class="keyword">*</span>BRAS1-aaa] <strong>authentication-scheme portal-mac-auth</strong>
+[<span class="keyword">*</span>BRAS1-aaa-authen-portal-mac-auth] <strong>commit</strong> 
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-authen-portal-mac-auth] <strong>authening authen-fail online authen-domain web-domain</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-authen-portal-mac-auth] <strong>quit</strong></pre>
+<p># Configure an authentication scheme named <strong>radius</strong>, with RADIUS authentication specified.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa]<strong> authentication-scheme radius</strong>
+[<span class="keyword">*</span>BRAS1-aaa-authen-radius]<strong> authentication-mode radius</strong>
+[<span class="keyword">*</span>BRAS1-aaa-authen-radius] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-authen-radius]<strong> quit</strong></pre>
+<p># Configure an authentication scheme named <strong>none</strong>, with non-authentication specified. In insecure network environments, you are advised to use a secure password authentication mode, encryption authentication algorithm, and protocol. For examples in secure environments, see <a href="dc_ne_aaa_cfg_0401.html">Example for Configuring RADIUS for User Authentication and Accounting</a>.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa]<strong> authentication-scheme none</strong>
+[<span class="keyword">*</span>BRAS1-aaa-authen-none]<strong> authentication-mode none</strong>
+[<span class="keyword">*</span>BRAS1-aaa-authen-none] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-authen-none]<strong> quit</strong></pre>
+<p># Configure an accounting scheme named <strong>radius</strong>, with RADIUS accounting specified.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa]<strong> accounting-scheme radius</strong>
+[<span class="keyword">*</span>BRAS1-aaa-accounting-radius] <strong>accounting-mode radius</strong>
+[<span class="keyword">*</span>BRAS1-aaa-accounting-radius] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-accounting-radius]<strong> quit</strong></pre>
+<p># Configure an accounting scheme named <strong>none</strong>, with non-accounting specified.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa]<strong> accounting-scheme none</strong>
+[<span class="keyword">*</span>BRAS1-aaa-accounting-none]<strong> accounting-mode none</strong>
+[<span class="keyword">*</span>BRAS1-aaa-accounting-none] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-accounting-none]<strong> quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa]<strong> quit</strong></pre>
+</p></li><li><span>Configure address pools.</span><p><div class="p"># Configure an IPv4 address pool.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>ip pool </strong><strong>pool_v4</strong> <strong>bas local</strong>
+[<span class="keyword">*</span>BRAS1-ip-pool-pool_v4] <strong>gateway 172.16.0.1 255.255.255.0</strong>
+[<span class="keyword">*</span>BRAS1-ip-pool-pool_v4] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-ip-pool-pool_v4] <strong>section 0 172.16.0.2 172.16.0.200</strong> 
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-ip-pool-pool_v4] <strong>dns-server 10.1.6.2</strong>
+[<span class="keyword">*</span>BRAS1-ip-pool-pool_v4] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1] <strong>commit</strong></pre>
+</div>
+<div class="p"># Configure IPv6 address pools.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>ipv6 prefix </strong><strong>pre_nd_1</strong> <strong>local</strong>
+[<span class="keyword">*</span>BRAS1-ipv6-prefix-pre_nd_1] <strong>prefix 2001:db8:1::/48</strong>
+[<span class="keyword">*</span>BRAS1-ipv6-prefix-pre_nd_1] <strong>slaac-unshare-only</strong>
+[<span class="keyword">*</span>BRAS1-ipv6-prefix-pre_nd_1] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1] <strong>commi</strong><strong>t</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>ipv6 pool pool_nd_1 bas local</strong>
+[<span class="keyword">*</span>BRAS1-ipv6-pool-pool_nd_1] <strong>prefix pre_nd_1</strong>
+[<span class="keyword">*</span>BRAS1-ipv6-pool-pool_nd_1] <strong>dns-server 2001:db8:11::1</strong>
+[<span class="keyword">*</span>BRAS1-ipv6-pool-pool_nd_1] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1] <strong>commi</strong><strong>t</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>ipv6 prefix </strong><strong>pre_nd_2</strong> <strong>local</strong>
+[<span class="keyword">*</span>BRAS1-ipv6-prefix-pre_nd_2] <strong>prefix 2001:db8:2::/48</strong>
+[<span class="keyword">*</span>BRAS1-ipv6-prefix-pre_nd_2] <strong>slaac-unshare-only</strong>
+[<span class="keyword">*</span>BRAS1-ipv6-prefix-pre_nd_2] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1] <strong>commi</strong><strong>t</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>ipv6 pool pool_nd_2 bas local</strong> <strong>rui-slave</strong>
+[<span class="keyword">*</span>BRAS1-ipv6-pool-pool_nd_2] <strong>prefix pre_nd_2</strong>
+[<span class="keyword">*</span>BRAS1-ipv6-pool-pool_nd_2] <strong>dns-server 2001:db8:12::1</strong>
+[<span class="keyword">*</span>BRAS1-ipv6-pool-pool_nd_2] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1] <strong>commi</strong><strong>t</strong></pre>
+</div>
+</p></li><li><span>Enable MAC authentication in MAC authentication domain <strong>mac-domain</strong>, and bind it to RADIUS server group <strong>rd1</strong> and authentication scheme <strong>portal-mac-auth</strong>.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa] <strong>domain mac-domain</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-mac-domain] <strong>radius-server group rd1</strong>
+[<span class="keyword">*</span>BRAS1-aaa-domain-mac-domain] <strong>authentication-scheme portal-mac-auth</strong>
+[<span class="keyword">*</span>BRAS1-aaa-domain-mac-domain] <strong>accounting-scheme radius</strong>
+[<span class="keyword">*</span>BRAS1-aaa-domain-mac-domain] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-mac-domain] <strong>prefix-assign-mode unshared</strong> 
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-mac-domain] <strong>ip-pool pool_v4</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-mac-domain] <strong>ipv6-pool pool_nd_1</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-mac-domain] <strong>mac-authentication enable</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-mac-domain] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa] <strong>quit</strong></pre>
+</p></li><li><span>Configure a web authentication domain named <strong>web-domain</strong> in which users can access only limited network resources. Bind the non-authentication scheme and non-accounting scheme to this domain.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1]<strong> user-group web-group</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1]<strong> aaa</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa] <strong>domain web-domain</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-web-domain]<strong> authentication-scheme none</strong>
+[<span class="keyword">*</span>BRAS1-aaa-domain-web-domain]<strong> accounting-scheme none</strong>
+[<span class="keyword">*</span>BRAS1-aaa-domain-web-domain] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-web-domain]<strong> </strong><strong>prefix-assign-mode unshared</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-web-domain]<strong> ip-pool pool_v4</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-web-domain]<strong> ipv6-pool pool_nd1</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-web-domain]<strong> user-group web-group</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-web-domain]<strong> web-server 10.1.1.10</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-web-domain]<strong> web-server url http://www.isp1.com</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-web-domain]<strong> </strong><strong>web-server identical-url</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-web-domain]<strong> quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa]<strong> quit</strong></pre>
+<p># Configure the addresses carried in the Portal packets received by the BRASs from the web authentication server.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>interface</strong> <strong>LoopBack 0</strong>
+[<span class="keyword">*</span>BRAS1-LoopBack0] <strong>ipv6 enable</strong>
+[<span class="keyword">*</span>BRAS1-LoopBack0] <strong>ip address </strong><strong>10.1.1.1</strong><strong> 32</strong>
+[<span class="keyword">*</span>BRAS1-LoopBack0] <strong>ipv6 address </strong><strong>2001:db8:1::3</strong><strong> 128</strong>
+[<span class="keyword">*</span>BRAS1-LoopBack0] <strong>ipv6 address auto link-local</strong>
+[<span class="keyword">*</span>BRAS1-LoopBack0] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-LoopBack0] <strong>quit</strong></pre>
+<p># Configure the web authentication server.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1]<strong> web-auth-server source-ip 10.1.1.1</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1]<strong> web-auth-server enable</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1]<strong> </strong><strong>web-auth-server source interface LoopBack 0</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1]<strong> web-auth-server 10.1.1.10 key cipher YsHsjx_202206</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>web-auth-server version v2 v</strong><strong>1</strong></pre>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>V1.0 does not provide the authenticator, and therefore no encryption is needed. The V2.0 authenticator uses MD5 encryption that has low security, potentially bringing security risks. For security purposes, you are advised not to use V2.0 or V1.0. If they are required, run the <a href="cmdqueryname=undo+crypto+weak-algorithm+disable"><b><span class="cmdname">undo crypto weak-algorithm disable</span></b></a> command to enable the weak security algorithm function first.</p>
+</div></div>
+</p></li><li><span>Configure ACL rules for web authentication domain <strong>web-domain</strong>.</span><p><p># Configure IPv4 ACL rules.</p>
+<ul><li>Configure ACL 6000 to permit the traffic between user group <strong>web-group</strong> and web authentication server and between user group <strong>web-group</strong> and the DNS server.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1]<strong> acl number 6000</strong>
+[<span class="keyword">*</span>BRAS1-acl-ucl-6000] <strong>rule 10 permit ip source user-group web-group destination ip-address 10.1.6.2 0</strong>
+[<span class="keyword">*</span>BRAS1-acl-ucl-6000] <strong>rule 20 permit ip source user-group web-group destination ip-address 10.1.1.10 0</strong>
+[<span class="keyword">*</span>BRAS1-acl-ucl-6000] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-acl-ucl-6000] <strong>quit</strong></pre>
+</li><li>Configure ACL 6001 to allow HTTP redirection for the TCP packets originating from user group <strong>web-group</strong> and carrying destination port www or 8080.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1]<strong> acl number 6001</strong>
+[<span class="keyword">*</span>BRAS1-acl-ucl-6001] <strong>rule 5 permit tcp source user-group web-group destination-port eq www</strong>
+[<span class="keyword">*</span>BRAS1-acl-ucl-6001] <strong>rule 10 permit tcp source user-group web-group destination-port eq 8080</strong>
+[<span class="keyword">*</span>BRAS1-acl-ucl-6001] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-acl-ucl-6001] <strong>quit</strong></pre>
+</li><li>Configure ACL 6002 to deny all the traffic originating from user group <strong>web-group</strong>.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1]<strong> acl number 6002</strong>
+[<span class="keyword">*</span>BRAS1-acl-ucl-6002] <strong>rule 5 permit ip source ip-address any destination user-group web-group</strong>
+[<span class="keyword">*</span>BRAS1-acl-ucl-6002] <strong>rule 10 permit ip source user-group web-group destination ip-address any</strong>
+[<span class="keyword">*</span>BRAS1-acl-ucl-6002]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-acl-ucl-6002] <strong>quit</strong></pre>
+</li></ul>
+<p># Configure IPv6 ACL rules.</p>
+<ul><li>Configure ACL 6000 to permit the traffic between user group <strong>web-group</strong> and web authentication server and between user group <strong>web-group</strong> and the DNS server.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1]<strong> acl ipv6 number 6000</strong>
+[<span class="keyword">*</span>BRAS1-acl6-ucl-6000] <strong>rule 5 permit ipv6 source user-group web-group destination ipv6-address 2001:db8:1::1/128</strong>
+[<span class="keyword">*</span>BRAS1-acl6-ucl-6000] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-acl6-ucl-6000] <strong>quit</strong></pre>
+</li><li>Configure ACL 6001 to allow HTTP redirection for the TCP packets originating from user group <strong>web-group</strong> and carrying destination port www or 8080.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1]<strong> acl ipv6 number 6001</strong>
+[<span class="keyword">*</span>BRAS1-acl6-ucl-6001] <strong>rule 5 permit tcp source user-group web-group destination-port eq www</strong>
+[<span class="keyword">*</span>BRAS1-acl6-ucl-6001] <strong>rule 10 permit tcp source user-group web-group destination-port eq 8080</strong>
+[<span class="keyword">*</span>BRAS1-acl6-ucl-6001] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-acl6-ucl-6001] <strong>quit</strong></pre>
+</li><li>Configure ACL 6002 to deny all the traffic originating from user group <strong>web-group</strong>.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1]<strong> acl ipv6 number 6002</strong>
+[<span class="keyword">*</span>BRAS1-acl6-ucl-6002] <strong>rule 5 permit ipv6 source ipv6-address any destination user-group web-group</strong>
+[<span class="keyword">*</span>BRAS1-acl6-ucl-6002] <strong>rule 10 permit ipv6 source user-group web-group destination ipv6-address any</strong>
+[<span class="keyword">*</span>BRAS1-acl6-ucl-6002] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-acl6-ucl-6002] <strong>quit</strong></pre>
+</li></ul>
+<div class="p"># Configure a traffic policy.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1]<strong> traffic classifier 6000</strong>
+[<span class="keyword">*</span>BRAS1-classifier-6000]<strong> if-match acl 6000</strong>
+[<span class="keyword">*</span>BRAS1-classifier-6000]<strong> if-match ipv6 acl 6000</strong>
+[<span class="keyword">*</span>BRAS1-classifier-6000]<strong> quit</strong>
+[<span class="keyword">*</span>BRAS1]<strong> traffic classifier 6001</strong>
+[<span class="keyword">*</span>BRAS1-classifier-6001]<strong> if-match acl 6001</strong>
+[<span class="keyword">*</span>BRAS1-classifier-6001]<strong> if-match ipv6 acl 6001</strong>
+[<span class="keyword">*</span>BRAS1-classifier-6001]<strong> quit</strong>
+[<span class="keyword">*</span>BRAS1]<strong> traffic classifier 6002</strong>
+[<span class="keyword">*</span>BRAS1-classifier-6002]<strong> if-match acl 6002</strong>
+[<span class="keyword">*</span>BRAS1-classifier-6002]<strong> if-match ipv6 acl 6002</strong>
+[<span class="keyword">*</span>BRAS1-classifier-6002]<strong> quit</strong>
+[<span class="keyword">*</span>BRAS1]<strong> traffic behavior permit</strong>
+[<span class="keyword">*</span>BRAS1-behavior-permit]<strong> permit</strong>
+[<span class="keyword">*</span>BRAS1-behavior-permit]<strong> </strong><strong>quit</strong>
+[<span class="keyword">*</span>BRAS1]<strong> traffic behavior in-deny</strong>
+[<span class="keyword">*</span>BRAS1-behavior-in-deny]<strong> deny</strong>
+[<span class="keyword">*</span>BRAS1-behavior-in-deny]<strong> quit</strong>
+[<span class="keyword">*</span>BRAS1]<strong> traffic behavior redirect</strong>
+[<span class="keyword">*</span>BRAS1-behavior-redirect]<strong> http-redirect</strong> <strong>plus</strong>
+[<span class="keyword">*</span>BRAS1-behavior-redirect]<strong> quit</strong>
+[<span class="keyword">*</span>BRAS1]<strong> traffic policy before-auth-in</strong>
+[<span class="keyword">*</span>BRAS1-trafficpolicy-before-auth-in]<strong> share-mode</strong>
+[<span class="keyword">*</span>BRAS1-trafficpolicy-before-auth-in]<strong> classifier 6000 behavior permit</strong>
+[<span class="keyword">*</span>BRAS1-trafficpolicy-before-auth-in]<strong> classifier 6001 behavior redirect</strong>
+[<span class="keyword">*</span>BRAS1-trafficpolicy-before-auth-in]<strong> classifier 6002 behavior in-deny</strong>
+[<span class="keyword">*</span>BRAS1-trafficpolicy-before-auth-in]<strong> quit</strong></pre>
+</div>
+<p># Apply the traffic policy in the system view.</p>
+<pre class="screen">[<span class="keyword">*</span>BRAS1]<strong> traffic-policy before-auth-in inbound</strong>
+[<span class="keyword">*</span>BRAS1] <strong>commit</strong></pre>
+</p></li><li><span>Configure a post-authentication domain named <strong>after-domain</strong> and bind it to the RADIUS accounting template and RADIUS authentication template.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1]<strong> aaa</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa]<strong> domain after-domain</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-after-domain]<strong> authentication-scheme radius</strong>
+[<span class="keyword">*</span>BRAS1-aaa-domain-after-domain]<strong> accounting-scheme radius</strong>
+[<span class="keyword">*</span>BRAS1-aaa-domain-after-domain] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-after-domain]<strong> </strong><strong>prefix-assign-mode unshared</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-after-domain]<strong> ip-pool pool_v4</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-after-domain]<strong> ipv6-pool pool_nd1</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-after-domain]<strong> radius-server group rd1</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa-domain-after-domain]<strong> quit</strong></pre>
+</p></li><li><span>In the AAA view, configure the MAC address carried in user access request packets as the pure username.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa] <strong>default-user-name include mac-address -</strong>
+[<span class="keyword">*</span>BRAS1-aaa] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa] <strong>default-password cipher YsHsjx_202206</strong>
+[<span class="keyword">*</span>BRAS1-aaa] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-aaa] <strong>quit</strong></pre>
+</p></li><li><span>Configure a DUID for the device.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>dhcpv6 duid 12345678</strong>
+[<span class="keyword">*</span>BRAS1] <strong>commit</strong></pre>
+</p></li><li><span>Configure a BAS interface.</span><p><p># Configure the Eth-Trunk interface to work in static LACP mode and set a timeout period for the interface to receive LACPDUs.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>interface Eth-Trunk2</strong>
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2]<strong> mode lacp-static</strong>
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2]<strong> lacp timeout fast</strong>
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2]<strong> </strong><strong>commit</strong></pre>
+<p># Configure a BAS interface.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-Eth-Trunk2]<strong> </strong><strong>interface Eth-Trunk2.10</strong>
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2.10] <strong>ipv6 enable</strong>
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2.10] <strong>ipv6 address auto link-local</strong>
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2.10] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-Eth-Trunk2.10]<strong> user-vlan 2001</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-Eth-Trunk2.10-user-vlan-2001]<strong> </strong><strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-Eth-Trunk2.10] <strong>bas</strong>
+[<strong><span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span></strong>BRAS1-Eth-Trunk2.10-bas]<strong> access-type layer2-subscriber default-domain pre-authentication mac-domain authentication after-domain</strong>
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2.10-bas]<strong> </strong><strong>authentication-method web</strong>
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2.10-bas]<strong> </strong><strong>authentication-method-ipv6 web</strong>
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2.10-bas]<strong> commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-Eth-Trunk2.10-bas]<strong> </strong><strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-Eth-Trunk2.10]<strong> </strong><strong>quit</strong></pre>
+</p></li><li><span>Configure a BFD session and VRRP on the access side of the master and backup BRASs. BRAS1 is the master, and BRAS2 is the backup.</span><p><p># Configure a BFD session on the access side to allow the device to rapidly detect interface or link faults and trigger a master/backup VRRP switchover upon such a fault.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>bfd</strong>
+[<span class="keyword">*</span>BRAS1-bfd] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1]<strong> bfd bfd1 bind peer-ip 192.168.4.130</strong>
+[<span class="keyword">*</span>BRAS1-bfd-session-bfd1] <strong>discriminator local 1</strong>
+[<span class="keyword">*</span>BRAS1-bfd-session-bfd1] <strong>discriminator remote 1</strong>
+[<span class="keyword">*</span>BRAS1-bfd-session-bfd1] <strong>quit</strong> 
+[<span class="keyword">*</span>BRAS1] <strong>commit</strong></pre>
+<p># Configure a VRRP group on an interface/sub-interface (sub-interface Eth-Trunk2.1 is used in this example), and configure VRRP to track the BFD session and network-side interface. Set the VRRP preemption delay to 1800s.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>interface </strong><strong>Eth-Trunk2.1 </strong>             
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2.1] <strong>vlan-type dot1q 96</strong>                           
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2.1] <strong>ip address 192.168.4.129 255.255.255.248</strong>            
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2.1] <strong>vrrp vrid 5 virtual-ip 192.168.4.131</strong>   
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2.1] <strong>admin-vrrp vrid 5</strong>           
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2.1] <strong>vrrp vrid 5 priority 120</strong> 
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2.1] <strong>vrrp vrid 5 preempt-mode timer delay 1800 </strong>
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2.1] <strong>vrrp vrid 5 track interface GigabitEthernet </strong><strong><span>0/1/0</span></strong><strong> reduced 50</strong> 
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2.1] <strong>vrrp vrid 5 track bfd-session session-name bfd1 link</strong>
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2.1] <strong>commit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1-Eth-Trunk2.1] <strong>quit</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>vrrp recover-delay 300</strong>
+[<span class="keyword">*</span>BRAS1] <strong>commit</strong></pre>
+</p></li><li><span>Configure an RBS and an RBP.</span><p><p># Configure an RBS, and configure the device to use the NAS IP address as the source IP address in packets replied to the RADIUS server.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>peer-backup route-cost auto-advertising</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>remote-backup-service s1</strong>
+[<span class="keyword">*</span>BRAS1-rm-backup-srv-s1] <strong>peer 10.13.13.13 source 10.3.3.3 port 6001</strong>
+[<span class="keyword">*</span>BRAS1-rm-backup-srv-s1] <strong>track interface GigabitEthernet </strong><strong><span>0/1/0</span></strong>
+[<span class="keyword">*</span>BRAS1-rm-backup-srv-s1] <strong>protect lsp-tunnel for-all-instance peer-ip 10.13.13.13</strong>
+[<span class="keyword">*</span>BRAS1-rm-backup-srv-s1] <strong>ip-pool pool_v4 metric 10</strong>
+[<span class="keyword">*</span>BRAS1-rm-backup-srv-s1] <strong>ipv6-pool pool_nd_1 metric 10</strong>
+[<span class="keyword">*</span>BRAS1-rm-backup-srv-s1] <strong>ipv6-pool pool_nd_2 metric 20</strong>
+[<span class="keyword">*</span>BRAS1-rm-backup-srv-s1] <strong>radius-authorization source same-as nas-logic-ip</strong>
+[<span class="keyword">*</span>BRAS1-rm-backup-srv-s1] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1] <strong>commit</strong></pre>
+<p># Configure an RBP, and configure a logical IP address, logical interface, and logical hostname, so that the active and standby devices use the same NAS-IP-Address, NAS-Port, NAS-Port-ID, and Option 82 information in the packets sent to the RADIUS and DHCP servers.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>remote-backup-profile p1</strong>
+[<span class="keyword">*</span>BRAS1-rm-backup-prf-p1] <strong>service-type bras</strong>
+[<span class="keyword">*</span>BRAS1-rm-backup-prf-p1] <strong>peer-backup hot</strong>
+[<span class="keyword">*</span>BRAS1-rm-backup-prf-p1] <strong>backup-id 5 remote-backup-service s1</strong>
+[<span class="keyword">*</span>BRAS1-rm-backup-prf-p1] <strong>vrrp-id 5 interface Eth-Trunk2.1</strong>
+[<span class="keyword">*</span>BRAS1-rm-backup-prf-p1]<strong> nas logic-port</strong> <strong>Eth-Trunk2</strong> 
+[<span class="keyword">*</span>BRAS1-rm-backup-prf-p1] <strong>nas logic-ip 10.10.1.1</strong>
+[<span class="keyword">*</span>BRAS1-rm-backup-prf-p1] <strong>nas logic-sysname huawei</strong>
+[<span class="keyword">*</span>BRAS1-rm-backup-prf-p1] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1] <strong>commit</strong></pre>
+<p># Bind the RBP to the interface through which users go online.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>BRAS1] <strong>interface </strong><strong>Eth-Trunk2</strong>.<strong>10</strong>
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2.10] <strong>remote-backup-profile p1</strong>
+[<span class="keyword">*</span>BRAS1-Eth-Trunk2.10] <strong>quit</strong>
+[<span class="keyword">*</span>BRAS1] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001206474186__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li>BRAS1 configuration file</li></ul>
+<pre class="screen">#
+sysname BRAS1
+#
+radius-server group rd1                                                       
+ radius-server shared-key-cipher %^%#e,yC%f9z4M2)b)2<font style="font-size:8pt" Face="Courier New" >~</font>r+lA{$g*Fzc+5/bu7VHAN&lt;%(%^% 
+ radius-server authentication 192.168.7.249 1812 weight 0                       
+ radius-server accounting 192.168.7.249 1813 weight 0                           
+ radius-server source interface LoopBack1
+# 
+ip pool pool_v4 bas local                                                       
+ gateway 172.16.0.1 255.255.255.0                                               
+ section 0 172.16.0.2 172.16.0.200                                              
+ dns-server 10.1.6.2
+#
+ipv6 prefix pre_nd_1 local                                                   
+ prefix 2001:DB8:1::/48                                                         
+ slaac-unshare-only                                                             
+#                                                                               
+ipv6 pool pool_nd_1 bas local                                                
+ dns-server 2001:DB8:11::1                                         
+ prefix pre_nd_1                                                                  
+#
+ipv6 prefix pre_nd_2 local                                                   
+ prefix 2001:DB8:2::/48 
+ slaac-unshare-only
+#                                                                               
+ipv6 pool pool_nd_2 bas local rui-slave                                                
+ dns-server 2001:DB8:12::1                                         
+ prefix pre_nd_2                                                                  
+#
+user-group web-group
+#
+acl number 6000
+ rule 5 permit ip source user-group web-group destination ip-address 10.1.6.2 0
+ rule 10 permit ip source user-group web-group destination ip-address 10.1.1.10 0
+#
+acl number 6001
+ rule 5 permit tcp source user-group web-group destination-port eq www
+ rule 10 permit tcp source user-group web-group destination-port eq 8080
+#
+acl number 6002
+ rule 5 permit ip source ip-address any destination user-group web-group
+ rule 10 permit ip source user-group web-group destination ip-address any
+#
+acl ipv6 number 6000
+ rule 5 permit ipv6 source user-group web-group destination ipv6-address 2001:DB8:1::1/128
+#
+acl ipv6 number 6001
+ rule 5 permit tcp source user-group web-group destination-port eq www
+ rule 10 permit tcp source user-group web-group destination-port eq 8080
+#
+acl ipv6 number 6002
+ rule 5 permit ipv6 source ipv6-address any destination user-group web-group
+ rule 10 permit ipv6 source user-group web-group destination ipv6-address any
+#
+dhcpv6 duid 12345678
+#
+traffic classifier 6000 operator or
+ if-match acl 6000 precedence 1
+ if-match ipv6 acl 6000 precedence 2
+#
+traffic classifier 6001 operator or
+ if-match acl 6001 precedence 3
+ if-match ipv6 acl 6001 precedence 4
+#
+traffic classifier 6002 operator or
+ if-match acl 6002 precedence 5
+ if-match ipv6 acl 6002 precedence 6
+#
+traffic behavior in-deny
+ deny
+#
+traffic behavior permit
+#
+traffic behavior redirect
+ http-redirect plus
+#
+traffic policy before-auth-in
+ share-mode
+ classifier 6000 behavior permit precedence 1
+ classifier 6001 behavior redirect precedence 2
+ classifier 6002 behavior in-deny precedence 3
+#
+radius local-ip all
+#
+bfd
+#
+bfd bfd1 bind peer-ip 192.168.4.130
+ discriminator local 1 
+ discriminator remote 1
+#
+mpls lsr-id 10.3.3.3
+#
+mpls
+#
+mpls ldp
+#
+aaa
+ default-password cipher %^%#`E)v.Q@BHVzxxZ;ij{&gt;&amp;_M0!TGP7YRA@8a7mq&lt;\/%^%#
+ default-user-name include mac-address -
+ #
+ authentication-scheme none
+  authentication-mode none
+ #
+ authentication-scheme radius
+  authentication-mode radius local
+ #
+ authentication-scheme portal-mac-auth
+  authening authen-fail online authen-domain web-domain
+ #
+ accounting-scheme radius
+ #
+ accounting-scheme none
+  accounting-mode none
+ #
+ domain mac-domain
+  authentication-scheme portal-mac-auth
+  accounting-scheme radius
+  radius-server group rd1
+ <strong> </strong>prefix-assign-mode unshared
+  ip-pool pool_v4
+  ipv6-pool pool_nd1
+  ipv6-pool pool_nd2
+  mac-authentication enable
+  #
+ domain web-domain
+  authentication-scheme none
+  accounting-scheme none
+  prefix-assign-mode unshared
+  ip-pool pool_v4
+  ipv6-pool pool_nd1
+  user-group web-group
+  web-server 10.1.1.10
+  web-server url http://www.isp1.com
+  web-server identical-url
+ #
+ domain after-domain
+  authentication-scheme radius
+  accounting-scheme radius
+  radius-server group group1
+  prefix-assign-mode unshared
+  ip-pool pool_v4
+  ipv6-pool pool_nd1
+  user-group web-group
+#                                                                               
+interface Eth-Trunk2                                                      
+ pppoe-server bind Virtual-Template 5                                           
+ mode lacp-static                                                               
+ lacp timeout fast                                                              
+#
+interface  Eth-Trunk2.1
+ vlan-type dot1q 96
+ ip address 192.168.4.129 255.255.255.248
+ vrrp vrid 5 virtual-ip 192.168.4.131
+ admin-vrrp vrid 5
+ vrrp vrid 5 priority 120
+ vrrp vrid 5 preempt-mode timer delay 1800
+ vrrp vrid 5 track interface GigabitEthernet<span>0/1/0</span> reduced 50
+ vrrp vrid 5 track bfd-session session-name bfd1 link
+#
+peer-backup route-cost auto-advertising
+#
+remote-backup-service s1
+ peer 10.13.13.13 source 10.3.3.3 port 6001
+ track interface GigabitEthernet<span>0/1/0</span>
+ protect lsp-tunnel for-all-instance peer-ip 10.13.13.13
+ ip-pool pool_v4 metric 10
+ ipv6-pool pool_nd_1 metric 10
+ ipv6-pool pool_nd_2 metric 20
+ radius-authorization source same-as nas-logic-ip
+#
+remote-backup-profile p1
+ service-type bras
+ backup-id 5 remote-backup-service s1
+ peer-backup hot
+ vrrp-id 5 interface Eth-Trunk2.1
+ nas logic-port Eth-Trunk2 
+ nas logic-ip 10.10.1.1
+ nas logic-sysname huawei
+#
+interface Eth-Trunk2.10                                                         
+ ipv6 enable                                                                    
+ ipv6 address auto link-local                                                   
+ statistic enable                                                               
+ user-vlan 2001
+ remote-backup-profile p1                                             
+ bas                                                                            
+ #                                                                              
+  access-type layer2-subscriber default-domain pre-authentication mac-domain authentication after-domain            
+  authentication-method web
+  authentication-method-ipv6 web  
+ #                                                                              
+#                                                                               
+interface GigabitEthernet<span>0/1/0</span>                                                  
+ undo shutdown                                                                  
+ ipv6 enable                                                                    
+ ip address 10.2.1.1 255.255.255.0                                              
+ ipv6 address 2001:DB8:8::7/64                                                 
+ ipv6 address auto link-local
+ mpls
+ mpls ldp
+#
+interface LoopBack0
+ ipv6 enable
+ ip address 10.1.1.1 32
+ ipv6 address 2001:DB8:1::3 128
+ ipv6 address auto link-local
+#
+interface LoopBack1
+ ipv6 enable
+ ip address 10.2.2.2 255.255.255.0
+ ipv6 address 2001:DB8::2:2/64
+ ipv6 address auto link-local
+#
+interface LoopBack2
+ ip address 10.3.3.3 255.255.255.0
+#
+web-auth-server enable
+web-auth-server 10.1.1.10 port 50100 key cipher %^%#4*RHO=w*}.d\&gt;j09'Z:%=:co<font style="font-size:8pt" Face="Courier New" >~</font>p\w9'G-^|-zR'N4%^%#
+web-auth-server source interface LoopBack0
+web-auth-server version v2 v1
+<span>#</span>
+<span>undo web-auth-server source-ip all</span>
+<span>web-auth-server source-ip 10.1.1.1</span>
+#
+traffic-policy before-auth-in inbound
+#
+ospf 1
+ default cost inherit-metric
+ import-route unr
+ opaque-capability enable
+ area 0.0.0.0
+  network 10.2.1.0 0.0.0.255
+  network 10.3.3.3 0.0.0.0
+#
+vrrp recover-delay 300
+#
+return</pre>
+<ul><li>BRAS2 configuration file</li></ul>
+<pre class="screen">#
+sysname BRAS2
+#
+radius-server group rd1                                                       
+ radius-server shared-key-cipher %^%#e,yC%f9z4M2)b)2<font style="font-size:8pt" Face="Courier New" >~</font>r+lA{$g*Fzc+5/bu7VHAN&lt;%(%^% 
+ radius-server authentication 192.168.7.249 1812 weight 0                       
+ radius-server accounting 192.168.7.249 1813 weight 0                           
+ radius-server source interface LoopBack1
+# 
+ip pool pool_v4 bas local                                                       
+ gateway 172.16.0.1 255.255.255.0                                               
+ section 0 172.16.0.2 172.16.0.200                                              
+ dns-server 10.1.6.2
+#
+ipv6 prefix pre_nd_1 local                                                   
+ prefix 2001:DB8:1::/48                                                         
+ slaac-unshare-only                                                             
+#                                                                               
+ipv6 pool pool_nd_1 bas local                                                
+ dns-server 2001:DB8:11::1                                         
+ prefix pre_nd_1                                                                  
+#
+ipv6 prefix pre_nd_2 local                                                   
+ prefix 2001:DB8:2::/48 
+ slaac-unshare-only
+#                                                                               
+ipv6 pool pool_nd_2 bas local rui-slave                                                
+ dns-server 2001:DB8:12::1                                         
+ prefix pre_nd_2                                                                  
+#
+user-group web-group
+#
+acl number 6000
+ rule 5 permit ip source user-group web-group destination ip-address 10.1.6.2 0
+ rule 10 permit ip source user-group web-group destination ip-address 10.1.1.10 0
+#
+acl number 6001
+ rule 5 permit tcp source user-group web-group destination-port eq www
+ rule 10 permit tcp source user-group web-group destination-port eq 8080
+#
+acl number 6002
+ rule 5 permit ip source ip-address any destination user-group web-group
+ rule 10 permit ip source user-group web-group destination ip-address any
+#
+acl ipv6 number 6000
+ rule 5 permit ipv6 source user-group web-group destination ipv6-address 2001:DB8:1::2/128
+ #
+acl ipv6 number 6001
+ rule 5 permit tcp source user-group web-group destination-port eq www
+ rule 10 permit tcp source user-group web-group destination-port eq 8080
+#
+acl ipv6 number 6002
+ rule 5 permit ipv6 source ipv6-address any destination user-group web-group
+ rule 10 permit ipv6 source user-group web-group destination ipv6-address any
+#
+dhcpv6 duid 12345678
+#
+traffic classifier 6000 operator or
+ if-match acl 6000 precedence 1
+ if-match ipv6 acl 6000 precedence 2
+#
+traffic classifier 6001 operator or
+ if-match acl 6001 precedence 3
+ if-match ipv6 acl 6001 precedence 4
+#
+traffic classifier 6002 operator or
+ if-match acl 6002 precedence 5
+ if-match ipv6 acl 6002 precedence 6
+#
+traffic behavior in-deny
+ deny
+#
+traffic behavior permit
+#
+traffic behavior redirect
+ http-redirect plus
+#
+traffic policy before-auth-in
+ share-mode
+ classifier 6000 behavior permit precedence 1
+ classifier 6001 behavior redirect precedence 2
+ classifier 6002 behavior in-deny precedence 3
+#
+radius local-ip all
+#
+bfd
+#
+bfd bfd1 bind peer-ip 192.168.4.129
+ discriminator local 1 
+ discriminator remote 1
+#
+mpls lsr-id 10.13.13.13
+#
+mpls
+#
+mpls ldp
+#
+aaa
+ default-password cipher %^%#`E)v.Q@BHVzxxZ;ij{&gt;&amp;_M0!TGP7YRA@8a7mq&lt;\/%^%#
+ default-user-name include mac-address -
+ #
+ authentication-scheme none
+  authentication-mode none
+ #
+ authentication-scheme radius
+  authentication-mode radius local
+ #
+ authentication-scheme portal-mac-auth
+  authening authen-fail online authen-domain web-domain
+ #
+ accounting-scheme radius
+ #
+ accounting-scheme none
+  accounting-mode none
+ #
+ domain mac-domain
+  authentication-scheme portal-mac-auth
+  accounting-scheme radius
+  radius-server group rd1
+ <strong> </strong>prefix-assign-mode unshared
+  ip-pool pool_v4
+  ipv6-pool pool_nd2
+  mac-authentication enable
+  #
+ domain web-domain
+  authentication-scheme none
+  accounting-scheme none
+  prefix-assign-mode unshared
+  ip-pool pool_v4
+  ipv6-pool pool_nd2
+  user-group web-group
+  web-server 10.1.1.10 2001:DB8:1::2
+  web-server url http://www.isp1.com
+  web-server identical-url
+ #
+ domain after-domain
+  authentication-scheme radius
+  accounting-scheme radius
+  radius-server group group1
+  prefix-assign-mode unshared
+  ip-pool pool_v4
+  ipv6-pool pool_nd2
+  user-group web-group
+#                                                                               
+interface Eth-Trunk2                                                      
+ pppoe-server bind Virtual-Template 5                                           
+ mode lacp-static                                                               
+ lacp timeout fast                                                              
+#
+interface Eth-Trunk2.1
+ vlan-type dot1q 96
+ ip address 192.168.4.130 255.255.255.248
+ vrrp vrid 5 virtual-ip 192.168.4.131
+ admin-vrrp vrid 5
+ vrrp vrid 5 priority 100
+ vrrp vrid 5 track bfd-session session-name bfd1 peer
+#
+peer-backup route-cost auto-advertising
+#
+remote-backup-service s1
+ peer 10.3.3.3 source 10.13.13.13 port 6001
+ track interface GigabitEthernet<span>0/1/0</span>
+ protect lsp-tunnel for-all-instance peer-ip 10.3.3.3
+ ip-pool pool_v4 metric 20
+ ipv6-pool pool_nd_1 metric 20
+ ipv6-pool pool_nd_2 metric 10
+ radius-authorization source same-as nas-logic-ip
+#
+remote-backup-profile p1
+ service-type bras
+ backup-id 5 remote-backup-service s1
+ peer-backup hot
+ vrrp-id 5 interface Eth-Trunk2.1
+ nas logic-port Eth-Trunk2 
+ nas logic-ip 10.10.1.1
+ nas logic-sysname huawei
+#
+interface Eth-Trunk2.10                                                         
+ ipv6 enable                                                                    
+ ipv6 address auto link-local                                                   
+ statistic enable                                                               
+ user-vlan 2001
+ remote-backup-profile p1                                             
+ bas                                                                            
+ #                                                                              
+  access-type layer2-subscriber default-domain pre-authentication mac-domain authentication after-domain            
+  authentication-method web
+  authentication-method-ipv6 web  
+ #                                                                              
+#                                                                               
+interface GigabitEthernet<span>0/1/0</span>                                                  
+ undo shutdown                                                                  
+ ipv6 enable                                                                    
+ ip address 10.4.1.1 255.255.255.0                                              
+ ipv6 address 2001:DB8:9::7/128                                                 
+ ipv6 address auto link-local
+ mpls
+ mpls ldp
+#
+interface LoopBack0
+ ipv6 enable
+ ip address 10.11.1.1 32
+ ipv6 address 2001:DB8:1::3 128
+ ipv6 address auto link-local
+#
+interface LoopBack1
+ ipv6 enable
+ ip address 10.4.4.4 255.255.255.0
+ ipv6 address 2001:DB8::3:3/64
+ ipv6 address auto link-local
+#
+interface LoopBack2
+ ip address 10.13.13.13 255.255.255.0
+#
+web-auth-server enable
+web-auth-server 10.1.1.10 port 50100 key cipher %^%#4*RHO=w*}.d\&gt;j09'Z:%=:co<font style="font-size:8pt" Face="Courier New" >~</font>p\w9'G-^|-zR'N4%^%#
+web-auth-server source interface LoopBack0
+web-auth-server version v2 v1
+<span>#</span>
+<span>undo web-auth-server source-ip all</span>
+<span>web-auth-server source-ip 10.11.1.1</span>
+#
+traffic-policy before-auth-in inbound
+#
+ospf 1
+ default cost inherit-metric
+ import-route unr
+ opaque-capability enable
+ area 0.0.0.0
+  network 10.4.1.0 0.0.0.255
+  network 10.13.13.13 0.0.0.0
+#
+vrrp recover-delay 300
+#
+return</pre>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_rui_0050.html">Configuration Examples
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_rui_0063.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cfg_rui_1003.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

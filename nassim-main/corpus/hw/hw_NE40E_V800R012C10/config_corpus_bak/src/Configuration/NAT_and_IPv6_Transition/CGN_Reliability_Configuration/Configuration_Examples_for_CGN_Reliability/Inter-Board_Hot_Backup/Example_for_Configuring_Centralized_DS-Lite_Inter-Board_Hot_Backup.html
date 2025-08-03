@@ -1,0 +1,341 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Centralized DS-Lite Inter-Board Hot Backup">
+<meta name="abstract" content="">
+<meta name="description" content="">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0042.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0032.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0034.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="c00549182">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="featurename" content="CGN Reliability">
+<meta name="featuretype" content="NAT and IPv6 Transition">
+<meta name="OWNER" content="c00549182">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="c00549182">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172362467">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Centralized DS-Lite Inter-Board Hot Backup</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172362467"></a><a name="EN-US_TASK_0172362467"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Centralized DS-Lite Inter-Board Hot Backup</h1>
+<div class="taskbody"><p></p>
+<div class="context"><a name="EN-US_TASK_0172362467__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><div class="p">In the centralized deployment scenario shown in <a href="#EN-US_TASK_0172362467__fig_01">Figure 1</a>, a CGN device is deployed close to the CR on the MAN core as a standalone device and equipped with two CGN boards to implement 1:1 inter-board backup. A terminal user assigned a private IPv4 address accesses an IPv6 metropolitan area network (MAN) through the customer premises equipment (CPE). The CPE establishes a Dual-Stack Lite (DS-Lite) tunnel to the CGN device. The CPE transmits traffic with the private IPv4 address along the DS-Lite tunnel to the CGN device. The CGN device decapsulates traffic, uses a Network Address Translation (NAT) technique to translate the private IPv4 address to a public IPv4 address, and forwards traffic to the IPv4 Internet.<div class="fignone" id="EN-US_TASK_0172362467__fig_01"><a name="EN-US_TASK_0172362467__fig_01"></a><a name="fig_01"></a><span class="figcap"><b>Figure 1 </b>Centralized DS-Lite networking</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interface 1 in this example represents GE <span>0/1/1</span>.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_ne_ds-lite_0005.png"></span></div>
+</div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172362467__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Apply for NAT session resources and configure DS-Lite session resources and the DS-Lite GTL license.</p>
+</li><li>Enable HA hot backup.</li><li><p>Add the CPU of the master service board to a DS-Lite instance.</p>
+</li><li><p>Configure a local IPv6 address and a remote IPv6 address for a DS-Lite tunnel.</p>
+</li><li><p>Configure a traffic policy for the DS-Lite tunnel.</p>
+</li><li><p>Configure basic DS-Lite functions.</p>
+</li><li><p>Enable the CGN device to advertise routes.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172362467__1.4.3"></a><a name="1.4.3"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Apply for NAT session resources and configure DS-Lite session resources and the DS-Lite GTL license.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname CGN</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN]<strong> vsm on-board-mode disable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>display license</strong></pre>
+<pre class="screen"> Item name          Item type  Value    Description 
+ -------------------------------------------------------------                        
+LCR5NATDS00        Resource   256      2M NAT Session    
+             </pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN] <strong>License</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-license] <strong>active nat session-table size 16 slot <span>1</span> </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-license] <strong>active nat session-table size 16 slot <span>2</span> </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-license] <strong>active nat bandwidth-enhance 40 slot</strong> <strong><span>1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-license] <strong>active nat bandwidth-enhance 40 slot</strong><strong> <span>2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-license] <strong>active ds-lite vsuf slot <span>1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-license] <strong>active ds-lite vsuf slot <span>2</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-license] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN-license] <strong>quit</strong></pre>
+</p></li><li><span>Enable HA hot backup.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN] <strong>service-ha hot-backup enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN] <strong>commit</strong></pre>
+</p></li><li><span>Add the CPU of the master service board to a DS-Lite instance.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN] <strong>service-location 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-service-location-1] <strong>location slot <span>1</span> backup slot <span>2</span> </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-service-location-1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN-service-location-1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN] <strong>service-instance-group group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-instance-group-group1] <strong>service-location 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-instance-group-group1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN-instance-group-group1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN] <strong>ds-lite instance ds-lite-1 id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-ds-lite-instance-ds-lite-1] <strong>service-instance-group group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-ds-lite-instance-ds-lite-1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN-ds-lite-instance-ds-lite-1] <strong>quit</strong></pre>
+</p></li><li><span>Configure a local IPv6 address and a remote IPv6 address for a DS-Lite tunnel.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN] <strong>ds-lite instance ds-lite-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-ds-lite-instance-ds-lite-1] <strong>local-ipv6 2001:dB8:2::12 prefix-length 128</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-ds-lite-instance-ds-lite-1] <strong>remote-ipv6 2001:db8:1:: prefix-length 41</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN-ds-lite-instance-ds-lite-1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-ds-lite-instance-ds-lite-1] <strong>quit</strong></pre>
+</p></li><li><span>Configure a traffic policy for the DS-Lite tunnel.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN] <strong>acl ipv6 3500</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-acl6-basic-3500] <strong>rule permit ipv6 source 2001:db8:1:: 41 destination 2001:dB8:2::12 128</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-acl6-basic-3500] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN-acl6-basic-3500] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN] <strong>traffic classifier c1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-classifier-c1] <strong>if-match ipv6 acl 3500</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN-classifier-c1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-classifier-c1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN] <strong>traffic behavior b1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-behavior-b1] <strong>ds-lite bind instance ds-lite-1</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN-behavior-b1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-behavior-b1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN] <strong>traffic policy p1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-trafficpolicy-p1] <strong>classifier c1 behavior b1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-trafficpolicy-p1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN-trafficpolicy-p1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN] <strong>interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN-GigabitEthernet<span>0/1/1</span>] <strong>traffic-policy p1 inbound</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-GigabitEthernet<span>0/1/1</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+</p></li><li><span>Configure basic DS-Lite functions.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN] <strong>ds-lite instance ds-lite-1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-ds-lite-instance-ds-lite-1] <strong>port-range 4096</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-ds-lite-instance-ds-lite-1] <strong>ds-lite address-group group1 group-id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-ds-lite-instance-ds-lite-1-ds-lite-address-group-group1] <strong>section 0 11.1.1.1 mask 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-ds-lite-instance-ds-lite-1-ds-lite-address-group-group1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-ds-lite-instance-ds-lite-1] <strong>ds-lite outbound 3500 address-group group1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-ds-lite-instance-ds-lite-1] <strong>ds-lite alg all</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-ds-lite-instance-ds-lite-1] <strong>ds-lite filter mode full-cone</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CGN-ds-lite-instance-ds-lite-1] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CGN-ds-lite-instance-ds-lite-1] <strong>quit</strong></pre>
+</p></li><li><span>Enable the CGN device to advertise routes.</span><p><p>Advertise public routing information based on the live network status. If a public address pool is configured using a mask, run the <strong>network</strong> command to advertise a route. Do not configure a black-hole summary route, which prevents a failure to forward reverse traffic.</p>
+</p></li><li><span>Verify the configuration.</span><p><p># Run the <strong>display device</strong> command to view the status of the master and slave service boards.</p>
+<pre class="screen">&lt;CGN&gt; <strong>display device</strong></pre>
+<pre class="screen"><span class="keyword">NE40E</span>'s Device status:
+Slot #    Type       Online    Register      Status      Primary 
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+<span>1</span>         VSU        Present   Registered    Normal      NA
+<span>2</span>         VSU        Present   Registered    Normal      NA
+17        MPU        Present   NA            Normal      Master
+18        MPU        Present   Registered    Normal      Slave
+19        SFU        Present   Registered    Normal      NA   
+21        SFU        Present   Registered    Normal      NA   
+23        CLK        Present   Registered    Normal      Master
+24        CLK        Present   Registered    Normal      Slave
+25        PWR        Present   Registered    Normal      NA   
+26        PWR        Present   Registered    Normal      NA   
+27        FAN        Present   Registered    Normal      NA   
+28        FAN        Present   Registered    Normal      NA   
+29        FAN        Present   Registered    Normal      NA   
+30        FAN        Present   Registered    Normal      NA
+</pre>
+<p># Verify that the public network routes are properly advertised.</p>
+<pre class="screen">&lt;CGN&gt; <strong>display ip routing-table</strong></pre>
+<pre class="screen">Route Flags: R - relay, D - download to fib
+---------------------------------------------------------------
+Routing Table: Public                                        
+         Destinations : 21813    Routes : 21814  
+Destination/Mask    Proto   Pre  Cost      Flags NextHop         Interface
+     11.1.1.0/24  Unr     64   10          D   127.0.0.1       InLoopBack0
+</pre>
+<pre class="screen">&lt;CGN&gt; <strong>display ipv6 routing-table 2001:dB8:2::12</strong></pre>
+<pre class="screen">Routing Table :      
+Summary Count : 1    
+                     
+ Destination  : 2001:dB8:2::12                  PrefixLength : 128
+ NextHop      : ::1                             Preference   : 64
+ Cost         : 10                              Protocol     : Unr
+ RelayNextHop : ::                              TunnelID     : 0x0 
+ Interface    : InLoopBack0                     Flags        : D     </pre>
+<p># Verify that the master/backup status in the service-location is correct.</p>
+<pre class="screen">&lt;CGN&gt; <strong>display service-location 1</strong></pre>
+<pre class="screen">service-location 1
+ Location slot ID: <span>1</span>                            
+ Current location slot ID: <span>1</span>                    
+ Backup slot ID: <span>2</span>                             
+ Current backup slot ID: <span>2</span>                      
+ Bound service-instance-group number: 1                       
+ Batch-backup state: finished </pre>
+<p># Verify that user table information on the master and slave service boards is correct.</p>
+<pre class="screen">&lt;CGN&gt; <strong>display nat user-information slot <span>1</span> verbose</strong></pre>
+<pre class="screen">This operation will take a few minutes. Press 'Ctrl+C' to break ... 
+Slot: <span>1</span> 
+Total number:  2. 
+  --------------------------------------------------------------------------- 
+  User Type                             :  Ds-Lite 
+  IPv6Address                           :  2001:db8:1::0221:0:0200:0001/128 
+  User ID                               :  -
+  VPN Instance                          :  -   
+  Address Group                         :  group1 
+  DS-Lite Instance                      :  ds-lite-1 
+  Public IP                             :  11.1.1.2 
+  Start Port                            :  1024 
+  Port Range                            :  4096 
+  Port Total                            :  4096 
+  Total/TCP/UDP/ICMP Session Limit      :  8192/10240/10240/512
+  Total/TCP/UDP/ICMP Session Current    :  26/0/26/0
+  Total/TCP/UDP/ICMP Port Limit         :  20992/10240/10240/512
+  Total/TCP/UDP/ICMP Port Current       :  8192/0/8192/0
+  Nat ALG Enable                        :  ALL
+  Rbp Index/Rbp Status                  :  0/0/0
+  Token/TB/TP                           :  0/0/0
+  Port Forwarding Flag                  :  Non Port Forwarding
+  Port Forwarding Ports                 :  0 0 0 0 0
+  Aging Time(s)                         :  -
+  Left Time(s)                          :  -
+  Port Limit Discard Count              :  0
+  Session Limit Discard Count           :  0
+  Fib Miss Discard Count                :  0
+  --&gt;Transmit Packets                   :  8192
+  --&gt;Transmit Bytes                     :  19252
+  --&gt;Drop Packets                       :  0
+  &lt;--Transmit Packets                   :  0
+  ------------------------------------------------------------</pre>
+<p># Verify that user session table information on the master and slave service boards is correct.</p>
+<pre class="screen">&lt;CGN&gt; <strong>display nat session table slot <span>1</span></strong></pre>
+<pre class="screen">This operation will take a few minutes. Press 'Ctrl+C' to break 
+Slot: <span>1</span>     
+Current total sessions: 8192.                                 
+  udp: 192.168.1.2:28195[11.1.1.2:1723]--&gt; *:*   
+  udp: 192.168.1.2:20069[11.1.1.2:1727]--&gt; *:*    
+  udp: 192.168.1.2:59556[11.1.1.2:1085]--&gt; *:*   </pre>
+<pre class="screen">&lt;CGN&gt; <strong>display nat session table slot <span>2</span></strong></pre>
+<pre class="screen">This operation will take a few minutes. Press 'Ctrl+C' to break 
+Slot: <span>2</span>     
+Current total sessions: 8192.                                 
+  udp: 192.168.1.2:28195[11.1.1.2:1723]--&gt; *:*   
+  udp: 192.168.1.2:20069[11.1.1.2:1727]--&gt; *:*    
+  udp: 192.168.1.2:59556[11.1.1.2:1085]--&gt; *:*   </pre>
+<p># Run the <strong>display nat statistics</strong> command to view the number of sent and received packets on the master service board.</p>
+<pre class="screen">&lt;CGN&gt; <strong>display nat statistics received slot <span>1</span></strong></pre>
+<pre class="screen">This operation will take a few minutes. Press 'Ctrl+C' to break 
+Slot: <span>1</span>     
+---------------------------------------------------------------------
+ Packets received from interface                :632014772    
+ Packets received from mainboard                :29450        
+ Packets received by nat entry                  :255587842    
+ receive hrp packets from peer device           :0            
+ receive boardhrp packets from peer board       :0            
+-----------------------------------------------------------------------</pre>
+<pre class="screen">&lt;CGN&gt; <strong>display nat statistics transmitted slot <span>1</span></strong></pre>
+<pre class="screen">This operation will take a few minutes. Press 'Ctrl+C' to break 
+Slot: <span>1</span>     
+-----------------------------------------------------------------------
+ Packets transmitted to interface               :159142427    
+ Packets transmitted to mainboard               :22219        
+ Seclog packets transmitted                     :0            
+ Syslog packets transmitted                     :0            
+ Userinfo log msg transmitted to cp             :0            
+ Transparent packet with nat                    :65080312     
+ Transparent packet without nat                 :0            
+ sessions sent by hrp                           :0            
+ UserTbl sent by hrp                            :0            
+ UserTbl sent by Boardhrp                       :0            
+ sessions sent by Boardhrp                      :0            
+------------------------------------------------------------------------</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172362467__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>CGN configuration file</p>
+<pre class="screen">#
+sysname CGN
+#
+vsm on-board-mode disable
+#
+license
+ active nat session-table size 16 slot <span>1</span> 
+ active nat session-table size 16 slot <span>2</span> 
+ active nat bandwidth-enhance 40 slot <span>2</span>
+ active nat bandwidth-enhance 40 slot <span>2</span>
+ active ds-lite vsuf slot <span>1</span>
+ active ds-lite vsuf slot <span>2</span>
+#
+service-ha hot-backup enable
+service-ha delay-time 10
+#
+service-location 1
+ location slot <span>1</span> backup slot <span>2</span> 
+#
+service-instance-group group1
+ service-location 1
+#
+ds-lite instance ds-lite-1 id 1
+ port-range 4096
+ local-ipv6 2001:dB8:2::12 prefix-length 128
+ remote-ipv6 2001:db8:1:: prefix-length 41
+ ds-lite address-group group1 group-id 1
+   section 0 11.1.1.1 mask 24
+ ds-lite outbound 3500 address-group group1
+ ds-lite alg all
+ ds-lite filter mode full-cone
+#
+acl ipv6 3500
+ rule permit ipv6 source 2001:db8:1:: 41 destination 2001:dB8:2::12 128
+#
+traffic classifier c1 operator or
+ if-match ipv6 acl 3500 precedence 1
+#
+traffic behavior b1
+ ds-lite bind instance ds-lite-1
+#
+traffic policy p1
+ classifier c1 behavior b1 precedence 1
+#
+interface gigabitethernet <span>0/1/1</span>
+ ip address 10.1.1.1 24
+ traffic-policy p1 inbound
+#
+return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0042.html">Inter-Board Hot Backup
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0032.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/ne/dc_ne_cgn-reliability_cfg_0034.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

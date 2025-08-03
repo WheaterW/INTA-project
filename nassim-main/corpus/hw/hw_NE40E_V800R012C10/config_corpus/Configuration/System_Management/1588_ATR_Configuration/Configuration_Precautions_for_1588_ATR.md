@@ -1,0 +1,14 @@
+Configuration Precautions for 1588 ATR
+======================================
+
+Configuration Precautions for 1588 ATR
+
+#### Feature Requirements
+
+**Table 1** Feature requirements
+| Feature Requirements | Series | Models |
+| --- | --- | --- |
+| 1. An interface cannot be configured with both 1588v2/G.8275.1 and G.8275.2 routes.  2. An interface cannot be configured with both G.8275.1 and 1588v2/G.8275.1 routes.  Reason: The G.8275.2 small TC timestamping solution and the 1588v2/G.8275.1 timestamping solution cannot be configured at the same time. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| The following types of interfaces do not support 1588 ATR: FlexE, HP-GE, FgClient, WDM, and OpticalAmplifier interfaces.  The ATOM GPS module does not support the 1588 ATR function. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| 1588 ATR cannot be deployed in cascading mode because 1588 ATR is affected by the PDV of the intermediate network and the time synchronization precision is low. After 1588 ATR is cascaded, the time synchronization performance cannot meet the time locking requirements. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |
+| Routers support the G.8275.2-compliant 1588 ATR server function. Network deployment has the following limitations:  1. The upstream and downstream traffic between a server and a client must pass the same unique path.  2. The intermediate network includes up to 3 hops of microwave devices (4 devices) or three Layer 2 switches. Traversing routers is not supported.  3. PTP packets are exchanged between the server and client. The PTP packets can be Layer 3 IP packets or single VLAN-tagged packets. The packets cannot carry MPLS labels or SRv6 labels.If PTP packets need to traverse an MPLS network, the MPLS labels must be removed before the PTP packets enter the server and client. Specifically, configure MPLS label popping on the devices that are directly connected to the server and client on the MPLS network. For details, see the label advertise command.  4. The ptp-adaptive atr enable command must be run on the inbound and outbound interfaces of PTP packets.  5. Measurement and compensation for static asymmetry of upstream and downstream delay are required for 1588 packets on the primary and secondary devices.  6. When LAG exists on the intermediate network, the fibers of all LAG member links must have the same length. That is, the asymmetry of delay is fixed regardless of changes.  7. PTP packets have the highest priority. The transit networks must be able to identify the priority of PTP packets for scheduling.  The time synchronization performance cannot be met. | NE40E-M2 | NE40E-M2E/NE40E-M2F/NE40E-M2H/NE40E-M2K/NE40E-M2K-B |

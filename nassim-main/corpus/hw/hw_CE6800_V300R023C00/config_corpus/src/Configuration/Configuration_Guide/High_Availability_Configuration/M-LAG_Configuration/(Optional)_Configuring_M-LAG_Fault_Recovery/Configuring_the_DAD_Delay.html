@@ -1,0 +1,90 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Configuring the DAD Delay">
+<meta name="abstract" content="">
+<meta name="description" content="">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_cfg_m-lag_0033.html">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_cfg_m-lag_0034_c.html">
+<meta name="DC.Relation" scheme="URI" content="../dc/dc_cfg_m-lag_0049_c.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="M-LAG">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="M-LAG">
+<meta name="featuretype" content="High Availability">
+<meta name="featurename" content="M-LAG">
+<meta name="featuretype" content="High Availability">
+<meta name="featuretype" content="High Availability">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001512849238">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Configuring the DAD Delay</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001512849238"></a><a name="EN-US_TASK_0000001512849238"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Configuring the DAD Delay</h1>
+<div class="taskbody"><p></p>
+<div class="context"><a name="EN-US_TASK_0000001512849238__1.4.1"></a><a name="1.4.1"></a><h4 class="sectiontitle">Context</h4>
+<div class="p"><p>If the peer-link fails but the DAD heartbeat status is normal, accelerated DAD is triggered immediately and three DAD packets are separately sent at intervals of 200 ms. As a result, exceptions occur in the following scenarios:</p>
+<ul><li>If the peer-link fails because one M-LAG device restarts unexpectedly, interfaces on the other M-LAG device are triggered to enter the error-down state. As a result, both the master and backup devices are abnormal.</li><li>In an M-LAG double-fault failure recovery scenario, if interfaces on one M-LAG device enter the error-down state due to a peer-link fault and then the other M-LAG device fails, the interfaces in the error-down state on the first M-LAG device go up and start to forward traffic. After the other M-LAG device is restarted, the heartbeat status of the M-LAG device becomes normal first. Before the peer-link interface on the M-LAG device recovers, the peer-link fails but the DAD heartbeat status is normal, triggering accelerated DAD. As a result, interfaces on the M-LAG device enter the error-down state.</li></ul>
+<p>To solve the preceding problems, the device supports the following functions:</p>
+<ul><li>If the peer-link fails when the DAD heartbeat status is normal, three DAD packets are separately sent at intervals of 200 milliseconds after the DAD delay, which is 3 seconds by default.</li><li>When the peer-link fails and the DAD heartbeat status is abnormal, if the DAD heartbeat status becomes normal, three DAD packets are separately sent at intervals of 200 milliseconds after the DAD delay, which is 3 seconds by default.</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001512849238__1.4.2"></a><a name="1.4.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Enter the system view.</span><p><pre class="screen"><a href="cmdqueryname=system-view"><b><span class="cmdname">system-view</span></b></a></pre>
+</p></li><li><span>Enter the DFS group view.</span><p><pre class="screen"><a href="cmdqueryname=dfs-group"><b><span class="cmdname">dfs-group</span></b></a> <i><span class="varname">dfs-group-id</span></i></pre>
+</p></li><li><span>Configure the DAD delay upon failure of the peer-link.</span><p><pre class="screen"><strong><a href="cmdqueryname=dual-active+detection+delay"><b><span class="cmdname">dual-active detection delay</span></b></a></strong> <em><i><span class="varname">delaytime</span></i></em></pre>
+<p>By default, the DAD delay upon failure of the peer-link is 3 seconds.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><ul><li>When both M-LAG and BFD are configured, set <em>delaytime</em> to a value less than 1 second to prevent BFD session flapping upon failure of the peer-link.</li><li>In an M-LAG multicast traffic forwarding scenario, set <em>delaytime</em> to a value less than 1 second to reduce excess multicast packets upon failure of the peer-link.</li><li>If the DFS configuration exists and the <a href="cmdqueryname=dual-active+detection+delay"><b><span class="cmdname">dual-active detection delay</span></b></a> command is not supported before an upgrade, a configuration with <em>delaytime</em> being 3000 is generated by default after the upgrade.</li></ul>
+</div></div>
+</p></li><li><span>Configure the DAD delay upon M-LAG heartbeat recovery.</span><p><pre class="screen"><strong><a href="cmdqueryname=dual-active+detection+hold-time"><b><span class="cmdname">dual-active detection hold-time</span></b></a></strong> <em>holdtime</em></pre>
+<p>By default, the DAD delay upon M-LAG heartbeat recovery is 3 seconds.</p>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>To prevent interfaces on one M-LAG device from entering the error-down state incorrectly, you are advised to set the DAD delay upon M-LAG heartbeat recovery to 3 seconds or longer and set the delay for network-side interfaces of M-LAG devices to go up to be at least 3 seconds longer than the delay for peer-link interfaces to go up.</p>
+</div></div>
+</p></li><li><span>Commit the configuration.</span><p><pre class="screen" id="EN-US_TASK_0000001512849238__en-us_task_0228023023_screen163801330213"><a href="cmdqueryname=commit"><b><span class="cmdname" id="EN-US_TASK_0000001512849238__en-us_task_0228023023_en-us_concept_0141113565_cmdname1667501373175340">commit</span></b></a></pre>
+</p></li></ol></div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../dc/dc_cfg_m-lag_0033.html">(Optional) Configuring M-LAG Fault Recovery
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../dc/dc_cfg_m-lag_0034_c.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../dc/dc_cfg_m-lag_0049_c.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,595 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring VLL-based CFM Through Sub-interfaces for QinQ VLAN Tag Termination">
+<meta name="abstract" content="This section provides an example for configuring virtual leased line (VLL)-based connectivity fault management (CFM).">
+<meta name="description" content="This section provides an example for configuring virtual leased line (VLL)-based connectivity fault management (CFM).">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfm_cfg_000021.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfm_cfg_000024.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfm_cfg_000026.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="z50024784,c00376497,z00603461,w00800033,jwx1168690,w00556928,w00437000,eoam-vrp,w00606909,m00390128,l00455378,wwx1270540">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="Ethernet OAM">
+<meta name="featuretype" content="Network Reliability">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Ethernet OAM">
+<meta name="featuretype" content="Network Reliability">
+<meta name="featurename" content="Ethernet OAM">
+<meta name="featuretype" content="Network Reliability">
+<meta name="featurename" content="Ethernet OAM">
+<meta name="featuretype" content="Network Reliability">
+<meta name="featurename" content="Ethernet OAM">
+<meta name="featuretype" content="Network Reliability">
+<meta name="OWNER" content="z00545680">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="p00915595">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172361977">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring VLL-based CFM Through Sub-interfaces for QinQ VLAN Tag Termination</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172361977"></a><a name="EN-US_TASK_0172361977"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring VLL-based CFM Through Sub-interfaces for QinQ VLAN Tag Termination</h1>
+<div class="taskbody"><p>This section provides an example for configuring virtual leased line (VLL)-based connectivity fault management (CFM).</p>
+<div class="context"><a name="EN-US_TASK_0172361977__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On the network shown in <a href="#EN-US_TASK_0172361977__fig_dc_vrp_cfm_cfg_00002501">Figure 1</a>, CE1's GE <span>0/1/0</span>.1 and CE2's GE <span>0/1/0</span>.1 are connected to PE1 and PE2, respectively. 802.1Q in 802.1Q (QinQ) is deployed on each switch so that the switch adds Tag 100 to the packets sent by the CE the switch is connected to. That is, the packets sent from the switch to the PE it is connected to carry double virtual local area network (VLAN) tags. QinQ reduces public VLAN ID resources needed. Label Distribution Protocol (LDP) VLL runs on the backbone network, and the LDP is used to establish pseudo wires (PWs). To improve network reliability, bind a sub-interface for QinQ VLAN tag termination on the attachment circuit (AC) interface of each PE to a Layer 2 virtual circuit (L2VC) interface and deploy VLL-based CFM to quickly detect faults on the VLL link between PEs.</p>
+<div class="fignone" id="EN-US_TASK_0172361977__fig_dc_vrp_cfm_cfg_00002501"><a name="EN-US_TASK_0172361977__fig_dc_vrp_cfm_cfg_00002501"></a><a name="fig_dc_vrp_cfm_cfg_00002501"></a><span class="figcap"><b>Figure 1 </b>VLL-based CFM</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface1, interface2, and interface3 represent GE <span>0/1/0</span>, GE <span>0/1/1</span>, and GE <span>0/2/0</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_cfm_cfg_00002501.png" width="NaN" height="NaN"></span><br></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172361977__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Set the interface mode on PE1 and PE2 to the user termination mode.</p>
+</li><li><p>Configure an Interior Gateway Protocol (IGP) on the backbone network to enable communication between devices on the backbone network.</p>
+</li><li><p>Enable basic Multiprotocol Label Switching (MPLS) capabilities on the backbone network and establish a label switched path (LSP).</p>
+</li><li><p>Establish a remote MPLS LDP peer relationship between PEs at both ends of the PW.</p>
+</li><li><p>Configure a sub-interface for QinQ VLAN tag termination on the AC interface of each PE.</p>
+</li><li><p>Create an MPLS L2VC on each PE and bind the sub-interface to the L2VC.</p>
+</li><li><p>Configure VLL-based CFM on each PE.</p>
+</li><li><p>Enable Layer 2 forwarding and QinQ on each UPE.</p>
+</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172361977__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li><p>Interface name of each PE connected to each CE</p>
+</li><li><p>Interface IP addresses</p>
+</li><li><p>L2VC IDs at both ends of the PW (must be the same)</p>
+</li><li><p>MPLS LSR IDs of the PEs and P</p>
+</li><li><p>IP address of the remote peer of each PE</p>
+</li><li><p>Tag value that is terminated on the sub-interface for QinQ VLAN tag termination</p>
+</li><li><p>MD name, MA name, MEP ID and type, and name of the interface on which the MEP resides</p>
+</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172361977__1.4.4"></a><a name="1.4.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Set the interface mode on each PE to the user termination mode.</span><p><p># Configure PE1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname PE1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE1]<strong> interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>]<strong> quit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname PE2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>PE2]<strong> interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>] <strong>quit</strong></pre>
+</p></li><li><span>Configure an IGP on the backbone network. This example uses Open Shortest Path First (OSPF).</span><p><p>Assign IP addresses to interfaces on the PEs and P using information in <a href="#EN-US_TASK_0172361977__fig_dc_vrp_cfm_cfg_00002501">Figure 1</a>. After OSPF is enabled, the 32-bit loopback addresses of PE1, P, and PE2 must be advertised.</p>
+<p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1]<strong> ip address 1.1.1.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-LoopBack1] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>]<strong> ip address 10.1.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1]<strong> ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1]<strong> area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1-area-0.0.0.0]<strong> network 1.1.1.9 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1-area-0.0.0.0]<strong> network 10.1.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1-area-0.0.0.0]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-ospf-1]<strong> quit</strong></pre>
+<p># Configure the P.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>]<strong> sysname P</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>P]<strong> interface LoopBack 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-LoopBack1]<strong> ip address 2.2.2.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-LoopBack1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/1/0</span>]<strong> ip address 10.1.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/1/0</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P]<strong> interface gigabitethernet <span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/2/0</span>]<strong> ip address 10.1.2.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/2/0</span>]<strong> undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/2/0</span>]<strong> quit </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P]<strong> ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-ospf-1]<strong> area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-ospf-1-area-0.0.0.0]<strong> network 2.2.2.9 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-ospf-1-area-0.0.0.0]<strong> network 10.1.1.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-ospf-1-area-0.0.0.0] <strong>network 10.1.2.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-ospf-1-area-0.0.0.0]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-ospf-1]<strong> quit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> interface loopback 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1]<strong> ip address 3.3.3.9 32</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-LoopBack1]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>]<strong> ip address 10.1.2.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> ospf</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1]<strong> area 0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1-area-0.0.0.0]<strong> network 3.3.3.9 0.0.0.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1-area-0.0.0.0] <strong>network 10.1.2.0 0.0.0.255</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1-area-0.0.0.0]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-ospf-1]<strong> quit</strong></pre>
+<p>After the configuration is complete, run the <strong>display ip routing-table</strong> command. The command output shows that an OSPF route exists between Loopback1 interfaces of PE1 and PE2.</p>
+<p>The following example uses the command output on PE1.</p>
+<pre class="screen">&lt;PE1&gt; <strong>display ip routing-table</strong></pre>
+<pre class="screen">Route Flags: R - relied, D - download to fib</pre>
+<pre class="screen">------------------------------------------------------------------------------</pre>
+<pre class="screen">Routing Table: Public</pre>
+<pre class="screen">         Destinations : 9        Routes : 9
+</pre>
+<pre class="screen">Destination/Mask    Proto  Pre  Cost     Flags NextHop         Interface
+</pre>
+<pre class="screen">        1.1.1.9/32  Direct 0    0           D  127.0.0.1       InLoopBack0</pre>
+<pre class="screen">        2.2.2.9/32  OSPF   10   2           D  10.1.1.2       GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">        3.3.3.9/32  OSPF   10   3           D  10.1.1.2       GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">      10.1.1.0/24  Direct 0    0           D  10.1.1.1       GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">      10.1.1.1/32  Direct 0    0           D  127.0.0.1       <span>GigabitEthernet<span>0/1/0</span></span></pre>
+<pre class="screen">      10.1.1.2/32  Direct 0    0           D  10.1.1.2       GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">      10.1.2.0/24  OSPF   10   2           D  10.1.1.2       GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen">      127.0.0.0/8   Direct 0    0           D  127.0.0.1       InLoopBack0</pre>
+<pre class="screen">      127.0.0.1/32  Direct 0    0           D  127.0.0.1       InLoopBack0</pre>
+<pre class="screen">&lt;PE1&gt; ping 10.1.2.2</pre>
+<pre class="screen">  PING 10.1.2.2: 56  data bytes, press CTRL_C to break</pre>
+<pre class="screen">    Reply from 10.1.2.2: bytes=56 Sequence=1 ttl=254 time=200 ms</pre>
+<pre class="screen">    Reply from 10.1.2.2: bytes=56 Sequence=2 ttl=254 time=60 ms</pre>
+<pre class="screen">    Reply from 10.1.2.2: bytes=56 Sequence=3 ttl=254 time=90 ms</pre>
+<pre class="screen">    Reply from 10.1.2.2: bytes=56 Sequence=4 ttl=254 time=90 ms</pre>
+<pre class="screen">    Reply from 10.1.2.2: bytes=56 Sequence=5 ttl=254 time=90 ms
+</pre>
+<pre class="screen">  --- 10.1.2.2 ping statistics ---</pre>
+<pre class="screen">    5 packet(s) transmitted</pre>
+<pre class="screen">    5 packet(s) received</pre>
+<pre class="screen">    0.00% packet loss</pre>
+<pre class="screen">    round-trip min/avg/max = 60/106/200 ms</pre>
+</p></li><li><span>Enable basic MPLS functions and LDP on the backbone network.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>mpls lsr-id 1.1.1.9 </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/1/0</span>]<strong> quit</strong></pre>
+<p># Configure the P.</p>
+<pre class="screen">[<span class="keyword">*</span>P] <strong>mpls lsr-id 2.2.2.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P] mpls <strong>ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P] <strong>interface gigabitethernet<span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/1/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/1/0</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P] <strong>interface gigabitethernet<span>0/2/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/2/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/2/0</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>P-GigabitEthernet<span>0/2/0</span>]<strong> quit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>mpls lsr-id 3.3.3.9 </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-mpls] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-mpls-ldp] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface gigabitethernet <span>0/1/0</span> </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>mpls</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>mpls ldp</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<p>After the configurations are complete, LDP sessions are established between PE1 and the P and between PE2 and the P. Run the <strong>display mpls ldp session</strong> command. The command output shows that the LDP session status is <strong>Operational</strong>.</p>
+<p>The following example uses the command output on PE1.</p>
+<pre class="screen">&lt;PE1&gt; <strong>display mpls ldp session</strong></pre>
+<pre class="screen">LDP Session(s) in Public Network
+ Codes: LAM(Label Advertisement Mode), SsnAge Unit(DDDD:HH:MM)
+<span> An asterisk (*) before a session means the session is being deleted.</span>
+ ------------------------------------------------------------------------------
+ PeerID             Status      LAM  SsnRole  SsnAge      KASent/Rcv
+ ------------------------------------------------------------------------------
+ 2.2.2.9:0          <strong>Operational</strong> DU   Active   0000:03:01  726/726
+ ------------------------------------------------------------------------------
+ TOTAL: 1 session(s) Found.</pre>
+</p></li><li><span>Establish a remote LDP session between PEs.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>mpls ldp remote-peer 3.3.3.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls-ldp-remote-3.3.3.9] <strong>remote-ip 3.3.3.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-mpls-ldp-remote-3.3.3.9] <strong>quit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword">*</span>PE2]<strong> mpls ldp remote-peer 1.1.1.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-mpls-ldp-remote-1.1.1.9] <strong>remote-ip 1.1.1.9</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-mpls-ldp-remote-1.1.1.9] <strong>quit</strong></pre>
+<p>After the configuration is complete, run the <strong>display mpls ldp session</strong> command. The command output shows that an LDP session has been established between PE1 and PE2 and its state is <strong>Operational</strong>.</p>
+<p>The following example uses the command output on PE1.</p>
+<pre class="screen">&lt;PE1&gt; <strong>display mpls ldp session</strong></pre>
+<pre class="screen">LDP Session(s) in Public Network
+ Codes: LAM(Label Advertisement Mode), SsnAge Unit(DDDD:HH:MM)
+<span> An asterisk (*) before a session means the session is being deleted.</span>
+ ------------------------------------------------------------------------------
+ PeerID             Status      LAM  SsnRole  SsnAge      KASent/Rcv
+ ------------------------------------------------------------------------------
+ 2.2.2.9:0          Operational DU   Passive  0000:00:09  37/37
+ 3.3.3.9:0          <strong>Operational</strong> DU   Passive  0000:00:03  13/13
+ ------------------------------------------------------------------------------
+ TOTAL: 2 session(s) Found.</pre>
+</p></li><li><span>Enable MPLS L2VPN, create a VC, and configure a sub-interface for QinQ VLAN tag termination.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-l2vpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>interface gigabitethernet <span>0/2/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>.1] <strong>control-vid 1 qinq-termination</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>.1] <strong>qinq termination l2 symmetry </strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>.1] <strong>qinq termination pe-vid 100 ce-vid 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>.1] <strong>mpls l2vc 3.3.3.9 101</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-GigabitEthernet<span>0/2/0</span>.1] <strong>quit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>mpls l2vpn</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-l2vpn] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>interface gigabitethernet <span>0/2/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>.1] <strong>control-vid 1 qinq-termination</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>.1] <strong>qinq termination l2 symmetry</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>.1] <strong>qinq termination pe-vid 100 ce-vid 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>.1] <strong>mpls l2vc 1.1.1.9 101</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-GigabitEthernet<span>0/2/0</span>.1] <strong>quit</strong></pre>
+</p></li><li><span>Configure Ethernet CFM on each PE.</span><p><p># Configure PE1.</p>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>cfm enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>cfm version standard</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1] <strong>cfm md md1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-md-md1] <strong>ma ma1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-md-md1-ma-ma1] <strong>ccm-interval 30</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-md-md1-ma-ma1] <strong>map mpls l2vc 101 tagged</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-md-md1-ma-ma1] <strong>mep mep-id 1 interface gigabitethernet <span>0/2/0</span>.1 pe-vid 100 ce-vid 10 inward</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-md-md1-ma-ma1] <strong>remote-mep mep-id 2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-md-md1-ma-ma1] <strong>mep ccm-send mep-id 1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-md-md1-ma-ma1] <strong>remote-mep ccm-receive mep-id 2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE1-md-md1-ma-ma1] <strong>quit</strong></pre>
+<p># Configure PE2.</p>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>cfm enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>cfm version standard</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2] <strong>cfm md md1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-md-md1] <strong>ma ma1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-md-md1-ma-ma1] <strong>ccm-interval 30</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-md-md1-ma-ma1] <strong>map mpls l2vc 101 tagged</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-md-md1-ma-ma1] <strong>mep mep-id 2 interface gigabitethernet <span>0/2/0</span>.1 pe-vid 100 ce-vid 10 inward</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-md-md1-ma-ma1] <strong>remote-mep mep-id 1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-md-md1-ma-ma1] <strong>mep ccm-send mep-id 2 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-md-md1-ma-ma1] <strong>remote-mep ccm-receive mep-id 1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>PE2-md-md1-ma-ma1] <strong>quit</strong></pre>
+</p></li><li><span>Enable QinQ so that each switch can send packets with double VLAN tags to the PE it is connected to.</span><p><p># Configure UPE1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname UPE1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE1] <strong>vlan 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-vlan100] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/0</span>] <strong>portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/0</span>] <strong>port trunk allow-pass vlan 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1] <strong>interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/1</span>] <strong>portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/1</span>] <strong>port vlan-stacking vlan 10 stack-vlan 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/1</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE1-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+<p># Configure UPE2.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname UPE2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>UPE2] <strong>vlan 100</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">*</span>UPE2-vlan100] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2] <strong>interface gigabitethernet <span>0/1/0</span></strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/0</span>] <strong>portswitch</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/0</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[UPE2-GigabitEthernet<span>0/1/0</span>] <strong>port trunk allow-pass vlan 100</strong></pre>
+<pre class="screen">[UPE2-GigabitEthernet<span>0/1/0</span>] <strong>quit</strong></pre>
+<pre class="screen">[UPE2] <strong>interface gigabitethernet <span>0/1/1</span></strong></pre>
+<pre class="screen">[UPE2-GigabitEthernet<span>0/1/1</span>] <strong>portswitch</strong></pre>
+<pre class="screen">[UPE2-GigabitEthernet<span>0/1/1</span>] <strong>undo shutdown</strong></pre>
+<pre class="screen">[UPE2-GigabitEthernet<span>0/1/1</span>] <strong>port vlan-stacking vlan 10 stack-vlan 100</strong></pre>
+<pre class="screen">[UPE2-GigabitEthernet<span>0/1/1</span>] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>UPE2-GigabitEthernet<span>0/1/2</span>] <strong>quit</strong></pre>
+<p># Assign IP addresses to each CE's sub-interfaces (as shown in <a href="#EN-US_TASK_0172361977__fig_dc_vrp_cfm_cfg_00002501">Figure 1</a>) so that packets sent from each CE to the switch connected to it carry a single tag.</p>
+<p># Configure CE1.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname CE1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE1] <strong>interface gigabitethernet <span>0/1/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>.1] <strong>ip address 10.1.1.1 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>.1] <strong>vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>.1] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE1-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+<p># Configure CE2.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">HUAWEI</span>] <strong>sysname CE2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">HUAWEI</span>] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>CE2] <strong>interface gigabitethernet <span>0/1/0</span>.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>.1] <strong>ip address 10.1.1.2 24</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>.1] <strong>vlan-type dot1q 10</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>.1] <strong>undo shutdown</strong></pre>
+<pre class="screen">[<span class="keyword">*</span>CE2-GigabitEthernet<span>0/1/0</span>.1] <strong>quit</strong></pre>
+</p></li><li><span>Verify the configuration.</span><p><p>After the configuration is complete, run the <strong>display cfm mep</strong> and <strong>display cfm remote-mep</strong> commands on PE1, PE2, or PE3. The command output shows that VLL-based CFM has been established. Ethernet CFM can rapidly detect faults in the link between the PEs and notify an NMS of the faults.</p>
+<p>The following example uses the command output on PE1.</p>
+<pre class="screen">&lt;PE1&gt; <strong>display cfm mep md md1</strong></pre>
+<pre class="screen">The total number of MEPs is : 1
+--------------------------------------------------
+ MD Name            : md1
+ MD Name Format     : string
+ Level              : 0
+ MA Name            : ma1
+ MEP ID             : 1
+ VLAN ID            : -- 
+ VSI Name           : --
+ L2VC ID            : 101 tagged 
+<span> L2VPN Name         : --  CE ID              : --  CE Offset          : --</span>
+<span>  L2TPV3 Tunnel Name            : --</span>
+<span> L2TPV3 Local Connection Name  : --</span>
+ Interface Name     : GigabitEthernet<span>0/2/0</span>.1
+ CCM Send           : enabled
+ Direction          : inward
+ MAC Address        : 00e0-fc12-7880
+ MEP Pe-vid         : --
+ MEP Ce-vid         : --
+ MEP Vid            : -- 
+ Alarm Status       : none
+ Alarm RDI          : enabled
+<span> Bandwidth Receive  : false
+ Bandwidth          : --</span></pre>
+<pre class="screen">&lt;PE1&gt; <strong>display cfm remote-mep md md1</strong></pre>
+<pre class="screen">The total number of RMEPs is : 1
+The status of RMEPs : 1 up, 0 down, 0 disable
+--------------------------------------------------
+ MD Name            : md1
+ Level              : 0
+ MA Name            : ma1
+ RMEP ID            : 2
+ VLAN ID            : -- 
+ VSI Name           : --
+ L2VC ID            : 101 tagged
+<span> L2VPN Name         : --  CE ID              : --  CE Offset          : --</span>
+<span>  L2TPV3 Tunnel Name            : --</span>
+<span> L2TPV3 Local Connection Name  : --</span>
+ MAC                : 00e0-fc12-7890
+ CCM Receive        : enabled
+ Trigger-If-Down    : enabled
+ CFM Status         : up
+ Alarm Status       : none
+ Interface TLV      : --
+ Port Status TLV    : --</pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172361977__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p>PE1 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname PE1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">cfm version standard</pre>
+<pre class="screen">cfm enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls lsr-id 1.1.1.9</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls l2vpn</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls ldp remote-peer 3.3.3.9</pre>
+<pre class="screen"> remote-ip 3.3.3.9</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span>.1</pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> control-vid 1 qinq-termination</pre>
+<pre class="screen"> qinq termination l2 symmetry</pre>
+<pre class="screen"> qinq termination pe-vid 100 ce-vid 10</pre>
+<pre class="screen"> mpls l2vc 3.3.3.9 101</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface Gigabitethernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.1.1.1 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 1.1.1.9 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">cfm md md1</pre>
+<pre class="screen">  ma ma1</pre>
+<pre class="screen">   map mpls l2vc 101 tagged</pre>
+<pre class="screen">   ccm-interval 30</pre>
+<pre class="screen">   mep mep-id 1 interface gigabitethernet <span>0/2/0</span>.1 pe-vid 100 ce-vid 10 inward</pre>
+<pre class="screen">   mep ccm-send mep-id 1 enable</pre>
+<pre class="screen">   remote-mep mep-id 2</pre>
+<pre class="screen">   remote-mep ccm-receive mep-id 2 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 1.1.1.9 0.0.0.0</pre>
+<pre class="screen">  network 10.1.1.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>PE2 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname PE2</pre>
+<pre class="screen">#</pre>
+<pre class="screen">cfm version standard</pre>
+<pre class="screen">cfm enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls lsr-id 3.3.3.9</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls l2vpn</pre>
+<pre class="screen">#</pre>
+<pre class="screen">mpls ldp remote-peer 1.1.1.9</pre>
+<pre class="screen"> remote-ip 1.1.1.9</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/2/0</span>.1</pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> control-vid 1 qinq-termination</pre>
+<pre class="screen"> qinq termination l2 symmetry</pre>
+<pre class="screen"> qinq termination pe-vid 100 ce-vid 10</pre>
+<pre class="screen"> mpls l2vc 1.1.1.9 101</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface Gigabitethernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.1.2.2 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 3.3.3.9 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">cfm md md1</pre>
+<pre class="screen">  ma ma1</pre>
+<pre class="screen">   map mpls l2vc 101 tagged</pre>
+<pre class="screen">   ccm-interval 30</pre>
+<pre class="screen">   mep mep-id 2 interface gigabitethernet <span>0/2/0</span>.1 pe-vid 100 ce-vid 10 inward</pre>
+<pre class="screen">   mep ccm-send mep-id 2 enable</pre>
+<pre class="screen">   remote-mep mep-id 1</pre>
+<pre class="screen">   remote-mep ccm-receive mep-id 1 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 3.3.3.9 0.0.0.0</pre>
+<pre class="screen">  network 10.1.2.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>P configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname P</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls lsr-id 2.2.2.9</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.1.1.2 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface Gigabitethernet<span>0/2/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.1.2.1 255.255.255.0</pre>
+<pre class="screen"> mpls</pre>
+<pre class="screen"> mpls ldp</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface LoopBack1</pre>
+<pre class="screen"> ip address 2.2.2.9 255.255.255.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">ospf 1</pre>
+<pre class="screen"> area 0.0.0.0</pre>
+<pre class="screen">  network 2.2.2.9 0.0.0.0</pre>
+<pre class="screen">  network 10.1.2.0 0.0.0.255</pre>
+<pre class="screen">  network 10.1.1.0 0.0.0.255</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>CE1 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname CE1</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span>.1</pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> vlan-type dot1q 10</pre>
+<pre class="screen"> ip address 10.1.1.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>CE2 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname CE2</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span>.1</pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> vlan-type dot1q 10</pre>
+<pre class="screen"> ip address 10.1.1.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>UPE1 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname UPE1</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> vlan batch 100</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> port trunk allow-pass vlan 100</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/1</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> port vlan-stacking vlan 10 stack-vlan 100</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p>UPE2 configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen"> sysname UPE2</pre>
+<pre class="screen">#</pre>
+<pre class="screen"> vlan batch 100</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> port trunk allow-pass vlan 100</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/1</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> port vlan-stacking vlan 10 stack-vlan 100</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfm_cfg_000021.html">Configuration Examples for CFM
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfm_cfg_000024.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_cfm_cfg_000026.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

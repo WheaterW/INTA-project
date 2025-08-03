@@ -1,0 +1,273 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring a Dynamic BGP Peer Group">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0098.html">
+<meta name="DC.Relation" scheme="URI" content="vrp_bgp_cfg_0100.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing">
+<meta name="featuretype" content="IP Routing">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001176663651">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring a Dynamic BGP Peer Group</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001176663651"></a><a name="EN-US_TASK_0000001176663651"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring a Dynamic BGP Peer Group</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001176663651__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>On a BGP network, multiple peers may change frequently, causing the establishment of peer relationships to change accordingly. If you configure peers in static mode, you must frequently add or delete peer configurations on the local device, increasing the maintenance workload. To address this problem, configure the dynamic BGP peer function to enable a BGP device to listen for BGP connection requests from a specified network segment, dynamically establish BGP peer relationships, and add these peers to the same dynamic peer group. As a result, manually adding or deleting BGP peer configurations in response to each dynamic peer change is no longer required.</p>
+<p>As shown in <a href="#EN-US_TASK_0000001176663651__fig_dc_vrp_bgp_cfg_407901">Figure 1</a>, DeviceA, DeviceD, and DeviceE belong to AS 65008, and DeviceB and DeviceC belong to AS 65009. Because many devices are on the same network segment in an AS, you can configure a dynamic peer group on DeviceA.</p>
+<div class="fignone" id="EN-US_TASK_0000001176663651__fig_dc_vrp_bgp_cfg_407901"><a name="EN-US_TASK_0000001176663651__fig_dc_vrp_bgp_cfg_407901"></a><a name="fig_dc_vrp_bgp_cfg_407901"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring a dynamic BGP peer group</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1, interface 2, interface 3, and interface 4 represent <span>100GE</span><span>1/0/1</span>, <span>100GE</span><span>1/0/2</span>, <span>100GE</span><span>1/0/3</span>, and <span>100GE</span><span>1/0/4</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001176663721.png"></span><p></p>
+</div>
+<p>To complete the configuration, you need the following data:</p>
+<ul><li><p>AS numbers of DeviceA, DeviceD, and DeviceE</p>
+</li><li><p>AS numbers of DeviceB and DeviceC</p>
+</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176663651__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>During the configuration, note the following:</p>
+<ul><li>To improve security, you are advised to deploy BGP security measures. For details, see "Configuring BGP Authentication." Keychain authentication is used as an example. For details, see Example for Configuring Keychain Authentication for BGP.</li></ul>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001176663651__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure a dynamic IBGP peer group on DeviceA to listen for BGP connection requests from network segment 10.2.0.0/16.</p>
+</li><li><p>Configure a dynamic EBGP peer group on DeviceA to listen for BGP connection requests from network segment 10.1.0.0/16.</p>
+</li><li><p>Establish IBGP connections between DeviceD and DeviceA, and between DeviceE and DeviceA.</p>
+</li><li><p>Establish EBGP connections between DeviceB and DeviceA, and between DeviceC and DeviceA.</p>
+</li></ol>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001176663651__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface. For detailed configurations, see <a href="#EN-US_TASK_0000001176663651__postreq1662236201619">Configuration Scripts</a>.</span></li><li><span>Configure a dynamic BGP peer group.</span><p><p># Configure a dynamic BGP peer group on DeviceA.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA]<strong> bgp 65008</strong>
+[<span class="keyword">*</span>DeviceA-bgp]<strong> bgp dynamic-session-limit 5</strong>
+[<span class="keyword">*</span>DeviceA-bgp]<strong> group a listen internal</strong>
+[<span class="keyword">*</span>DeviceA-bgp]<strong> peer a listen-net 10.2.0.0 16</strong>
+[<span class="keyword">*</span>DeviceA-bgp]<strong> group b listen external</strong>
+[<span class="keyword">*</span>DeviceA-bgp]<strong> peer b listen-as 65009</strong>
+[<span class="keyword">*</span>DeviceA-bgp]<strong> peer b listen-net 10.1.0.0 16</strong>
+[<span class="keyword">*</span>DeviceA-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>Configure IBGP connections.</span><p><p># Configure DeviceD.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceD]<strong> bgp 65008</strong>
+[<span class="keyword">*</span>DeviceD-bgp]<strong> peer 10.2.1.1 as-number 65008</strong>
+[<span class="keyword">*</span>DeviceD-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceD] <strong>commit</strong></pre>
+<p># Configure DeviceE.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceE]<strong> bgp 65008</strong>
+[<span class="keyword">*</span>DeviceE-bgp]<strong> peer 10.2.2.1 as-number 65008</strong>
+[<span class="keyword">*</span>DeviceE-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceE] <strong>commit</strong></pre>
+</p></li><li><span>Configure EBGP connections.</span><p><p># Configure DeviceB.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceB]<strong> bgp 65009</strong>
+[<span class="keyword">*</span>DeviceB-bgp] <strong>peer 10.1.1.1 as-number 65008</strong>
+[<span class="keyword">*</span>DeviceB-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceB] <strong>commit</strong></pre>
+<p># Configure DeviceC.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceC]<strong> bgp 65009</strong>
+[<span class="keyword">*</span>DeviceC-bgp]<strong> peer 10.1.2.1 as-number 65008</strong>
+[<span class="keyword">*</span>DeviceC-bgp]<strong> quit</strong>
+[<span class="keyword">*</span>DeviceC] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001176663651__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check the status of BGP connections.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display bgp peer</strong>
+<strong> Status codes: * - Dynamic</strong>
+ BGP local router ID        : 10.1.1.1
+ Local AS number            : 65008
+ Total number of peers      : 4
+ Peers in established state : 4
+ Total number of dynamic peers : 4
+
+  Peer            V          AS  MsgRcvd  MsgSent  OutQ  Up/Down       State  PrefRcv
+  *10.1.1.2       4       65009        8        7     0 00:04:16 Established        0
+  *10.1.2.2       4       65009        5        5     0 00:02:01 Established        0
+  *10.2.1.2       4       65008        5        5     0 00:02:01 Established        0
+  *10.2.2.2       4       65008        5        5     0 00:02:01 Established        0
+</pre>
+<p>The command output shows that DeviceA has established BGP connections with other devices and the connection status is <strong>Established</strong>.</p>
+<p># Check information about BGP peer groups.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display bgp group a</strong>
+ BGP peer-group                       : a
+ Remote AS                            : 65008
+ Authentication type configured       : None
+ Type                                 : listen internal
+ Configured hold timer value   : 180
+ Keepalive timer value         : 60
+ Connect-retry timer value     : 32
+ Minimum route advertisement interval is 15 seconds
+ PeerSession Members                  :
+ 10.2.1.2                                10.2.2.2
+  
+ Send large community has been configured
+ Peer Preferred Value: 0
+ No routing policy is configured
+ Peer Members:
+  Peer            V          AS    MsgRcvd  MsgSent  OutQ  Up/Down       State  PrefRcv
+  *10.2.1.2       4       65008          3        4     0 00:00:20 Established        0
+  *10.2.2.2       4       65008          3        4     0 00:00:21 Established        0</pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>display bgp group b</strong>
+BGP peer-group                       : b
+ Remote AS                            : 65009
+ Authentication type configured       : None
+ Type                                 : listen external
+ Configured hold timer value   : 180
+ Keepalive timer value         : 60
+ Connect-retry timer value     : 32
+ Minimum route advertisement interval is 15 seconds
+ PeerSession Members                  :
+ 10.1.1.2                                10.1.2.2
+  
+ Send large community has been configured
+ Peer Preferred Value: 0
+ No routing policy is configured
+ Peer Members:
+  Peer            V          AS    MsgRcvd  MsgSent  OutQ  Up/Down       State  PrefRcv
+  *10.1.1.2       4       65009          3        4     0 00:00:20 Established        0
+  *10.1.2.2       4       65009          3        4     0 00:00:21 Established        0</pre>
+<p>The command output shows that two dynamic peer groups <strong>a</strong> and <strong>b</strong> exist on DeviceA and each dynamic peer group has two peers, indicating that the dynamic peer groups are properly established.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001176663651__postreq1662236201619"></a><a name="postreq1662236201619"></a><a name="EN-US_TASK_0000001176663651__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><ul><li><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/2</span>
+ undo portswitch
+ ip address 10.1.2.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/3</span>
+ undo portswitch
+ ip address 10.2.1.1 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/4</span>
+ undo portswitch
+ ip address 10.2.2.1 255.255.255.0
+#
+bgp 65008
+ bgp dynamic-session-limit 5
+ group a listen internal
+ peer a listen-net 10.2.0.0 255.255.0.0
+ group b listen external
+ peer b listen-as 65009
+ peer b listen-net 10.1.0.0 255.255.0.0
+ #
+ ipv4-family unicast
+  peer a enable
+  peer b enable
+#
+return</pre>
+</li><li><p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.1.2 255.255.255.0
+#
+bgp 65009
+ peer 10.1.1.1 as-number 65008
+ #
+ ipv4-family unicast
+  peer 10.1.1.1 enable
+#
+return</pre>
+</li><li><p>DeviceC</p>
+<pre class="screen">#
+sysname DeviceC
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.1.2.2 255.255.255.0
+#
+bgp 65009
+ peer 10.1.2.1 as-number 65008
+ #
+ ipv4-family unicast
+  peer 10.1.2.1 enable
+#
+return</pre>
+</li><li><p>DeviceD</p>
+<pre class="screen">#
+sysname DeviceD
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.2.1.2 255.255.255.0
+#
+bgp 65008
+ peer 10.2.1.1 as-number 65008
+ ipv4-family unicast
+  peer 10.2.1.1 enable
+#
+return</pre>
+</li><li><p>DeviceE</p>
+<pre class="screen">#
+sysname DeviceE
+#
+interface <span>100GE</span><span>1/0/1</span>
+ undo portswitch
+ ip address 10.2.2.2 255.255.255.0
+#
+bgp 65008
+ peer 10.2.2.1 as-number 65008
+ #
+ ipv4-family unicast
+  peer 10.2.2.1 enable
+#
+return</pre>
+</li></ul>
+<p></p>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="vrp_bgp_cfg_0098.html">Configuring a Dynamic BGP Peer Group
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="vrp_bgp_cfg_0100.html"><span class="font-st">&lt; </span>Previous topic</a>
+</div>
+</div>
+</body>
+</html>

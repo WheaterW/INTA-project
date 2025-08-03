@@ -1,0 +1,285 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring HWTACACS and Local Authentication, Command Authorization, and Command Auditing for Administrators">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../galaxy_aaa_cfg_0056.html">
+<meta name="DC.Relation" scheme="URI" content="../galaxy_aaa_cfg_0059.html">
+<meta name="DC.Relation" scheme="URI" content="../galaxy_aaa_cfg_0060.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="AAA">
+<meta name="featurename" content="HWTACACS">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="featurename" content="AAA">
+<meta name="featurename" content="AD">
+<meta name="featurename" content="HWTACACS">
+<meta name="featurename" content="LDAP">
+<meta name="featurename" content="RADIUS">
+<meta name="featurename" content="Local User">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="featurename" content="AAA">
+<meta name="featurename" content="AD">
+<meta name="featurename" content="HWTACACS">
+<meta name="featurename" content="LDAP">
+<meta name="featurename" content="RADIUS">
+<meta name="featurename" content="Local User">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="featuretype" content="User Access and Authentication">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001945219498">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="../public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring HWTACACS and Local Authentication, Command Authorization, and Command Auditing for Administrators</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001945219498"></a><a name="EN-US_TASK_0000001945219498"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring HWTACACS and Local Authentication, Command Authorization, and Command Auditing for Administrators</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001945219498__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><div class="p">In <a href="#EN-US_TASK_0000001945219498__fig1348613432384">Figure 1</a>, an HWTACACS server is deployed on an enterprise network. The enterprise requires that the administrator use HWTACACS authentication to log in to DeviceA through STelnet. The specific requirements are as follows:<ol><li>The administrator can log in to the device through STelnet only after entering a correct user name and password.</li><li>After the administrator logs in to the device through STelnet, the privilege level 3 is authorized to the administrator, the commands that the administrator can execute are limited, and the commands that the administrator has executed are recorded.</li><li>If the server does not respond to the authentication request from the device (for example, the link between the device and server is disconnected), local authentication is performed when the administrator attempts to log in to the device.</li></ol>
+</div>
+<div class="fignone" id="EN-US_TASK_0000001945219498__fig1348613432384"><a name="EN-US_TASK_0000001945219498__fig1348613432384"></a><a name="fig1348613432384"></a><span class="figcap"><b>Figure 1 </b>Network diagram for configuring HWTACACS and local authentication, command authorization, and command auditing for administrators</span><div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 and interface 2 represent <span>100GE</span> <span>1/0/1</span> and <span>100GE</span> <span>1/0/2</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="../images/en-us_image_0000001972377717.png" width="NaN" height="NaN"></span></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001945219498__1.3.2"></a><a name="1.3.2"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><ol><li>Configure STelnet login on DeviceA: Set the authentication mode for accessing VTY user interfaces to AAA, enable the STelnet service, and configure the authentication mode and service type for SSH users.</li><li>Configure HWTACACS authentication on DeviceA: Create an HWTACACS server template, configure AAA schemes and a recording scheme, and enable command authorization.</li><li>Configure a local user on DeviceA.</li><li>Configure the HWTACACS server.</li></ol>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0000001945219498__1.3.3"></a><a name="1.3.3"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><ul id="EN-US_TASK_0000001945219498__ul10524971911"><li id="EN-US_TASK_0000001945219498__li125249121910">Ensure that there are reachable routes between devices before the configuration.</li><li id="EN-US_TASK_0000001945219498__li1955494196">Ensure that the shared key in the HWTACACS server template is the same as that configured on the HWTACACS server.</li><li id="EN-US_TASK_0000001945219498__li444633442614">If the login account is not created on the server but exists on the local host, HWTACACS authentication is considered failed, and local authentication is not performed. Local authentication is performed only when the server is down or does not respond.</li><li id="EN-US_TASK_0000001945219498__li5446143472615">If the accounting mode is set to HWTACACS in an accounting scheme, the administrator will pass local authentication but fail to log in to the device because accounting will fail to start after the link between the device and server is disconnected. To prevent this problem, run the <strong id="EN-US_TASK_0000001945219498__b418517241234">accounting start-fail</strong> <strong id="EN-US_TASK_0000001945219498__b41861624152315">online</strong> command in the accounting scheme view to allow users to go online after initial accounting fails. By default, users are allowed to go online after initial accounting fails.</li></ul>
+<ul><li>After the authorization scheme containing command authorization is applied in the administrator view, executing the <strong>undo authorization-cmd</strong> command will cause the administrator unable to execute any command except the <strong>quit</strong> command. In this case, the administrator needs to log in again.</li><li>The device sends TACACS accounting packets to report the commands that have been executed by the administrator through SSH, Telnet, or the web system. Therefore, a TACACS accounting server needs to be configured on the device.</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001945219498__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure IP addresses for interfaces.</span><p><pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[*<span class="keyword">DeviceA</span>] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">DeviceA</span>] <strong>vlan batch 10 20</strong>
+[*DeviceA] <strong>interface </strong><strong><span>100ge</span> </strong><strong><span>1/0/1</span> </strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>portswitch</strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>port link-type trunk</strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>port trunk allow-pass vlan 10</strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[*DeviceA] <strong>interface </strong><strong><span>100ge</span></strong><strong> <span>1/0/2</span></strong> 
+[*DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>portswitch</strong>
+[*DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>port link-type trunk</strong>
+[*DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>port trunk allow-pass vlan 20</strong>
+[*DeviceA-<span>100GE</span><span>1/0/2</span>] <strong>quit</strong>
+[*<span class="keyword">DeviceA</span>] <strong>interface vlanif 10</strong>
+[*<span class="keyword">DeviceA-Vlanif10</span>] <strong>ip address </strong><strong>10.1.1.2 255.255.255.0</strong>
+[*<span class="keyword">DeviceA-Vlanif10</span>] <strong>quit</strong>
+[*<span class="keyword">DeviceA</span>]<strong> interface vlanif 20</strong>
+[*<span class="keyword">DeviceA</span>-Vlanif20]<strong> ip address</strong> <strong>10.1.6.2 255.255.255.0</strong>
+[*<span class="keyword">DeviceA</span>-Vlanif20] <strong>quit</strong>
+[*<span class="keyword">DeviceA</span>] <strong>commit</strong></pre>
+</p></li><li><span>Configure STelnet login.</span><p><p># Configure DeviceA to generate a local key pair.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>rsa local-key-pair create</strong>
+The key name will be:Host
+The range of public key size is (2048, 4096).
+NOTE: Key pair generation will take a short while.
+Please input the modulus [default = 3072]:3072 </pre>
+<p># Set the authentication mode and protocol for accessing VTY user interfaces 0 to 4 to AAA and SSH, respectively.</p>
+<pre class="screen">[<span class="keyword">*</span>DeviceA] <strong>user-interface vty 0 4</strong> 
+[<span class="keyword">*</span>DeviceA-ui-vty0-4] <strong>authentication-mode aaa</strong> 
+[<span class="keyword">*</span>DeviceA-ui-vty0-4] <strong>protocol inbound ssh</strong>
+[<span class="keyword">*</span>DeviceA-ui-vty0-4] <strong>quit</strong></pre>
+<p># Enable the SSH server function on DeviceA.</p>
+<pre class="screen">[<span class="keyword">*</span>DeviceA] <strong>stelnet server enable</strong> 
+[<span class="keyword">*</span>DeviceA] <strong>ssh server-source -i </strong><strong>vlanif 10</strong></pre>
+<p># Set the authentication mode of all SSH users to password authentication.</p>
+<pre class="screen">[<span class="keyword">*</span>DeviceA] <strong>ssh authentication-type default password</strong>
+[<span class="keyword">*DeviceA</span>] <strong>commit</strong></pre>
+<div class="note"><img src="../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p id="EN-US_TASK_0000001945219498__en-us_task_0000001512836118_p13568138164810">If only the authentication mode and service type of a few SSH users need to be set to password authentication and STelnet, you can specify the SSH user name to set the authentication mode and service type of a single SSH user. For example, set the authentication mode and service type of an SSH user named <strong id="EN-US_TASK_0000001945219498__en-us_task_0000001512836118_b109551148172614">admin</strong> to password authentication and STelnet, respectively.</p>
+<p id="EN-US_TASK_0000001945219498__en-us_task_0000001512836118_p155681781488">[<span class="keyword" id="EN-US_TASK_0000001945219498__en-us_task_0000001512836118_keyword2069313224815">DeviceA</span>] <strong id="EN-US_TASK_0000001945219498__en-us_task_0000001512836118_b1856815854819">ssh user admin authentication-type password</strong></p>
+<p id="EN-US_TASK_0000001945219498__en-us_task_0000001512836118_p12568108194815">[<span class="keyword" id="EN-US_TASK_0000001945219498__en-us_task_0000001512836118_keyword13425133415489">DeviceA</span>] <strong id="EN-US_TASK_0000001945219498__en-us_task_0000001512836118_b16568158164817">ssh user admin service-type stelnet</strong></p>
+</div></div>
+</p></li><li><span>Configure HWTACACS authentication, authorization, and accounting.</span><p><p># Create an HWTACACS server template named <strong>template1</strong> for communication between DeviceA and the HWTACACS server.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>hwtacacs-server template template1</strong> 
+[<span class="keyword">*</span>DeviceA-hwtacacs-template1] <strong>hwtacacs-server authentication 10.1.6.6 49</strong> 
+[<span class="keyword">*</span>DeviceA-hwtacacs-template1] <strong>hwtacacs-server authorization 10.1.6.6 49</strong> 
+[<span class="keyword">*</span>DeviceA-hwtacacs-template1] <strong>hwtacacs-server accounting 10.1.6.6 49</strong> 
+[<span class="keyword">*</span>DeviceA-hwtacacs-template1] <strong>hwtacacs-server shared-key cipher YsHsjx_202206139</strong> 
+[<span class="keyword">*</span>DeviceA-hwtacacs-template1] <strong>quit</strong>
+[<span class="keyword">*DeviceA</span>] <strong>commit</strong></pre>
+<p># Configure an authentication scheme named <strong>sch1</strong> and set the authentication mode to HWTACACS and local authentication.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>aaa</strong> 
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-aaa] <strong>authentication-scheme sch1</strong>
+[<span class="keyword">*</span>DeviceA-aaa-authen-sch1] <strong>authentication-mode hwtacacs</strong> <strong>local</strong>
+[<span class="keyword">*</span>DeviceA-aaa-authen-sch1] <strong>quit</strong></pre>
+<p># Create an authorization scheme named <strong>sch2</strong>, set the authorization mode to HWTACACS authorization, and enable command authorization for the administrator with the privilege level 3.</p>
+<pre class="screen">[<span class="keyword">*</span>DeviceA-aaa] <strong>authorization-scheme sch2</strong> 
+[<span class="keyword">*</span>DeviceA-aaa-author-sch2] <strong>authorization-mode hwtacacs</strong> <strong>local</strong>
+[<span class="keyword">*</span>DeviceA-aaa-author-sch2] <strong>authorization-cmd 3 hwtacacs</strong> <strong>local</strong>
+[<span class="keyword">*</span>DeviceA-aaa-author-sch2] <strong>quit</strong></pre>
+<p># Create a recording scheme named <strong>sch0</strong> to record the commands that the administrator has executed.</p>
+<pre class="screen">[<span class="keyword">*</span>DeviceA-aaa] <strong>recording-scheme sch0</strong> 
+[<span class="keyword">*</span>DeviceA-aaa-recording-sch0] <strong>recording-mode hwtacacs template1</strong> 
+[<span class="keyword">*</span>DeviceA-aaa-recording-sch0] <strong>quit</strong> 
+[<span class="keyword">*</span>DeviceA-aaa] <strong>cmd recording-scheme sch0</strong></pre>
+<p># Create an accounting scheme named <strong>sch3</strong> and set the accounting mode to HWTACACS accounting.</p>
+<pre class="screen">[<span class="keyword">*</span>DeviceA-aaa] <strong>accounting-scheme sch3</strong> 
+[<span class="keyword">*</span>DeviceA-aaa-accounting-sch3] <strong>accounting-mode hwtacacs</strong> 
+[<span class="keyword">*</span>DeviceA-aaa-accounting-sch3] <strong>quit</strong></pre>
+<p># Apply the HWTACACS server template and AAA schemes to the domain <strong>huawei.com</strong>.</p>
+<pre class="screen">[<span class="keyword">*</span>DeviceA-aaa] <strong>domain huawei.com</strong> 
+[<span class="keyword">*</span>DeviceA-aaa-domain-huawei.com] <strong>hwtacacs-server template1</strong> 
+[<span class="keyword">*</span>DeviceA-aaa-domain-huawei.com] <strong>authentication-scheme sch1</strong> 
+[<span class="keyword">*</span>DeviceA-aaa-domain-huawei.com] <strong>authorization-scheme sch2</strong> 
+[<span class="keyword">*</span>DeviceA-aaa-domain-huawei.com] <strong>accounting-scheme sch3</strong> 
+[<span class="keyword">*</span>DeviceA-aaa-domain-huawei.com] <strong>quit</strong> 
+[<span class="keyword">*</span>DeviceA-aaa] <strong>quit</strong></pre>
+<p># Set the domain <strong>huawei.com</strong> as the global default administrative domain.</p>
+<pre class="screen">[<span class="keyword">*</span>DeviceA] <strong>domain huawei.com</strong><strong> admin</strong> 
+[<span class="keyword">*DeviceA</span>] <strong>commit</strong></pre>
+</p></li><li><span>Configure AAA local authentication. Set the local user name to <strong>user1-huawei</strong>, password to <strong>YsHsjx_202206</strong>, and privilege level to 3.</span><p><pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>aaa</strong>
+[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA-aaa] <strong>local-user user1-huawei password irreversible-cipher </strong><strong>YsHsjx_202206</strong>
+[<span class="keyword">*</span>DeviceA-aaa] <strong>local-user user1-huawei service-type ssh</strong>
+[<span class="keyword">*</span>DeviceA-aaa] <strong>local-user user1-huawei privilege level 3</strong>
+[<span class="keyword">*</span>DeviceA-aaa] <strong>quit</strong>
+[<span class="keyword">*</span>DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>Configure the HWTACACS server. Here, the Secure ACS is used as an example.</span><p><p>The configuration includes the following: add a device, add a user, set the user privilege level to 3, and configure command authorization. Note that the <strong>reset hwtacacs-server statistics all</strong> command cannot be configured.</p>
+<p>You can check logs recording command execution successes and failures of all users including non-HWTACACS authentication users under <strong>Reports and Activity</strong> &gt; <strong>TACACS+ Administration</strong>.</p>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001945219498__1.3.5"></a><a name="1.3.5"></a><h4 class="sectiontitle">Verifying the Configuration</h4><ul><li>The administrator can log in to DeviceA through the STelnet client after entering the correct user name and password.</li><li>When the link between DeviceA and the server is operational, run the <strong>display access-user username</strong> <em>user-name </em><strong>detail</strong> command on DeviceA to check information about the user <strong>user1-huawei</strong>.<p>In the command output, the values of <strong>User access type</strong>, <strong>User Privilege</strong>, <strong>User authentication type</strong>, <strong>Current authentication method</strong>, <strong>Current authorization method</strong>, and <strong>Current accounting method</strong> indicate that the user login mode is SSH, the privilege level is 3, the authentication type is administrator authentication, and the authentication, authorization, as well as accounting modes are HWTACACS.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display access-user username user1-huawei detail</strong>
+ ------------------------------------------------------------------------------
+Basic:
+  User ID                         : 16414
+  User name                       : user1-huawei
+  Domain-name                     : huawei.com
+  User MAC                        : -
+  User IP address                 : 10.1.1.10
+  User IPv6 address               : -
+  User access time                : 2024/07/01 10:49:22
+  User accounting session ID      : example010000000000006d****010001e
+  User access type                : SSH
+  User Privilege                  : 3
+  User Group                      : -
+
+AAA:
+  User authentication type        : Administrator authentication
+  Current authentication method   : HWTACACS
+  Current authorization method    : HWTACACS
+  Current accounting method       : HWTACACS</pre>
+</li><li>After the administrator logs in to DeviceA, run the <strong>reset hwtacacs-server statistics all</strong> command. The system displays the message "Error: Failed to pass the authorization.", indicating that command authorization is successful.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span>DeviceA] <strong>quit</strong>
+&lt;DeviceA&gt; <strong>reset hwtacacs-server statistics all</strong>
+ Error: Failed to pass the authorization.</pre>
+</li><li>When the link between DeviceA and the HWTACACS server is disconnected, run the <strong>display access-user username</strong> <em>user-name</em><strong> detail</strong> command on DeviceA to check information about the user <strong>user1-huawei</strong>.<p>In the command output, the values of <strong>User access type</strong>, <strong>User Privilege</strong>, <strong>User authentication type</strong>, <strong>Current authentication method</strong>, <strong>Current authorization method</strong>, and <strong>Current accounting method</strong> indicate that the login mode is SSH, the privilege level is 3, the authentication type is administrator authentication, the authentication and authorization modes are local, and the accounting mode is HWTACACS.</p>
+<pre class="screen">&lt;DeviceA&gt; <strong>display access-user username user1-huawei detail</strong>
+ ------------------------------------------------------------------------------
+Basic:
+  User ID                         : 16414
+  User name                       : user1-huawei
+  Domain-name                     : huawei.com
+  User MAC                        : -
+  User IP address                 : 10.1.1.10
+  User IPv6 address               : -
+  User access time                : 2024/07/01 10:49:22
+  User accounting session ID      : example010000000000006d****010001e
+  User access type                : SSH
+  User Privilege                  : 3
+  User Group                      : -
+
+AAA:
+  User authentication type        : Administrator authentication
+  Current authentication method   : Local
+  Current authorization method    : Local
+  Current accounting method       : HWTACACS</pre>
+</li></ul>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001945219498__1.3.6"></a><a name="1.3.6"></a><h4 class="sectiontitle">Configuration Scripts</h4><p>DeviceA</p>
+<pre class="screen"># 
+sysname DeviceA 
+# 
+hwtacacs-server template template1                                           
+ hwtacacs-server authentication 10.1.6.6                                    
+ hwtacacs-server authorization 10.1.6.6                                   
+ hwtacacs-server accounting 10.1.6.6  
+ hwtacacs-server shared-key cipher %+%##!!!!!!!!!"!!!!"!!!!*!!!!SKvr${[Fs."u,S-6a-X1'[X=L"cpF!5Oz`1!!!!!2jp5!!!!!!A!!!!Ix&gt;cM8i{y6!);(8Dr9:dK`&amp;BHfE(H2=.:SH{@pT%+%#  
+# 
+aaa 
+ authentication-scheme sch1     
+  authentication-mode hwtacacs local
+ authorization-scheme sch2                                                       
+  authorization-mode hwtacacs local
+  authorization-cmd 3 hwtacacs local
+ accounting-scheme sch3                                                          
+  accounting-mode hwtacacs  
+ recording-scheme sch0                                                           
+  recording-mode hwtacacs template1                                                    
+ cmd recording-scheme sch0 
+ domain huawei.com                                                               
+  authentication-scheme sch1                                                     
+  accounting-scheme sch3                                                         
+  authorization-scheme sch2                                                      
+  hwtacacs-server template1  
+ local-user user1-huawei password irreversible-cipher $1d$OwseVRh@LH}ZeTBm$1nH4$ab&gt;d(N{-%0!ab48y=Ic*xEUR4pVhR2"9-<font style="font-size:8pt" Face="Courier New" >~</font>,$
+ local-user user1-huawei privilege level 3
+ local-user user1-huawei service-type ssh   
+#  
+domain huawei.com admin 
+#
+vlan batch 10 20
+#
+interface Vlanif10
+ ip address 10.1.1.2 255.255.255.0
+#
+interface Vlanif20
+ ip address 10.1.6.2 255.255.255.0
+#
+interface <span>100GE</span><span>1/0/1</span>
+ port link-type trunk
+ port trunk allow-pass vlan 10
+#
+interface <span>100GE</span><span>1/0/2</span>
+ port link-type trunk
+ port trunk allow-pass vlan 20
+#
+stelnet server enable 
+ssh server-source -i Vlanif10
+# 
+user-interface vty 0 4           
+ authentication-mode aaa           
+ protocol inbound ssh
+# 
+return</pre>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../galaxy_aaa_cfg_0056.html">Configuration Examples for AAA
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../galaxy_aaa_cfg_0059.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../galaxy_aaa_cfg_0060.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

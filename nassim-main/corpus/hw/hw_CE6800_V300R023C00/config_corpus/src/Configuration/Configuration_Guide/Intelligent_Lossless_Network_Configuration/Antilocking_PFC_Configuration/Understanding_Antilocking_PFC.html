@@ -1,0 +1,83 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="concept">
+<meta name="DC.Title" content="Understanding Antilocking PFC">
+<meta name="abstract" content="">
+<meta name="description" content="">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_antilocking_pfc_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_antilocking_pfc_cfg_0002.html">
+<meta name="DC.Relation" scheme="URI" content="spec/Antilocking_PFC_limitation_CE_v6r23c00.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featurename" content="Antilocking PFC">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="Antilocking PFC">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="featuretype" content="Intelligent Lossless Network">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_CONCEPT_0000001513045306">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Understanding Antilocking PFC</title>
+</head>
+<body><a name="EN-US_CONCEPT_0000001513045306"></a><a name="EN-US_CONCEPT_0000001513045306"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Understanding Antilocking PFC</h1>
+<div><p></p>
+<div class="section"><h4 class="sectiontitle">Traditional PFC</h4><p><strong>Stopping the upstream device from sending traffic â traditional PFC procedure</strong></p>
+<p><a href="#EN-US_CONCEPT_0000001513045306__fig13511427183412">Figure 1</a> shows how traditional PFC controls the upstream device to stop sending traffic. (B<sub>PFC</sub> indicates the interface bandwidth, and T<sub>PFC</sub> indicates the one-way forwarding delay between DeviceA and DeviceB.)</p>
+<ol><li>When the buffer usage of lossless queues on DeviceA is lower than the threshold for triggering a PFC frame, DeviceB continuously sends traffic to DeviceA. As a result, the buffer usage of lossless queues on DeviceA gradually increases.</li><li>When the buffer usage of lossless queues on DeviceA exceeds the threshold for triggering a PFC frame, DeviceA sends a PFC frame to instruct DeviceB to stop sending traffic. However, within period T<sub>PFC</sub> before the PFC frame reaches DeviceB, DeviceB still sends traffic to DeviceA. As a result, the buffer usage of lossless queues on DeviceA keeps increasing.</li><li>Upon receiving the PFC frame, DeviceB stops sending traffic to DeviceA.</li><li>Traffic that has been sent from DeviceB is still sent to DeviceA and arrives at DeviceA after period T<sub>PFC</sub>. The buffer usage of lossless queues on DeviceA keeps increasing during this period.</li><li>DeviceA stops receiving traffic from DeviceB. The buffer usage of lossless queues on DeviceA reaches the maximum value and then gradually decreases.</li></ol>
+<p>To prevent packet loss in DeviceA's lossless queues, the buffer space of these lossless queues still needs to absorb B<sub>PFC</sub> x 2T<sub>PFC</sub> traffic received within period 2T<sub>PFC</sub> after the threshold for triggering a PFC frame is exceeded.</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001513045306__fig13511427183412"><a name="EN-US_CONCEPT_0000001513045306__fig13511427183412"></a><a name="fig13511427183412"></a><span class="figcap"><b>Figure 1 </b>Stopping the upstream device from sending traffic in PFC</span><br><span><img class="vsd" src="figure/en-us_image_0000001563765645.png"></span></div>
+<p><strong>Upstream device resuming sending traffic â traditional PFC procedure</strong></p>
+<p><a href="#EN-US_CONCEPT_0000001513045306__fig13422115314">Figure 2</a> shows how traditional PFC controls the upstream device to resume sending traffic.</p>
+<ol><li>When the buffer usage of lossless queues on DeviceA exceeds the threshold for stopping a PFC frame, DeviceB does not send traffic to DeviceA. As a result, the buffer usage of lossless queues on DeviceA gradually decreases.</li><li>When the buffer usage of lossless queues on DeviceA falls below the threshold for stopping a PFC frame, DeviceA sends a PFC frame to instruct DeviceB to resume sending traffic. However, DeviceB still does not send traffic to DeviceA within period T<sub>PFC</sub> â until the PFC frame reaches DeviceB. As a result, the buffer usage of lossless queues on DeviceA keeps decreasing.</li><li>Upon receiving the PFC frame, DeviceB resumes sending traffic to DeviceA.</li><li>The traffic from DeviceB will reach DeviceA after period T<sub>PFC</sub>. As a result, the buffer usage of lossless queues on DeviceA continues to decrease within this period.</li><li>DeviceA starts receiving traffic from DeviceB. The buffer usage of lossless queues on DeviceA reaches the minimum value and then gradually increases.</li></ol>
+<p>To ensure that DeviceA's lossless queues have throughput, their buffer usage must be greater than 0 within 2T<sub>PFC</sub> after the buffer usage falls below the threshold for stopping a PFC frame. Therefore, the threshold for stopping a PFC frame must be at least B<sub>PFC</sub> x 2T<sub>PFC</sub>.</p>
+<p>During flow control, stop PFC frames after resolving the congestion to ensure reduced buffer usage. This means that the threshold for stopping a PFC frame must be smaller than the threshold for triggering a PFC frame. As such, to ensure zero packet loss and high throughput of lossless queues, the queue buffer size must be at least 2 x (B<sub>PFC</sub> x 2T<sub>PFC</sub>).</p>
+<div class="fignone" id="EN-US_CONCEPT_0000001513045306__fig13422115314"><a name="EN-US_CONCEPT_0000001513045306__fig13422115314"></a><a name="fig13422115314"></a><span class="figcap"><b>Figure 2 </b>Upstream device resuming sending traffic in PFC</span><br><span><img class="vsd" src="figure/en-us_image_0000001513165298.png"></span></div>
+</div>
+<div class="section"><h4 class="sectiontitle">Antilocking PFC</h4><p>Antilocking PFC periodically scans the buffer usage of lossless queues and calculates the duration (t<sub>stop</sub>) during which the upstream device stops sending traffic in a period of t. When the value of t<sub>stop</sub> is greater than 0, a PFC frame with a timer is sent to the upstream device, controlling the upstream device to resume sending traffic after t<sub>stop</sub> expires in the corresponding period. (The duration of a period is t, which is far shorter than the one-way forwarding delay between two devices. The value of t<sub>stop</sub> is within the range of 0 to t.)</p>
+<div class="fignone"><span class="figcap"><b>Figure 3 </b>Working principle of antilocking PFC</span><br><span><img class="vsd" src="figure/en-us_image_0000001563885281.png"></span></div>
+<p>The headroom buffer of a lossless queue is used to store packets received after the queue sends a PFC frame and before the queue stops receiving packets from the upstream device, preventing packets in this period from being discarded. According to the preceding analysis of the traditional PFC mechanism, the threshold for triggering a PFC frame is at least B<sub>PFC</sub> x 2T<sub>PFC</sub>, and the headroom buffer size is at least B<sub>PFC</sub> x 2T<sub>PFC</sub>. Therefore, the required buffer size is at least 2 x (B<sub>PFC</sub> x 2T<sub>PFC</sub>). (B<sub>PFC</sub> indicates the interface bandwidth, and T<sub>PFC</sub> indicates the one-way forwarding delay between devices at the two ends.)</p>
+<p>Antilocking PFC does not have a threshold for triggering a PFC frame. When the buffer usage exceeds the preset threshold, antilocking PFC starts to take effect. The duration from the time when a PFC frame is sent upon the end of a period to the time when the traffic controlled by the PFC frame is sent to the local device is 2T<sub>ABS</sub>. To ensure that the lossless queues have throughput but no packet loss, the headroom buffer size must be at least B<sub>ABS</sub> x 2T<sub>ABS</sub>; therefore, the required buffer size is at least B<sub>ABS</sub> x 2T<sub>ABS</sub> + threshold. To ensure the maximum distance with the minimum buffer, you are advised to set the threshold to 0. In this case, the buffer occupied by antilocking PFC is about B<sub>ABS</sub>*2T<sub>ABS</sub>. (B<sub>ABS</sub> indicates the interface bandwidth, and T<sub>ABS</sub> indicates the one-way forwarding delay between devices at the two ends.)</p>
+<div class="fignone"><span class="figcap"><b>Figure 4 </b>Comparison between traditional PFC and antilocking PFC in terms of buffer allocation</span><br><span><img class="vsd" src="figure/en-us_image_0000001512845766.png"></span></div>
+<p>Therefore, if the bandwidth and buffer size in traditional PFC are the same as those in antilocking PFC (that is, B<sub>PFC</sub> = B<sub>ABS</sub> and 2 x (B<sub>PFC</sub> x 2T<sub>PFC</sub>) = B<sub>ABS</sub> x 2T<sub>ABS</sub>), T<sub>ABS</sub> is about twice T<sub>PFC</sub>, meaning that the distance supported by antilocking PFC is about twice that supported in traditional PFC.</p>
+<p>Antilocking PFC can continuously control sending and pausing of a small amount of traffic at a high frequency within a short period. Therefore, when the bandwidth and device distance are the same, antilocking PFC occupies much less buffer space than traditional PFC. When the buffer size and bandwidth are the same, antilocking PFC can support longer-distance lossless transmission than traditional PFC.</p>
+</div>
+<div class="section"><h4 class="sectiontitle">PFC Deadlock Detection for Antilocking PFC</h4><p>Antilocking PFC uses PFC frames to control traffic, which may cause PFC deadlocks. To detect such deadlocks, antilocking PFC provides the PFC deadlock detection function. After determining that a PFC deadlock occurs, antilocking PFC enters the deadlock recovery process, but it does not support deadlock control. For more details, see "PFC Deadlock Detection" in <span>Configuration Guide</span> &gt; DCN and Network Management Configuration &gt; DCB Configuration.</p>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_antilocking_pfc_cfg_0001.html">Antilocking PFC Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_antilocking_pfc_cfg_0002.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="spec/Antilocking_PFC_limitation_CE_v6r23c00.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

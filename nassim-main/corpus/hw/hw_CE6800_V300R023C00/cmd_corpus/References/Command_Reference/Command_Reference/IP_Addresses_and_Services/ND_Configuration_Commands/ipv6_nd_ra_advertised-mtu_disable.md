@@ -1,0 +1,80 @@
+ipv6 nd ra advertised-mtu disable
+=================================
+
+ipv6 nd ra advertised-mtu disable
+
+Function
+--------
+
+
+
+The **ipv6 nd ra advertised-mtu disable** command disables RA messages from carrying the MTU option.
+
+The **undo ipv6 nd ra advertised-mtu disable** command restores the default configuration.
+
+
+
+By default, RA messages carry the MTU option.
+
+![](../public_sys-resources/note_3.0-en-us.png) 
+
+This command is supported only on the CE6863H, CE6863H-K, CE6860-SAN, CE6866K, CE6866, CE6860-HAM, CE6855-48XS8CQ, CE6885-SAN, CE8850-SAN, CE8855, CE8851-32CQ4BQ, CE8851K, CE8851-32CQ8DQ-P, CE8850-HAM, CE6881H, CE6881H-K, CE6820H, CE6820H-K, CE6820S, CE6885, CE6885-T, CE6885-LL (standard forwarding mode) and CE6863E-48S8CQ.
+
+
+
+Format
+------
+
+**ipv6 nd ra advertised-mtu disable**
+
+**undo ipv6 nd ra advertised-mtu disable**
+
+
+Parameters
+----------
+
+None
+
+Views
+-----
+
+100ge sub-interface view,100GE interface view,10GE sub-interface view,10GE interface view,200GE sub-interface view,200GE interface view,25GE sub-interface view,25GE interface view,400GE sub-interface view,400GE interface view,50GE sub-interface view,50GE interface view,Eth-Trunk sub-interface view,Eth-Trunk interface view,VBDIF interface view,VLANIF interface view
+
+
+Default Level
+-------------
+
+2: Configuration level
+
+
+Usage Guidelines
+----------------
+
+**Usage Scenario**
+
+By default, the MTU value contained in RA messages is the same as that configured using the **ipv6 mtu** command. If the **ipv6 mtu** command has not been run to configure the MTU option, the default interface MTU is used. To disable RA messages sent by a device from carrying the MTU option, run the **ipv6 nd ra advertised-mtu disable** command.
+
+**Prerequisites**
+
+
+
+IPv6 has been enabled using the **ipv6 enable** command in the interface view.
+
+
+
+**Configuration Impact**
+
+Upon receipt of the RA messages that carry the MTU option, the host adjusts the size of the RA messages to be forwarded based on the MTU value.
+
+
+Example
+-------
+
+# Configure the VLANIF10 so that the RA messages sent by the interface do not carry the MTU option.
+```
+<HUAWEI> system-view
+[~HUAWEI] interface vlanif 10
+[~HUAWEI-Vlanif10] ipv6 enable
+[*HUAWEI-Vlanif10] ipv6 nd ra advertised-mtu disable
+
+```

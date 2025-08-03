@@ -1,0 +1,290 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring BGP RPD">
+<meta name="abstract" content="BGP RPD ensures that route-policies are distributed dynamically.">
+<meta name="description" content="BGP RPD ensures that route-policies are distributed dynamically.">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_3070.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_4097.html">
+<meta name="DC.Relation" scheme="URI" content="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_4090.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation-V8R23C00">
+<meta name="DC.Creator" content="w00800033,bgpvrp,w00556928,w00606909,l00455378">
+<meta name="DC.Publisher" content="20240229">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Route">
+
+<meta name="DC.Audience.Job" content="Configuration">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Route">
+<meta name="featurename" content="BGP">
+<meta name="featuretype" content="IP Routing Basis">
+<meta name="OWNER" content="w00604599">
+<meta name="IA" content="">
+<meta name="SE" content="">
+<meta name="TE" content="">
+<meta name="LASTMODIFIER" content="l00615954">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0172366415">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../../../../public_sys-resources/commonltr.css">
+<script language="javascript" type="text/javascript" src="../../../../public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring BGP RPD</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0172366415"></a><a name="EN-US_TASK_0172366415"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring BGP RPD</h1>
+<div class="taskbody"><p>BGP RPD ensures that route-policies are distributed dynamically.</p>
+<div class="context"><a name="EN-US_TASK_0172366415__1.4.1"></a><a name="1.4.1"></a>
+<div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In a MAN ingress or IGW scenario, uneven link resource utilization or link faults may cause link congestion. To fully use network bandwidth, you can deploy an inbound traffic optimization solution to adjust route priorities so that traffic is diverted to idle links. In such a scenario, the <span class="keyword">Router</span> functions as a forwarder, and RPD needs to be deployed on it.</p>
+<p>In <a href="#EN-US_TASK_0172366415__fig_dc_vrp_bgp_cfg_410501">Figure 1</a>, BGP runs on all <span class="keyword">Router</span>s. <span class="keyword">Router</span> A and <span class="keyword">Router</span> B reside in AS 100, <span class="keyword">Router</span> C in AS 200, and the controller in AS 300. The traffic that <span class="keyword">Device</span> C in AS 200 sends to the destination IP address 192.168.1.0 can enter AS 100 through <span class="keyword">Router</span> A or <span class="keyword">Router</span> B. However, the controller finds that the link between <span class="keyword">Router</span> A and <span class="keyword">Router</span> C is congested. In this case, a traffic optimization policy can be configured so that an RPD route is delivered to divert the traffic to <span class="keyword">Router</span> B when the traffic enters AS 100.</p>
+<div class="fignone" id="EN-US_TASK_0172366415__fig_dc_vrp_bgp_cfg_410501"><a name="EN-US_TASK_0172366415__fig_dc_vrp_bgp_cfg_410501"></a><a name="fig_dc_vrp_bgp_cfg_410501"></a><span class="figcap"><b>Figure 1 </b>Network diagram of configuring BGP RPD</span><div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>Interface 1 and interface 2 in this example stand for GE <span>0/1/0</span> and GE <span>0/1/1</span>, respectively.</p>
+</div></div>
+<br><span><img class="vsd" src="images/fig_dc_vrp_bgp_cfg_410501.png"></span><br></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172366415__1.4.2"></a><a name="1.4.2"></a>
+<div class="p"><h4 class="sectiontitle">Precautions</h4><p>To improve security, you are advised to deploy BGP security measures. For details, see "Configuring BGP Security." Keychain authentication is used as an example. For details, see "Example for Configuring BGP Keychain."</p>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172366415__1.4.3"></a><a name="1.4.3"></a>
+<div class="p"><h4 class="sectiontitle">Configuration Roadmap</h4><p>The configuration roadmap is as follows:</p>
+<ol><li><p>Configure EBGP connections between <span class="keyword">Device</span> A and <span class="keyword">Device</span> C, and between <span class="keyword">Device</span> B and <span class="keyword">Device</span> C.</p>
+</li><li><p>On <span class="keyword">Device</span> A and <span class="keyword">Device</span> B, enable RPD and establish RPD peer relationships with the controller.</p>
+</li><li><p>Configure IPv4 unicast on <span class="keyword">Device</span> A, <span class="keyword">Device</span> B, and <span class="keyword">Device</span> C so that IPv4 unicast peer relationships are established between <span class="keyword">Device</span> A and <span class="keyword">Device</span> C, and between <span class="keyword">Device</span> B and <span class="keyword">Device</span> C.</p>
+</li></ol>
+<div class="note"><img src="../../../../public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>This section provides only the configurations and procedures for forwarders. The controller's configurations, such as the BGP, RPD address family, and traffic optimization policy configurations, are not provided here.</p>
+</div></div>
+</div></div>
+<div class="context"><a name="EN-US_TASK_0172366415__1.4.4"></a><a name="1.4.4"></a>
+<div class="p"><h4 class="sectiontitle">Data Preparation</h4><p>To complete the configuration, you need the following data:</p>
+<ul><li>Router ID (4.1.1.1) of <span class="keyword">Device</span> A, router ID (2.2.2.2) of <span class="keyword">Device</span> B, and their AS number 100</li><li>Router ID 3.3.3.3 of <span class="keyword">Device</span> C and its AS number 200</li></ul>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0172366415__1.4.5"></a><a name="1.4.5"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Assign an IP address to each interface. For configuration details, see Configuration Files in this section.</span></li><li><span>Configure BGP connections.</span><p><p># Configure <span class="keyword">Device</span> A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A]<strong> bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp]<strong> router-id 1.1.1.1</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>peer 10.2.1.2 as-number 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>peer 1.1.1.1 as-number 300</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>ipv4-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp-af-ipv4] <strong>network 192.168.1.0 255.255.255.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp-af-ipv4]<strong> commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-bgp-af-ipv4]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-bgp]<strong> quit</strong></pre>
+<p># Configure <span class="keyword">Device</span> B.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B]<strong> bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp]<strong> router-id 2.2.2.2</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>peer 10.3.1.2 as-number 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>peer 2.1.1.1 as-number 300</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>ipv4-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp-af-ipv4] <strong>network 192.168.1.0 255.255.255.0</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp-af-ipv4] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-bgp-af-ipv4]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-bgp] <strong>quit</strong></pre>
+<p># Configure <span class="keyword">Device</span> C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C]<strong> bgp 200</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp]<strong> router-id 3.3.3.3</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp] <strong>peer 10.2.1.1 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp] <strong>peer 10.3.1.1 as-number 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp] <strong>ipv4-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>C-bgp-af-ipv4] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-bgp-af-ipv4]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C-bgp] <strong>quit</strong></pre>
+<p># Check the routing table of <span class="keyword">Device</span> C.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>display bgp routing-table 192.168.1.0 24</strong>
+
+ BGP local router ID : 3.3.3.3
+ Local AS number : 200
+ Paths:   2 available, 1 best, 1 select
+ BGP routing table entry information of 192.168.1.0/24:
+ From: 10.2.1.1 (1.1.1.1)
+ Route Duration: 0d00h00m56s
+ Direct Out-interface: GigabitEthernet<span>0/1/0</span>
+ Original nexthop: 10.2.1.1
+ Qos information : 0x0
+ AS-path 100, origin igp, MED 0, pref-val 0, valid, external, best, select, pre 255
+ Advertised to such 2 peers:
+    10.2.1.1
+    10.3.1.1
+
+ BGP routing table entry information of 192.168.1.0/24:
+ From: 10.3.1.1 (2.2.2.2)
+ Route Duration: 0d00h00m06s
+ Direct Out-interface: GigabitEthernet<span>0/1/1</span>
+ Original nexthop: 10.3.1.1
+ Qos information : 0x0
+ AS-path 100, origin igp, MED 0, pref-val 0, valid, external, pre 255, not preferred for router ID
+ Not advertised to any peers yet</pre>
+<p>The preceding command output shows that there are two valid routes to 192.168.1.0/24. The route with the next-hop address of 10.2.1.1 is the optimal route because the router ID of <span class="keyword">Device</span> A is smaller. In this case, traffic enters AS 100 through <span class="keyword">Device</span> A.</p>
+</p></li><li><span>Configure BGP RPD functions on forwarders so that the forwarders receive RPD routes delivered by the controller and execute corresponding route-policies.</span><p><p># Configure <span class="keyword">Device</span> A.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp]<strong> peer 1.1.1.1 as-number 300</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>rpd-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp-af-rpd]<strong> peer 1.1.1.1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp-af-rpd]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp] <strong>ipv4-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp-af-ipv4] <strong>peer 10.2.1.2 rpd-policy export enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>A-bgp-af-ipv4] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-bgp-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A-bgp] <strong>quit</strong></pre>
+<p># Configure <span class="keyword">Device</span> B.</p>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B] <strong>bgp 100</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp]<strong> peer 2.1.1.1 as-number 300</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>rpd-family</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp-af-rpd]<strong> peer 2.1.1.1 enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp-af-rpd]<strong> quit</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp] <strong>ipv4-family unicast</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp-af-ipv4] <strong>peer 10.3.1.2 rpd-policy export enable</strong></pre>
+<pre class="screen">[<span class="keyword">*</span><span class="keyword">Device</span>B-bgp-af-ipv4] <strong>commit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-bgp-af-ipv4] <strong>quit</strong></pre>
+<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>B-bgp] <strong>quit</strong></pre>
+<div class="p"># Check information about RPD routes on <span class="keyword">Device</span> A.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>A] <strong>display bgp rpd routing-table</strong>
+
+ Total number of Routes : 1
+ BGP Local router ID is 4.1.1.1
+ Status codes: * - valid, &gt; - best, d - damped, x - best external, a - add path,
+               h - history,  i - internal, s - suppressed, S - Stale
+               Origin : i - IGP, e - EGP, ? - incomplete
+        Network                        Peer           MED        LocPrf    PrefVal Path/Ogn 
+ *&gt;     1/10.2.1.2/1                   1.1.1.1        50                   0       100?</pre>
+</div>
+<div class="p"># Check the routing table of <span class="keyword">Device</span> C.<pre class="screen">[<span class="keyword"><font style="font-size:8pt" Face="Courier New" >~</font></span><span class="keyword">Device</span>C] <strong>display bgp routing-table 192.168.1.0 24</strong>
+
+ BGP local router ID : 3.3.3.3
+ Local AS number : 200
+ Paths:   2 available, 1 best, 1 select
+ BGP routing table entry information of 192.168.1.0/24:
+ From: 10.3.1.1 (2.2.2.2)
+ Route Duration: 0d00h00m06s
+ Direct Out-interface: GigabitEthernet1/0/1
+ Original nexthop: <strong>10.3.1.1</strong>
+ Qos information : 0x0
+ AS-path 100, origin igp, <strong>MED 0</strong>, pref-val 0, valid, external, best, select, pre 255
+ Advertised to such 2 peers:
+    10.2.1.1
+    10.3.1.1
+
+ BGP routing table entry information of 192.168.1.0/24:
+ From: 10.2.1.1 (1.1.1.1)
+ Route Duration: 0d00h00m56s
+ Direct Out-interface: GigabitEthernet1/0/0
+ Original nexthop: <strong>10.2.1.1</strong>
+ Qos information : 0x0
+ AS-path 100, origin igp, <strong>MED 50</strong>, pref-val 0, valid, external, pre 255, not preferred for MED
+ Not advertised to any peers yet</pre>
+</div>
+<p>The preceding command output shows that the route with the next hop of 10.3.1.1 (<span class="keyword">Device</span> B) is selected by <span class="keyword">Device</span> C as the optimal route because its MED value 0 is smaller than that (50) of the route with the next hop of 10.2.1.1 (<span class="keyword">Device</span> A). In this case, the traffic bypasses the congested link.</p>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0172366415__1.4.6"></a><a name="1.4.6"></a><h4 class="sectiontitle">Configuration Files</h4><ul><li><p><span class="keyword">Device</span> A configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname <span class="keyword">Device</span>A</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.2.1.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/1</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 1.1.1.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 100</pre>
+<pre class="screen"> router-id 1.1.1.1</pre>
+<pre class="screen"> peer 1.1.1.1 as-number 300</pre>
+<pre class="screen"> peer 10.2.1.2 as-number 200</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  network 192.168.1.0 255.255.255.0</pre>
+<pre class="screen">  peer 10.2.1.2 enable</pre>
+<pre class="screen">  peer 10.2.1.2 rpd-policy export enable</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> rpd-family</pre>
+<pre class="screen">  peer 1.1.1.1 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p><span class="keyword">Device</span> B configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname <span class="keyword">Device</span>B</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.3.1.1 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/1</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 2.1.1.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 100</pre>
+<pre class="screen"> router-id 2.2.2.2</pre>
+<pre class="screen"> peer 2.1.1.1 as-number 300</pre>
+<pre class="screen"> peer 10.3.1.2 as-number 200</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  network 192.168.1.0 255.255.255.0</pre>
+<pre class="screen">  peer 10.3.1.2 enable</pre>
+<pre class="screen">  peer 10.3.1.2 rpd-policy export enable</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> rpd-family</pre>
+<pre class="screen">  peer 2.1.1.1 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li><li><p><span class="keyword">Device</span> C configuration file</p>
+<pre class="screen">#</pre>
+<pre class="screen">sysname <span class="keyword">Device</span>C</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/0</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.2.1.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">interface GigabitEthernet<span>0/1/1</span></pre>
+<pre class="screen"> undo shutdown</pre>
+<pre class="screen"> ip address 10.3.1.2 255.255.255.0</pre>
+<pre class="screen">#</pre>
+<pre class="screen">bgp 200</pre>
+<pre class="screen"> router-id 3.3.3.3</pre>
+<pre class="screen"> peer 10.2.1.1 as-number 100</pre>
+<pre class="screen"> peer 10.3.1.1 as-number 100</pre>
+<pre class="screen"> #</pre>
+<pre class="screen"> ipv4-family unicast</pre>
+<pre class="screen">  peer 10.2.1.1 enable</pre>
+<pre class="screen">  peer 10.3.1.1 enable</pre>
+<pre class="screen">#</pre>
+<pre class="screen">return</pre>
+</li></ul>
+</div>
+</div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_3070.html">Configuration Examples for BGP
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_4097.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="../../../../software/nev8r10_vrpv8r16/user/vrp/dc_vrp_bgp_cfg_4090.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>

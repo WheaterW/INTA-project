@@ -1,0 +1,172 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-us" xml:lang="en-us">
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="DC.Type" content="task">
+<meta name="DC.Title" content="Example for Configuring Device-to-Device MACsec">
+<meta name="product" content="">
+<meta name="DC.Relation" scheme="URI" content="galaxy_macsec_cfg_0001.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_macsec_cfg_0008.html">
+<meta name="DC.Relation" scheme="URI" content="galaxy_macsec_cfg_0010.html">
+<meta name="prodname" content="">
+<meta name="version" content="">
+<meta name="brand" content="Product Documentation">
+<meta name="DC.Publisher" content="20230413">
+<meta name="featuretype" content="Security">
+<meta name="featuretype" content="Security Protection">
+<meta name="DC.Format" content="XHTML">
+<meta name="DC.Identifier" content="EN-US_TASK_0000001512689218">
+<meta name="DC.Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/commonltr.css">
+<link rel="stylesheet" type="text/css" href="public_sys-resources/mediaQuery.css">
+<script language="javascript" type="text/javascript" src="public_sys-resources/browseVersion.js"></script>
+<title>Example for Configuring Device-to-Device MACsec</title>
+
+<style type="text/css">
+			<!--	pre.screen,pre.codeblock{
+					word-wrap:break-word;
+					word-break:break-all;
+					white-space:pre-wrap !important;
+				}-->
+		</style>
+</head>
+<body><a name="EN-US_TASK_0000001512689218"></a><a name="EN-US_TASK_0000001512689218"></a>
+
+<div class="articleBoxWithoutHead">
+<h1 class="topicTitle-h1">Example for Configuring Device-to-Device MACsec</h1>
+<div class="taskbody"><div class="context"><a name="EN-US_TASK_0000001512689218__1.3.1"></a><a name="1.3.1"></a>
+<div class="p"><div class="p"><h4 class="sectiontitle">Networking Requirements</h4><p>In <a href="#EN-US_TASK_0000001512689218__fig1528244419247">Figure 1</a>, DeviceA and DeviceB are connected and exchange important information, which needs to be protected.</p>
+<div class="fignone" id="EN-US_TASK_0000001512689218__fig1528244419247"><a name="EN-US_TASK_0000001512689218__fig1528244419247"></a><a name="fig1528244419247"></a><span class="figcap"><b>Figure 1 </b>Network diagram of device-to-device MACsec</span><div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p>In this example, interface 1 represents <span>100GE</span> <span>1/0/1</span>.</p>
+</div></div>
+<br><span><img class="vsd" src="figure/en-us_image_0000001564008617.png"></span></div>
+<h4 class="sectiontitle">Configuration Roadmap</h4><p>When MACsec is configured on two devices, the configuration roadmap is as follows:</p>
+<ol><li>Configure the key server priority. In this example, DeviceA is configured as the key server.</li><li>Set the encryption mode to normal, indicating that both data encryption and integrity check are enabled.</li><li>Set the CKN and CAK for MKA session negotiation to f1c3b2a4d6d9a7c5b4e1ab56dc21ed79ac97be533671dcab2678ac55cf71aced and ab2145369adcadef69512347adceb210, respectively.</li></ol>
+<div class="note"><img src="public_sys-resources/note_3.0-en-us.png"><span class="notetitle"> </span><div class="notebody"><p><span><img src="figure/en-us_image_0000001691092389.png"></span></p>
+<p>In this example, if transparent transmission devices DeviceC, DeviceD, and DeviceE are deployed between DeviceA and DeviceB, the transparent transmission devices must support Layer 2 protocol tunneling to ensure that DeviceA and DeviceB can perform MACsec session negotiation. The procedure is as follows:</p>
+<ol><li>Run the <strong>l2protocol-tunnel user-defined-protocol</strong> <i><span class="varname">protocol-name</span></i> <strong>protocol-mac </strong><strong>0180-c200-0003</strong> <strong>group-mac</strong> <i><span class="varname">group-mac</span></i> command in the system view of DeviceC and DeviceE to configure Layer 2 transparent transmission of EAP packets.</li><li>Run the <strong>l2protocol-tunnel user-defined-protocol </strong><i><span class="varname">protocol-name</span></i><strong> enable</strong> command on the interface used by DeviceC to connect to DeviceA and the interface used by DeviceE to connect to DeviceB to enable Layer 2 protocol tunneling on these interfaces.</li><li>When MACsec session negotiation is performed between DeviceA and DeviceB, all types of packets except LLDP, MKA, 1588, and pause packets are encrypted. As a result, DeviceC, DeviceD, and DeviceE cannot identify these encrypted packets. For example, after STP packets are encrypted on DeviceA, DeviceC cannot identify them. In this case, you need to configure Layer 2 protocol tunneling.</li></ol>
+<p>This procedure is only for reference. For configuration details, see "Layer 2 Protocol Tunneling Configuration" in CLI Configuration Guide &gt; Ethernet Switching Configuration.</p>
+</div></div>
+</div>
+</div></div>
+<div class="steps"><a name="EN-US_TASK_0000001512689218__1.3.2"></a><a name="1.3.2"></a><h4 class="sectiontitle">Procedure</h4>
+<ol><li><span>Configure DeviceA.</span><p><p># Create a MACsec profile.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">HUAWEI</span>] <strong>sysname DeviceA</strong>
+[*<span class="keyword">DeviceA</span>] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">DeviceA</span>] <strong>mac-security-profile name test1</strong></pre>
+<p># Set the key server priority of DeviceA to 1 and the encryption mode to normal.</p>
+<pre class="screen">[*DeviceA-macsec-profile-test1] <strong>mka keyserver priority 1</strong>
+[*DeviceA-macsec-profile-test1] <strong>macsec mode normal</strong>
+[*DeviceA-macsec-profile-test1] <strong>quit</strong>
+[*<span class="keyword">DeviceA</span>] <strong>commit</strong></pre>
+<p># Set the CKN to <strong>f1c3b2a4d6d9a7c5b4e1ab56dc21ed79ac97be533671dcab2678ac55cf71aced</strong> and CAK to <strong>ab2145369adcadef69512347adceb210</strong>, and apply the MACsec profile.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>mka cak-mode static ckn f1c3b2a4d6d9a7c5b4e1ab56dc21ed79ac97be533671dcab2678ac55cf71aced cak ab2145369adcadef69512347adceb210</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>mac-security-profile test1</strong>
+[*DeviceA-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[*DeviceA] <strong>commit</strong></pre>
+</p></li><li><span>Configure DeviceB.</span><p><p># Create a MACsec profile.</p>
+<pre class="screen">&lt;<span class="keyword">HUAWEI</span>&gt; <strong>system-view</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">HUAWEI</span>] <strong>sysname DeviceB</strong>
+[*<span class="keyword">DeviceB</span>] <strong>commit</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font><span class="keyword">DeviceB</span>] <strong>mac-security-profile name test2</strong></pre>
+<p># Set the key server priority of DeviceB to 2 and the encryption mode to normal.</p>
+<pre class="screen">[*DeviceB-macsec-profile-test2] <strong>mka keyserver priority 2</strong>
+[*DeviceB-macsec-profile-test2] <strong>macsec mode normal</strong>
+[*DeviceB-macsec-profile-test2] <strong>quit</strong>
+[*<span class="keyword">DeviceB</span>] <strong>commit</strong></pre>
+<p># Set the CKN to <strong>f1c3b2a4d6d9a7c5b4e1ab56dc21ed79ac97be533671dcab2678ac55cf71aced</strong> and CAK to <strong>ab2145369adcadef69512347adceb210</strong>, and apply the MACsec profile.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceB] <strong>interface <span>100ge</span> <span>1/0/1</span></strong>
+[*DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>mka cak-mode static ckn f1c3b2a4d6d9a7c5b4e1ab56dc21ed79ac97be533671dcab2678ac55cf71aced cak ab2145369adcadef69512347adceb210</strong>
+[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>mac-security-profile test2</strong>
+[*DeviceB-<span>100GE</span><span>1/0/1</span>] <strong>quit</strong>
+[*DeviceB] <strong>commit</strong></pre>
+</p></li></ol></div>
+<div class="example"><a name="EN-US_TASK_0000001512689218__1.3.3"></a><a name="1.3.3"></a><h4 class="sectiontitle">Verifying the Configuration</h4><p># Check the configuration on DeviceA.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceA] <strong>display mka interface </strong><strong><span>100ge</span> <span>1/0/1</span></strong>
+Interface <span>100GE</span><span>1/0/1</span>:
+  CKN: F1C3B2A4D6D9A7C5B4E1AB56DC21ED79AC97BE533671DCAB2678AC55CF71ACED
+  MKA status      : SUCCEEDED
+  MI              : 5B8D4074D0E0639D8AE1AF1E 
+  MN              : 52
+  MACsec mode     : normal
+  Key server      : YES
+  Live peers      : 1
+  Potential peers : 0
+  Live peers list :
+  MI                         MN          Priority  Capability  Rx-SCI
+  67C7271E983BA02C04A88ACD   53          2         3           000B09BACF0A0024
+  Potential peers list:
+  MI                         MN          Priority  Capability  Rx-SCI
+  --                         --          --        --          --</pre>
+<p># Check the configuration on DeviceB.</p>
+<pre class="screen">[<font style="font-size:8pt" Face="Courier New" >~</font>DeviceB] <strong>display mka interface </strong><strong><span>100ge</span> <span>1/0/1</span></strong>
+Interface <span>100GE</span><span>1/0/1</span>:
+  CKN: F1C3B2A4D6D9A7C5B4E1AB56DC21ED79AC97BE533671DCAB2678AC55CF71ACED
+  MKA status      : SUCCEEDED
+  MI              : 67C7271E983BA02C04A88ACD 
+  MN              : 56
+  MACsec mode     : normal
+  Key server      : NO
+  Live peers      : 1
+  Potential peers : 0
+  Live peers list :
+  MI                         MN          Priority  Capability  Rx-SCI
+  5B8D4074D0E0639D8AE1AF1E   55          1         3           000B09C312CE0031
+  Potential peers list:
+  MI                         MN          Priority  Capability  Rx-SCI
+  --                         --          --        --          --</pre>
+<p>In the preceding command outputs, the <strong>MKA status</strong> field displays <strong>SUCCEEDED</strong>, indicating that MKA session negotiation is successful, and the <strong>MACsec mode</strong> field displays <strong>normal</strong>, indicating that the MACsec encryption mode is normal.</p>
+</div>
+<div class="postreq"><a name="EN-US_TASK_0000001512689218__1.3.4"></a><a name="1.3.4"></a><h4 class="sectiontitle">Configuration Scripts</h4><p>DeviceA</p>
+<pre class="screen">#
+sysname DeviceA
+#
+mac-security-profile name test1
+ mka keyserver priority 1
+ macsec mode normal
+#
+interface <span>100GE</span><span>1/0/1</span>
+ mka cak-mode static ckn f1c3b2a4d6d9a7c5b4e1ab56dc21ed79ac97be533671dcab2678ac55cf71aced cak %^%#&amp;gqJ1f*uV0vqB$ZT5hr#qwL/;Cd/`OmO&lt;m2+hh1A1&amp;w{)jh1"'poiXB\UAn9%^%#
+ mac-security-profile test1
+#
+return</pre>
+<p>DeviceB</p>
+<pre class="screen">#
+sysname DeviceB
+#
+mac-security-profile name test2
+ mka keyserver priority 2
+ macsec mode normal
+#
+interface <span>100GE</span><span>1/0/1</span>
+ mka cak-mode static ckn f1c3b2a4d6d9a7c5b4e1ab56dc21ed79ac97be533671dcab2678ac55cf71aced cak %^%#W5_!'<font style="font-size:8pt" Face="Courier New" >~</font>9]i&gt;47d&amp;X^Vro#S!z&lt;4s+/N5\Ek*#27i_Wz-U3/"3tJM1.6++,nP+Z%^%#
+ mac-security-profile test2
+#
+return</pre>
+</div></div>
+
+</div>
+<div class="footerNavBar clearfix">
+
+<div class="parentlink">
+Parent Topic:
+<a href="galaxy_macsec_cfg_0001.html">MACsec Configuration
+</a>
+</div>
+<div class="copyrightBottomBar">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="copyrightBottomBar_responsive">
+Copyright &copy; Huawei Technologies Co., Ltd.</div>
+<div class="bottomNavBtn clearfix">
+<a href="galaxy_macsec_cfg_0008.html"><span class="font-st">&lt; </span>Previous topic</a>
+<a href="galaxy_macsec_cfg_0010.html">Next topic<span class="font-st"> &gt;</span></a>
+</div>
+</div>
+</body>
+</html>
