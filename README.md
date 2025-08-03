@@ -20,10 +20,9 @@ INTA 是一个强大的多智能体框架，专门用于实现不同网络设备
 INTA由以下核心智能体组成：
 
 1. **ConfigDivideAgent**: 负责配置文件的结构化拆分和功能意图提取
-2. **LLMTranslatorAgent**: 基于大型语言模型的配置翻译核心组件
-3. **ContentTraverseAgent**: 遍历和分析配置内容
-4. **CriticAgent**: 对翻译结果进行评估和优化
-5. **EmbeddingModel**: 用于语义相似度计算和知识检索
+3. **ContentTraverseAgent**: 手册内容遍历和提取
+2. **LLMTranslatorAgent**: 基于LLM的配置翻译模块及修正
+4. **CriticAgent**: 对翻译结果进行评估
 
 ## 安装要求
 
@@ -90,16 +89,15 @@ python run.py \
 ## 项目结构
 ```
 INTA-project/
-├── Readme.md                   # 项目说明文档
-├── Result/                     # 翻译结果目录
-├── collect_corpus.py           # 语料收集脚本
-├── config_parser.py            # 配置解析器
+├── README.md                   # 项目说明文档
+├── result/                     # 翻译结果目录
 ├── datasets/                   # 数据集目录
-├── generate_embeddings.py      # 嵌入生成脚本
-├── individual_critics.py       # 独立评估器
 ├── logs/                       # 日志目录
+├── collect_corpus.py           # 设备手册语料库收集脚本
+├── config_parser.py            # 配置解析模块
+├── generate_embeddings.py      # 嵌入生成脚本
+├── individual_critics.py       # 独立评估器（翻译后评估）
 ├── multi_agent.py              # 多智能体实现
-├── run.new.sh                  # 运行脚本示例
 ├── run.py                      # 主运行脚本
 └── utils.py                    # 工具函数
 ```
