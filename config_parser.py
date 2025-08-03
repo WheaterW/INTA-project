@@ -1,4 +1,8 @@
-# To refract.
+# ====================================================
+# Author: Yunze Wei <yunzewei@outlook.com>
+# Date: 2025-08-03
+# Description: Parser for network device configurations.
+# ====================================================
 
 from utils import *
 import argparse

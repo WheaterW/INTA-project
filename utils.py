@@ -1,4 +1,8 @@
-
+# ====================================================
+# Author: Yunze Wei <yunzewei@outlook.com>
+# Date: 2025-08-03
+# Description: Utility functions for network configuration translation and evaluation.
+# ====================================================
 import json
 from typing import List
 import logging

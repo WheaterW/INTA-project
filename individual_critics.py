@@ -1,3 +1,8 @@
+# ====================================================
+# Author: Yunze Wei <yunzewei@outlook.com>
+# Date: 2025-08-03
+# Description: Individual critics for evaluating network device configurations. (after translation)
+# ====================================================
 from multi_agent import CriticAgent
 from utils import *
 from config_parser import build_config_tree_huawei, build_config_tree_nokia

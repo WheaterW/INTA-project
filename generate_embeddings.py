@@ -1,4 +1,8 @@
-
+# ====================================================
+# Author: Yunze Wei <yunzewei@outlook.com>
+# Date: 2025-08-03
+# Description: Generates embeddings for command manuals and configurations.
+# ====================================================
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 

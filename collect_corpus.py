@@ -1,3 +1,8 @@
+# ====================================================
+# Author: Yunze Wei <yunzewei@outlook.com>
+# Date: 2025-08-03
+# Description: Collects and processes command manuals from official documentation.
+# ====================================================
 from markdownify import markdownify as md
 import requests
 import time

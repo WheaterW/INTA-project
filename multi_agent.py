@@ -1,4 +1,8 @@
-
+# ====================================================
+# Author: Yunze Wei <yunzewei@outlook.com>
+# Date: 2025-08-03
+# Description: Multiple agents for network configuration translation and evaluation.
+# ====================================================
 from openai import OpenAI
 from utils import *
 from collect_corpus import find_desc, extract_section, flatten_desc

@@ -1,6 +1,10 @@
-
+# ====================================================
+# Author: Yunze Wei <yunzewei@outlook.com>
+# Date: 2025-08-03
+# Description: Main script to run the network configuration translation and evaluation pipeline.
+# ====================================================
 import argparse
-import json
+from jsonschema import validate, ValidationError, Draft7Validator
 from jsonschema import validate, ValidationError
 import os
 from utils import *
